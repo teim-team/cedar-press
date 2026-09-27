@@ -1087,12 +1087,17 @@ test.describe("the table's default columns", () => {
     await page.goto("/data?c=contractors");
     await page.locator(".cp-ex__table thead th").first().waitFor();
     const heads = await page.locator(".cp-ex__table thead th").allInnerTexts();
-    // The declared seven, plus the pinned uid and the row opener.
-    expect(heads.length).toBeLessThanOrEqual(10);
+    // The declared seven, plus the pinned uid, the row opener and the source
+    // link. Prime Contracting carries no source column: its link is built
+    // from the award key, and the table shows it as the record page does
+    // (recordColumns.js columnPlan, 2026-09-27).
+    expect(heads.length).toBeLessThanOrEqual(11);
     const text = heads.join(" | ").toUpperCase();
-    for (const wanted of ["NATIVE ENTITY", "ACTION DATE", "AWARDEE", "FUNDING AGENCY", "DESCRIPTION", "AMOUNT"]) {
+    for (const wanted of ["NATIVE ENTITY", "ACTION DATE", "AWARDEE", "FUNDING AGENCY", "DESCRIPTION", "AMOUNT", "SOURCE RECORD"]) {
       expect(text).toContain(wanted);
     }
+    // The built link is the originating award, the same one the record opens.
+    await expect(page.locator('.cp-ex__table tbody a[href^="https://www.usaspending.gov/award/"]').first()).toBeVisible();
     // The raw keys stay in the open record, where the reviewer asked for them.
     for (const raw of ["TRANSACTION ID", "AWARDEE UEI", "PRODUCT OR SERVICE CODE", "RECIPIENT COUNTY FIPS"]) {
       expect(text).not.toContain(raw);
@@ -1290,6 +1295,11 @@ test.describe("About this collection", () => {
     await expect(notes.getByText("Read the full collection notes")).toBeVisible();
     await notes.getByText("Read the full collection notes").click();
     await expect(panel.getByRole("heading", { name: "What is not in it" })).toBeVisible();
+    // The release's tables by name, not by file name (2026-09-27).
+    const tables = await panel.locator(".cp-ab__tables li").allInnerTexts();
+    expect(tables.length).toBeGreaterThan(1);
+    expect(tables).toContain("Prime contracts");
+    for (const name of tables) expect(name).not.toMatch(/\.csv$|_/);
 
     // Closing returns the reader to the cut they opened it from.
     await panel.getByRole("button", { name: /close the collection profile/i }).click();
@@ -1880,6 +1890,30 @@ test.describe("the record page", () => {
     await page.waitForURL(/\/data\?/);
     await expect(page.locator(".cp-rail__item[aria-pressed='true']")).toContainText("Federal Funding");
     expect(errors).toEqual([]);
+  });
+
+  // THE SOURCE IS THE EVIDENCE, NOT CEDAR'S WORKING FILE (2026-09-27).
+  // A table whose link is built from the row's own identifiers opens the
+  // originating record; the file Cedar read it through is named for what it
+  // is; and a row with no link in a table that has links says so for the row.
+  test("a record links to its originating document and names Cedar's own files as working files", async ({ page }) => {
+    const errors = watchConsole(page);
+    await signIn(page);
+    await page.goto("/record?k=federal-register/fr_ex_parte_party_entity_links&r=2014-09591");
+    await expect(page.getByTestId("record-head")).toBeVisible();
+    await expect(page.getByRole("link", { name: /Open the source record/ })).toHaveAttribute("href", "https://www.federalregister.gov/d/2014-09591");
+    await page.getByTestId("record-more").click();
+    for (const summary of await page.locator(".cp-rec__group summary").all()) await summary.click();
+    const body = await page.locator("main").innerText();
+    expect(body).toContain("Cedar working file");
+    expect(body).not.toContain("ferc_ex_parte_parties.csv");
+    expect(errors).toEqual([]);
+  });
+
+  test("a row with no link in a table that has links says so for the row", async ({ page }) => {
+    await signIn(page);
+    await page.goto("/record?k=lobbying/lobbying_registrant_native_ownership_evidence&r=88052");
+    await expect(page.getByTestId("record-no-link")).toHaveText("No link was recorded for this row.");
   });
 
   test("a record that is not in the preview says so rather than showing a neighbour", async ({ page }) => {

@@ -728,6 +728,64 @@ class TestGeneratorAndManifestAgree(unittest.TestCase):
                 f"{path} publishes a withheld field; run import_cedar_manifest.py --audit",
             )
 
+    def test_a_local_path_never_reaches_a_served_sample(self) -> None:
+        # Found 2026-09-27: need_enterprises__10.csv served "the owner's
+        # research dataset, on this machine at ~/Desktop/dissertation/...".
+        # Injected, the scrub fires and keeps the file's own quoting; restored
+        # (a clean file), it changes nothing; and every sample the site serves
+        # today is clean.
+        import tempfile
+        leaked = (
+            'id,source_document,note\n'
+            '1,"native_entity_enterprise_dataset_v6_geocoded.csv (the owner\'s research '
+            'dataset, on this machine at '
+            '~/Desktop/dissertation/data/tribal_federal_spending/clean/) '
+            ':: https://www.bowhead.com/about/",kept\n'
+            '2,/Users/someone/work/x.csv,C:\\Users\\someone\\x.csv\n'
+            '3,https://www.example.com/home/about,~20% of rows\n'
+        )
+        clean = self.script.scrub_local_paths(leaked)
+        self.assertNotIn("Desktop", clean)
+        self.assertNotIn("/Users/", clean)
+        self.assertNotIn("C:\\Users", clean)
+        self.assertIn(
+            '"native_entity_enterprise_dataset_v6_geocoded.csv (Lumecon research dataset) '
+            ':: https://www.bowhead.com/about/",kept',
+            clean,
+        )
+        removed = self.script.LOCAL_PATH_REMOVED
+        self.assertIn(f"2,{removed},{removed}\n", clean)
+        # A URL's own /home/ segment and a "~" that is not a home directory stay.
+        self.assertIn("3,https://www.example.com/home/about,~20% of rows\n", clean)
+        # The same line count and the same quoting: raw-text substitution only.
+        self.assertEqual(clean.count("\n"), leaked.count("\n"))
+        self.assertEqual(clean.count('"'), leaked.count('"'))
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            served = root / "public" / "data" / "cedar" / "samples" / "fixture"
+            served.mkdir(parents=True)
+            (served / "leak__10.csv").write_text(leaked, encoding="utf-8", newline="")
+            (served / "clean__10.csv").write_text("id,x\n1,y\n", encoding="utf-8", newline="")
+            rewritten = self.script.scrub_public_samples(root)
+            self.assertEqual([p.name for p in rewritten], ["leak__10.csv"])
+            self.assertEqual((served / "leak__10.csv").read_text(encoding="utf-8"), clean)
+            self.assertEqual(
+                self.script.scrub_public_samples(root), [], "a second pass finds nothing")
+            # The import path writes through the same scrub.
+            target = root / "out" / "leak__10.csv"
+            self.assertFalse(
+                self.script.publish_sample(served / "leak__10.csv", target), "already clean")
+            source = root / "bundle.csv"
+            source.write_text(leaked, encoding="utf-8", newline="")
+            self.assertTrue(self.script.publish_sample(source, target))
+            self.assertEqual(target.read_text(encoding="utf-8"), clean)
+        for path in (_REPO / "public" / "data" / "cedar" / "samples").rglob("*.csv"):
+            text = path.read_text(encoding="utf-8")
+            self.assertEqual(
+                self.script.scrub_local_paths(text), text,
+                f"{path} carries a local filesystem path; run import_cedar_manifest.py --audit",
+            )
+
     def test_the_explore_contracts_match_the_samples(self) -> None:
         # The Explore card reads each table through a contract derived from
         # its sample header (scripts/derive-explore.mjs). A sample whose

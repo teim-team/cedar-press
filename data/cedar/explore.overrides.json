@@ -81,7 +81,13 @@
     "attribution_columns": [
       "entity_match_method",
       "confidence_tier"
-    ]
+    ],
+    "source": null,
+    "source_builder": {
+      "kind": "propublica_ein",
+      "column": "EIN"
+    },
+    "_why_source": "Declared 2026-09-27: source_url is the same IRS Business Master File landing page on every row, the dataset's source rather than this organization's, so the row link is built from the EIN to the organization's ProPublica Nonprofit Explorer page (the pattern code/33_nonprofit_financials.py records as propublica_url). source_url stays in the owner's default columns as the dataset source."
   },
   "lobbying/native_entity_lobbying_disclosures": {
     "reviewed": true,
@@ -304,6 +310,101 @@
       "entity_attribution_basis",
       "confidence"
     ]
+  },
+  "lobbying/advocacy_passthrough": {
+    "source": "source_url_lobbying",
+    "_why_source": "Declared 2026-09-27: source_url_lobbying is the table's own per-row link to the originating record (the recipient's LDA filing); the derived rule did not pick it by name."
+  },
+  "lobbying/advocacy_passthrough_2026-08-07": {
+    "source": "source_url_lobbying",
+    "_why_source": "Declared 2026-09-27: source_url_lobbying is the table's own per-row link to the originating record (the recipient's LDA filing); the derived rule did not pick it by name."
+  },
+  "lobbying/lobbying_registrant_native_ownership_evidence": {
+    "source": "evidence_url",
+    "_why_source": "Declared 2026-09-27: evidence_url is the table's own per-row link to the originating record (the filing or page the ownership evidence is quoted from); the derived rule did not pick it by name."
+  },
+  "contractors/contractor_ranking": {
+    "source": "link_evidence_url",
+    "_why_source": "Declared 2026-09-27: link_evidence_url is the table's own per-row link to the originating record (the owner's page that evidences the link); the derived rule did not pick it by name."
+  },
+  "nonprofits/np_org_scale": {
+    "source": "propublica_url",
+    "_why_source": "Declared 2026-09-27: propublica_url is the table's own per-row link to the originating record (the organization's ProPublica Nonprofit Explorer page; source_url is the API's JSON response, which a reader cannot use); the derived rule did not pick it by name."
+  },
+  "federal-register/federal_actions_entity_bridge": {
+    "source_builder": {
+      "kind": "federal_register_document",
+      "column": "document_number"
+    },
+    "_why_source": "Declared 2026-09-27: the table carries no link column, and its document_number determines the notice's federalregister.gov page. The pattern is the one code/130_build_section_106_consultation.py and code/1187_native_federal_advocacy.py already records, not a new one."
+  },
+  "federal-register/fr_consultation_referenced": {
+    "source_builder": {
+      "kind": "federal_register_document",
+      "column": "document_number"
+    },
+    "_why_source": "Declared 2026-09-27: the table carries no link column, and its document_number determines the notice's federalregister.gov page. The pattern is the one code/130_build_section_106_consultation.py and code/1187_native_federal_advocacy.py already records, not a new one."
+  },
+  "federal-register/fr_ex_parte_party_entity_links": {
+    "source_builder": {
+      "kind": "federal_register_document",
+      "column": "document_number"
+    },
+    "_why_source": "Declared 2026-09-27: the table carries no link column, and its document_number determines the notice's federalregister.gov page. The pattern is the one code/130_build_section_106_consultation.py and code/1187_native_federal_advocacy.py already records, not a new one."
+  },
+  "nagpra/fr_nagpra_title_index": {
+    "source_builder": {
+      "kind": "federal_register_document",
+      "column": "document_number"
+    },
+    "_why_source": "Declared 2026-09-27: the table carries no link column, and its document_number determines the notice's federalregister.gov page. The pattern is the one code/130_build_section_106_consultation.py and code/1187_native_federal_advocacy.py already records, not a new one."
+  },
+  "nagpra/nagpra_notice_entity_bridge": {
+    "source_builder": {
+      "kind": "federal_register_document",
+      "column": "document_number"
+    },
+    "_why_source": "Declared 2026-09-27: the table carries no link column, and its document_number determines the notice's federalregister.gov page. The pattern is the one code/130_build_section_106_consultation.py and code/1187_native_federal_advocacy.py already records, not a new one."
+  },
+  "nagpra/nagpra_notice_institutions": {
+    "source_builder": {
+      "kind": "federal_register_document",
+      "column": "document_number"
+    },
+    "_why_source": "Declared 2026-09-27: the table carries no link column, and its document_number determines the notice's federalregister.gov page. The pattern is the one code/130_build_section_106_consultation.py and code/1187_native_federal_advocacy.py already records, not a new one."
+  },
+  "lobbying/oira_federal_action_links": {
+    "source_builder": {
+      "kind": "federal_register_document",
+      "column": "federal_action_document_number"
+    },
+    "_why_source": "Declared 2026-09-27: the table carries no link column, and the linked federal action's document number determines its federalregister.gov page. The pattern is the one code/130_build_section_106_consultation.py and code/1187_native_federal_advocacy.py already records, not a new one."
+  },
+  "nonprofits/np_ein_entity_hub": {
+    "source_builder": {
+      "kind": "propublica_ein",
+      "column": "ein"
+    },
+    "_why_source": "Declared 2026-09-27: the table carries no link column, and its EIN determines the organization's ProPublica Nonprofit Explorer page. The pattern is the one code/33_nonprofit_financials.py (propublica_url) already records, not a new one."
+  },
+  "nonprofits/np_ein_uei_bridge": {
+    "source_builder": {
+      "kind": "propublica_ein",
+      "column": "ein"
+    },
+    "_why_source": "Declared 2026-09-27: the table carries no link column, and its EIN determines the organization's ProPublica Nonprofit Explorer page. The pattern is the one code/33_nonprofit_financials.py (propublica_url) already records, not a new one."
+  },
+  "legislation/native_bills_entity_class": {
+    "source_builder": {
+      "kind": "congress_bill"
+    },
+    "_why_source": "Declared 2026-09-27: the table carries no link column, and its congress, bill_type and number determine the bill's congress.gov page. The pattern is the one legislation/native_bills (declared 2026-09-05) already records, not a new one."
+  },
+  "legislation/native_bills_subject_sweep": {
+    "source_builder": {
+      "kind": "congress_bill"
+    },
+    "_why_source": "Declared 2026-09-27: the table carries no link column, and its congress, bill_type and number determine the bill's congress.gov page. The pattern is the one legislation/native_bills (declared 2026-09-05) already records, not a new one."
   },
   "_note_attribution_columns": "Which columns of THIS row say how it was attributed to its entity. The record page shows them instead of a general paragraph about matching, because a reader checking one record needs the basis for that record. A table with none says so rather than explaining matching in general. Declared 2026-09-15 from each sample's header."
 }
