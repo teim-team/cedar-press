@@ -75,7 +75,9 @@ class PartitionedReleaseTest(unittest.TestCase):
         env.start()
         self.addCleanup(env.stop)
         self.fetch = patch.object(
-            repository, "_release_json", side_effect=lambda _, **_options: copy.deepcopy(self.manifest)
+            repository,
+            "_release_json",
+            side_effect=lambda _, **_options: copy.deepcopy(self.manifest),
         )
         self.fetch.start()
         self.addCleanup(self.fetch.stop)

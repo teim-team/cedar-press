@@ -63,9 +63,9 @@ git ls-files src/<dir>/grove                                   # files to move
 
 | | |
 |---|---|
-| Files to move | 140 — `features/grove` 95, `pages/grove` 42, `components/grove` 1, `styles/grove` 2 |
-| Path references to rewrite | 416, across 98 files |
-| Referencing files inside `src/` | 48 — `pages/` 32, `features/` 12, `context/` 2, `components/` 1, `main.jsx` 1 |
+| Files to move | 143 — `features/grove` 97, `pages/grove` 43, `components/grove` 1, `styles/grove` 2 |
+| Path references to rewrite | 417, across 99 files |
+| Referencing files inside `src/` | 49 — `pages/` 33, `features/` 12, `context/` 2, `components/` 1, `main.jsx` 1 |
 | Referencing files outside `src/` | 50 — `server/cedar_press/` 8, `scripts/` 10, `docs/` 16, `code/` 5, `server/tests/` 4, `tests/` 2, `data/` 1, `.github/` 1, `.env.example` 1, `AGENTS.md` 1, `eslint.config.js` 1 |
 
 The reason this was deferred has expired. The table used to carry a fifth row
@@ -79,7 +79,7 @@ as its own commit — moving the four directories to `press/` and rewriting the
 references in one pass — for two reasons that are about review rather than
 about risk.
 
-First, "did all 416 references get rewritten?" is a question the build, the
+First, "did all 417 references get rewritten?" is a question the build, the
 suites and the smoke run answer, and not one a reader can answer from a diff.
 Folded into a change that also alters behaviour or prose, the rename hides
 that change instead of accompanying it.
@@ -97,7 +97,7 @@ day the four directories move, the same measurement turns into the stale-path
 sweep and names every file that still spells the old one.
 
 One precondition, found while re-measuring the rows above. `npm run test:smoke`
-is one of the three things that answer "did all 416 references get rewritten?",
+is one of the three things that answer "did all 417 references get rewritten?",
 and until this commit it could answer for the wrong tree: `playwright.config.js`
 hardcoded port 4180 and kept `reuseExistingServer` on outside CI, so a run in
 one checkout attached to a preview server another checkout had left listening

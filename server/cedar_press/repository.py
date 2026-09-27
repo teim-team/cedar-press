@@ -602,6 +602,7 @@ def _partitioned_release(catalog, collection_id, requested_release_id, metadata_
     result = {
         "kind": "full",
         "release_id": rid,
+        "manifest_sha256": pin["manifest_sha256"],
         "record_count": count,
         "fields": header,
         "table_id": table,
@@ -791,6 +792,7 @@ def full_release(collection_id, requested_release_id=None, *, metadata_only=Fals
             return {
                 "kind": "full",
                 "release_id": release_id,
+                "manifest_sha256": manifest_digest,
                 "schema_version": 1,
                 "record_count": count,
                 "fields": header,
@@ -1180,6 +1182,7 @@ def _grove_partitioned_release(pin, manifest, logical, *, metadata_only=False):
     if metadata_only:
         return {
             "kind": "full", "release_id": release_id, "schema_version": 1,
+            "manifest_sha256": pin["manifest_sha256"],
             "record_count": logical["record_count"], "fields": header,
             "table_id": component, "scope": "All manifest-ordered verified component parts",
             "format": "jsonl", "parts": logical["parts"],
@@ -1263,6 +1266,7 @@ def _grove_component_release(pin, manifest, component, *, metadata_only=False):
         return {
             "kind": "full",
             "release_id": release_id,
+            "manifest_sha256": pin["manifest_sha256"],
             "schema_version": 1,
             "record_count": count,
             "fields": header,

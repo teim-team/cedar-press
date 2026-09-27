@@ -2994,14 +2994,14 @@
         "origin": "lumecon",
         "rows_label": "14,868 rows",
         "vintage": null,
-        "version": "v2",
-        "updated": "2026-09-26",
+        "version": "v3",
+        "updated": "2026-09-27",
         "downloads": null,
         "name": "Cedar Native Entity Enterprise Dataset (NEED)",
         "short_name": "NEED",
         "tracks": "Enterprise ownership and affiliation across tribes, Alaska Native corporations, Native Hawaiian organizations, and state-recognized Native entities — the parent, the holding company and the operating company, kept as a chain rather than a flat list.",
         "sources": "What each owner publishes about itself: audited annual reports filed by ANCSA corporations with the Alaska Division of Banking and Securities under Alaska Statute 45.55.139, whose Principles of Consolidation note enumerates the subsidiaries by legal name; nations' own “Our Companies” and enterprise registers; ANC and NHO subsidiary directories. Publishers whose terms forbid reuse are excluded by every route and named as excluded.",
-        "method": "Two relations, declared per row and never conflated: a STRUCTURE is ownership — nation, holding company, operating company — and a TIE is a published relationship that is not ownership, such as a joint venture, which genuinely has two parents. Ownership is only ever recorded where a source asserted it; a shared name or a shared address is not evidence and does not create a row. An external identifier appears only where the owner published it, so the register is not padded with plausible matches. Where no external identifier exists the enterprise still gets a permanent, check-digited Cedar identifier and is carried as a sub-hub of its nation, which is what makes visible the enterprises federal contracting never sees."
+        "method": "NEED records enterprises and evidence-backed relationships, distinguishing ownership from other affiliations and preserving the legal entity named by each source. Public profiles belong to registered Native entities keyed by their Cedar entity ID; NEED-only enterprises appear as related records without a duplicate profile. Patent ownership and credit-rating histories remain attributed to the exact legal owner or issuer, including an entity itself where supported. Existing CEDAR-NEST and NESTREL identifiers are preserved. No new canonical IDs were issued in this review. The full internal candidate remains withheld under the maintained collection-wide publication rule; internal research coverage is not a permitted public preview."
       },
       "cedar": {
         "cedar_id": "need",

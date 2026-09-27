@@ -18,7 +18,7 @@ import sys
 import tempfile
 from pathlib import Path
 
-from cedar_press import need_profiles, repository
+from cedar_press import need_profiles, release_research, repository
 
 PROTOCOL_VERSION = 1
 MAX_REQUEST_BYTES = 16 * 1024
@@ -43,6 +43,7 @@ def _validate(request: dict) -> str:
         "discover": set(),
         "profile": {"cedar_uid"},
         "download": {"collection", "release_id", "component"},
+        "research": {"collection", "release_id", "component"},
     }.get(operation)
     if extra is None or set(request) - ({"protocol_version", "tier", "operation"} | extra):
         raise ExchangeRefusal(400, "Invalid Grove consumer request")
@@ -76,6 +77,8 @@ def exchange(request: dict, output_directory: Path | None = None) -> dict:
     if not repository.may_download_full(request["tier"], collection):
         raise ExchangeRefusal(403, "Collection is unavailable to this plan")
     repository.assert_collection_publishable(collection)
+    if operation == "research":
+        return release_research.packet(request["tier"], collection, rid, component)
     if output_directory is None or not output_directory.is_dir() or output_directory.is_symlink():
         raise ExchangeRefusal(503, "Private download storage is unavailable")
     if repository.is_component_release(collection):

@@ -116,6 +116,26 @@ export async function fetchCollections({ signal } = {}) {
   return request("/press/collections", { signal });
 }
 
+export function fetchReleaseCollections({ signal } = {}) {
+  return request("/press/release-collections", { signal });
+}
+
+export function releaseDownloadUrl(collection, releaseId, component = null) {
+  if (!/^[a-z][a-z0-9-]{0,63}$/.test(collection || "") || collection === "gaming"
+      || !/^[a-f0-9]{64}$/.test(releaseId || "")
+      || (component !== null && !/^[a-z0-9][a-z0-9_]{0,59}$/.test(component))) return null;
+  const query = new URLSearchParams({ release_id: releaseId });
+  if (component) query.set("component", component);
+  return `${API_URL}/press/collections/${collection}/full-download?${query}`;
+}
+
+export function fetchReleaseResearch(collection, releaseId, component = null, { signal } = {}) {
+  if (!releaseDownloadUrl(collection, releaseId, component)) return Promise.reject(new Error("Invalid release"));
+  const query = new URLSearchParams({ release_id: releaseId });
+  if (component) query.set("component", component);
+  return request(`/press/collections/${collection}/research?${query}`, { signal });
+}
+
 /** Release history: what changed in each collection, newest first. */
 export async function fetchReleases({ signal } = {}) {
   return request("/press/releases", { signal });

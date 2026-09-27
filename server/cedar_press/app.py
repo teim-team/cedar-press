@@ -69,6 +69,7 @@ from cedar_press import (
     press_catalog,
     priorities,
     ratelimit,
+    release_research,
     repository,
     shelf,
     subscribers,
@@ -485,9 +486,21 @@ def collections(session: Session = Depends(require_session)) -> dict[str, object
 
 
 @app.get("/press/release-collections")
-def release_collections(session: Session = Depends(require_session)) -> dict[str, object]:
+def release_collections(
+    response: Response, session: Session = Depends(require_session)
+) -> dict[str, object]:
     """Collection release integration targets with verified metadata when available."""
-    return repository.release_targets_for(session.tier)
+    try:
+        subscriber = subscribers.find(session.email)
+    except Exception as error:
+        raise HTTPException(status_code=503, detail="Authorization unavailable") from error
+    if subscriber is None:
+        raise HTTPException(status_code=401, detail="Authentication required")
+    response.headers["Cache-Control"] = "private, no-store"
+    result = repository.release_targets_for(subscriber.tier)
+    # A Grove subscriber can visit Press; its Press surface still has fourteen collections.
+    result["collections"] = [entry for entry in result["collections"] if entry["id"] != "gaming"]
+    return result
 
 
 @app.get("/press/entities/{cedar_uid}/need-evidence")
@@ -603,6 +616,37 @@ def _download_audit(
             else ("unknown" if component is not None else None)
         )
     DOWNLOAD_LOG.info(json.dumps(event, sort_keys=True))
+
+
+@app.get("/press/collections/{collection_id}/research")
+def release_research_preview(
+    collection_id: str,
+    release_id: str,
+    component: str | None = None,
+    session: Session | None = Depends(current_session),
+):
+    """Real bounded examples and definitions behind the same live-account gates as downloads."""
+    if session is None:
+        raise HTTPException(status_code=401, detail="Authentication required")
+    if not repository.may_download_full(session.tier, collection_id):
+        raise HTTPException(status_code=403, detail="Collection not included")
+    try:
+        subscriber = subscribers.find(session.email)
+    except Exception as error:
+        raise HTTPException(status_code=503, detail="Authorization unavailable") from error
+    if subscriber is None:
+        raise HTTPException(status_code=401, detail="Authentication required")
+    if not repository.may_download_full(subscriber.tier, collection_id):
+        raise HTTPException(status_code=403, detail="Collection not included")
+    try:
+        payload = release_research.packet(subscriber.tier, collection_id, release_id, component)
+    except (repository.FullReleaseUnavailable, OSError, ValueError, KeyError, TypeError) as error:
+        raise HTTPException(
+            status_code=503, detail="Pinned research preview unavailable or held"
+        ) from error
+    return JSONResponse(
+        payload, headers={"Cache-Control": "private, no-store", "X-Cedar-Release": release_id}
+    )
 
 
 @app.get("/press/collections/{collection_id}/full-download")

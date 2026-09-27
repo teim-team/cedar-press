@@ -360,7 +360,9 @@ class SharedCollectionReleaseTest(unittest.TestCase):
         ):
             response = self.client.get("/press/release-collections")
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.json()["collections"]), 15)
+        self.assertEqual(len(response.json()["collections"]), 14)
+        self.assertNotIn("gaming", [entry["id"] for entry in response.json()["collections"]])
+        self.assertEqual(response.headers["cache-control"], "private, no-store")
 
     def test_matching_presentation_never_clears_held_or_missing_field_rights(self):
         for collection in ("gaming", "plot", "foundation-corporate-giving", "need"):

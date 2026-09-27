@@ -984,18 +984,28 @@
     },
     "need": {
       "name": "Cedar Native Entity Enterprise Dataset (NEED)",
-      "version": "v2",
-      "updated": "2026-09-26",
+      "version": "v3",
+      "updated": "2026-09-27",
       "cadence": "Updated weekly",
       "retired": false,
       "history": [
+        {
+          "version": "v3",
+          "date": "2026-09-27",
+          "kind": "data",
+          "changed": [
+            "Release: 3 tables, 14,868 rows.",
+            "No preview file yet: the collection's flagship table is unsettled, and no sample is published until it is.",
+            "Readiness is blocked, with 1 named blocker recorded in the manifest."
+          ]
+        },
         {
           "version": "v2",
           "date": "2026-09-26",
           "kind": "data",
           "changed": [
             "Release: 3 tables, 14,868 rows.",
-            "A 10-row preview of need_enterprises.csv, the collection's flagship table, was produced with this release and is not published on the shelf yet."
+            "A 10-row preview of need_enterprises.csv, the collection's flagship table, was published with this release; the shelf now serves the current release's preview."
           ]
         },
         {
