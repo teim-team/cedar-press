@@ -46,7 +46,7 @@ import { coverageFrom } from "../../features/grove/pressAccess";
 import { LUMECON_TEAM_URL, LUMECON_URL, TBN_PLANS_URL, TBN_URL } from "../../features/grove/pressArticles";
 import { PRESS_TIERS, STOREFRONT_CATALOG, collectionsOnShelf } from "../../features/grove/pressCatalog";
 import { formatUpdated, recentlyUpdated } from "../../features/grove/pressReleases";
-import { SOURCE_REACH_FIGURE, SOURCE_ROTATION } from "../../features/grove/sourceRotation.js";
+import { SOURCE_REACH_FIGURE, SOURCE_ROTATION_ORDER } from "../../features/grove/sourceRotation.js";
 import { MAINTENANCE } from "../../features/grove/pressMethod.js";
 import {
   PRESS_METHODS_PATH,
@@ -84,11 +84,11 @@ import { PressPreviewNotice } from "./PressChrome";
 import { TierName } from "./TierName";
 import PressReleaseSpecimen from "./PressReleaseSpecimen";
 
-/** The source list dealt into rows for the navy banner, in list order
- * across rows so neighbours in the list are not neighbours on screen. */
+/** The source list dealt into rows for the navy banner, from the scrambled
+ * order, so no row reads as a list someone could copy in sequence. */
 const SOURCE_ROW_COUNT = 7;
 const SOURCE_ROWS = Array.from({ length: SOURCE_ROW_COUNT }, (_, r) =>
-  SOURCE_ROTATION.filter((_, i) => i % SOURCE_ROW_COUNT === r),
+  SOURCE_ROTATION_ORDER.filter((_, i) => i % SOURCE_ROW_COUNT === r),
 ).filter((row) => row.length);
 
 /** The brand mark, served from public/. The all-teal mark is the current one. */
@@ -740,7 +740,10 @@ export default function PressGate({ user }) {
                 {/* Several runs, alternating direction, so the banner fills
                     the column rather than one line at its foot. Each run is
                     duplicated for a seamless loop; the copy is aria-hidden so
-                    a screen reader hears every source once. */}
+                    a screen reader hears every source once. It does not
+                    pause on hover or focus, and a transparent layer over the
+                    runs keeps the moving text from being selected and copied
+                    (owner, 2026-09-27). */}
                 <div className="cp-why__runs">
                   {SOURCE_ROWS.map((row, r) => (
                     <div className="cp-hero3__marqwrap" key={r}>

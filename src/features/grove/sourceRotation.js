@@ -16,8 +16,11 @@
  * Press door should not name its sources. Nothing counts this list: the
  * marquee's run time is its length, and the 500+ figure never depended on it.
  *
- * The final six labels (parcel, assessor, permit and environmental-review
- * records) name the systems PLOT is being built from.
+ * The parcel, assessor, permit and environmental-review labels name the
+ * systems PLOT is built from. The three USPTO labels and the one broad
+ * credit-rating label name the Cedar NEED patent and rating enrichment
+ * (owner, 2026-09-27); the USPTO is the one federal patent office, so its
+ * separate public systems are listed rather than several offices.
  */
 
 export const SOURCE_REACH_CLAIM =
@@ -88,6 +91,24 @@ export const SOURCE_ROTATION = Object.freeze([
   "Building permit and inspection records",
   "Environmental permits and CEQA reviews",
   // Cedar NEED's enrichments (owner, 2026-09-27). The 500+ figure is unchanged.
-  "Patent records",
-  "Rating-agency announcements",
+  "USPTO patent grants",
+  "USPTO patent assignment records",
+  "PatentsView patent data",
+  "Credit rating agency announcements",
 ]);
+
+/**
+ * The order the banner shows them in: fixed, so a build is reproducible and
+ * the prerendered page matches the hydrated one, but with no pattern a reader
+ * can follow (owner, 2026-09-27). Each label is placed by a hash of its own
+ * text, so adding or removing one does not reshuffle the rest.
+ */
+const placeOf = (label) => {
+  let h = 0x811c9dc5;
+  for (const ch of `cedar-banner:${label}`) h = Math.imul(h ^ ch.codePointAt(0), 0x01000193) >>> 0;
+  return h;
+};
+
+export const SOURCE_ROTATION_ORDER = Object.freeze(
+  [...SOURCE_ROTATION].sort((a, b) => placeOf(a) - placeOf(b)),
+);

@@ -140,8 +140,9 @@ test.describe("the gate", () => {
       "Cedar Press maintains its datasets weekly with human review, expands their source coverage and useful fields over time and develops new collections.",
     );
     const panel = page.locator(".cp-hero3__proof");
-    await expect(panel).toContainText("Patent records");
-    await expect(panel).toContainText("Rating-agency announcements");
+    for (const label of ["USPTO patent grants", "USPTO patent assignment records", "PatentsView patent data", "Credit rating agency announcements"]) {
+      await expect(panel).toContainText(label);
+    }
     await expect(panel.locator(".cp-hero3__proofcount")).toContainText("500+ source websites");
   });
 
@@ -173,6 +174,28 @@ test.describe("the gate", () => {
     await expect(ledes.nth(1).locator('a[href="https://lumecon.ai/team/"]')).toHaveCount(1);
     await expect(ledes.nth(2).locator('a[href="https://tribalbusinessnews.com"]')).toHaveCount(1);
     await expect(page.locator("body")).not.toContainText("As search and analytical tools improve");
+  });
+
+  // The navy banner does not pause, cannot be selected, and is not in the
+  // order the source list is written in (owner, 2026-09-27).
+  test("the source banner keeps moving, cannot be selected, and is not in list order", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop", "a pointer question");
+    await page.goto("/");
+    const runs = page.locator(".cp-why__runs");
+    await runs.scrollIntoViewIfNeeded();
+    await runs.hover();
+    const states = await page.locator(".cp-why__sources .cp-hero3__marquee").evaluateAll((els) => els.map((el) => getComputedStyle(el).animationPlayState));
+    expect(states.every((s) => s === "running")).toBe(true);
+    await expect(runs).toHaveCSS("user-select", "none");
+    const covered = await runs.evaluate((el) => {
+      const r = el.getBoundingClientRect();
+      const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+      return hit === el;
+    });
+    expect(covered, "the layer over the runs takes the pointer").toBe(true);
+    const shown = await page.locator(".cp-why__runs .cp-hero3__run:not([aria-hidden])").evaluateAll((uls) => uls.flatMap((ul) => [...ul.querySelectorAll("li")].map((li) => li.textContent)));
+    const sorted = [...shown].sort((a, b) => a.localeCompare(b));
+    expect(shown).not.toEqual(sorted);
   });
 
   test("a reader who closed the old private-preview note sees the early access note once", async ({ page }) => {
