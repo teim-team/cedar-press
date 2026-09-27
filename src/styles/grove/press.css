@@ -1440,10 +1440,12 @@
 .teim-rd .cp-aud__panel.is-on { opacity: 1; visibility: visible; transition: opacity 0.35s var(--cp-ease), visibility 0s; }
 /* A quiet tint holds the panel's place until the lazy photograph lands, so
  * an empty panel never reads as a broken image. */
-.teim-rd .cp-aud__media { grid-area: media; position: relative; min-height: 13rem; background: var(--door-ground-bright); }
+/* Taller (owner, 2026-09-27): the space the removed quiet line held goes to
+ * the card, so the photograph and the text both have room. */
+.teim-rd .cp-aud__media { grid-area: media; position: relative; min-height: clamp(15rem, 22vw, 19rem); background: var(--door-ground-bright); }
 .teim-rd .cp-aud__media picture { position: absolute; inset: 0; display: block; }
 .teim-rd .cp-aud__media img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.teim-rd .cp-aud__text { grid-area: text; min-width: 0; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 0.45rem; padding: clamp(1.2rem, 2.2vw, 1.8rem) clamp(1.2rem, 2.6vw, 2.2rem); }
+.teim-rd .cp-aud__text { grid-area: text; min-width: 0; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 0.6rem; padding: clamp(1.6rem, 3vw, 2.6rem) clamp(1.3rem, 2.8vw, 2.4rem); }
 .teim-rd .cp-aud__label { margin: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.2rem 0.6rem; font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--dteal); }
 /* The job, after the audience, in the page's quieter ink. */
 .teim-rd .cp-aud__job { color: var(--door-ink-3); font-weight: 600; }
@@ -1535,7 +1537,6 @@
 .teim-rd .cp-aud__meta { font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--door-ink-3); white-space: nowrap; }
 @media (max-width: 560px) { .teim-rd .cp-aud__note { min-height: 0; } }
 /* The owner's quiet line, the last thing in the module. */
-.teim-rd .cp-aud__quiet { margin: 0.75rem 0 0; font-size: 0.84rem; line-height: 1.5; color: var(--door-ink-3); }
 
 /* The partners, one line under the lede. Links in the page's teal text token
  * (scoped under .cp-door to outrank its `a { color: inherit }`);
@@ -2772,17 +2773,17 @@
 /* The source banner on navy (owner, 2026-09-27): the right column of the
  * passage, above the shelves. Same run and mask as before; light on dark. */
 .teim-rd .cp-why__head > .cp-why__side { display: flex; flex-direction: column; gap: clamp(1.4rem, 3vw, 2.2rem); min-width: 0; align-self: stretch; }
-.teim-rd .cp-why__sources { flex: 1 1 auto; display: flex; flex-direction: column; min-height: 14rem; max-width: none; margin: 0; background: rgba(255, 255, 255, 0.06); border-color: rgba(255, 255, 255, 0.18); box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
-.teim-rd .cp-why__sources .cp-hero3__prooflabel { color: rgba(255, 255, 255, 0.72); }
-.teim-rd .cp-why__sources .cp-hero3__prooflabel:hover, .teim-rd .cp-why__sources .cp-hero3__prooflabel:focus-visible { color: #fff; }
+.teim-rd .cp-why__sources { flex: 1 1 auto; display: flex; flex-direction: column; min-height: 14rem; max-width: none; margin: 0; border-radius: 10px; background: #fff; border-color: #fff; box-shadow: 0 0 0 1px rgba(95, 217, 204, 0.18), 0 22px 44px -22px rgba(95, 217, 204, 0.55), 0 10px 24px -12px rgba(0, 0, 0, 0.55); -webkit-backdrop-filter: none; backdrop-filter: none; }
+.teim-rd .cp-why__sources .cp-hero3__prooflabel { color: var(--dteal); }
+.teim-rd .cp-why__sources .cp-hero3__prooflabel:hover, .teim-rd .cp-why__sources .cp-hero3__prooflabel:focus-visible { color: var(--dteal); border-bottom-color: currentColor; }
 .teim-rd .cp-why__runs { flex: 1 1 auto; display: flex; flex-direction: column; justify-content: space-evenly; gap: 0.55rem; }
 .teim-rd .cp-hero3__marquee--back { animation-direction: reverse; }
 .teim-rd .cp-why__runs { position: relative; -webkit-user-select: none; user-select: none; }
 .teim-rd .cp-why__runs::after { content: ''; position: absolute; inset: 0; z-index: 1; }
 .teim-rd .cp-why__sources .cp-hero3__marquee:hover, .teim-rd .cp-why__sources .cp-hero3__marquee:focus-within { animation-play-state: running; }
-.teim-rd .cp-why__sources .cp-hero3__proofcount { color: var(--door-accent-light); }
-.teim-rd .cp-why__sources .cp-hero3__run li { color: rgba(255, 255, 255, 0.86); }
-.teim-rd .cp-why__sources .cp-hero3__run li::before { background: rgba(255, 255, 255, 0.2); }
+.teim-rd .cp-why__sources .cp-hero3__proofcount { color: var(--dteal); }
+.teim-rd .cp-why__sources .cp-hero3__run li { color: var(--dteal); }
+.teim-rd .cp-why__sources .cp-hero3__run li::before { background: var(--teal-line); }
 .teim-rd .cp-why__lede a { color: #fff; text-decoration: underline; text-decoration-color: rgba(255, 255, 255, 0.45); text-underline-offset: 0.18em; }
 .teim-rd .cp-why__lede a:hover, .teim-rd .cp-why__lede a:focus-visible { text-decoration-color: currentColor; }
 .teim-rd .cp-why__shelves { list-style: none; margin: 0; padding: 1rem 0 0; border-top: 1px solid rgba(255, 255, 255, 0.22); display: grid; gap: 0.7rem; }
@@ -3216,7 +3217,7 @@
  * so a guarded rule is the difference between a response and a stuck one. */
 @media (hover: hover) and (pointer: fine) {
   .teim-rd .cp-hero3__run li:hover { color: var(--dteal); }
-  .teim-rd .cp-why__sources .cp-hero3__run li:hover { color: rgba(255, 255, 255, 0.86); }
+  .teim-rd .cp-why__sources .cp-hero3__run li:hover { color: var(--dteal); }
   .teim-rd .cp-ways__row:hover { border-bottom-color: var(--dteal); }
   .teim-rd .cp-ways__row:hover .cp-ways__label { color: var(--ink); }
   .teim-rd .cp-hero3__stage:hover .cp-hero3__frame { transform: translateY(-3px); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.98), 0 4px 8px rgba(10, 28, 52, 0.08), 0 26px 54px -24px rgba(10, 28, 52, 0.3), 0 60px 110px -56px rgba(10, 28, 52, 0.38); }

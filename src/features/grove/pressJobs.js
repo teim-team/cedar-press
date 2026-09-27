@@ -15,7 +15,6 @@
  *   JOBS             the shared vocabulary of jobs a use case is for
  *   QUESTION_KINDS   Describe, Compare, Trace: every question carries one
  *   ENTITY_JOBS      the entity page's line and the actions that work today
- *   BAND_NOTE        the quiet line under the door's use cases
  *
  * Surfaces that read them: the door's use-case band
  * (`PressAudienceExample.jsx`), the collection profile
@@ -378,7 +377,7 @@ export const AUDIENCE_JOBS = Object.freeze([
     // contracts (Prime Contracting), major transactions (Deals), resource
     // activity (Natural Resources), funding (Federal Funding).
     explanation: "Follow enterprise growth, contracts, major transactions, resource activity and funding across Indian Country to identify strategies worth examining in your own planning.",
-    collections: Object.freeze(["need", "contractors", "deals", "natural-resources", "funding"]),
+    collections: Object.freeze(["need", "contractors", "natural-resources", "funding"]),
     // Owner: economy sectors (hospitality, energy, construction,
     // manufacturing, healthcare), and not "Tribal Nations = council
     // chamber", so no government photograph. An exterior scene leads; the
@@ -394,7 +393,7 @@ export const AUDIENCE_JOBS = Object.freeze([
     job: "Competitive intelligence",
     outcome: "Understand the competitive environment around your portfolio.",
     explanation: "Track subsidiaries, joint ventures, federal business, major transactions and property activity to see where peer organizations are expanding and where new opportunities may be forming.",
-    collections: Object.freeze(["need", "contractors", "subcontracting", "deals", "plot"]),
+    collections: Object.freeze(["need", "subcontracting", "deals", "plot"]),
     imagePool: Object.freeze(["transportation", "manufacturing", "construction"]),
   }),
   Object.freeze({
@@ -403,7 +402,7 @@ export const AUDIENCE_JOBS = Object.freeze([
     job: "Partner discovery",
     outcome: "Find opportunities, partners and competitive signals.",
     explanation: "Compare ownership networks, contracting, transactions and Native-owned businesses to identify partners, suppliers, competitors and markets worth watching.",
-    collections: Object.freeze(["need", "contractors", "subcontracting", "deals", "owned"]),
+    collections: Object.freeze(["need", "contractors", "deals", "owned"]),
     imagePool: Object.freeze(["manufacturing-v2", "agriculture", "retail", "wholesale"]),
   }),
   Object.freeze({
@@ -415,7 +414,7 @@ export const AUDIENCE_JOBS = Object.freeze([
     job: "Due diligence",
     outcome: "Do more informed diligence and spot opportunities earlier.",
     explanation: "Understand ownership, federal business, funding relationships, transactions and property activity before financing, investing in or partnering with a Native enterprise.",
-    collections: Object.freeze(["need", "contractors", "funding", "deals", "plot"]),
+    collections: Object.freeze(["contractors", "foundation-corporate-giving", "deals", "plot"]),
     imagePool: Object.freeze(["finance", "realestate"]),
   }),
   Object.freeze({
@@ -450,7 +449,7 @@ export const AUDIENCE_JOBS = Object.freeze([
     job: "Market entry",
     outcome: "Understand the market before entering it.",
     explanation: "Identify Native enterprises, Native-owned businesses, active sectors, contracting patterns and major transactions before choosing markets, partners or outreach targets.",
-    collections: Object.freeze(["need", "owned", "contractors", "deals"]),
+    collections: Object.freeze(["need", "owned", "subcontracting", "deals"]),
     // The owner's list: construction, logistics, professional services,
     // tech, finance. Lumecon's professional-services and information
     // photographs show faces, so logistics is carried twice instead.
@@ -461,11 +460,11 @@ export const AUDIENCE_JOBS = Object.freeze([
     audience: "Universities and researchers",
     job: "Research",
     outcome: "Spend more time answering the research question, not rebuilding the data.",
-    // "Federal, tribal and institutional datasets": federal funding,
-    // advocacy and legislation, the tribal entity structure, and NAGPRA's
-    // institutional records.
+    // "Federal, tribal and institutional datasets": legislation and advocacy
+    // (federal), natural resource revenues on trust lands (tribal), and
+    // NAGPRA's institutional records.
     explanation: "Start with cleaned, linked and source-backed records instead of rebuilding separate federal, tribal and institutional datasets from scratch.",
-    collections: Object.freeze(["funding", "lobbying", "legislation", "need", "nagpra"]),
+    collections: Object.freeze(["legislation", "lobbying", "natural-resources", "nagpra"]),
     // Research is not a sector, and Lumecon's education photograph shows a
     // seated audience's faces: the two context textures, in slate.
     imagePool: Object.freeze(["context-lattice", "context-cedar"]),
@@ -487,10 +486,10 @@ export const AUDIENCE_JOBS = Object.freeze([
     outcome: "Prepare more informed tribal consultations, build stronger government-to-government relationships, and better serve the communities you represent.",
     // Every claim has a collection, in the sentence's order: funding
     // (Federal Funding), legislation (Legislation), agency actions (Federal
-    // Register), and Native-entity records (Cedar NEED). Advocacy's release
-    // carries tribal consultations, which is what backs the outcome.
+    // Register), and Native-entity records (NAGPRA, whose notices are the
+    // consultation record most agencies and museums work from).
     explanation: "Bring funding, legislation, agency actions and Native-entity records together with sources you can check.",
-    collections: Object.freeze(["funding", "legislation", "federal-register", "lobbying", "need"]),
+    collections: Object.freeze(["funding", "legislation", "federal-register", "nagpra"]),
     // Public infrastructure with no faces and no council chamber: utilities,
     // transportation, then the cedar texture.
     imagePool: Object.freeze(["utilities", "transportation", "context-cedar"]),
@@ -501,7 +500,7 @@ export const AUDIENCE_JOBS = Object.freeze([
     job: "Journalism",
     outcome: "Get to the story faster and show the record behind it.",
     explanation: "Follow organizations and events across funding, policy, advocacy, ownership, land and transactions while keeping the underlying source attached.",
-    collections: Object.freeze(["funding", "federal-register", "lobbying", "need", "plot", "deals"]),
+    collections: Object.freeze(["federal-register", "lobbying", "need", "plot", "deals"]),
     imagePool: Object.freeze(["context-cedar", "context-lattice"]),
     researchExample: Object.freeze({
       text: "A reporter needs Deals and Cedar NEED to trace an acquisition and the enterprise structure behind it.",
@@ -521,7 +520,7 @@ export const AUDIENCE_JOBS = Object.freeze([
     // (Federal Funding), contracting (Prime Contracting), ownership (Cedar
     // NEED), policy (Federal Register), transaction records (Deals).
     explanation: "Research organizations, markets and prospective clients through funding, contracting, ownership, policy and transaction records.",
-    collections: Object.freeze(["funding", "contractors", "need", "federal-register", "deals"]),
+    collections: Object.freeze(["contractors", "subcontracting", "federal-register", "lobbying"]),
     // Lumecon's professional-services and management photographs both show
     // faces, and a handshake beside this sentence reads as an endorsement.
     imagePool: Object.freeze(["context-lattice", "context-cedar"]),
@@ -538,14 +537,11 @@ export const AUDIENCE_JOBS = Object.freeze([
     job: "Economic development",
     outcome: "See where capital, support or partnership may fit.",
     explanation: "Compare public funding, enterprise activity, contracting, transactions and organizational presence to understand where outside investment, procurement, philanthropy or technical support may fit.",
-    collections: Object.freeze(["funding", "need", "contractors", "deals", "nonprofits"]),
+    collections: Object.freeze(["funding", "subcontracting", "foundation-corporate-giving", "nonprofits"]),
     imagePool: Object.freeze(["utilities", "agriculture", "construction"]),
   }),
 ]);
 
-/** The quiet line at the bottom of the door's use-case module (owner copy). */
-export const BAND_NOTE =
-  "Spend staff time on strategy, grants, diligence, reporting and decisions, not rebuilding public data.";
 
 /**
  * An audience as a page shows it against `catalog`, with its collections
