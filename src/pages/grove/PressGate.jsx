@@ -722,7 +722,7 @@ export default function PressGate({ user }) {
                 <a href={LUMECON_TEAM_URL} target="_blank" rel="noreferrer">team</a> of economists
                 and researchers has spent years producing published research and tribal economic
                 studies, and led the original construction of the Native Entity Enterprise Dataset.
-                Across more than 600 source websites, agentic models and machine learning pipelines
+                Across more than 600 publicly available sources, agentic models and machine learning pipelines
                 propose matches and human reviewers confirm them, giving each organization a
                 permanent identifier. That is how {STOREFRONT_CATALOG.length} datasets answer as
                 one collection.
@@ -745,7 +745,8 @@ export default function PressGate({ user }) {
                     Sources Lumecon draws on
                   </Link>
                   <span className="cp-hero3__proofcount">
-                    {SOURCE_REACH_FIGURE} source websites · {STOREFRONT_CATALOG.length} collections
+                    {SOURCE_REACH_FIGURE} publicly available sources ·{" "}
+                    <span className="cp-nowrap">{STOREFRONT_CATALOG.length} collections</span>
                   </span>
                 </div>
                 {/* Several runs, alternating direction, so the banner fills

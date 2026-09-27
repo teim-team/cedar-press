@@ -1,5 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { SOURCE_REACH_FIGURE, SOURCE_ROTATION, SOURCE_ROTATION_ORDER } from "./sourceRotation.js";
 
 test("no source label appears twice, even with different case or spacing", () => {
@@ -29,4 +30,19 @@ test("replaced labels are gone, so a source is not named twice", () => {
 // never moves because labels were added to this list.
 test("the reach figure is the stated one", () => {
   assert.equal(SOURCE_REACH_FIGURE, "600+");
+});
+
+// Owner, 2026-09-27: the source count is "publicly available sources", never
+// "websites", on the landing page and in Cedar's answers alike.
+test("the source count is never worded as websites", () => {
+  const files = [
+    new URL("./sourceRotation.js", import.meta.url),
+    new URL("./doorCedar.js", import.meta.url),
+    new URL("../../pages/grove/PressGate.jsx", import.meta.url),
+  ];
+  for (const file of files) {
+    const text = readFileSync(file, "utf8");
+    assert.doesNotMatch(text, /(?:600\+?|SOURCE_REACH_FIGURE\}?|distinct|source) (?:source )?websites/i, file.pathname);
+    assert.match(text, /publicly available sources/, file.pathname);
+  }
 });

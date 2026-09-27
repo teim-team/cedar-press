@@ -217,7 +217,7 @@ const GENERAL_INTENTS = [
     triggers: ["what is cedar press", "what is this", "what does cedar press do", "what is cedar", "about cedar press", "explain cedar press", "what do you do", "what is press", "cedar press", "what is it", "what are you"],
     answer:
       `Cedar Press is a research and intelligence service about Indian Country's economy. ` +
-      `It publishes ${COUNT} maintained collections, built from more than 600 source websites and ` +
+      `It publishes ${COUNT} maintained collections, built from more than 600 publicly available sources and ` +
       `resolved to the nations, corporations and organizations the records belong to.\n\n` +
       `A federal contract names the company that won it but not the nation that owns the company, so ` +
       `Cedar does the work between the record and the entity, publishes what it could not resolve, and keeps the ` +
@@ -254,24 +254,21 @@ const GENERAL_INTENTS = [
     followUps: ["current", "entities", "limits"],
     triggers: ["where does the data come from", "what are the sources", "what sources", "source systems", "is this public data", "where do you get", "how do you get the data", "provenance", "the sources", "data sources", "where is it from", "where does it come from"],
     answer:
-      `Lumecon draws on more than 600 source websites for the ${COUNT} collections and the research behind ` +
-      `them. They include federal spending and award systems ` +
-      `(USAspending, FPDS, FSRS, SAM, FAADS), Congress and the Federal Register (Congress.gov, Voteview, ` +
-      `federalregister.gov), advocacy and docket records (Senate and House lobbying disclosure, FERC and NRC ` +
-      `dockets, IBIA and IBLA appeals, regulations.gov), tax filings (IRS Business Master File, Form 990), ` +
-      `resource revenue (ONRR, OSMRE, ANCSA 7(i) and 7(j) filings, the Osage Minerals Council), and what ` +
-      `nations and corporations publish about themselves. For Cedar NEED there are also patent records, ` +
-      `supported by company, tribal, SEC and court evidence, and rating-agency announcements, supported by ` +
-      `issuer and tribal releases, filings, regulator records and labeled secondary sources.\n\n` +
-      `Not all of it is public. The Native-Owned Businesses collection comes from tribal TERO and commerce ` +
-      `offices under each nation's stated terms, and publishers whose terms forbid reuse are excluded by ` +
-      `every route and named as excluded.`,
+      `Every collection is built from publicly available sources, more than 600 of them. They include ` +
+      `federal spending and award systems (USAspending, FPDS, FSRS, SAM, FAADS), Congress and rulemaking ` +
+      `(Congress.gov, Voteview, the Federal Register, regulations.gov), lobbying disclosures and regulatory ` +
+      `dockets (FERC and NRC dockets, IBIA and IBLA appeals), IRS filings (the Business Master File and ` +
+      `Form 990), resource revenue reporting (ONRR, OSMRE, ANCSA 7(i) and 7(j) filings, the Osage Minerals ` +
+      `Council), and what nations and their enterprises publish about themselves.\n\n` +
+      `Cedar NEED also draws on patent records, supported by company, tribal, SEC and court evidence, and ` +
+      `rating-agency announcements, supported by issuer and tribal releases, filings, regulator records ` +
+      `and labeled secondary sources.`,
     expanded:
-      `Going deeper: some sources are deep rather than single. Behind the tribal business directories ` +
-      `sits a registry of ${REGISTRY_PROGRAMS} source programs, each one a nation's own TERO list, a ` +
-      `member-owned directory, a state certified-vendor list or a regional chamber.\n\n` +
-      `Every row carries the source it came from, so a figure can be traced back to the filing, the notice ` +
-      `or the directory that stated it, and a source that changes its terms is removed by name rather than quietly.`,
+      `Going deeper: the tribal business directories are one source family with a registry of ` +
+      `${REGISTRY_PROGRAMS} programs behind it: nations' own TERO lists, member-owned directories, state ` +
+      `certified-vendor lists and regional chambers.\n\n` +
+      `Every row carries the source it came from, so a figure traces back to the filing, the notice or ` +
+      `the directory that stated it.`,
   },
   {
     id: "entities",
@@ -539,7 +536,7 @@ const AUDIENCES_INTENT = {
     `\n\nTell me which is yours and I will say which collections carry that work.`,
   expanded:
     `Going deeper: every use case names the collections its work rests on, and nothing more. ` +
-    `Cedar Press shows what the public and private record says, with the source attached; it does not ` +
+    `Cedar Press shows what the public record says, with the source attached; it does not ` +
     `score need, supply contact lists or stand in for engaging Native nations directly.\n\n` +
     `Name an audience, such as ${AUDIENCES.slice(0, 2).map((a) => a.audience).join(" or ")}, and I will go through it.`,
 };
