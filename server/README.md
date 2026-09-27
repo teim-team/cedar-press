@@ -182,3 +182,42 @@ entitled tiers. Giving release
 `f65ea15d5f63ccd4ccb8b9425a744ab7e33f77e62ca66bb98a962fd4b81b6fac`
 was verified at 14 rows and download-held. These are rehearsal releases, not
 production eligibility or complete PLOT parcel/ownership coverage.
+
+### Replay the original collections and Gaming without collecting large bodies
+
+The legacy dataset v1 format has no governed production eligibility label.
+Its full-download path now requires both `CEDAR_PRESS_ENVIRONMENT=development`
+and `LUMECON_ENVIRONMENT=review`; staging and production refuse before calling
+the data API. Collection releases retain their existing production/class gates.
+Neither redistribution rights nor a successful database import issues a release.
+
+`tests/stream_release_rehearsal.py` runs saved native datasets, original
+partitioned tables, and Gaming components through both real ASGI applications.
+The queue is a JSON array of `{ "collection": "...", "release": "<sha256>",
+"store": "<immutable-store>" }`. Install both packages in one interpreter.
+
+```sh
+PYTHONPATH=server python server/tests/stream_release_rehearsal.py \
+  --queue <saved-queue.json> --output <review-receipts> \
+  --temporary-directory <bulk-scratch-directory> --code-revision <consumer-sha> \
+  --timeout-seconds 1800
+```
+
+Use `--collection <id>` to run one unfinished collection, or `--resume` to
+reuse same-revision successes only after the producer re-verifies every saved
+part. The script refuses inherited database configuration before importing the
+app. It starts no listener or subprocess and does not rebuild source data.
+Producer HTTP bodies are disk-spooled; the unchanged consumer verifies bounded
+parts; the consumer ASGI send callback computes SHA-256, bytes and newline rows
+without storing the logical body. An independent streaming read checks the
+manifest-ordered local artifacts. Anonymous, wrong-tier and production controls
+remain active. An absent component is disclosed separately from served or held
+components. Failures write per-collection receipts and the queue continues.
+
+Temporary files, SQLite scratch, and configurable caches must point at a drive
+with measured space. Progress is emitted by collection and every 64 MiB of HTTP
+body. Requests have an asynchronous timeout; synchronous producer verification
+may finish before cancellation can complete, so retain the coordinator's process
+and log stall monitoring. Redirect output to a persistent operation log. The
+collector regression streams 16 MiB with less than 2 MiB of traced allocation;
+that synthetic check is not a real collection receipt.

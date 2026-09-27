@@ -78,6 +78,7 @@ def main():
     token = secrets.token_hex(32)
     password = secrets.token_hex(32)
     os.environ["CEDAR_PRESS_ENVIRONMENT"] = "development"
+    os.environ["LUMECON_ENVIRONMENT"] = "review"
     os.environ["CEDAR_PRESS_SECRET"] = secrets.token_hex(32)
     os.environ["CEDAR_PRESS_INSECURE_COOKIE"] = "1"
     os.environ["CEDAR_PRESS_ACCOUNTS"] = json.dumps(

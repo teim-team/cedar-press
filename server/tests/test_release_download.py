@@ -58,7 +58,14 @@ class ReleaseDownloadTest(unittest.TestCase):
             },
         }
         self.approve_manifest_fixture()
-        self.env = patch.dict(os.environ, {"CEDAR_PRESS_RELEASE_CATALOG": str(self.catalog)})
+        self.env = patch.dict(
+            os.environ,
+            {
+                "CEDAR_PRESS_RELEASE_CATALOG": str(self.catalog),
+                "CEDAR_PRESS_ENVIRONMENT": "development",
+                "LUMECON_ENVIRONMENT": "review",
+            },
+        )
         self.env.start()
         self.addCleanup(self.env.stop)
         self.fetch = patch.object(repository, "_release_json", side_effect=self.response)
@@ -391,6 +398,27 @@ class ReleaseDownloadTest(unittest.TestCase):
                 ).status_code,
                 503,
             )
+
+    def test_legacy_dataset_requires_review_and_refuses_production_before_transport(self):
+        for environment, review in (
+            ("production", "review"),
+            ("staging", "review"),
+            ("development", ""),
+        ):
+            with (
+                patch.dict(
+                    os.environ,
+                    {"CEDAR_PRESS_ENVIRONMENT": environment, "LUMECON_ENVIRONMENT": review},
+                ),
+                patch.object(repository, "_release_response") as transport,
+            ):
+                self.mock_fetch.reset_mock()
+                response = self.client.get(
+                    "/press/collections/legislation/full-download", params={"release_id": self.rid}
+                )
+                self.assertEqual(response.status_code, 503)
+                self.mock_fetch.assert_not_called()
+                transport.assert_not_called()
 
     def test_explicit_pin_missing_malformed_or_stale_is_refused_and_audited(self):
         for pin, expected in [(None, 400), ("../outside", 400), ("b" * 64, 503)]:

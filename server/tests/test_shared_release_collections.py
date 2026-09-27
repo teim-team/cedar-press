@@ -2,6 +2,7 @@
 
 import copy
 import hashlib
+import importlib.util
 import os
 import tempfile
 import unittest
@@ -256,3 +257,15 @@ class SharedCollectionReleaseTest(unittest.TestCase):
             response = self.client.get("/press/release-collections")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.json()["collections"]), 15)
+
+    def test_real_rehearsal_refuses_inherited_database_before_imports_or_artifacts(self):
+        path = Path(__file__).with_name("shared_collection_rehearsal.py")
+        spec = importlib.util.spec_from_file_location("isolated_shared_rehearsal", path)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        for variable in ("DATABASE_URL", "CEDAR_PRESS_DB"):
+            with (
+                patch.dict(os.environ, {variable: "not-a-real-connection"}),
+                self.assertRaisesRegex(SystemExit, "isolated environment"),
+            ):
+                module.main()
