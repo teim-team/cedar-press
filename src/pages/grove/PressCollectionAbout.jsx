@@ -13,7 +13,11 @@
 //
 // NOTHING HERE IS WRITTEN. Every field comes from a file the release
 // produced: the descriptor (`collections.manifest.json` by way of
-// `collection.js`), the catalog, the codebook, and the release ledger. A
+// `collection.js`), the catalog, the codebook, and the release ledger. The
+// one block that is not the release's is "Questions this collection can help
+// answer", and it is not written here either: it is `COLLECTION_JOBS` in
+// `pressJobs.js`, where every question names the codebook fields that answer
+// it and the node suite checks those fields exist. A
 // profile that paraphrased its collection would drift from it the first time
 // a release moved, and the whole point of the page is to be the thing a
 // reader checks a figure against.
@@ -29,6 +33,7 @@ import { codebookFor } from "../../features/grove/explore.js";
 import { coverageLabel } from "../../features/grove/pressAccess.js";
 import { articleHref, articlesDrawingOn } from "../../features/grove/pressArticles.js";
 import { PRESS_CATALOG_BY_ID } from "../../features/grove/pressCatalog.js";
+import { collectionQuestions } from "../../features/grove/pressJobs.js";
 import { formatUpdated, ledgerFor } from "../../features/grove/pressReleases.js";
 import { PRESS_METHODS_PATH, PRESS_WHATS_NEW_PATH } from "../../features/grove/pressRoutes.js";
 import { COLLECTION_ICONS } from "./pressCollectionIcons";
@@ -72,6 +77,7 @@ export default function PressCollectionAbout({ entry, flagship, onClose }) {
   const book = flagship ? codebookFor(flagship.key) : null;
   const releases = ledgerFor(entry.id) ?? [];
   const latest = releases[0] ?? null;
+  const questions = collectionQuestions(entry.id);
 
   return (
     <div className="cp-ab" role="dialog" aria-label={`About ${entry.name}`} ref={panelRef}>
@@ -110,6 +116,19 @@ export default function PressCollectionAbout({ entry, flagship, onClose }) {
                 </p>
               ) : null}
             </>
+          ) : null}
+        </Block>
+
+        {/* Immediately after what it holds, so a reader deciding whether
+            this is the collection for their question sees the questions it
+            answers before the method behind them (owner, 2026-09-26). */}
+        <Block title="Questions this collection can help answer">
+          {questions.length ? (
+            <ul className="cp-ab__qs">
+              {questions.map((item) => (
+                <li key={item.q}>{item.q}</li>
+              ))}
+            </ul>
           ) : null}
         </Block>
 

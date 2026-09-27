@@ -25,7 +25,8 @@ const REDUCED = "@media (prefers-reduced-motion: reduce)";
 
 /** Every pointer response the pass added or touched. A finger gets none of them. */
 const HOVER_RULES = [
-  ".cp-dcol__tile:hover",
+  ".cp-aud__col:hover",
+  ".cp-aud__tab:hover",
   ".cp-why__item:hover",
   ".cp-ways__row:hover",
   ".cp-hero3__stage:hover",
@@ -59,8 +60,10 @@ test("every hover the pass touched lives only under the fine-pointer query", () 
   }
 });
 
-test("keyboard focus lifts a tile the way a pointer does", () => {
-  const [rule] = rulesFor(pressCss(), ".cp-dcol__tile:focus-visible");
+test("keyboard focus lifts a collection chip the way a pointer does", () => {
+  // The door's collection shelf was replaced by the use-case band on
+  // 2026-09-26; its chips inherit the shelf tiles' motion contract.
+  const [rule] = rulesFor(pressCss(), ".cp-aud__col:focus-visible");
   assert.ok(rule);
   assert.match(rule.body, /transform:\s*translateY\(-2px\)/);
   assert.match(rule.body, /outline:\s*2px solid/);
@@ -69,7 +72,6 @@ test("keyboard focus lifts a tile the way a pointer does", () => {
 test("the arrivals run on the curve, hold their start, and are exempt on the first screen", () => {
   const css = pressCss();
   for (const [needle, keyframe] of [
-    [".cp-dcol__grid > li", "cp-tile-in"],
     [".cp-proc__stage", "cp-stage-in"],
   ]) {
     const arrival = rulesFor(css, needle).find((r) => r.body.includes(`animation: ${keyframe}`));
@@ -85,31 +87,28 @@ test("the arrivals run on the curve, hold their start, and are exempt on the fir
 });
 
 test("the components write the index the stylesheet staggers on", () => {
-  assert.match(read("../../pages/grove/PressDoorCollections.jsx"), /<li key=\{entry\.id\} style=\{\{ "--i": i \}\}>/);
   assert.match(read("../../pages/grove/pressMethodSections.jsx"), /className="cp-proc__stage" key=\{stage\.id\} style=\{\{ "--i": index \}\}/);
-  assert.match(read("../../pages/grove/PressDoorCollections.jsx"), /cp-dcol__shelf\$\{active\?\.shelf === tier\.shelf \? " is-active" : ""\}/);
 });
 
-test("the shelf band's active state is a colour, not a movement", () => {
+test("a chosen chip is a colour, not a movement, and a chip moves on the curve", () => {
   const css = pressCss();
-  const active = rulesFor(css, ".cp-dcol__shelf.is-active");
-  assert.ok(active.length >= 2);
-  for (const rule of active) {
-    assert.doesNotMatch(rule.body, /transform|animation|box-shadow/, `${rule.selector} moves`);
-    assert.match(rule.body, /color/);
+  const chosen = rulesFor(css, ".cp-aud__col.is-on");
+  assert.ok(chosen.length >= 1);
+  for (const rule of chosen) {
+    assert.doesNotMatch(rule.body, /transform|animation/, `${rule.selector} moves`);
+    assert.match(rule.body, /border-color|background/);
   }
-  for (const needle of [".cp-dcol__shelf {", ".cp-dcol__tier {"]) {
-    const rule = rulesFor(css, needle.slice(0, -2)).find((r) => r.selector === `.teim-rd ${needle.slice(0, -2)}` && /transition/.test(r.body));
-    assert.ok(rule, `${needle} has no transition`);
-    assert.match(rule.body, /var\(--cp-ease\)/, `${needle} eases on something other than the curve`);
-  }
+  const base = rulesFor(css, ".cp-aud__col").find((r) => r.selector === ".teim-rd .cp-aud__col" && /transition/.test(r.body));
+  assert.ok(base, ".cp-aud__col has no transition");
+  assert.doesNotMatch(base.body.replace(/var\(--cp-ease\)/g, ""), /cubic-bezier|\bease\b/, "a chip eases on something other than the curve");
+  assert.ok(contextsFor(css, ".cp-aud__col").some((c) => c.startsWith(REDUCED)), "a chip is not stilled under reduced motion");
 });
 
 test("nothing the pass added names a second curve", () => {
   // The rules this pass wrote all say var(--cp-ease). Pre-existing rules on
   // other curves are recorded as drift in docs/DESIGN_SYSTEM.md, not fixed here.
   const css = uncommented(pressCss());
-  for (const needle of [".cp-dcol.cp-fade.is-in", ".cp-ch.cp-fade.is-in", ".cp-dcol__shelf", ".cp-dcol__tier", ".cp-proc__stage {", ".cp-proc__name {"]) {
+  for (const needle of [".cp-aud__col", ".cp-aud__panel", ".cp-aud__tab", ".cp-ch.cp-fade.is-in", ".cp-proc__stage {", ".cp-proc__name {"]) {
     for (const rule of rulesFor(css, needle.replace(" {", ""))) {
       if (!/transition|animation/.test(rule.body)) continue;
       const literal = rule.body.replace(/var\(--cp-ease\)/g, "");

@@ -31,6 +31,52 @@ export const PRIORITY_TYPES = Object.freeze({
   }),
 });
 
+/**
+ * WHAT TO ASK FOR: EXAMPLES, NOT A ROADMAP (owner, 2026-09-26).
+ *
+ * Collections answer what the current evidence can answer; Priorities is
+ * where a subscriber asks what intelligence should exist next. These show
+ * the scale of ask the page is for. None is planned, scheduled or promised,
+ * and the page labels them as examples where they are shown.
+ *
+ *   datasets   ambitious collections that do not exist yet, one per theme
+ *   research   ambitious questions, split into descriptive patterns (what
+ *              happened, where, how much) and causal ones (why, and what
+ *              changed because of it), which need a research design beyond
+ *              the records and say so
+ *   expansions narrower asks that grow a collection Cedar already publishes;
+ *              shown smaller, beneath the other two
+ *
+ * None names a collection that is announced but not released.
+ */
+export const PRIORITY_EXAMPLES = Object.freeze({
+  datasets: Object.freeze([
+    Object.freeze({ theme: "Infrastructure", text: "Every broadband, water, road and transit project on tribal lands, with its funding sources, sponsors, cost and completion status." }),
+    Object.freeze({ theme: "Capital access", text: "Loans, guarantees and equity reaching Native enterprises and households, by lender type, terms and outcome." }),
+    Object.freeze({ theme: "Housing", text: "Housing units built, rehabilitated and financed by tribal housing authorities, with the programs and partners behind each one." }),
+    Object.freeze({ theme: "Healthcare", text: "Tribal and Indian Health Service facilities, the services each offers, its staffing and its funding over time." }),
+    Object.freeze({ theme: "Energy", text: "Energy projects on tribal lands from proposal to operation, with capacity, ownership, offtake and revenue to the Nation." }),
+    Object.freeze({ theme: "Workforce", text: "Employment in tribal governments and enterprises by sector and occupation, including TERO hiring and training outcomes." }),
+  ]),
+  research: Object.freeze({
+    descriptive: Object.freeze([
+      "Which tribal enterprises have grown fastest in federal contracting over the last decade, and in which industries?",
+      "How is federal assistance to Native nations distributed across agencies and programs, and how has that mix shifted?",
+      "Where are Native-owned businesses concentrated by industry and region, and how does that compare with tribal enterprises?",
+    ]),
+    causal: Object.freeze([
+      "Did changes to 8(a) rules alter how tribally owned firms grow?",
+      "Does federal infrastructure funding change how many enterprises a Nation starts in the years that follow?",
+      "How much of a Nation's economic diversification follows from its gaming revenue?",
+    ]),
+  }),
+  expansions: Object.freeze([
+    "Add annual filing history to Native Nonprofits.",
+    "Add more tribal TERO and commerce offices to Native-Owned Businesses.",
+    "Carry Natural Resource Revenues to more Nations and commodities.",
+  ]),
+});
+
 /** The statuses in the order a priority moves through them. */
 export const PRIORITY_STATUSES = Object.freeze([
   Object.freeze({ id: "interest", label: "Gathering interest" }),

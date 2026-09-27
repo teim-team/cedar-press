@@ -64,7 +64,11 @@ const COLLECTION_WORDS = Object.freeze({
   contractors: ["contract", "contracts", "contracting", "prime", "fpds", "8(a)", "set aside", "set-aside", "vendor", "vendors"],
   subcontracting: ["subaward", "subawards", "subcontract", "subcontracts", "subcontractor", "subcontractors", "fsrs"],
   owned: ["tero", "small business", "small businesses", "individually owned", "business directory", "certified", "native owned", "native-owned"],
-  nonprofits: ["nonprofit", "nonprofits", "990", "irs", "charity", "charities", "foundation", "foundations"],
+  nonprofits: ["nonprofit", "nonprofits", "990", "irs", "charity", "charities"],
+  // "Foundation" reached Native Nonprofits until the giving collection
+  // joined the shelf; a reader asking about foundations means their giving.
+  "foundation-corporate-giving": ["foundation", "foundations", "philanthropy", "philanthropic", "grantmaker", "grantmakers", "corporate giving", "bank giving", "private giving", "private funding", "donor", "donors", "990-pf"],
+  plot: ["parcel", "parcels", "land", "property", "properties", "permit", "permits", "real estate", "land ownership", "assessor"],
   need: ["enterprise", "enterprises", "subsidiary", "subsidiaries", "ownership", "who owns", "holding company", "structure"],
   "natural-resources": ["royalty", "royalties", "oil", "gas", "coal", "mineral", "minerals", "timber", "severance", "onrr"],
 });
@@ -117,8 +121,8 @@ function lowerFirst(text) {
  *
  * lumecon.ai offers at most three next questions under an answer, chosen by
  * what was just discussed. These are deliberate pairs rather than a scored
- * guess, because the door's bank is ten general answers and twelve
- * collections, small enough to write out. The twelve collections share one
+ * guess, because the door's bank is ten general answers and fourteen
+ * collections, small enough to write out. The fourteen collections share one
  * list: after "what is in Federal Prime Contracting", the useful next
  * questions are how it reaches a nation, what it is built from, and how to
  * get it.
@@ -126,7 +130,7 @@ function lowerFirst(text) {
 const COLLECTION_FOLLOW_UPS = Object.freeze(["entities", "sources", "plans"]);
 const FALLBACK_FOLLOW_UPS = Object.freeze(["what", "collections", "plans"]);
 
-/** The twelve dataset intents, one per storefront collection. */
+/** The dataset intents, one per storefront collection. */
 const COLLECTION_INTENTS = STOREFRONT_CATALOG.map((entry) => ({
   id: `collection:${entry.id}`,
   collectionId: entry.id,
@@ -193,8 +197,8 @@ const GENERAL_INTENTS = [
     expanded:
       `Going deeper: the ${PRESS?.name} shelf is the public record of what is happening, ` +
       `${lowerFirst(PRESS?.promise ?? "")} The ${PRESS_PRO?.name} shelf is the structure behind it: ` +
-      `who holds the contracts and subawards, who owns which enterprise, where resource revenue goes, ` +
-      `which businesses and nonprofits are Native-controlled.\n\n` +
+      `who holds the contracts and subawards, who owns which enterprise and which parcels, where resource ` +
+      `revenue goes, which businesses and nonprofits are Native-controlled.\n\n` +
       `Each collection states its own coverage, row count and sources, and I can give you any of them by name.`,
   },
   {

@@ -40,13 +40,16 @@ import {
 
 // The feed used to cover ten collections while the storefront sold twelve,
 // and one of the ten was not sold at all.
-test("every storefront collection has a release and nothing else does", () => {
+test("every released collection has a release and nothing else does", () => {
   assert.deepEqual(
     Object.keys(PRESS_RELEASES).sort(),
     LAUNCH_COLLECTION.map((dataset) => dataset.id).sort(),
   );
   for (const entry of PRESS_CATALOG) {
-    assert.ok(releaseFor(entry.id), `${entry.id} has no release`);
+    // The two on the shelf ahead of a first release have none, and the feed
+    // does not invent one for them.
+    if (entry.coverage.kind === "pending") assert.equal(releaseFor(entry.id), null, `${entry.id} has a release it never shipped`);
+    else assert.ok(releaseFor(entry.id), `${entry.id} has no release`);
   }
 });
 

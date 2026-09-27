@@ -68,6 +68,11 @@ process.stdout.write(
       // against the collections manifest, whose `excluded` entries carry the
       // shelf the Cedar data workspace assigned.
       catalogByShelf: Object.fromEntries(Object.entries(byShelf).sort()),
+      // Catalog entries on the shelf with no release yet (`coverage:
+      // PENDING`). The launch collection holds only released ones, so the
+      // Python side compares the catalog minus these against it, and holds
+      // this list to the manifest: pending exactly when there is no release.
+      pending: PRESS_CATALOG.filter((entry) => entry.coverage?.kind === "pending").map((entry) => entry.id).sort(),
       // What the CLIENT decides, collection by collection, over the whole
       // catalog rather than the storefront subset. This is the decision the
       // browser acts on -- it is what puts a download control on a tile --

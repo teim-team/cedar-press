@@ -485,8 +485,11 @@ class TestPressCatalogSnapshot(unittest.TestCase):
         for entry in press_catalog.CATALOG:
             with self.subTest(collection=entry["id"]):
                 coverage = entry["coverage"]
-                self.assertIn(coverage["kind"], {"series", "roster"})
-                if coverage["kind"] == "series":
+                self.assertIn(coverage["kind"], {"series", "roster", "pending"})
+                if coverage["kind"] == "pending":
+                    # No release, so nothing measured: neither shape's field.
+                    self.assertEqual(coverage, {"kind": "pending"})
+                elif coverage["kind"] == "series":
                     self.assertIn("from", coverage)
                     self.assertNotIn("captured", coverage)
                 else:
@@ -518,6 +521,8 @@ class TestPressCatalogSnapshot(unittest.TestCase):
         for entry in press_catalog.CATALOG:
             coverage = entry["coverage"]
             with self.subTest(collection=entry["id"]):
+                if coverage["kind"] == "pending":
+                    continue
                 if coverage["kind"] == "series":
                     self.assertIsInstance(coverage["from"], int)
                     self.assertGreaterEqual(coverage["from"], 1800)
@@ -554,14 +559,17 @@ class TestPressCatalogSnapshot(unittest.TestCase):
                 self.assertIn("current roster rather than a series", sentence)
                 self.assertNotIn("Coverage from", sentence)
 
-    def test_the_ladder_is_six_collections_and_six_more(self) -> None:
+    def test_the_ladder_is_seven_collections_and_seven_more(self) -> None:
         # The owner's ruling of 2026-09-02: Cedar Press is the standard
         # shelf at full depth, Cedar Press+ is that plus the pro shelf. The
-        # counts are what the tier copy promises, so they are pinned.
+        # counts are what the tier copy promises, so they are pinned. Seven
+        # and seven since 2026-09-27: Foundation & Corporate Giving joined
+        # the standard shelf and PLOT the pro shelf.
         shelves: dict[str, set[str]] = {}
         for entry in press_catalog.CATALOG:
             shelves.setdefault(entry["shelf"], set()).add(entry["id"])
-        self.assertEqual(len(shelves["standard"]), 6)
+        self.assertEqual(len(shelves["standard"]), 7)
+        self.assertIn("foundation-corporate-giving", shelves["standard"])
         self.assertEqual(
             shelves["pro"],
             {
@@ -571,6 +579,7 @@ class TestPressCatalogSnapshot(unittest.TestCase):
                 "need",
                 "natural-resources",
                 "nonprofits",
+                "plot",
             },
         )
 

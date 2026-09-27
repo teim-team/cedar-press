@@ -22,7 +22,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { LAUNCH_COLLECTION } from "../../features/grove/collection";
+import { LAUNCH_COLLECTION, pendingReleaseReason } from "../../features/grove/collection";
 import { contractFor, exploreTables, parseCsv, universalRows } from "../../features/grove/explore.js";
 import { columnPlan } from "../../features/grove/recordColumns.js";
 import { Cards, Rows } from "./PressRecordTable.jsx";
@@ -112,6 +112,9 @@ export default function CollectionPreview({ entry, tier, register }) {
   const shownColumns = defaults.length ? defaults : all;
   const rowsLabel = ROWS_LABEL[entry.id];
   const fresh = freshnessLine(entry.id);
+  // On the shelf with no release: nothing was produced, so the pane says so
+  // rather than describing a sample that "is not on the site yet".
+  const unpublished = pendingReleaseReason(entry.id);
   return (
     <div className="cp-pane" data-testid="collection-stage" data-collection={entry.id}>
       <div className="cp-pane__head">
@@ -171,9 +174,11 @@ export default function CollectionPreview({ entry, tier, register }) {
       ) : (
         <div className="cp-pane__pending">
           <span className="cp-pane__pendingcap">
-            {status === "none" ? "Preview pending" : "The sample could not be read"}
+            {unpublished ? "Not yet published" : status === "none" ? "Preview pending" : "The sample could not be read"}
           </span>
-          {status === "none" ? (
+          {unpublished ? (
+            <p>{unpublished}</p>
+          ) : status === "none" ? (
             <p>
               The ten-row sample of this collection&rsquo;s main table was produced with the
               current release and is not on the site yet, so there is nothing here to show you

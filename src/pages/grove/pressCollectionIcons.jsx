@@ -176,6 +176,25 @@ const ShelfRollupIcon = (
   </svg>
 );
 
+/** A wrapped gift: a grant or donation, the formal gift a funder discloses. */
+const GivingIcon = (
+  <svg {...glyph}>
+    <path d="M5.5 13.5h17v10.5h-17z" />
+    <path d="M3.8 9.5h20.4v4H3.8z" />
+    <path d="M14 9.5V24" />
+    <path d="M14 9.5c-1.4-3.8-6.6-4.6-6-1.6.3 1.6 3.6 1.6 6 1.6zM14 9.5c1.4-3.8 6.6-4.6 6-1.6-.3 1.6-3.6 1.6-6 1.6z" />
+  </svg>
+);
+
+/** Three parcels in a row, each tab fitted to the next: land, pieced together. */
+const PlotIcon = (
+  <svg {...glyph}>
+    <path d="M2.5 7h5.7v5.3a1.7 1.7 0 1 1 0 3.4V21H2.5z" />
+    <path d="M11 7h5.7v5.3a1.7 1.7 0 1 1 0 3.4V21H11v-5.3a1.7 1.7 0 1 0 0-3.4z" />
+    <path d="M19.5 7H25.5v14h-6v-5.3a1.7 1.7 0 1 0 0-3.4z" />
+  </svg>
+);
+
 /** By collection id. An id with no mark gets none rather than a stand-in,
  *  which would put the same glyph on two different things. */
 export const COLLECTION_ICONS = {
@@ -185,12 +204,14 @@ export const COLLECTION_ICONS = {
   deals: DealsIcon,
   nagpra: NagpraIcon,
   lobbying: LobbyingIcon,
+  "foundation-corporate-giving": GivingIcon,
   contractors: ContractorsIcon,
   subcontracting: SubcontractingIcon,
   "natural-resources": ResourcesIcon,
   owned: OwnedIcon,
   nonprofits: NonprofitsIcon,
   need: NeedIcon,
+  plot: PlotIcon,
   census: CensusIcon,
   labor: LaborIcon,
   economy: EconomyIcon,

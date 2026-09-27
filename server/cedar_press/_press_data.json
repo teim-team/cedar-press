@@ -391,7 +391,7 @@
         "kind": "series",
         "from": 2007
       },
-      "blurb": "Every award the federal government reports sending into Indian Country: grants, loans, direct payments and insurance. Trace a program's reach, a recipient's funding history or a year's totals, award by award.",
+      "blurb": "Federal assistance transactions reported for Native nations, organizations, enterprises and other identified recipients, including grants, loans and direct payments. Follow funding by recipient, program, agency, amount and year.",
       "linkage": "Recipients resolved to the Native entity behind them, so an award to a subsidiary, a housing authority or a consortium is attributed to the nation or organization it belongs to."
     },
     {
@@ -403,7 +403,7 @@
         "kind": "series",
         "from": 1994
       },
-      "blurb": "The Federal Register is the government's daily record of proposed and final agency action. Catch every notice, rule and comment window touching tribes, lands, water or recognition while there is still time to respond.",
+      "blurb": "Federal Register notices and agency actions concerning tribes, Native organizations, lands, resources, recognition and other Indian Country matters. Follow published actions, consultations and comment periods across agencies and time.",
       "linkage": "Notices matched to the tribes, lands and organizations they name, including entities that appear under former or variant names."
     },
     {
@@ -415,7 +415,7 @@
         "kind": "series",
         "from": 1973
       },
-      "blurb": "Bills, resolutions and roll-call votes from both chambers of Congress, the House and the Senate. Follow a measure from introduction to the floor and see who sponsored it, who voted and how.",
+      "blurb": "Bills, resolutions, sponsorship and roll-call votes concerning tribes and Indian Country. Follow legislation from introduction through congressional action and examine sponsorship and voting records.",
       "linkage": "Bills and votes tied to the tribes and Native organizations they affect, not only to the sponsors who filed them."
     },
     {
@@ -439,7 +439,7 @@
         "kind": "series",
         "from": 1994
       },
-      "blurb": "Activity under the Native American Graves Protection and Repatriation Act: notices, inventories and completed repatriations. Track an institution's progress or a nation's outstanding claims, item by item.",
+      "blurb": "Public records of activity under the Native American Graves Protection and Repatriation Act, including notices, inventories and repatriation-related actions. Follow records by institution, Native entity, notice type and date.",
       "linkage": "Notices matched to the tribes and Native Hawaiian organizations named in them, across the naming changes of three decades."
     },
     {
@@ -455,6 +455,17 @@
       "linkage": "Each activity, from a lobbying registration to a consultation, a docket filing or testimony, resolved to the tribe or Native organization behind it where the record supports the link; a row the record cannot place keeps its printed party name and a blank key rather than a guess."
     },
     {
+      "id": "foundation-corporate-giving",
+      "short": "Foundation & Corporate Giving",
+      "name": "Foundation & Corporate Giving",
+      "shelf": "standard",
+      "coverage": {
+        "kind": "pending"
+      },
+      "blurb": "Foundation, corporate and bank funding publicly disclosed for Native nations, organizations and initiatives. Follow the funder, legal recipient, purpose, geography, amount and timing while keeping commitments, payments, authorizations and other reported financial statuses distinct.",
+      "linkage": "Philanthropic, corporate and bank giving, each disclosure kept as its own record: commitments and payments are separate facts, and the legal recipient is kept distinct from the Native beneficiary."
+    },
+    {
       "id": "contractors",
       "short": "Prime Contracting",
       "name": "Federal Prime Contracting",
@@ -463,7 +474,7 @@
         "kind": "series",
         "from": 2000
       },
-      "blurb": "A prime contract is an award the government makes directly to a vendor, whether a firm, a tribal enterprise or a tribal government itself. Every prime award here names the agency, the dollars, the industry and the set-aside path it came through.",
+      "blurb": "Federal contract transactions awarded directly to Native governments, enterprises, organizations and identified Native-owned businesses. Examine awarding agencies, recipients, industries, obligations, procurement mechanisms and set-asides.",
       "linkage": "Vendors resolved to tribally owned firms, ANC and NHO subsidiaries and 8(a) participants, then rolled up to the parent nation or corporation."
     },
     {
@@ -475,7 +486,7 @@
         "kind": "series",
         "from": 2010
       },
-      "blurb": "A subaward is work a prime vendor passes down to another. Follow the dollars below the prime layer to see which vendors do the work, under whom and in which sectors.",
+      "blurb": "Reported federal subawards to Native entities and businesses beneath prime contracts. Follow the prime relationship, subrecipient, amount, industry and timing of reported subcontracting activity.",
       "linkage": "Subawards matched to the same resolved entities as the prime contracts above them."
     },
     {
@@ -487,7 +498,7 @@
         "kind": "series",
         "from": 1880
       },
-      "blurb": "Energy and mineral activity on trust and restricted lands: production volumes, the royalties it owes and the disbursements that follow. See what a commodity produced, what it paid and where the money went.",
+      "blurb": "Public records of energy and mineral production, revenues, royalties and related disbursements associated with tribal trust and restricted lands. Compare reported activity by commodity, Native entity, location and period.",
       "linkage": "Production and disbursements matched to the nations and allottees they belong to."
     },
     {
@@ -499,7 +510,7 @@
         "kind": "roster",
         "captured": "2026-09-01"
       },
-      "blurb": "Individually owned Native businesses, certified by their own nations' TERO and commerce offices and shared with the project office by office. The businesses no federal register counts: who they are, what trades they work and what preference status their nation certifies.",
+      "blurb": "Individually owned Native businesses identified through tribal TERO offices, commerce programs and other documented Native-business registries. Records preserve the issuing source, reported affiliation or certification, location and industry where available.",
       "linkage": "Every listing carries the nation whose office certified it, appears only under that nation's stated terms, and is credited to the issuing TERO or commerce office."
     },
     {
@@ -511,7 +522,7 @@
         "kind": "roster",
         "captured": "2026-04-29"
       },
-      "blurb": "Native-led and Native-serving nonprofits with their annual federal filings. Compare budgets, revenue mixes, program spending and how an institution's finances move year over year.",
+      "blurb": "A maintained roster of Native-led, Native-serving and Native-focused nonprofit organizations, with EINs and available federal filing information kept distinct by organization type. Identify organizations and connect them to other Cedar records without treating Native-led and Native-serving as the same thing.",
       "linkage": "Filers classified as Native-led, Native-serving or Native-focused, which are three different things and are labeled separately."
     },
     {
@@ -523,8 +534,19 @@
         "kind": "series",
         "from": 2016
       },
-      "blurb": "Who owns whom across Indian Country's enterprises: parent nations and corporations, their subsidiaries, holding companies and joint ventures, and how those ties change as entities are created, renamed, acquired and wound down.",
+      "blurb": "Enterprises owned or controlled by Native nations, Alaska Native corporations and other Native entities, including subsidiaries, holding companies and joint ventures. Follow parent relationships and organizational changes over time.",
       "linkage": "This is the structure the rest of the record resolves against, published as a collection in its own right: every tie names the nation or corporation behind it."
+    },
+    {
+      "id": "plot",
+      "short": "PLOT",
+      "name": "PLOT",
+      "shelf": "pro",
+      "coverage": {
+        "kind": "pending"
+      },
+      "blurb": "Parcel-level ownership and development records associated with Native nations, organizations and enterprises. Follow ownership, transfers, parcel characteristics, geometry, permits and other recorded property activity over time.",
+      "linkage": "Land ownership, transfers, permitting and development, followed parcel by parcel: each parcel and the recorded events attached to it, linked to the Native entity that holds it."
     }
   ],
   "releases": {
@@ -1003,5 +1025,211 @@
       "id": "academic",
       "label": "University or research institute"
     }
-  ]
+  ],
+  "cedarQuestions": {
+    "funding": [
+      {
+        "q": "What does this collection let me compare across peer organizations?",
+        "kind": "Describe",
+        "route": "content"
+      },
+      {
+        "q": "How are awards to subsidiaries and housing authorities credited to their Nation?",
+        "kind": "Trace",
+        "route": "construct"
+      },
+      {
+        "q": "What changed since I last used this collection?",
+        "kind": "Compare",
+        "route": "changes"
+      }
+    ],
+    "federal-register": [
+      {
+        "q": "What does this collection let me follow across agencies?",
+        "kind": "Describe",
+        "route": "content"
+      },
+      {
+        "q": "How are notices matched to the tribes they name?",
+        "kind": "Trace",
+        "route": "construct"
+      },
+      {
+        "q": "What changed since I last used this collection?",
+        "kind": "Compare",
+        "route": "changes"
+      }
+    ],
+    "legislation": [
+      {
+        "q": "What does this collection let me follow on a bill?",
+        "kind": "Describe",
+        "route": "content"
+      },
+      {
+        "q": "How are bills tied to the tribes they affect?",
+        "kind": "Trace",
+        "route": "construct"
+      },
+      {
+        "q": "What changed since I last used this collection?",
+        "kind": "Compare",
+        "route": "changes"
+      }
+    ],
+    "deals": [
+      {
+        "q": "What does this collection track about each transaction?",
+        "kind": "Describe",
+        "route": "content"
+      },
+      {
+        "q": "How are buyers, sellers and borrowers tied to the Native entity behind them?",
+        "kind": "Trace",
+        "route": "construct"
+      },
+      {
+        "q": "What changed since I last used this collection?",
+        "kind": "Compare",
+        "route": "changes"
+      }
+    ],
+    "nagpra": [
+      {
+        "q": "What does this collection hold about each notice?",
+        "kind": "Describe",
+        "route": "content"
+      },
+      {
+        "q": "How are notices matched to the Nations and Native Hawaiian organizations they name?",
+        "kind": "Trace",
+        "route": "construct"
+      },
+      {
+        "q": "What changed since I last used this collection?",
+        "kind": "Compare",
+        "route": "changes"
+      }
+    ],
+    "lobbying": [
+      {
+        "q": "What does this collection include beyond registered lobbying?",
+        "kind": "Describe",
+        "route": "content"
+      },
+      {
+        "q": "How is each activity tied to the tribe or organization behind it?",
+        "kind": "Trace",
+        "route": "construct"
+      },
+      {
+        "q": "What changed since I last used this collection?",
+        "kind": "Compare",
+        "route": "changes"
+      }
+    ],
+    "contractors": [
+      {
+        "q": "What does this collection let me examine on an award?",
+        "kind": "Describe",
+        "route": "content"
+      },
+      {
+        "q": "How are vendors rolled up to their parent Nation or corporation?",
+        "kind": "Trace",
+        "route": "construct"
+      },
+      {
+        "q": "What changed since I last used this collection?",
+        "kind": "Compare",
+        "route": "changes"
+      }
+    ],
+    "subcontracting": [
+      {
+        "q": "What does this collection show about the prime relationship?",
+        "kind": "Describe",
+        "route": "content"
+      },
+      {
+        "q": "How are subawards tied to the same entities as their primes?",
+        "kind": "Trace",
+        "route": "construct"
+      },
+      {
+        "q": "What changed since I last used this collection?",
+        "kind": "Compare",
+        "route": "changes"
+      }
+    ],
+    "natural-resources": [
+      {
+        "q": "What does this collection let me compare across commodities?",
+        "kind": "Describe",
+        "route": "content"
+      },
+      {
+        "q": "How are production and disbursements matched to Nations and allottees?",
+        "kind": "Trace",
+        "route": "construct"
+      },
+      {
+        "q": "What changed since I last used this collection?",
+        "kind": "Compare",
+        "route": "changes"
+      }
+    ],
+    "owned": [
+      {
+        "q": "What does this collection hold about each business?",
+        "kind": "Describe",
+        "route": "content"
+      },
+      {
+        "q": "How does a business come to be listed, and on whose terms?",
+        "kind": "Trace",
+        "route": "construct"
+      },
+      {
+        "q": "What changed since I last used this collection?",
+        "kind": "Compare",
+        "route": "changes"
+      }
+    ],
+    "nonprofits": [
+      {
+        "q": "What does this collection hold about each organization?",
+        "kind": "Describe",
+        "route": "content"
+      },
+      {
+        "q": "How are Native-led and Native-serving organizations told apart?",
+        "kind": "Trace",
+        "route": "construct"
+      },
+      {
+        "q": "What changed since I last used this collection?",
+        "kind": "Compare",
+        "route": "changes"
+      }
+    ],
+    "need": [
+      {
+        "q": "What does this collection hold about an enterprise's owner and parent?",
+        "kind": "Describe",
+        "route": "content"
+      },
+      {
+        "q": "How are subsidiaries and joint ventures tied to the Nation or corporation behind them?",
+        "kind": "Trace",
+        "route": "construct"
+      },
+      {
+        "q": "What changed since I last used this collection?",
+        "kind": "Compare",
+        "route": "changes"
+      }
+    ]
+  }
 }

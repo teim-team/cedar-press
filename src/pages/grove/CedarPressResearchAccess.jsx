@@ -14,6 +14,7 @@ import { LUMECON_URL, TBN_URL } from "../../features/grove/pressArticles";
 import { PRESS_METHODS_PATH, PRESS_PATH } from "../../features/grove/pressRoutes";
 import { useAuth } from "../../context/useAuth";
 import { canReadCedarPress } from "../../features/grove/pressAccess";
+import { researchExamples } from "../../features/grove/pressJobs";
 import { useFadeIn } from "../../features/grove/useFadeIn";
 import { PressCedarFab } from "./PressCedarFab";
 import { PressFoot, PressMast } from "./PressChrome";
@@ -93,9 +94,11 @@ export default function CedarPressResearchAccess() {
           </div>
           <div className="cp-trh__side">
             <p className="cp-trh__sub">
+              Use source-linked Cedar Press data for a defined paper, story, thesis or
+              public-interest project without rebuilding the underlying collection yourself.
               Researchers, journalists, students, nonprofits and public-interest organizations may
-              request limited project-specific access when a full Cedar subscription does not fit
-              the scope of the work.
+              request access to one or two collections when a full subscription does not fit the
+              project.
             </p>
             <a className="cp-trh__cta" href={REQUEST_HREF}>
               Submit a research request <span aria-hidden="true">&#8594;</span>
@@ -112,18 +115,31 @@ export default function CedarPressResearchAccess() {
             the checklist's own heading now, where somebody writing the thing
             will read it. */}
 
-        {/* Fit, as one comparison rather than a page of criteria. The two
-            examples do more work than a policy paragraph would. */}
+        {/* Fit, as one comparison rather than a page of criteria. The
+            examples do more work than a policy paragraph would. The good-fit
+            ones are the owner's (2026-09-26) and live with their audiences in
+            `AUDIENCE_JOBS`, so the collections they name are catalog ids and
+            an example citing a collection that is not live is not shown. */}
         <section className="cp-fit cp-fade" aria-label="Whether this fits">
           <div className="cp-fit__side cp-fit__side--yes">
             <span className="cp-fit__cap">Good fit</span>
-            <p>A researcher needs the Advocacy collection for one defined journal article.</p>
+            {researchExamples().map((example) => (
+              <p key={example.id} data-example={example.id}>{example.text}</p>
+            ))}
           </div>
           <div className="cp-fit__side cp-fit__side--no">
             <span className="cp-fit__cap">Not a fit</span>
             <p>A research program wants six Cedar collections for open-ended analysis.</p>
           </div>
         </section>
+
+        {/* The owner's time-savings line, placed once, here, rather than on
+            every screen (2026-09-26). */}
+        <p className="cp-fit__why cp-fade">
+          Lumecon maintains the source trail, entity relationships and releases behind these
+          records so users can spend their time on analysis rather than reconstructing the same
+          public systems.
+        </p>
 
         {/* The seven proposal items are instructions for someone who has
             already decided to apply; open by default they sat between the

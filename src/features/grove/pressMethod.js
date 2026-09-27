@@ -38,6 +38,10 @@ export const EXPERTISE_DOMAINS = Object.freeze([
   "Native nonprofits",
   "Tribal enterprises and economic development",
   "Native business certification and ownership",
+  // The owner's Methods concepts for the two collections that joined Cedar
+  // Press on 2026-09-27 (Foundation & Corporate Giving, PLOT).
+  "Philanthropic, corporate and bank giving",
+  "Land ownership, transfers, permitting and development",
 ]);
 
 /**
@@ -86,6 +90,16 @@ export const EXPERTISE_STRIP = Object.freeze([
       "Tribal enterprises and economic development",
       "Native business certification and ownership",
     ]),
+  }),
+  Object.freeze({
+    id: "giving",
+    label: "Private giving",
+    covers: Object.freeze(["Philanthropic, corporate and bank giving"]),
+  }),
+  Object.freeze({
+    id: "land",
+    label: "Land ownership",
+    covers: Object.freeze(["Land ownership, transfers, permitting and development"]),
   }),
 ]);
 
@@ -160,6 +174,46 @@ export const CONSTRUCTION_STEPS = Object.freeze([
   }),
 ]);
 
+/**
+ * How Cedar decides what to build next (owner, 2026-09-26): from a question
+ * the collections cannot answer yet to a maintained release. The Methods
+ * chapter draws these in order; Priorities is where the questions come in.
+ */
+export const BUILD_NEXT_QUESTION = "What important question can I not answer today?";
+
+export const BUILD_NEXT_STEPS = Object.freeze([
+  Object.freeze({
+    id: "question",
+    label: "Question",
+    note: "A question the current collections cannot answer, from a subscriber's priority, a Nation's request or Cedar's own research.",
+  }),
+  Object.freeze({
+    id: "sources",
+    label: "Source investigation",
+    note: "Which public records could answer it, who publishes them, how far back they reach and what they leave out.",
+  }),
+  Object.freeze({
+    id: "design",
+    label: "Research and collection design",
+    note: "What one record is, which fields it carries and how each record reaches the Native entity it is about.",
+  }),
+  Object.freeze({
+    id: "validate",
+    label: "Validation",
+    note: "Records checked against their sources and against the other collections; ambiguous matches go to a researcher.",
+  }),
+  Object.freeze({
+    id: "release",
+    label: "Release",
+    note: "Published with a version, a coverage span, its sources and what it does not contain.",
+  }),
+  Object.freeze({
+    id: "maintain",
+    label: "Maintenance",
+    note: "Kept current as sources update, organizations change and corrections arrive, each change logged against a release.",
+  }),
+]);
+
 /** What research judgment looks like when direct reporting runs out. */
 export const DISCOVERY_MOVES = Object.freeze([
   "Identifying indirect evidence",
@@ -199,6 +253,8 @@ export const ECOSYSTEM_EXAMPLES = Object.freeze([
   "Advocacy records, from lobbying filings to consultations, docket comments and testimony, connect organizations to legislation, and bill histories and votes show what followed.",
   "A nation's own enterprise register or audited filing names the subsidiaries the federal record files under unrelated names.",
   "Federal funding and contracting records add economic activity to an entity profile.",
+  "A site acquisition recorded in Indian Country Deals links to the parcels PLOT follows, so a transaction and the land it bought read together without being collapsed into one record.",
+  "Foundation, corporate and bank giving read beside federal funding and the Native Nonprofits roster shows how an organization's private and public support combine, with the legal recipient and the Native beneficiary kept apart.",
   "Better entity resolution then improves matching across every collection above.",
 ]);
 
