@@ -689,6 +689,14 @@ def full_release(collection_id, requested_release_id=None, *, metadata_only=Fals
             raise FullReleaseUnavailable("Wrong product catalog")
         if catalog.get("catalog_kind") == "collection_releases":
             return _partitioned_release(catalog, collection_id, requested_release_id, metadata_only)
+        # Legacy dataset v1 manifests have no governed production eligibility
+        # label. Mirror the database loader's rehearsal-only native bridge before
+        # touching the data API; rights alone cannot promote a review release.
+        if (
+            os.environ.get("CEDAR_PRESS_ENVIRONMENT", "development") != "development"
+            or os.environ.get("LUMECON_ENVIRONMENT") != "review"
+        ):
+            raise FullReleaseUnavailable("Legacy dataset delivery requires explicit review")
         pins = [item for item in catalog["collections"] if item["dataset_id"] == collection_id]
         if len(pins) != 1:
             raise FullReleaseUnavailable("Exactly one pinned collection release required")

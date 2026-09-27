@@ -30,7 +30,14 @@ class LumeconContractTest(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
         self.catalog_path = Path(self.temp.name) / "catalog.json"
-        self.env = patch.dict(os.environ, {"CEDAR_PRESS_RELEASE_CATALOG": str(self.catalog_path)})
+        self.env = patch.dict(
+            os.environ,
+            {
+                "CEDAR_PRESS_RELEASE_CATALOG": str(self.catalog_path),
+                "CEDAR_PRESS_ENVIRONMENT": "development",
+                "LUMECON_ENVIRONMENT": "review",
+            },
+        )
         self.env.start()
         self.addCleanup(self.env.stop)
 
@@ -149,11 +156,13 @@ class LumeconContractTest(unittest.TestCase):
                 content = b"".join(repository._canonical_bytes(row) for row in rows)
                 changed["records_jsonl_utf8"] = content.decode("utf-8")
                 changed["manifest"]["files"]["records.jsonl"] = {
-                    "bytes": len(content), "sha256": hashlib.sha256(content).hexdigest()
+                    "bytes": len(content),
+                    "sha256": hashlib.sha256(content).hexdigest(),
                 }
                 self.assertEqual(changed["catalog"], entry["catalog"])
                 with self.assertRaises(repository.FullReleaseUnavailable):
                     self.consume(changed)
+
     def test_synthetic_wire_state_with_valid_manifest_pin_is_refused(self):
         for entry in self.fixture["collections"]:
             with self.subTest(collection=entry["collection_id"]):

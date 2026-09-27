@@ -9604,6 +9604,12 @@ the id carries two check characters over the uid's alphabet, and the
 individually owned entity class closes to new mints. Documentation only; no
 code changed.
 <!-- BEGIN CEDAR-GIVING-PLOT-CONSUMER-20260926 -->
+The same worker subsequently added bounded queue replay in
+`server/tests/stream_release_rehearsal.py` and fenced legacy dataset v1 delivery
+to explicit development/review. Staging/production refusal occurs before source
+transport. Synthetic streaming and release regression checks cover the mechanism;
+the coordinator records real queue results. Both rehearsal commands refuse
+inherited database configuration before importing the Cedar app.
 The isolated Giving/PLOT worker branch adds only server integration surfaces:
 `governed_collections.py`, the authenticated 15-target release registry,
 Press component pin/catalog configuration, and existing full-release verifier
@@ -9615,4 +9621,3 @@ both installed packages and an immutable store: no listener or subprocess.
 Actual PLOT 1,242 permits/3,210 events served with exact hashes; Giving's real14
 remained rights-held. Root owns integrated pins, database proof and final CI.
 <!-- END CEDAR-GIVING-PLOT-CONSUMER-20260926 -->
-

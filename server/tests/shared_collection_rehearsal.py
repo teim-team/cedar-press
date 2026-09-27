@@ -13,15 +13,22 @@ from pathlib import Path
 from unittest.mock import patch
 
 from fastapi.testclient import TestClient
-from lumecon_data.api import create_app
-from lumecon_data.collection import build_collection_catalog, verify_collection_release
-
-from cedar_press import repository, subscribers
-from cedar_press.app import app
-from cedar_press.session import Session, current_session
 
 
 def main():
+    # Importing Cedar's app opens the configured priorities store. Refuse inherited
+    # connections before that import or creating any review output.
+    if any(os.environ.get(name, "").strip() for name in ("DATABASE_URL", "CEDAR_PRESS_DB")):
+        raise SystemExit(
+            "REFUSED: rehearsal requires an isolated environment without database configuration"
+        )
+    from lumecon_data.api import create_app
+    from lumecon_data.collection import build_collection_catalog, verify_collection_release
+
+    from cedar_press import repository, subscribers
+    from cedar_press.app import app
+    from cedar_press.session import Session, current_session
+
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--store", required=True, type=Path)
     parser.add_argument(
