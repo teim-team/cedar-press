@@ -413,10 +413,10 @@ def _float(value: str) -> float | None:
 #: class, the per-field lists and the predicate. Loaded by path so this script
 #: cannot drift from the rule it enforces; if the module is missing the
 #: importer refuses rather than guessing (fail closed).
-def _publication_rule():
+def _publication_rule(module_name="cedar_domain"):
     import importlib.util
-    source = REPO / "code" / "cedar_domain.py"
-    spec = importlib.util.spec_from_file_location("cedar_domain", source)
+    source = REPO / "code" / f"{module_name}.py"
+    spec = importlib.util.spec_from_file_location(module_name, source)
     if spec is None or spec.loader is None:
         raise SystemExit(f"publication rule not found at {source}; refusing to import samples")
     module = importlib.util.module_from_spec(spec)
@@ -425,6 +425,7 @@ def _publication_rule():
 
 
 _RULE = _publication_rule()
+_COLLECTION_RULE = _publication_rule("cedar_publication")
 WITHHELD_CLASS = _RULE.INDIVIDUAL_NATIVE_CLASS
 WITHHELD_FIELDS = frozenset(_RULE.INDIVIDUAL_NATIVE_WITHHELD_FIELDS)
 may_publish_individual_native_field = _RULE.may_publish_individual_native_field
@@ -501,14 +502,44 @@ def review_sample(workspace: Path):
     """Where the importer reads a table's sample: the review bundle's layout."""
     def locate(collection: dict, table: dict) -> Path:
         cedar_id = collection["cedar"]["cedar_id"]
-        return workspace / "dist" / "review" / "samples" / cedar_id / f"{Path(table['table']).stem}__10.csv"
+        return review_sample_path(workspace, cedar_id, table["table"])
     return locate
+
+
+def review_sample_path(workspace: Path, cedar_id: str, table: str) -> Path:
+    """Read only a declared review sample inside the supplied review bundle."""
+    if not cedar_id or cedar_id in (".", "..") or any(c in cedar_id for c in "/\\:"):
+        raise ValueError("Invalid sample collection identifier")
+    root = (workspace / "dist" / "review" / "samples").resolve()
+    source = (root / cedar_id / f"{Path(table).stem}__10.csv").resolve()
+    if not source.is_relative_to(root):
+        raise ValueError("Sample source escapes review bundle")
+    return source
+
+
+def public_sample_path(repo: Path, url: str) -> Path:
+    """Resolve a local asset URL inside public; refuse traversal and external links."""
+    if not isinstance(url, str) or not url.startswith("/") or url.startswith("//"):
+        raise ValueError("Sample must use a local public URL")
+    if "\\" in url or ":" in url or "?" in url or "#" in url or "%" in url:
+        raise ValueError("Invalid public sample URL")
+    relative = Path(url[1:])
+    if ".." in relative.parts:
+        raise ValueError("Public sample path traversal")
+    repository = repo.resolve()
+    root = (repository / "public").resolve()
+    if not root.is_relative_to(repository):
+        raise ValueError("Public directory escapes repository")
+    target = (root / relative).resolve()
+    if not target.is_relative_to(root) or target == root:
+        raise ValueError("Sample path escapes public directory")
+    return target
 
 
 def public_sample(repo: Path):
     """Where the site serves a table's sample: the manifest's own path under public/."""
     def locate(collection: dict, table: dict) -> Path:
-        return repo / "public" / table["sample_path"].lstrip("/")
+        return public_sample_path(repo, table["sample_path"])
     return locate
 
 
@@ -529,18 +560,34 @@ def withhold_samples(manifest: dict, locate, names: frozenset[str], uids: frozen
     struck: list[dict] = []
     for collection in manifest["collections"]:
         flagship = collection.get("sample") or {}
+        policy_hold = None
+        try:
+            _COLLECTION_RULE.assert_collection_publishable(
+                collection.get("cedar", {}).get("cedar_id", collection["id"])
+            )
+        except _COLLECTION_RULE.FieldMapRefusal:
+            policy_hold = "This collection is withheld from publication under its maintained publication policy."
+            collection["publication_hold"] = {
+                "code": "COLLECTION_PUBLICATION_HOLD", "message": policy_hold,
+            }
+            collection.setdefault("cedar", {})["status"] = "BLOCKED"
+            collection["cedar"]["blockers"] = [policy_hold]
         for table in collection["tables"]:
             path = table.get("sample_path")
             if not path:
                 continue
-            file = locate(collection, table)
-            if not file.exists():
-                continue
-            columns = sample_violations(file, names, uids)
-            if not columns:
-                continue
+            if policy_hold:
+                columns = ["all fields: collection publication hold"]
+            else:
+                file = locate(collection, table)
+                if not file.exists():
+                    continue
+                columns = sample_violations(file, names, uids)
+                if not columns:
+                    continue
             table["sample_path"] = None
-            table["sample_withheld_why"] = WITHHELD_WHY
+            table["sample_withheld_path"] = path
+            table["sample_withheld_why"] = policy_hold or WITHHELD_WHY
             table["sample_withheld_columns"] = columns
             struck.append({"collection": collection["id"], "table": table["table"],
                            "path": path, "columns": columns})
@@ -548,15 +595,15 @@ def withhold_samples(manifest: dict, locate, names: frozenset[str], uids: frozen
                 collection["sample"] = {
                     "table": flagship.get("table"),
                     "path": None,
-                    "unavailable_because": WITHHELD_WHY,
+                    "unavailable_because": policy_hold or WITHHELD_WHY,
                 }
     return struck
 
 
 def unpublish(repo: Path, struck: list[dict]) -> None:
     """Delete the served copy of every struck sample, if an earlier import published one."""
-    for entry in struck:
-        served = repo / "public" / entry["path"].lstrip("/")
+    paths = [public_sample_path(repo, entry["path"]) for entry in struck]
+    for served in paths:
         if served.exists():
             served.unlink()
 
@@ -571,10 +618,11 @@ def audit(repo: Path = REPO) -> list[dict]:
     """
     manifest_path = repo / "data" / "cedar" / "collections.manifest.json"
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    original = json.dumps(manifest, sort_keys=True)
     names, uids = withheld_entities(repo / "data" / "spine" / "cedar_entity_names.csv")
     struck = withhold_samples(manifest, public_sample(repo), names, uids)
     unpublish(repo, struck)
-    if struck:
+    if json.dumps(manifest, sort_keys=True) != original:
         manifest_path.write_text(
             json.dumps(manifest, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
         )
@@ -588,18 +636,22 @@ def copy_samples(workspace: Path, manifest: dict) -> int:
     manifest states, and so the Python side and the browser read one set of
     bytes rather than two copies that can disagree.
     """
-    source_root = workspace / "dist" / "review" / "samples"
     written = 0
     for collection in manifest["collections"]:
         cedar_id = collection["cedar"]["cedar_id"]
+        try:
+            _COLLECTION_RULE.assert_collection_publishable(cedar_id)
+        except _COLLECTION_RULE.FieldMapRefusal:
+            if any(table.get("sample_path") for table in collection["tables"]):
+                raise ValueError("Stale manifest attempts to copy a publication-held collection") from None
+            continue
         for table in collection["tables"]:
             if not table.get("sample_path"):
                 continue  # struck by withhold_samples: never copied
-            name = f"{Path(table['table']).stem}__10.csv"
-            source = source_root / cedar_id / name
+            source = review_sample_path(workspace, cedar_id, table["table"])
             if not source.exists():
                 raise SystemExit(f"missing sample: {source}")
-            target = REPO / "public" / table["sample_path"].lstrip("/")
+            target = public_sample_path(REPO, table["sample_path"])
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(source, target)
             written += 1
@@ -640,17 +692,19 @@ def main() -> int:
     # import; the tests refuse a stale one. On the importer's machine every
     # sample was just copied, so the record says none is missing -- until the
     # files are committed elsewhere, which is exactly what it exists to show.
-    measured = subprocess.run(  # noqa: S603
+    measured = subprocess.run(
         ["node", str(REPO / "scripts" / "measure-samples.mjs")],
         capture_output=True, text=True, check=False,
+        creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0), timeout=120,
     )
     if measured.returncode != 0:
         raise SystemExit(f"measure-samples failed:\n{measured.stderr}")
     # The Explore card's per-table contracts are read off the sample headers
     # just copied, so they follow every import for the same reason.
-    derived = subprocess.run(  # noqa: S603
+    derived = subprocess.run(
         ["node", str(REPO / "scripts" / "derive-explore.mjs")],
         capture_output=True, text=True, check=False,
+        creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0), timeout=120,
     )
     if derived.returncode != 0:
         raise SystemExit(f"derive-explore failed:\n{derived.stderr}")

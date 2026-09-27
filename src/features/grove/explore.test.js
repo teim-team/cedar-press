@@ -692,8 +692,11 @@ test("the field map decides every column of every sampled flagship in the owner'
     const lead = book.fields.slice(0, expectedLead.length).map((f) => f.label);
     assert.deepEqual(lead, expectedLead, key);
   }
-  assert.equal(sampled, 11);
-  // The unsampled flagship is decided from the builder's 53-field declaration.
+  assert.equal(sampled, 10);
+  assert.deepEqual(exploreTables("need"), []);
+  assert.equal(flagshipKey("need"), null);
+  // NEED remains publication-held; Owned's unsampled flagship is decided from
+  // the builder's 53-field declaration.
   const owned = FIELD_MAP["owned/native_owned_businesses"];
   assert.equal(owned.columns_today, 53);
   assert.match(owned.header_source, /builder declaration/);

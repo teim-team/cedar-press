@@ -22,10 +22,10 @@ Generated from `data/cedar/field_map.json` and the sample headers by `scripts/fi
 | `natural-resources` | `beneficiary_entity_id` | the beneficiary, in its declared namespace | kept as beneficiary_entity_id | object_id | 10 | 0 |
 | `natural-resources` | `payer_entity_id` | the payer, in its declared namespace | kept as payer_entity_id | object_id | 10 | 0 |
 | `natural-resources` | `operator_entity_id` | the operator, in its declared namespace | kept as operator_entity_id | object_id | 0 | 0 |
-| `need` | `enterprise_id` | the enterprise (a business), not the Native entity | kept as enterprise_id | object_id | 10 | 0 |
-| `need` | `owner_hub_cedar_uid` | the canonical Native entity, as a second spelling of cedar_uid on the same row | cedar_uid | alias_verified | 10 | 0 |
-| `need` | `uei_candidate` | a candidate UEI for the enterprise | uei, where verified | internal_crosswalk | 0 | 0 |
-| `need` | `enterprise_existing_cedar_uid` | the enterprise as a register entity in its own right, distinct from its owner | Preserve internally; future same-legal-object relationship requires explicit evidence and contract. No identity merge. | internal_crosswalk | 1 | 0 |
+| `need` | `enterprise_id` | the enterprise (a business), not the Native entity | kept as enterprise_id | object_id | — | 0 |
+| `need` | `owner_hub_cedar_uid` | the canonical Native entity, as a second spelling of cedar_uid on the same row | cedar_uid | alias_verified | — | 0 |
+| `need` | `uei_candidate` | a candidate UEI for the enterprise | uei, where verified | internal_crosswalk | — | 0 |
+| `need` | `enterprise_existing_cedar_uid` | the enterprise as a register entity in its own right, distinct from its owner | Preserve internally; future same-legal-object relationship requires explicit evidence and contract. No identity merge. | internal_crosswalk | — | 0 |
 | `nonprofits` | `entity_id` | Preserved organization/object evidence. Do not alias to the affiliated Native entity; explicit pinned source evidence must distinguish the objects. | No automatic replacement; cedar_uid retains its separately evidenced relationship role. | internal_crosswalk | 2 | 0 |
 | `nonprofits` | `cedar_spine_entity_id` | Preserved organization/object evidence. Do not alias to the affiliated Native entity; explicit pinned source evidence must distinguish the objects. | No automatic replacement; cedar_uid retains its separately evidenced relationship role. | internal_crosswalk | 9 | 0 |
 | `nonprofits` | `key_redirect_proposed_entity_id` | a proposed redirect of the entity link | cedar_uid, once the redirect is ruled | internal_crosswalk | 0 | 0 |

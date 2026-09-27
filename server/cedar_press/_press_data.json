@@ -888,7 +888,7 @@
           "kind": "data",
           "changed": [
             "Release: 3 tables, 14,868 rows.",
-            "A 10-row preview of need_enterprises.csv, the collection's flagship table, downloads from the shelf."
+            "A 10-row preview of need_enterprises.csv, the collection's flagship table, was produced with this release and is not published on the shelf yet."
           ]
         },
         {

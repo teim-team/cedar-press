@@ -45,7 +45,7 @@ import explore from "../../../data/cedar/explore.json" with { type: "json" };
 import codebookJson from "../../../data/cedar/codebook.json" with { type: "json" };
 import scopesJson from "../../../data/cedar/scopes.json" with { type: "json" };
 
-import { collectionCitation, collectionSample, collectionTables, sampleUnavailableReason } from "./collection.js";
+import { collectionCitation, collectionPublicationHold, collectionSample, collectionTables, sampleUnavailableReason } from "./collection.js";
 import { canOpenDataset } from "./pressAccess.js";
 import { recordStructure } from "./pressRecordStructure.js";
 import { PRESS_CATALOG_BY_ID, STOREFRONT_CATALOG } from "./pressCatalog.js";
@@ -109,6 +109,7 @@ export function contractFor(key) {
  * dataset to a reader; the rest are supporting tables from the same release.
  */
 export function exploreTables(collectionId) {
+  if (collectionPublicationHold(collectionId)) return [];
   const flagship = collectionSample(collectionId)?.path ?? null;
   const tables = collectionTables(collectionId)
     .filter((table) => table.sample_path)

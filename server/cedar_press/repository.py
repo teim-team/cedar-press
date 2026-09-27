@@ -267,6 +267,7 @@ def collection_csv(collection_id: str) -> str | None:
     tables are not served from this repository; ``collection_tables`` carries
     what a serving layer needs to find them.
     """
+    assert_collection_publishable(collection_id)
     return launch.collection_csv(collection_id)
 
 

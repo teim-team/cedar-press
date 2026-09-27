@@ -189,7 +189,7 @@ from cedar_publication import (          # noqa: E402
     FLAGSHIP as _FLAGSHIP, apply_field_map, FieldMapRefusal,
     NEVER, GATES, DROP_COLS, YEAR_COLS, row_ok, publishable_columns,
     is_publication_eligible, mask_attribution, MASK, translate_neid_values,
-    apply_official_names,
+    apply_official_names, assert_collection_publishable,
     enforce_denials, DENIAL_MASK_REASON,
 )
 
@@ -312,6 +312,13 @@ def build(mode: str) -> int:
     done = set()
 
     for coll, tbls in sorted(cols_map.items()):
+        try:
+            assert_collection_publishable(coll)
+        except FieldMapRefusal:
+            man.extend({"collection": coll, "table": table,
+                        "note": "Collection publication held; internal source evidence retained"}
+                       for table in sorted(tbls))
+            continue
         for tname, shippable in sorted(tbls.items()):
             if (coll, tname) in done:
                 continue

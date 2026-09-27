@@ -728,6 +728,70 @@ class TestGeneratorAndManifestAgree(unittest.TestCase):
                 f"{path} publishes a withheld field; run import_cedar_manifest.py --audit",
             )
 
+    def test_sample_paths_cannot_delete_or_overwrite_outside_public(self) -> None:
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            outside = root / "retained.csv"
+            outside.write_text("retained\n", encoding="utf-8")
+            valid = "/data/cedar/samples/deals/example.csv"
+            self.assertEqual(
+                self.script.public_sample_path(root, valid),
+                root.resolve() / "public" / valid[1:],
+            )
+            for bad in ("/../retained.csv", "//server/file.csv", "C:/retained.csv",
+                        "/C:/retained.csv", "/data\\..\\retained.csv", "/%2e%2e/retained.csv"):
+                with self.subTest(path=bad), self.assertRaises(ValueError):
+                    self.script.unpublish(root, [{"path": bad}])
+            self.assertEqual(outside.read_text(encoding="utf-8"), "retained\n")
+
+    def test_canonical_need_policy_refuses_stale_manifest_sample_paths(self) -> None:
+        manifest = {"collections": [{
+            "id": "need", "cedar": {"cedar_id": "need"},
+            "sample": {"path": "/data/cedar/samples/need/restored.csv"},
+            "tables": [{"table": "restored.csv",
+                        "sample_path": "/data/cedar/samples/need/restored.csv"}],
+        }]}
+        with self.assertRaisesRegex(ValueError, "publication-held"):
+            self.script.copy_samples(_REPO, manifest)
+        struck = self.script.withhold_samples(
+            manifest, lambda *_: self.fail("Held files must never be read"), frozenset())
+        self.assertEqual(len(struck), 1)
+        self.assertIsNone(manifest["collections"][0]["tables"][0]["sample_path"])
+        self.assertEqual(manifest["collections"][0]["cedar"]["status"], "BLOCKED")
+
+    def test_manifest_collection_holds_match_canonical_policy(self) -> None:
+        for collection in self.manifest["collections"]:
+            identifier = collection.get("cedar", {}).get("cedar_id", collection["id"])
+            try:
+                self.script._COLLECTION_RULE.assert_collection_publishable(identifier)
+            except self.script._COLLECTION_RULE.FieldMapRefusal:
+                self.assertTrue(collection.get("publication_hold"), identifier)
+                self.assertFalse(any(t.get("sample_path") for t in collection["tables"]))
+
+    def test_audit_persists_policy_even_without_sample_paths(self) -> None:
+        import tempfile
+        from unittest.mock import patch
+
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            path = root / "data/cedar/collections.manifest.json"
+            path.parent.mkdir(parents=True)
+            path.write_text(json.dumps({"collections": [{
+                "id": "need", "cedar": {"cedar_id": "need", "status": "READY"},
+                "sample": {"path": None}, "tables": [{"sample_path": None}],
+            }]}), encoding="utf-8")
+            with patch.object(
+                self.script, "withheld_entities", return_value=(frozenset(), frozenset())
+            ):
+                self.assertEqual(self.script.audit(root), [])
+                updated = path.read_bytes()
+                status = json.loads(updated)["collections"][0]["cedar"]["status"]
+                self.assertEqual(status, "BLOCKED")
+                self.assertEqual(self.script.audit(root), [])
+                self.assertEqual(path.read_bytes(), updated)
+
     def test_the_explore_contracts_match_the_samples(self) -> None:
         # The Explore card reads each table through a contract derived from
         # its sample header (scripts/derive-explore.mjs). A sample whose

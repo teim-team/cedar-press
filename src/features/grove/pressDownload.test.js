@@ -14,11 +14,27 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 
-import { LAUNCH_COLLECTION, collectionSample, hasSample, samplePath } from "./collection.js";
+import { LAUNCH_COLLECTION, collectionSample, collectionPublicationHold, collectionCsv, hasSample, samplePath } from "./collection.js";
 import { csvFor, hasReleaseFile } from "./pressDownload.js";
 
 const PUBLIC = fileURLToPath(new URL("../../../public", import.meta.url));
 const readSample = (path) => readFile(`${PUBLIC}${path}`, "utf8");
+
+test("held NEED sample cannot be fetched or serialized from cached rows", async () => {
+  let calls = 0;
+  const result = await csvFor({ id: "need", name: "Cedar NEED" }, async () => {
+    calls++;
+    return "enterprise_id,name\nCEDAR-NEST-1,old cached row\n";
+  });
+  assert.ok(collectionPublicationHold("need"));
+  assert.equal(hasSample("need"), false);
+  assert.equal(samplePath("need"), null);
+  assert.equal(collectionCsv("need", "enterprise_id,name\nold,cached\n"), null);
+  assert.equal(calls, 0);
+  assert.equal(result.name, "need-collection-description.csv");
+  assert.match(result.csv, /withheld from publication/);
+  assert.doesNotMatch(result.csv, /old cached row/);
+});
 
 /**
  * A minimal RFC 4180 reader, because line counting is wrong here and quietly

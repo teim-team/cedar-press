@@ -156,6 +156,14 @@ class SharedCollectionReleaseTest(unittest.TestCase):
                 for row in repository.grove_release_metadata("need")
             ))
 
+    def test_legacy_need_preview_obeys_collection_hold_before_reading_rows(self):
+        self.session("press_pro")
+        with patch.object(repository.launch, "collection_csv") as rows:
+            response = self.client.get("/press/collections/need/download")
+            self.assertEqual(response.status_code, 503)
+            self.assertEqual(response.json()["code"], "COLLECTION_HELD")
+            rows.assert_not_called()
+
     def test_fifteen_targets_preserve_tiers_and_never_invent_samples(self):
         with (
             patch.object(repository, "grove_release_metadata", return_value=None),

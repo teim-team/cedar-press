@@ -31,7 +31,7 @@
 
 import { downloadCollection } from "../../api.js";
 import { isConnected } from "../../config.js";
-import { collectionCitation, collectionCsv, hasSample, samplePath } from "./collection.js";
+import { collectionCitation, collectionCsv, collectionPublicationHold, hasSample, samplePath } from "./collection.js";
 import { coverageLabel } from "./pressAccess.js";
 import { recordStructure } from "./pressRecordStructure.js";
 
@@ -78,6 +78,10 @@ export async function csvFor(entry, fetchText = defaultFetchText) {
   const rows = [
     ["field", "value"],
     ["collection", entry.name],
+    ...(collectionPublicationHold(entry.id) ? [
+      ["publication_status", "held"],
+      ["publication_hold", collectionPublicationHold(entry.id).message],
+    ] : []),
     ["shelf", entry.shelf || entry.kind || ""],
     ...(coverage ? [["coverage", coverage]] : []),
     ["contents", entry.blurb || ""],

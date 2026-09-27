@@ -712,7 +712,16 @@ def download(collection_id: str, session: Session = Depends(require_session)) ->
                 "message": "That collection is not included in this subscription.",
             },
         )
-    csv = repository.collection_csv(collection_id)
+    try:
+        csv = repository.collection_csv(collection_id)
+    except repository.FullReleaseUnavailable as error:
+        raise HTTPException(
+            status_code=503,
+            detail={
+                "code": "COLLECTION_HELD",
+                "message": "This collection is withheld from publication.",
+            },
+        ) from error
     if csv is None:
         # A collection on the shelf whose preview Cedar cannot produce is a
         # named data problem, not a missing route, and the reader is told

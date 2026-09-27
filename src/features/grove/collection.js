@@ -153,7 +153,8 @@ function unpublishedReason(table) {
 }
 
 /** A collection's sample, or the same entry marked unpublished with a reason. */
-function withPublication(sample) {
+function withPublication(sample, hold = null) {
+  if (hold) return { ...(sample ?? {}), path: null, unavailable_because: hold.message };
   if (!sample?.path || !UNPUBLISHED.has(sample.path)) return sample;
   const { path, ...rest } = sample;
   return { ...rest, path: null, unpublished_path: path,
@@ -161,19 +162,29 @@ function withPublication(sample) {
 }
 
 /** A table entry, or the same entry with its sample marked unpublished. */
-function tableWithPublication(table) {
+function tableWithPublication(table, hold = null) {
+  if (hold) return { ...table, sample_path: null, sample_withheld_why: hold.message };
   if (!table.sample_path || !UNPUBLISHED.has(table.sample_path)) return table;
   return { ...table, sample_path: null, sample_unpublished: table.sample_path };
 }
 
+const PUBLICATION_HOLDS = deepFreeze(Object.fromEntries(
+  manifest.collections.filter((entry) => entry.publication_hold)
+    .map((entry) => [entry.id, entry.publication_hold]),
+));
+
+export function collectionPublicationHold(datasetId) {
+  return PUBLICATION_HOLDS[datasetId] ?? null;
+}
+
 const SAMPLES = deepFreeze(
   Object.fromEntries(
-    manifest.collections.map((entry) => [entry.id, withPublication(entry.sample)]),
+    manifest.collections.map((entry) => [entry.id, withPublication(entry.sample, entry.publication_hold)]),
   ),
 );
 const TABLES = deepFreeze(
   Object.fromEntries(
-    manifest.collections.map((entry) => [entry.id, entry.tables.map(tableWithPublication)]),
+    manifest.collections.map((entry) => [entry.id, entry.tables.map((table) => tableWithPublication(table, entry.publication_hold))]),
   ),
 );
 
@@ -238,6 +249,7 @@ export function collectionDeclaredSample(datasetId) {
  * instead of reporting the collection missing.
  */
 export function sampleUnavailableReason(datasetId) {
+  if (collectionPublicationHold(datasetId)) return collectionPublicationHold(datasetId).message;
   return SAMPLES[datasetId]?.unavailable_because ?? null;
 }
 
@@ -560,6 +572,7 @@ function columnCount(headerLine) {
  * page for a button most readers never press.
  */
 export function collectionCsv(datasetId, sampleText) {
+  if (collectionPublicationHold(datasetId)) return null;
   const sample = SAMPLES[datasetId];
   if (!sample?.path || sampleText == null) return null;
   const lines = sampleText.replace(/\r\n/g, "\n").replace(/\n+$/, "").split("\n");
@@ -576,10 +589,10 @@ export function collectionCsv(datasetId, sampleText) {
  * this answers from the manifest alone.
  */
 export function hasSample(datasetId) {
-  return Boolean(SAMPLES[datasetId]?.path);
+  return !collectionPublicationHold(datasetId) && Boolean(SAMPLES[datasetId]?.path);
 }
 
 /** Where the browser fetches a collection's preview file, or `null`. */
 export function samplePath(datasetId) {
-  return SAMPLES[datasetId]?.path ?? null;
+  return collectionPublicationHold(datasetId) ? null : SAMPLES[datasetId]?.path ?? null;
 }

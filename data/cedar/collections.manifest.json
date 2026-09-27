@@ -3005,22 +3005,22 @@
       },
       "cedar": {
         "cedar_id": "need",
-        "status": "READY",
-        "blockers": [],
+        "status": "BLOCKED",
+        "blockers": [
+          "This collection is withheld from publication under its maintained publication policy."
+        ],
         "n_rows": 14868,
         "n_tables": 3
       },
       "sample": {
         "table": "need_enterprises.csv",
-        "path": "/data/cedar/samples/need/need_enterprises__10.csv",
-        "rows": 10,
-        "of": 5820,
-        "columns": 65
+        "path": null,
+        "unavailable_because": "This collection is withheld from publication under its maintained publication policy."
       },
       "tables": [
         {
           "table": "need_enterprise_relations.csv",
-          "sample_path": "/data/cedar/samples/need/need_enterprise_relations__10.csv",
+          "sample_path": null,
           "rows_in": 8690,
           "rows_published": 8690,
           "rows_withheld": 0,
@@ -3032,11 +3032,16 @@
             "split": "",
             "files": 0,
             "largest_file_mb": 0.0
-          }
+          },
+          "sample_withheld_path": "/data/cedar/samples/need/need_enterprise_relations__10.csv",
+          "sample_withheld_why": "This collection is withheld from publication under its maintained publication policy.",
+          "sample_withheld_columns": [
+            "all fields: collection publication hold"
+          ]
         },
         {
           "table": "need_enterprises.csv",
-          "sample_path": "/data/cedar/samples/need/need_enterprises__10.csv",
+          "sample_path": null,
           "rows_in": 5820,
           "rows_published": 5820,
           "rows_withheld": 0,
@@ -3048,11 +3053,16 @@
             "split": "",
             "files": 0,
             "largest_file_mb": 0.0
-          }
+          },
+          "sample_withheld_path": "/data/cedar/samples/need/need_enterprises__10.csv",
+          "sample_withheld_why": "This collection is withheld from publication under its maintained publication policy.",
+          "sample_withheld_columns": [
+            "all fields: collection publication hold"
+          ]
         },
         {
           "table": "need_entity_dual_role.csv",
-          "sample_path": "/data/cedar/samples/need/need_entity_dual_role__10.csv",
+          "sample_path": null,
           "rows_in": 358,
           "rows_published": 358,
           "rows_withheld": 0,
@@ -3064,12 +3074,21 @@
             "split": "",
             "files": 0,
             "largest_file_mb": 0.0
-          }
+          },
+          "sample_withheld_path": "/data/cedar/samples/need/need_entity_dual_role__10.csv",
+          "sample_withheld_why": "This collection is withheld from publication under its maintained publication policy.",
+          "sample_withheld_columns": [
+            "all fields: collection publication hold"
+          ]
         }
       ],
       "full_files": {
         "served": false,
         "note": "The full spreadsheets are built by code/1135_full_dataset_review_bundle.py and are not in this repository: the set measures 6.2 GB and single tables exceed GitHub's 100 MB limit. Each table above carries the split and file count a serving layer needs to locate it."
+      },
+      "publication_hold": {
+        "code": "COLLECTION_PUBLICATION_HOLD",
+        "message": "This collection is withheld from publication under its maintained publication policy."
       }
     },
     {
