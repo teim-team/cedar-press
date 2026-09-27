@@ -460,7 +460,7 @@
       "name": "Foundation & Corporate Giving",
       "shelf": "standard",
       "coverage": {
-        "kind": "pending"
+        "kind": "structure"
       },
       "blurb": "Foundation, corporate and bank funding publicly disclosed for Native nations, organizations and initiatives. Follow the funder, legal recipient, purpose, geography, amount and timing while keeping commitments, payments, authorizations and other reported financial statuses distinct.",
       "linkage": "Philanthropic, corporate and bank giving, each disclosure kept as its own record: commitments and payments are separate facts, and the legal recipient is kept distinct from the Native beneficiary."
@@ -543,7 +543,7 @@
       "name": "PLOT",
       "shelf": "pro",
       "coverage": {
-        "kind": "pending"
+        "kind": "structure"
       },
       "blurb": "Parcel-level ownership and development records associated with Native nations, organizations and enterprises. Follow ownership, transfers, parcel characteristics, geometry, permits and other recorded property activity over time.",
       "linkage": "Land ownership, transfers, permitting and development, followed parcel by parcel: each parcel and the recorded events attached to it, linked to the Native entity that holds it."

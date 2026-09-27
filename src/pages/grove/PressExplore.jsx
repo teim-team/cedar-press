@@ -66,7 +66,7 @@ import {
 import { useSampleRows } from "../../features/grove/useSamples.js";
 import { recordHref, rememberReturn, takeReturn } from "../../features/grove/pressRecord.js";
 import { PRESS_METHODS_PATH } from "../../features/grove/pressRoutes.js";
-import { LAUNCH_COLLECTION, isReleased } from "../../features/grove/collection.js";
+import { LAUNCH_COLLECTION } from "../../features/grove/collection.js";
 import { formatUpdated } from "../../features/grove/pressReleases.js";
 import { downloadCsv, hasReleaseFile, saveZip } from "../../features/grove/pressDownload.js";
 import { PRESS_CATALOG_BY_ID } from "../../features/grove/pressCatalog.js";
@@ -76,6 +76,7 @@ const DEFAULT_COLLECTION = "funding";
 import { Cards, Human, Rows } from "./PressRecordTable.jsx";
 import { columnPlan, short } from "../../features/grove/recordColumns.js";
 import { coverageLabel, upgradeFor } from "../../features/grove/pressAccess.js";
+import { RecordStructureCap, RecordStructureTable } from "./PressRecordStructure.jsx";
 import { TBN_PLANS_URL, articleHref, articlesDrawingOn } from "../../features/grove/pressArticles.js";
 import { EVENT, track } from "../../features/grove/telemetry.js";
 import { useNarrow } from "../../features/grove/useNarrow.js";
@@ -562,13 +563,20 @@ function CollectionAtlas({ collections, query, onSelect }) {
             </tr>
           </thead>
           <tbody>
-            {visible.map(({ entry, open, flagship, previewUnavailable }) => {
+            {visible.map(({ entry, open, flagship, structure, previewUnavailable }) => {
               const release = LAUNCH_COLLECTION.find((item) => item.id === entry.id);
               const upgrade = upgradeFor(entry);
-              const unavailable = !flagship;
+              // A collection presented by its record structure opens by plan
+              // like any other; only a missing sample preview is its own state.
+              const unavailable = !flagship && !structure;
               const locked = !open && !unavailable;
+              // No span and no row count for a collection that states none:
+              // the cell is left empty rather than holding a placeholder.
+              const coverage = coverageLabel(entry);
+              const rows = ROWS_BY_ID[entry.id] ?? (structure ? "" : "—");
+              const version = release?.version ?? (structure ? "" : "—");
               const access = (compact = false) => {
-                if (unavailable) return <span className={compact ? "cp-atlas__mobileaccess is-pending" : "cp-atlas__pending"} title={previewUnavailable}>{isReleased(entry.id) ? "Preview pending" : "Not yet published"}</span>;
+                if (unavailable) return <span className={compact ? "cp-atlas__mobileaccess is-pending" : "cp-atlas__pending"} title={previewUnavailable}>Preview pending</span>;
                 if (open) return <span className={compact ? "cp-atlas__mobileaccess is-included" : "cp-atlas__included"}>Included</span>;
                 return <span className={compact ? "cp-atlas__mobileaccess is-locked" : "cp-atlas__locked"}><TierName name={upgrade.name} /></span>;
               };
@@ -587,16 +595,16 @@ function CollectionAtlas({ collections, query, onSelect }) {
                     </button>
                     <small className="cp-ex__uid">{entry.blurb}</small>
                     <small className="cp-atlas__mobilemeta">
-                      <span>{coverageLabel(entry)}</span>
-                      <span>{ROWS_BY_ID[entry.id] ?? "—"}</span>
-                      <span>{release?.version ?? "—"}</span>
+                      {coverage ? <span>{coverage}</span> : null}
+                      {rows ? <span>{rows}</span> : null}
+                      {version ? <span>{version}</span> : null}
                       {access(true)}
                     </small>
                   </td>
-                  <td>{coverageLabel(entry)}</td>
-                  <td className="cp-ex__amount">{ROWS_BY_ID[entry.id] ?? "—"}</td>
+                  <td>{coverage}</td>
+                  <td className="cp-ex__amount" data-testid="atlas-rows">{rows}</td>
                   <td>
-                    {release?.version ?? "—"}
+                    {version}
                     {release?.updated ? <small className="cp-ex__uid">updated {formatUpdated(release.updated)}</small> : null}
                   </td>
                   <td>{access()}</td>
@@ -638,11 +646,16 @@ function InactiveCollectionToolbar({ entry, onAbout }) {
 }
 
 function LockedCollection({ collection, onAbout }) {
-  const { entry, flagship } = collection;
+  const { entry, flagship, structure } = collection;
   const upgrade = upgradeFor(entry);
   const release = LAUNCH_COLLECTION.find((item) => item.id === entry.id);
   const contract = flagship ? contractFor(flagship.key) : null;
-  const columns = (contract?.default_columns ?? []).slice(0, 6);
+  // A collection presented by its record structure names its own fields in
+  // the locked frame, where another names its release's default columns.
+  const columns = structure
+    ? structure.fields.slice(0, 6).map((field) => field.name)
+    : (contract?.default_columns ?? []).slice(0, 6);
+  const columnLabel = (column) => (structure ? column.replace(/_/g, " ") : labelFor(flagship.key, column));
   const rows = ROWS_BY_ID[entry.id];
 
   return (
@@ -660,7 +673,7 @@ function LockedCollection({ collection, onAbout }) {
                 <tr>
                   {columns.map((column) => (
                     <th key={column} scope="col" className="cp-ex__c-text">
-                      {labelFor(flagship.key, column)}
+                      {columnLabel(column)}
                     </th>
                   ))}
                 </tr>
@@ -686,8 +699,10 @@ function LockedCollection({ collection, onAbout }) {
             {release?.updated ? ` · updated ${formatUpdated(release.updated)}` : ""}
           </p>
           <p className="cp-lock__say">
-            Available with <TierName name={upgrade.name} />. The published preview, filters, and
-            sample export are included together. {" "}
+            Available with <TierName name={upgrade.name} />.{" "}
+            {structure
+              ? "It opens on what each record holds and how the collection connects to the others."
+              : "The published preview, filters, and sample export are included together."}{" "}
             <a href={TBN_PLANS_URL} target="_blank" rel="noreferrer">
               See <TierName name={upgrade.name} /> <span aria-hidden="true">&#8594;</span>
             </a>
@@ -703,8 +718,6 @@ function UnavailableCollection({ collection, onAbout }) {
   const release = LAUNCH_COLLECTION.find((item) => item.id === entry.id);
   const rows = ROWS_BY_ID[entry.id];
   const reason = previewUnavailable ?? "No public preview is available for this collection in the current release.";
-  // On the shelf with no release: the same panel, saying that instead.
-  const unpublished = !isReleased(entry.id);
 
   return (
     <div className="cp-lock cp-lock--unavailable" data-testid="explore-unavailable">
@@ -712,9 +725,9 @@ function UnavailableCollection({ collection, onAbout }) {
       <div className="cp-ex__card">
         <div className="cp-lock__unavailable">
           <p className="cp-lock__eyebrow">Collection status</p>
-          <h2>{unpublished ? "Not yet published" : "Preview unavailable"}</h2>
+          <h2>Preview unavailable</h2>
           <dl className="cp-lock__status">
-            <div><dt>Access</dt><dd>{unpublished ? "With its first release" : "Not available for self-service browsing"}</dd></div>
+            <div><dt>Access</dt><dd>Not available for self-service browsing</dd></div>
             {release?.version ? <div><dt>Release</dt><dd>{release.version}</dd></div> : null}
           </dl>
           <p>{reason}</p>
@@ -727,10 +740,36 @@ function UnavailableCollection({ collection, onAbout }) {
             {release?.updated ? ` · updated ${formatUpdated(release.updated)}` : ""}
           </p>
           <p className="cp-lock__say">
-            {unpublished
-              ? "This collection is part of Cedar Press and has no published release yet."
-              : "This collection is listed for transparency. The current release does not offer a public preview or self-service table access."}
+            This collection is listed for transparency. The current release does not offer a public preview or self-service table access.
           </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * An open collection presented by its record structure (Foundation &
+ * Corporate Giving, PLOT): the product's frame and bar, with what each
+ * record holds where another collection's sample records sit. It reads as
+ * the collection's own view, not as an absence: the fields, what each one
+ * means, and how the collection connects to the others. No row count, year
+ * span or sample value is shown, because none is stated for it.
+ */
+function StructureCollection({ collection, onAbout }) {
+  const { entry } = collection;
+  return (
+    <div className="cp-lock cp-structview" data-testid="explore-structure" data-collection={entry.id}>
+      <div className="cp-ex__bar" role="group" aria-label="This collection">
+        <h1 className="cp-ex__title">{entry.name}</h1>
+        <AboutCollectionLink onOpen={onAbout} />
+      </div>
+      <div className="cp-ex__card">
+        <RecordStructureCap collectionId={entry.id} className="cp-structview__cap" />
+        <RecordStructureTable collectionId={entry.id} name={entry.name} />
+        <div className="cp-ex__foot">
+          <p className="cp-ex__caption">{entry.blurb}</p>
+          {entry.linkage ? <p className="cp-lock__say">{entry.linkage}</p> : null}
         </div>
       </div>
     </div>
@@ -820,7 +859,9 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
   // A collection can be in the catalog and on a reader's plan while its
   // publication rule still withholds the preview. That needs its own state:
   // it is neither a locked table nor an empty search result.
-  const unavailableSingle = [single, lockedSingle].find((collection) => collection && !collection.flagship) ?? null;
+  const unavailableSingle = [single, lockedSingle].find((collection) => collection && !collection.flagship && !collection.structure) ?? null;
+  // Open and presented by its record structure: the collection's own view.
+  const structureSingle = single && !single.flagship && single.structure ? single : null;
   const recordFiltersActive = Boolean(
     cut.entities?.length || cut.scopes?.length || cut.types !== null || cut.years || cut.q || cut.history,
   );
@@ -843,7 +884,7 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
       : collections.filter((c) => selected.includes(c.entry.id) && c.flagship).map((c) => c.flagship)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   ), [collections, selectedKey, tableKey]);
-  const noPreview = collections.filter((c) => selected.includes(c.entry.id) && !c.flagship);
+  const noPreview = collections.filter((c) => selected.includes(c.entry.id) && !c.flagship && !c.structure);
 
   const { rows, missing, columns, loading } = useSampleRows(tables, register);
   const facets = useMemo(() => facetsOf(rows, register), [rows, register]);
@@ -1086,6 +1127,8 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
       <div className="cp-ex__in">
         {unavailableSingle ? (
           <UnavailableCollection collection={unavailableSingle} onAbout={() => write({ about: true })} />
+        ) : structureSingle ? (
+          <StructureCollection collection={structureSingle} onAbout={() => write({ about: true })} />
         ) : lockedSingle ? (
           <LockedCollection collection={lockedSingle} onAbout={() => write({ about: true })} />
         ) : (

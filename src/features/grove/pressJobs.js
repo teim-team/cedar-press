@@ -55,12 +55,13 @@
  * an audience is hidden only when a collection it names is not in the catalog
  * it is resolved against, or when it names fewer than `MIN_COLLECTIONS`.
  *
- * TWO COLLECTIONS HAVE NO RELEASE YET
- * Foundation & Corporate Giving and PLOT are on the shelf with no release
- * (`coverage: PENDING`). Their profile questions are held to the producer's
- * declared fields where a producer exists (`PENDING_FIELDS`), and they carry
- * no Cedar questions: Cedar answers from a release profile, and neither has
- * one. See `COLLECTION_JOBS` below.
+ * TWO COLLECTIONS ARE PRESENTED BY THEIR RECORD STRUCTURE
+ * Foundation & Corporate Giving and PLOT are live on their shelves with no
+ * release file in this repository (`coverage: STRUCTURE`). Their profile
+ * questions are held to the producer's declared fields where a producer
+ * exists, and they carry no Cedar questions: Cedar's suggested questions are
+ * routed through a release profile, and neither has one. See
+ * `COLLECTION_JOBS` below.
  *
  * COVERAGE IS A REVIEW CHECK, NOT A RULE (owner, 2026-09-26: "The landing
  * page should show the best reasons to use Cedar Press, not prove that each
@@ -289,10 +290,10 @@ export const COLLECTION_JOBS = Object.freeze({
   }),
 });
 
-// ── The two collections with no release yet ─────────────────────────────
+// ── The two collections presented by their record structure ─────────────
 //
 // The owner's questions (2026-09-26) for Foundation & Corporate Giving and
-// PLOT. Neither has a release, so neither has a codebook table in this
+// PLOT. Neither has a release file, so neither has a codebook table in this
 // repository, and neither carries `cedar` questions: Cedar answers from a
 // release profile and there is none to answer from. `cedarQuestions` returns
 // nothing for them, and the Python suite, which runs every Cedar question
@@ -307,7 +308,7 @@ export const COLLECTION_JOBS = Object.freeze({
 //
 // "Organizations like this one" is made exact the way Federal Funding's is:
 // "like" is the recipient's entity type, not a similarity measure.
-const PENDING_JOBS = Object.freeze({
+const STRUCTURE_JOBS = Object.freeze({
   "foundation-corporate-giving": Object.freeze({
     questions: Object.freeze([
       q(describe, "Which funders support organizations of the same type as this one?", ["funder_name", "recipient_entity_type", "recipient_name"]),
@@ -325,7 +326,7 @@ const PENDING_JOBS = Object.freeze({
 });
 
 /** Every collection's questions, released or not, by catalog id. */
-export const ALL_COLLECTION_JOBS = Object.freeze({ ...COLLECTION_JOBS, ...PENDING_JOBS });
+export const ALL_COLLECTION_JOBS = Object.freeze({ ...COLLECTION_JOBS, ...STRUCTURE_JOBS });
 
 /** The questions a collection's fields can answer, or none. */
 export function collectionQuestions(id) {

@@ -83,7 +83,8 @@ export function datasets() {
     creator: { "@id": ORG },
     publisher: { "@id": ORG },
     includedInDataCatalog: { "@id": `${SITE}/#catalog` },
-    temporalCoverage: coverageLabel(entry),
+    // Left out for a collection that states no span, rather than a placeholder.
+    temporalCoverage: coverageLabel(entry) ?? undefined,
     spatialCoverage: "United States",
     keywords: [entry.name, entry.short, ...KEYWORDS.slice(0, 6)].filter((k, i, a) => k && a.indexOf(k) === i),
     isAccessibleForFree: false,

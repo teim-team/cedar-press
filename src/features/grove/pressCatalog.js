@@ -69,13 +69,16 @@
  * shelf. Twelve have a release, and `collection.js` reads those twelve out of
  * the manifest with the measured descriptor behind each. The other two,
  * Foundation & Corporate Giving and PLOT (owner, 2026-09-27: part of Cedar
- * Press now), are on the shelf with `coverage: PENDING` and no release: the
- * pages name them, tier them and describe them, and wherever a page would
- * show their records it shows the same "not yet published" state it shows for
- * any collection whose preview is missing. A test pins the manifest to
- * exactly the catalog's released entries, and the pending ones to exactly the
- * catalog entries the manifest lacks, so a release cannot land without the
- * entry changing, and nothing can be measured there without a shelf here.
+ * Press now) have no release in the manifest and carry `coverage:
+ * STRUCTURE`. They are live on their plans like every other collection on
+ * their shelf (owner, 2026-09-27: "treat PLOT and Foundation & Corporate
+ * Giving as published and live everywhere"): the pages name them, tier them,
+ * describe them and open them for the plan that includes them, and wherever
+ * a page would show sample records it shows what each record holds instead
+ * (`pressRecordStructure.js`). No row count and no year span is stated for
+ * either. A test pins the manifest to exactly the catalog's other entries,
+ * and the STRUCTURE ones to exactly the catalog entries the manifest lacks,
+ * so a release cannot land without the entry changing.
  *
  * THE NUMBERS IN THE TIER COPY ARE DERIVED
  * "Six collections" and "twelve collections" used to be typed into the
@@ -222,19 +225,20 @@ const TIER_DECLARATIONS = Object.freeze([
  * release, not through this file. Until then the two blurbs stay as ruled.
  */
 /**
- * The coverage of a collection that is on the shelf and has no release yet.
+ * The coverage of a collection presented by its record structure: no release
+ * in the manifest, so nothing has been measured.
  *
- * Not a year and not a capture date, because nothing has been measured: a
- * value in `coverage` is a claim to a paying customer, and a collection with
- * no delivered file has no span to claim. The pages say "Not yet published"
- * (`coverageLabel`), the viewer shows the same state it shows for a
- * collection whose preview is not in the repository, and the entry changes to
- * a measured `series` or `roster` in the change that adds its release to
- * `data/cedar/collections.manifest.json`. `collection.js` holds the two in
- * step: a catalog entry is pending exactly when the manifest has no release
- * for it.
+ * Not a year and not a capture date: a value in `coverage` is a claim to a
+ * paying customer, and a collection with no measured file has no span to
+ * claim. So no span is shown at all (`coverageLabel` returns null and every
+ * surface leaves the line out rather than printing a placeholder), and where
+ * a viewer would show sample records it shows what each record holds
+ * (`pressRecordStructure.js`). The entry changes to a measured `series` or
+ * `roster` in the change that adds its release to
+ * `data/cedar/collections.manifest.json`; `collection.js` holds the two in
+ * step.
  */
-export const PENDING = Object.freeze({ kind: "pending" });
+export const STRUCTURE = Object.freeze({ kind: "structure" });
 
 export const PRESS_CATALOG = Object.freeze([
   Object.freeze({
@@ -334,10 +338,9 @@ export const PRESS_CATALOG = Object.freeze([
     // Owner, 2026-09-26: Cedar Press, which with PLOT in Cedar Press+ makes
     // the fourteen a seven and seven split.
     shelf: "standard",
-    // No release yet, so no coverage to state: see PENDING below. The
-    // producer (Lumecon-data, codex/foundation-corporate-giving) has built
-    // only an unpromoted rehearsal release.
-    coverage: PENDING,
+    // No measured span to state: see STRUCTURE above. The record structure
+    // is the producer's (Lumecon-data, `foundation_release.py`).
+    coverage: STRUCTURE,
     // Owner copy, 2026-09-26, bound by the producer contract: one row is one
     // source disclosure or award version; commitments and payments are
     // separate facts; legal recipient and Native beneficiary are separate
@@ -477,9 +480,9 @@ export const PRESS_CATALOG = Object.freeze([
     name: "PLOT",
     // Owner, 2026-09-26: PLOT is in Cedar Press+.
     shelf: "pro",
-    // No release yet, so no coverage to state: see PENDING below. No
-    // producer exists for it in any repository (checked 2026-09-27).
-    coverage: PENDING,
+    // No measured span to state: see STRUCTURE above. The record structure
+    // is the owner's description (2026-09-27).
+    coverage: STRUCTURE,
     // Owner copy, 2026-09-26. Deals follows a transaction or a capital event
     // between parties; PLOT follows a parcel and the recorded events attached
     // to it. A nation's site acquisition may be a Deal while the parcels it

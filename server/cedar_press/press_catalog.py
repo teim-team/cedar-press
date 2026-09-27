@@ -139,10 +139,11 @@ ARTICLES = _frozen(_DATA["articles"])
 CITATIONS = _frozen(_DATA["citations"])
 
 #: The full collection ladder (``pressCatalog.js``): every collection the
-#: product is designed around, including ones whose first release is still in
-#: preparation. Cedar's profile layer reads this for the collections that do
-#: not yet ship figures, so a catalog entry can describe itself without a
-#: second hand-typed copy of its blurb.
+#: storefront sells, including the two presented by their record structure
+#: (coverage kind ``structure``: Foundation & Corporate Giving and PLOT).
+#: Cedar's profile layer reads this for the collections that ship no figures,
+#: so a catalog entry can describe itself without a second hand-typed copy of
+#: its blurb.
 CATALOG = _frozen(_DATA["catalog"])
 
 #: Release history per collection (``pressReleases.js``): version, cadence and

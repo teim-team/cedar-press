@@ -131,10 +131,35 @@ def may_open(tier: str, collection_id: str) -> bool:
     ``tests/test_access.py::TestNothingTheClientOpensIsRefused`` compares the
     two answers per tier and per collection in both directions.
     """
-    return any(
+    if any(
         dataset.id == collection_id and _reaches(tier, dataset.shelf)
         for dataset in launch.LAUNCH_COLLECTION
-    )
+    ):
+        return True
+    # Foundation & Corporate Giving and PLOT: live on their shelves like any
+    # other collection (owner, 2026-09-27), and presented by their record
+    # structure because no release file exists here. The plan that reaches
+    # the shelf includes them, on both sides of the language boundary
+    # (`canOpenDataset`); there is simply no file for the download route to
+    # hand over, and `sample_unavailable_reason` says so.
+    shelf = _structure_shelf(collection_id)
+    return shelf is not None and _reaches(tier, shelf)
+
+
+def _structure_shelf(collection_id: str) -> str | None:
+    """The storefront shelf of a collection presented by its record structure.
+
+    ``None`` for every other collection, and for one placed off the
+    storefront: the grove shelf is never sold here, whatever the plan.
+    """
+    for entry in press_catalog.CATALOG:
+        if entry["id"] != collection_id:
+            continue
+        if (entry.get("coverage") or {}).get("kind") != "structure":
+            return None
+        shelf = entry.get("shelf")
+        return shelf if shelf in ("standard", "pro") else None
+    return None
 
 
 def is_sold(collection_id: str) -> bool:
@@ -174,7 +199,14 @@ def sample_unavailable_reason(collection_id: str) -> str | None:
     both with "No such collection" hides a real, named data problem behind a
     routing message.
     """
-    return launch.sample_unavailable_reason(collection_id)
+    reason = launch.sample_unavailable_reason(collection_id)
+    if reason is None and _structure_shelf(collection_id) is not None:
+        return (
+            "This collection is presented by its record structure: what each "
+            "record holds is on its page, and there is no sample file to "
+            "download."
+        )
+    return reason
 
 
 def download_name(collection_id: str) -> str:

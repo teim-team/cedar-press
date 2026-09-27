@@ -21,7 +21,8 @@ import { readFileSync, readdirSync } from "node:fs";
 
 import codebookJson from "../../../data/cedar/codebook.json" with { type: "json" };
 import { PRESS_CATALOG, STOREFRONT_CATALOG } from "./pressCatalog.js";
-import { PENDING_RELEASE, isReleased } from "./collection.js";
+import { STRUCTURE_ONLY, isReleased } from "./collection.js";
+import { RECORD_STRUCTURE, RECORD_STRUCTURE_TITLE } from "./pressRecordStructure.js";
 import { SECTOR_IMAGES, imageFile, imageSources } from "./pressImagery.js";
 import { BUILD_NEXT_QUESTION, BUILD_NEXT_STEPS, ECOSYSTEM_EXAMPLES } from "./pressMethod.js";
 import { PRIORITY_EXAMPLES } from "./pressPriorities.js";
@@ -184,8 +185,8 @@ const PRODUCER_FIELDS = Object.freeze({
 const NO_PRODUCER = Object.freeze(["plot"]);
 
 test("a collection with no release holds its questions to the producer's fields, or is named as having none", () => {
-  assert.deepEqual([...PENDING_RELEASE].sort(), ["foundation-corporate-giving", "plot"]);
-  for (const id of PENDING_RELEASE) {
+  assert.deepEqual([...STRUCTURE_ONLY].sort(), ["foundation-corporate-giving", "plot"]);
+  for (const id of STRUCTURE_ONLY) {
     const questions = collectionQuestions(id);
     assert.ok(questions.length >= 2, `${id} has no questions`);
     if (codebookTable(id)) {
@@ -203,6 +204,31 @@ test("a collection with no release holds its questions to the producer's fields,
     for (const item of questions) {
       assert.ok(item.fields.length, `"${item.q}" names no field`);
       for (const column of item.fields) assert.ok(columns.has(column), `"${item.q}" rests on ${column}, which the producer does not declare`);
+    }
+  }
+});
+
+// "What each record holds" (owner, 2026-09-27): the field list a viewer
+// shows for these two in place of sample records. Foundation & Corporate
+// Giving's is the producer's FIELDS, in order, with nothing added or
+// dropped; PLOT's is the owner's description, heading by heading. Every
+// meaning is one plain sentence and none states a figure.
+test("the record structure is the producer's fields for giving and the owner's headings for PLOT", () => {
+  assert.equal(RECORD_STRUCTURE_TITLE, "What each record holds");
+  assert.deepEqual(Object.keys(RECORD_STRUCTURE).sort(), [...STRUCTURE_ONLY].sort(), "one structure per collection with no sample rows");
+  assert.deepEqual(
+    RECORD_STRUCTURE["foundation-corporate-giving"].fields.map((field) => field.name),
+    [...PRODUCER_FIELDS["foundation-corporate-giving"]],
+  );
+  assert.deepEqual(
+    RECORD_STRUCTURE.plot.fields.map((field) => field.name),
+    ["Owner or entity", "Parcel ID", "Transfers", "Parcel characteristics", "Geometry", "Permits", "Development activity", "Dates", "Source"],
+  );
+  for (const [id, structure] of Object.entries(RECORD_STRUCTURE)) {
+    for (const { name, meaning } of structure.fields) {
+      assert.match(meaning, /^[A-Z][^&\u2014]*\.$/, `${id} ${name}: one plain sentence`);
+      assert.doesNotMatch(meaning, /\d/, `${id} ${name}: a meaning states no figure`);
+      assert.doesNotMatch(meaning, /\bimpact\b/i, `${id} ${name}`);
     }
   }
 });

@@ -382,16 +382,20 @@ class TestCatalog(unittest.TestCase):
         ratelimit.reset_for_tests()
 
     def test_a_catalog_only_collection_says_it_has_no_figures(self) -> None:
-        # A quantity question about an unreleased collection is answered with
-        # the honest state of the numbers, never a routing miss or a made-up
-        # figure.
+        # A quantity question about a collection presented by its record
+        # structure is answered with the honest state of the numbers, never a
+        # routing miss or a made-up figure, and never as a collection that is
+        # waiting to be published.
         with _catalog_only_collection() as entry:
             response = client.post(
                 "/cedar/ask",
                 json={"question": "How many records are in it?", "collectionId": entry["id"]},
             )
             self.assertEqual(response.status_code, 200)
-            self.assertIn("no published figures", response.json()["answer"])
+            answer = response.json()["answer"]
+            self.assertIn("states no figures", answer)
+            self.assertNotIn("preparation", answer)
+            self.assertNotRegex(answer, r"\d")
 
     def test_a_shipping_collection_without_a_figure_says_so_too(self) -> None:
         # Eight of the twelve have real row counts and no figure series, which
@@ -473,13 +477,13 @@ class TestCatalog(unittest.TestCase):
 
     def test_every_released_catalog_collection_ships_with_a_version(self) -> None:
         # No released entry answers from its catalog copy alone, because every
-        # released entry has a descriptor behind it. The two on the shelf
-        # ahead of a first release (coverage kind "pending") answer from the
+        # released entry has a descriptor behind it. The two presented by
+        # their record structure (coverage kind "structure") answer from the
         # catalog and claim no version.
         for entry in press_catalog.CATALOG:
             with self.subTest(collection=entry["id"]):
                 profile = client.get(f"/press/collections/{entry['id']}/profile").json()
-                if entry["coverage"]["kind"] == "pending":
+                if entry["coverage"]["kind"] == "structure":
                     self.assertIsNone(profile["version"])
                 else:
                     self.assertIsNotNone(profile["version"])

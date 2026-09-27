@@ -459,11 +459,14 @@ export function MethodsByCollection() {
             <span className="cp-mbc__pic" aria-hidden="true">{COLLECTION_ICONS[entry.id] ?? null}</span>
             <div>
               <h3 className="cp-mbc__name">{entry.name}</h3>
-              <p className="cp-mbc__meta">
-                {release ? `${release.version} · ` : ""}
-                {coverageLabel(entry)}
-                {release ? ` · ${release.cadence}` : ""}
-              </p>
+              {/* Version, span and cadence where the collection states them;
+                  one presented by its record structure states none, and the
+                  line is left out rather than left empty. */}
+              {release || coverageLabel(entry) ? (
+                <p className="cp-mbc__meta">
+                  {[release?.version, coverageLabel(entry), release?.cadence].filter(Boolean).join(" · ")}
+                </p>
+              ) : null}
             </div>
           </header>
           <p className="cp-mbc__blurb">{entry.blurb}</p>

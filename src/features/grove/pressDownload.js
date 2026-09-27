@@ -33,6 +33,7 @@ import { downloadCollection } from "../../api.js";
 import { isConnected } from "../../config.js";
 import { collectionCitation, collectionCsv, hasSample, samplePath } from "./collection.js";
 import { coverageLabel } from "./pressAccess.js";
+import { recordStructure } from "./pressRecordStructure.js";
 
 const csvCell = (value) => `"${String(value ?? "").replace(/"/g, '""')}"`;
 
@@ -67,16 +68,21 @@ export async function csvFor(entry, fetchText = defaultFetchText) {
   const citation =
     collectionCitation(entry.id) ||
     `Lumecon, "${entry.name}", Cedar Press collection, cedarpress.ai.`;
+  // The label, not the year: a roster has no year, and an empty coverage
+  // cell in a file that outlives the page reads as unknown rather than as
+  // "this is a roster". A collection presented by its record structure
+  // states no span, so the row is left out rather than left blank, and its
+  // fields follow, one row each.
+  const coverage = coverageLabel(entry);
+  const structure = recordStructure(entry.id);
   const rows = [
     ["field", "value"],
     ["collection", entry.name],
     ["shelf", entry.shelf || entry.kind || ""],
-    // The label, not the year: a roster has no year, and an empty
-    // coverage cell in a file that outlives the page reads as unknown
-    // rather than as "this is a roster".
-    ["coverage", coverageLabel(entry)],
+    ...(coverage ? [["coverage", coverage]] : []),
     ["contents", entry.blurb || ""],
     ["entity_linkage", entry.linkage || ""],
+    ...(structure ? structure.fields.map((item) => [`record_field: ${item.name}`, item.meaning]) : []),
     ["cite_as", citation],
   ];
   return {
@@ -110,7 +116,9 @@ async function defaultFetchText(path) {
  * `csvFor` decides.
  */
 export async function downloadCsv(entry) {
-  if (isConnected()) {
+  // A collection presented by its record structure has no file on the
+  // service; its description, fields included, is built here in both modes.
+  if (isConnected() && !recordStructure(entry.id)) {
     const { blob, filename } = await downloadCollection(entry.id);
     saveBlob(filename, blob);
     return;

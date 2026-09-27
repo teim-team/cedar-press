@@ -16,9 +16,10 @@
 // It is the selected collection's, so pointing at the rail below changes it
 // and the two objects read as one surface rather than as a card beside a
 // screenshot.
-import { LAUNCH_COLLECTION, collectionCedarFacts, isReleased } from "../../features/grove/collection";
+import { LAUNCH_COLLECTION, collectionCedarFacts } from "../../features/grove/collection";
 import { coverageLabel } from "../../features/grove/pressAccess";
 import { formatUpdated } from "../../features/grove/pressReleases";
+import { recordStructure } from "../../features/grove/pressRecordStructure.js";
 import { COLLECTION_ICONS } from "./pressCollectionIcons";
 
 /** "3646750" as the release states it, or null rather than a guess. */
@@ -41,11 +42,14 @@ export default function PressReleaseSpecimen({ entry }) {
   const rows = rowsOf(release, facts);
   const tables = Number.isInteger(facts?.n_tables) ? facts.n_tables : null;
   const coverage = coverageLabel(entry);
+  // A collection presented by its record structure states its fields, and
+  // no release, span or row count.
+  const structure = recordStructure(entry.id);
 
   return (
     <aside className="cp-spec cp-fade" aria-label="Current release">
       <p className="cp-spec__cap">
-        Cedar Press <span aria-hidden="true">/</span> {isReleased(entry.id) ? "Current release" : "First release"}
+        Cedar Press <span aria-hidden="true">/</span> {structure ? "Record structure" : "Current release"}
       </p>
       <p className="cp-spec__name">
         <span className="cp-spec__mark" aria-hidden="true">{COLLECTION_ICONS[entry.id] ?? null}</span>
@@ -71,6 +75,12 @@ export default function PressReleaseSpecimen({ entry }) {
           <div>
             <dt>Tables</dt>
             <dd>{tables}</dd>
+          </div>
+        ) : null}
+        {structure ? (
+          <div>
+            <dt>Fields</dt>
+            <dd>{structure.fields.length}</dd>
           </div>
         ) : null}
       </dl>
