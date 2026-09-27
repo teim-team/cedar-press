@@ -711,7 +711,7 @@ export default function PressGate({ user }) {
                 <a href={LUMECON_TEAM_URL} target="_blank" rel="noreferrer">team</a> of economists
                 and researchers has spent years producing published research and tribal economic
                 studies, and led the original construction of the Native Entity Enterprise Dataset.
-                Across more than 500 source websites, agentic models and machine learning pipelines
+                Across more than 600 source websites, agentic models and machine learning pipelines
                 propose matches and human reviewers confirm them, giving each organization a
                 permanent identifier. That is how {STOREFRONT_CATALOG.length} datasets answer as
                 one collection.
