@@ -16,6 +16,8 @@ test("Held, missing and unsafe-source facts never become visible evidence", () =
     { ...row, hold_reason: "rights" }, { ...row, publication_status: "held" },
     { ...row, source_url: "javascript:alert(1)" }, { ...row, source_url: "https://u:p@example.org" },
     { ...row, source_url: "invalid" },
+    { ...row, source_url: "https://example.org/report?token=synthetic" },
+    { ...row, source_url: "https://host.internal/report" },
   ] }), []);
 });
 

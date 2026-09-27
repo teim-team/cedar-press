@@ -57,13 +57,17 @@ class NeedProfiles(unittest.TestCase):
             | updates
         )
 
-    def serve(self, links=None, records=None, returned_pin=PIN):
+    def serve(self, links=None, records=None, returned_pin=PIN, held=(), broken=()):
         policy = SimpleNamespace(
             assert_collection_publishable=lambda _: None, FieldMapRefusal=ValueError
         )
         streams = []
 
         def released(*args, **kwargs):
+            if kwargs["component"] in held:
+                raise repository.ComponentPublicationHeld("Synthetic explicit rights hold")
+            if kwargs["component"] in broken:
+                raise repository.FullReleaseUnavailable("Synthetic transport or hash failure")
             rows = (
                 (links if links is not None else [self.link()])
                 if kwargs["component"] == "profile_links"
@@ -85,6 +89,25 @@ class NeedProfiles(unittest.TestCase):
         for call in transport.call_args_list:
             self.assertEqual(call.args, ("need", PIN))
         return result
+
+    def test_finite_component_release_keeps_relationships_without_exposing_held_facts(self):
+        result = self.serve(held=profiles.COMPONENTS)
+        self.assertEqual(result["status"], "available")
+        self.assertEqual(len(result["related_enterprises"]), 1)
+        self.assertTrue(all(result[key] == [] for key in profiles.COMPONENTS))
+        self.assertEqual(result["component_status"]["credit_rating_actions"], "publication_held")
+        self.assertIn("remain held", result["message"])
+
+    def test_held_relationships_do_not_block_exact_direct_issuer(self):
+        result = self.serve(
+            held=("profile_links",), records=[self.row(legal_subject_cedar_uid=UID)]
+        )
+        self.assertFalse(result["related_enterprises"])
+        self.assertEqual(result["credit_rating_actions"][0]["legal_subject_cedar_uid"], UID)
+
+    def test_integrity_errors_are_not_relabelled_as_publication_holds(self):
+        with self.assertRaises(repository.FullReleaseUnavailable):
+            self.serve(broken=("credit_rating_actions",))
 
     def test_publication_hold_precedes_pin_and_transport(self):
         with patch.object(
@@ -156,6 +179,8 @@ class NeedProfiles(unittest.TestCase):
             "http://example.org",
             "javascript:alert(1)",
             "https://a:b@example.org",
+            "https://example.org/report?token=synthetic",
+            "https://host.internal/report",
             "https://[",
         ):
             with self.subTest(source=source), self.assertRaises(repository.FullReleaseUnavailable):

@@ -10,9 +10,8 @@ import io
 import json
 import re
 from pathlib import Path
-from urllib.parse import urlsplit
 
-from cedar_press import repository
+from cedar_press import repository, source_presentation
 
 COMPONENTS = (
     "patent_observations", "patent_events", "credit_rating_actions", "rating_availability"
@@ -53,18 +52,11 @@ def empty_profile(status: str, message: str) -> dict:
 
 
 def _source_url(value: object) -> bool:
-    if not isinstance(value, str):
-        return False
-    try:
-        parsed = urlsplit(value)
-        return (
-            parsed.scheme == "https"
-            and bool(parsed.hostname)
-            and not parsed.username
-            and not parsed.password
-        )
-    except ValueError:
-        return False
+    return (
+        isinstance(value, str)
+        and value.startswith("https://")
+        and source_presentation.safe_url(value) is not None
+    )
 
 
 def select_entity_rows(rows, cedar_uid: str, links: dict[str, list[dict]]) -> list[dict]:
@@ -153,10 +145,22 @@ def entity_evidence(cedar_uid: str) -> dict:
     )
     result["release_id"] = pin["release_id"]
     result["profile_cedar_uid"] = cedar_uid
+    result["component_status"] = {}
+
+    def permitted_rows(component):
+        try:
+            # grove_full_release verifies all bytes and component rights before
+            # the first row. Preserve streaming when scanning other entities.
+            yield from _component_rows(component, pin["release_id"])
+        except repository.ComponentPublicationHeld:
+            result["component_status"][component] = "publication_held"
+        else:
+            result["component_status"][component] = "permitted"
+
     links: dict[str, list[dict]] = {}
     seen_links = set()
     profile_links = []
-    for link in _component_rows("profile_links", pin["release_id"]):
+    for link in permitted_rows("profile_links"):
         if not isinstance(link, dict):
             raise repository.FullReleaseUnavailable("Malformed NEED profile relationship")
         if link.get("profile_cedar_uid") != cedar_uid:
@@ -184,9 +188,9 @@ def entity_evidence(cedar_uid: str) -> dict:
     result["related_enterprises"] = profile_links
     for component in COMPONENTS:
         result[component] = select_entity_rows(
-            _component_rows(component, pin["release_id"]), cedar_uid, links
+            permitted_rows(component), cedar_uid, links
         )
-    if any(result[name] for name in COMPONENTS):
+    if profile_links or any(result[name] for name in COMPONENTS):
         result.update(
             status="available",
             message=(
@@ -196,4 +200,6 @@ def entity_evidence(cedar_uid: str) -> dict:
                 "current ratings; an acquisition does not by itself prove a patent assignment."
             ),
         )
+    if "publication_held" in result["component_status"].values():
+        result["message"] += " Some NEED components remain held and are not shown."
     return result

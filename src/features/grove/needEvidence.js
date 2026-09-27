@@ -1,11 +1,10 @@
 /** Evidence retains its exact registered legal subject or related enterprise. */
+import { safeSourceUrl } from "./sourcePresentation.js";
 export const NEED_EVIDENCE_EMPTY = "No released patent or rating evidence is connected to this profile yet. This does not establish that none exists.";
 
 function sourceLink(value) {
-  try {
-    const url = new URL(value);
-    return url.protocol === "https:" && !url.username && !url.password ? url.href : null;
-  } catch { return null; }
+  const safe = safeSourceUrl(value);
+  return safe?.startsWith("https://") ? safe : null;
 }
 
 export function attributionLabel(row) {

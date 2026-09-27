@@ -360,6 +360,10 @@ class FullReleaseUnavailable(ValueError):
     """The pinned full file cannot be verified; never substitute a sample."""
 
 
+class ComponentPublicationHeld(FullReleaseUnavailable):
+    """An explicit component rights decision; never a transport or integrity failure."""
+
+
 def _canonical_bytes(value):
     return (
         json.dumps(
@@ -1097,6 +1101,20 @@ def grove_component_contract(
     if not isinstance(contract, dict):
         raise FullReleaseUnavailable("Component is not in the pinned release")
     rights = contract.get("rights")
+    if (
+        isinstance(rights, dict)
+        and rights.get("publication_class") in {
+            "public", "publishable", "restricted", "tenant_private", "withheld"
+        }
+        and type(rights.get("redistribution")) is bool
+        and type(contract.get("download_permitted")) is bool
+        and (
+            rights["publication_class"] in {"restricted", "tenant_private", "withheld"}
+            or rights["redistribution"] is False
+            or contract["download_permitted"] is False
+        )
+    ):
+        raise ComponentPublicationHeld("Component is not eligible for customer delivery")
     if (
         not isinstance(rights, dict)
         or rights.get("publication_class") not in {"public", "publishable"}

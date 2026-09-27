@@ -312,6 +312,15 @@ class SharedCollectionReleaseTest(unittest.TestCase):
                 )
                 self.assertEqual(response.status_code, 403)
 
+    def test_only_explicit_component_rights_are_typed_as_publication_holds(self):
+        manifest, _, _ = self.fixture(rights=False)
+        with self.assertRaises(repository.ComponentPublicationHeld):
+            repository.grove_component_contract(manifest, "plot", "environmental_events")
+        manifest["components"]["environmental_events"]["rights"]["redistribution"] = "false"
+        with self.assertRaises(repository.FullReleaseUnavailable) as raised:
+            repository.grove_component_contract(manifest, "plot", "environmental_events")
+        self.assertNotIsInstance(raised.exception, repository.ComponentPublicationHeld)
+
     def test_giving_rights_hold_prevents_download_for_entitled_users(self):
         self.fixture("foundation-corporate-giving", "reviewed_disclosures", rights=False)
         self.session("press")
