@@ -43,7 +43,7 @@ import { useFadeIn } from "../../features/grove/useFadeIn";
 import { activatePressAccount, validatePressCode } from "../../api";
 import { LAUNCH_COLLECTION, LAUNCH_ROWS_TOTAL } from "../../features/grove/collection";
 import { coverageFrom } from "../../features/grove/pressAccess";
-import { LUMECON_URL, TBN_PLANS_URL, TBN_URL } from "../../features/grove/pressArticles";
+import { LUMECON_TEAM_URL, LUMECON_URL, TBN_PLANS_URL, TBN_URL } from "../../features/grove/pressArticles";
 import { PRESS_TIERS, STOREFRONT_CATALOG, collectionsOnShelf } from "../../features/grove/pressCatalog";
 import { formatUpdated, recentlyUpdated } from "../../features/grove/pressReleases";
 import { SOURCE_REACH_FIGURE, SOURCE_ROTATION } from "../../features/grove/sourceRotation.js";
@@ -83,6 +83,13 @@ import PressAudienceExample from "./PressAudienceExample";
 import { PressPreviewNotice } from "./PressChrome";
 import { TierName } from "./TierName";
 import PressReleaseSpecimen from "./PressReleaseSpecimen";
+
+/** The source list dealt into rows for the navy banner, in list order
+ * across rows so neighbours in the list are not neighbours on screen. */
+const SOURCE_ROW_COUNT = 7;
+const SOURCE_ROWS = Array.from({ length: SOURCE_ROW_COUNT }, (_, r) =>
+  SOURCE_ROTATION.filter((_, i) => i % SOURCE_ROW_COUNT === r),
+).filter((row) => row.length);
 
 /** The brand mark, served from public/. The all-teal mark is the current one. */
 const MARK = "/brand/lumecon-logo-mark-teal.png";
@@ -582,12 +589,6 @@ export default function PressGate({ user }) {
                 </button>
               )}
             </div>
-            <ul className="cp-hero3__facts cp-fade" aria-label="What Cedar Press holds">
-              <li><b>{STOREFRONT_CATALOG.length}</b> collections</li>
-              {LAUNCH_ROWS_TOTAL ? <li><b>{LAUNCH_ROWS_TOTAL.toLocaleString("en-US")}</b> records</li> : null}
-              {EARLIEST_YEAR ? <li>as far back as <b>{EARLIEST_YEAR}</b></li> : null}
-              {recentlyUpdated(1)[0] ? <li>updated <b>{formatUpdated(recentlyUpdated(1)[0].updated)}</b></li> : null}
-            </ul>
           </div>
 
           {/* The product frame. The rail is the twelve collections with
@@ -645,6 +646,15 @@ export default function PressGate({ user }) {
               A live preview: the real viewer, reading the sample records published with
               each collection&rsquo;s current release.
             </figcaption>
+            {/* The summary figures, one line under the caption (owner,
+                2026-09-27), so nothing sits below the hero's button and the
+                use cases start higher. */}
+            <ul className="cp-hero3__facts" aria-label="What Cedar Press holds">
+              <li><b>{STOREFRONT_CATALOG.length}</b> collections</li>
+              {LAUNCH_ROWS_TOTAL ? <li><b>{LAUNCH_ROWS_TOTAL.toLocaleString("en-US")}</b> records</li> : null}
+              {EARLIEST_YEAR ? <li>as far back as <b>{EARLIEST_YEAR}</b></li> : null}
+              {recentlyUpdated(1)[0] ? <li>updated <b>{formatUpdated(recentlyUpdated(1)[0].updated)}</b></li> : null}
+            </ul>
           </figure>
 
         </div>
@@ -666,36 +676,6 @@ export default function PressGate({ user }) {
           onPoint={setSelectedId}
         />
 
-        {/* The provenance band: a rotation of the systems Lumecon sources
-            from (`sourceRotation.js`, owner copy), on a slow run so the
-            breadth reads as breadth rather than as a paragraph nobody
-            finishes. Not the collections' own source list: that is
-            `PRESS_SOURCES`, held to its evidence, which Methods reads.
-
-            The run is duplicated and the track translated by half its width,
-            which is what makes the loop seamless; the copy is aria-hidden so
-            a screen reader hears the list once. Hover or focus stops it, and
-            prefers-reduced-motion turns it into a wrapped list (CSS). */}
-        <aside className="cp-hero3__proof cp-fade" aria-label="Source systems">
-          <div className="cp-hero3__proofhead">
-            <Link className="cp-hero3__prooflabel" to={PRESS_METHODS_PATH}>
-              Sources Lumecon draws on
-            </Link>
-            <span className="cp-hero3__proofcount">
-              {SOURCE_REACH_FIGURE} source websites · {STOREFRONT_CATALOG.length} collections
-            </span>
-          </div>
-          <div className="cp-hero3__marqwrap">
-          <div className="cp-hero3__marquee" style={{ "--run-dur": `${SOURCE_ROTATION.length * 2.4}s` }}>
-            <ul className="cp-hero3__run">
-              {SOURCE_ROTATION.map((label) => <li key={label}>{label}</li>)}
-            </ul>
-            <ul className="cp-hero3__run" aria-hidden="true">
-              {SOURCE_ROTATION.map((label) => <li key={`${label}-echo`}>{label}</li>)}
-            </ul>
-          </div>
-          </div>
-        </aside>
       </section>
 
       {/* ── The passage: why, on navy, with the photograph ────────────── */}
@@ -722,28 +702,73 @@ export default function PressGate({ user }) {
                 A federal contract names the company that won it, a Form 990 names the nonprofit
                 that filed it, and a royalty statement names whoever was paid. None of them says
                 whether those names belong to one nation or three, and no public system keeps
-                track. Lumecon draws on more than 500 source websites to settle that question,
-                giving every organization it can resolve a permanent identifier and keeping it
-                current as organizations rename, merge and change hands. That is how{" "}
-                {STOREFRONT_CATALOG.length} datasets come to answer as one collection.
+                track.
               </p>
-              {/* Owner copy, 2026-09-25. The records say what happened; the
-                  reporting says what it means. No count of relationships is
-                  given because none has been measured. */}
-              <p className="cp-why__lede cp-why__lede--tbn cp-fade">
-                Tribal Business News adds what the records cannot: context from relationships across
-                Indian Country built over years of investigative journalism, so each figure arrives
-                with an understanding of the nations and enterprises behind it.
+              {/* Owner copy, 2026-09-27: who does the work and how, then what
+                  Tribal Business News adds. Three paragraphs of about equal
+                  length; both partners and the team page are linked. */}
+              <p className="cp-why__lede cp-fade">
+                <a href={LUMECON_URL} target="_blank" rel="noreferrer">Lumecon</a>&rsquo;s{" "}
+                <a href={LUMECON_TEAM_URL} target="_blank" rel="noreferrer">team</a> of economists
+                and researchers has spent years producing published research and tribal economic
+                studies, and led the original construction of the Native Entity Enterprise Dataset.
+                Across more than 500 source websites, agentic models and machine learning pipelines
+                propose matches and human reviewers confirm them, giving each organization a
+                permanent identifier. That is how {STOREFRONT_CATALOG.length} datasets answer as
+                one collection.
+              </p>
+              <p className="cp-why__lede cp-fade">
+                <a href={TBN_URL} target="_blank" rel="noreferrer">Tribal Business News</a> reports
+                on topics no one else covers and has become a trusted partner across Indian Country,
+                including with government agencies. Organizations that want to reach people engaged
+                in the multibillion-dollar Indian Country economy turn to it, and its reporting gives
+                each figure context about the nations and enterprises behind it.
               </p>
             </div>
-            <ul className="cp-why__shelves cp-fade" aria-label="The shelves">
-              {SHELVES.map(({ tier, entries }) => (
-                <li key={tier.id}>
-                  <b><TierName name={tier.name} /></b>
-                  <span>{tier.question} {entries.length} collections.</span>
-                </li>
-              ))}
-            </ul>
+            {/* The source banner sits here (owner, 2026-09-27): the passage
+                is already about how the records are gathered, and this column
+                was empty above the shelves. */}
+            <div className="cp-why__side">
+              <aside className="cp-hero3__proof cp-why__sources cp-fade" aria-label="Source systems">
+                <div className="cp-hero3__proofhead">
+                  <Link className="cp-hero3__prooflabel" to={PRESS_METHODS_PATH}>
+                    Sources Lumecon draws on
+                  </Link>
+                  <span className="cp-hero3__proofcount">
+                    {SOURCE_REACH_FIGURE} source websites · {STOREFRONT_CATALOG.length} collections
+                  </span>
+                </div>
+                {/* Several runs, alternating direction, so the banner fills
+                    the column rather than one line at its foot. Each run is
+                    duplicated for a seamless loop; the copy is aria-hidden so
+                    a screen reader hears every source once. */}
+                <div className="cp-why__runs">
+                  {SOURCE_ROWS.map((row, r) => (
+                    <div className="cp-hero3__marqwrap" key={r}>
+                      <div
+                        className={`cp-hero3__marquee${r % 2 ? " cp-hero3__marquee--back" : ""}`}
+                        style={{ "--run-dur": `${row.length * 3.2}s` }}
+                      >
+                        <ul className="cp-hero3__run">
+                          {row.map((label) => <li key={label}>{label}</li>)}
+                        </ul>
+                        <ul className="cp-hero3__run" aria-hidden="true">
+                          {row.map((label) => <li key={`${label}-echo`}>{label}</li>)}
+                        </ul>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </aside>
+              <ul className="cp-why__shelves cp-fade" aria-label="The shelves">
+                {SHELVES.map(({ tier, entries }) => (
+                  <li key={tier.id}>
+                    <b><TierName name={tier.name} /></b>
+                    <span>{tier.question} {entries.length} collections.</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </header>
           <div className="cp-why__photo cp-fade" aria-hidden="true">
             <picture>
@@ -765,14 +790,6 @@ export default function PressGate({ user }) {
               </li>
             ))}
           </ol>
-          {/* The owner's long-run trust line (2026-09-26): here, where the
-              passage argues for the maintained record, and never on a use
-              case card. */}
-          <p className="cp-why__trust cp-fade">
-            As search and analytical tools improve, Cedar Press keeps the underlying evidence
-            consistent: the same maintained sources, entities, releases and provenance beneath new
-            ways of working with the data.
-          </p>
           <p className="cp-why__note cp-fade">Photography is illustrative and does not identify Cedar Press customers.</p>
         </div>
       </section>

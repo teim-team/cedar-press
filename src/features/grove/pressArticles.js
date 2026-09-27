@@ -87,6 +87,7 @@ export const TBN_URL = "https://tribalbusinessnews.com";
  * not exist) strands the one reader who is trying to pay. */
 export const TBN_PLANS_URL = `${TBN_URL}/subscribe`;
 export const LUMECON_URL = "https://lumecon.ai";
+export const LUMECON_TEAM_URL = `${LUMECON_URL}/team/`;
 
 /**
  * The intrinsic pixel size of every lane photograph in public/pitch/lanes/.
