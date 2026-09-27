@@ -2133,6 +2133,50 @@
 .teim-rd .cp-ar__locked { font-size: 0.92rem; line-height: 1.5; color: var(--muted); margin: auto 0 0; }
 .teim-rd .cp-ar__locked .cp-m__more { display: inline-block; margin-top: 0.4rem; }
 
+/* ── A RESEARCH BRIEF, REDRAWN (owner, 2026-09-27) ──────────────────────────
+ * "The first thing on the page should be the title, authors and image, and
+ * maybe two or three key facts and the collection used." The head is one
+ * navy panel in the house duotone: the words on the left, the duotoned
+ * picture on the right, and under both the facts and the collections, each
+ * collection open to a reader who has it and priced for one who does not.
+ * The body keeps its column; figures sit in it as tinted cards at text width,
+ * so a chart's type stays at reading size instead of scaling with the page. */
+.teim-rd .cp-ar__hero { margin: 0.4rem 0 2.6rem; padding: clamp(1.6rem, 3.6vw, 3rem); border-radius: 10px; color: #fff; background: radial-gradient(120% 140% at 100% 0%, rgba(15, 181, 165, 0.22) 0%, rgba(15, 181, 165, 0) 55%), linear-gradient(160deg, #0b1a3a 0%, #09132b 60%, #0a2a3a 100%); }
+.teim-rd .cp-ar__heroin { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); gap: clamp(1.6rem, 3.4vw, 3rem); align-items: center; }
+.teim-rd .cp-ar__tag { margin: 0; font-family: var(--mono); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #5fd9cc; }
+.teim-rd .cp-ar__hero .cp-ar__title { color: #fff; margin-top: 0.7rem; font-size: clamp(2rem, 3.9vw, 3.3rem); }
+.teim-rd .cp-ar__hero .cp-ar__dek { color: rgba(255, 255, 255, 0.82); font-size: clamp(1.05rem, 1.3vw, 1.18rem); text-align: left; max-width: 60ch; }
+.teim-rd .cp-ar__hero .cp-ar__meta { display: flex; flex-wrap: wrap; gap: 0.35rem 1.1rem; margin-top: 1.4rem; color: rgba(255, 255, 255, 0.62); }
+.teim-rd .cp-ar__hero .cp-ar__by { color: #fff; }
+.teim-rd .cp-ar__heroimg { margin: 0; border-radius: 10px; overflow: hidden; background-color: #0f3f4a; }
+.teim-rd .cp-ar__heroimg .cp-ar__art { aspect-ratio: 4 / 3; object-fit: cover; }
+.teim-rd .cp-ar__heroimg .cp-ar__cap { margin: 0; padding: 0.65rem 0.9rem; background: rgba(9, 19, 43, 0.92); color: rgba(255, 255, 255, 0.72); font-size: 0.82rem; }
+.teim-rd .cp-ar__herofoot { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 1.4rem clamp(1.6rem, 3.4vw, 3rem); margin-top: clamp(1.6rem, 3vw, 2.4rem); padding-top: clamp(1.2rem, 2.4vw, 1.8rem); border-top: 1px solid rgba(255, 255, 255, 0.14); }
+.teim-rd .cp-ar__facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); gap: 1rem; margin: 0; }
+.teim-rd .cp-ar__fact { padding: 0.9rem 1rem 1rem; border-radius: 10px; background: rgba(15, 181, 165, 0.12); border: 1px solid rgba(95, 217, 204, 0.28); }
+.teim-rd .cp-ar__fact dt { font-family: var(--sans); font-size: clamp(1.7rem, 2.6vw, 2.3rem); font-weight: 750; letter-spacing: -0.03em; line-height: 1; color: #5fd9cc; font-variant-numeric: tabular-nums; }
+.teim-rd .cp-ar__fact dd { margin: 0.5rem 0 0; font-size: 0.9rem; line-height: 1.45; color: rgba(255, 255, 255, 0.85); }
+.teim-rd .cp-ar__usecap { display: block; font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255, 255, 255, 0.6); }
+.teim-rd .cp-ar__uselist { list-style: none; margin: 0.7rem 0 0; padding: 0; display: flex; flex-direction: column; gap: 0.6rem; }
+.teim-rd .cp-ar__use { display: flex; flex-direction: column; gap: 0.3rem; padding: 0.8rem 1rem; border-radius: 10px; background: #fff; }
+.teim-rd .cp-ar__use.is-locked { background: rgba(255, 255, 255, 0.9); }
+.teim-rd .cp-ar__usename { font-family: var(--sans); font-size: 1rem; font-weight: 700; color: var(--door-navy, #09132b); }
+.teim-rd .cp-ar__usego { align-self: flex-start; font-family: var(--sans); font-size: 0.88rem; font-weight: 700; color: var(--dteal); text-decoration: none; border-bottom: 1px solid var(--teal-line); }
+.teim-rd .cp-ar__usego:hover, .teim-rd .cp-ar__usego:focus-visible { border-bottom-color: var(--dteal); }
+@media (max-width: 900px) {
+  .teim-rd .cp-ar__heroin, .teim-rd .cp-ar__herofoot { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* The body, in the same two colours. A figure is a tinted card at the width
+ * of the text; a pull quote is teal type between hairlines, not a box with a
+ * stripe; a section heading carries a short teal rule above it. */
+.teim-rd .cp-ar__body .cp-ar__fig { margin: 2.2rem 0; padding: 1.2rem 1.3rem 1.1rem; border: 1px solid var(--teal-line); border-top: 1px solid var(--teal-line); border-radius: 10px; background: var(--teal-tint); }
+.teim-rd .cp-ar__body .cp-ar__chart { max-width: 640px; }
+.teim-rd .cp-ar__body .cp-ar__figcap { color: var(--door-navy, #09132b); }
+.teim-rd .cp-ar__body .cp-ar__pull { margin: 2.4rem 0; padding: 1.1rem 0; border-top: 1px solid var(--teal-line); border-bottom: 1px solid var(--teal-line); color: var(--dteal); font-size: clamp(1.3rem, 2.1vw, 1.7rem); }
+.teim-rd .cp-ar__h2 { position: relative; padding-top: 0.9rem; }
+.teim-rd .cp-ar__h2::before { content: ''; position: absolute; top: 0; left: 0; width: 2.4rem; height: 3px; border-radius: 2px; background: var(--teal); }
+
 /* ── Sponsorship ──────────────────────────────────────────────────────────
  * A slot with nothing booked renders no element, so none of this applies to
  * the live page today. The empty variant is the `?ads=demo` preview: a dashed

@@ -42,6 +42,7 @@ import {
   BLOCK,
   LUMECON_URL,
   PRESS_ARTICLES,
+  TBN_PLANS_URL,
   TBN_URL,
 } from "../../features/grove/pressArticles";
 import { canOpenDataset, canReadCedarPress, upgradeFor } from "../../features/grove/pressAccess";
@@ -226,6 +227,42 @@ function DrawnFrom({ id, user }) {
   );
 }
 
+/**
+ * One collection the piece is built from, at the head of the page.
+ *
+ * Owner, 2026-09-27: the collection a brief used belongs up top, beside the
+ * title, so a reader who has it can dive straight in and one who does not
+ * sees what opens it. Open collections go to the viewer on that collection;
+ * a closed one says which plan includes it and links to where that plan is
+ * bought (a Tribal Business News membership for Cedar Press+, the Cedar
+ * Grove page for Grove).
+ */
+function UsedCollection({ id, user }) {
+  const entry = PRESS_CATALOG_BY_ID[id];
+  if (!entry) return null;
+  const open = canOpenDataset(user, entry);
+  const upgrade = upgradeFor(entry);
+  return (
+    <li className={`cp-ar__use${open ? "" : " is-locked"}`}>
+      <span className="cp-ar__usename">{entry.name}</span>
+      {open ? (
+        <Link className="cp-ar__usego" to={`${PRESS_DATA_PATH}?c=${entry.id}`}>
+          Open the data <span aria-hidden="true">&#8594;</span>
+        </Link>
+      ) : (
+        <a
+          className="cp-ar__usego"
+          href={upgrade.sameProduct ? TBN_PLANS_URL : GROVE_MARKETING_URL}
+          target="_blank"
+          rel="noreferrer"
+        >
+          Included in {upgrade.name}. Get access <span aria-hidden="true">&#8594;</span>
+        </a>
+      )}
+    </li>
+  );
+}
+
 export default function CedarPressArticle() {
   const { articleId } = useParams();
   const { user, loading } = useAuth();
@@ -289,13 +326,11 @@ export default function CedarPressArticle() {
   // runs past the last paragraph and the grid row stretches to match it,
   // which leaves a hole where the article should have ended.
   const longEnough = article.body.length >= 12;
-  // The piece's principal figure, lifted out of the body to lead the page.
-  // Only the FIRST figure moves: the rest stay where the argument put them.
-  // A brief with no figure keeps its photograph at the top and `body` is the
-  // body unchanged.
-  const leadIndex = article.body.findIndex((b) => b.kind === BLOCK.FIGURE);
-  const lead = leadIndex >= 0 ? article.body[leadIndex] : null;
-  const body = lead ? article.body.filter((_, i) => i !== leadIndex) : article.body;
+  // Figures stay where the argument put them (owner, 2026-09-27). The first
+  // one used to be lifted out to lead the page at full width, where its type
+  // scaled to headline size and the piece opened on a chart instead of on
+  // what it is and who wrote it.
+  const body = article.body;
 
   return (
     <div className="teim-rd teim-rd--paper">
@@ -307,64 +342,62 @@ export default function CedarPressArticle() {
         <PressBack label="All Data Briefs" to={PRESS_ARTICLES_PATH} />
 
         <article className="cp-ar">
-          <header className="cp-ar__head cp-fade">
-            <p className="cp-hero__access">{article.tag}</p>
-            <h1 className="cp-ar__title">{article.title}</h1>
-            <p className="cp-ar__dek">{article.dek}</p>
-            <p className="cp-ar__meta">
-              {article.byline} · {article.date}
-              {article.minutes ? ` · ${article.minutes} min read` : ""}
-            </p>
-            {/* Invented numbers never read as findings: a demonstration
-                placeholder states what it is before the reader reaches a
-                statistic. The notice leaves with the flag, when sourced
-                research replaces the piece. */}
+          {/* THE HEAD OF THE PAGE (owner, 2026-09-27): title, authors and the
+              picture first, then two or three key facts and the collections
+              the piece was built from, each one open to a reader who has it
+              and priced for one who does not. On the house duotone, navy
+              with the teal. */}
+          <header className="cp-ar__hero cp-fade">
+            <div className="cp-ar__heroin">
+              <div className="cp-ar__herotext">
+                <p className="cp-ar__tag">{article.tag}</p>
+                <h1 className="cp-ar__title">{article.title}</h1>
+                <p className="cp-ar__dek">{article.dek}</p>
+                <p className="cp-ar__meta">
+                  <span className="cp-ar__by">By {article.byline}</span>
+                  <span>{article.date}</span>
+                  {article.minutes ? <span>{article.minutes} min read</span> : null}
+                </p>
+              </div>
+              <figure className="cp-ar__figure cp-ar__heroimg">
+                <img
+                  className="cp-ar__art"
+                  src={article.image}
+                  alt={article.imageAlt}
+                  width={ARTICLE_IMAGE.width}
+                  height={ARTICLE_IMAGE.height}
+                  fetchPriority="high"
+                />
+                <figcaption className="cp-ar__cap">
+                  {article.caption ?? article.imageAlt}
+                  {article.credit ? <span className="cp-ar__credit">{article.credit}</span> : null}
+                </figcaption>
+              </figure>
+            </div>
+            <div className="cp-ar__herofoot">
+              {article.facts?.length ? (
+                <dl className="cp-ar__facts" aria-label="Key facts">
+                  {article.facts.map((fact) => (
+                    <div className="cp-ar__fact" key={fact.label}>
+                      <dt>{fact.value}</dt>
+                      <dd>{fact.label}</dd>
+                    </div>
+                  ))}
+                </dl>
+              ) : null}
+              <div className="cp-ar__uses">
+                <span className="cp-ar__usecap">
+                  {drawn.length > 1 ? "Collections used" : "Collection used"}
+                </span>
+                <ul className="cp-ar__uselist">
+                  {drawn.map((id) => <UsedCollection key={id} id={id} user={user} />)}
+                </ul>
+              </div>
+            </div>
           </header>
-
-          {/* THE EVIDENCE COMES BEFORE THE STOCK PHOTOGRAPH.
-              The lead picture used to be the first thing under the headline —
-              on a data-led brief that means a reader passes a generic
-              meeting-room photograph to reach the one thing the piece is for.
-              If the article has a figure, the figure leads and the photograph
-              drops to where the prose reaches it; a piece with no figure
-              keeps the picture at the top, because then it is the only image
-              there is. Nothing is added or removed, only ordered. */}
-          {lead ? <Figure block={lead} lead /> : null}
-          {lead ? null : (
-            <figure className="cp-ar__figure">
-              <img
-                className="cp-ar__art"
-                src={article.image}
-                alt={article.imageAlt}
-                width={ARTICLE_IMAGE.width}
-                height={ARTICLE_IMAGE.height}
-                fetchPriority="high"
-              />
-              <figcaption className="cp-ar__cap">
-                {article.caption ?? article.imageAlt}
-                {article.credit ? <span className="cp-ar__credit">{article.credit}</span> : null}
-              </figcaption>
-            </figure>
-          )}
 
           <div className="cp-ar__grid">
             <div className="cp-ar__body">
-              {lead ? (
-                <figure className="cp-ar__figure cp-ar__figure--inline">
-                  <img
-                    className="cp-ar__art"
-                    src={article.image}
-                    alt={article.imageAlt}
-                    width={ARTICLE_IMAGE.width}
-                    height={ARTICLE_IMAGE.height}
-                    loading="lazy"
-                  />
-                  <figcaption className="cp-ar__cap">
-                    {article.caption ?? article.imageAlt}
-                    {article.credit ? <span className="cp-ar__credit">{article.credit}</span> : null}
-                  </figcaption>
-                </figure>
-              ) : null}
               {body.map((block, index) => {
                 if (block.kind === BLOCK.H2) {
                   return <h2 key={index} className="cp-ar__h2">{block.text}</h2>;

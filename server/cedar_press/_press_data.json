@@ -19,6 +19,20 @@
       "date": "August 2026",
       "byline": "Elijah S. Moreno",
       "minutes": 3,
+      "facts": [
+        {
+          "value": "22",
+          "label": "individually owned businesses certified on White Earth Nation's TERO list"
+        },
+        {
+          "value": "17",
+          "label": "of them certified at first preference"
+        },
+        {
+          "value": "1",
+          "label": "nation roster shared directly so far, under the terms its office set"
+        }
+      ],
       "body": [
         {
           "kind": "p",
@@ -41,14 +55,39 @@
           "text": "White Earth's list certifies 22 individually owned businesses, 17 of them at first preference, concentrated in the building trades: construction, drywall, tile, tree and site services. That is one nation's certified economy in a single sheet, and it is exactly the layer the federal registers miss, because none of these firms needs a federal registration to work tribal preference contracts at home."
         },
         {
-          "kind": "image",
-          "src": "/pitch/lanes/professional-wide.webp",
-          "alt": "A meeting around a conference table",
-          "caption": "Each nation's office decides the terms: publication, aggregates only, or a process of its own design."
+          "kind": "figure",
+          "chart": "bars",
+          "caption": "White Earth's certified businesses by preference tier",
+          "source": "owned",
+          "points": [
+            {
+              "label": "1st preference",
+              "value": 17
+            },
+            {
+              "label": "2nd preference",
+              "value": 4
+            },
+            {
+              "label": "4th preference",
+              "value": 1
+            }
+          ],
+          "notes": [
+            "Counts the 22 individually owned businesses on the roster White Earth Nation's TERO supplied on Aug. 28, 2026.",
+            "Preference tiers are the nation's own; a tier with no business on the roster is not drawn.",
+            "One nation's list. It is not a sample of Native-owned businesses anywhere else."
+          ]
         },
         {
           "kind": "p",
           "text": "One roster is a beginning, not a finding. The outreach wave behind it spans TERO and commerce offices across the country, and the early responses already sketch the range of governance the dataset has to respect: one office is taking the request to its commission for formal review, and another keeps its list confidential but is forwarding the invitation to its businesses so each can opt in itself. Both of those are good outcomes. A dataset assembled on those terms is slower, and it is the only version of this dataset worth building."
+        },
+        {
+          "kind": "image",
+          "src": "/pitch/lanes/professional-wide.webp",
+          "alt": "A meeting around a conference table",
+          "caption": "Each nation's office decides the terms: publication, aggregates only, or a process of its own design."
         },
         {
           "kind": "p",
@@ -74,6 +113,20 @@
       "date": "July 2026",
       "byline": "Cedar Press research desk",
       "minutes": 4,
+      "facts": [
+        {
+          "value": "52",
+          "label": "transactions announced in Q2 2026, the most of the five quarters charted below"
+        },
+        {
+          "value": "35",
+          "label": "of them confirmed against a primary source so far"
+        },
+        {
+          "value": "About 1 in 5",
+          "label": "dollars of 2023 announced capital not yet closed twelve months later"
+        }
+      ],
       "body": [
         {
           "kind": "p",
@@ -185,6 +238,38 @@
           "text": "Inclusion rules travel with every release, so a transaction missing from the collection is a documented gap rather than a silent one. Where a deal is reported but unconfirmed it sits as announced and is visible as such, which is the difference between a figure that can be cited and one that cannot. Where a value is not disclosed, the transaction is counted and the value is not, rather than being estimated into the total."
         },
         {
+          "kind": "figure",
+          "chart": "bars",
+          "caption": "Share of announced transactions confirmed, by quarter (percent)",
+          "source": "deals",
+          "points": [
+            {
+              "label": "Q2'25",
+              "value": 77
+            },
+            {
+              "label": "Q3'25",
+              "value": 76
+            },
+            {
+              "label": "Q4'25",
+              "value": 82
+            },
+            {
+              "label": "Q1'26",
+              "value": 70
+            },
+            {
+              "label": "Q2'26",
+              "value": 67
+            }
+          ],
+          "notes": [
+            "Confirmed transactions divided by announced transactions in the same quarter, from the first figure in this piece, rounded to a whole percent.",
+            "The latest quarters read low because confirmation usually follows announcement by one to three quarters."
+          ]
+        },
+        {
           "kind": "p",
           "text": "Anyone reproducing the numbers here should note the as-of date beside each figure. The collections update continuously, every correction is logged on the What’s New page, and a change that moves a total says so there. A figure cited with its date stays explainable: the log shows what has moved since and why."
         },
@@ -212,6 +297,16 @@
       "date": "June 2026",
       "byline": "Cedar Press research desk",
       "minutes": 4,
+      "facts": [
+        {
+          "value": "4",
+          "label": "consecutive quarters of rising obligations to Native-owned firms"
+        },
+        {
+          "value": "53%",
+          "label": "of Q2 2026 obligations went to tribal enterprises, rolled up to parent"
+        }
+      ],
       "body": [
         {
           "kind": "p",

@@ -128,6 +128,13 @@ export const PRESS_ARTICLES = Object.freeze([
     date: "August 2026",
     byline: "Elijah S. Moreno",
     minutes: 3,
+    // Key facts for the head of the page. Each is a number the body states,
+    // from the roster itself; nothing here is computed beyond it.
+    facts: Object.freeze([
+      Object.freeze({ value: "22", label: "individually owned businesses certified on White Earth Nation's TERO list" }),
+      Object.freeze({ value: "17", label: "of them certified at first preference" }),
+      Object.freeze({ value: "1", label: "nation roster shared directly so far, under the terms its office set" }),
+    ]),
     body: Object.freeze([
       Object.freeze({
         kind: BLOCK.P,
@@ -150,16 +157,32 @@ export const PRESS_ARTICLES = Object.freeze([
           "White Earth's list certifies 22 individually owned businesses, 17 of them at first preference, concentrated in the building trades: construction, drywall, tile, tree and site services. That is one nation's certified economy in a single sheet, and it is exactly the layer the federal registers miss, because none of these firms needs a federal registration to work tribal preference contracts at home.",
       }),
       Object.freeze({
-        kind: BLOCK.IMAGE,
-        src: "/pitch/lanes/professional-wide.webp",
-        alt: "A meeting around a conference table",
-        caption:
-          "Each nation's office decides the terms: publication, aggregates only, or a process of its own design.",
+        kind: BLOCK.FIGURE,
+        chart: CHART.BARS,
+        caption: "White Earth's certified businesses by preference tier",
+        source: "owned",
+        points: Object.freeze([
+          Object.freeze({ label: "1st preference", value: 17 }),
+          Object.freeze({ label: "2nd preference", value: 4 }),
+          Object.freeze({ label: "4th preference", value: 1 }),
+        ]),
+        notes: Object.freeze([
+          "Counts the 22 individually owned businesses on the roster White Earth Nation's TERO supplied on Aug. 28, 2026.",
+          "Preference tiers are the nation's own; a tier with no business on the roster is not drawn.",
+          "One nation's list. It is not a sample of Native-owned businesses anywhere else.",
+        ]),
       }),
       Object.freeze({
         kind: BLOCK.P,
         text:
           "One roster is a beginning, not a finding. The outreach wave behind it spans TERO and commerce offices across the country, and the early responses already sketch the range of governance the dataset has to respect: one office is taking the request to its commission for formal review, and another keeps its list confidential but is forwarding the invitation to its businesses so each can opt in itself. Both of those are good outcomes. A dataset assembled on those terms is slower, and it is the only version of this dataset worth building.",
+      }),
+      Object.freeze({
+        kind: BLOCK.IMAGE,
+        src: "/pitch/lanes/professional-wide.webp",
+        alt: "A meeting around a conference table",
+        caption:
+          "Each nation's office decides the terms: publication, aggregates only, or a process of its own design.",
       }),
       Object.freeze({
         kind: BLOCK.P,
@@ -184,6 +207,13 @@ export const PRESS_ARTICLES = Object.freeze([
     date: "July 2026",
     byline: "Cedar Press research desk",
     minutes: 4,
+    // Key facts for the head of the page, read from the figures and text
+    // below; the demonstration flag covers them like every other number here.
+    facts: Object.freeze([
+      Object.freeze({ value: "52", label: "transactions announced in Q2 2026, the most of the five quarters charted below" }),
+      Object.freeze({ value: "35", label: "of them confirmed against a primary source so far" }),
+      Object.freeze({ value: "About 1 in 5", label: "dollars of 2023 announced capital not yet closed twelve months later" }),
+    ]),
     body: Object.freeze([
       Object.freeze({
         kind: BLOCK.P,
@@ -272,6 +302,23 @@ export const PRESS_ARTICLES = Object.freeze([
           "Inclusion rules travel with every release, so a transaction missing from the collection is a documented gap rather than a silent one. Where a deal is reported but unconfirmed it sits as announced and is visible as such, which is the difference between a figure that can be cited and one that cannot. Where a value is not disclosed, the transaction is counted and the value is not, rather than being estimated into the total.",
       }),
       Object.freeze({
+        kind: BLOCK.FIGURE,
+        chart: CHART.BARS,
+        caption: "Share of announced transactions confirmed, by quarter (percent)",
+        source: "deals",
+        points: Object.freeze([
+          Object.freeze({ label: "Q2'25", value: 77 }),
+          Object.freeze({ label: "Q3'25", value: 76 }),
+          Object.freeze({ label: "Q4'25", value: 82 }),
+          Object.freeze({ label: "Q1'26", value: 70 }),
+          Object.freeze({ label: "Q2'26", value: 67 }),
+        ]),
+        notes: Object.freeze([
+          "Confirmed transactions divided by announced transactions in the same quarter, from the first figure in this piece, rounded to a whole percent.",
+          "The latest quarters read low because confirmation usually follows announcement by one to three quarters.",
+        ]),
+      }),
+      Object.freeze({
         kind: BLOCK.P,
         text:
           "Anyone reproducing the numbers here should note the as-of date beside each figure. The collections update continuously, every correction is logged on the What\u2019s New page, and a change that moves a total says so there. A figure cited with its date stays explainable: the log shows what has moved since and why.",
@@ -299,6 +346,12 @@ export const PRESS_ARTICLES = Object.freeze([
     date: "June 2026",
     byline: "Cedar Press research desk",
     minutes: 4,
+    // Key facts for the head of the page, read from the figures and text
+    // below; the demonstration flag covers them like every other number here.
+    facts: Object.freeze([
+      Object.freeze({ value: "4", label: "consecutive quarters of rising obligations to Native-owned firms" }),
+      Object.freeze({ value: "53%", label: "of Q2 2026 obligations went to tribal enterprises, rolled up to parent" }),
+    ]),
     body: Object.freeze([
       Object.freeze({
         kind: BLOCK.P,
