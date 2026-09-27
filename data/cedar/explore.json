@@ -39,7 +39,7 @@
       "year": null,
       "date": null,
       "amount": "owner_obligations_usd",
-      "source": null,
+      "source": "link_evidence_url",
       "record_id": null,
       "subject": null,
       "superseded": null,
@@ -58,6 +58,7 @@
       ],
       "scopes": null,
       "link_status": null,
+      "_why_source": "Declared 2026-09-27: link_evidence_url is the table's own per-row link to the originating record (the owner's page that evidences the link); the derived rule did not pick it by name.",
       "reviewed": false,
       "columns": 44
     },
@@ -757,14 +758,12 @@
       "year_basis": null,
       "observation": [
         "proposed_name",
-        "match_method",
-        "source_files"
+        "match_method"
       ],
       "search": [
         "native_party",
         "proposed_name",
-        "match_method",
-        "source_files"
+        "match_method"
       ],
       "scopes": null,
       "link_status": null,
@@ -1257,6 +1256,11 @@
       ],
       "scopes": null,
       "link_status": null,
+      "source_builder": {
+        "kind": "federal_register_document",
+        "column": "document_number"
+      },
+      "_why_source": "Declared 2026-09-27: the table carries no link column, and its document_number determines the notice's federalregister.gov page. The pattern is the one code/130_build_section_106_consultation.py and code/1187_native_federal_advocacy.py already records, not a new one.",
       "reviewed": false,
       "columns": 13
     },
@@ -1390,6 +1394,11 @@
       ],
       "scopes": null,
       "link_status": null,
+      "source_builder": {
+        "kind": "federal_register_document",
+        "column": "document_number"
+      },
+      "_why_source": "Declared 2026-09-27: the table carries no link column, and its document_number determines the notice's federalregister.gov page. The pattern is the one code/130_build_section_106_consultation.py and code/1187_native_federal_advocacy.py already records, not a new one.",
       "reviewed": false,
       "columns": 5
     },
@@ -1510,17 +1519,22 @@
       "amount_basis": null,
       "year_basis": "calendar year of publication date",
       "observation": [
-        "source_dataset",
         "party_as_printed",
-        "resolved_native_entity_name"
+        "resolved_native_entity_name",
+        "resolution_method"
       ],
       "search": [
-        "source_dataset",
         "party_as_printed",
-        "resolved_native_entity_name"
+        "resolved_native_entity_name",
+        "resolution_method"
       ],
       "scopes": null,
       "link_status": null,
+      "source_builder": {
+        "kind": "federal_register_document",
+        "column": "document_number"
+      },
+      "_why_source": "Declared 2026-09-27: the table carries no link column, and its document_number determines the notice's federalregister.gov page. The pattern is the one code/130_build_section_106_consultation.py and code/1187_native_federal_advocacy.py already records, not a new one.",
       "reviewed": false,
       "columns": 12
     },
@@ -2212,13 +2226,13 @@
       "year_basis": "fiscal year",
       "observation": [
         "relationship",
-        "source_dataset",
-        "duplicate_status"
+        "duplicate_status",
+        "subaward_number"
       ],
       "search": [
         "relationship",
-        "source_dataset",
-        "duplicate_status"
+        "duplicate_status",
+        "subaward_number"
       ],
       "scopes": null,
       "link_status": null,
@@ -2670,6 +2684,10 @@
       ],
       "scopes": null,
       "link_status": null,
+      "source_builder": {
+        "kind": "congress_bill"
+      },
+      "_why_source": "Declared 2026-09-27: the table carries no link column, and its congress, bill_type and number determine the bill's congress.gov page. The pattern is the one legislation/native_bills (declared 2026-09-05) already records, not a new one.",
       "reviewed": false,
       "columns": 13
     },
@@ -2699,6 +2717,10 @@
       ],
       "scopes": null,
       "link_status": null,
+      "source_builder": {
+        "kind": "congress_bill"
+      },
+      "_why_source": "Declared 2026-09-27: the table carries no link column, and its congress, bill_type and number determine the bill's congress.gov page. The pattern is the one legislation/native_bills (declared 2026-09-05) already records, not a new one.",
       "reviewed": false,
       "columns": 21
     },
@@ -2718,13 +2740,13 @@
       "year_basis": null,
       "observation": [
         "issue_area",
-        "source_or_forum",
-        "coverage_state"
+        "coverage_state",
+        "what_was_swept"
       ],
       "search": [
         "issue_area",
-        "source_or_forum",
-        "coverage_state"
+        "coverage_state",
+        "what_was_swept"
       ],
       "scopes": null,
       "link_status": null,
@@ -2854,7 +2876,7 @@
       "year": "grant_year",
       "date": null,
       "amount": "grant_amount_usd",
-      "source": null,
+      "source": "source_url_lobbying",
       "record_id": "passthrough_id",
       "subject": null,
       "superseded": null,
@@ -2873,6 +2895,7 @@
       ],
       "scopes": null,
       "link_status": null,
+      "_why_source": "Declared 2026-09-27: source_url_lobbying is the table's own per-row link to the originating record (the recipient's LDA filing); the derived rule did not pick it by name.",
       "reviewed": false,
       "columns": 28
     },
@@ -2883,7 +2906,7 @@
       "year": "grant_year",
       "date": null,
       "amount": "grant_amount_usd",
-      "source": null,
+      "source": "source_url_lobbying",
       "record_id": "passthrough_id",
       "subject": null,
       "superseded": null,
@@ -2902,6 +2925,7 @@
       ],
       "scopes": null,
       "link_status": null,
+      "_why_source": "Declared 2026-09-27: source_url_lobbying is the table's own per-row link to the originating record (the recipient's LDA filing); the derived rule did not pick it by name.",
       "reviewed": false,
       "columns": 28
     },
@@ -3439,7 +3463,7 @@
       "year": null,
       "date": null,
       "amount": null,
-      "source": null,
+      "source": "evidence_url",
       "record_id": "registrant_id",
       "subject": null,
       "superseded": null,
@@ -3459,6 +3483,7 @@
       ],
       "scopes": null,
       "link_status": null,
+      "_why_source": "Declared 2026-09-27: evidence_url is the table's own per-row link to the originating record (the filing or page the ownership evidence is quoted from); the derived rule did not pick it by name.",
       "reviewed": false,
       "columns": 24
     },
@@ -3742,6 +3767,11 @@
       ],
       "scopes": null,
       "link_status": null,
+      "source_builder": {
+        "kind": "federal_register_document",
+        "column": "federal_action_document_number"
+      },
+      "_why_source": "Declared 2026-09-27: the table carries no link column, and the linked federal action's document number determines its federalregister.gov page. The pattern is the one code/130_build_section_106_consultation.py and code/1187_native_federal_advocacy.py already records, not a new one.",
       "reviewed": false,
       "columns": 10
     },
@@ -3857,6 +3887,11 @@
       ],
       "scopes": null,
       "link_status": null,
+      "source_builder": {
+        "kind": "federal_register_document",
+        "column": "document_number"
+      },
+      "_why_source": "Declared 2026-09-27: the table carries no link column, and its document_number determines the notice's federalregister.gov page. The pattern is the one code/130_build_section_106_consultation.py and code/1187_native_federal_advocacy.py already records, not a new one.",
       "reviewed": false,
       "columns": 10
     },
@@ -3912,6 +3947,11 @@
       ],
       "scopes": null,
       "link_status": null,
+      "source_builder": {
+        "kind": "federal_register_document",
+        "column": "document_number"
+      },
+      "_why_source": "Declared 2026-09-27: the table carries no link column, and its document_number determines the notice's federalregister.gov page. The pattern is the one code/130_build_section_106_consultation.py and code/1187_native_federal_advocacy.py already records, not a new one.",
       "reviewed": false,
       "columns": 14
     },
@@ -3941,6 +3981,11 @@
       ],
       "scopes": null,
       "link_status": null,
+      "source_builder": {
+        "kind": "federal_register_document",
+        "column": "document_number"
+      },
+      "_why_source": "Declared 2026-09-27: the table carries no link column, and its document_number determines the notice's federalregister.gov page. The pattern is the one code/130_build_section_106_consultation.py and code/1187_native_federal_advocacy.py already records, not a new one.",
       "reviewed": false,
       "columns": 16
     },
@@ -4469,6 +4514,11 @@
       ],
       "scopes": null,
       "link_status": null,
+      "source_builder": {
+        "kind": "propublica_ein",
+        "column": "ein"
+      },
+      "_why_source": "Declared 2026-09-27: the table carries no link column, and its EIN determines the organization's ProPublica Nonprofit Explorer page. The pattern is the one code/33_nonprofit_financials.py (propublica_url) already records, not a new one.",
       "reviewed": false,
       "columns": 17
     },
@@ -4488,16 +4538,21 @@
       "year_basis": null,
       "observation": [
         "match_method",
-        "match_evidence",
-        "total_fed_assist_M"
+        "total_fed_assist_M",
+        "canonical_name_token_match"
       ],
       "search": [
         "match_method",
-        "match_evidence",
-        "total_fed_assist_M"
+        "total_fed_assist_M",
+        "canonical_name_token_match"
       ],
       "scopes": null,
       "link_status": null,
+      "source_builder": {
+        "kind": "propublica_ein",
+        "column": "ein"
+      },
+      "_why_source": "Declared 2026-09-27: the table carries no link column, and its EIN determines the organization's ProPublica Nonprofit Explorer page. The pattern is the one code/33_nonprofit_financials.py (propublica_url) already records, not a new one.",
       "reviewed": false,
       "columns": 15
     },
@@ -4567,7 +4622,7 @@
       "year": "first_filing_year",
       "date": null,
       "amount": null,
-      "source": "source_url",
+      "source": "propublica_url",
       "record_id": "ein",
       "subject": "org_name",
       "superseded": null,
@@ -4586,6 +4641,7 @@
       ],
       "scopes": null,
       "link_status": null,
+      "_why_source": "Declared 2026-09-27: propublica_url is the table's own per-row link to the originating record (the organization's ProPublica Nonprofit Explorer page; source_url is the API's JSON response, which a reader cannot use); the derived rule did not pick it by name.",
       "reviewed": false,
       "columns": 30
     },
@@ -4596,7 +4652,7 @@
       "year": null,
       "date": null,
       "amount": "bmf_revenue_amt",
-      "source": "source_url",
+      "source": null,
       "record_id": "EIN",
       "subject": "org_name",
       "superseded": null,
@@ -4632,6 +4688,11 @@
         "entity_match_method",
         "confidence_tier"
       ],
+      "source_builder": {
+        "kind": "propublica_ein",
+        "column": "EIN"
+      },
+      "_why_source": "Declared 2026-09-27: source_url is the same IRS Business Master File landing page on every row, the dataset's source rather than this organization's, so the row link is built from the EIN to the organization's ProPublica Nonprofit Explorer page (the pattern code/33_nonprofit_financials.py records as propublica_url). source_url stays in the owner's default columns as the dataset source.",
       "columns": 67
     },
     "nonprofits/np_schedule_i_filers": {

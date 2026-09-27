@@ -14,13 +14,17 @@ import { readFileSync, readdirSync, statSync } from "node:fs";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 
-import { contractFor as deriveContract, validateContract } from "../../../scripts/derive-explore.mjs";
+import { SOURCE_BUILDERS, contractFor as deriveContract, validateContract } from "../../../scripts/derive-explore.mjs";
 import { LAUNCH_COLLECTION, collectionTables } from "./collection.js";
 import { STOREFRONT_CATALOG } from "./pressCatalog.js";
+import { isInternalProvenanceColumn, namesInternalFile } from "./readerValues.js";
+import { columnPlan } from "./recordColumns.js";
 import {
   CODEBOOK,
   CONTRACTS,
   EMPTY_CUT,
+  SOURCE_BUILDER_KINDS,
+  SOURCE_LINK_COLUMN,
   UNLINKED,
   WITHHELD_TEXT,
   buildRegister,
@@ -39,6 +43,7 @@ import {
 
   entityVectors,
   cutReadme,
+  declaresSource,
   decodeCut,
   describeCut,
   encodeCut,
@@ -285,6 +290,141 @@ test("a record-level source is built only where the table declares how, from its
   // A column URL wins over a builder; a table with neither has no source.
   assert.equal(rowSource({ source_url: "https://x.example/1" }, { source: "source_url" }), "https://x.example/1");
   assert.equal(rowSource({ source_url: "n/a" }, { source: "source_url" }), null);
+  // Federal Register document numbers, in every shape the tables carry.
+  const fr = contractFor("federal-register/federal_actions_entity_bridge");
+  for (const [number, url] of [
+    ["2012-4517", "https://www.federalregister.gov/d/2012-4517"],
+    ["94-915", "https://www.federalregister.gov/d/94-915"],
+    ["E7-9453", "https://www.federalregister.gov/d/E7-9453"],
+    ["X94-11116", "https://www.federalregister.gov/d/X94-11116"],
+    ["not a number", null],
+    ["", null],
+  ]) assert.equal(rowSource({ document_number: number }, fr), url, number);
+  assert.equal(
+    rowSource({ federal_action_document_number: "2015-06658" }, contractFor("lobbying/oira_federal_action_links")),
+    "https://www.federalregister.gov/d/2015-06658",
+  );
+  // An EIN to its ProPublica page, leading zeros dropped as code/33 writes it.
+  const hub = contractFor("nonprofits/np_ein_entity_hub");
+  assert.equal(rowSource({ ein: "020778620" }, hub), "https://projects.propublica.org/nonprofits/organizations/20778620");
+  assert.equal(rowSource({ ein: "39-1773613" }, hub), "https://projects.propublica.org/nonprofits/organizations/391773613");
+  assert.equal(rowSource({ ein: "12345" }, hub), null);
+  assert.equal(rowSource({ ein: "000000000" }, hub), null);
+  // np_orgs' source_url is the same BMF landing page on every row, so the
+  // row's own link is the EIN's page, not that.
+  const orgs = contractFor("nonprofits/np_orgs");
+  assert.equal(orgs.source, null);
+  assert.equal(
+    rowSource({ EIN: "453221112", source_url: "https://www.irs.gov/charities-non-profits/exempt-organizations-business-master-file-extract-eo-bmf" }, orgs),
+    "https://projects.propublica.org/nonprofits/organizations/453221112",
+  );
+  // An unknown builder builds nothing.
+  assert.equal(rowSource({ x: "1" }, { source_builder: { kind: "guess", column: "x" } }), null);
+});
+
+test("a malformed source cell links to its first real address, and a bare scheme to nothing", () => {
+  const contract = { source: "source_url" };
+  assert.equal(rowSource({ source_url: "https://a.example/1 | https://b.example/2" }, contract), "https://a.example/1");
+  assert.equal(rowSource({ source_url: "https://portal.akdbsstar.us/StarWebPortal/  (AS 45.55.139 filing)" }, contract), "https://portal.akdbsstar.us/StarWebPortal/");
+  assert.equal(
+    rowSource({ source_url: "https://apps.irs.gov/pub/epostcard/990/download990xml_2018_2.zip (IRS e-file return object_id 201800000000000000)" }, contract),
+    "https://apps.irs.gov/pub/epostcard/990/download990xml_2018_2.zip",
+  );
+  assert.equal(rowSource({ source_url: "https://" }, contract), null);
+  // A malformed cell with nothing usable falls through to the builder.
+  assert.equal(
+    rowSource({ source_url: "https://", document_number: "2012-4517" }, { ...contract, source_builder: { kind: "federal_register_document", column: "document_number" } }),
+    "https://www.federalregister.gov/d/2012-4517",
+  );
+  // Every source the published samples yield is one well-formed address.
+  for (const key of Object.keys(CONTRACTS)) {
+    const [collection] = key.split("/");
+    if (!exploreTables(collection).some((t) => t.key === key)) continue;
+    for (const item of universalRows(key, load(key).rows, REGISTER)) {
+      if (item.source) assert.match(item.source, /^https?:\/\/[^\s|]+$/, `${key}: ${item.source}`);
+    }
+  }
+});
+
+test("the declared and built sources of the tables the audit named produce links on their samples", () => {
+  for (const key of [
+    "lobbying/advocacy_passthrough",
+    "lobbying/lobbying_registrant_native_ownership_evidence",
+    "contractors/contractor_ranking",
+    "nonprofits/np_org_scale",
+    "federal-register/federal_actions_entity_bridge",
+    "federal-register/fr_consultation_referenced",
+    "federal-register/fr_ex_parte_party_entity_links",
+    "nagpra/fr_nagpra_title_index",
+    "nagpra/nagpra_notice_entity_bridge",
+    "nagpra/nagpra_notice_institutions",
+    "lobbying/oira_federal_action_links",
+    "nonprofits/np_orgs",
+    "nonprofits/np_ein_entity_hub",
+    "nonprofits/np_ein_uei_bridge",
+    "legislation/native_bills_entity_class",
+    "legislation/native_bills_subject_sweep",
+  ]) {
+    assert.ok(declaresSource(contractFor(key)), `${key} declares no source`);
+    const linked = universalRows(key, load(key).rows, REGISTER).filter((item) => item.source).length;
+    assert.ok(linked > 0, `${key}: no sample row yields a link`);
+  }
+  // np_org_scale reads the reader's page, not the API's JSON.
+  const scale = universalRows("nonprofits/np_org_scale", load("nonprofits/np_org_scale").rows, REGISTER);
+  assert.ok(scale.every((item) => !item.source || !/\/api\//.test(item.source)));
+  assert.equal(declaresSource(null), false);
+  assert.equal(declaresSource({ source: null }), false);
+});
+
+test("a table whose link is built shows it in the table view, under the plan's source column", () => {
+  for (const key of ["funding/federal_funding_transactions", "legislation/native_bills", "contractors/prime_contracts"]) {
+    const contract = contractFor(key);
+    const { columns } = load(key);
+    assert.ok(!columns.includes(contract.source ?? ""), `${key} carries its own source column`);
+    const plan = columnPlan(key, contract, columns);
+    assert.ok(plan.defaults.includes(SOURCE_LINK_COLUMN), `${key}: no source in the opening columns`);
+    assert.ok(plan.all.includes(SOURCE_LINK_COLUMN), `${key}: no source among all columns`);
+    // Sorting that column sorts by the same link the cell shows.
+    const items = universalRows(key, load(key).rows, REGISTER);
+    const sorted = sortRows(items, { by: SOURCE_LINK_COLUMN, dir: "asc" }).map((item) => item.source).filter(Boolean);
+    assert.deepEqual(sorted, [...sorted].sort((a, b) => a.localeCompare(b, "en", { numeric: true, sensitivity: "base" })));
+  }
+  // A table that carries its source column keeps it, and gains no second one.
+  const nagpra = contractFor("nagpra/nagpra_notices");
+  const plan = columnPlan("nagpra/nagpra_notices", nagpra, load("nagpra/nagpra_notices").columns);
+  assert.ok(plan.defaults.includes("source_url"));
+  assert.ok(!plan.all.includes(SOURCE_LINK_COLUMN));
+  // A contract with no builder never names the column.
+  assert.ok(!columnPlan(null, { source: null }, ["a"]).all.includes(SOURCE_LINK_COLUMN));
+});
+
+test("no table opens on a column of Cedar's own file names", () => {
+  for (const key of Object.keys(CONTRACTS)) {
+    const [collection] = key.split("/");
+    if (!exploreTables(collection).some((t) => t.key === key)) continue;
+    const contract = contractFor(key);
+    const { columns, rows } = load(key);
+    for (const column of contract.observation ?? []) {
+      assert.ok(!isInternalProvenanceColumn(column), `${key}: observation column ${column} is Cedar lineage`);
+      assert.ok(!rows.some((row) => namesInternalFile(row[column])), `${key}: observation column ${column} names Cedar's own files`);
+    }
+    // The fallback opening columns (the codebook's order) skip lineage too.
+    if (!(contract.default_columns ?? []).length) {
+      for (const column of columnPlan(key, contract, columns).defaults) {
+        if (column === SOURCE_LINK_COLUMN) continue;
+        assert.ok(!isInternalProvenanceColumn(column), `${key}: opens on ${column}`);
+      }
+    }
+  }
+  // And the derive step, handed a sample whose only prose column is lineage, skips it.
+  const derived = deriveContract(["link_id", "source_dataset", "party_as_printed"], [
+    { link_id: "1", source_dataset: "ferc_ex_parte_parties.csv", party_as_printed: "Navajo Nation" },
+  ]);
+  assert.deepEqual(derived.observation, ["party_as_printed"]);
+  const byValue = deriveContract(["id", "provenance", "party_as_printed"], [
+    { id: "1", provenance: "data/clean/x.csv", party_as_printed: "Navajo Nation" },
+  ]);
+  assert.ok(!byValue.observation.includes("provenance"));
 });
 
 test("supersession is read from the table and the replacement's link follows the table's own URL pattern", () => {
@@ -928,6 +1068,15 @@ test("the contract guard fires on each violation it names, and passes a clean ov
   assert.throws(() => validateContract("t/x", { ...clean, entity_roles: [{ column: "missing_ids", role: "consulted" }] }, columns), /role column missing_ids is not in the sample/);
   assert.throws(() => validateContract("t/x", { ...clean, entity_roles: [{ column: "consulted_entity_ids", role: "" }] }, columns), /names no role/);
   assert.throws(() => validateContract("t/x", { ...clean, entity_roles: [{ column: "cedar_uid", role: "owner" }] }, columns), /is the entity column, not a further role/);
+  // A declared source column the sample lacks, a builder nobody knows, and a
+  // builder reading a column the sample lacks: each would link nothing silently.
+  assert.throws(() => validateContract("t/x", { ...clean, source: "absent_url" }, columns), /source column absent_url is not in the sample/);
+  assert.throws(() => validateContract("t/x", { ...clean, source_builder: { kind: "guess", column: "record_id" } }, columns), /unknown source builder guess/);
+  assert.throws(() => validateContract("t/x", { ...clean, source_builder: { kind: "federal_register_document", column: "document_number" } }, columns), /reads document_number, which is not in the sample/);
+  assert.throws(() => validateContract("t/x", { ...clean, source_builder: { kind: "congress_bill" } }, columns), /reads congress, which is not in the sample/);
+  assert.doesNotThrow(() => validateContract("t/x", { ...clean, source_builder: { kind: "propublica_ein", column: "record_id" } }, columns));
+  // The derive step and the viewer know the same builders.
+  assert.deepEqual(Object.keys(SOURCE_BUILDERS).sort(), [...SOURCE_BUILDER_KINDS].sort());
   // And restored, the real overrides still pass every table they describe.
   for (const k of Object.keys(CONTRACTS)) assert.doesNotThrow(() => validateContract(k, CONTRACTS[k], load(k).columns));
 });

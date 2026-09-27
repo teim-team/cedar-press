@@ -28,6 +28,8 @@
 import { existsSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
+import { isInternalProvenanceColumn, namesInternalFile } from "../src/features/grove/readerValues.js";
+
 const REPO = fileURLToPath(new URL("..", import.meta.url));
 const MANIFEST = `${REPO}data/cedar/collections.manifest.json`;
 const OVERRIDES = `${REPO}data/cedar/explore.overrides.json`;
@@ -139,7 +141,26 @@ function pickShape(columns, pattern, exclude) {
   return columns.find((c) => pattern.test(norm(c)) && !(exclude && exclude.test(norm(c)))) ?? null;
 }
 
-export function contractFor(columns) {
+/**
+ * The columns whose values name Cedar's own files, scripts or paths in the
+ * sample: `source_dataset = ferc_ex_parte_parties.csv`, `source_or_forum =
+ * data/clean/gaming_land_decisions.csv (...)`. Real lineage, and never the
+ * one-line observation a reader scans: the observation is what the RECORD
+ * says, and these say how Cedar handled it.
+ */
+export function internalValueColumns(rows) {
+  const hit = new Set();
+  for (const row of rows) {
+    for (const [column, value] of Object.entries(row)) {
+      if (!hit.has(column) && value && namesInternalFile(value)) hit.add(column);
+    }
+  }
+  return hit;
+}
+
+export function contractFor(columns, rows = []) {
+  const internal = internalValueColumns(rows);
+  const lineage = (col) => internal.has(col) || isInternalProvenanceColumn(col);
   const c = {};
   c.entity_uid = pick(columns, RULES.entity_uid) ?? pickShape(columns, /cedar_uid$/, /candidate/);
   // The approved plural block and the older pipe lists are lists; the
@@ -172,12 +193,12 @@ export function contractFor(columns) {
   const byNorm = new Map(columns.map((col) => [norm(col), col]));
   for (const name of OBSERVATION) {
     const col = byNorm.get(name);
-    if (col && !taken.has(col) && !observation.includes(col)) observation.push(col);
+    if (col && !taken.has(col) && !observation.includes(col) && !lineage(col)) observation.push(col);
     if (observation.length === 4) break;
   }
   if (observation.length < 2) {
     for (const col of columns) {
-      if (taken.has(col) || observation.includes(col) || NOISE.test(col)) continue;
+      if (taken.has(col) || observation.includes(col) || NOISE.test(col) || lineage(col)) continue;
       observation.push(col);
       if (observation.length === 3) break;
     }
@@ -259,9 +280,32 @@ export function deriveRegister() {
  * (Codex, PR #66): a guard that has only ever seen valid input is a guard
  * nobody has proven.
  */
+// The link builders the viewer knows (explore.js builtSource), each with the
+// columns its pattern reads. A declaration naming another kind, or a column
+// the sample does not carry, would build nothing and say nothing, so it is
+// refused here instead.
+export const SOURCE_BUILDERS = Object.freeze({
+  usaspending_award: (b) => [b.column],
+  congress_bill: () => ["congress", "bill_type", "number"],
+  federal_register_document: (b) => [b.column],
+  propublica_ein: (b) => [b.column],
+});
+
 export function validateContract(key, contract, columns) {
   for (const column of contract.default_columns ?? []) {
     if (!columns.includes(column)) throw new Error(`${key}: default column ${column} is not in the sample`);
+  }
+  if (contract.source && !columns.includes(contract.source)) {
+    throw new Error(`${key}: source column ${contract.source} is not in the sample`);
+  }
+  if (contract.source_builder) {
+    const needs = SOURCE_BUILDERS[contract.source_builder.kind];
+    if (!needs) throw new Error(`${key}: unknown source builder ${contract.source_builder.kind}`);
+    for (const column of needs(contract.source_builder)) {
+      if (!column || !columns.includes(column)) {
+        throw new Error(`${key}: source builder ${contract.source_builder.kind} reads ${column ?? "no column"}, which is not in the sample`);
+      }
+    }
   }
   // Every declared role column exists, names a role, and is not the
   // entity column itself (which carries the table's own role).
@@ -287,7 +331,7 @@ export function derive() {
       }
       const columns = header(path);
       const override = overrides[key] ?? {};
-      const contract = { ...contractFor(columns), ...override };
+      const contract = { ...contractFor(columns, rows(path)), ...override };
       // The year's meaning follows the year and date the override settled on,
       // unless the override states it in its own words.
       if (!("year_basis" in override)) {

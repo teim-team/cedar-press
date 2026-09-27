@@ -25,6 +25,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { LAUNCH_COLLECTION, collectionPublicationHold } from "../../features/grove/collection";
 import { contractFor, exploreTables, parseCsv, universalRows } from "../../features/grove/explore.js";
 import { columnPlan } from "../../features/grove/recordColumns.js";
+import { tableLabel } from "../../features/grove/readerValues.js";
 import { Cards, Rows } from "./PressRecordTable.jsx";
 import { useNarrow } from "../../features/grove/useNarrow.js";
 import { coverageLabel } from "../../features/grove/pressAccess";
@@ -151,7 +152,7 @@ export default function CollectionPreview({ entry, tier, register }) {
         <>
           <p className="cp-pane__tablecap">
             <span>
-              {table.table.replace(/_/g, " ")}
+              {tableLabel(table)}
               {table.flagship ? null : <em> · supporting table</em>}
             </span>
             <span>

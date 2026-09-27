@@ -142,7 +142,41 @@ test.describe("the gate", () => {
     for (const label of ["Patent publication and family records", "Historical S&P and Fitch ratings", "AM Best insurance financial-strength releases", "IRS Form 990-PF grant schedules", "Recorded deeds and land transfers"]) {
       await expect(panel).toContainText(label);
     }
-    await expect(panel.locator(".cp-hero3__proofcount")).toContainText("600+ source websites");
+    await expect(panel.locator(".cp-hero3__proofcount")).toContainText("600+ documented upstream sources");
+  });
+
+  // The greeting note above Ask Cedar (owner, 2026-09-27): it rises once the
+  // reader scrolls in, stays until answered, and dismissing it holds for the
+  // visit. No emoji.
+  test("the door's Cedar greets on scroll and stays dismissed once dismissed", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop", "the phone launcher waits out the hero");
+    await page.goto("/");
+    const note = page.locator(".cp-greet");
+    await expect(note).toHaveCount(0);
+    await page.evaluate(() => window.scrollTo(0, window.innerHeight * 1.6));
+    await expect(note).toBeVisible({ timeout: 5_000 });
+    await expect(note).toContainText("Hi, I’m Cedar.");
+    await expect(note).not.toContainText(/\p{Extended_Pictographic}/u);
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+    await page.waitForTimeout(400);
+    await expect(note).toBeVisible();
+    await note.getByRole("button", { name: "Dismiss this message" }).click();
+    await expect(note).toHaveCount(0);
+    await page.reload();
+    await page.evaluate(() => window.scrollTo(0, window.innerHeight * 1.6));
+    await page.waitForTimeout(2_500);
+    await expect(note).toHaveCount(0);
+  });
+
+  test("clicking the greeting opens the door's Cedar", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop", "the phone launcher waits out the hero");
+    await page.goto("/");
+    await page.evaluate(() => window.scrollTo(0, window.innerHeight * 1.6));
+    const note = page.locator(".cp-greet");
+    await expect(note).toBeVisible({ timeout: 5_000 });
+    await note.locator(".cp-greet__open").click();
+    await expect(page.locator(".cp-dc.is-open")).toHaveCount(1);
+    await expect(note).toHaveCount(0);
   });
 
   // The sticky masthead is opaque (owner, 2026-09-27): no alpha, no blur,
@@ -153,8 +187,8 @@ test.describe("the gate", () => {
     await expect(bar).toHaveCSS("background-color", "rgb(255, 255, 255)");
     await expect(bar).toHaveCSS("backdrop-filter", "none");
     await expect(page.locator(".cp-hero3__reach")).toHaveCount(0);
-    await expect(page.locator(".cp-hero3")).not.toContainText("distinct source websites in dataset construction");
-    await expect(page.locator(".cp-hero3__proofcount")).toContainText("600+ source websites");
+    await expect(page.locator(".cp-hero3")).not.toContainText("Lumecon builds its datasets and research from");
+    await expect(page.locator(".cp-hero3__proofcount")).toContainText("600+ documented upstream sources");
   });
 
   // The landing layout of 2026-09-27: the source banner in the navy
@@ -1053,12 +1087,17 @@ test.describe("the table's default columns", () => {
     await page.goto("/data?c=contractors");
     await page.locator(".cp-ex__table thead th").first().waitFor();
     const heads = await page.locator(".cp-ex__table thead th").allInnerTexts();
-    // The declared seven, plus the pinned uid and the row opener.
-    expect(heads.length).toBeLessThanOrEqual(10);
+    // The declared seven, plus the pinned uid, the row opener and the source
+    // link. Prime Contracting carries no source column: its link is built
+    // from the award key, and the table shows it as the record page does
+    // (recordColumns.js columnPlan, 2026-09-27).
+    expect(heads.length).toBeLessThanOrEqual(11);
     const text = heads.join(" | ").toUpperCase();
-    for (const wanted of ["NATIVE ENTITY", "ACTION DATE", "AWARDEE", "FUNDING AGENCY", "DESCRIPTION", "AMOUNT"]) {
+    for (const wanted of ["NATIVE ENTITY", "ACTION DATE", "AWARDEE", "FUNDING AGENCY", "DESCRIPTION", "AMOUNT", "SOURCE RECORD"]) {
       expect(text).toContain(wanted);
     }
+    // The built link is the originating award, the same one the record opens.
+    await expect(page.locator('.cp-ex__table tbody a[href^="https://www.usaspending.gov/award/"]').first()).toBeVisible();
     // The raw keys stay in the open record, where the reviewer asked for them.
     for (const raw of ["TRANSACTION ID", "AWARDEE UEI", "PRODUCT OR SERVICE CODE", "RECIPIENT COUNTY FIPS"]) {
       expect(text).not.toContain(raw);
@@ -1256,6 +1295,11 @@ test.describe("About this collection", () => {
     await expect(notes.getByText("Read the full collection notes")).toBeVisible();
     await notes.getByText("Read the full collection notes").click();
     await expect(panel.getByRole("heading", { name: "What is not in it" })).toBeVisible();
+    // The release's tables by name, not by file name (2026-09-27).
+    const tables = await panel.locator(".cp-ab__tables li").allInnerTexts();
+    expect(tables.length).toBeGreaterThan(1);
+    expect(tables).toContain("Prime contracts");
+    for (const name of tables) expect(name).not.toMatch(/\.csv$|_/);
 
     // Closing returns the reader to the cut they opened it from.
     await panel.getByRole("button", { name: /close the collection profile/i }).click();
@@ -1846,6 +1890,30 @@ test.describe("the record page", () => {
     await page.waitForURL(/\/data\?/);
     await expect(page.locator(".cp-rail__item[aria-pressed='true']")).toContainText("Federal Funding");
     expect(errors).toEqual([]);
+  });
+
+  // THE SOURCE IS THE EVIDENCE, NOT CEDAR'S WORKING FILE (2026-09-27).
+  // A table whose link is built from the row's own identifiers opens the
+  // originating record; the file Cedar read it through is named for what it
+  // is; and a row with no link in a table that has links says so for the row.
+  test("a record links to its originating document and names Cedar's own files as working files", async ({ page }) => {
+    const errors = watchConsole(page);
+    await signIn(page);
+    await page.goto("/record?k=federal-register/fr_ex_parte_party_entity_links&r=2014-09591");
+    await expect(page.getByTestId("record-head")).toBeVisible();
+    await expect(page.getByRole("link", { name: /Open the source record/ })).toHaveAttribute("href", "https://www.federalregister.gov/d/2014-09591");
+    await page.getByTestId("record-more").click();
+    for (const summary of await page.locator(".cp-rec__group summary").all()) await summary.click();
+    const body = await page.locator("main").innerText();
+    expect(body).toContain("Cedar working file");
+    expect(body).not.toContain("ferc_ex_parte_parties.csv");
+    expect(errors).toEqual([]);
+  });
+
+  test("a row with no link in a table that has links says so for the row", async ({ page }) => {
+    await signIn(page);
+    await page.goto("/record?k=lobbying/lobbying_registrant_native_ownership_evidence&r=88052");
+    await expect(page.getByTestId("record-no-link")).toHaveText("No link was recorded for this row.");
   });
 
   test("a record that is not in the preview says so rather than showing a neighbour", async ({ page }) => {
@@ -2823,6 +2891,33 @@ test.describe("the loop between the records and the journalism", () => {
     await expect(page).toHaveURL(/\/data\?c=deals/);
     await page.locator(".cp-rail__item").first().waitFor();
     await expect(page.getByRole("heading", { level: 1 })).toContainText("Deals");
+    expect(errors).toEqual([]);
+  });
+
+  // A research brief opens on what it is (owner, 2026-09-27): title,
+  // authors and picture first, then its key facts and the collections it
+  // used, each one open to this reader; and its figures sit in the text,
+  // two or three to a piece, rather than one lifted to lead the page.
+  test("a research brief opens on its title, authors, picture, highlights and collections", async ({ page }) => {
+    const errors = watchConsole(page);
+    await signIn(page);
+    await page.goto("/articles/brief-deals");
+    const hero = page.locator(".cp-ar__hero");
+    await expect(hero.getByRole("heading", { level: 1 })).toContainText("Announced deals");
+    await expect(hero.locator(".cp-ar__by")).toContainText("Cedar Press research desk");
+    await expect(page.locator(".cp-ar__lead img.cp-ar__art")).toBeVisible();
+    // Three headlines from the piece, in a box beside the picture.
+    await expect(page.locator(".cp-ar__highlights li")).toHaveCount(3);
+    const uses = page.locator(".cp-ar__uses .cp-ar__use");
+    await expect(uses.first()).toContainText("Deals");
+    expect(await page.locator(".cp-ar__body .cp-ar__fig").count()).toBeGreaterThanOrEqual(2);
+    await expect(page.locator(".cp-ar__fig--lead")).toHaveCount(0);
+    await expect(page.locator(".cp-ar__quote")).toHaveCount(1);
+    // Example sponsor units, labelled as examples, beside the one invitation.
+    expect(await page.locator(".cp-ad--example").count()).toBeGreaterThanOrEqual(2);
+    await expect(page.locator(".cp-ad--example .cp-ad__cap").first()).toHaveText("Sponsored · Example");
+    await uses.first().getByRole("link", { name: /Open the data/ }).click();
+    await expect(page).toHaveURL(/\/data\?c=deals/);
     expect(errors).toEqual([]);
   });
 

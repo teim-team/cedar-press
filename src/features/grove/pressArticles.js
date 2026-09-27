@@ -128,6 +128,16 @@ export const PRESS_ARTICLES = Object.freeze([
     date: "August 2026",
     byline: "Elijah S. Moreno",
     minutes: 3,
+    // Three headlines from the piece for the highlights box beside the
+    // lead picture (owner, 2026-09-27).
+    highlights: Object.freeze([
+      "White Earth Nation's TERO shared its certified Indian-owned business list, the first roster in the collection",
+      "The roster certifies 22 individually owned businesses, 17 at first preference, mostly in the building trades",
+      "Each nation decides how its list may be used; until it does, its businesses appear only in aggregate",
+    ]),
+    authors: Object.freeze([
+      Object.freeze({ name: "Elijah S. Moreno", role: "Founder and CEO, Lumecon", photo: "/photo/authors/elijah-moreno.webp" }),
+    ]),
     body: Object.freeze([
       Object.freeze({
         kind: BLOCK.P,
@@ -150,16 +160,32 @@ export const PRESS_ARTICLES = Object.freeze([
           "White Earth's list certifies 22 individually owned businesses, 17 of them at first preference, concentrated in the building trades: construction, drywall, tile, tree and site services. That is one nation's certified economy in a single sheet, and it is exactly the layer the federal registers miss, because none of these firms needs a federal registration to work tribal preference contracts at home.",
       }),
       Object.freeze({
-        kind: BLOCK.IMAGE,
-        src: "/pitch/lanes/professional-wide.webp",
-        alt: "A meeting around a conference table",
-        caption:
-          "Each nation's office decides the terms: publication, aggregates only, or a process of its own design.",
+        kind: BLOCK.FIGURE,
+        chart: CHART.BARS,
+        caption: "White Earth's certified businesses by preference tier",
+        source: "owned",
+        points: Object.freeze([
+          Object.freeze({ label: "1st preference", value: 17 }),
+          Object.freeze({ label: "2nd preference", value: 4 }),
+          Object.freeze({ label: "4th preference", value: 1 }),
+        ]),
+        notes: Object.freeze([
+          "Counts the 22 individually owned businesses on the roster White Earth Nation's TERO supplied on Aug. 28, 2026.",
+          "Preference tiers are the nation's own; a tier with no business on the roster is not drawn.",
+          "One nation's list. It is not a sample of Native-owned businesses anywhere else.",
+        ]),
       }),
       Object.freeze({
         kind: BLOCK.P,
         text:
           "One roster is a beginning, not a finding. The outreach wave behind it spans TERO and commerce offices across the country, and the early responses already sketch the range of governance the dataset has to respect: one office is taking the request to its commission for formal review, and another keeps its list confidential but is forwarding the invitation to its businesses so each can opt in itself. Both of those are good outcomes. A dataset assembled on those terms is slower, and it is the only version of this dataset worth building.",
+      }),
+      Object.freeze({
+        kind: BLOCK.IMAGE,
+        src: "/pitch/lanes/professional-wide.webp",
+        alt: "A meeting around a conference table",
+        caption:
+          "Each nation's office decides the terms: publication, aggregates only, or a process of its own design.",
       }),
       Object.freeze({
         kind: BLOCK.P,
@@ -184,16 +210,26 @@ export const PRESS_ARTICLES = Object.freeze([
     date: "July 2026",
     byline: "Cedar Press research desk",
     minutes: 4,
+    // Three headlines from the piece for the highlights box beside the
+    // lead picture (owner, 2026-09-27).
+    highlights: Object.freeze([
+      "Energy and project finance carry most of the rise in announced transactions",
+      "A deal enters the totals only once a primary source confirms it",
+      "Ownership changes visible only in federal contracting are reported, with the record cited",
+    ]),
+    authors: Object.freeze([
+      Object.freeze({ name: "Cedar Press research desk", role: "Lumecon" }),
+    ]),
     body: Object.freeze([
       Object.freeze({
         kind: BLOCK.P,
         text:
-          "Announced transactions in Indian Country are running ahead of any comparable period in the series, and the composition has moved as much as the count. Energy and project finance carry most of the increase, with tribal governments and tribal enterprises appearing as principals rather than as counterparties. That is a change in kind as much as in volume: a nation financing its own generation capacity is a different economic actor from one leasing land to somebody else's project.",
+          "Announced transactions in Indian Country are running ahead of any comparable period in the Deals series, and the composition has moved as much as the count. Energy and project finance carry most of the increase, with tribal governments and tribal enterprises appearing as principals rather than as counterparties. A nation financing its own generation capacity is a different economic actor from one leasing land to somebody else's project, and the record is starting to show the difference.",
       }),
       Object.freeze({
         kind: BLOCK.P,
         text:
-          "The distinction matters for anyone reading a total. Announced and closed are labeled separately in the Deals collection, and a transaction enters totals only once its status is confirmed against a primary source. A year that looks strong on announcements can settle differently, and the gap between the two lines is itself worth watching. In 2023 roughly a fifth of announced capital had not closed twelve months later, most of it in a single sector.",
+          "Deals is the one Cedar collection that exists nowhere else in any form. There is no federal register of tribal acquisitions, no filing that captures a tribal enterprise buying an operating business, and no index that follows an Alaska Native corporation's holding company as it restructures. The 2,662 records in the current release are assembled from tribal newsletters and tribal press, trade and journalist coverage, ANCSA shareholder filings and Cedar's own federal contracting record, and every one of them links to the document it came from.",
       }),
       Object.freeze({
         kind: BLOCK.FIGURE,
@@ -214,25 +250,28 @@ export const PRESS_ARTICLES = Object.freeze([
           "Undisclosed values are counted as transactions and excluded from any dollar total.",
         ]),
       }),
-      Object.freeze({ kind: BLOCK.H2, text: "Who is on the other side" }),
+      Object.freeze({ kind: BLOCK.H2, text: "Announced is not closed" }),
       Object.freeze({
         kind: BLOCK.P,
         text:
-          "Resolving counterparties is where a transaction record becomes readable. A financing that names a subsidiary tells you very little until the subsidiary is joined to its parent nation or corporation, and the same acquisition can appear three times under three names across a decade of filings. Announcements name the entity as it was styled that week, which is rarely the entity a researcher is looking for.",
+          "The distinction matters for anyone reading a total. Announced and closed are labeled separately, and a transaction enters totals only once its status is confirmed against a primary source. A year that looks strong on announcements can settle differently, and the gap between the two lines is worth watching in its own right: the latest quarters always read low on the confirmed line, because confirmation usually follows announcement by one to three quarters.",
       }),
       Object.freeze({
         kind: BLOCK.P,
         text:
-          "The work is unglamorous and it is most of the value. A tribal enterprise formed in 1998, renamed in 2006, reorganized under a holding company in 2014 and acquired in 2021 leaves four record trails that no public source connects. Cedar maintains those relationships over time, which is why an ownership change recorded here also corrects rows in Prime Contracting and in the enterprise structures NEED publishes. Corrections travel to every release they touch, and a figure cited last quarter stays reproducible.",
+          "That rule costs speed and buys citability. A figure built from announcements moves every time a press release is withdrawn or a closing slips; a figure built from confirmed transactions moves only when the underlying record does. Where a value is not disclosed, the transaction is counted and the value is not, rather than being estimated into a dollar total that nobody could check.",
       }),
+      Object.freeze({ kind: BLOCK.PULL, text: "A transaction enters the totals only once a primary source confirms it. Until then it is an announcement, and it is labeled as one." }),
+      Object.freeze({ kind: BLOCK.H2, text: "The deals nobody announced" }),
       Object.freeze({
-        kind: BLOCK.PULL,
-        text: "The records are public. Knowing that four names over twelve years are one enterprise is the work.",
+        kind: BLOCK.P,
+        text:
+          "Some of the most consequential transactions in Indian Country were never announced at all. A tribal holding company acquires a federal contractor, the contractor keeps its name and its registrations, and the only public trace is that its parent identifier changes in the federal contracting record. Cedar reports those changes as transactions, cites the contracting record with the identifier and the years involved, and leaves the check open for a reader to re-run.",
       }),
       Object.freeze({
         kind: BLOCK.P,
         text:
-          "The practical effect shows up in concentration. Read at face value, the transaction record looks more distributed than it is, because one buyer appears as several. Resolved to parents, the top ten acquirers account for a meaningfully larger share of announced capital than the unresolved list suggests, and the direction of that error is consistent across every year in the series.",
+          "The same discipline runs the other way. A change of reporting parent inside one tribal corporate family, a subsidiary moved from one holding company to its sister, is an internal reorganization rather than a deal, and it is not counted as one. Treating it as a transaction would inflate the count and misstate who is buying what.",
       }),
       Object.freeze({
         kind: BLOCK.PAIR,
@@ -249,37 +288,55 @@ export const PRESS_ARTICLES = Object.freeze([
           }),
         ]),
       }),
+      Object.freeze({ kind: BLOCK.H2, text: "Who is on the other side" }),
+      Object.freeze({
+        kind: BLOCK.P,
+        text:
+          "Resolving counterparties is where a transaction record becomes readable. A financing that names a subsidiary says very little until the subsidiary is joined to its parent nation or corporation, and the same acquisition can appear under three names across a decade of filings. A tribal enterprise formed in 1998, renamed in 2006, reorganized under a holding company in 2014 and acquired in 2021 leaves four record trails that no public source connects. Cedar maintains that chain once, so an ownership change recorded in Deals also corrects rows in Prime Contracting and in Cedar NEED.",
+      }),
+      Object.freeze({
+        kind: BLOCK.P,
+        text:
+          "Read at face value, the transaction record looks more distributed than it is, because one buyer appears as several. Resolved to parents, the leading acquirers account for a larger share of announced capital than the unresolved list suggests, and the direction of that error is the same in every year of the series.",
+      }),
       Object.freeze({ kind: BLOCK.H2, text: "What to watch" }),
       Object.freeze({
         kind: BLOCK.P,
         text:
-          "Project finance in energy is the line to follow into next year. Announced capital is concentrated in a small number of large projects, so a single delay moves the annual figure more than the underlying rate of activity would suggest. Two of the largest announcements in the current period are at the permitting stage, where timelines are least predictable, and either one slipping would take the year below the prior period on announced capital while activity itself was flat.",
+          "Project finance in energy is the line to follow into next year. Announced capital is concentrated in a small number of large projects, so a single delay moves the annual figure more than the underlying rate of activity would suggest, and projects at the permitting stage carry the least predictable timelines.",
       }),
       Object.freeze({
         kind: BLOCK.P,
         text:
-          "Property and hospitality are the quieter half of the increase and the steadier one. Transactions there are smaller, more numerous and less exposed to a single closing, which makes them a better read on whether the underlying rate of activity has moved. They are also where tribal enterprises most often appear as buyers of operating businesses rather than as developers, which is a different capability and a different balance sheet.",
-      }),
-      Object.freeze({
-        kind: BLOCK.P,
-        text:
-          "Bond issuance is the third thread and the one most sensitive to conditions outside Indian Country. Issuance held up through the rate environment of the last two years, which was not the expectation, and the reasons are worth a separate piece. The collection carries issuance alongside the acquisitions and financings so the three can be read against each other rather than separately.",
+          "Property and hospitality are the quieter half of the increase and the steadier one: smaller transactions, more of them, and less exposure to any single closing. Bond issuance is the third thread and the one most sensitive to conditions outside Indian Country. The collection carries all three together so they can be read against each other rather than separately.",
       }),
       Object.freeze({ kind: BLOCK.H2, text: "How to read the totals" }),
       Object.freeze({
         kind: BLOCK.P,
         text:
-          "Inclusion rules travel with every release, so a transaction missing from the collection is a documented gap rather than a silent one. Where a deal is reported but unconfirmed it sits as announced and is visible as such, which is the difference between a figure that can be cited and one that cannot. Where a value is not disclosed, the transaction is counted and the value is not, rather than being estimated into the total.",
+          "Inclusion rules travel with every release, so a transaction missing from the collection is a documented gap rather than a silent one. The confirmation rate below is the clearest way to see why the two lines in the first figure should never be added together or swapped for one another.",
+      }),
+      Object.freeze({
+        kind: BLOCK.FIGURE,
+        chart: CHART.BARS,
+        caption: "Share of announced transactions confirmed, by quarter (percent)",
+        source: "deals",
+        points: Object.freeze([
+          Object.freeze({ label: "Q2'25", value: 77 }),
+          Object.freeze({ label: "Q3'25", value: 76 }),
+          Object.freeze({ label: "Q4'25", value: 82 }),
+          Object.freeze({ label: "Q1'26", value: 70 }),
+          Object.freeze({ label: "Q2'26", value: 67 }),
+        ]),
+        notes: Object.freeze([
+          "Confirmed transactions divided by announced transactions in the same quarter, from the first figure in this piece, rounded to a whole percent.",
+          "The latest quarters read low because confirmation usually follows announcement by one to three quarters.",
+        ]),
       }),
       Object.freeze({
         kind: BLOCK.P,
         text:
-          "Anyone reproducing the numbers here should note the as-of date beside each figure. The collections update continuously, every correction is logged on the What\u2019s New page, and a change that moves a total says so there. A figure cited with its date stays explainable: the log shows what has moved since and why.",
-      }),
-      Object.freeze({
-        kind: BLOCK.P,
-        text:
-          "One caution on comparison. Transaction counts across Indian Country cannot be read against a national deal index without adjusting for what each includes, and most published indices exclude the tribal enterprise structures that account for a large share of the activity here. The comparison people usually want is between periods within this series, which is why the reconstructed history matters more for this collection than a benchmark against somebody else's.",
+          "Anyone reproducing these numbers should note the as-of date beside each figure. The collection updates continuously, every correction is logged on the What's New page, and a figure cited with its date stays explainable. Comparisons are best made within this series: most national deal indices exclude the tribal enterprise structures that account for a large share of the activity here.",
       }),
     ]),
   }),
@@ -299,16 +356,26 @@ export const PRESS_ARTICLES = Object.freeze([
     date: "June 2026",
     byline: "Cedar Press research desk",
     minutes: 4,
+    // Three headlines from the piece for the highlights box beside the
+    // lead picture (owner, 2026-09-27).
+    highlights: Object.freeze([
+      "Obligations to Native-owned firms rose for a fourth straight quarter",
+      "$65.2 billion in candidate awards stays unattributed rather than guessed",
+      "Summed naively, subaward reporting overstates the true total by 63.4 percent",
+    ]),
+    authors: Object.freeze([
+      Object.freeze({ name: "Cedar Press research desk", role: "Lumecon" }),
+    ]),
     body: Object.freeze([
       Object.freeze({
         kind: BLOCK.P,
         text:
-          "Obligations to Native-owned firms rose for a fourth consecutive quarter, and the growth is broader than the headline suggests. Rolled up to parent tribes, ANCs and NHOs, the increase reaches more entities than in any quarter of the prior year rather than concentrating in the largest holders. The number of distinct parents winning at least one award is the highest in the series.",
+          "Obligations to Native-owned firms rose for a fourth consecutive quarter, and the growth is broader than the headline suggests. Rolled up to parent tribes, Alaska Native corporations and Native Hawaiian organizations, the increase reaches more entities than in any quarter of the prior year rather than concentrating in the largest holders.",
       }),
       Object.freeze({
         kind: BLOCK.P,
         text:
-          "8(a) participants lead, which is the expected result and also the one most often misread. Participation is a status with a start and an end, so a firm that held it in 2019 and does not hold it now should not be counted as an 8(a) award today. Reading the program as a permanent attribute of a company overstates its current share and understates how many firms have graduated out of it and kept winning work.",
+          "The Native Federal Contractors collection holds 3,345,971 records across its tables, drawn from the Federal Procurement Data System through USAspending, SAM entity registrations and the subsidiary disclosures parent corporations publish themselves, including the audited filings Alaska Native corporations make under Alaska Statute 45.55.139. Coverage begins in fiscal 2000, because before then the federal record does not identify Native ownership at all.",
       }),
       Object.freeze({
         kind: BLOCK.FIGURE,
@@ -328,30 +395,33 @@ export const PRESS_ARTICLES = Object.freeze([
           "Band order is fixed across every quarter, so only the bottom band and the total share a baseline.",
         ]),
       }),
+      Object.freeze({ kind: BLOCK.H2, text: "The names do not match" }),
       Object.freeze({
         kind: BLOCK.P,
         text:
-          "Resolving the vendor list to parents is what turns a procurement record into an industry picture. Federal reporting names the awardee, and the awardee is frequently a subsidiary two or three levels below the nation or corporation that owns it. A single ANC can appear under a dozen names across agencies, none of which reference each other, and none of which are wrong.",
+          "Resolving the vendor list to parents is what turns a procurement record into an industry picture, and it is harder than it looks. A subsidiary's legal name routinely shares no word with its owner's: ASRC Federal's operating companies file as BROADLEAF, INUTEQ and VISTRONIX. Federal reporting names the awardee, and the awardee is often two or three levels below the nation or corporation that owns it.",
+      }),
+      Object.freeze({
+        kind: BLOCK.P,
+        text:
+          "So awardees are matched by identifier first: the unique entity identifier, the CAGE code and the parent identifier a firm declares. A name match is accepted only with corroboration, the attribution tier is recorded on every row, and a tier is never promoted on a name alone. 8(a) status is handled the same way, as a status with a start and an end rather than a permanent attribute, so a firm that graduated in 2019 is not counted as an 8(a) awardee today.",
+      }),
+      Object.freeze({ kind: BLOCK.PULL, text: "$65.2 billion in candidate awards stays unattributed rather than being handed to a plausible owner." }),
+      Object.freeze({
+        kind: BLOCK.P,
+        text:
+          "That caution has a visible cost, and the collection publishes it rather than hiding it. Candidate rows worth $65.2 billion remain unattributed because the evidence to name their owner is not there yet. Any total for the sector built from this collection is therefore a floor, and the release says so beside the number.",
       }),
       Object.freeze({ kind: BLOCK.H2, text: "The subaward layer" }),
       Object.freeze({
         kind: BLOCK.P,
         text:
-          "Prime awards are the visible half. Matching subaward activity to the same resolved entities shows work moving between Native firms that neither record describes on its own, and it is where the growth in the smaller tiers actually appears. A prime award to one tribal enterprise that subcontracts to three others is four firms working, and the prime record shows one.",
+          "Prime awards are the visible half. The Native Federal Subcontracting collection, 90,479 records in the current release, resolves both sides of every subaward independently, so a Native prime paying a non-Native subcontractor and the reverse are distinguishable, and work moving between Native firms appears that neither record describes on its own.",
       }),
       Object.freeze({
         kind: BLOCK.P,
         text:
-          "The pattern is not uniform. In construction, subaward activity to other Native firms is a small share of the prime value. In professional and technical services it is substantially higher, which is consistent with how those contracts are staffed and is worth knowing before drawing conclusions about the depth of the sector from prime awards alone.",
-      }),
-      Object.freeze({
-        kind: BLOCK.PULL,
-        text: "The industry only appears once the vendors are joined to who owns them.",
-      }),
-      Object.freeze({
-        kind: BLOCK.P,
-        text:
-          "Both collections are maintained against the same entity layer, so a parent renaming or a subsidiary being acquired reaches every historical award at once rather than leaving two records that disagree. That is also why a correction filed in the Deals collection can move a figure here: the entity is the same entity, and the relationship is maintained in one place.",
+          "Subaward reporting needs its own care. A single subaward is often refiled month after month, and each filing is a real event, so the filings are kept and flagged rather than deleted. Summed without that flag, the subaward file comes to $57.02 billion; counted correctly, $34.91 billion. The $22.11 billion difference is 63.4 percent of the correct total and 38.8 percent of the unfiltered one. A subaward is also a slice of a prime award, so it is never added to prime obligations.",
       }),
       Object.freeze({
         kind: BLOCK.IMAGE,
@@ -365,11 +435,6 @@ export const PRESS_ARTICLES = Object.freeze([
         kind: BLOCK.P,
         text:
           "Construction and facilities services carry most of the volume and almost none of the increase. The quarters that moved are professional services and information technology, where the average award is smaller and the number of distinct entities winning work is higher. Read only in dollars, the sector looks flat; read in entities and awards, it does not.",
-      }),
-      Object.freeze({
-        kind: BLOCK.P,
-        text:
-          "That composition is worth watching for a reason beyond the totals. A base of many small awards across many firms is a different kind of exposure from a base of few large ones, and it responds differently when an agency changes how it buys. Consolidation of small contracts into larger vehicles has been the direction of federal procurement for a decade, and the firms most exposed to it are the ones the headline number is least sensitive to.",
       }),
       Object.freeze({
         kind: BLOCK.FIGURE,
@@ -390,21 +455,21 @@ export const PRESS_ARTICLES = Object.freeze([
           "A subcontractor is counted as Native where ownership is established from filings or primary-source confirmation.",
         ]),
       }),
+      Object.freeze({
+        kind: BLOCK.P,
+        text:
+          "That composition is worth watching beyond the totals. A base of many small awards across many firms responds differently from a base of a few large ones when an agency changes how it buys, and consolidation of small contracts into larger vehicles has been the direction of federal procurement for a decade.",
+      }),
       Object.freeze({ kind: BLOCK.H2, text: "What the collection does and does not claim" }),
       Object.freeze({
         kind: BLOCK.P,
         text:
-          "The collection publishes obligations as reported, with the entity resolution applied on top and documented. Where a firm's parent changed during the period covered, the award is attributed to the parent it had at the time of award rather than the one it has now. Both attributions are defensible and they answer different questions; the one used here is stated with the release so a figure can be reproduced or deliberately recomputed the other way.",
+          "Obligations are not receipts. An obligation is the government committing funds, and the work and the payment can fall in later periods or, on a terminated contract, never arrive. Where a firm's parent changed during the period covered, the award is attributed to the parent it had at the time of award, and the rule is stated with the release so a figure can be reproduced or deliberately recomputed the other way.",
       }),
       Object.freeze({
         kind: BLOCK.P,
         text:
-          "Obligations are not receipts. An obligation is the government committing funds, and the timing of the work and the payment can sit in later periods or, on a terminated contract, never arrive. For questions about revenue rather than about award activity, the obligation series is the wrong instrument, and the methodology note says so rather than leaving a reader to find out from a discrepancy.",
-      }),
-      Object.freeze({
-        kind: BLOCK.P,
-        text:
-          "Nor does the collection assert that every Native-owned firm appears. Ownership is established from filings, registrations and primary-source confirmation, and a firm that is Native-owned but has never had to declare it in a record Cedar reads will be missing. That gap is documented with the release, it is smaller at the top of the award distribution than at the bottom, and it is the honest limit on any statement about the total size of the sector rather than about the awards themselves.",
+          "Nor does the collection claim that every Native-owned firm appears. Ownership is established from identifiers, filings and primary-source confirmation, and a firm that has never declared it in a record Cedar reads will be missing. That gap is documented with the release, and it is the honest limit on any statement about the total size of the sector.",
       }),
     ]),
   }),

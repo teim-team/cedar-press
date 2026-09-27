@@ -79,7 +79,6 @@ import argparse
 import csv
 import json
 import re
-import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -612,7 +611,9 @@ def audit(repo: Path = REPO) -> list[dict]:
     """Apply the withholding rule to the committed manifest and public/ files.
 
     ``python scripts/import_cedar_manifest.py --audit``. Rewrites the manifest,
-    deletes each struck file under public/, and prints what it struck. The
+    deletes each struck file under public/, removes local filesystem paths
+    from the samples still served (``scrub_local_paths``), and prints what it
+    struck and what it scrubbed. The
     caller re-runs measure-samples and derive-explore (the test suites name
     both when stale).
     """
@@ -622,6 +623,8 @@ def audit(repo: Path = REPO) -> list[dict]:
     names, uids = withheld_entities(repo / "data" / "spine" / "cedar_entity_names.csv")
     struck = withhold_samples(manifest, public_sample(repo), names, uids)
     unpublish(repo, struck)
+    for sample in scrub_public_samples(repo):
+        print(f"  scrubbed  local path(s) from {sample.relative_to(repo)}")
     if json.dumps(manifest, sort_keys=True) != original:
         manifest_path.write_text(
             json.dumps(manifest, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
@@ -629,12 +632,71 @@ def audit(repo: Path = REPO) -> list[dict]:
     return struck
 
 
+#: A path on somebody's machine: a home directory, POSIX or Windows. Never
+#: inside a URL (the lookbehind refuses a path glued to a host or another
+#: path segment), and ``~`` only as ``~/``, so "~20%" is not a path.
+LOCAL_PATH = re.compile(
+    r"(?<![\w.:/\\-])"
+    r"(?:~(?=/)|/Users/[^/\s]+|/home/[^/\s]+|[A-Za-z]:\\Users\\[^\\\s]+)"
+    r"(?:[/\\][^\s)\"',;|]*)?"
+)
+#: The clause the NEED builder wrote around the path (code/1133 ``OWNER_DOC``):
+#: dropped whole, so the parenthetical keeps its description and loses the
+#: machine it was on.
+ON_THIS_MACHINE = re.compile(r",?\s*on this machine at\s+" + LOCAL_PATH.pattern)
+#: A replacement for what is left of a path the clause above did not cover.
+LOCAL_PATH_REMOVED = "[local path removed]"
+
+
+def scrub_local_paths(text: str) -> str:
+    """A published sample's text with every local filesystem path removed.
+
+    FOUND 2026-09-27: ``need_enterprises__10.csv`` published, in
+    ``source_document``, "the owner's research dataset, on this machine at
+    ~/Desktop/dissertation/data/tribal_federal_spending/clean/" -- a path on
+    the owner's own computer, served to every visitor of the site. The value
+    is written upstream (code/1133) and reaches the site through this copy,
+    so this copy is where a public file stops carrying it, for that value and
+    for any later one of the same shape. Applied to the raw text, not parsed
+    cells: nothing substituted in carries a comma, a quote or a newline, so
+    the file's own quoting is left byte for byte as 1135 wrote it.
+    """
+    text = ON_THIS_MACHINE.sub("", text)
+    text = text.replace("the owner's research dataset", "Lumecon research dataset")
+    return LOCAL_PATH.sub(LOCAL_PATH_REMOVED, text)
+
+
+def publish_sample(source: Path, target: Path) -> bool:
+    """Write ``source`` to ``target`` without local paths; True if any were removed."""
+    raw = source.read_text(encoding="utf-8")
+    clean = scrub_local_paths(raw)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    # newline="" so a CRLF in the source stays CRLF: the bytes are 1135's.
+    with target.open("w", encoding="utf-8", newline="") as handle:
+        handle.write(clean)
+    return clean != raw
+
+
+def scrub_public_samples(repo: Path = REPO) -> list[Path]:
+    """Rewrite every served sample under ``public/`` that carries a local path."""
+    rewritten: list[Path] = []
+    root = repo / "public" / "data" / "cedar" / "samples"
+    for sample in sorted(root.rglob("*.csv")):
+        raw = sample.read_text(encoding="utf-8")
+        if scrub_local_paths(raw) != raw:
+            publish_sample(sample, sample)
+            rewritten.append(sample)
+    return rewritten
+
+
 def copy_samples(workspace: Path, manifest: dict) -> int:
     """The ten-row samples the manifest points at, and nothing else.
 
     Copied under ``public/`` so the built site serves them at the same URL the
     manifest states, and so the Python side and the browser read one set of
-    bytes rather than two copies that can disagree.
+    bytes rather than two copies that can disagree -- bar one deliberate
+    difference: a local filesystem path in the review bundle never reaches the
+    served copy (``scrub_local_paths``).
     """
     written = 0
     for collection in manifest["collections"]:
@@ -652,8 +714,8 @@ def copy_samples(workspace: Path, manifest: dict) -> int:
             if not source.exists():
                 raise SystemExit(f"missing sample: {source}")
             target = public_sample_path(REPO, table["sample_path"])
-            target.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copyfile(source, target)
+            if publish_sample(source, target):
+                print(f"  scrubbed  local path(s) from {target.relative_to(REPO)}")
             written += 1
     return written
 

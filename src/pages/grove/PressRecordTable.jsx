@@ -23,11 +23,13 @@ import { useEffect, useRef } from "react";
 import { Link } from "react-router";
 
 import {
+  SOURCE_LINK_COLUMN,
   WITHHELD_TEXT,
   labelFor,
   meaningFor,
   scopeName,
 } from "../../features/grove/explore.js";
+import { isBareScheme, isWellFormedUrl, readerText } from "../../features/grove/readerValues.js";
 import { money, short } from "../../features/grove/recordColumns.js";
 import { scrollEdges } from "../../features/grove/scrollEdges.js";
 import SourceCitation from "./SourceCitation.jsx";
@@ -36,10 +38,14 @@ import { safeSourceUrl } from "../../features/grove/sourcePresentation.js";
 export function Human({ column, value, contract, item = null }) {
   if (column === contract?.source && item?.sourceDetails) return <SourceCitation source={item.sourceDetails} compact />;
   if (["source_inbox", "source_files", "link_ledger_source_file", "source_dataset", "raw_path", "storage_path"].includes(column)) return "Retained in internal provenance";
-  if (value === "" || value == null) return "—";
-  const text = String(value);
-  if (/^[A-Za-z]:[\\/]|^file:\/\/|^\\\\/.test(text)) return "Retained in internal provenance";
-  if (/^https?:\/\/\S+$/i.test(text)) return safeSourceUrl(text) ? <a href={safeSourceUrl(text)} target="_blank" rel="noreferrer">{text.replace(/^https?:\/\/(www\.)?/, "").slice(0, 80)}{text.length > 88 ? "…" : ""}</a> : "Source link unavailable";
+  if (value === "" || value == null || isBareScheme(value)) return "?";
+  const raw = String(value);
+  if (/^[A-Za-z]:[\\/]|^file:\/\/|^\\\\/.test(raw)) return "Retained in internal provenance";
+  if (isWellFormedUrl(raw)) {
+    const url = safeSourceUrl(raw.trim());
+    return url ? <a href={url} target="_blank" rel="noreferrer">{url.replace(/^https?:\/\/(www\.)?/, "").slice(0, 80)}{url.length > 88 ? "?" : ""}</a> : "Source link unavailable";
+  }
+  const text = readerText(raw);
   // Money wherever the column is money: the table's amount, or any column
   // named in dollars (`_usd`, `_amt`, `obligations`, `amount`, `value_usd`).
   if (contract?.amount === column || /(_usd|_amt|obligations|_amount|amount_usd)$/i.test(column) || /^(income|expenses|spend)_/i.test(column)) {
@@ -172,7 +178,9 @@ export function Rows({ view, items, columns, sort, onSort, onActive, showAmount,
     ["source", "Source"],
   ];
   const pinned = (c) => c === entityColumn || c === contract?.entity_uid;
-  const heads = view === "table" ? columns.map((c) => [c, labelFor(items[0]?.key, c), pinned(c), c === contract?.entity_uid ? " cp-ex__pin--uid" : c === entityColumn && contract?.entity_uid && columns.includes(contract.entity_uid) ? " cp-ex__pin--name" : ""]) : universal;
+  // The built source link has no column in the file, so no codebook label.
+  const headLabel = (c) => (c === SOURCE_LINK_COLUMN ? "Source record" : labelFor(items[0]?.key, c));
+  const heads = view === "table" ? columns.map((c) => [c, headLabel(c), pinned(c), c === contract?.entity_uid ? " cp-ex__pin--uid" : c === entityColumn && contract?.entity_uid && columns.includes(contract.entity_uid) ? " cp-ex__pin--name" : ""]) : universal;
   return (
     // The wrapper exists for the edge fade: every cell paints its own
     // background, so a gradient on the scroller itself is painted over by
@@ -231,7 +239,9 @@ export function Rows({ view, items, columns, sort, onSort, onActive, showAmount,
                   ? columns.map((column) => (
                     <td key={column} className={`${pinned(column) ? "cp-ex__pin" : ""}${column === contract?.entity_uid ? " cp-ex__pin--uid" : column === entityColumn && contract?.entity_uid && columns.includes(contract.entity_uid) ? " cp-ex__pin--name" : ""}${column === contract?.amount ? " cp-ex__amount" : ""}`}>
                       {column === entityColumn && item.superseded ? <span className="cp-ex__badge">Superseded</span> : null}
-                      {column === entityColumn && item.entity.withheld ? <em>{WITHHELD_TEXT}</em> : <Human column={column} value={item.row[column]} contract={contract} item={item} />}
+                      {column === entityColumn && item.entity.withheld
+                        ? <em>{WITHHELD_TEXT}</em>
+                        : <Human column={column} value={column === SOURCE_LINK_COLUMN ? item.source : item.row[column]} contract={contract} item={item} />}
                       {column === entityColumn && item.entity.uid && !columns.includes(contract?.entity_uid) ? <small className="cp-ex__uid">{item.entity.uids.join(" · ")}</small> : null}
                     </td>
                   ))
