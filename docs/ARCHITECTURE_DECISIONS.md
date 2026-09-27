@@ -3966,6 +3966,9 @@ Coordinator owns this isolated integration worktree and the common release consu
 <!-- END CEDAR-CONVERGENCE-20260926 -->
 
 <!-- BEGIN CEDAR-GIVING-PLOT-CONSUMER-20260926 -->
+The coordinator subsequently assigned the same worker the NEED `1102` legacy
+conflict-writer correction and its focused regressions. No shared publication or
+identity gate is changed. The preserved candidate archives are read-only evidence.
 The Giving/PLOT consumer worker owns only the isolated
 `codex/giving-plot-consumer-20260926` worktree from `ee79d67`: additive server
 release target declarations, component consumption and focused tests. The
