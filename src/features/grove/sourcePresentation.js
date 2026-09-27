@@ -10,7 +10,7 @@ const SPECS = {
   lobbying: { systems: { lda: "U.S. Senate Office of Public Records, Lobbying Disclosure Act filings" }, title: "activity_title", titleBasis: "Filing type or activity label", locators: ["source_record_id", "activity_id"], periods: ["reporting_year", "reporting_period"], events: ["activity_date"] },
   nagpra: { publisher: FR, title: "title", titleBasis: "Notice title", locators: ["document_number"], published: "publication_date" },
   nonprofits: { systems: { "IRS Exempt Organizations Business Master File (eo1-eo4)": "Internal Revenue Service" }, dataset: "Exempt Organizations Business Master File extract", locators: ["ein"], periods: ["tax_period"], snapshot: "bmf_as_of_date" },
-  legislation: { systems: { "congress.gov": "Library of Congress, Congress.gov" }, title: "title", titleBasis: "Bill title", locators: ["bill_id", "congress", "bill_type", "bill_number"], events: ["introduced_date", "latest_action_date"] },
+  legislation: { systems: { "congress.gov": "Library of Congress, Congress.gov", "govinfo.gov": "U.S. Government Publishing Office, GovInfo" }, title: "title", titleBasis: "Bill title", locators: ["bill_id", "congress", "bill_type", "bill_number"], events: ["introduced_date", "latest_action_date"] },
   "federal-register": { systems: { federal_register: FR }, locators: ["fr_document_number", "federal_register_citation", "consultation_event_id"], published: "notice_date", events: ["event_start_date", "event_end_date", "comment_deadline"] },
   deals: { title: "title", titleBasis: "Cedar event description", locators: ["deal_id"], events: ["event_date", "event_date_precision", "event_year"] },
   owned: { locators: ["business_source_id", "certification_number"], events: ["source_last_updated", "first_seen", "last_seen"] },

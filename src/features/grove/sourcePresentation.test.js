@@ -73,3 +73,12 @@ test("held facts and Grove-only Gaming never become Press source cards", () => {
   assert.equal(owned.title, null);
   assert.equal(owned.publisher, null);
 });
+
+
+test("GovInfo version metadata retains its publisher and distinguishes action from introduction", () => {
+  const source = sourcePresentation("legislation", { source_system: "govinfo.gov", bill_id: "119-s-254", title: "ARTIST Act", introduced_date: "2025-01-24", latest_action_date: "2026-06-12" }, "https://www.govinfo.gov/app/details/PLAW-119publ99");
+  assert.equal(source.publisher, "U.S. Government Publishing Office, GovInfo");
+  assert.equal(source.eventDates.introduced_date, "2025-01-24");
+  assert.equal(source.eventDates.latest_action_date, "2026-06-12");
+  assert.equal(source.publicationDate, null);
+});
