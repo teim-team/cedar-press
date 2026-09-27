@@ -4,8 +4,8 @@
 // card halfway down the reader landed the new page halfway down too. Every
 // Press page that can be reached mid-scroll starts at its own top instead.
 //
-// The one exception is an arrival WITH a fragment ("Make your own" lands on
-// /press#grove): the fragment owns the scroll and this hook must not fight
+// The one exception is an arrival WITH a fragment (a link to a section of a
+// page): the fragment owns the scroll and this hook must not fight
 // it, so it stands down when a hash is present.
 
 import { useEffect } from "react";

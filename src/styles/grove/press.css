@@ -1117,11 +1117,6 @@
 /* The collections surface ends as a working surface. The Grove route keeps a
  * compact deep-link target for articles without turning this page into a
  * second product pitch. */
-.teim-rd .cp-grove-exit { display: flex; flex-wrap: wrap; gap: 0.4rem 0.8rem; align-items: baseline; max-width: 1560px; margin: 0 auto; padding: 0.85rem 2.4rem; border-top: 1px solid var(--line); font-size: 0.88rem; line-height: 1.5; color: var(--muted); }
-.teim-rd .cp-grove-exit strong { color: var(--ink); }
-.teim-rd .cp-grove-exit a { margin-left: auto; color: var(--dteal); font-weight: 700; text-decoration: none; }
-.teim-rd .cp-grove-exit a:hover { text-decoration: underline; text-underline-offset: 3px; }
-@media (max-width: 860px) { .teim-rd .cp-grove-exit { padding-inline: 1.1rem; } .teim-rd .cp-grove-exit a { margin-left: 0; } }
 /* ── The end of the page ──────────────────────────────────────────────────
  * Two teal cards on white, shut until asked. Both used to be open columns of
  * prose, which is a wall of text at the end of a page nobody came here to
@@ -2584,6 +2579,9 @@
 @media (max-width: 560px) { .teim-rd .cp-hero3__reach { font-size: 0.92rem; max-width: none; } }
 .teim-rd .cp-hero3__facts { list-style: none; display: flex; flex-wrap: wrap; gap: 0.3rem 1.4rem; margin: 0.45rem 0 0; padding: 0; font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--door-ink-3); }
 .teim-rd .cp-hero3__facts b { font-weight: 700; color: var(--ink); }
+/* The ticking figures keep their width while they count, so the line does
+ * not reflow under them. */
+.teim-rd .cp-tick { font-variant-numeric: tabular-nums; }
 /* Each fact is one unit: a date broken across two lines ("UPDATED SEPT. 26, /
  * 2026") reads as two facts. On a phone the two columns size to their facts
  * rather than splitting the width evenly, which is what gives the date room. */
@@ -2591,7 +2589,8 @@
 
 /* The stage: a directional light plane behind the frame, and the frame. */
 .teim-rd .cp-hero3__stage { position: relative; min-width: 0; margin: 0; isolation: isolate; }
-.teim-rd .cp-hero3__stage::before { content: ''; position: absolute; z-index: -1; inset: 6% -8% 2% -6%; background: linear-gradient(145deg, rgba(15, 181, 165, 0.22), rgba(15, 181, 165, 0.05) 46%, rgba(196, 151, 68, 0.1) 78%, transparent); filter: blur(38px); transform: skewY(-3deg); pointer-events: none; }
+/* No coloured glow behind the preview (owner, 2026-09-27): the frame's own
+ * shadow is the only depth it carries. */
 .teim-rd .cp-hero3__stage figcaption { margin: 0.8rem 0 0; font-size: 0.78rem; line-height: 1.45; color: var(--door-ink-3); }
 @media (min-width: 1500px) { .teim-rd .cp-hero3__stage { margin-right: -3rem; } }
 
@@ -2773,15 +2772,19 @@
 /* The source banner on navy (owner, 2026-09-27): the right column of the
  * passage, above the shelves. Same run and mask as before; light on dark. */
 .teim-rd .cp-why__head > .cp-why__side { display: flex; flex-direction: column; gap: clamp(1.4rem, 3vw, 2.2rem); min-width: 0; align-self: stretch; }
-.teim-rd .cp-why__sources { flex: 1 1 auto; display: flex; flex-direction: column; min-height: 14rem; max-width: none; margin: 0; border-radius: 10px; background: #fff; border-color: #fff; box-shadow: 0 0 0 1px rgba(95, 217, 204, 0.18), 0 22px 44px -22px rgba(95, 217, 204, 0.55), 0 10px 24px -12px rgba(0, 0, 0, 0.55); -webkit-backdrop-filter: none; backdrop-filter: none; }
-.teim-rd .cp-why__sources .cp-hero3__prooflabel { color: var(--door-navy); }
-.teim-rd .cp-why__sources .cp-hero3__prooflabel:hover, .teim-rd .cp-why__sources .cp-hero3__prooflabel:focus-visible { color: var(--door-navy); border-bottom-color: currentColor; }
+.teim-rd .cp-why__sources { flex: 1 1 auto; display: flex; flex-direction: column; min-height: 14rem; max-width: none; margin: 0; border-radius: 10px; background: rgba(255, 255, 255, 0.9); border-color: rgba(255, 255, 255, 0.9); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 16px 36px -14px rgba(0, 0, 0, 0.65); -webkit-backdrop-filter: none; backdrop-filter: none; }
+/* The top row (owner, 2026-09-27): the label and the 600+ figure take the
+ * signup buttons' green (the darker stop, 5:1 on the box), and a hairline
+ * separates them from the moving rows. */
+.teim-rd .cp-why__sources .cp-hero3__proofhead { border-bottom: 1px solid rgba(9, 19, 43, 0.12); margin-bottom: 0.75rem; }
+.teim-rd .cp-why__sources .cp-hero3__prooflabel { color: var(--door-action-bottom); }
+.teim-rd .cp-why__sources .cp-hero3__prooflabel:hover, .teim-rd .cp-why__sources .cp-hero3__prooflabel:focus-visible { color: var(--door-action-bottom); border-bottom-color: currentColor; }
 .teim-rd .cp-why__runs { flex: 1 1 auto; display: flex; flex-direction: column; justify-content: space-evenly; gap: 0.55rem; }
 .teim-rd .cp-hero3__marquee--back { animation-direction: reverse; }
 .teim-rd .cp-why__runs { position: relative; -webkit-user-select: none; user-select: none; }
 .teim-rd .cp-why__runs::after { content: ''; position: absolute; inset: 0; z-index: 1; }
 .teim-rd .cp-why__sources .cp-hero3__marquee:hover, .teim-rd .cp-why__sources .cp-hero3__marquee:focus-within { animation-play-state: running; }
-.teim-rd .cp-why__sources .cp-hero3__proofcount { color: var(--door-navy); }
+.teim-rd .cp-why__sources .cp-hero3__proofcount { color: var(--door-action-bottom); }
 .teim-rd .cp-why__sources .cp-hero3__run li { color: var(--door-navy); }
 .teim-rd .cp-why__sources .cp-hero3__run li::before { background: rgba(9, 19, 43, 0.18); }
 .teim-rd .cp-why__lede a { color: #fff; text-decoration: underline; text-decoration-color: rgba(255, 255, 255, 0.45); text-underline-offset: 0.18em; }
@@ -2857,7 +2860,6 @@
   .teim-rd .cp-door__word { font-size: 0.92rem; }
   .teim-rd .cp-btn { min-height: 40px; padding-inline: 0.9rem; font-size: 0.88rem; }
   .teim-rd .cp-hero3 { padding-top: 1.8rem; }
-  .teim-rd .cp-hero3__stage::before { inset: 4% -10% 2% -10%; }
   .teim-rd .cp-hero3__frame { aspect-ratio: auto; container-type: normal; }
   .teim-rd .cp-app { width: 100%; height: auto; transform: none; }
   .teim-rd .cp-app__body { grid-template-columns: minmax(0, 1fr); min-height: 0; }
@@ -4491,6 +4493,10 @@ body[data-cp-preview-in-view] .teim-rd .cp-dc__fab { display: none; }
  * scrolling sideways is 77px the records could have had. The masthead keeps
  * its gutters, because it is the same masthead as every other page. */
 .teim-rd .cp-page--table { padding-bottom: 0; padding-inline: 0; }
+/* No measure on this page (owner, 2026-09-27): the viewer runs the full width
+ * of the window, rail to edge, instead of stopping at the document's 1560px
+ * and leaving paper either side on a wide screen. */
+.teim-rd .cp-page--table { max-width: none; }
 /* THE MASTHEAD, ON A PAGE THAT IS A WORKING SURFACE.
  * 141px of a 900px window before the frame even started. It keeps its
  * gutters (it is the same masthead as every other page) and loses what a
@@ -4522,7 +4528,7 @@ body[data-cp-preview-in-view] .teim-rd .cp-dc__fab { display: none; }
  * chrome above it (`--cp-frame-h`, measured in `CedarPressData`), and the
  * scrolling moves INSIDE it: the rail scrolls its own twelve rows, the
  * records scroll under a heading that stays, and the page itself does not
- * move until a reader goes past the frame to the compact Cedar Grove exit.
+ * move until a reader goes past the frame to the footer.
  *
  * Every box between the frame and the scroller needs `min-height: 0`. A flex
  * item's default floor is its content, so without it the table refuses to be

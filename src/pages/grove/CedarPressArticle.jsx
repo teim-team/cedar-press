@@ -56,6 +56,7 @@ import {
   PRESS_PATH,
 } from "../../features/grove/pressRoutes";
 import { useScrollToTop } from "../../features/grove/useScrollToTop";
+import { GROVE_MARKETING_URL } from "../../features/grove/appLink.js";
 import PressAd from "./PressAd";
 import { PressCedarFab } from "./PressCedarFab";
 import { TierName } from "./TierName";
@@ -102,10 +103,10 @@ function Figure({ block, lead = false }) {
         <b>{entry?.name ?? block.source}</b>
         {release ? `, as of ${formatUpdated(release.updated)}` : null}
         . Built in Cedar Grove.{" "}
-        {/* To the Grove section on the reader, not /app/grove: a Press
+        {/* To the Cedar Grove page on lumecon.ai, not /app/grove: a Press
             reader clicking this has no Grove entitlement, and the app route
             answers with a sign-in wall instead of the argument. */}
-        <Link to={`${PRESS_DATA_PATH}#grove`}>Make your own &#8594;</Link>
+        <a href={GROVE_MARKETING_URL} target="_blank" rel="noreferrer">Make your own &#8594;</a>
       </p>
     </figure>
   );
@@ -207,12 +208,18 @@ function DrawnFrom({ id, user }) {
       ) : (
         <p className="cp-ar__locked">
           Included in <TierName name={upgrade.name} />.{" "}
-          {/* A Grove upgrade goes to the Grove section on the reader, same
+          {/* A Grove upgrade goes to the Cedar Grove page on lumecon.ai, same
               reasoning as the figure attribution: the app route is a
               sign-in wall for exactly the reader seeing this prompt. */}
-          <Link className="cp-m__more" to={upgrade.sameProduct ? PRESS_DATA_PATH : `${PRESS_DATA_PATH}#grove`}>
-            See what it opens <span aria-hidden="true">&#8594;</span>
-          </Link>
+          {upgrade.sameProduct ? (
+            <Link className="cp-m__more" to={PRESS_DATA_PATH}>
+              See what it opens <span aria-hidden="true">&#8594;</span>
+            </Link>
+          ) : (
+            <a className="cp-m__more" href={GROVE_MARKETING_URL} target="_blank" rel="noreferrer">
+              See what it opens <span aria-hidden="true">&#8594;</span>
+            </a>
+          )}
         </p>
       )}
     </li>
