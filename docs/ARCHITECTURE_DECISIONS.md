@@ -3964,3 +3964,13 @@ remain prohibited. Original canonical data and active review artifacts stay pinn
 <!-- BEGIN CEDAR-CONVERGENCE-20260926 -->
 Coordinator owns this isolated integration worktree and the common release consumers, entitlement registration, producer pins, generated inventory and convergence handoff. Existing sources and active identity review stay preserved. The user authorized commits, review-branch pushes and draft PRs for this recovery; no production release or identity issuance.
 <!-- END CEDAR-CONVERGENCE-20260926 -->
+
+<!-- BEGIN CEDAR-GIVING-PLOT-CONSUMER-20260926 -->
+The Giving/PLOT consumer worker owns only the isolated
+`codex/giving-plot-consumer-20260926` worktree from `ee79d67`: additive server
+release target declarations, component consumption and focused tests. The
+coordinator owns integration and exact cross-repository pins. PR #131 owns
+frontend presentation. Giving is standard Press with inherited Grove access;
+PLOT is Press+ with inherited Grove access; Gaming remains Grove exclusive.
+Existing full-release verification and subscriber authority remain canonical.
+<!-- END CEDAR-GIVING-PLOT-CONSUMER-20260926 -->

@@ -127,3 +127,58 @@ The old client pin is refused after a catalog switch. Run
 with both existing packages for real local login, 401/403/200, exact download,
 stale-pin and byte-preserving rollback checks. See
 `docs/HAVALA_INFRASTRUCTURE_REVIEW.md` for exact revisions and results.
+
+## Giving and PLOT component releases
+
+`GET /press/release-collections` is the authenticated integration registry for
+the 15 collection targets: the original 12, Foundation and Corporate Giving,
+PLOT, and Gaming. Its tier-filtered entries have verified release metadata or
+an explicit missing/unavailable value. It supplies no invented samples or row
+counts. The existing original-12 storefront registry is preserved; this server
+surface does not claim the new collection pages are delivered.
+
+| Collection | Minimum Press tier | Grove access | Components |
+| --- | --- | --- | --- |
+| Foundation and Corporate Giving | Standard | Shared | `reviewed_disclosures` |
+| PLOT | Press+ | Shared | `environmental_permits`, `environmental_events` |
+| Gaming Intelligence | Unavailable | Exclusive | Existing Gaming component map |
+
+The existing `/press/collections/{id}/full-download` endpoint accepts an explicit
+`release_id` and `component` for these collections. All component downloads use
+the established collection catalog/manifest/hash/schema/rights verifier. The
+presentation list in `governed_collections.py` is a compatibility gate; Lumecon's
+embedded contract remains the type, grain, rights and release authority. Giving
+decimal amounts remain exact serialized strings. PLOT EPA context does not
+establish Native ownership or parcel affiliation.
+
+Configure `CEDAR_PRESS_COMPONENT_RELEASE_CATALOG` and
+`CEDAR_PRESS_COMPONENT_RELEASE_PIN` with the exact reviewed collection catalog
+and pin. They are separate from the original dataset catalog configuration so
+both formats can coexist. The committed shared pin is empty. Gaming keeps its
+existing Grove pin/catalog. A review requires `CEDAR_GROVE_ENVIRONMENT=review`
+with `CEDAR_PRESS_ENVIRONMENT=development`, matching the existing component
+review path; production refuses this setting. Source rights remain enforced
+even in review.
+
+Reproduce a saved real candidate without a server listener or child process:
+
+```sh
+PYTHONPATH=server python server/tests/shared_collection_rehearsal.py \
+  --store <immutable-store> --collection plot --release <sha256> \
+  --output <isolated-review-directory>
+```
+
+The interpreter must have both Cedar and Lumecon importable. The command verifies
+the actual immutable candidate, writes an isolated review catalog/pin, calls both
+FastAPI applications in process, tests Press/Press+/Grove and production refusal,
+and writes `receipt.json`. It does not start a database or claim database proof.
+Use `foundation-corporate-giving` for Giving; the current real 14-row candidate
+has redistribution disabled, so all subscriber tiers correctly receive a hold.
+
+Recovery verification on 2026-09-26 used real PLOT release
+`1d8a75617b4ee1749d65c7aacc344f9a228f7f2ea9081420bcd0547956fef3a6`:
+1,242 permit rows and 3,210 event rows matched their manifest checksums at both
+entitled tiers. Giving release
+`f65ea15d5f63ccd4ccb8b9425a744ab7e33f77e62ca66bb98a962fd4b81b6fac`
+was verified at 14 rows and download-held. These are rehearsal releases, not
+production eligibility or complete PLOT parcel/ownership coverage.

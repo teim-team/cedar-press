@@ -37,7 +37,7 @@ from typing import Any
 from urllib.parse import urlparse
 from urllib.request import HTTPRedirectHandler, Request, build_opener
 
-from cedar_press import collection_profiles, press_catalog
+from cedar_press import collection_profiles, governed_collections, press_catalog
 from cedar_press import collections as launch
 
 #: Which shelf each plan reaches. Mirrors ``PLAN_REACH`` in
@@ -157,6 +157,13 @@ def is_grove_release(collection_id: str) -> bool:
     return any(entry["id"] == collection_id for entry in launch.GROVE_RELEASE_COLLECTIONS)
 
 
+def is_component_release(collection_id: str) -> bool:
+    return (
+        is_grove_release(collection_id)
+        or collection_id in governed_collections.SHARED_COLLECTIONS
+    )
+
+
 def may_download_full(tier: str, collection_id: str) -> bool:
     """Whether this plan may take a pinned full release of this collection.
 
@@ -168,6 +175,9 @@ def may_download_full(tier: str, collection_id: str) -> bool:
     """
     if may_open(tier, collection_id):
         return True
+    shared = governed_collections.SHARED_COLLECTIONS.get(collection_id)
+    if shared is not None:
+        return _reaches(tier, shared["shelf"])
     return is_grove_release(collection_id) and _reaches(tier, "grove")
 
 
@@ -188,6 +198,8 @@ def grove_components(collection_id: str) -> tuple[str, ...]:
     Empty for anything the Grove declaration does not name. A component the
     catalog does not pin is still listed here and is refused at download.
     """
+    if collection_id in governed_collections.SHARED_COLLECTIONS:
+        return governed_collections.SHARED_COLLECTIONS[collection_id]["components"]
     if not is_grove_release(collection_id):
         return ()
     prefix = collection_id + "/"
@@ -798,6 +810,9 @@ def full_release(collection_id, requested_release_id=None, *, metadata_only=Fals
 #: ``current`` pointer. Changing what Cedar serves is a reviewed edit of this
 #: file; rollback is the revert of that edit, and every component moves with it.
 GROVE_RELEASE_PIN = Path(__file__).resolve().parents[2] / "data/cedar/grove_release_pin.json"
+PRESS_COMPONENT_RELEASE_PIN = (
+    Path(__file__).resolve().parents[2] / "data/cedar/press_component_release_pin.json"
+)
 GROVE_RELEASE_CATALOG_ENV = "CEDAR_GROVE_RELEASE_CATALOG"
 #: Lumecon release classes this server delivers. A rehearsal (real candidate,
 #: PROPOSED IDs) and a synthetic fixture never reach a customer; only the
@@ -841,14 +856,20 @@ def grove_release_pin(collection_id: str) -> dict[str, str]:
     collection. A per-table dataset (``<collection>--<table>``) is never
     assembled into a collection, so a pin naming one is refused.
     """
+    shared = collection_id in governed_collections.SHARED_COLLECTIONS
+    location = (
+        Path(os.environ.get("CEDAR_PRESS_COMPONENT_RELEASE_PIN", PRESS_COMPONENT_RELEASE_PIN))
+        if shared else GROVE_RELEASE_PIN
+    )
+    product = "cedar_press" if shared else "cedar_grove"
     try:
-        document = json.loads(GROVE_RELEASE_PIN.read_text(encoding="utf-8"))
+        document = json.loads(location.read_text(encoding="utf-8"))
     except (OSError, ValueError) as error:
         raise FullReleaseUnavailable("Grove release pin unreadable") from error
     if (
         not isinstance(document, dict)
         or document.get("schema_version") != 1
-        or document.get("product") != "cedar_grove"
+        or document.get("product") != product
         or not isinstance(document.get("pins"), dict)
     ):
         raise FullReleaseUnavailable("Malformed Grove release pin")
@@ -877,7 +898,11 @@ def _grove_prefix(pin: dict[str, str]) -> str:
 
 def _grove_catalog(pin: dict[str, str]) -> dict[str, Any]:
     """The pinned catalog's one entry for the pinned release, verified by hash."""
-    location = os.environ.get(GROVE_RELEASE_CATALOG_ENV)
+    shared = pin["collection_id"] in governed_collections.SHARED_COLLECTIONS
+    catalog_env = (
+        "CEDAR_PRESS_COMPONENT_RELEASE_CATALOG" if shared else GROVE_RELEASE_CATALOG_ENV
+    )
+    location = os.environ.get(catalog_env)
     if not location:
         raise FullReleaseUnavailable("No pinned release catalog configured")
     raw = Path(location).read_bytes()
@@ -895,7 +920,7 @@ def _grove_catalog(pin: dict[str, str]) -> dict[str, Any]:
     if (
         type(catalog.get("schema_version")) is not int
         or catalog["schema_version"] != 1
-        or catalog.get("product") != "cedar_grove"
+        or catalog.get("product") != ("cedar_press" if shared else "cedar_grove")
         or catalog.get("entitlement_required") is not True
     ):
         raise FullReleaseUnavailable("Wrong product catalog")
@@ -930,7 +955,10 @@ def _grove_manifest(pin: dict[str, str]) -> dict[str, Any]:
         manifest.get("collection_id") != pin["collection_id"]
         or manifest.get("release_id") != pin["release_id"]
         or manifest.get("release_kind") != "collection"
-        or manifest.get("product") != "cedar_grove"
+        or manifest.get("product") != (
+            "cedar_press" if pin["collection_id"] in governed_collections.SHARED_COLLECTIONS
+            else "cedar_grove"
+        )
         or type(manifest.get("schema_version")) is not int
         or manifest["schema_version"] != 1
         or not isinstance(manifest.get("components"), dict)
@@ -1034,7 +1062,11 @@ def grove_component_contract(
     if not isinstance(fields, list) or any(not isinstance(f, dict) for f in fields):
         raise FullReleaseUnavailable("Malformed component contract")
     header = [field.get("name") for field in fields]
-    entry = _field_map_tables().get(f"{collection_id}/{presentation_component or component}")
+    entry = (
+        governed_collections.presentation(collection_id, presentation_component or component)
+        if collection_id in governed_collections.SHARED_COLLECTIONS
+        else _field_map_tables().get(f"{collection_id}/{presentation_component or component}")
+    )
     if not entry or entry.get("collection") != collection_id or header != entry.get("order"):
         raise FullReleaseUnavailable("Full release does not match product field map")
     declared_rights = (contract.get("metadata") or {}).get("field_rights") or {}
@@ -1154,7 +1186,7 @@ def grove_full_release(
     contract against the field map, then (unless ``metadata_only``) the exact
     component bytes. Any mismatch fails closed; nothing is substituted.
     """
-    if not is_grove_release(collection_id):
+    if not is_component_release(collection_id):
         raise FullReleaseUnavailable("Unknown collection")
     if not isinstance(component, str) or not _COMPONENT_ID.fullmatch(component):
         raise FullReleaseUnavailable("A Grove release names a well-formed component")
@@ -1194,7 +1226,7 @@ def grove_full_release(
                 "record_count": count,
                 "fields": header,
                 "table_id": component,
-                "scope": "One governed component of a Cedar Grove collection release",
+                "scope": "One governed component of a pinned collection release",
                 "format": "jsonl",
                 "records_sha256": expected["sha256"],
                 "download_path": route,
@@ -1218,6 +1250,10 @@ def grove_full_release(
             or len(set(keys)) != count
         ):
             raise FullReleaseUnavailable("Invalid primary keys")
+        product_name = (
+            "Cedar Press" if collection_id in governed_collections.SHARED_COLLECTIONS
+            else "Cedar Grove"
+        )
         return {
             "content": content,
             "release_id": release_id,
@@ -1225,7 +1261,10 @@ def grove_full_release(
             "sha256": expected["sha256"],
             "fields": header,
             "component": component,
-            "citation": f"Cedar Grove {collection_id}/{component}, release {release_id}",
+            "citation": (
+                f"{product_name} "
+                f"{collection_id}/{component}, release {release_id}"
+            ),
             "filename": f"{collection_id}--{component}-{release_id}.jsonl",
             "media_type": "application/x-ndjson",
         }
@@ -1243,7 +1282,7 @@ def grove_release_metadata(collection_id):
     ``None`` when no release is pinned; an unverifiable component is reported
     as unavailable rather than dropped, and never replaced by a sample.
     """
-    if not is_grove_release(collection_id):
+    if not is_component_release(collection_id):
         return None
     out = []
     for component in grove_components(collection_id):
@@ -1264,3 +1303,29 @@ def full_release_metadata(collection_id):
         return full_release(collection_id, metadata_only=True)
     except FullReleaseUnavailable:
         return {"kind": "full", "status": "unavailable"}
+
+
+def release_targets_for(tier: str) -> dict[str, Any]:
+    """Tier-filtered integration targets; unpinned data has no invented sample or count."""
+    targets = [
+        {"id": item.id, "name": item.name, "shelf": item.shelf}
+        for item in launch.LAUNCH_COLLECTION
+    ] + [
+        {"id": key, "name": value["name"], "shelf": value["shelf"]}
+        for key, value in governed_collections.SHARED_COLLECTIONS.items()
+    ] + [dict(item) for item in launch.GROVE_RELEASE_COLLECTIONS]
+    visible = []
+    for target in targets:
+        key = target["id"]
+        if not may_download_full(tier, key):
+            continue
+        metadata = (
+            grove_release_metadata(key) if is_component_release(key)
+            else full_release_metadata(key)
+        )
+        visible.append({**target, "release": metadata, "sample": None})
+    return {
+        "kind": "release_target_registry", "target_count": len(targets),
+        "press_target_count": sum(item["shelf"] != "grove" for item in targets),
+        "collections": visible,
+    }

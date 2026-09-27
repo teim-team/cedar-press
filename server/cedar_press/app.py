@@ -483,6 +483,12 @@ def collections(session: Session = Depends(require_session)) -> dict[str, object
     return {"collections": repository.collections_for(session.tier)}
 
 
+@app.get("/press/release-collections")
+def release_collections(session: Session = Depends(require_session)) -> dict[str, object]:
+    """Collection release integration targets with verified metadata when available."""
+    return repository.release_targets_for(session.tier)
+
+
 @app.get("/press/shelf", response_class=HTMLResponse)
 def press_shelf(
     request: Request,
@@ -539,10 +545,11 @@ if not DOWNLOAD_LOG.handlers:
 def _download_audit(
     collection_id, outcome, release=None, requested_release_id=None, component=None
 ):
-    grove = repository.is_grove_release(collection_id)
+    component_release = repository.is_component_release(collection_id)
     safe_collection = (
         collection_id
-        if grove or any(item.id == collection_id for item in repository.launch.LAUNCH_COLLECTION)
+        if component_release
+        or any(item.id == collection_id for item in repository.launch.LAUNCH_COLLECTION)
         else "unknown"
     )
     event = {
@@ -558,8 +565,8 @@ def _download_audit(
         "release_id": release.get("release_id") if release else None,
         "sha256": release.get("sha256") if release else None,
     }
-    if grove:
-        # A Grove collection is several governed components: the record names
+    if component_release:
+        # A collection release has governed components: the record names
         # which one, redacted like the collection when it is not a declared one.
         event["component"] = (
             component
@@ -607,10 +614,10 @@ def full_download(
         if not release_id or not re.fullmatch(r"[0-9a-f]{64}", release_id):
             audit("invalid_release_request", requested=None)
             raise HTTPException(status_code=400, detail="Explicit release ID required")
-        if repository.is_grove_release(collection_id) and component is None:
+        if repository.is_component_release(collection_id) and component is None:
             audit("invalid_release_request")
             raise HTTPException(status_code=400, detail="Explicit component required")
-        if repository.is_grove_release(collection_id):
+        if repository.is_component_release(collection_id):
             release = repository.grove_full_release(collection_id, release_id, component=component)
         elif component is not None:
             audit("invalid_release_request")
