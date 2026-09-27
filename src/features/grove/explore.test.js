@@ -16,6 +16,7 @@ import { fileURLToPath } from "node:url";
 
 import { contractFor as deriveContract, validateContract } from "../../../scripts/derive-explore.mjs";
 import { LAUNCH_COLLECTION, collectionTables } from "./collection.js";
+import { STOREFRONT_CATALOG } from "./pressCatalog.js";
 import {
   CODEBOOK,
   CONTRACTS,
@@ -155,12 +156,14 @@ test("the flagship comes first among a collection's tables and locked shelves st
   const owned = standard.find((c) => c.entry.id === "owned");
   assert.equal(owned.flagship, null);
   assert.match(owned.previewUnavailable, /not in the repository|withheld|no preview/i);
-  // A collection on the shelf with no release says that, not "no preview".
+  // A collection presented by its record structure carries that structure,
+  // and is not a collection missing its preview.
   for (const id of ["plot", "foundation-corporate-giving"]) {
-    const pending = standard.find((c) => c.entry.id === id);
-    assert.equal(pending.flagship, null, id);
-    assert.deepEqual(pending.tables, [], id);
-    assert.match(pending.previewUnavailable, /is not yet published\. It is part of Cedar Press/, id);
+    const described = standard.find((c) => c.entry.id === id);
+    assert.equal(described.flagship, null, id);
+    assert.deepEqual(described.tables, [], id);
+    assert.equal(described.previewUnavailable, null, id);
+    assert.ok(described.structure?.fields.length >= 5, id);
   }
 });
 
@@ -512,15 +515,17 @@ test("every flagship sample reads through its contract without a thrown row", ()
     assert.ok(items.every((item) => item.recordId), `${key}: a row has no record id`);
   }
   // A Cedar Press+ reader's plan reaches all fourteen and a Cedar Press
-  // reader's seven, but the two with no release open for nobody: there is
-  // nothing to open, so they show "not yet published" rather than a lock.
-  assert.equal(explorableCollections(PRO).filter((c) => c.open).length, 12);
-  assert.equal(explorableCollections(PRESS).filter((c) => c.open).length, 6);
-  for (const user of [PRO, PRESS]) {
-    for (const id of ["plot", "foundation-corporate-giving"]) {
-      assert.equal(explorableCollections(user).find((c) => c.entry.id === id).open, false, id);
-    }
-  }
+  // reader's seven, the two new collections included like any other on
+  // their shelf (owner, 2026-09-27): Foundation & Corporate Giving on Cedar
+  // Press, PLOT on Cedar Press+.
+  const count = (shelves) => STOREFRONT_CATALOG.filter((entry) => shelves.includes(entry.shelf)).length;
+  assert.equal(explorableCollections(PRO).filter((c) => c.open).length, count(["standard", "pro"]));
+  assert.equal(explorableCollections(PRESS).filter((c) => c.open).length, count(["standard"]));
+  const opens = (user, id) => explorableCollections(user).find((c) => c.entry.id === id).open;
+  assert.equal(opens(PRESS, "foundation-corporate-giving"), true);
+  assert.equal(opens(PRO, "foundation-corporate-giving"), true);
+  assert.equal(opens(PRESS, "plot"), false, "PLOT is Cedar Press+");
+  assert.equal(opens(PRO, "plot"), true);
 });
 
 test("a table with no identifier column has no record id, and its rows keep distinct positional ids", () => {

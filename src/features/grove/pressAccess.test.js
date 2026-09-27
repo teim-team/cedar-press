@@ -5,7 +5,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { LAUNCH_COLLECTION, PENDING_RELEASE } from "./collection.js";
+import { LAUNCH_COLLECTION, STRUCTURE_ONLY } from "./collection.js";
 import {
   NATIVE_LINKAGE,
   GROVE_INCLUDES,
@@ -192,20 +192,20 @@ test("the upgrade prompt names the product that actually opens the shelf", () =>
 // behind it is a collection the shelf sells and the API cannot serve, which
 // is what the Gaming Intelligence preview was.
 //
-// Two catalog entries have no release yet, and they are named here: a
-// catalog entry with no release is allowed only with `coverage: PENDING`, so
-// it can never be sold as if it shipped, and a release landing for one fails
-// this until its coverage is measured.
-test("the catalog is the shipping collection plus the two pending a first release", () => {
+// Two catalog entries have no release file here, and they are named: a
+// catalog entry with no release is allowed only with `coverage: STRUCTURE`,
+// so no span or count can ever be stated for it, and a release landing for
+// one fails this until its coverage is measured.
+test("the catalog is the shipping collection plus the two presented by their record structure", () => {
   const shipping = new Set(LAUNCH_COLLECTION.map((dataset) => dataset.id));
   for (const dataset of LAUNCH_COLLECTION) {
     assert.ok(PRESS_CATALOG_BY_ID[dataset.id], `${dataset.id} is not in the catalog`);
   }
-  const pending = PRESS_CATALOG.filter((entry) => !shipping.has(entry.id));
-  assert.deepEqual(pending.map((entry) => entry.id).sort(), ["foundation-corporate-giving", "plot"]);
-  assert.deepEqual([...PENDING_RELEASE].sort(), ["foundation-corporate-giving", "plot"]);
+  const described = PRESS_CATALOG.filter((entry) => !shipping.has(entry.id));
+  assert.deepEqual(described.map((entry) => entry.id).sort(), ["foundation-corporate-giving", "plot"]);
+  assert.deepEqual([...STRUCTURE_ONLY].sort(), ["foundation-corporate-giving", "plot"]);
   for (const entry of PRESS_CATALOG) {
-    assert.equal(entry.coverage.kind === "pending", !shipping.has(entry.id), `${entry.id}: pending exactly when it has no release`);
+    assert.equal(entry.coverage.kind === "structure", !shipping.has(entry.id), `${entry.id}: structure exactly when it has no release`);
   }
   assert.equal(PRESS_CATALOG.length, LAUNCH_COLLECTION.length + 2);
 });
@@ -251,7 +251,7 @@ test("no collection states coverage that depends on a tier", () => {
   for (const entry of PRESS_CATALOG) {
     assert.ok(entry.coverage, `${entry.id} states no coverage`);
     assert.ok(
-      ["series", "roster", "pending"].includes(entry.coverage.kind),
+      ["series", "roster", "structure"].includes(entry.coverage.kind),
       `${entry.id} coverage kind ${entry.coverage.kind}`,
     );
     // The retired pair, gone rather than aliased. A `standardFrom` equal to
@@ -273,10 +273,10 @@ test("every series states a plausible year and every roster a capture date", () 
       assert.ok(from >= 1800, `${entry.id}: ${from}`);
       assert.ok(from <= thisYear, `${entry.id}: ${from}`);
       assert.equal(captured, undefined, `${entry.id} is a series with a capture date`);
-    } else if (kind === "pending") {
-      // No release, so nothing measured: neither a year nor a capture date.
-      assert.equal(from, undefined, `${entry.id} is pending with a from year`);
-      assert.equal(captured, undefined, `${entry.id} is pending with a capture date`);
+    } else if (kind === "structure") {
+      // Nothing measured: neither a year nor a capture date.
+      assert.equal(from, undefined, `${entry.id} states a from year with no measurement`);
+      assert.equal(captured, undefined, `${entry.id} states a capture date with no measurement`);
     } else {
       assert.match(captured, /^\d{4}-\d{2}-\d{2}$/, `${entry.id}: ${captured}`);
       // The whole point of the shape. A roster carrying a `from` would be the
@@ -315,19 +315,23 @@ test("a collection outside the reader's shelf still states its coverage", () => 
   assert.equal(coverageFrom(contractors), contractors.coverage.from);
 });
 
-// A collection on the shelf with no release says so, and never produces a
-// year for a rollup to reach back to.
-test("a pending collection reads as not yet published, and states no year", () => {
+// Foundation & Corporate Giving and PLOT are live on their plans like any
+// other collection on their shelf (owner, 2026-09-27), state no span and no
+// count, and never produce a year for a rollup to reach back to.
+test("the two presented by their record structure open by plan and state no span", () => {
+  const reach = { press: ["standard"], press_pro: ["standard", "pro"], grove: ["standard", "pro"], tree: ["standard", "pro"] };
   for (const id of ["plot", "foundation-corporate-giving"]) {
     const entry = PRESS_CATALOG_BY_ID[id];
-    assert.equal(entry.coverage.kind, "pending", id);
+    assert.equal(entry.coverage.kind, "structure", id);
     assert.equal(coverageFrom(entry), null, id);
-    assert.equal(coverageLabel(entry), "Not yet published", id);
-    // Included by its shelf, opened by nobody: there is nothing to open.
-    for (const tier of ["press", "press_pro", "grove", "tree"]) {
-      assert.equal(canOpenDataset({ workspace_tier: tier }, entry), false, `${id} opens for ${tier}`);
+    assert.equal(coverageLabel(entry), null, `${id} states a span`);
+    for (const [tier, shelves] of Object.entries(reach)) {
+      assert.equal(canOpenDataset({ workspace_tier: tier }, entry), shelves.includes(entry.shelf), `${id} for ${tier}`);
     }
   }
+  assert.equal(canOpenDataset({ workspace_tier: "press" }, PRESS_CATALOG_BY_ID["foundation-corporate-giving"]), true);
+  assert.equal(canOpenDataset({ workspace_tier: "press" }, PRESS_CATALOG_BY_ID.plot), false);
+  assert.equal(canOpenDataset({ workspace_tier: "press_pro" }, PRESS_CATALOG_BY_ID.plot), true);
   assert.equal(PRESS_CATALOG_BY_ID["foundation-corporate-giving"].shelf, "standard");
   assert.equal(PRESS_CATALOG_BY_ID.plot.shelf, "pro");
 });

@@ -460,7 +460,7 @@
       "name": "Foundation & Corporate Giving",
       "shelf": "standard",
       "coverage": {
-        "kind": "pending"
+        "kind": "structure"
       },
       "blurb": "Foundation, corporate and bank funding publicly disclosed for Native nations, organizations and initiatives. Follow the funder, legal recipient, purpose, geography, amount and timing while keeping commitments, payments, authorizations and other reported financial statuses distinct.",
       "linkage": "Philanthropic, corporate and bank giving, each disclosure kept as its own record: commitments and payments are separate facts, and the legal recipient is kept distinct from the Native beneficiary."
@@ -534,7 +534,7 @@
         "kind": "series",
         "from": 2016
       },
-      "blurb": "Enterprises owned or controlled by Native nations, Alaska Native corporations and other Native entities, including subsidiaries, holding companies and joint ventures. Follow parent relationships and organizational changes over time.",
+      "blurb": "Enterprises owned or controlled by Native nations, Alaska Native corporations and other Native entities, including subsidiaries, holding companies and joint ventures. Follow parent relationships and organizational changes over time. Where records are available, profiles also carry patents, assigned or later acquired, and dated credit ratings, each kept with the entity it concerns.",
       "linkage": "This is the structure the rest of the record resolves against, published as a collection in its own right: every tie names the nation or corporation behind it."
     },
     {
@@ -543,7 +543,7 @@
       "name": "PLOT",
       "shelf": "pro",
       "coverage": {
-        "kind": "pending"
+        "kind": "structure"
       },
       "blurb": "Parcel-level ownership and development records associated with Native nations, organizations and enterprises. Follow ownership, transfers, parcel characteristics, geometry, permits and other recorded property activity over time.",
       "linkage": "Land ownership, transfers, permitting and development, followed parcel by parcel: each parcel and the recorded events attached to it, linked to the Native entity that holds it."
@@ -554,7 +554,7 @@
       "name": "Federal Funding to Indian Country",
       "version": "v2",
       "updated": "2026-09-26",
-      "cadence": "Updated monthly",
+      "cadence": "Updated weekly",
       "retired": false,
       "history": [
         {
@@ -590,7 +590,7 @@
       "name": "Federal Register — Indian Affairs",
       "version": "v2",
       "updated": "2026-09-26",
-      "cadence": "Updated as records arrive",
+      "cadence": "Updated weekly",
       "retired": false,
       "history": [
         {
@@ -626,7 +626,7 @@
       "name": "Native Legislation and Votes",
       "version": "v2",
       "updated": "2026-09-26",
-      "cadence": "Updated monthly",
+      "cadence": "Updated weekly",
       "retired": false,
       "history": [
         {
@@ -662,7 +662,7 @@
       "name": "Indian Country Deals",
       "version": "v2",
       "updated": "2026-09-26",
-      "cadence": "Updated continuously",
+      "cadence": "Updated weekly",
       "retired": false,
       "history": [
         {
@@ -698,7 +698,7 @@
       "name": "NAGPRA Notices",
       "version": "v2",
       "updated": "2026-09-26",
-      "cadence": "Updated as records arrive",
+      "cadence": "Updated weekly",
       "retired": false,
       "history": [
         {
@@ -734,7 +734,7 @@
       "name": "Native Federal Advocacy and Engagement",
       "version": "v2",
       "updated": "2026-09-26",
-      "cadence": "Updated as records arrive",
+      "cadence": "Updated weekly",
       "retired": false,
       "history": [
         {
@@ -770,7 +770,7 @@
       "name": "Native Federal Contractors",
       "version": "v2",
       "updated": "2026-09-26",
-      "cadence": "Updated monthly",
+      "cadence": "Updated weekly",
       "retired": false,
       "history": [
         {
@@ -806,7 +806,7 @@
       "name": "Native Federal Subcontracting",
       "version": "v2",
       "updated": "2026-09-26",
-      "cadence": "Updated monthly",
+      "cadence": "Updated weekly",
       "retired": false,
       "history": [
         {
@@ -842,7 +842,7 @@
       "name": "Native-Owned Businesses",
       "version": "v2",
       "updated": "2026-09-26",
-      "cadence": "Updated as records arrive",
+      "cadence": "Updated weekly",
       "retired": false,
       "history": [
         {
@@ -879,7 +879,7 @@
       "name": "Cedar Native Entity Enterprise Dataset (NEED)",
       "version": "v2",
       "updated": "2026-09-26",
-      "cadence": "Updated as records arrive",
+      "cadence": "Updated weekly",
       "retired": false,
       "history": [
         {
@@ -915,7 +915,7 @@
       "name": "Tribal Natural Resource Revenue",
       "version": "v2",
       "updated": "2026-09-26",
-      "cadence": "Updated quarterly",
+      "cadence": "Updated weekly",
       "retired": false,
       "history": [
         {
@@ -951,7 +951,7 @@
       "name": "Native Nonprofits",
       "version": "v2",
       "updated": "2026-09-26",
-      "cadence": "Updated annually",
+      "cadence": "Updated weekly",
       "retired": false,
       "history": [
         {
@@ -987,43 +987,63 @@
   "workKinds": [
     {
       "id": "tribal_government",
-      "label": "Tribal government"
-    },
-    {
-      "id": "tribal_enterprise",
-      "label": "Tribal enterprise or corporation"
+      "label": "Tribal Nations"
     },
     {
       "id": "anc_nho",
-      "label": "ANC or NHO"
+      "label": "ANCs and NHOs"
     },
     {
-      "id": "native_nonprofit",
-      "label": "Native nonprofit or association"
-    },
-    {
-      "id": "federal",
-      "label": "Federal agency"
-    },
-    {
-      "id": "state_local",
-      "label": "State or local government"
+      "id": "tribal_enterprise",
+      "label": "Native enterprises"
     },
     {
       "id": "lender_investor",
-      "label": "Lender, investor or fund"
+      "label": "Banks, lenders and investors"
     },
     {
-      "id": "advisor",
-      "label": "Law, accounting or consulting firm"
+      "id": "native_nonprofit",
+      "label": "Native nonprofits"
     },
     {
-      "id": "media",
-      "label": "Newsroom or media"
+      "id": "foundation",
+      "label": "Foundations and philanthropy"
+    },
+    {
+      "id": "business",
+      "label": "Businesses working in Indian Country"
     },
     {
       "id": "academic",
-      "label": "University or research institute"
+      "label": "Universities and researchers"
+    },
+    {
+      "id": "government",
+      "label": "Government and public agency officials"
+    },
+    {
+      "id": "media",
+      "label": "Journalists and newsrooms"
+    },
+    {
+      "id": "advisor",
+      "label": "Consultants and advisors"
+    },
+    {
+      "id": "economic_development",
+      "label": "Economic development, investors and outside partners"
+    },
+    {
+      "id": "federal",
+      "label": "Government and public agency officials (federal)",
+      "retired": true,
+      "audience": "government"
+    },
+    {
+      "id": "state_local",
+      "label": "Government and public agency officials (state or local)",
+      "retired": true,
+      "audience": "government"
     }
   ],
   "cedarQuestions": {

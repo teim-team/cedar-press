@@ -21,6 +21,37 @@
 import { contactHref } from "./appLink.js";
 
 /**
+ * How Cedar Press is maintained, and what for (owner, 2026-09-27). One
+ * source for the wording, so each surface that says it (the door, Methods,
+ * the collection profile, the signed-in close, What's New and door Cedar)
+ * says the same thing without pasting the same paragraph everywhere: a
+ * surface takes the sentence, the goal or the short label it needs.
+ */
+export const MAINTENANCE = Object.freeze({
+  /** The whole commitment, in one sentence. */
+  sentence:
+    "Cedar Press maintains its datasets weekly with human review, expands their source coverage and useful fields over time and develops new collections.",
+  /** Why: the goal the maintenance serves. */
+  goal: "The aim is exceptionally useful, well-documented data and tools for Indian Country, well beyond filling in missing records.",
+  /** The short form for a fact line. */
+  label: "Weekly, with human review",
+});
+
+/**
+ * Patents and credit ratings in Cedar NEED (owner, 2026-09-27): enrichments
+ * of the enterprise records, not collections of their own, so they add no
+ * catalog entry and no count. Each keeps the entity it concerns.
+ */
+export const NEED_ENRICHMENTS = Object.freeze({
+  patents:
+    "Patents, where records are available, cover those originally assigned to an entity and those it later acquired, and an acquired patent is shown as acquired rather than as the entity's own invention.",
+  ratings:
+    "Credit ratings, where records are available, keep their issuer, instrument, agency and date, so a historical rating reads as an observation on that date rather than as a current rating.",
+  attachment:
+    "Each patent and each rating stays attached to the Native entity or enterprise it concerns, so a subsidiary's record is never presented as its parent's.",
+});
+
+/**
  * The domains the collections are built out of. Each one has its own legal
  * definitions, administrative systems, reporting conventions, historical
  * changes and source quirks, which is the point: no single API or technical
@@ -128,6 +159,9 @@ export const SOURCE_KINDS = Object.freeze([
   "Legal and administrative decisions",
   "Entity records",
   "Manually reviewed documentation",
+  // Cedar NEED's enrichments (owner, 2026-09-27).
+  "Patent records, supported by company, tribal, SEC and court evidence",
+  "Rating-agency announcements, supported by issuer and tribal releases, filings, regulator records and labeled secondary sources",
 ]);
 
 /**
@@ -210,7 +244,7 @@ export const BUILD_NEXT_STEPS = Object.freeze([
   Object.freeze({
     id: "maintain",
     label: "Maintenance",
-    note: "Kept current as sources update, organizations change and corrections arrive, each change logged against a release.",
+    note: "Reviewed weekly by a person as sources update, organizations change and corrections arrive, with each change logged against a release and source coverage and useful fields added over time.",
   }),
 ]);
 
@@ -252,6 +286,7 @@ export const ECOSYSTEM_EXAMPLES = Object.freeze([
   "A Federal Register notice can validate a recognition event, a regulatory action or a land-related development.",
   "Advocacy records, from lobbying filings to consultations, docket comments and testimony, connect organizations to legislation, and bill histories and votes show what followed.",
   "A nation's own enterprise register or audited filing names the subsidiaries the federal record files under unrelated names.",
+  "Patent records and rating-agency announcements add to an enterprise's Cedar NEED profile where records are available, each kept with the specific entity it concerns and its date.",
   "Federal funding and contracting records add economic activity to an entity profile.",
   "A site acquisition recorded in Indian Country Deals links to the parcels PLOT follows, so a transaction and the land it bought read together without being collapsed into one record.",
   "Foundation, corporate and bank giving read beside federal funding and the Native Nonprofits roster shows how an organization's private and public support combine, with the legal recipient and the Native beneficiary kept apart.",

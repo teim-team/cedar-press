@@ -6,8 +6,8 @@
  *   answerable      every collection question names codebook fields that
  *                   exist; Cedar's suggestions are held to the profile router
  *                   by the Python suite (server/tests/test_cedar_questions.py)
- *   the owner's copy every audience shows the owner's sentence, and all
- *                   eleven show against the fourteen-collection catalog
+ *   the owner's copy every audience shows the owner's sentence, and every
+ *                   declared audience shows against the full catalog
  *   coverage        a REPORT, not a rule (owner, 2026-09-26)
  *   imagery         every photograph a use case can show is copied in, at
  *                   the sizes declared, and has a license record
@@ -21,7 +21,8 @@ import { readFileSync, readdirSync } from "node:fs";
 
 import codebookJson from "../../../data/cedar/codebook.json" with { type: "json" };
 import { PRESS_CATALOG, STOREFRONT_CATALOG } from "./pressCatalog.js";
-import { PENDING_RELEASE, isReleased } from "./collection.js";
+import { STRUCTURE_ONLY, isReleased } from "./collection.js";
+import { RECORD_STRUCTURE, RECORD_STRUCTURE_TITLE } from "./pressRecordStructure.js";
 import { SECTOR_IMAGES, imageFile, imageSources } from "./pressImagery.js";
 import { BUILD_NEXT_QUESTION, BUILD_NEXT_STEPS, ECOSYSTEM_EXAMPLES } from "./pressMethod.js";
 import { PRIORITY_EXAMPLES } from "./pressPriorities.js";
@@ -184,8 +185,8 @@ const PRODUCER_FIELDS = Object.freeze({
 const NO_PRODUCER = Object.freeze(["plot"]);
 
 test("a collection with no release holds its questions to the producer's fields, or is named as having none", () => {
-  assert.deepEqual([...PENDING_RELEASE].sort(), ["foundation-corporate-giving", "plot"]);
-  for (const id of PENDING_RELEASE) {
+  assert.deepEqual([...STRUCTURE_ONLY].sort(), ["foundation-corporate-giving", "plot"]);
+  for (const id of STRUCTURE_ONLY) {
     const questions = collectionQuestions(id);
     assert.ok(questions.length >= 2, `${id} has no questions`);
     if (codebookTable(id)) {
@@ -203,6 +204,31 @@ test("a collection with no release holds its questions to the producer's fields,
     for (const item of questions) {
       assert.ok(item.fields.length, `"${item.q}" names no field`);
       for (const column of item.fields) assert.ok(columns.has(column), `"${item.q}" rests on ${column}, which the producer does not declare`);
+    }
+  }
+});
+
+// "What each record holds" (owner, 2026-09-27): the field list a viewer
+// shows for these two in place of sample records. Foundation & Corporate
+// Giving's is the producer's FIELDS, in order, with nothing added or
+// dropped; PLOT's is the owner's description, heading by heading. Every
+// meaning is one plain sentence and none states a figure.
+test("the record structure is the producer's fields for giving and the owner's headings for PLOT", () => {
+  assert.equal(RECORD_STRUCTURE_TITLE, "What each record holds");
+  assert.deepEqual(Object.keys(RECORD_STRUCTURE).sort(), [...STRUCTURE_ONLY].sort(), "one structure per collection with no sample rows");
+  assert.deepEqual(
+    RECORD_STRUCTURE["foundation-corporate-giving"].fields.map((field) => field.name),
+    [...PRODUCER_FIELDS["foundation-corporate-giving"]],
+  );
+  assert.deepEqual(
+    RECORD_STRUCTURE.plot.fields.map((field) => field.name),
+    ["Owner or entity", "Parcel ID", "Transfers", "Parcel characteristics", "Geometry", "Permits", "Development activity", "Dates", "Source"],
+  );
+  for (const [id, structure] of Object.entries(RECORD_STRUCTURE)) {
+    for (const { name, meaning } of structure.fields) {
+      assert.match(meaning, /^[A-Z][^&\u2014]*\.$/, `${id} ${name}: one plain sentence`);
+      assert.doesNotMatch(meaning, /\d/, `${id} ${name}: a meaning states no figure`);
+      assert.doesNotMatch(meaning, /\bimpact\b/i, `${id} ${name}`);
     }
   }
 });
@@ -250,11 +276,10 @@ test("questions keep the house style", () => {
 
 // ── Every audience shows the owner's sentence ──────────────────────────────
 
-test("every collection an audience cites is in the catalog, and all eleven audiences show", () => {
+test("every collection an audience cites is in the catalog, and every declared audience shows", () => {
   const catalogIds = liveIdsOf();
   for (const id of citedIds(ALL)) assert.ok(catalogIds.has(id), `${id} is not in the catalog`);
   const shown = visibleAudiences();
-  assert.equal(shown.length, 11, "all eleven, Foundations included");
   assert.equal(shown.length, AUDIENCE_JOBS.length, "no audience is hidden");
   assert.equal(shown[5].id, "foundations-philanthropy", "in its place, after Native nonprofits");
   for (const audience of shown) {
@@ -281,6 +306,37 @@ test("the owner's launch sentences are the ones shown", () => {
   assert.match(byId["native-nonprofits"].explanation, /combine federal and private support/);
   assert.ok(ids(byId["native-nonprofits"]).includes("foundation-corporate-giving"));
   assert.deepEqual(ids(byId["foundations-philanthropy"]), ["foundation-corporate-giving", "funding", "nonprofits"]);
+});
+
+// Owner direction, 2026-09-27, verbatim: the renamed consultants audience
+// and the new government audience, each with its job and with chips that
+// back the explanation's claims in the order it makes them.
+test("the consultants and government use cases carry the owner's copy and chips in claim order", () => {
+  const byId = Object.fromEntries(AUDIENCE_JOBS.map((audience) => [audience.id, audience]));
+  const advisors = byId.advisors;
+  assert.equal(advisors.audience, "Consultants and advisors");
+  assert.equal(advisors.job, "Client strategy");
+  assert.equal(advisors.outcome, "Build sourced analyses for clients without reconstructing records across agencies and vendors.");
+  assert.equal(advisors.explanation, "Research organizations, markets and prospective clients through funding, contracting, ownership, policy and transaction records.");
+  assert.deepEqual([...advisors.collections], ["funding", "contractors", "need", "federal-register", "deals"]);
+  assert.deepEqual([...advisors.imagePool], ["context-lattice", "context-cedar"]);
+  const government = byId["government-officials"];
+  assert.equal(government.audience, "Government and public agency officials");
+  assert.equal(government.job, "Tribal consultation");
+  assert.equal(government.outcome, "Prepare more informed tribal consultations, build stronger government-to-government relationships, and better serve the communities you represent.");
+  assert.equal(government.explanation, "Bring funding, legislation, agency actions and Native-entity records together with sources you can check.");
+  assert.deepEqual([...government.collections], ["funding", "legislation", "federal-register", "lobbying", "need"]);
+  assert.deepEqual([...government.imagePool], ["utilities", "transportation", "context-cedar"]);
+  // Placement: after the researchers, before the journalists; Tribal
+  // Nations stays its own audience.
+  const ids = AUDIENCE_JOBS.map((audience) => audience.id);
+  assert.equal(ids.indexOf("government-officials"), ids.indexOf("universities-researchers") + 1);
+  assert.equal(ids.indexOf("journalists"), ids.indexOf("government-officials") + 1);
+  assert.ok(ids.includes("tribal-nations"));
+  // No contact database, and support for engagement rather than a stand-in.
+  for (const text of [advisors.outcome, advisors.explanation, government.outcome, government.explanation]) {
+    assert.doesNotMatch(text, /contacts?\b|leads? list|outreach list|replace|instead of|\bimpact\b|—|&/i, text);
+  }
 });
 
 test("Foundations and philanthropy says that it is not a need score", () => {
@@ -321,8 +377,10 @@ test("the coverage report names a collection that loses its last use case", () =
 // ── Copy and data rules ───────────────────────────────────────────────────
 
 test("every use case has a job from the shared vocabulary", () => {
-  assert.equal(JOBS.length, 11);
+  assert.equal(new Set(JOBS).size, JOBS.length, "no job is listed twice");
   assert.ok(JOBS.includes("Competitive intelligence"), "the owner's job for ANCs and NHOs");
+  assert.ok(JOBS.includes("Client strategy"), "the owner's job for consultants and advisors");
+  assert.ok(JOBS.includes("Tribal consultation"), "the owner's job for government officials");
   for (const audience of ALL) assert.ok(JOBS.includes(audience.job), `${audience.id}: "${audience.job}" is not a job`);
 });
 

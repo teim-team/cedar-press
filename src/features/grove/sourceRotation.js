@@ -87,4 +87,7 @@ export const SOURCE_ROTATION = Object.freeze([
   "County assessor and property-tax records",
   "Building permit and inspection records",
   "Environmental permits and CEQA reviews",
+  // Cedar NEED's enrichments (owner, 2026-09-27). The 500+ figure is unchanged.
+  "Patent records",
+  "Rating-agency announcements",
 ]);

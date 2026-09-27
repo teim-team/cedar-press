@@ -1528,7 +1528,7 @@
 /* The collection in hand, in the owner's words: what the shelf's line under
  * the tiles did. Its height is reserved for about three lines so a shorter
  * description does not pull the provenance band up. */
-.teim-rd .cp-aud__note { font-size: 0.95rem; line-height: 1.6; color: var(--ink-2); margin: 1rem 0 0; min-height: 4.8em; max-width: 96ch; padding-top: 0.9rem; border-top: 1px solid var(--door-rule); }
+.teim-rd .cp-aud__note { font-size: 0.95rem; line-height: 1.6; color: var(--ink-2); margin: 1rem 0 0; min-height: 7.5em; max-width: 96ch; padding-top: 0.9rem; border-top: 1px solid var(--door-rule); }
 .teim-rd .cp-aud__note b { color: var(--ink); }
 .teim-rd .cp-aud__meta { font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--door-ink-3); white-space: nowrap; }
 @media (max-width: 560px) { .teim-rd .cp-aud__note { min-height: 0; } }
@@ -3512,6 +3512,25 @@
 .teim-rd .cp-lock__status > div { display: grid; gap: 0.15rem; }
 .teim-rd .cp-lock__status dt { font-family: var(--mono); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
 .teim-rd .cp-lock__status dd { margin: 0; font-size: 0.9rem; font-weight: 700; color: var(--ink); }
+
+/* ── WHAT EACH RECORD HOLDS (PressRecordStructure.jsx) ─────────────────────
+ * Foundation & Corporate Giving and PLOT, in the frame another collection's
+ * sample records fill: the product's own table, one row per field. Row
+ * headers here are the field names, so they drop the column header's sticky
+ * mono caps; the meaning wraps, because a sentence cut off by an ellipsis
+ * explains nothing. On a phone each field stacks over its meaning. */
+.teim-rd .cp-struct__table tbody th { position: static; z-index: auto; width: 1%; font-family: var(--sans); font-size: 0.84rem; font-weight: 700; letter-spacing: 0; text-transform: none; color: var(--ink); border-bottom: 1px solid var(--line-soft); }
+.teim-rd .cp-struct__table code { font-family: var(--mono); font-size: 0.76rem; font-weight: 600; color: var(--ink); }
+.teim-rd .cp-struct__table td.cp-struct__meaning { white-space: normal; max-width: none; min-width: 16rem; overflow: visible; color: var(--ink-2); }
+.teim-rd .cp-structview__cap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.3rem 1rem; margin: 0; padding: 0.5rem 1rem; border-bottom: 1px solid var(--line); font-family: var(--mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.11em; text-transform: uppercase; color: var(--muted); }
+.teim-rd .cp-structview .cp-ex__foot { display: block; }
+.teim-rd .cp-structview .cp-ex__foot > p { margin: 0.2rem 0; max-width: 72ch; }
+@media (max-width: 560px) {
+  .teim-rd .cp-struct__table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .teim-rd .cp-struct__table, .teim-rd .cp-struct__table tbody, .teim-rd .cp-struct__table tr { display: block; width: 100%; }
+  .teim-rd .cp-struct__table tr { border-bottom: 1px solid var(--line-soft); padding: 0.55rem 0; }
+  .teim-rd .cp-struct__table tbody th, .teim-rd .cp-struct__table td.cp-struct__meaning { display: block; width: auto; min-width: 0; padding: 0.1rem 1rem; border-bottom: 0; white-space: normal; }
+}
 .teim-rd .cp-ex__act.is-off { display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.4rem 0.7rem; border: 1px solid var(--line); background: var(--bg); color: var(--muted); cursor: default; }
 @media (max-width: 720px) {
   .teim-rd .cp-lock__say { margin-left: 0; text-align: left; }
@@ -4028,6 +4047,7 @@ body[data-cp-preview-in-view] .teim-rd .cp-dc__fab { display: none; }
 .teim-rd .cp-ch__n { display: block; font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.11em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.3rem; }
 .teim-rd .cp-ch .cp-msec__title { margin-bottom: 0.8rem; }
 .teim-rd .cp-ch__claim { font-size: 1.06rem; line-height: 1.6; color: var(--ink-2); margin: 0 0 1.4rem; max-width: 66ch; }
+.teim-rd .cp-ch__note { font-size: 0.95rem; line-height: 1.6; color: var(--ink-2); margin: 1.2rem 0 0; max-width: 66ch; }
 
 /* The actions. Never more than three, and the first may lead. */
 .teim-rd .cp-ch__acts { display: flex; flex-wrap: wrap; gap: 0.6rem; margin: 1.6rem 0 0; }

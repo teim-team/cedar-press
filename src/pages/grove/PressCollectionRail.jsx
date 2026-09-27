@@ -33,6 +33,7 @@ import { canOpenDataset } from "../../features/grove/pressAccess";
 import { downloadAll } from "../../features/grove/pressDownload";
 import { PRESS_TIERS, STOREFRONT_CATALOG } from "../../features/grove/pressCatalog";
 import { LAUNCH_COLLECTION, sampleUnavailableReason } from "../../features/grove/collection";
+import { recordStructure } from "../../features/grove/pressRecordStructure.js";
 import { TBN_PLANS_URL } from "../../features/grove/pressArticles";
 import { COLLECTION_ICONS } from "./pressCollectionIcons";
 import { TierName } from "./TierName";
@@ -100,7 +101,9 @@ export default function PressCollectionRail({
         </button>
       ) : null}
       {SHELVES.map(({ tier, entries }) => {
-        const sampleReady = entries.filter((entry) => canOpenDataset(user, entry) && !sampleUnavailableReason(entry.id));
+        // Samples only: a collection presented by its record structure opens
+        // like any other but has no sample rows to put in the shelf's file.
+        const sampleReady = entries.filter((entry) => canOpenDataset(user, entry) && !sampleUnavailableReason(entry.id) && !recordStructure(entry.id));
         const upgradeable = entries.filter((entry) => !canOpenDataset(user, entry) && !sampleUnavailableReason(entry.id));
         return (
           <div className="cp-rail__shelf" key={tier.id}>

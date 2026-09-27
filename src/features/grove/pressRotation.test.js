@@ -75,7 +75,10 @@ test("reduced motion never cycles, and one example has nothing to cycle", () => 
 });
 
 test("the counter counts what is shown", () => {
-  assert.equal(counterLabel(0, visibleAudiences().length), "01 / 11");
+  // The total is the shown set's size, derived, never typed: twelve today.
+  const shown = visibleAudiences().length;
+  assert.equal(counterLabel(0, shown), `01 / ${String(shown).padStart(2, "0")}`);
+  assert.equal(counterLabel(0, 12), "01 / 12");
   assert.equal(counterLabel(9, 10), "10 / 10");
 });
 

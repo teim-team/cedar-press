@@ -485,10 +485,11 @@ class TestPressCatalogSnapshot(unittest.TestCase):
         for entry in press_catalog.CATALOG:
             with self.subTest(collection=entry["id"]):
                 coverage = entry["coverage"]
-                self.assertIn(coverage["kind"], {"series", "roster", "pending"})
-                if coverage["kind"] == "pending":
-                    # No release, so nothing measured: neither shape's field.
-                    self.assertEqual(coverage, {"kind": "pending"})
+                self.assertIn(coverage["kind"], {"series", "roster", "structure"})
+                if coverage["kind"] == "structure":
+                    # Presented by its record structure, nothing measured:
+                    # neither shape's field, and no span to state.
+                    self.assertEqual(coverage, {"kind": "structure"})
                 elif coverage["kind"] == "series":
                     self.assertIn("from", coverage)
                     self.assertNotIn("captured", coverage)
@@ -521,7 +522,7 @@ class TestPressCatalogSnapshot(unittest.TestCase):
         for entry in press_catalog.CATALOG:
             coverage = entry["coverage"]
             with self.subTest(collection=entry["id"]):
-                if coverage["kind"] == "pending":
+                if coverage["kind"] == "structure":
                     continue
                 if coverage["kind"] == "series":
                     self.assertIsInstance(coverage["from"], int)

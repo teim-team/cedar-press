@@ -113,17 +113,44 @@ async function openDoorCedar(page) {
 }
 
 test.describe("the gate", () => {
-  test("the private preview note invites feedback and gives an access contact", async ({ page }) => {
+  test("the early access note names the summit and gives an access contact", async ({ page }) => {
     await page.goto("/");
     const notice = page.getByTestId("press-preview-note");
     await expect(notice).toBeVisible();
-    await expect(notice).toContainText("small group");
+    await expect(notice.locator("b")).toHaveText("Early access.");
+    await expect(notice.locator(".cp-preview__copy")).toHaveText(
+      "Early access. Cedar Press is open early to attendees of the Great Lakes Tribal Economic Summit ahead of its public launch. Need a login? elijah.moreno@lumecon.ai",
+    );
+    await expect(notice).not.toContainText("small group");
     await expect(notice.getByRole("link", { name: "elijah.moreno@lumecon.ai" }))
-      .toHaveAttribute("href", /mailto:elijah\.moreno@lumecon\.ai/);
+      .toHaveAttribute("href", "mailto:elijah.moreno@lumecon.ai?subject=Cedar%20Press%20preview%20access");
     // The way out is a close control, not a "Continue →" pill. A reader who
     // does not want to continue anywhere still has to be able to shut it.
     await notice.getByRole("button", { name: "Close this notice" }).click();
     await expect(notice).toHaveCount(0);
+    await page.reload();
+    await expect(page.getByTestId("press-preview-note")).toHaveCount(0);
+  });
+
+  // The maintenance story and the NEED enrichment sources (owner,
+  // 2026-09-27), on the door; the 500+ figure is unchanged.
+  test("the door says how Cedar Press is maintained and names the NEED enrichment sources", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.getByTestId("door-maintenance")).toContainText(
+      "Cedar Press maintains its datasets weekly with human review, expands their source coverage and useful fields over time and develops new collections.",
+    );
+    const panel = page.locator(".cp-hero3__proof");
+    await expect(panel.locator(".cp-hero3__run").first()).toContainText("Patent records");
+    await expect(panel.locator(".cp-hero3__run").first()).toContainText("Rating-agency announcements");
+    await expect(panel.locator(".cp-hero3__proofcount")).toContainText("500+ source websites");
+  });
+
+  test("a reader who closed the old private-preview note sees the early access note once", async ({ page }) => {
+    await page.goto("/");
+    await page.evaluate(() => sessionStorage.setItem("cedar-press-private-preview-notice", "dismissed"));
+    await page.reload();
+    await expect(page.getByTestId("press-preview-note")).toBeVisible();
+    await expect(page.getByTestId("press-preview-note")).toContainText("Early access.");
   });
 
   test("every signed-in route wears the same masthead", async ({ page }) => {
@@ -829,6 +856,58 @@ test.describe("Explore the collections", () => {
     expect(errors).toEqual([]);
   });
 
+  // FOUNDATION & CORPORATE GIVING AND PLOT ARE LIVE ON THEIR PLANS (owner,
+  // 2026-09-27). Each opens for the plan that includes it like any other
+  // collection on its shelf, and where another collection shows sample
+  // records it shows what each record holds. No row count, span or version
+  // is stated for either, anywhere a reader can see.
+  const NUMERIC_COUNT = /\d[\d,.]*\s*(k|m|million|thousand)?\s*(rows?|records?)\b/i;
+  for (const { id, fields, cases } of [
+    { id: "foundation-corporate-giving", fields: 27, cases: [{ account: PRESS_ACCOUNT, open: true }, { account: ACCOUNT, open: true }] },
+    { id: "plot", fields: 9, cases: [{ account: PRESS_ACCOUNT, open: false }, { account: ACCOUNT, open: true }] },
+  ]) {
+    for (const { account, open } of cases) {
+      test(`${id} ${open ? "opens on what each record holds" : "is offered on Cedar Press+"} for ${account === ACCOUNT ? "Cedar Press+" : "Cedar Press"}`, async ({ page }) => {
+        const errors = watchConsole(page);
+        await signIn(page, account);
+        await page.goto(`/data?c=${id}`);
+        const explore = page.getByTestId("explore");
+        await expect(explore).not.toContainText(/not yet published|first release/i);
+        await expect(page.getByTestId("explore-unavailable")).toHaveCount(0);
+        if (open) {
+          const view = page.getByTestId("explore-structure");
+          await expect(view).toBeVisible();
+          await expect(page.getByTestId("explore-locked")).toHaveCount(0);
+          await expect(view).toContainText("What each record holds");
+          await expect(view.getByTestId("record-structure").locator("tbody tr")).toHaveCount(fields);
+          expect(await view.innerText()).not.toMatch(NUMERIC_COUNT);
+        } else {
+          const locked = page.getByTestId("explore-locked");
+          await expect(locked).toBeVisible();
+          await expect(locked.locator(".cp-lock__say")).toContainText("Available with Cedar Press+");
+          expect((await locked.locator("thead th").allInnerTexts()).join(" | ").toUpperCase()).toContain("OWNER OR ENTITY");
+          expect(await locked.innerText()).not.toMatch(NUMERIC_COUNT);
+        }
+        const rail = page.locator(".cp-rail__item").filter({ has: page.locator(`text=${id === "plot" ? "PLOT" : "Foundation & Corporate Giving"}`) }).first();
+        await expect(rail.locator(".cp-rail__lock")).toHaveText(open ? [] : ["Plus"]);
+        expect(errors).toEqual([]);
+      });
+    }
+
+    test(`the door shows ${id} by what each record holds, with no count`, async ({ page }) => {
+      const errors = watchConsole(page);
+      await page.goto(`/?collection=${id}`);
+      const stage = page.locator(`[data-testid="collection-stage"][data-collection="${id}"]`);
+      await expect(stage).toBeVisible();
+      await expect(stage.getByTestId("record-structure").locator("tbody tr")).toHaveCount(fields);
+      await expect(stage).toContainText("What each record holds");
+      await expect(stage).not.toContainText(/not yet published|first release/i);
+      await expect(stage.locator(".cp-pane__facts")).not.toContainText(/\d/);
+      expect(await stage.innerText()).not.toMatch(NUMERIC_COUNT);
+      expect(errors).toEqual([]);
+    });
+  }
+
   for (const { label, account } of [
     { label: "Cedar Press", account: PRESS_ACCOUNT },
     { label: "Cedar Press+", account: ACCOUNT },
@@ -860,18 +939,26 @@ test.describe("Explore the collections", () => {
     const atlas = page.locator(".cp-atlas");
     await expect(atlas).toBeVisible();
     await expect(atlas.getByTestId("atlas-row")).toHaveCount(STOREFRONT_CATALOG.length);
-    // A collection with no release yet (coverage "pending") is neither
-    // included nor locked: it reads "Not yet published" on either shelf.
-    const pending = (entry) => entry.coverage.kind === "pending";
+    // Every collection on the reader's shelf is included and every one on
+    // the Plus shelf is offered, Foundation & Corporate Giving and PLOT like
+    // the rest (owner, 2026-09-27). Owned alone is its own state: a release
+    // whose sample preview is not published.
     await expect(atlas.locator(".cp-atlas__included")).toHaveCount(
-      STOREFRONT_CATALOG.filter((entry) => entry.shelf === "standard" && !pending(entry)).length,
+      STOREFRONT_CATALOG.filter((entry) => entry.shelf === "standard").length,
     );
     await expect(atlas.locator(".cp-atlas__locked")).toHaveCount(
-      STOREFRONT_CATALOG.filter((entry) => entry.shelf === "pro" && entry.id !== "owned" && !pending(entry)).length,
+      STOREFRONT_CATALOG.filter((entry) => entry.shelf === "pro" && entry.id !== "owned").length,
     );
-    // Owned's preview is pending; the two new collections are not yet published.
-    await expect(atlas.locator(".cp-atlas__pending")).toHaveCount(3);
-    await expect(atlas.locator(".cp-atlas__pending", { hasText: "Not yet published" })).toHaveCount(2);
+    await expect(atlas.locator(".cp-atlas__pending")).toHaveCount(1);
+    await expect(atlas).not.toContainText(/not yet published|first release/i);
+    // Neither states a row count, a span or a version: the cells are empty
+    // rather than holding a placeholder.
+    for (const name of ["PLOT", "Foundation & Corporate Giving"]) {
+      const row = atlas.getByTestId("atlas-row").filter({ has: page.getByRole("button", { name, exact: true }) });
+      await expect(row.getByTestId("atlas-rows")).toHaveText("");
+      await expect(row.locator("td").nth(1)).toHaveText("");
+      await expect(row.locator("td").nth(3)).toHaveText("");
+    }
     await expect(page.locator(".cp-ex__pages")).toHaveCount(0);
 
     await atlas.getByRole("button", { name: "Federal Prime Contracting" }).click();
@@ -1332,12 +1419,14 @@ test.describe("the door's use cases", () => {
     const cited = await page.locator(".cp-aud__col").evaluateAll((els) => [...new Set(els.map((el) => el.dataset.collection))]);
     const sold = new Set(STOREFRONT_CATALOG.map((entry) => entry.id));
     for (const id of cited) expect(sold.has(id), `${id} is not a live collection`).toBe(true);
-    // All eleven use cases, Foundations and philanthropy among them, and the
-    // two newest collections on its chips and on the others the owner wrote
-    // them into.
-    expect(shown).toBe(11);
-    await expect(counter(page)).toHaveText("01 / 11");
-    await expect(page.locator('.cp-aud__panel[data-audience="foundations-philanthropy"]')).toHaveCount(1);
+    // Every declared use case, counted from the layer rather than typed:
+    // Foundations and philanthropy and the government audience among them,
+    // and the two newest collections on the chips the owner wrote them into.
+    expect(shown).toBe(AUDIENCE_JOBS.length);
+    await expect(counter(page)).toHaveText(`01 / ${String(AUDIENCE_JOBS.length).padStart(2, "0")}`);
+    for (const id of ["foundations-philanthropy", "government-officials", "advisors"]) {
+      await expect(page.locator(`.cp-aud__panel[data-audience="${id}"]`)).toHaveCount(1);
+    }
     for (const id of ["plot", "foundation-corporate-giving"]) expect(cited, id).toContain(id);
     expect(errors).toEqual([]);
   });
@@ -1428,15 +1517,57 @@ test.describe("the door's use cases", () => {
     }
   });
 
+  // At most two lines above 1100; at or below it, one row that scrolls
+  // sideways inside itself while the page does not. The phone project
+  // measures 390 on its own viewport.
   test("the audience names are one row until there is room for two lines", async ({ page }, testInfo) => {
-    test.skip(testInfo.project.name !== "desktop", "measured at 1040 and 1440");
-    for (const [width, maxLines] of [[1040, 1], [1440, 2]]) {
-      await page.setViewportSize({ width, height: 900 });
+    const widths = testInfo.project.name === "desktop" ? [1440, 1040, 720] : [null];
+    for (const width of widths) {
+      if (width) await page.setViewportSize({ width, height: 900 });
       await page.goto("/");
+      const at = width ?? page.viewportSize().width;
       const lines = await page.locator(".cp-aud__tab").evaluateAll((tabs) => new Set(tabs.map((tab) => Math.round(tab.getBoundingClientRect().top))).size);
-      expect(lines, `at ${width}`).toBeLessThanOrEqual(maxLines);
+      expect(lines, `at ${at}`).toBeLessThanOrEqual(at > 1100 ? 2 : 1);
+      if (at <= 1100) {
+        const row = await page.locator(".cp-aud__tabs").evaluate((el) => ({ scroll: el.scrollWidth, client: el.clientWidth, overflow: getComputedStyle(el).overflowX }));
+        expect(row.overflow, `the row scrolls at ${at}`).toBe("auto");
+        expect(row.scroll, `the names overflow the row at ${at}, so it scrolls`).toBeGreaterThan(row.client);
+      }
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
-      expect(overflow, `the page scrolls sideways at ${width}`).toBeLessThanOrEqual(0);
+      expect(overflow, `the page scrolls sideways at ${at}`).toBeLessThanOrEqual(0);
+    }
+  });
+
+  // The government card carries the longest headline the band has. It must
+  // fit its card at every width: nothing clipped, nothing spilling, and on a
+  // phone the card is its own height (the test above checks the gap).
+  test("the longest headline fits its card at every width", async ({ page }, testInfo) => {
+    const widths = testInfo.project.name === "desktop" ? [1440, 1040, 720] : [null];
+    const index = visibleAudiences().findIndex((audience) => audience.id === "government-officials");
+    expect(index).toBeGreaterThanOrEqual(0);
+    for (const width of widths) {
+      if (width) await page.setViewportSize({ width, height: 900 });
+      await page.goto("/");
+      await band(page).evaluate((el) => el.scrollIntoView({ block: "center", behavior: "instant" }));
+      await page.locator(".cp-aud__tab").nth(index).click();
+      const panel = page.locator('.cp-aud__panel.is-on[data-audience="government-officials"]');
+      await expect(panel).toHaveCount(1);
+      const fit = await panel.evaluate((el) => {
+        const box = el.getBoundingClientRect();
+        const stack = el.closest(".cp-aud__stack").getBoundingClientRect();
+        const parts = [...el.querySelectorAll(".cp-aud__outcome, .cp-aud__use, .cp-aud__cols")].map((node) => ({
+          name: node.className,
+          right: node.getBoundingClientRect().right,
+          bottom: node.getBoundingClientRect().bottom,
+          clipped: node.scrollWidth > node.clientWidth + 1 || node.scrollHeight > node.clientHeight + 1,
+        }));
+        return { right: Math.min(box.right, stack.right), bottom: Math.min(box.bottom, stack.bottom), parts };
+      });
+      for (const part of fit.parts) {
+        expect(part.clipped, `${part.name} is clipped at ${width ?? "phone"}`).toBe(false);
+        expect(part.right, `${part.name} spills right at ${width ?? "phone"}`).toBeLessThanOrEqual(fit.right + 0.5);
+        expect(part.bottom, `${part.name} spills below the card at ${width ?? "phone"}`).toBeLessThanOrEqual(fit.bottom + 0.5);
+      }
     }
   });
 
@@ -2057,6 +2188,21 @@ test.describe("the bundle", () => {
     // Without this the test would pass just as happily against a build with
     // no account configured at all, which proves nothing about the digest.
     expect(digestSeen, "the configured digest is not in the build").toBe(true);
+  });
+
+  // Foundation & Corporate Giving and PLOT are published and live (owner,
+  // 2026-09-27): no page, prerendered route, SEO text or door answer in the
+  // build calls anything "not yet published", or waits on a first release.
+  test("says nothing is not yet published", async () => {
+    const dir = fileURLToPath(new URL("../dist-site/", import.meta.url));
+    const assets = await readdir(dir, { recursive: true, withFileTypes: true });
+    const files = assets.filter((entry) => entry.isFile() && /\.(js|html|json|xml|txt)$/.test(entry.name));
+    expect(files.length, "nothing was built to check").toBeGreaterThan(0);
+    for (const entry of files) {
+      const body = await readFile(`${entry.parentPath}/${entry.name}`, "utf8");
+      expect(body, `${entry.name} says "not yet published"`).not.toMatch(/not yet published/i);
+      expect(body, `${entry.name} waits on a first release`).not.toMatch(/with (its|their) first release/i);
+    }
   });
 
   // BOTH NEW COLLECTIONS ARE IN THE BUILD.
@@ -2709,6 +2855,39 @@ test.describe("dead ends", () => {
     await expect(page.getByRole("link", { name: /View in table/ })).toHaveCount(0);
     await expect(page.getByText("Records Cedar Press has resolved to this entity")).toHaveCount(0);
   });
+});
+
+test.describe("Settings: your work", () => {
+  // The offered answers are the landing audiences: same set, same order,
+  // same labels (readerWork.js reads them from pressJobs.js). A preserved
+  // stored answer is shown under the government audience with its level, to
+  // its holder only, and its stored value is never rewritten.
+  const OFFERED = visibleAudiences().map((audience) => audience.audience);
+
+  test("offers the landing audiences, in order, as the landing names them", async ({ page }) => {
+    await page.goto("/");
+    const landing = await page.locator(".cp-aud__tab").allTextContents();
+    expect(landing).toEqual(OFFERED);
+    await signIn(page);
+    await page.goto("/settings");
+    await expect(page.locator("#cp-work option")).toHaveText(["Rather not say", ...landing]);
+    await expect(page.locator("#cp-work option", { hasText: "Consultants and advisors" })).toHaveAttribute("value", "advisor");
+    await expect(page.locator("#cp-work option", { hasText: /^Government and public agency officials$/ })).toHaveAttribute("value", "government");
+  });
+
+  for (const [id, level] of [["federal", "federal"], ["state_local", "state or local"]]) {
+    test(`keeps a stored ${id} answer under the government audience, unchanged`, async ({ page }) => {
+      await signIn(page);
+      await page.evaluate((value) => localStorage.setItem("cedar-press-work", value), id);
+      await page.goto("/settings");
+      const select = page.locator("#cp-work");
+      await expect(select).toHaveValue(id);
+      const at = OFFERED.indexOf("Government and public agency officials");
+      const expected = ["Rather not say", ...OFFERED.slice(0, at + 1), `Government and public agency officials (${level})`, ...OFFERED.slice(at + 1)];
+      await expect(select.locator("option")).toHaveText(expected);
+      expect(await page.evaluate(() => localStorage.getItem("cedar-press-work"))).toBe(id);
+    });
+  }
 });
 
 /* ── Interaction: arrival, response, state ─────────────────────────────────

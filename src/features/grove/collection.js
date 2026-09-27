@@ -2,7 +2,8 @@
  * PURPOSE
  * The launch collection: the datasets Cedar Press sells that have a release.
  * Twelve of the catalog's fourteen do; Foundation & Corporate Giving and PLOT
- * are on the shelf with no release yet (`PENDING_RELEASE`, below).
+ * are live on their shelves and presented by their record structure
+ * (`STRUCTURE_ONLY`, below).
  *
  * This said "what the standalone Cedar Grove license reads", from the model in
  * which Cedar Grove published a slice of itself as Cedar Press. That model was
@@ -177,32 +178,21 @@ const TABLES = deepFreeze(
 );
 
 /**
- * Catalog collections with no release in the manifest: on the shelf, named,
- * tiered and described, with nothing measured and no records to show. Derived
- * rather than listed, so it cannot disagree with the manifest; the tests pin
- * it to the two collections it is today and fail when a release lands until
- * the catalog entry's coverage is measured.
+ * Catalog collections with no release in the manifest: live on their shelves,
+ * named, tiered, described and opened by plan like any other, and presented
+ * by their record structure (`pressRecordStructure.js`) because there are no
+ * sample rows here to show. Derived rather than listed, so it cannot disagree
+ * with the manifest; the tests pin it to the two collections it is today and
+ * fail when a release lands until the catalog entry's coverage is measured.
  */
 const RELEASED = new Set(manifest.collections.map((entry) => entry.id));
-export const PENDING_RELEASE = Object.freeze(
+export const STRUCTURE_ONLY = Object.freeze(
   PRESS_CATALOG.filter((entry) => !RELEASED.has(entry.id)).map((entry) => entry.id),
 );
 
 /** Whether a collection has a release this repository serves. */
 export function isReleased(datasetId) {
   return RELEASED.has(datasetId);
-}
-
-/**
- * What the viewer says where a pending collection's records would be. The
- * same slot `sampleUnavailableReason` fills for a released collection whose
- * preview file is missing, so every surface that already handles that state
- * handles this one.
- */
-export function pendingReleaseReason(datasetId) {
-  const entry = PRESS_CATALOG.find((item) => item.id === datasetId);
-  if (!entry || RELEASED.has(datasetId)) return null;
-  return `${entry.name} is not yet published. It is part of Cedar Press, and its sample records appear here with its first release.`;
 }
 
 /** Readiness, blockers and measured counts for a dataset, or `null`. */
@@ -248,7 +238,7 @@ export function collectionDeclaredSample(datasetId) {
  * instead of reporting the collection missing.
  */
 export function sampleUnavailableReason(datasetId) {
-  return SAMPLES[datasetId]?.unavailable_because ?? pendingReleaseReason(datasetId);
+  return SAMPLES[datasetId]?.unavailable_because ?? null;
 }
 
 /** The storefront's display short name, by collection id, where it sets one. */

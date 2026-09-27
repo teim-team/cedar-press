@@ -405,7 +405,7 @@ export default function PressAudienceExample({ selected, onPick, onPoint }) {
             <b>{described.name}.</b> {described.blurb}{" "}
             <span className="cp-aud__meta">
               {coverageLabel(described)}
-              {tier ? <> &middot; <TierName name={tier.name} /></> : null}
+              {tier ? <>{coverageLabel(described) ? <> &middot; </> : null}<TierName name={tier.name} /></> : null}
             </span>
           </>
         ) : null}

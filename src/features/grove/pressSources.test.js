@@ -44,6 +44,15 @@ test("every registry-evidenced source is a kind the registry actually holds", ()
   }
 });
 
+test("a declared source is a Cedar NEED enrichment, and says what supports it", () => {
+  const declared = PRESS_SOURCES.filter((s) => s.declared);
+  assert.deepEqual(declared.map((s) => s.name), ["Patent records", "Rating-agency announcements"]);
+  for (const source of declared) {
+    assert.deepEqual(source.collections, ["need"], source.name);
+    assert.ok(source.supportedBy, `${source.name} does not say what supports it`);
+  }
+});
+
 test("the registry entries do not restate a descriptor entry", () => {
   // The TERO registries are already named by the Owned descriptor, so the
   // registry group must not name them again. Near-duplicates were the

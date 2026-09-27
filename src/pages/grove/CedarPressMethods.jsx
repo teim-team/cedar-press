@@ -78,6 +78,7 @@ import { useFadeIn } from "../../features/grove/useFadeIn";
 import { useScrollToTop } from "../../features/grove/useScrollToTop";
 import {
   BUILD_NEXT_QUESTION,
+  MAINTENANCE,
   CREDIBILITY_DISCLAIMER,
   CREDIBILITY_STRIP,
   METHOD_COMMITMENTS,
@@ -414,6 +415,11 @@ export default function CedarPressMethods() {
               claim="Sources are gathered, normalized, resolved to entities and checked against each other; ambiguous matches go to a researcher rather than to a score, and every ruling goes back into the evidence."
             >
               <ProcessRail />
+              {/* How the collections are maintained, and what for (owner,
+                  2026-09-27), under the pipeline whose last stage it is. */}
+              <p className="cp-ch__note" data-testid="methods-maintenance">
+                {MAINTENANCE.sentence} {MAINTENANCE.goal}
+              </p>
 
               {/* THE ARGUMENT THIS PAGE EXISTS FOR. The two identifiers are
                   load-bearing, so they are named, shown at transcription size
