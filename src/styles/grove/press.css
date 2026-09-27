@@ -2581,13 +2581,12 @@
    together. Below 560px the column sets the width, so the text can be larger. */
 .teim-rd .cp-hero3__reach { margin: 0.9rem 0 0; max-width: 50ch; font-size: clamp(0.816rem, 1vw, 0.92rem); line-height: 1.55; color: var(--door-ink-3); text-wrap: pretty; }
 @media (max-width: 560px) { .teim-rd .cp-hero3__reach { font-size: 0.92rem; max-width: none; } }
-.teim-rd .cp-hero3__facts { list-style: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.55rem 1.2rem; margin: 1.2rem 0 0; padding: 1.1rem 0 0; border-top: 1px solid var(--door-rule); font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--door-ink-3); }
+.teim-rd .cp-hero3__facts { list-style: none; display: flex; flex-wrap: wrap; gap: 0.3rem 1.4rem; margin: 0.45rem 0 0; padding: 0; font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--door-ink-3); }
 .teim-rd .cp-hero3__facts b { font-weight: 700; color: var(--ink); }
 /* Each fact is one unit: a date broken across two lines ("UPDATED SEPT. 26, /
  * 2026") reads as two facts. On a phone the two columns size to their facts
  * rather than splitting the width evenly, which is what gives the date room. */
 .teim-rd .cp-hero3__facts li { white-space: nowrap; }
-@media (max-width: 720px) { .teim-rd .cp-hero3__facts { grid-template-columns: repeat(2, auto); justify-content: space-between; } }
 
 /* The stage: a directional light plane behind the frame, and the frame. */
 .teim-rd .cp-hero3__stage { position: relative; min-width: 0; margin: 0; isolation: isolate; }
@@ -2756,6 +2755,8 @@
   .teim-rd .cp-hero3__run { flex-wrap: wrap; gap: 0.35rem 0; }
   .teim-rd .cp-hero3__run li:first-child { padding-left: 0; }
   .teim-rd .cp-hero3__run li:first-child::before { display: none; }
+  .teim-rd .cp-why__sources .cp-hero3__marqwrap { overflow: hidden; }
+  .teim-rd .cp-why__sources .cp-hero3__run { flex-wrap: nowrap; }
 }
 
 /* ── The passage ─────────────────────────────────────────────────────────
@@ -2767,8 +2768,20 @@
 .teim-rd .cp-why__head { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(20rem, 0.95fr); align-items: end; gap: clamp(2rem, 5vw, 6rem); margin-bottom: clamp(1.8rem, 3.5vw, 2.8rem); }
 .teim-rd .cp-why__head > div { display: grid; gap: 0.8rem; }
 .teim-rd .cp-why__title { max-width: 18ch; margin: 0; color: #fff; font-family: var(--sans); font-size: clamp(2rem, 4vw, 3.6rem); font-weight: 750; letter-spacing: -0.03em; line-height: 1.02; text-wrap: balance; }
-.teim-rd .cp-why__lede--tbn { margin-top: 1rem; }
-.teim-rd .cp-why__lede { font-size: clamp(1rem, 1.2vw, 1.1rem); line-height: 1.6; color: rgba(255, 255, 255, 0.8); margin: 0; max-width: 54ch; text-wrap: pretty; }
+.teim-rd .cp-why__lede { font-size: clamp(1rem, 1.2vw, 1.1rem); line-height: 1.6; color: rgba(255, 255, 255, 0.8); margin: 0; max-width: 62ch; text-wrap: pretty; }
+/* The source banner on navy (owner, 2026-09-27): the right column of the
+ * passage, above the shelves. Same run and mask as before; light on dark. */
+.teim-rd .cp-why__head > .cp-why__side { display: flex; flex-direction: column; gap: clamp(1.4rem, 3vw, 2.2rem); min-width: 0; align-self: stretch; }
+.teim-rd .cp-why__sources { flex: 1 1 auto; display: flex; flex-direction: column; min-height: 14rem; max-width: none; margin: 0; background: rgba(255, 255, 255, 0.06); border-color: rgba(255, 255, 255, 0.18); box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
+.teim-rd .cp-why__sources .cp-hero3__prooflabel { color: rgba(255, 255, 255, 0.72); }
+.teim-rd .cp-why__sources .cp-hero3__prooflabel:hover, .teim-rd .cp-why__sources .cp-hero3__prooflabel:focus-visible { color: #fff; }
+.teim-rd .cp-why__runs { flex: 1 1 auto; display: flex; flex-direction: column; justify-content: space-evenly; gap: 0.55rem; }
+.teim-rd .cp-hero3__marquee--back { animation-direction: reverse; }
+.teim-rd .cp-why__sources .cp-hero3__proofcount { color: var(--door-accent-light); }
+.teim-rd .cp-why__sources .cp-hero3__run li { color: rgba(255, 255, 255, 0.86); }
+.teim-rd .cp-why__sources .cp-hero3__run li::before { background: rgba(255, 255, 255, 0.2); }
+.teim-rd .cp-why__lede a { color: #fff; text-decoration: underline; text-decoration-color: rgba(255, 255, 255, 0.45); text-underline-offset: 0.18em; }
+.teim-rd .cp-why__lede a:hover, .teim-rd .cp-why__lede a:focus-visible { text-decoration-color: currentColor; }
 .teim-rd .cp-why__shelves { list-style: none; margin: 0; padding: 1rem 0 0; border-top: 1px solid rgba(255, 255, 255, 0.22); display: grid; gap: 0.7rem; }
 .teim-rd .cp-why__shelves li { display: grid; grid-template-columns: 8rem minmax(0, 1fr); gap: 1rem; font-size: 0.92rem; line-height: 1.45; color: rgba(255, 255, 255, 0.78); }
 .teim-rd .cp-why__shelves b { color: #fff; font-weight: 700; }
@@ -2791,8 +2804,6 @@
 .teim-rd .cp-why__ic svg { width: 2.4rem; height: 2.4rem; }
 .teim-rd .cp-why__label { font-family: var(--sans); font-size: 1rem; font-weight: 750; letter-spacing: -0.015em; line-height: 1.25; color: #fff; }
 .teim-rd .cp-why__body { font-size: 0.88rem; line-height: 1.55; color: rgba(255, 255, 255, 0.76); }
-.teim-rd .cp-why__trust { margin: clamp(1.6rem, 3vw, 2.4rem) 0 0; max-width: 64ch; font-size: 1rem; line-height: 1.6; color: rgba(255, 255, 255, 0.82); text-wrap: pretty; }
-.teim-rd .cp-why__trust + .cp-why__note { margin-top: 1rem; }
 .teim-rd .cp-why__note { margin: clamp(1.6rem, 3vw, 2.4rem) 0 0; font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255, 255, 255, 0.45); }
 
 /* ── The ways in ─────────────────────────────────────────────────────────
@@ -3202,6 +3213,7 @@
  * so a guarded rule is the difference between a response and a stuck one. */
 @media (hover: hover) and (pointer: fine) {
   .teim-rd .cp-hero3__run li:hover { color: var(--dteal); }
+  .teim-rd .cp-why__sources .cp-hero3__run li:hover { color: #fff; }
   .teim-rd .cp-ways__row:hover { border-bottom-color: var(--dteal); }
   .teim-rd .cp-ways__row:hover .cp-ways__label { color: var(--ink); }
   .teim-rd .cp-hero3__stage:hover .cp-hero3__frame { transform: translateY(-3px); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.98), 0 4px 8px rgba(10, 28, 52, 0.08), 0 26px 54px -24px rgba(10, 28, 52, 0.3), 0 60px 110px -56px rgba(10, 28, 52, 0.38); }

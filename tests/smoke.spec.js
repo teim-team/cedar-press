@@ -140,8 +140,8 @@ test.describe("the gate", () => {
       "Cedar Press maintains its datasets weekly with human review, expands their source coverage and useful fields over time and develops new collections.",
     );
     const panel = page.locator(".cp-hero3__proof");
-    await expect(panel.locator(".cp-hero3__run").first()).toContainText("Patent records");
-    await expect(panel.locator(".cp-hero3__run").first()).toContainText("Rating-agency announcements");
+    await expect(panel).toContainText("Patent records");
+    await expect(panel).toContainText("Rating-agency announcements");
     await expect(panel.locator(".cp-hero3__proofcount")).toContainText("500+ source websites");
   });
 
@@ -155,6 +155,24 @@ test.describe("the gate", () => {
     await expect(page.locator(".cp-hero3__reach")).toHaveCount(0);
     await expect(page.locator(".cp-hero3")).not.toContainText("distinct source websites in dataset construction");
     await expect(page.locator(".cp-hero3__proofcount")).toContainText("500+ source websites");
+  });
+
+  // The landing layout of 2026-09-27: the source banner in the navy
+  // passage's right column, the summary figures one line under the viewer
+  // caption with nothing below the hero's button, the passage in three
+  // paragraphs with Lumecon, its team page and Tribal Business News linked,
+  // and the long-run trust line gone.
+  test("the source banner sits in the navy passage and the figures sit under the viewer", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.locator(".cp-why .cp-why__side .cp-hero3__proof")).toHaveCount(1);
+    await expect(page.locator(".cp-hero3__copy .cp-hero3__facts")).toHaveCount(0);
+    await expect(page.locator(".cp-hero3__stage figcaption + .cp-hero3__facts")).toHaveCount(1);
+    const ledes = page.locator(".cp-why__lede");
+    await expect(ledes).toHaveCount(3);
+    await expect(ledes.nth(1).locator('a[href="https://lumecon.ai"]')).toHaveCount(1);
+    await expect(ledes.nth(1).locator('a[href="https://lumecon.ai/team/"]')).toHaveCount(1);
+    await expect(ledes.nth(2).locator('a[href="https://tribalbusinessnews.com"]')).toHaveCount(1);
+    await expect(page.locator("body")).not.toContainText("As search and analytical tools improve");
   });
 
   test("a reader who closed the old private-preview note sees the early access note once", async ({ page }) => {
