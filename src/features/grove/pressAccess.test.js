@@ -5,7 +5,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { LAUNCH_COLLECTION } from "./collection.js";
+import { LAUNCH_COLLECTION, PENDING_RELEASE } from "./collection.js";
 import {
   NATIVE_LINKAGE,
   GROVE_INCLUDES,
@@ -191,15 +191,23 @@ test("the upgrade prompt names the product that actually opens the shelf", () =>
 // The other direction matters as much: a catalog entry with no descriptor
 // behind it is a collection the shelf sells and the API cannot serve, which
 // is what the Gaming Intelligence preview was.
-test("the catalog and the shipping collection are the same set", () => {
+//
+// Two catalog entries have no release yet, and they are named here: a
+// catalog entry with no release is allowed only with `coverage: PENDING`, so
+// it can never be sold as if it shipped, and a release landing for one fails
+// this until its coverage is measured.
+test("the catalog is the shipping collection plus the two pending a first release", () => {
   const shipping = new Set(LAUNCH_COLLECTION.map((dataset) => dataset.id));
   for (const dataset of LAUNCH_COLLECTION) {
     assert.ok(PRESS_CATALOG_BY_ID[dataset.id], `${dataset.id} is not in the catalog`);
   }
+  const pending = PRESS_CATALOG.filter((entry) => !shipping.has(entry.id));
+  assert.deepEqual(pending.map((entry) => entry.id).sort(), ["foundation-corporate-giving", "plot"]);
+  assert.deepEqual([...PENDING_RELEASE].sort(), ["foundation-corporate-giving", "plot"]);
   for (const entry of PRESS_CATALOG) {
-    assert.ok(shipping.has(entry.id), `${entry.id} is in the catalog and does not ship`);
+    assert.equal(entry.coverage.kind === "pending", !shipping.has(entry.id), `${entry.id}: pending exactly when it has no release`);
   }
-  assert.equal(PRESS_CATALOG.length, LAUNCH_COLLECTION.length);
+  assert.equal(PRESS_CATALOG.length, LAUNCH_COLLECTION.length + 2);
 });
 
 // The shelf is the same one on both sides: a collection the workspace put on
@@ -243,7 +251,7 @@ test("no collection states coverage that depends on a tier", () => {
   for (const entry of PRESS_CATALOG) {
     assert.ok(entry.coverage, `${entry.id} states no coverage`);
     assert.ok(
-      entry.coverage.kind === "series" || entry.coverage.kind === "roster",
+      ["series", "roster", "pending"].includes(entry.coverage.kind),
       `${entry.id} coverage kind ${entry.coverage.kind}`,
     );
     // The retired pair, gone rather than aliased. A `standardFrom` equal to
@@ -265,6 +273,10 @@ test("every series states a plausible year and every roster a capture date", () 
       assert.ok(from >= 1800, `${entry.id}: ${from}`);
       assert.ok(from <= thisYear, `${entry.id}: ${from}`);
       assert.equal(captured, undefined, `${entry.id} is a series with a capture date`);
+    } else if (kind === "pending") {
+      // No release, so nothing measured: neither a year nor a capture date.
+      assert.equal(from, undefined, `${entry.id} is pending with a from year`);
+      assert.equal(captured, undefined, `${entry.id} is pending with a capture date`);
     } else {
       assert.match(captured, /^\d{4}-\d{2}-\d{2}$/, `${entry.id}: ${captured}`);
       // The whole point of the shape. A roster carrying a `from` would be the
@@ -301,6 +313,23 @@ test("a collection outside the reader's shelf still states its coverage", () => 
   const contractors = PRESS_CATALOG_BY_ID.contractors;
   assert.equal(canOpenDataset({ workspace_tier: "press" }, contractors), false);
   assert.equal(coverageFrom(contractors), contractors.coverage.from);
+});
+
+// A collection on the shelf with no release says so, and never produces a
+// year for a rollup to reach back to.
+test("a pending collection reads as not yet published, and states no year", () => {
+  for (const id of ["plot", "foundation-corporate-giving"]) {
+    const entry = PRESS_CATALOG_BY_ID[id];
+    assert.equal(entry.coverage.kind, "pending", id);
+    assert.equal(coverageFrom(entry), null, id);
+    assert.equal(coverageLabel(entry), "Not yet published", id);
+    // Included by its shelf, opened by nobody: there is nothing to open.
+    for (const tier of ["press", "press_pro", "grove", "tree"]) {
+      assert.equal(canOpenDataset({ workspace_tier: tier }, entry), false, `${id} opens for ${tier}`);
+    }
+  }
+  assert.equal(PRESS_CATALOG_BY_ID["foundation-corporate-giving"].shelf, "standard");
+  assert.equal(PRESS_CATALOG_BY_ID.plot.shelf, "pro");
 });
 
 test("an entry with no coverage says so rather than guessing", () => {

@@ -78,7 +78,7 @@ import {
 import CollectionPreview from "./PressCollectionPreview";
 import PressCollectionRail from "./PressCollectionRail.jsx";
 import PressDoorCedar from "./PressDoorCedar";
-import PressDoorCollections from "./PressDoorCollections";
+import PressAudienceExample from "./PressAudienceExample";
 import { PressPreviewNotice } from "./PressChrome";
 import { TierName } from "./TierName";
 import PressReleaseSpecimen from "./PressReleaseSpecimen";
@@ -242,6 +242,32 @@ export default function PressGate({ user }) {
     return () => {
       observer.disconnect();
       document.body.removeAttribute("data-cp-preview-in-view");
+    };
+  }, []);
+  // THE SAME, ON A PHONE, FOR THE FIRST SCREEN AND THE USE CASES. At 390 the
+  // launcher sat on the hero's facts row and, lower down, on the use-case
+  // card's last lines. While either is on screen it stays away (the
+  // stylesheet applies this below 720 only); the door's other ways into
+  // Cedar are a scroll away, and from the navy passage down it is back.
+  const heroCopyRef = useRef(null);
+  useEffect(() => {
+    const nodes = [heroCopyRef.current, document.querySelector(".cp-aud")].filter(Boolean);
+    if (!nodes.length || typeof IntersectionObserver !== "function") return undefined;
+    const showing = new Set();
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) showing.add(entry.target);
+          else showing.delete(entry.target);
+        }
+        document.body.toggleAttribute("data-cp-launcher-away", showing.size > 0);
+      },
+      { threshold: 0 },
+    );
+    for (const node of nodes) observer.observe(node);
+    return () => {
+      observer.disconnect();
+      document.body.removeAttribute("data-cp-launcher-away");
     };
   }, []);
   useEffect(() => {
@@ -523,7 +549,7 @@ export default function PressGate({ user }) {
       {/* ── The hero: the promise, and beside it the product ─────────── */}
       <section className="cp-hero3" aria-label="Cedar Press">
         <div className="cp-hero3__in">
-          <div className="cp-hero3__copy">
+          <div className="cp-hero3__copy" ref={heroCopyRef}>
             <p className="cp-kicker cp-fade">Original intelligence collections</p>
             {/* Two messages, on purpose: the door sells the asset, the
                 signed-in overview keeps the editorial "Know what's shaping
@@ -535,6 +561,15 @@ export default function PressGate({ user }) {
               Original collections built from publicly available sources, connected through original
               research, and maintained as Indian Country changes. Every record traces back to the
               document it came from.
+            </p>
+            {/* Who made it, on the first screen (owner's brief, 2026-09-26):
+                one restrained line rather than logos, so the product frame
+                stays the proof object. The foot and the navy passage still
+                say what each partner contributes. */}
+            <p className="cp-hero3__by cp-fade">
+              Built by <a href={LUMECON_URL} target="_blank" rel="noreferrer">Lumecon</a> in
+              partnership with{" "}
+              <a href={TBN_URL} target="_blank" rel="noreferrer">Tribal Business News</a>.
             </p>
             <p className="cp-hero3__reach cp-fade">{SOURCE_REACH_CLAIM}</p>
             <div className="cp-hero3__cta cp-fade">
@@ -614,21 +649,19 @@ export default function PressGate({ user }) {
 
         </div>
 
-        {/* THE TWELVE, AT A SIZE YOU CAN ACTUALLY POINT AT.
-            Its own band under the hero, full page width. Inside the hero's
-            split it landed in the right-hand column and every tile shrank to
-            one character wide.
-
-            The frame's rail lists all twelve and has always been clickable,
-            but the frame renders the real app at 1280px and scales it to fit,
-            so a rail row is about seventeen pixels tall in six-point type:
-            visible, not pointable. A visitor deciding whether to subscribe
-            should be able to see what the twelve are and what each holds.
-
-            Pointing at one drives the frame above and answers in the line
-            below, so it works whether or not the frame is still on screen. */}
-        <PressDoorCollections
-          selectedId={selectedId}
+        {/* THE SPACE UNDER THE HERO IS HOW THE COLLECTIONS GET USED.
+            This slot held the full-size collection shelf, which was there
+            because the frame renders the real app at 1280px and scales it to
+            fit, so a rail row is about seventeen pixels tall: visible, not
+            pointable. The owner replaced the shelf on 2026-09-26 (it repeated
+            what the viewer already shows) with the use-case band, which keeps
+            the shelf's jobs: its chips preview a collection in the frame on
+            point and commit it on click through the same `pick`, and the
+            selected collection's description sits under it. Whether every live
+            collection is named by some use case is a review report
+            (pressJobs.test.js), not a rule. */}
+        <PressAudienceExample
+          selected={selected}
           onPick={pick}
           onPoint={setSelectedId}
         />
@@ -692,7 +725,7 @@ export default function PressGate({ user }) {
                 track. Lumecon draws on more than 500 source websites to settle that question,
                 giving every organization it can resolve a permanent identifier and keeping it
                 current as organizations rename, merge and change hands. That is how{" "}
-                {LAUNCH_COLLECTION.length} datasets come to answer as one collection.
+                {STOREFRONT_CATALOG.length} datasets come to answer as one collection.
               </p>
               {/* Owner copy, 2026-09-25. The records say what happened; the
                   reporting says what it means. No count of relationships is
@@ -732,6 +765,14 @@ export default function PressGate({ user }) {
               </li>
             ))}
           </ol>
+          {/* The owner's long-run trust line (2026-09-26): here, where the
+              passage argues for the maintained record, and never on a use
+              case card. */}
+          <p className="cp-why__trust cp-fade">
+            As search and analytical tools improve, Cedar Press keeps the underlying evidence
+            consistent: the same maintained sources, entities, releases and provenance beneath new
+            ways of working with the data.
+          </p>
           <p className="cp-why__note cp-fade">Photography is illustrative and does not identify Cedar Press customers.</p>
         </div>
       </section>

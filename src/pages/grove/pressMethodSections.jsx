@@ -19,7 +19,7 @@ import {
   labelLines,
   say,
 } from "../../features/grove/pressEcosystem.js";
-import { CONSTRUCTION_STEPS } from "../../features/grove/pressMethod.js";
+import { BUILD_NEXT_STEPS, CONSTRUCTION_STEPS } from "../../features/grove/pressMethod.js";
 import {
   IDENTIFIERS,
   KEPT_OUTSIDE,
@@ -46,6 +46,26 @@ import { COLLECTION_ICONS } from "./pressCollectionIcons.jsx";
  * reads one process with seven moments in it. Seven separate cards read as
  * seven separate things, which is the opposite of the claim.
  */
+/**
+ * How Cedar decides what to build next: the question first, then the six
+ * stages from it to a maintained release, as one numbered row. Its own
+ * classes rather than `.cp-proc`'s, so the seven construction stages keep
+ * their sequence and their count.
+ */
+export function BuildNextRail() {
+  return (
+    <ol className="cp-bnx" aria-label="From a question to a maintained release">
+      {BUILD_NEXT_STEPS.map((stage, index) => (
+        <li className="cp-bnx__stage" key={stage.id}>
+          <span className="cp-bnx__n">{String(index + 1).padStart(2, "0")}</span>
+          <h3 className="cp-bnx__name">{stage.label}</h3>
+          <p className="cp-bnx__body">{stage.note}</p>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
 export function ProcessRail() {
   return (
     <ol className="cp-proc">

@@ -12,6 +12,7 @@ system's named components to where each lives today.
 | ActionPill | `.cp-start__act` | The overview's start-here verbs. Reuse for any future inline CTA row; do not restyle per page. |
 | SponsorshipUnit | `PressAd` + `AD_SLOT` (`pressAds.js`) | One component, shape variants per slot (banner on the overview, sidebar in articles). Same `SPONSORSHIP` cap, border, tint and CTA everywhere. Enquiries go to TBN's media kit (`AD_ENQUIRY_HREF`). |
 | AskCedarFAB | `PressCedarFab` | Identical launcher, offset and dimensions on every page; context arrives via props (`examples`, `gated`) and events (`cedar:open`, `cedar:ask-collection`), never via per-page styling. The PANEL is `.cp-dc__*`, shared with the door and with lumecon.ai's `CedarFAB.astro` — see "Cedar" below. |
+| UseCaseBand | `PressAudienceExample` + `pressJobs.js` (`AUDIENCE_JOBS`) + `pressRotation.js` + `pressImagery.js` | The door's band under the hero, in the slot the collection shelf held until 2026-09-26. One use case at a time as a card: a duotone sector photograph as a panel beside the text (a 5:2 banner on top on a phone; the side alternates by use case above 720px), the audience and its job, the outcome as the headline, what Cedar Press lets that audience understand, and the collections it names as chips that preview and pick in the hero frame; then the picked collection's description and the owner's quiet line. Use cases are data in the shared jobs layer, which the collection profile, Cedar's suggestions, the entity page and Research access also read; collections are catalog ids, so names and marks come from the catalog. Each use case rotates through its image pool, one photograph per visit; photographs are lazy and only the shown and next use cases hold one. Announced but unreleased collections, their marks and every sentence and question about them live in `pressAnnounced.js` and `pressAnnouncedIcons.jsx`, which nothing the page loads imports, so none of it is in the shipped bundle (the smoke suite greps the production build for it). Coverage of every collection is a review report, not a rule (see below). |
 | CollectionRail | `PressCollectionRail` (`src/pages/grove/PressCollectionRail.jsx`) | The twelve collections, once. Two modes: `preview` on the door, `app` behind the paywall, where a collection the plan cannot open stays in the rail and is visibly locked. Never a second list of the same twelve. |
 | CollectionAtlas | `CollectionAtlas` (in `PressExplore`) | The catalogue, in the table: one row a collection, its coverage, size, release and what opens it, locked ones included. What "show me everything" means when nothing has been asked yet; the pooled records come back the moment a search or filter turns the question back into one about records. |
 | LockedCollection | `LockedCollection` (in `PressExplore`) | The same toolbar, the collection's own declared column headers, the same row density, the same status bar — with the values withheld by never being fetched. One line says what opens it. A blank page with an upsell box asks somebody to buy a thing they have not been shown. |
@@ -96,36 +97,45 @@ are revealed by `useFadeIn` (see the hook for why anything on the first
 screen is marked `cp-fade--now` and does not transition). Inside a revealed
 block, a set reads in order rather than landing as a slab: the door's four
 claims and three ways in stagger by `transition-delay` on the items
-themselves (0/70/140/210ms); the twelve collection tiles and Methods' seven
-process stages stagger by a keyframe (`cp-tile-in`, `cp-stage-in`) on each
-item's own `--i`, 45ms and 55ms a beat, with a `backwards` fill and no
-forward fill, so an arrived element is free to answer the pointer. Both are
-inert under `.cp-fade--now` — which, measured on the built door, is what the
-twelve are on every common desktop window (their top sits at 0.77 to 1.01 of
-the window height from 1280x720 to 1920x1080, inside the hook's 1.1 slack), so
-on a desktop they arrive with the page and the stagger is what a phone, or a
-window under about 1100 wide, sees.
+themselves (0/70/140/210ms); Methods' seven process stages stagger by a
+keyframe (`cp-stage-in`) on each item's own `--i`, 55ms a beat, with a
+`backwards` fill and no forward fill, so an arrived element is free to answer
+the pointer. It is inert under `.cp-fade--now`. (The door's twelve collection
+tiles staggered the same way on `cp-tile-in` until the shelf was replaced by
+the use-case band on 2026-09-26; the keyframe went with it.)
 
 **Response** — a fine pointer, or keyboard focus. A lift of at most 3px with
-a soft shadow (the twelve: `translateY(-2px)` + `--door-shadow-surface`; the
-hero frame 3px). Every `:hover` on the door and on Methods' process rail is
+a soft shadow (the use-case chips: `translateY(-2px)` +
+`--door-shadow-surface`; the hero frame 3px). Every `:hover` on the door and on Methods' process rail is
 inside `@media (hover: hover) and (pointer: fine)`, and `:focus-visible`
-lifts a tile the same way. The pattern is lumecon-website PR #353 (the Why
-Lumecon cards). Nothing loops, nothing moves after it has arrived, and
-nothing around the lifted element moves.
+lifts a chip the same way. The pattern is lumecon-website PR #353 (the Why
+Lumecon cards). Nothing around the lifted element moves.
 
-**State** — colour only. The shelf whose collection is in hand
-(`.cp-dcol__shelf.is-active`) takes the accent on its rule and its plan
-name; a tapped tile is `.is-on`. A state is never a movement.
+**Two things on the door move on their own**, and both stop for the reader:
+the provenance marquee (hover or focus stops it; reduced motion turns it into
+a wrapped list) and the use-case band (`PressAudienceExample`), which changes
+its example every eight seconds by a 0.35s crossfade in place. The band pauses
+while hovered or focused, stops for good once the visitor picks anything in
+it, does not turn while off screen, and never turns under reduced motion. It
+changes the EXAMPLE only, never the selected collection. Every example sits in
+one grid cell, so the band is as tall as its longest example and nothing
+below it moves. Its chips preview a collection in the hero frame only above
+1100px with a fine pointer, where a preview cannot change any height; below
+that a chip commits on click (a preview on a tap's focus once swapped the
+phone's ~2,300px fluid frame mid-tap and lost the tap).
+
+**State** — colour only. The chip whose collection is in hand is `.is-on`
+(teal rule, teal tint); a Cedar Press+ collection's chip carries the plan's
+raised plus (`TierName`). A state is never a movement.
 
 **Reduced motion** removes travel, not response: no transition, no
-animation, every arrival already in place, and a pointed tile raised on the
+animation, every arrival already in place, and a pointed chip raised on the
 next frame rather than over 180ms. The old rule of also cancelling the lift
 made the pointer response vanish for that reader, which is not what the
 setting asks for.
 
 **Touch** gets no hover state anywhere. A touch browser pins `:hover` to the
-last thing tapped, so an unguarded lift leaves the tile a reader chose raised
+last thing tapped, so an unguarded lift leaves the chip a reader chose raised
 beside the one they chose next. The tap's own state (`.is-on`,
 `aria-pressed`) is what a finger gets. The phone smoke project runs with
 `hasTouch`, and "a finger gets no hover state" asserts it.
@@ -148,12 +158,29 @@ beside the one they chose next. The tap's own state (`.is-on`,
   collection profile, the request page's requester rules. Nothing else on
   the site shows a long note all at once, so nothing new was folded.
 
-Radius stays at 10px or under (the tiles are 4px), nothing added is a
-gradient, and no copy changed.
+Radius stays at 10px or under (the chips are 4px, the band's card 8px), and
+nothing added is a gradient.
 
-Measured by: `the door's twelve arrive and respond` (3), `a finger gets no
-hover state`, `Methods' seven stages arrive as a sequence` in
-`tests/smoke.spec.js`, and `src/features/grove/pressMotion.test.js` (7).
+Measured by: `the use-case chips respond` (2), `the door's use cases` (6),
+`the use cases drive the viewer` (4), `a finger gets no hover state`,
+`Methods' seven stages arrive as a sequence` in `tests/smoke.spec.js`;
+`src/features/grove/pressMotion.test.js`; and the rotation rules in
+`src/features/grove/pressRotation.test.js`.
+
+## Use-case coverage (review check)
+
+The owner's ruling of 2026-09-26: "The landing page should show the best
+reasons to use Cedar Press, not prove that each dataset got a turn." So a use
+case's chips are the collections its sentence names, and nothing is added so
+that a collection appears. Whether every live collection is named by some
+shown use case is reported for review rather than enforced:
+`pressJobs.test.js` prints it ("coverage report") on every run and never
+fails on it. Every collection stays one click away in the hero viewer's rail.
+
+As of 2026-09-27: **no collection is uncovered** (14 of 14, eleven use cases
+shown). PLOT and Foundation & Corporate Giving joined Cedar Press that day,
+and the owner's sentences that name them are the ones shown. Update this line
+when the report changes.
 
 ## Where this is deliberately not the Lumecon website
 

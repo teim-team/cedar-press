@@ -111,9 +111,11 @@ export default function CedarPressArticles() {
           <p className="cp-hero__access">Original research</p>
           <h1 className="cp-mh__title">Research Briefs.</h1>
           <p className="cp-mh__sub">
-            Original research built from the collections and written for people who work in
-            Indian Country&rsquo;s economy. Every brief names the collection behind it, and the
-            data it draws on is downloadable from the same subscription.
+            Cedar Press research briefs use the collections to examine changes in funding,
+            business activity, policy and institutions across Indian Country. Every brief names
+            the records behind it, and subscribers can inspect and download the same underlying
+            data. The briefs are examples of the kinds of questions the collections can answer,
+            not a substitute for working with the data directly.
           </p>
         </section>
 

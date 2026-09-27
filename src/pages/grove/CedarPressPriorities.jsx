@@ -29,6 +29,7 @@ import { fetchRelatedPriorities, submitResearchRequest } from "../../api.js";
 import { useAuth } from "../../context/useAuth";
 import { canReadCedarPress } from "../../features/grove/pressAccess";
 import {
+  PRIORITY_EXAMPLES,
   PRIORITY_TYPES,
   byType,
   pointsWord,
@@ -261,7 +262,7 @@ export default function CedarPressPriorities() {
 
         <section className="cp-mh cp-fade">
           <p className="cp-hero__access">Shape the research</p>
-          <h1 className="cp-mh__title">What should Cedar research and build next?</h1>
+          <h1 className="cp-mh__title">Help set the research agenda.</h1>
           {/* The points used to open this paragraph, which made the page read
               as a scoring system with a comment box attached. The owner's
               ruling is that the writing is the product: a subscriber says what
@@ -276,8 +277,9 @@ export default function CedarPressPriorities() {
               A deck should say what only it can say — what this page is for
               — and then stop. */}
           <p className="cp-mh__sub">
-            Tell Cedar what you need in your own words. There is no list of categories and nothing
-            is out of scope to ask for.
+            Tell Cedar what your organization needs to understand, compare or track. Research
+            questions and data requests both belong here. Points show what matters most to
+            subscribers: they inform what Cedar builds and do not decide it.
           </p>
         </section>
 
@@ -348,6 +350,46 @@ export default function CedarPressPriorities() {
                     </li>
                   </ol>
                 </aside>
+              </div>
+            </section>
+
+            {/* WHAT TO ASK FOR. Owner, 2026-09-26: ambitious examples,
+                labelled as examples and not a roadmap. Datasets and research
+                questions lead; research questions say which are descriptive
+                and which causal, because a causal question needs a design
+                the records alone do not supply. The narrower asks, growing a
+                collection that already exists, sit underneath and smaller. */}
+            <section className="cp-pri__ex" aria-label="Examples of what to ask for" data-testid="priority-examples">
+              <div className="cp-head">
+                <span className="cp-sec__band">Examples of what to ask for</span>
+              </div>
+              <p className="cp-pri__exnote">Examples, not a roadmap: none of these is planned or promised.</p>
+              <div className="cp-pri__exgrid">
+                <div>
+                  <span className="cp-set__cap">Data that should exist</span>
+                  <ul className="cp-pri__exlist">
+                    {PRIORITY_EXAMPLES.datasets.map((item) => (
+                      <li key={item.theme}><b>{item.theme}.</b> {item.text}</li>
+                    ))}
+                  </ul>
+                </div>
+                <div>
+                  <span className="cp-set__cap">Research questions</span>
+                  <p className="cp-pri__exkind">Descriptive: what happened, where and how much</p>
+                  <ul className="cp-pri__exlist">
+                    {PRIORITY_EXAMPLES.research.descriptive.map((text) => <li key={text}>{text}</li>)}
+                  </ul>
+                  <p className="cp-pri__exkind">Causal: why, and what changed because of it. These need a research design beyond the records.</p>
+                  <ul className="cp-pri__exlist">
+                    {PRIORITY_EXAMPLES.research.causal.map((text) => <li key={text}>{text}</li>)}
+                  </ul>
+                </div>
+              </div>
+              <div className="cp-pri__exsmall">
+                <span className="cp-pri__exsmallcap">Smaller asks: growing a collection</span>
+                <ul>
+                  {PRIORITY_EXAMPLES.expansions.map((text) => <li key={text}>{text}</li>)}
+                </ul>
               </div>
             </section>
 

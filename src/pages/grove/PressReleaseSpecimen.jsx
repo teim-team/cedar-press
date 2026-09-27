@@ -16,7 +16,7 @@
 // It is the selected collection's, so pointing at the rail below changes it
 // and the two objects read as one surface rather than as a card beside a
 // screenshot.
-import { LAUNCH_COLLECTION, collectionCedarFacts } from "../../features/grove/collection";
+import { LAUNCH_COLLECTION, collectionCedarFacts, isReleased } from "../../features/grove/collection";
 import { coverageLabel } from "../../features/grove/pressAccess";
 import { formatUpdated } from "../../features/grove/pressReleases";
 import { COLLECTION_ICONS } from "./pressCollectionIcons";
@@ -45,7 +45,7 @@ export default function PressReleaseSpecimen({ entry }) {
   return (
     <aside className="cp-spec cp-fade" aria-label="Current release">
       <p className="cp-spec__cap">
-        Cedar Press <span aria-hidden="true">/</span> Current release
+        Cedar Press <span aria-hidden="true">/</span> {isReleased(entry.id) ? "Current release" : "First release"}
       </p>
       <p className="cp-spec__name">
         <span className="cp-spec__mark" aria-hidden="true">{COLLECTION_ICONS[entry.id] ?? null}</span>

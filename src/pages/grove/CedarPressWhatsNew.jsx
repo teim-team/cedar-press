@@ -152,11 +152,17 @@ export default function CedarPressWhatsNew() {
               reader cannot infer from the rows: that methodology releases can
               move figures somebody has already published, and that old
               versions stay addressable. */}
-          <p className="cp-nh__sub">
-            Methodology releases are marked, because they can move figures somebody has already
-            published. Every version keeps its address, so a citation can name the release it
-            came from.
-          </p>
+          <div className="cp-nh__say">
+            <p className="cp-nh__sub">
+              Methodology releases are marked, because they can move figures somebody has already
+              published. Every version keeps its address, so a citation can name the release it
+              came from.
+            </p>
+            <p className="cp-nh__sub cp-nh__sub--use">
+              Use the release history to see what changed before reusing an earlier figure or
+              analysis.
+            </p>
+          </div>
           <dl className="cp-nh__pulse">
             <dt>Last {activity.days} days</dt>
             <dd className="cp-nh__pulselead">

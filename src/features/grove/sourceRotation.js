@@ -2,16 +2,22 @@
  * The labels the landing page's provenance band rotates through, and the
  * claim above them.
  *
- * NOT `PRESS_SOURCES`. That list is the source systems the twelve
+ * NOT `PRESS_SOURCES`. That list is the source systems the released
  * collections name, each held to its evidence by `pressSources.test.js`, and
  * Methods and the door answer from it. This one describes Lumecon's sourcing
  * as a whole, across dataset construction and research, so it names systems
- * no single Cedar Press collection reads (gaming, labor, parcel records).
+ * no single released Cedar Press collection reads (labor, parcel records).
  * Copy supplied by the owner, 2026-09-25, verbatim.
  *
+ * The gaming sources (NIGC reports and opinions, sports wagering, casino
+ * websites, gaming licenses, facility capacity, BIA gaming compacts, gaming
+ * payment records and gaming litigation) were removed on the owner's note of
+ * 2026-09-27: gaming is not a Cedar Press collection, so a panel on the Cedar
+ * Press door should not name its sources. Nothing counts this list: the
+ * marquee's run time is its length, and the 500+ figure never depended on it.
+ *
  * The final six labels (parcel, assessor, permit and environmental-review
- * records) name systems being added or evaluated for a property collection.
- * The 500+ figure does not depend on counting them.
+ * records) name the systems PLOT is being built from.
  */
 
 export const SOURCE_REACH_CLAIM =
@@ -33,23 +39,13 @@ export const SOURCE_ROTATION = Object.freeze([
   "USAspending assistance transactions",
   "FAADS historical assistance records",
   "USAC E-Rate and Rural Health Care data",
-  "NIGC gaming revenue reports",
-  "State sports wagering regulator data",
-  "Casino operator websites",
-  "NIGC gaming operations roster",
-  "State gaming license records",
-  "State gaming facility capacity",
-  "BIA gaming compacts",
   "BIA land-into-trust actions",
-  "NIGC Indian lands opinions",
   "EPA environmental impact reviews",
   "Federal Audit Clearinghouse single audits",
-  "State gaming payment records",
   "OSHA injury and illness data",
   "DOL Form 5500 filings",
   "NLRB election records",
   "Census LODES employment data",
-  "Gaming litigation records",
   "Lobbying Disclosure Act filings",
   "Regulations.gov public comments",
   "Congressional hearing records",

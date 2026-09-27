@@ -148,13 +148,20 @@ test("the flagship comes first among a collection's tables and locked shelves st
   assert.ok(tables[0].flagship);
   assert.equal(tables[0].key, "lobbying/native_entity_lobbying_disclosures");
   const standard = explorableCollections(PRESS);
-  assert.equal(standard.length, 12);
+  assert.equal(standard.length, 14);
   assert.ok(standard.some((c) => c.open) && standard.some((c) => !c.open), "a standard reader sees open and locked collections");
   // A collection whose flagship sample is not published says why rather
   // than silently contributing nothing.
   const owned = standard.find((c) => c.entry.id === "owned");
   assert.equal(owned.flagship, null);
   assert.match(owned.previewUnavailable, /not in the repository|withheld|no preview/i);
+  // A collection on the shelf with no release says that, not "no preview".
+  for (const id of ["plot", "foundation-corporate-giving"]) {
+    const pending = standard.find((c) => c.entry.id === id);
+    assert.equal(pending.flagship, null, id);
+    assert.deepEqual(pending.tables, [], id);
+    assert.match(pending.previewUnavailable, /is not yet published\. It is part of Cedar Press/, id);
+  }
 });
 
 // ── The publication rule ───────────────────────────────────────────────────
@@ -504,9 +511,16 @@ test("every flagship sample reads through its contract without a thrown row", ()
     assert.ok(items.every((item) => item.observation.length > 0), `${key}: a row has an empty observation`);
     assert.ok(items.every((item) => item.recordId), `${key}: a row has no record id`);
   }
-  // A Cedar Press+ reader can open all twelve; a Cedar Press reader six.
+  // A Cedar Press+ reader's plan reaches all fourteen and a Cedar Press
+  // reader's seven, but the two with no release open for nobody: there is
+  // nothing to open, so they show "not yet published" rather than a lock.
   assert.equal(explorableCollections(PRO).filter((c) => c.open).length, 12);
   assert.equal(explorableCollections(PRESS).filter((c) => c.open).length, 6);
+  for (const user of [PRO, PRESS]) {
+    for (const id of ["plot", "foundation-corporate-giving"]) {
+      assert.equal(explorableCollections(user).find((c) => c.entry.id === id).open, false, id);
+    }
+  }
 });
 
 test("a table with no identifier column has no record id, and its rows keep distinct positional ids", () => {

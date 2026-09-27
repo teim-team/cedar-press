@@ -235,6 +235,12 @@ export default function CedarPressTribalRequest() {
               last year still resolves.
             </p>
           </div>
+          {/* Owner, 2026-09-26: one quiet line after the correction process,
+              and nothing else changed on this page. */}
+          <p className="cp-tr3__after">
+            Keeping these relationships current also improves how your Nation appears across
+            future Cedar releases and analysis.
+          </p>
         </section>
 
         <section className="cp-limits cp-two cp-fade" aria-label="What a request does not include">
