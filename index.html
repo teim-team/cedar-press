@@ -671,17 +671,50 @@
     </script>
   </head>
   <body>
-    <!-- The house duotone for photography (owner, 2026-09-27): luminance
-         mapped from shadow #09444A to highlight #86BFBA, the same pair the
-         lumecon.ai team headshots use. Referenced from press.css as
-         filter: url(#cp-duotone). -->
+    <!-- The house duotones for photography (owner, 2026-09-27): lumecon.ai's
+         five washes, shadow -> highlight, from its sector photography
+         (duotone.js holds the same numbers and a test
+         keeps them equal). press.css applies one per picture through
+         filter: url(#cp-duo-<name>). -->
     <svg width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute;width:0;height:0;overflow:hidden">
-      <filter id="cp-duotone" color-interpolation-filters="sRGB">
+      <filter id="cp-duo-teal" color-interpolation-filters="sRGB">
         <feColorMatrix type="matrix" values="0.2126 0.7152 0.0722 0 0 0.2126 0.7152 0.0722 0 0 0.2126 0.7152 0.0722 0 0 0 0 0 1 0" />
         <feComponentTransfer>
           <feFuncR type="table" tableValues="0.0353 0.5255" />
           <feFuncG type="table" tableValues="0.2667 0.7490" />
           <feFuncB type="table" tableValues="0.2902 0.7294" />
+        </feComponentTransfer>
+      </filter>
+      <filter id="cp-duo-bronze" color-interpolation-filters="sRGB">
+        <feColorMatrix type="matrix" values="0.2126 0.7152 0.0722 0 0 0.2126 0.7152 0.0722 0 0 0.2126 0.7152 0.0722 0 0 0 0 0 1 0" />
+        <feComponentTransfer>
+          <feFuncR type="table" tableValues="0.1922 0.6667" />
+          <feFuncG type="table" tableValues="0.1255 0.5922" />
+          <feFuncB type="table" tableValues="0.1333 0.5569" />
+        </feComponentTransfer>
+      </filter>
+      <filter id="cp-duo-gold" color-interpolation-filters="sRGB">
+        <feColorMatrix type="matrix" values="0.2126 0.7152 0.0722 0 0 0.2126 0.7152 0.0722 0 0 0.2126 0.7152 0.0722 0 0 0 0 0 1 0" />
+        <feComponentTransfer>
+          <feFuncR type="table" tableValues="0.4588 0.9451" />
+          <feFuncG type="table" tableValues="0.3412 0.8235" />
+          <feFuncB type="table" tableValues="0.1333 0.5765" />
+        </feComponentTransfer>
+      </filter>
+      <filter id="cp-duo-green" color-interpolation-filters="sRGB">
+        <feColorMatrix type="matrix" values="0.2126 0.7152 0.0722 0 0 0.2126 0.7152 0.0722 0 0 0.2126 0.7152 0.0722 0 0 0 0 0 1 0" />
+        <feComponentTransfer>
+          <feFuncR type="table" tableValues="0.1216 0.5216" />
+          <feFuncG type="table" tableValues="0.2353 0.6275" />
+          <feFuncB type="table" tableValues="0.2118 0.5725" />
+        </feComponentTransfer>
+      </filter>
+      <filter id="cp-duo-slate" color-interpolation-filters="sRGB">
+        <feColorMatrix type="matrix" values="0.2126 0.7152 0.0722 0 0 0.2126 0.7152 0.0722 0 0 0.2126 0.7152 0.0722 0 0 0 0 0 1 0" />
+        <feComponentTransfer>
+          <feFuncR type="table" tableValues="0.0902 0.5882" />
+          <feFuncG type="table" tableValues="0.1490 0.6392" />
+          <feFuncB type="table" tableValues="0.1882 0.6667" />
         </feComponentTransfer>
       </filter>
     </svg>

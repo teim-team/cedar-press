@@ -96,6 +96,8 @@ export const EVENT = Object.freeze({
   lockedCollectionTapped: "press.locked_collection_tapped",
   upgradeOpened: "press.upgrade_opened",
   articleOpened: "press.article_opened",
+  // A brief shared from its page: as a PDF, by email, or as a link.
+  articleShared: "press.article_shared",
   cedarAsked: "press.cedar_asked",
   // The Explore card: a cut narrowed (which filters, never which entity),
   // downloaded as a file, or kept on the reader's device.
