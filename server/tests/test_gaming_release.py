@@ -352,6 +352,27 @@ class GamingConsumerBoundaryTest(_ServerCase):
         with patch.object(repository, "GROVE_RELEASE_PIN", self.write_pin({"gaming": good})):
             self.assertEqual(repository.grove_release_pin("gaming"), good)
 
+    def test_external_runtime_pin_uses_the_same_validation_and_release_gate(self):
+        good = {
+            "catalog_id": "a" * 64,
+            "catalog_sha256": "b" * 64,
+            "collection_id": "gaming",
+            "release_id": "c" * 64,
+            "manifest_sha256": "d" * 64,
+        }
+        location = self.write_pin({"gaming": good})
+        with patch.dict(os.environ, {"CEDAR_GROVE_RELEASE_PIN": str(location)}):
+            self.assertEqual(repository.grove_release_pin("gaming"), good)
+            self.write_pin({"gaming": {**good, "release_id": "latest"}})
+            with self.assertRaisesRegex(repository.FullReleaseUnavailable, "Malformed"):
+                repository.grove_release_pin("gaming")
+            self.write_pin({"gaming": good})
+            with patch.dict(os.environ, {
+                "CEDAR_PRESS_ENVIRONMENT": "production", "CEDAR_GROVE_ENVIRONMENT": "review"
+            }), self.assertRaisesRegex(repository.FullReleaseUnavailable, "never enabled"):
+                repository.grove_served_release_classes()
+        self.assertEqual(json.loads(repository.GROVE_RELEASE_PIN.read_text())["pins"], {})
+
     def test_entitlement_is_decided_before_any_pin_catalog_or_artifact(self):
         reads = []
         with patch.object(repository, "grove_release_pin", side_effect=reads.append):

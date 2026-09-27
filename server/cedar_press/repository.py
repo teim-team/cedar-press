@@ -903,7 +903,7 @@ def grove_release_pin(collection_id: str) -> dict[str, str]:
     shared = collection_id in governed_collections.SHARED_COLLECTIONS
     location = (
         Path(os.environ.get("CEDAR_PRESS_COMPONENT_RELEASE_PIN", PRESS_COMPONENT_RELEASE_PIN))
-        if shared else GROVE_RELEASE_PIN
+        if shared else Path(os.environ.get("CEDAR_GROVE_RELEASE_PIN", GROVE_RELEASE_PIN))
     )
     product = "cedar_press" if shared else "cedar_grove"
     try:
