@@ -1103,6 +1103,32 @@ class PartitionedConsumerTest(_ServerCase):
         self.assertNotIn(b"payment_id", response.content)
         self.assertEqual(events[-1]["outcome"], "unavailable")
 
+    def test_hyphenated_physical_parts_serve_only_through_the_logical_component(self):
+        old = "payments_part_0"
+        new = "payments-part-0000"
+        self.contents[new] = self.contents.pop(old)
+        self.manifest["components"][new] = self.manifest["components"].pop(old)
+        self.manifest["partitioned_components"][0]["parts"][0]["component"] = new
+        expected = b"".join(
+            self.contents[part["component"]]
+            for part in self.manifest["partitioned_components"][0]["parts"]
+        )
+        response, _ = self.get("gaming_payments")
+        self.assertEqual(response.status_code, 200, response.text)
+        self.assertEqual(response.content, expected)
+        self.fetched.clear()
+        self.assertNotEqual(self.get(new)[0].status_code, 200)
+        self.assertEqual(self.fetched, [])
+
+    def test_unsafe_physical_part_names_are_refused(self):
+        for bad in ("../part", "part/name", "part.name", "%2e%2e", "part\\name"):
+            manifest = copy.deepcopy(self.manifest)
+            old = manifest["partitioned_components"][0]["parts"][0]["component"]
+            manifest["components"][bad] = manifest["components"].pop(old)
+            manifest["partitioned_components"][0]["parts"][0]["component"] = bad
+            with self.subTest(name=bad), self.assertRaises(repository.FullReleaseUnavailable):
+                repository._grove_partitioned_parts(manifest)
+
     def test_duplicate_key_across_verified_parts_refused(self):
         content = self.contents["payments_part_0"]
         self.contents["payments_part_5"] = content

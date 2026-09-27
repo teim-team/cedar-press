@@ -209,6 +209,7 @@ def may_download_full(tier: str, collection_id: str) -> bool:
 #: A component id is the field-map key's part after the slash (a table stem);
 #: the same shape ``code/build.py release_dataset_id`` accepts.
 _COMPONENT_ID = re.compile(r"[a-z0-9][a-z0-9_]{0,59}")
+_PHYSICAL_COMPONENT_ID = re.compile(r"[a-z0-9][a-z0-9_-]{0,59}")
 GROVE_COMPONENT_SEPARATOR = "--"
 
 
@@ -1054,7 +1055,7 @@ def _grove_partitioned_parts(manifest: dict[str, Any]) -> frozenset[str]:
             label = part.get("partition") if isinstance(part, dict) else None
             if (
                 not isinstance(entry, dict)
-                or not isinstance(component, str) or not _COMPONENT_ID.fullmatch(component)
+                or not isinstance(component, str) or not _PHYSICAL_COMPONENT_ID.fullmatch(component)
                 or not isinstance(label, dict) or not label
                 or any(not isinstance(k, str) or not isinstance(v, str) for k, v in label.items())
                 or tuple(sorted(label.items())) in labels
