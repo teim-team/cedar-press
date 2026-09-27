@@ -32,3 +32,14 @@ test("Issuer, instrument, historical status and patent assignment caution remain
   assert.match(sections[1].items[0].detail, /Secured notes.*Negative.*not a verified current/);
   assert.match(sections[2].items[0].detail, /not a rating grade/);
 });
+
+test("Patent recordation never substitutes for the ownership effective date", () => {
+  const sections = evidenceSections({ status: "available", patent_events: [{
+    event_id: "synthetic-event", subject_name: "Synthetic subsidiary", patent_number: "SYNTH",
+    event_type: "assignment_recorded", effective_date: "2018-05-01", recordation_date: "2025-02-01",
+    source_url: "https://example.org/evidence", publication_status: "eligible", hold_reason: "",
+  }] });
+  assert.equal(sections.length, 1);
+  assert.match(sections[0].items[0].detail, /Effective date: 2018-05-01; Recorded: 2025-02-01/);
+  assert.match(sections[0].items[0].detail, /do not alone establish current ownership/);
+});

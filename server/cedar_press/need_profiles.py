@@ -14,7 +14,9 @@ from urllib.parse import urlsplit
 
 from cedar_press import repository
 
-COMPONENTS = ("patent_observations", "credit_rating_actions", "rating_availability")
+COMPONENTS = (
+    "patent_observations", "patent_events", "credit_rating_actions", "rating_availability"
+)
 MAX_PROFILE_ROWS = 1000
 MAX_ROW_BYTES = 256 * 1024
 REGISTER_PATH = Path(__file__).resolve().parents[2] / "public/data/cedar/register.json"
@@ -80,7 +82,7 @@ def select_entity_rows(rows, cedar_uid: str, links: dict[str, list[dict]]) -> li
             continue
         if not _source_url(row.get("source_url")):
             raise repository.FullReleaseUnavailable("NEED evidence lacks a source link")
-        key = row.get("observation_id") or row.get("availability_id")
+        key = row.get("observation_id") or row.get("availability_id") or row.get("event_id")
         if not isinstance(key, str) or not key or key in seen:
             raise repository.FullReleaseUnavailable("NEED evidence has invalid record identity")
         seen.add(key)

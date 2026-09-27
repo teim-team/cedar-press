@@ -124,6 +124,15 @@ class NeedProfiles(unittest.TestCase):
         with self.assertRaises(profiles.UnregisteredEntity):
             profiles.entity_evidence(ENTERPRISE)
 
+    def test_patent_event_uses_its_event_key_and_preserves_both_dates(self):
+        row = self.row(event_id="synthetic-event", effective_date="2018-05-01",
+                       recordation_date="2025-02-01")
+        row.pop("observation_id")
+        selected = profiles.select_entity_rows([row], UID, {ENTERPRISE: [self.link()]})
+        self.assertEqual(selected[0]["event_id"], "synthetic-event")
+        self.assertEqual(selected[0]["effective_date"], "2018-05-01")
+        self.assertEqual(selected[0]["recordation_date"], "2025-02-01")
+
     def test_held_unrelated_missing_and_malformed_links(self):
         for links in (
             [],

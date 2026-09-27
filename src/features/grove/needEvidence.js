@@ -1,4 +1,4 @@
-/** Source observations for an exact enterprise, never an affiliated tribe. */
+/** Evidence retains its exact registered legal subject or related enterprise. */
 export const NEED_EVIDENCE_EMPTY = "No released patent or rating evidence is connected to this profile yet. This does not establish that none exists.";
 
 function sourceLink(value) {
@@ -29,10 +29,26 @@ export function evidenceSections(profile) {
         "Current patent ownership is not established by an acquisition alone."].filter(Boolean).join(" — "),
       source: sourceLink(row.source_url),
     })) },
+    { title: "Patent events", items: rows("patent_events").map((row) => ({
+      id: row.event_id,
+      label: [row.subject_name, row.patent_number || row.publication_id, row.event_type].filter(Boolean).join(" · "),
+      detail: [attributionLabel(row),
+        `Effective date: ${row.effective_date || "not established"}`,
+        `Recorded: ${row.recordation_date || "not established"}`,
+        row.from_party && `From: ${row.from_party}`, row.to_party && `To: ${row.to_party}`,
+        row.review_note,
+        "Recordation, security interests and fee events do not alone establish current ownership."
+      ].filter(Boolean).join("; "),
+      source: sourceLink(row.source_url),
+    })) },
     { title: "Credit rating history", items: rows("credit_rating_actions").map((row) => ({
       id: row.observation_id,
       label: [row.issuer_name, row.agency, row.rating, row.action].filter(Boolean).join(" · "),
-      detail: [attributionLabel(row), row.instrument || row.rating_scope, row.action_date || row.publication_date || "Date not established",
+      detail: [attributionLabel(row), row.instrument || row.rating_scope,
+        row.rating_type && `Rating type: ${row.rating_type}`,
+        `Action date: ${row.action_date || "not established"}`,
+        row.publication_date && `Published: ${row.publication_date}`,
+        row.observation_as_of && `Observed: ${row.observation_as_of}`,
         row.outlook && `Outlook: ${row.outlook}`, row.watch && `Watch: ${row.watch}`,
         (row.preliminary === true || row.preliminary === "true") && "Preliminary",
         (row.expected === true || row.expected === "true") && "Expected",
