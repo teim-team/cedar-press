@@ -1018,11 +1018,21 @@ test.describe("Explore the collections", () => {
     expect(errors).toEqual([]);
   });
 
-  test("the Cedar Grove fragment reaches the compact workspace handoff", async ({ page }) => {
+  // Owner, 2026-09-27: the viewer page carries no Cedar Grove line under the
+  // table, and on a wide window the frame runs the full width.
+  test("the viewer runs full width with no Cedar Grove line under it", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop", "a wide-window question");
     const errors = watchConsole(page);
+    await page.setViewportSize({ width: 1680, height: 900 });
     await signIn(page);
-    await page.goto("/data#grove");
-    await expect(page.locator("#grove")).toBeInViewport({ timeout: 10_000 });
+    await page.goto("/data");
+    const frame = page.locator(".cp-ex__frame");
+    await expect(frame).toBeVisible({ timeout: 10_000 });
+    const box = await frame.boundingBox();
+    expect(box.x).toBeLessThanOrEqual(1);
+    expect(box.x + box.width).toBeGreaterThanOrEqual(1680 - 20);
+    await expect(page.locator("#grove")).toHaveCount(0);
+    await expect(page.getByText("brings these collections into a shared workspace")).toHaveCount(0);
     expect(errors).toEqual([]);
   });
 });

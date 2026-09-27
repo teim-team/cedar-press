@@ -1,6 +1,5 @@
 import { Suspense, lazy } from "react";
 
-import { GROVE_MARKETING_URL } from "../../features/grove/appLink.js";
 import { PageBoundary } from "./PageBoundary.jsx";
 
 const PressExplore = lazy(() => import("./PressExplore"));
@@ -13,13 +12,6 @@ export default function PressShelf({ user }) {
           <PressExplore user={user} />
         </Suspense>
       </PageBoundary>
-
-      <p id="grove" className="cp-grove-exit">
-        <strong>Cedar Grove</strong> brings these collections into a shared workspace for analysis.
-        <a href={GROVE_MARKETING_URL} target="_blank" rel="noreferrer">
-          Open Cedar Grove <span aria-hidden="true">&#8594;</span>
-        </a>
-      </p>
     </div>
   );
 }
