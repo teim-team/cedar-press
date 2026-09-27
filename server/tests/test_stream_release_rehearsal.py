@@ -6,10 +6,24 @@ import io
 import tracemalloc
 import unittest
 
-from tests.stream_release_rehearsal import DiskResponse, stream_asgi
+from tests.stream_release_rehearsal import DiskResponse, reusable_receipt, stream_asgi
 
 
 class StreamingReplayTest(unittest.TestCase):
+    def test_partial_component_receipt_cannot_resume_as_a_complete_rehearsal(self):
+        receipt = {
+            "status": "passed",
+            "release": "a" * 64,
+            "code_revision": "b" * 40,
+            "components": [
+                {"component": "gaming_regional_revenue"},
+                {"component": "gaming_government_payments"},
+            ],
+        }
+        self.assertFalse(
+            reusable_receipt({"collection": "gaming", "release": "a" * 64}, receipt, "b" * 40)
+        )
+
     def test_large_chunked_response_counts_and_hashes_without_body_accumulation(self):
         chunk = b"x" * 65535 + b"\n"
         expected = hashlib.sha256()

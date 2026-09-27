@@ -221,3 +221,14 @@ may finish before cancellation can complete, so retain the coordinator's process
 and log stall monitoring. Redirect output to a persistent operation log. The
 collector regression streams 16 MiB with less than 2 MiB of traced allocation;
 that synthetic check is not a real collection receipt.
+
+### Complete Gaming component review
+
+`data/cedar/gaming_component_contracts.json` records presentation columns from
+the exact saved Gaming release: 24 logical tables, including nine tables with
+permitted downloads. It contains schema metadata only. Existing field-map
+entries take precedence; additional tables must still match their pinned
+producer schema exactly. Component rights, proposed-ID review restrictions and
+Grove-only entitlement remain runtime gates. Internal tables remain unavailable.
+The stream rehearsal now refuses to resume an old two-table receipt as evidence
+for the complete declaration. It checks each component, including held responses.

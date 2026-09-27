@@ -250,13 +250,20 @@ class GamingConsumerBoundaryTest(_ServerCase):
 
         def declared(**changes):
             view = [
-                {"component": name, "partition": {"range": name[-1]},
-                 "record_count": entry["record_count"],
-                 "records.jsonl": entry["files"]["records.jsonl"]}
+                {
+                    "component": name,
+                    "partition": {"range": name[-1]},
+                    "record_count": entry["record_count"],
+                    "records.jsonl": entry["files"]["records.jsonl"],
+                }
                 for name, entry in parts.items()
             ]
-            logical = {"name": "gaming_payments", "partition_scheme": "fixture",
-                       "record_count": 5, "parts": view}
+            logical = {
+                "name": "gaming_payments",
+                "partition_scheme": "fixture",
+                "record_count": 5,
+                "parts": view,
+            }
             logical.update(changes)
             return {"components": dict(parts), "partitioned_components": [logical]}
 
@@ -277,28 +284,41 @@ class GamingConsumerBoundaryTest(_ServerCase):
         incomplete["partitioned_components"][0]["parts"].pop()
         rehashed = declared()
         rehashed["partitioned_components"][0]["parts"][0]["records.jsonl"] = {
-            "bytes": 10, "sha256": "c" * 64}
+            "bytes": 10,
+            "sha256": "c" * 64,
+        }
         missing = declared()
         del missing["components"]["gaming_payments__part_b"]
-        for broken in (incomplete, rehashed, missing, declared(record_count=6),
-                       declared(parts="gaming_payments__part_a")):
-            with self.assertRaisesRegex(repository.FullReleaseUnavailable,
-                                        "incomplete or unverified|Malformed"):
+        for broken in (
+            incomplete,
+            rehashed,
+            missing,
+            declared(record_count=6),
+            declared(parts="gaming_payments__part_a"),
+        ):
+            with self.assertRaisesRegex(
+                repository.FullReleaseUnavailable, "incomplete or unverified|Malformed"
+            ):
                 repository._grove_partitioned_parts(broken)
         import copy
 
         mutations = {
             "duplicate logical name": lambda m: m["partitioned_components"].append(
-                copy.deepcopy(m["partitioned_components"][0])),
+                copy.deepcopy(m["partitioned_components"][0])
+            ),
             "boolean total": lambda m: m["partitioned_components"][0].update(record_count=True),
-            "negative count": lambda m:
-                m["partitioned_components"][0]["parts"][0].update(record_count=-1),
-            "malformed files": lambda m:
-                m["components"]["gaming_payments__part_a"].update(files="bad"),
-            "malformed label": lambda m:
-                m["partitioned_components"][0]["parts"][0].update(partition=[]),
-            "duplicate label": lambda m:
-                m["partitioned_components"][0]["parts"][1].update(partition={"range": "a"}),
+            "negative count": lambda m: m["partitioned_components"][0]["parts"][0].update(
+                record_count=-1
+            ),
+            "malformed files": lambda m: m["components"]["gaming_payments__part_a"].update(
+                files="bad"
+            ),
+            "malformed label": lambda m: m["partitioned_components"][0]["parts"][0].update(
+                partition=[]
+            ),
+            "duplicate label": lambda m: m["partitioned_components"][0]["parts"][1].update(
+                partition={"range": "a"}
+            ),
         }
         for label, mutate in mutations.items():
             broken = copy.deepcopy(declared())
@@ -378,8 +398,12 @@ class GamingConsumerBoundaryTest(_ServerCase):
         self.assertEqual([e["id"] for e in launch.GROVE_RELEASE_COLLECTIONS], ["gaming"])
         self.assertEqual({e["shelf"] for e in launch.GROVE_RELEASE_COLLECTIONS}, {"grove"})
         self.assertEqual(
-            repository.grove_components("gaming"),
+            repository.grove_components("gaming")[:2],
             ("gaming_government_payments", self.COMPONENT),
+        )
+        self.assertEqual(
+            set(repository.grove_components("gaming")),
+            set(LUMECON_COMPONENT_STEMS[:25]) - {"gaming_facility_crosswalk"},
         )
         self.assertEqual(repository.grove_components("legislation"), ())
         for tier in ("press", "press_pro", "grove", "tree", "unknown"):
@@ -757,8 +781,11 @@ class PinnedLumeconReleaseTest(_ServerCase):
                     from lumecon_data.gaming.contract import PUBLIC_RIGHTS
                     from lumecon_data.gaming.revenue import PAY_CONTRACT
 
-                    public_fields = [name for name in PAY_CONTRACT["header"]
-                                     if PAY_CONTRACT["field_rights"][name] in PUBLIC_RIGHTS]
+                    public_fields = [
+                        name
+                        for name in PAY_CONTRACT["header"]
+                        if PAY_CONTRACT["field_rights"][name] in PUBLIC_RIGHTS
+                    ]
                     self.assertEqual(entry["order"], public_fields)
                     self.assertNotIn(component, manifest["components"])
                     continue  # Minimal regional fixture deliberately has no payments.
@@ -820,7 +847,7 @@ class PinnedLumeconReleaseTest(_ServerCase):
         )
         metadata = repository.grove_release_metadata("gaming")
         by_table = {item["table_id"]: item for item in metadata}
-        self.assertEqual(set(by_table), {SERVED, "gaming_government_payments"})
+        self.assertEqual(set(by_table), set(repository.grove_components("gaming")))
         self.assertEqual(by_table["gaming_government_payments"]["status"], "unavailable")
         self.assertEqual(
             by_table[SERVED]["records_sha256"], self.a["components"][SERVED]["records_jsonl_sha256"]
@@ -898,8 +925,20 @@ class PinnedLumeconReleaseTest(_ServerCase):
 
     def test_unpresented_undownloadable_and_per_table_catalogs_are_refused(self):
         self.pin(self.a)
-        # A component in the release that Cedar does not present is not offered.
-        self.assertEqual(self.get("gaming_compacts", self.a["release_id"])[0].status_code, 503)
+        # The additional public component is offered under the same exact pin.
+        self.assertEqual(self.get("gaming_compacts", self.a["release_id"])[0].status_code, 200)
+        declaration = copy.deepcopy(
+            repository.governed_collections.component_declarations("gaming")
+        )
+        declaration["gaming_compacts"]["order"].reverse()
+        with patch.object(
+            repository.governed_collections, "component_declarations", return_value=declaration
+        ):
+            self.assertEqual(self.get("gaming_compacts", self.a["release_id"])[0].status_code, 503)
+        # An omitted crosswalk is still not presented or downloadable.
+        self.assertEqual(
+            self.get("gaming_facility_crosswalk", self.a["release_id"])[0].status_code, 503
+        )
         # A presented component whose download Lumecon does not permit is refused.
         manifest = self.metadata(self.verify(self.store_a, "gaming", self.a["release_id"]))
         history = manifest["components"]["gaming_facility_history"]
@@ -957,14 +996,26 @@ class PartitionedConsumerTest(_ServerCase):
             artifact = {"bytes": len(content), "sha256": hashlib.sha256(content).hexdigest()}
             components[name] = {
                 "rights": {"publication_class": "public", "redistribution": True},
-                "download_permitted": True, "fields": [{"name": "payment_id"}, {"name": "amount"}],
-                "primary_key": ["payment_id"], "record_count": 1,
+                "download_permitted": True,
+                "fields": [{"name": "payment_id"}, {"name": "amount"}],
+                "primary_key": ["payment_id"],
+                "record_count": 1,
                 "files": {"records.jsonl": artifact},
             }
-            parts.append({"component": name, "partition": {"index": str(index)},
-                          "record_count": 1, "records.jsonl": artifact})
-        self.manifest = {"components": components, "partitioned_components": [
-            {"name": "gaming_payments", "parts": parts, "record_count": 6}]}
+            parts.append(
+                {
+                    "component": name,
+                    "partition": {"index": str(index)},
+                    "record_count": 1,
+                    "records.jsonl": artifact,
+                }
+            )
+        self.manifest = {
+            "components": components,
+            "partitioned_components": [
+                {"name": "gaming_payments", "parts": parts, "record_count": 6}
+            ],
+        }
         self.pin_value = {"collection_id": "gaming", "release_id": self.release_id}
         for patcher in (
             patch.object(
@@ -973,8 +1024,17 @@ class PartitionedConsumerTest(_ServerCase):
             patch.object(repository, "_grove_catalog"),
             patch.object(repository, "_grove_manifest", side_effect=lambda _: self.manifest),
             patch.object(repository, "grove_components", return_value=["gaming_payments"]),
-            patch.object(repository, "_field_map_tables", return_value={"gaming/gaming_payments": {
-                "collection": "gaming", "order": ["payment_id", "amount"], "fields": []}}),
+            patch.object(
+                repository,
+                "_field_map_tables",
+                return_value={
+                    "gaming/gaming_payments": {
+                        "collection": "gaming",
+                        "order": ["payment_id", "amount"],
+                        "fields": [],
+                    }
+                },
+            ),
             patch.object(repository, "_release_bytes", side_effect=self.fetch),
         ):
             patcher.start()
@@ -996,8 +1056,11 @@ class PartitionedConsumerTest(_ServerCase):
         original_part = self.contents["payments_part_5"]
         for release_id in ("c" * 64, "d" * 64, "c" * 64):
             self.pin_value["release_id"] = release_id
-            changed = (original_part.replace(b"-0.50", b"-1.50")
-                       if release_id == "d" * 64 else original_part)
+            changed = (
+                original_part.replace(b"-0.50", b"-1.50")
+                if release_id == "d" * 64
+                else original_part
+            )
             self.contents["payments_part_5"] = changed
             artifact = {"bytes": len(changed), "sha256": hashlib.sha256(changed).hexdigest()}
             self.manifest["components"]["payments_part_5"]["files"]["records.jsonl"] = artifact

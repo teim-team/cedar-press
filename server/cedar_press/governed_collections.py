@@ -4,6 +4,21 @@ These declarations contain no row counts, publication claims or release pins.
 Exact reviewed Lumecon manifests remain the authority for those facts.
 """
 
+import json
+from pathlib import Path
+
+
+def component_declarations(collection_id: str) -> dict:
+    """Maintained presentation metadata; never a runtime publication decision."""
+    if collection_id != "gaming":
+        return {}
+    path = Path(__file__).resolve().parents[2] / "data/cedar/gaming_component_contracts.json"
+    declaration = json.loads(path.read_text(encoding="utf-8"))
+    if declaration.get("schema_version") != 1 or declaration.get("collection") != collection_id:
+        raise ValueError("Invalid governed component presentation declaration")
+    return declaration["components"]
+
+
 SHARED_COLLECTIONS = {
     "foundation-corporate-giving": {
         "name": "Foundation and Corporate Giving",
@@ -85,6 +100,9 @@ COMPONENT_COLUMNS = {
 
 
 def presentation(collection_id: str, component: str) -> dict | None:
+    declared = component_declarations(collection_id).get(component)
+    if declared is not None:
+        return declared
     columns = COMPONENT_COLUMNS.get(f"{collection_id}/{component}")
     if columns is None:
         return None

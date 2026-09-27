@@ -321,8 +321,21 @@ def run_one(item, output, temporary, timeout):
                 if not permitted:
                     if served["status"] != 503:
                         raise AssertionError("Held component was not withheld")
+                    with patch.dict(os.environ, {"CEDAR_PRESS_ENVIRONMENT": "production"}):
+                        refused = asyncio.run(stream_asgi(app, route, timeout=timeout))
+                        if refused["status"] != 503:
+                            raise AssertionError("Production accepted a held review component")
                     results.append(
-                        {"component": component, "status": "rights-held", "expected": expected}
+                        {
+                            "component": component,
+                            "status": "rights-held",
+                            "expected": expected,
+                            "anonymous": 401,
+                            "wrong_tier": 403,
+                            "production_refused": True,
+                            "download_permitted": False,
+                            "tiers": {"grove": 503},
+                        }
                     )
                     continue
                 if served["status"] != 200 or any(
@@ -376,6 +389,12 @@ def reusable_receipt(item, receipt, code_revision):
         or receipt.get("code_revision") != code_revision
     ):
         return False
+    from cedar_press import repository
+
+    if repository.is_component_release(item["collection"]):
+        checked = {entry["component"] for entry in receipt.get("components", [])}
+        if checked != set(repository.grove_components(item["collection"])):
+            return False
     from lumecon_data.collection import collection_dir, verify_collection_release
     from lumecon_data.pipeline import verify_release
 

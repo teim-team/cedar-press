@@ -1,0 +1,4407 @@
+{
+  "schema_version": 1,
+  "collection": "gaming",
+  "scope": "Presentation only; pinned producer schema and runtime publication gates remain authoritative. No data rows or identity issuance.",
+  "source_release_id": "9c646dc901bb6c32380abccbd6d115eca8ef2120a73aa9a9ecd5a86658f5d057",
+  "source_manifest_file_sha256": "6cfe6a07809e2acb88b4dfa60cec463c43316998b5acebd0db8e468d8a7ddac1",
+  "components": {
+    "gaming_advocacy_links": {
+      "collection": "gaming",
+      "order": [
+        "advocacy_link_id",
+        "source_collection",
+        "source_native_id",
+        "source_event_type",
+        "event_date",
+        "link_target_type",
+        "target_id",
+        "evidence_text",
+        "topics",
+        "confidence",
+        "review_status",
+        "source_system",
+        "source_record_id",
+        "source_url",
+        "source_date",
+        "retrieved_date",
+        "rights_class"
+      ],
+      "fields": [
+        {
+          "column": "advocacy_link_id",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "confidence",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "event_date",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "evidence_text",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "link_target_type",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "retrieved_date",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "review_status",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "rights_class",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "source_collection",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "source_date",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_event_type",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "source_native_id",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_record_id",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_system",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_url",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "target_id",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "topics",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        }
+      ]
+    },
+    "gaming_compact_terms": {
+      "collection": "gaming",
+      "order": [
+        "gaming_term_id",
+        "term_id",
+        "term_source_table",
+        "compact_id",
+        "version_id",
+        "cedar_uid",
+        "state",
+        "term_field",
+        "term_class",
+        "value_semantics",
+        "value_text",
+        "value_numeric",
+        "unit",
+        "applies_to",
+        "revenue_concept",
+        "base_scope",
+        "formula_invertibility",
+        "measurement_type",
+        "is_payment_observation",
+        "effective_from",
+        "effective_from_basis",
+        "effective_to",
+        "effective_to_basis",
+        "is_instrument_language",
+        "doc_zone",
+        "source_page",
+        "source_quote",
+        "source_system",
+        "source_record_id",
+        "source_url",
+        "source_date",
+        "retrieved_date",
+        "rights_class"
+      ],
+      "fields": [
+        {
+          "column": "applies_to",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "base_scope",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "cedar_uid",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "compact_id",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "doc_zone",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "effective_from",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "effective_from_basis",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "effective_to",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "effective_to_basis",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "formula_invertibility",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "gaming_term_id",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "is_instrument_language",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "is_payment_observation",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "measurement_type",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "retrieved_date",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "revenue_concept",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "rights_class",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "source_date",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_page",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_quote",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_record_id",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_system",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_url",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "state",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "term_class",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "term_field",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "term_id",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "term_source_table",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "unit",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "value_numeric",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "value_semantics",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "value_text",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "version_id",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        }
+      ]
+    },
+    "gaming_compact_versions": {
+      "collection": "gaming",
+      "order": [
+        "version_id",
+        "compact_id",
+        "state",
+        "tribe_name_as_published",
+        "cedar_uid",
+        "version_seq",
+        "amendment_number",
+        "version_role",
+        "bia_title",
+        "bia_decision",
+        "approval_type",
+        "approval_status",
+        "approval_date",
+        "approval_date_basis",
+        "effective_date",
+        "effective_date_basis",
+        "expiry_date",
+        "expiry_date_basis",
+        "fr_document_number",
+        "fr_notice_url",
+        "doc_kind",
+        "regulatory_event_id",
+        "source_system",
+        "source_record_id",
+        "source_url",
+        "source_date",
+        "retrieved_date",
+        "rights_class"
+      ],
+      "fields": [
+        {
+          "column": "amendment_number",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "approval_date",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "approval_date_basis",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "approval_status",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "approval_type",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "bia_decision",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "bia_title",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "cedar_uid",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "compact_id",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "doc_kind",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "effective_date",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "effective_date_basis",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "expiry_date",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "expiry_date_basis",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "fr_document_number",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "fr_notice_url",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "regulatory_event_id",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "retrieved_date",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "rights_class",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "source_date",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_record_id",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_system",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_url",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "state",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "tribe_name_as_published",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "version_id",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "version_role",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "version_seq",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        }
+      ]
+    },
+    "gaming_compacts": {
+      "collection": "gaming",
+      "order": [
+        "compact_id",
+        "instrument_type",
+        "state",
+        "tribe_name_as_published",
+        "bia_tribes_column_conflict",
+        "cedar_uid",
+        "approval_type",
+        "bia_decision",
+        "bia_decision_date",
+        "original_effective_date",
+        "original_effective_date_basis",
+        "fr_document_number",
+        "fr_notice_url",
+        "term_end",
+        "term_end_basis",
+        "renewal_provisions",
+        "status",
+        "status_basis",
+        "successor_compact_id",
+        "n_versions",
+        "source_pdf",
+        "source_system",
+        "source_record_id",
+        "source_url",
+        "source_date",
+        "retrieved_date",
+        "rights_class"
+      ],
+      "fields": [
+        {
+          "column": "approval_type",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "bia_decision",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "bia_decision_date",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "bia_tribes_column_conflict",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "cedar_uid",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "compact_id",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "fr_document_number",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "fr_notice_url",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "instrument_type",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "n_versions",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "original_effective_date",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "original_effective_date_basis",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "renewal_provisions",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "retrieved_date",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "rights_class",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "source_date",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_pdf",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_record_id",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_system",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_url",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "state",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "status",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "status_basis",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "successor_compact_id",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "term_end",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "term_end_basis",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "tribe_name_as_published",
+          "decision": "keep",
+          "rights_class": "public_official"
+        }
+      ]
+    },
+    "gaming_coverage_gaps": {
+      "collection": "gaming",
+      "order": [
+        "coverage_gap_id",
+        "gap_source",
+        "component_table",
+        "state",
+        "cedar_uid",
+        "entity_name_in_source",
+        "subject",
+        "measure",
+        "expected_frequency",
+        "known_start",
+        "known_end",
+        "missing_from",
+        "missing_through",
+        "missing_periods",
+        "source_status",
+        "reason",
+        "evidence_url",
+        "affected_record_id",
+        "rights_class",
+        "publication_status"
+      ],
+      "fields": [
+        {
+          "column": "affected_record_id",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "cedar_uid",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "component_table",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "coverage_gap_id",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "entity_name_in_source",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "evidence_url",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "expected_frequency",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "gap_source",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "known_end",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "known_start",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "measure",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "missing_from",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "missing_periods",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "missing_through",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "publication_status",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "reason",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "rights_class",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_status",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "state",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "subject",
+          "decision": "keep",
+          "rights_class": "public_official"
+        }
+      ]
+    },
+    "gaming_environmental_reviews": {
+      "collection": "gaming",
+      "order": [
+        "environmental_review_id",
+        "project_key",
+        "project_key_basis",
+        "review_level",
+        "document_role",
+        "lead_agency",
+        "document_title",
+        "document_date",
+        "document_date_precision",
+        "document_date_basis",
+        "related_decision_id",
+        "related_decision_date",
+        "related_decision_status",
+        "cedar_uid",
+        "subject_name_as_published",
+        "state",
+        "applicant_projection_rows",
+        "mitigation_agreement_rows",
+        "facility_scenario_rows",
+        "also_cited_by",
+        "source_system",
+        "source_record_id",
+        "source_url",
+        "source_date",
+        "retrieved_date",
+        "rights_class"
+      ],
+      "fields": [
+        {
+          "column": "also_cited_by",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "applicant_projection_rows",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "cedar_uid",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "document_date",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "document_date_basis",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "document_date_precision",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "document_role",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "document_title",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "environmental_review_id",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "facility_scenario_rows",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "lead_agency",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "mitigation_agreement_rows",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "project_key",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "project_key_basis",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "related_decision_date",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "related_decision_id",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "related_decision_status",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "retrieved_date",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "review_level",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "rights_class",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "source_date",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_record_id",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_system",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_url",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "state",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "subject_name_as_published",
+          "decision": "keep",
+          "rights_class": "public_official"
+        }
+      ]
+    },
+    "gaming_facility_capacity": {
+      "collection": "gaming",
+      "order": [
+        "capacity_observation_id",
+        "gaming_facility_id",
+        "metric",
+        "metric_family",
+        "value",
+        "value_text",
+        "unit",
+        "measurement_type",
+        "as_of_date",
+        "as_of_precision",
+        "period_start",
+        "period_end",
+        "qualifier",
+        "evidence_quote",
+        "source_system",
+        "source_url",
+        "source_date",
+        "retrieved_date",
+        "rights_class"
+      ],
+      "fields": [
+        {
+          "column": "as_of_date",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "as_of_precision",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "capacity_observation_id",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "evidence_quote",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "gaming_facility_id",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "measurement_type",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "metric",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "metric_family",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "period_end",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "period_start",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "qualifier",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "retrieved_date",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "rights_class",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "source_date",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "source_system",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "source_url",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "unit",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "value",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "value_text",
+          "decision": "keep",
+          "rights_class": "public_official"
+        }
+      ]
+    },
+    "gaming_facility_history": {
+      "collection": "gaming",
+      "order": [
+        "history_id",
+        "gaming_facility_id",
+        "record_kind",
+        "event_type",
+        "status_value",
+        "event_date",
+        "date_precision",
+        "date_not_before",
+        "date_not_after",
+        "date_is_placeholder",
+        "event_qualifier",
+        "evidence_text",
+        "review_status",
+        "source_system",
+        "source_url",
+        "source_date",
+        "retrieved_date",
+        "rights_class"
+      ],
+      "fields": [
+        {
+          "column": "date_is_placeholder",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "date_not_after",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "date_not_before",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "date_precision",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "event_date",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "event_qualifier",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "event_type",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "evidence_text",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "gaming_facility_id",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "history_id",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "record_kind",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "retrieved_date",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "review_status",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "rights_class",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "source_date",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "source_system",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "source_url",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "status_value",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        }
+      ]
+    },
+    "gaming_facility_names": {
+      "collection": "gaming",
+      "order": [
+        "name_id",
+        "gaming_facility_id",
+        "name",
+        "name_type",
+        "first_observed",
+        "last_observed",
+        "observation_precision",
+        "is_selected_public_name",
+        "n_observations",
+        "evidence_quote",
+        "source_system",
+        "source_url",
+        "source_date",
+        "retrieved_date",
+        "rights_class"
+      ],
+      "fields": [
+        {
+          "column": "evidence_quote",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "first_observed",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "gaming_facility_id",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "is_selected_public_name",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "last_observed",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "n_observations",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "name",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "name_id",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "name_type",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "observation_precision",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "retrieved_date",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "rights_class",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "source_date",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "source_system",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "source_url",
+          "decision": "keep",
+          "rights_class": "public_official"
+        }
+      ]
+    },
+    "gaming_facility_relationships": {
+      "collection": "gaming",
+      "order": [
+        "relationship_id",
+        "gaming_facility_id",
+        "party_kind",
+        "cedar_uid",
+        "enterprise_id",
+        "business_uid",
+        "business_binding_status",
+        "party_name",
+        "party_external_id",
+        "party_external_id_scheme",
+        "relationship_type",
+        "claimed_relationship_type",
+        "role_as_stated",
+        "ownership_percent",
+        "effective_start",
+        "effective_end",
+        "observed_as_of",
+        "evidence_text",
+        "confidence",
+        "review_status",
+        "n_source_records",
+        "source_system",
+        "source_url",
+        "source_date",
+        "retrieved_date",
+        "rights_class"
+      ],
+      "fields": [
+        {
+          "column": "business_binding_status",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "business_uid",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "cedar_uid",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "claimed_relationship_type",
+          "decision": "keep",
+          "rights_class": "public_first_party"
+        },
+        {
+          "column": "confidence",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "effective_end",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "effective_start",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "enterprise_id",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "evidence_text",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "gaming_facility_id",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "n_source_records",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "observed_as_of",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "ownership_percent",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "party_external_id",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "party_external_id_scheme",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "party_kind",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "party_name",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "relationship_id",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "relationship_type",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "retrieved_date",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "review_status",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "rights_class",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "role_as_stated",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_date",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "source_system",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "source_url",
+          "decision": "keep",
+          "rights_class": "public_official"
+        }
+      ]
+    },
+    "gaming_financial_disclosures": {
+      "collection": "gaming",
+      "order": [
+        "financial_disclosure_id",
+        "source_system",
+        "source_record_id",
+        "disclosure_kind",
+        "figure_type",
+        "evidence_class",
+        "amount_nominal_usd",
+        "amount_as_published",
+        "amount_concept",
+        "summable_within_series",
+        "nonadditive_series_key",
+        "is_gaming_revenue",
+        "period_label",
+        "period_type",
+        "period_end",
+        "fiscal_year",
+        "filer_or_issuer_name",
+        "filer_role",
+        "counterparty_name",
+        "cedar_uid",
+        "gaming_facility_id",
+        "facility_is_on_indian_lands",
+        "term_rate_pct",
+        "term_rate_base",
+        "term_text",
+        "derivation_note",
+        "is_first_statement_of_fact",
+        "filing_form",
+        "filing_reference",
+        "source_authority",
+        "source_url",
+        "source_page",
+        "source_quote",
+        "source_date",
+        "retrieved_date",
+        "rights_class",
+        "publication_status"
+      ],
+      "fields": [
+        {
+          "column": "amount_as_published",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "amount_concept",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "amount_nominal_usd",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "cedar_uid",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "counterparty_name",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "derivation_note",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "disclosure_kind",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "evidence_class",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "facility_is_on_indian_lands",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "figure_type",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "filer_or_issuer_name",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "filer_role",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "filing_form",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "filing_reference",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "financial_disclosure_id",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "fiscal_year",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "gaming_facility_id",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "is_first_statement_of_fact",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "is_gaming_revenue",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "nonadditive_series_key",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "period_end",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "period_label",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "period_type",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "publication_status",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "retrieved_date",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "rights_class",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_authority",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_date",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_page",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_quote",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_record_id",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_system",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_url",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "summable_within_series",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "term_rate_base",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "term_rate_pct",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "term_text",
+          "decision": "keep",
+          "rights_class": "public_official"
+        }
+      ]
+    },
+    "gaming_government_payments": {
+      "collection": "gaming",
+      "order": [
+        "payment_observation_id",
+        "source_system",
+        "source_record_id",
+        "source_metric",
+        "state",
+        "fund",
+        "payer_name",
+        "payer_type",
+        "recipient_name",
+        "recipient_type",
+        "party_cedar_uid",
+        "party_cedar_uid_role",
+        "direction",
+        "amount_kind",
+        "amount_role",
+        "payment_status",
+        "is_forecast",
+        "amount_nominal_usd",
+        "amount_as_published",
+        "published_unit",
+        "period_start",
+        "period_end",
+        "period_cadence",
+        "fiscal_year_definition",
+        "basis",
+        "compact_reference",
+        "compact_rate_text",
+        "value_suppressed_by_source",
+        "sum_exclusion_flag",
+        "sum_exclusion_reason",
+        "summable_within_series",
+        "nonadditive_series_key",
+        "upstream_revenue_evidence_class",
+        "overlaps_online_sportsbook_observation_id",
+        "nonadditive_with_table",
+        "document_status",
+        "source_authority",
+        "source_document_type",
+        "source_url",
+        "source_page",
+        "source_quote",
+        "source_date",
+        "retrieved_date",
+        "rights_class",
+        "publication_status"
+      ],
+      "fields": [
+        {
+          "column": "amount_as_published",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "amount_kind",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "amount_nominal_usd",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "amount_role",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "basis",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "compact_rate_text",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "compact_reference",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "direction",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "document_status",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "fiscal_year_definition",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "fund",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "is_forecast",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "nonadditive_series_key",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "nonadditive_with_table",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "overlaps_online_sportsbook_observation_id",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "party_cedar_uid",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "party_cedar_uid_role",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "payer_name",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "payer_type",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "payment_observation_id",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "payment_status",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "period_cadence",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "period_end",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "period_start",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "publication_status",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "published_unit",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "recipient_name",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "recipient_type",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "retrieved_date",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "rights_class",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_authority",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_date",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_document_type",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_metric",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_page",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_quote",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_record_id",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_system",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_url",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "state",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "sum_exclusion_flag",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "sum_exclusion_reason",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "summable_within_series",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "upstream_revenue_evidence_class",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "value_suppressed_by_source",
+          "decision": "keep",
+          "rights_class": "public_official"
+        }
+      ]
+    },
+    "gaming_grove_facilities": {
+      "collection": "gaming",
+      "order": [
+        "gaming_facility_id",
+        "record_status",
+        "publication_status",
+        "public_name",
+        "public_name_source_system",
+        "public_name_source_url",
+        "public_name_as_of",
+        "public_name_rights",
+        "facility_type",
+        "facility_type_basis",
+        "street_address",
+        "city",
+        "state",
+        "postal_code",
+        "address_source_system",
+        "address_source_url",
+        "address_as_of",
+        "address_rights",
+        "county",
+        "county_fips",
+        "county_source_system",
+        "county_rights",
+        "latitude",
+        "longitude",
+        "coordinate_source_system",
+        "coordinate_method",
+        "coordinate_as_of",
+        "coordinate_rights",
+        "current_status",
+        "status_as_of",
+        "status_basis",
+        "status_source_system",
+        "status_source_url",
+        "status_rights",
+        "n_independent_sources",
+        "n_public_name_rows",
+        "n_public_history_rows",
+        "n_public_capacity_rows",
+        "n_public_relationship_rows"
+      ],
+      "fields": [
+        {
+          "column": "address_as_of",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "address_rights",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "address_source_system",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "address_source_url",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "city",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "coordinate_as_of",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "coordinate_method",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "coordinate_rights",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "coordinate_source_system",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "county",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "county_fips",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "county_rights",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "county_source_system",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "current_status",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "facility_type",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "facility_type_basis",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "gaming_facility_id",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "latitude",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "longitude",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "n_independent_sources",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "n_public_capacity_rows",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "n_public_history_rows",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "n_public_name_rows",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "n_public_relationship_rows",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "postal_code",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "public_name",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "public_name_as_of",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "public_name_rights",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "public_name_source_system",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "public_name_source_url",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "publication_status",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "record_status",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "state",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "status_as_of",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "status_basis",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "status_rights",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "status_source_system",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "status_source_url",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "street_address",
+          "decision": "keep",
+          "rights_class": "public_official"
+        }
+      ]
+    },
+    "gaming_labor_observations": {
+      "collection": "gaming",
+      "order": [
+        "labor_observation_id",
+        "source_system",
+        "source_record_id",
+        "measure",
+        "measured_concept",
+        "evidence_class",
+        "value",
+        "value_status",
+        "unit",
+        "disclosure_limitation",
+        "suppression_flag",
+        "period",
+        "period_type",
+        "outcome",
+        "cedar_uid",
+        "gaming_facility_id",
+        "employer_name_as_reported",
+        "establishment_or_unit_as_reported",
+        "reported_state",
+        "confidence",
+        "review_status",
+        "flags",
+        "source_url",
+        "source_date",
+        "retrieved_date",
+        "rights_class"
+      ],
+      "fields": [
+        {
+          "column": "cedar_uid",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "confidence",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "disclosure_limitation",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "employer_name_as_reported",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "establishment_or_unit_as_reported",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "evidence_class",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "flags",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "gaming_facility_id",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "labor_observation_id",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "measure",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "measured_concept",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "outcome",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "period",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "period_type",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "reported_state",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "retrieved_date",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "review_status",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "rights_class",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_date",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_record_id",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_system",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_url",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "suppression_flag",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "unit",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "value",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "value_status",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        }
+      ]
+    },
+    "gaming_land_eligibility": {
+      "collection": "gaming",
+      "order": [
+        "land_eligibility_id",
+        "determination_kind",
+        "determination_body",
+        "decision_id",
+        "legal_theory_as_published",
+        "legal_theory_class",
+        "igra_provision",
+        "current_status",
+        "current_status_basis",
+        "decision_date",
+        "decision_date_precision",
+        "decision_date_basis",
+        "latest_subsequent_action",
+        "latest_subsequent_action_date",
+        "regulatory_event_ids",
+        "cedar_uid",
+        "subject_name_as_published",
+        "state",
+        "parcel_as_published",
+        "fr_document_number",
+        "fr_publication_date",
+        "project_key",
+        "source_system",
+        "source_record_id",
+        "source_url",
+        "source_date",
+        "retrieved_date",
+        "rights_class"
+      ],
+      "fields": [
+        {
+          "column": "cedar_uid",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "current_status",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "current_status_basis",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "decision_date",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "decision_date_basis",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "decision_date_precision",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "decision_id",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "determination_body",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "determination_kind",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "fr_document_number",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "fr_publication_date",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "igra_provision",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "land_eligibility_id",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "latest_subsequent_action",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "latest_subsequent_action_date",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "legal_theory_as_published",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "legal_theory_class",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "parcel_as_published",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "project_key",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "regulatory_event_ids",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "retrieved_date",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "rights_class",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "source_date",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_record_id",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_system",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_url",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "state",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "subject_name_as_published",
+          "decision": "keep",
+          "rights_class": "public_official"
+        }
+      ]
+    },
+    "gaming_licenses": {
+      "collection": "gaming",
+      "order": [
+        "license_id",
+        "license_family",
+        "authority_name",
+        "authority_level",
+        "authority_cedar_uid",
+        "holder_name_as_published",
+        "holder_cedar_uid",
+        "holder_sec_cik",
+        "state",
+        "product_type",
+        "license_type_as_published",
+        "license_number",
+        "status",
+        "status_basis",
+        "effective_start",
+        "effective_end",
+        "operation_start_date",
+        "cessation_date",
+        "authorized_quantity",
+        "quantity_unit",
+        "measurement_type",
+        "compact_citation",
+        "evidence_quote",
+        "source_system",
+        "source_record_id",
+        "source_url",
+        "source_date",
+        "retrieved_date",
+        "rights_class"
+      ],
+      "fields": [
+        {
+          "column": "authority_cedar_uid",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "authority_level",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "authority_name",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "authorized_quantity",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "cessation_date",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "compact_citation",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "effective_end",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "effective_start",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "evidence_quote",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "holder_cedar_uid",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "holder_name_as_published",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "holder_sec_cik",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "license_family",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "license_id",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "license_number",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "license_type_as_published",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "measurement_type",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "operation_start_date",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "product_type",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "quantity_unit",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "retrieved_date",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "rights_class",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "source_date",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_record_id",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_system",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_url",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "state",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "status",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "status_basis",
+          "decision": "keep",
+          "rights_class": "public_official"
+        }
+      ]
+    },
+    "gaming_litigation": {
+      "collection": "gaming",
+      "order": [
+        "litigation_id",
+        "proceeding_kind",
+        "case_name",
+        "forum",
+        "docket_number",
+        "reporter_citation",
+        "filing_date",
+        "filing_date_precision",
+        "decision_date",
+        "decision_date_precision",
+        "date_basis",
+        "subject_area",
+        "related_decision_id",
+        "affected_subject_cedar_uid",
+        "party_cedar_uids",
+        "parties_as_published",
+        "outcome_as_stated",
+        "outcome_basis",
+        "also_cited_by",
+        "source_system",
+        "source_record_id",
+        "source_url",
+        "source_date",
+        "retrieved_date",
+        "rights_class"
+      ],
+      "fields": [
+        {
+          "column": "affected_subject_cedar_uid",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "also_cited_by",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "case_name",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "date_basis",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "decision_date",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "decision_date_precision",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "docket_number",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "filing_date",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "filing_date_precision",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "forum",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "litigation_id",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "outcome_as_stated",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "outcome_basis",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "parties_as_published",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "party_cedar_uids",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "proceeding_kind",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "related_decision_id",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "reporter_citation",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "retrieved_date",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "rights_class",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "source_date",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_record_id",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_system",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_url",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "subject_area",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        }
+      ]
+    },
+    "gaming_online_sportsbook_financials": {
+      "collection": "gaming",
+      "order": [
+        "financial_observation_id",
+        "sportsbook_unit_id",
+        "source_record_id",
+        "source_series_id",
+        "source_table",
+        "jurisdiction",
+        "period_type",
+        "period_start",
+        "period_end",
+        "period_label",
+        "period_convention",
+        "partial_period_flag",
+        "revision_label",
+        "revision_note",
+        "record_status",
+        "currency",
+        "handle_usd",
+        "payouts_usd",
+        "voided_wagers_usd",
+        "resettlements_usd",
+        "other_adjustments_usd",
+        "gross_revenue_usd",
+        "federal_excise_tax_usd",
+        "unadjusted_revenue_usd",
+        "promotional_credits_usd",
+        "promotional_deduction_usd",
+        "adjusted_revenue_usd",
+        "taxable_revenue_usd",
+        "state_payment_usd",
+        "local_payment_usd",
+        "per_wager_tax_usd",
+        "gross_revenue_method",
+        "revenue_definition_id",
+        "revenue_definition_gross_label",
+        "revenue_definition_adjusted_label",
+        "source_metric_labels",
+        "source_value_precision",
+        "source_class",
+        "source_url",
+        "source_locator",
+        "source_publication_date",
+        "retrieved_date",
+        "retrieved_at",
+        "source_notes",
+        "additivity",
+        "nonadditive_with_observation_ids",
+        "nonadditive_reason",
+        "existing_overlap_source_record_ids",
+        "existing_overlap_value_check",
+        "discrepancy_flag",
+        "discrepancy_measure",
+        "discrepancy_formula",
+        "discrepancy_published_value",
+        "discrepancy_calculated_value",
+        "discrepancy_difference",
+        "discrepancy_citation",
+        "discrepancy_disposition",
+        "rights_class",
+        "publication_status"
+      ],
+      "fields": [
+        {
+          "column": "additivity",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "adjusted_revenue_usd",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "currency",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "discrepancy_calculated_value",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "discrepancy_citation",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "discrepancy_difference",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "discrepancy_disposition",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "discrepancy_flag",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "discrepancy_formula",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "discrepancy_measure",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "discrepancy_published_value",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "existing_overlap_source_record_ids",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "existing_overlap_value_check",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "federal_excise_tax_usd",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "financial_observation_id",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "gross_revenue_method",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "gross_revenue_usd",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "handle_usd",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "jurisdiction",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "local_payment_usd",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "nonadditive_reason",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "nonadditive_with_observation_ids",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "other_adjustments_usd",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "partial_period_flag",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "payouts_usd",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "per_wager_tax_usd",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "period_convention",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "period_end",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "period_label",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "period_start",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "period_type",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "promotional_credits_usd",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "promotional_deduction_usd",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "publication_status",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "record_status",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "resettlements_usd",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "retrieved_at",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "retrieved_date",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "revenue_definition_adjusted_label",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "revenue_definition_gross_label",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "revenue_definition_id",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "revision_label",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "revision_note",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "rights_class",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_class",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_locator",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_metric_labels",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_notes",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_publication_date",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_record_id",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_series_id",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_table",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_url",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_value_precision",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "sportsbook_unit_id",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "state_payment_usd",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "taxable_revenue_usd",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "unadjusted_revenue_usd",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "voided_wagers_usd",
+          "decision": "keep",
+          "rights_class": "public_official"
+        }
+      ]
+    },
+    "gaming_online_sportsbook_relationships": {
+      "collection": "gaming",
+      "order": [
+        "relationship_id",
+        "sportsbook_unit_id",
+        "source_series_id",
+        "jurisdiction",
+        "cedar_uid",
+        "entity_name_in_package",
+        "gaming_facility_id",
+        "relationship_type",
+        "source_relationship_type",
+        "relationship_status",
+        "effective_from",
+        "effective_through",
+        "effective_dates_basis",
+        "allocation_status",
+        "financial_allocation_permitted",
+        "ownership_share_as_stated",
+        "allocation_weight",
+        "evidence_url",
+        "evidence_rights_basis",
+        "confidence",
+        "review_status",
+        "source_notes",
+        "rights_class",
+        "publication_status"
+      ],
+      "fields": [
+        {
+          "column": "allocation_status",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "allocation_weight",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "cedar_uid",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "confidence",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "effective_dates_basis",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "effective_from",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "effective_through",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "entity_name_in_package",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "evidence_rights_basis",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "evidence_url",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "financial_allocation_permitted",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "gaming_facility_id",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "jurisdiction",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "ownership_share_as_stated",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "publication_status",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "relationship_id",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "relationship_status",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "relationship_type",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "review_status",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "rights_class",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_notes",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_relationship_type",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_series_id",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "sportsbook_unit_id",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        }
+      ]
+    },
+    "gaming_online_sportsbook_units": {
+      "collection": "gaming",
+      "order": [
+        "sportsbook_unit_id",
+        "source_series_id",
+        "jurisdiction",
+        "reported_unit_type",
+        "source_reporting_grain",
+        "reporting_entity_as_reported",
+        "platform_labels_as_reported",
+        "property_named_in_source",
+        "gaming_facility_id",
+        "facility_link_status",
+        "evidence_tier",
+        "source_class",
+        "period_type",
+        "first_period",
+        "last_period",
+        "record_count",
+        "reported_zero_months",
+        "internal_missing_months",
+        "handle_available",
+        "revenue_definition_id",
+        "revenue_definition_interpretation",
+        "shared_report",
+        "linked_entity_count",
+        "allocation_status",
+        "nonadditive_with_unit_ids",
+        "nonadditive_reason",
+        "source_url",
+        "source_notes",
+        "rights_class",
+        "publication_status"
+      ],
+      "fields": [
+        {
+          "column": "allocation_status",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "evidence_tier",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "facility_link_status",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "first_period",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "gaming_facility_id",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "handle_available",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "internal_missing_months",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "jurisdiction",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "last_period",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "linked_entity_count",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "nonadditive_reason",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "nonadditive_with_unit_ids",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "period_type",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "platform_labels_as_reported",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "property_named_in_source",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "publication_status",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "record_count",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "reported_unit_type",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "reported_zero_months",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "reporting_entity_as_reported",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "revenue_definition_id",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "revenue_definition_interpretation",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "rights_class",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "shared_report",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_class",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_notes",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_reporting_grain",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_series_id",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_url",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "sportsbook_unit_id",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        }
+      ]
+    },
+    "gaming_regional_revenue": {
+      "collection": "gaming",
+      "order": [
+        "revenue_observation_id",
+        "geography_level",
+        "region_system_code",
+        "region_system_version",
+        "administrative_region_id",
+        "region_name",
+        "region_states_in_force",
+        "fiscal_year",
+        "fiscal_year_definition",
+        "figure_vintage",
+        "preferred_figure_for_fy",
+        "preferred_figure_rule",
+        "figure_precision",
+        "ggr_nominal_usd",
+        "operation_count",
+        "ggr_real_usd",
+        "real_usd_base_year",
+        "deflator_series",
+        "deflator_factor",
+        "ggr_change_pct",
+        "ggr_change_pct_basis",
+        "check_sum_of_regions_usd",
+        "check_sum_of_region_operations",
+        "check_printed_minus_sum_usd",
+        "check_tolerance_usd",
+        "check_reconciles",
+        "printed_total_found_in_source_text",
+        "revenue_measure",
+        "includes_nongaming_revenue",
+        "measure_note",
+        "source_system",
+        "source_record_id",
+        "source_document",
+        "source_document_title",
+        "source_url",
+        "source_date",
+        "retrieved_date",
+        "rights_class"
+      ],
+      "fields": [
+        {
+          "column": "administrative_region_id",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "check_printed_minus_sum_usd",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "check_reconciles",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "check_sum_of_region_operations",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "check_sum_of_regions_usd",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "check_tolerance_usd",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "deflator_factor",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "deflator_series",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "figure_precision",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "figure_vintage",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "fiscal_year",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "fiscal_year_definition",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "geography_level",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "ggr_change_pct",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "ggr_change_pct_basis",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "ggr_nominal_usd",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "ggr_real_usd",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "includes_nongaming_revenue",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "measure_note",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "operation_count",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "preferred_figure_for_fy",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "preferred_figure_rule",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "printed_total_found_in_source_text",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "real_usd_base_year",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "region_name",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "region_states_in_force",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "region_system_code",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "region_system_version",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "retrieved_date",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "revenue_measure",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "revenue_observation_id",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "rights_class",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_date",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_document",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_document_title",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_record_id",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_system",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_url",
+          "decision": "keep",
+          "rights_class": "public_official"
+        }
+      ]
+    },
+    "gaming_regulatory_events": {
+      "collection": "gaming",
+      "order": [
+        "regulatory_event_id",
+        "event_type",
+        "event_subtype",
+        "agency",
+        "action_date",
+        "action_date_precision",
+        "action_date_basis",
+        "posted_date",
+        "status",
+        "status_basis",
+        "cedar_uid",
+        "subject_cedar_uids",
+        "subject_name_as_published",
+        "state",
+        "compact_id",
+        "version_id",
+        "decision_id",
+        "fr_document_number",
+        "docket_ids",
+        "title_or_description",
+        "source_system",
+        "source_record_id",
+        "also_cited_by",
+        "n_source_records",
+        "source_url",
+        "source_date",
+        "retrieved_date",
+        "rights_class",
+        "evidence_note"
+      ],
+      "fields": [
+        {
+          "column": "action_date",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "action_date_basis",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "action_date_precision",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "agency",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "also_cited_by",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "cedar_uid",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "compact_id",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "decision_id",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "docket_ids",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "event_subtype",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "event_type",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "evidence_note",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "fr_document_number",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "n_source_records",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "posted_date",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "regulatory_event_id",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "retrieved_date",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "rights_class",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "source_date",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_record_id",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_system",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_url",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "state",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "status",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "status_basis",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "subject_cedar_uids",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "subject_name_as_published",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "title_or_description",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "version_id",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        }
+      ]
+    },
+    "gaming_reported_revenue_observations": {
+      "collection": "gaming",
+      "order": [
+        "reported_observation_id",
+        "source_system",
+        "source_record_id",
+        "source_metric",
+        "source_measure_label",
+        "state",
+        "scope",
+        "reporting_party_name",
+        "brand",
+        "cedar_uid",
+        "attribution_basis",
+        "gaming_facility_id",
+        "product_scope",
+        "measure",
+        "evidence_class",
+        "value_nominal_usd",
+        "value_as_published",
+        "published_unit",
+        "period_start",
+        "period_end",
+        "period_cadence",
+        "fiscal_year_definition",
+        "alternate_column_of",
+        "sum_exclusion_flag",
+        "sum_exclusion_reason",
+        "summable_within_series",
+        "nonadditive_series_key",
+        "absence_reason",
+        "overlaps_online_sportsbook_observation_id",
+        "nonadditive_with_table",
+        "source_authority",
+        "source_document",
+        "source_url",
+        "source_page",
+        "source_quote",
+        "source_date",
+        "retrieved_date",
+        "rights_class",
+        "publication_status"
+      ],
+      "fields": [
+        {
+          "column": "absence_reason",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "alternate_column_of",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "attribution_basis",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "brand",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "cedar_uid",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "evidence_class",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "fiscal_year_definition",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "gaming_facility_id",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "measure",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "nonadditive_series_key",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "nonadditive_with_table",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "overlaps_online_sportsbook_observation_id",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "period_cadence",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "period_end",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "period_start",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "product_scope",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "publication_status",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "published_unit",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "reported_observation_id",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "reporting_party_name",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "retrieved_date",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "rights_class",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "scope",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_authority",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_date",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_document",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_measure_label",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_metric",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_page",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_quote",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_record_id",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_system",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_url",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "state",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "sum_exclusion_flag",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "sum_exclusion_reason",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "summable_within_series",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "value_as_published",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "value_nominal_usd",
+          "decision": "keep",
+          "rights_class": "public_official"
+        }
+      ]
+    },
+    "gaming_revenue_bands": {
+      "collection": "gaming",
+      "order": [
+        "band_observation_id",
+        "fiscal_year",
+        "fiscal_year_definition",
+        "band_ordinal",
+        "band_label",
+        "band_lower_usd",
+        "band_upper_usd",
+        "pct_of_operations",
+        "pct_of_revenue",
+        "pct_precision",
+        "national_operation_count",
+        "national_ggr_nominal_usd",
+        "implied_operation_count_low",
+        "implied_operation_count_high",
+        "implied_band_ggr_nominal_low_usd",
+        "implied_band_ggr_nominal_high_usd",
+        "suppression_status",
+        "derivation_note",
+        "source_system",
+        "source_record_id",
+        "source_document",
+        "source_page",
+        "source_quote",
+        "source_url",
+        "source_date",
+        "retrieved_date",
+        "review_status",
+        "rights_class"
+      ],
+      "fields": [
+        {
+          "column": "band_label",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "band_lower_usd",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "band_observation_id",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "band_ordinal",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "band_upper_usd",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "derivation_note",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "fiscal_year",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "fiscal_year_definition",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "implied_band_ggr_nominal_high_usd",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "implied_band_ggr_nominal_low_usd",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "implied_operation_count_high",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "implied_operation_count_low",
+          "decision": "keep",
+          "rights_class": "public_derived"
+        },
+        {
+          "column": "national_ggr_nominal_usd",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "national_operation_count",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "pct_of_operations",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "pct_of_revenue",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "pct_precision",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "retrieved_date",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "review_status",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "rights_class",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_date",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_document",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_page",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_quote",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_record_id",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_system",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "source_url",
+          "decision": "keep",
+          "rights_class": "public_official"
+        },
+        {
+          "column": "suppression_status",
+          "decision": "keep",
+          "rights_class": "public_official"
+        }
+      ]
+    }
+  }
+}

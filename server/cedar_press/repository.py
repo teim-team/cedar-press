@@ -203,13 +203,15 @@ def grove_components(collection_id: str) -> tuple[str, ...]:
     if not is_grove_release(collection_id):
         return ()
     prefix = collection_id + "/"
-    return tuple(
+    existing = tuple(
         key[len(prefix) :]
         for key, entry in _field_map_tables().items()
         if key.startswith(prefix)
         and entry.get("collection") == collection_id
         and _COMPONENT_ID.fullmatch(key[len(prefix) :])
     )
+    additional = governed_collections.component_declarations(collection_id)
+    return tuple(dict.fromkeys((*existing, *additional)))
 
 
 def is_sold(collection_id: str) -> bool:
@@ -1070,11 +1072,10 @@ def grove_component_contract(
     if not isinstance(fields, list) or any(not isinstance(f, dict) for f in fields):
         raise FullReleaseUnavailable("Malformed component contract")
     header = [field.get("name") for field in fields]
-    entry = (
-        governed_collections.presentation(collection_id, presentation_component or component)
-        if collection_id in governed_collections.SHARED_COLLECTIONS
-        else _field_map_tables().get(f"{collection_id}/{presentation_component or component}")
-    )
+    display_component = presentation_component or component
+    entry = _field_map_tables().get(f"{collection_id}/{display_component}")
+    if entry is None:
+        entry = governed_collections.presentation(collection_id, display_component)
     if not entry or entry.get("collection") != collection_id or header != entry.get("order"):
         raise FullReleaseUnavailable("Full release does not match product field map")
     declared_rights = (contract.get("metadata") or {}).get("field_rights") or {}
