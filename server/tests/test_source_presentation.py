@@ -15,6 +15,11 @@ class SourcePresentationTest(unittest.TestCase):
         self.assertIn("Office of the Federal Register", value["publisher"])
         self.assertIsNone(value["title"])
         self.assertEqual(value["publicationDate"], "2025-03-01")
+        row["agency_names"] = "Bureau of Indian Affairs"
+        self.assertEqual(
+            present("federal-register", row)["issuingAuthority"], "Bureau of Indian Affairs"
+        )
+        self.assertEqual(present("federal-register", row)["publisher"], value["publisher"])
         row["source_url"] = "https://www.federalregister.gov.example.org/d/2014-09591"
         self.assertIsNone(present("federal-register", row)["publisher"])
         row.update(

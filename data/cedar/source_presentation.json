@@ -119,6 +119,7 @@
       ]
     },
     "federal-register": {
+      "issuingAuthorityFields": ["agency_names", "agency"],
       "systems": {
         "federal_register": "Office of the Federal Register (NARA) and GPO",
         "Federal Register": "Office of the Federal Register (NARA) and GPO"

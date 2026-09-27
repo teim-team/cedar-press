@@ -115,6 +115,14 @@ def present(collection, row, component=None):
     publisher = publisher or SPEC.get("publishers_by_host", {}).get(
         urlsplit(url).hostname if url else None
     )
+    issuing_authority = next(
+        (
+            source_title(row.get(k))
+            for k in spec.get("issuingAuthorityFields", [])
+            if source_title(row.get(k))
+        ),
+        None,
+    )
 
     def fields(names):
         return {name: readable(row.get(name)) for name in names or [] if readable(row.get(name))}
@@ -137,6 +145,7 @@ def present(collection, row, component=None):
         str(x)
         for x in [
             publisher or "Publisher not established",
+            "Issued by: " + issuing_authority if issuing_authority else None,
             title_basis + ": " + title if title else None,
             "; ".join(locators.values()),
             period_text,
@@ -146,6 +155,7 @@ def present(collection, row, component=None):
     )
     return {
         "publisher": publisher,
+        "issuingAuthority": issuing_authority,
         "title": title,
         "titleBasis": title_basis,
         "url": url,

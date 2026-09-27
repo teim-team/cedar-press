@@ -8,6 +8,10 @@ test("verified Federal Register hosts identify the publisher without inventing t
   assert.match(source.publisher, /Office of the Federal Register/);
   assert.equal(source.title, null);
   assert.equal(source.publicationDate, "2025-03-01");
+  const issued = sourcePresentation("federal-register", { ...row, agency_names: "Bureau of Indian Affairs" }, source.url);
+  assert.equal(issued.issuingAuthority, "Bureau of Indian Affairs");
+  assert.equal(issued.publisher, source.publisher);
+  assert.equal(sourcePresentation("federal-register", { ...row, agency_names: "extract.csv" }, source.url).issuingAuthority, null);
   assert.equal(sourcePresentation("federal-register", row, "https://www.federalregister.gov.example.org/d/2014-09591").publisher, null);
   assert.equal(sourcePresentation("federal-register", { publication_date: "2026-03-01", effective_date: "2026-04-01", source_system: "Federal Register" }, null).publicationDate, "2026-03-01");
 });

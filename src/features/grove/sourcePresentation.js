@@ -44,6 +44,7 @@ export function sourcePresentation(collection, row, recordUrl) {
   const title = family?.[1] ?? sourceTitle(row[spec.title]) ?? registered?.source_title ?? spec.dataset ?? null;
   const url = safeSourceUrl(collection === "plot" ? row.source_record_url : null) ?? safeSourceUrl(recordUrl);
   const publisher = identifiedPublisher ?? (url ? presentation.publishers_by_host?.[new URL(url).hostname] : null) ?? null;
+  const issuingAuthority = (spec.issuingAuthorityFields ?? []).map((name) => sourceTitle(row[name])).find(Boolean) ?? null;
   const fields = (names) => Object.fromEntries((names ?? []).flatMap((name) => text(row[name]) ? [[name, text(row[name])]] : []));
   const reportingPeriod = fields(spec.periods);
   const eventDates = fields(spec.events);
@@ -56,11 +57,11 @@ export function sourcePresentation(collection, row, recordUrl) {
   if (collection === "plot" && !safeSourceUrl(row.source_record_url)) gaps.push("A dataset or query link does not establish a citation to the individual parent record.");
   const periodText = Object.entries(reportingPeriod).map(([key, value]) => `${key.replaceAll("_", " ")}: ${value}`).join("; ");
   return {
-    publisher, title, titleBasis,
+    publisher, issuingAuthority, title, titleBasis,
     url, reportingPeriod, periodText, eventDates, locators,
     publicationDate: (spec.publishedFields ?? [spec.published]).map((name) => text(row[name])).find(Boolean) ?? null,
     snapshotDate: text(row[spec.snapshot]),
-    citation: [publisher ?? "Publisher not established", title ? `${titleBasis}: ${title}` : null, Object.values(locators).join("; ") || null, periodText || null, url].filter(Boolean).join(". "),
+    citation: [publisher ?? "Publisher not established", issuingAuthority ? `Issued by: ${issuingAuthority}` : null, title ? `${titleBasis}: ${title}` : null, Object.values(locators).join("; ") || null, periodText || null, url].filter(Boolean).join(". "),
     gaps,
   };
 }

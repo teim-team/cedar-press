@@ -4,6 +4,7 @@ export default function SourceCitation({ source, compact = false }) {
   return (
     <div className="cp-rec__source">
       <strong>{source.publisher ?? "Publisher not established"}</strong>
+      {source.issuingAuthority ? <span className="cp-rec__fine">Issued by: {source.issuingAuthority}</span> : null}
       {source.title ? <span className="cp-rec__fine">{source.titleBasis}: {source.title}</span> : null}
       {source.periodText ? <span className="cp-rec__fine">{source.periodText}</span> : null}
       {source.url ? <a href={source.url} target="_blank" rel="noreferrer">Open cited source <span aria-hidden="true">&#8599;</span></a> : null}
