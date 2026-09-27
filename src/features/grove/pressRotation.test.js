@@ -7,6 +7,7 @@ import assert from "node:assert/strict";
 
 import {
   INITIAL_ROTATION,
+  RESUME_MS,
   ROTATE_MS,
   counterLabel,
   imageFor,
@@ -40,16 +41,21 @@ test("hover and focus pause it, and releasing them resumes it", () => {
   assert.equal(shouldRotate(run(hovered, { type: "hover", on: false }), { total: 9 }), true);
 });
 
-test("any choice stops it for good, and a late tick cannot move the chosen example", () => {
-  for (const action of [{ type: "select", index: 4 }, { type: "next" }, { type: "prev" }]) {
+test("a choice holds the example until the visitor is idle, then it turns again", () => {
+  assert.ok(RESUME_MS >= 10000 && RESUME_MS <= 15000, String(RESUME_MS));
+  for (const action of [{ type: "select", index: 4 }, { type: "next" }, { type: "prev" }, { type: "stop" }]) {
     const chosen = run(onScreen, action);
     assert.equal(chosen.stopped, true, action.type);
+    assert.equal(chosen.choices, 1, `${action.type} restarts the idle timer`);
     assert.equal(shouldRotate(chosen, { total: 9 }), false, action.type);
     assert.equal(run(chosen, { type: "tick" }).index, chosen.index, `${action.type} then tick`);
-    // Leaving and re-entering does not restart it.
-    const back = run(chosen, { type: "hover", on: true }, { type: "hover", on: false }, { type: "visible", on: true });
-    assert.equal(shouldRotate(back, { total: 9 }), false, action.type);
+    // Idle: it resumes, and the next tick moves on.
+    const resumed = run(chosen, { type: "resume" });
+    assert.equal(shouldRotate(resumed, { total: 9 }), true, action.type);
+    assert.equal(run(resumed, { type: "tick" }).index, (chosen.index + 1) % 9, action.type);
+    assert.equal(shouldRotate(resumed, { total: 9, reducedMotion: true }), false, "reduced motion never turns");
   }
+  assert.equal(run(onScreen, { type: "resume" }), onScreen, "resume without a choice changes nothing");
   assert.equal(run(onScreen, { type: "prev" }).index, 8, "previous from the first wraps to the last");
   assert.equal(run(onScreen, { type: "select", index: -1 }).index, 8);
 });
@@ -64,7 +70,7 @@ test("committing a collection stops the rotation and keeps the example in place"
 
 test("rotation state carries no collection: only a visitor's click selects one", () => {
   const after = run(onScreen, { type: "tick" }, { type: "tick" }, { type: "next" }, { type: "stop" });
-  assert.deepEqual(Object.keys(after).sort(), ["focused", "hovered", "index", "stopped", "visible"]);
+  assert.deepEqual(Object.keys(after).sort(), ["choices", "focused", "hovered", "index", "stopped", "visible"]);
 });
 
 test("reduced motion never cycles, and one example has nothing to cycle", () => {

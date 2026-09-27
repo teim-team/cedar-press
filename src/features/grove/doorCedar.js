@@ -310,6 +310,42 @@ const GENERAL_INTENTS = [
       `because its sources archive nothing. ${MAINTENANCE.goal}` +
       (recentLine ? `\n\nThe latest releases: ${recentLine}.` : ""),
   },
+  // Institutional accounts (owner, 2026-09-27). Declared before "plans" so
+  // a question about an organization's account wins a tie with the price
+  // words it shares. No seat limits, seat counts or prices are stated.
+  {
+    id: "institutional",
+    chip: "Can my organization share an account?",
+    followUps: ["plans", "collaboration", "who"],
+    triggers: ["share an account", "share my account", "share one account", "shared account", "share a login", "institutional", "institutional plan", "institutional account", "multiple users", "several users", "more than one user", "organization account", "organizational account", "organization plan", "team account", "team plan", "invite colleagues", "invite my colleagues", "invite my team", "invite teammates", "invite people", "add colleagues", "add users", "admin", "administrator", "my team", "our team", "my colleagues", "seats"],
+    answer:
+      `Cedar Press and Cedar Press+ are individual plans, one person each. For an organization with several ` +
+      `people there is the institutional Cedar Press plan: an admin invites colleagues by email, and members ` +
+      `share the organization's details and its Cedar context.\n\n` +
+      `Each person keeps their own sign-in, and their conversations and activity stay private to them, so ` +
+      `teammates do not see each other's conversations. Access comes through the organization's plan: someone ` +
+      `removed from the organization loses that access at once and keeps anything they hold individually.\n\n` +
+      `To set one up, contact elijah.moreno@lumecon.ai.`,
+    expanded:
+      `Going deeper: the organization's plan is what opens the collections for its members, and the admin ` +
+      `manages who is in it by email invitation. Collaborative analysis and shared projects are part of ` +
+      `Cedar Grove rather than Cedar Press.\n\nTo set up an institutional plan, contact elijah.moreno@lumecon.ai.`,
+  },
+  {
+    id: "collaboration",
+    chip: "Can we work on analysis together?",
+    followUps: ["institutional", "plans", "who"],
+    triggers: ["collaborate", "collaboration", "collaborative", "collaborative analysis", "shared project", "shared projects", "work together", "shared workspace", "team workspace", "co-author", "coauthor"],
+    answer:
+      `Collaborative analysis and shared projects are part of Cedar Grove, not Cedar Press. In Cedar Press ` +
+      `each person's conversations and activity stay private to them; on the institutional plan, members ` +
+      `share the organization's details and its Cedar context.\n\nTo ask about either, contact ` +
+      `elijah.moreno@lumecon.ai.`,
+    expanded:
+      `Going deeper: Cedar Press is where the collections are read, cited and downloaded, one person at a ` +
+      `time or through an organization's institutional plan. Work that a team builds together belongs in ` +
+      `Cedar Grove.`,
+  },
   {
     id: "plans",
     chip: "How do I get access?",

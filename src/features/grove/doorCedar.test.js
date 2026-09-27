@@ -380,3 +380,33 @@ test("maintenance and Cedar NEED's enrichments: door Cedar says weekly, and keep
   assert.match(sources, /rating-agency announcements, supported by issuer and tribal releases, filings, regulator records and labeled secondary sources/);
   for (const text of everything()) assert.doesNotMatch(text, /updated (monthly|quarterly|annually)|every quarter/i, text.slice(0, 60));
 });
+
+test("institutional accounts: team and organization questions reach their own answer, never plans", () => {
+  const phrasings = [
+    "can my team share an account",
+    "is there an institutional plan",
+    "we have multiple users",
+    "do you offer an organization account",
+    "how do I invite colleagues",
+    "who is the admin for our account",
+    "how much is the institutional plan",
+  ];
+  for (const question of phrasings) {
+    const id = classify(question)?.id;
+    assert.equal(id, "institutional", question);
+    assert.notEqual(id, "plans", question);
+  }
+  const intent = DOOR_INTENTS.find((item) => item.id === "institutional");
+  assert.match(intent.answer, /Cedar Press and Cedar Press\+ are individual plans, one person each/);
+  assert.match(intent.answer, /admin invites colleagues by email/);
+  assert.match(intent.answer, /share the organization's details and its Cedar context/);
+  assert.match(intent.answer, /own sign-in/);
+  assert.match(intent.answer, /teammates do not see each other's conversations/);
+  assert.match(intent.answer, /loses that access at once and keeps anything they hold individually/);
+  assert.match(intent.answer, /elijah\.moreno@lumecon\.ai/);
+  for (const text of [intent.answer, intent.expanded]) {
+    assert.doesNotMatch(text, /\bseats?\b|\$|\bprice|\bcost|per user|up to \d/i, text.slice(0, 60));
+  }
+  assert.equal(classify("can we do collaborative analysis")?.id, "collaboration");
+  assert.match(DOOR_INTENTS.find((item) => item.id === "collaboration").answer, /Cedar Grove, not Cedar Press/);
+});
