@@ -185,3 +185,16 @@ The two trees were developed independently and share no history; the merge that
 brought them together is a deliberate `--allow-unrelated-histories` join, and
 only three paths collided. `docs/ARCHITECTURE.md` describes the **web client**;
 `docs/DATA_ARCHITECTURE.md` is the generated map of the **data collections**.
+
+Source cards in previews and record pages distinguish the original publisher,
+registered dataset title, event description and original source link. Missing
+publisher or document evidence stays explicit. The shared source labels are
+projected from Lumecon-data intake with `python -m lumecon_data.source_presentation
+--profiles intake/profiles --collection foundation-corporate-giving --collection
+federal-register --output <cedar-checkout>/data/cedar/source_display.json`.
+This projection does not clear records or establish acquisition hashes. Local
+source paths and ingest filenames remain outside displayed citation labels.
+
+Giving declarations append recipient state, source locator and award-family
+evidence. The earlier exact 27-column schema remains explicitly supported for
+pinned rollback; undeclared extra columns still refuse delivery.

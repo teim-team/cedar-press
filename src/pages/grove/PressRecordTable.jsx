@@ -30,11 +30,16 @@ import {
 } from "../../features/grove/explore.js";
 import { money, short } from "../../features/grove/recordColumns.js";
 import { scrollEdges } from "../../features/grove/scrollEdges.js";
+import SourceCitation from "./SourceCitation.jsx";
+import { safeSourceUrl } from "../../features/grove/sourcePresentation.js";
 
 export function Human({ column, value, contract, item = null }) {
+  if (column === contract?.source && item?.sourceDetails) return <SourceCitation source={item.sourceDetails} compact />;
+  if (["source_inbox", "source_files", "link_ledger_source_file", "source_dataset", "raw_path", "storage_path"].includes(column)) return "Retained in internal provenance";
   if (value === "" || value == null) return "—";
   const text = String(value);
-  if (/^https?:\/\/\S+$/i.test(text)) return <a href={text} target="_blank" rel="noreferrer">{text.replace(/^https?:\/\/(www\.)?/, "").slice(0, 80)}{text.length > 88 ? "…" : ""}</a>;
+  if (/^[A-Za-z]:[\\/]|^file:\/\/|^\\\\/.test(text)) return "Retained in internal provenance";
+  if (/^https?:\/\/\S+$/i.test(text)) return safeSourceUrl(text) ? <a href={safeSourceUrl(text)} target="_blank" rel="noreferrer">{text.replace(/^https?:\/\/(www\.)?/, "").slice(0, 80)}{text.length > 88 ? "…" : ""}</a> : "Source link unavailable";
   // Money wherever the column is money: the table's amount, or any column
   // named in dollars (`_usd`, `_amt`, `obligations`, `amount`, `value_usd`).
   if (contract?.amount === column || /(_usd|_amt|obligations|_amount|amount_usd)$/i.test(column) || /^(income|expenses|spend)_/i.test(column)) {
@@ -250,7 +255,7 @@ export function Rows({ view, items, columns, sort, onSort, onActive, showAmount,
                           {item.amount != null && item.amountBasis ? <small className="cp-ex__uid">{item.amountBasis}</small> : null}
                         </td>
                       ) : null}
-                      <td>{item.source ? <a href={item.source} target="_blank" rel="noreferrer">Source <span aria-hidden="true">&#8599;</span></a> : <span className="cp-ex__fine">no link</span>}</td>
+                      <td><SourceCitation source={item.sourceDetails} compact /></td>
                     </>
                   )}
               </tr>,

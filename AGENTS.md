@@ -9628,3 +9628,13 @@ both installed packages and an immutable store: no listener or subprocess.
 Actual PLOT 1,242 permits/3,210 events served with exact hashes; Giving's real14
 remained rights-held. Root owns integrated pins, database proof and final CI.
 <!-- END CEDAR-GIVING-PLOT-CONSUMER-20260926 -->
+
+## 2026-09-27 Source presentation separates publisher from ingestion artifact
+
+Source labels come from the maintained Lumecon intake projection or exact reviewed
+source-system mappings. A seed URL, filename, funder, certifying authority or
+curated transaction title never establishes a row's original publisher/report.
+`sourcePresentation.js` and `SourceCitation.jsx` are the shared Press display
+path; missing evidence stays explicit. NEED publication holds and Grove-only
+Gaming placement remain in force. Current Giving adds three trailing fields;
+`compatible_orders` explicitly preserves its prior pinned schema.

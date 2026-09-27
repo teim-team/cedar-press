@@ -77,6 +77,7 @@ import { COLLECTION_ICONS } from "./pressCollectionIcons";
 import { PressCedarFab } from "./PressCedarFab";
 import { PressFoot, PressMast } from "./PressChrome";
 import PressGate from "./PressGate";
+import SourceCitation from "./SourceCitation.jsx";
 
 const money = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
 
@@ -571,12 +572,8 @@ export default function CedarPressRecord() {
               <div className="cp-rec__blockhead"><h2>Source and evidence</h2></div>
               <div className="cp-rec__provgrid">
                 <div>
-                  <span className="cp-rec__cap">The document</span>
-                  {item.source ? (
-                    <a href={item.source} target="_blank" rel="noreferrer">Open the source record <span aria-hidden="true">&#8599;</span></a>
-                  ) : (
-                    <span className="cp-rec__fine">This row&rsquo;s table carries no per-record link.</span>
-                  )}
+                  <span className="cp-rec__cap">Publisher and source record</span>
+                  <SourceCitation source={item.sourceDetails} />
                   <span className="cp-rec__fine">
                     {entry?.short ?? collectionId}
                     {/* `cadence` is already a sentence ("Updated weekly"). */}

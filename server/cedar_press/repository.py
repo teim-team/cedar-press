@@ -1110,7 +1110,11 @@ def grove_component_contract(
     entry = _field_map_tables().get(f"{collection_id}/{display_component}")
     if entry is None:
         entry = governed_collections.presentation(collection_id, display_component)
-    if not entry or entry.get("collection") != collection_id or header != entry.get("order"):
+    if (
+        not entry
+        or entry.get("collection") != collection_id
+        or header not in [entry.get("order"), *entry.get("compatible_orders", [])]
+    ):
         raise FullReleaseUnavailable("Full release does not match product field map")
     declared_rights = (contract.get("metadata") or {}).get("field_rights")
     if collection_id == "gaming" or declared_rights is not None:

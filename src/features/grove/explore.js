@@ -48,6 +48,7 @@ import scopesJson from "../../../data/cedar/scopes.json" with { type: "json" };
 import { collectionCitation, collectionPublicationHold, collectionSample, collectionTables, sampleUnavailableReason } from "./collection.js";
 import { canOpenDataset } from "./pressAccess.js";
 import { recordStructure } from "./pressRecordStructure.js";
+import { safeSourceUrl, sourcePresentation } from "./sourcePresentation.js";
 import { PRESS_CATALOG_BY_ID, STOREFRONT_CATALOG } from "./pressCatalog.js";
 
 export const CONTRACTS = Object.freeze(explore.tables);
@@ -512,8 +513,7 @@ function builtSource(row, contract) {
 
 export function rowSource(row, contract) {
   const url = cell(row, contract?.source);
-  if (/^https?:\/\//i.test(url)) return url;
-  return builtSource(row, contract);
+  return safeSourceUrl(url) ?? safeSourceUrl(builtSource(row, contract));
 }
 
 export function rowRecordId(row, contract) {
@@ -602,6 +602,7 @@ export function universalRows(key, rows, register = EMPTY_REGISTER) {
       amount: rowAmount(row, contract),
       amountBasis: rowAmountBasis(row, contract),
       source: rowSource(row, contract),
+      sourceDetails: sourcePresentation(collection, row, rowSource(row, contract)),
       superseded: rowSuperseded(row, contract),
       replacement: rowReplacement(row, contract),
       observation: observationOf(row, contract),

@@ -79,8 +79,10 @@ class SharedCollectionReleaseTest(unittest.TestCase):
         component="environmental_events",
         rights=True,
         release_class="production",
+        columns=None,
     ):
-        columns = governed_collections.COMPONENT_COLUMNS[f"{collection}/{component}"]
+        if columns is None:
+            columns = governed_collections.COMPONENT_COLUMNS[f"{collection}/{component}"]
         row = dict.fromkeys(columns, None)
         row[columns[0]] = "SYNTHETIC-1"
         if "amount_exact_usd" in row:
@@ -314,6 +316,23 @@ class SharedCollectionReleaseTest(unittest.TestCase):
             self.assertRaisesRegex(repository.FullReleaseUnavailable, "Manifest differs"),
         ):
             repository._grove_manifest(pin)
+
+    def test_giving_appended_columns_and_prior_pinned_schema_both_work(self):
+        collection, component = "foundation-corporate-giving", "reviewed_disclosures"
+        declaration = governed_collections.presentation(collection, component)
+        for columns in [declaration["order"], *declaration["compatible_orders"]]:
+            with self.subTest(columns=len(columns)):
+                manifest, _pin, content = self.fixture(collection, component, columns=columns)
+                self.session("press")
+                response = self.client.get(
+                    "/press/collections/foundation-corporate-giving/full-download",
+                    params={"release_id": "c" * 64, "component": component},
+                )
+                self.assertEqual(response.status_code, 200)
+                self.assertEqual(response.content, content)
+                manifest["components"][component]["fields"].append({"name": "unreviewed_extra"})
+                with self.assertRaisesRegex(repository.FullReleaseUnavailable, "field map"):
+                    repository.grove_component_contract(manifest, collection, component)
 
     def test_rehearsal_remains_refused_in_production(self):
         _manifest, pin, _content = self.fixture(release_class="rehearsal")
