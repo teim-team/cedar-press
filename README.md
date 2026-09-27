@@ -24,6 +24,12 @@ Alongside these, `/tribal-data-request` carries the tribal data request
 policy and `/research-access` the limited research access path — each on its
 own URL, so either can be sent to a council office or a researcher directly.
 
+Fourteen collections: Federal Funding, Federal Register, Legislation, Deals,
+NAGPRA, Advocacy and Foundation & Corporate Giving on Cedar Press; Prime
+Contracting, Subcontracting, Natural Resources, Native-Owned Businesses, Native
+Nonprofits, Cedar NEED (with patents and credit ratings) and PLOT on Cedar
+Press+. The datasets are maintained weekly with human review.
+
 Every collection is built on publicly available sources, is extended through original
 research and entity resolution, and stays current as new information arrives.
 Every download carries its own citation, so a figure can be traced back to the
@@ -56,9 +62,9 @@ npm run build:site # the build, then the three public pages prerendered to HTML
 npm run seo:check  # the structured data and sitemap are current with the catalog
 ```
 
-Checked 2026-09-23: `npm run test` (305 pass, 0 fail, coverage floor met),
-`npm run test:smoke` (152 passed, 10 skipped, after
-`npx playwright install --with-deps chromium`), `npm run build`,
+Checked 2026-09-27: `npm run lint`, `npm run test` (473 pass, 0 fail,
+coverage floor met), `npm run test:smoke` (245 passed, 31 skipped, after
+`npx playwright install --with-deps chromium`), `make check-generated`,
 `npm run build:site` and `npm run seo:check` all succeed, and `npm run dev`
 starts on port 5173. The full list of checks CI runs, with how to run the API
 suite, is [`AGENTS.md`](AGENTS.md) §3.
