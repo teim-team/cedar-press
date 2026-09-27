@@ -325,7 +325,7 @@ test("dates are spelled one way everywhere", () => {
   // refresh fail a formatting test, which teaches the next person to edit the
   // date rather than read the failure.
   assert.match(freshnessLine("funding"),
-               /^Updated [A-Z][a-z]+\.? \d{1,2} · monthly$/);
+               /^Updated [A-Z][a-z]+\.? \d{1,2} · weekly$/);
   assert.equal(freshnessLine("not-a-collection"), "");
   assert.equal(latestRelease("need").version, releaseFor("need").version);
   assert.equal(latestRelease("not-a-collection"), null);

@@ -470,7 +470,7 @@ export const PRESS_CATALOG = Object.freeze([
     // series with a left edge rather than a roster.
     coverage: Object.freeze({ kind: "series", from: 2016 }),
     blurb:
-      "Enterprises owned or controlled by Native nations, Alaska Native corporations and other Native entities, including subsidiaries, holding companies and joint ventures. Follow parent relationships and organizational changes over time.",
+      "Enterprises owned or controlled by Native nations, Alaska Native corporations and other Native entities, including subsidiaries, holding companies and joint ventures. Follow parent relationships and organizational changes over time. Where records are available, profiles also carry patents, assigned or later acquired, and dated credit ratings, each kept with the entity it concerns.",
     linkage:
       "This is the structure the rest of the record resolves against, published as a collection in its own right: every tie names the nation or corporation behind it.",
   }),

@@ -34,6 +34,7 @@ import { coverageLabel } from "../../features/grove/pressAccess.js";
 import { articleHref, articlesDrawingOn } from "../../features/grove/pressArticles.js";
 import { PRESS_CATALOG_BY_ID } from "../../features/grove/pressCatalog.js";
 import { collectionQuestions } from "../../features/grove/pressJobs.js";
+import { MAINTENANCE, NEED_ENRICHMENTS } from "../../features/grove/pressMethod.js";
 import { formatUpdated, ledgerFor } from "../../features/grove/pressReleases.js";
 import { PRESS_METHODS_PATH, PRESS_WHATS_NEW_PATH } from "../../features/grove/pressRoutes.js";
 import { COLLECTION_ICONS } from "./pressCollectionIcons";
@@ -101,12 +102,20 @@ export default function PressCollectionAbout({ entry, flagship, onClose }) {
           {coverageLabel(catalog) ? (<div><dt>Coverage</dt><dd>{coverageLabel(catalog)}</dd></div>) : null}
           {launch.rowsLabel ? (<div><dt>Records</dt><dd>{launch.rowsLabel}</dd></div>) : null}
           {Number.isInteger(facts?.n_tables) ? (<div><dt>Tables</dt><dd>{facts.n_tables}</dd></div>) : null}
+          <div><dt>Maintained</dt><dd>{MAINTENANCE.label}</dd></div>
         </dl>
 
         <Block title="What is in this collection">
           {catalog?.blurb || book?.row ? (
             <>
               {catalog?.blurb ? <p>{catalog.blurb}</p> : null}
+              {/* Cedar NEED's enrichments, said in full where the collection
+                  profile says what the collection holds. */}
+              {entry.id === "need" ? (
+                <p data-testid="need-enrichments">
+                  {NEED_ENRICHMENTS.patents} {NEED_ENRICHMENTS.ratings} {NEED_ENRICHMENTS.attachment}
+                </p>
+              ) : null}
               {/* The unit of observation, in the codebook's own words: the
                   single most useful sentence for anyone about to cite a
                   count, and it was not on this surface anywhere. */}

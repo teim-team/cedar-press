@@ -1528,7 +1528,7 @@
 /* The collection in hand, in the owner's words: what the shelf's line under
  * the tiles did. Its height is reserved for about three lines so a shorter
  * description does not pull the provenance band up. */
-.teim-rd .cp-aud__note { font-size: 0.95rem; line-height: 1.6; color: var(--ink-2); margin: 1rem 0 0; min-height: 4.8em; max-width: 96ch; padding-top: 0.9rem; border-top: 1px solid var(--door-rule); }
+.teim-rd .cp-aud__note { font-size: 0.95rem; line-height: 1.6; color: var(--ink-2); margin: 1rem 0 0; min-height: 7.5em; max-width: 96ch; padding-top: 0.9rem; border-top: 1px solid var(--door-rule); }
 .teim-rd .cp-aud__note b { color: var(--ink); }
 .teim-rd .cp-aud__meta { font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--door-ink-3); white-space: nowrap; }
 @media (max-width: 560px) { .teim-rd .cp-aud__note { min-height: 0; } }
@@ -4047,6 +4047,7 @@ body[data-cp-preview-in-view] .teim-rd .cp-dc__fab { display: none; }
 .teim-rd .cp-ch__n { display: block; font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.11em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.3rem; }
 .teim-rd .cp-ch .cp-msec__title { margin-bottom: 0.8rem; }
 .teim-rd .cp-ch__claim { font-size: 1.06rem; line-height: 1.6; color: var(--ink-2); margin: 0 0 1.4rem; max-width: 66ch; }
+.teim-rd .cp-ch__note { font-size: 0.95rem; line-height: 1.6; color: var(--ink-2); margin: 1.2rem 0 0; max-width: 66ch; }
 
 /* The actions. Never more than three, and the first may lead. */
 .teim-rd .cp-ch__acts { display: flex; flex-wrap: wrap; gap: 0.6rem; margin: 1.6rem 0 0; }

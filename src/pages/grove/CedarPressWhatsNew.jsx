@@ -154,6 +154,7 @@ export default function CedarPressWhatsNew() {
               versions stay addressable. */}
           <div className="cp-nh__say">
             <p className="cp-nh__sub">
+              Collections are maintained weekly with human review, and every change lands here.
               Methodology releases are marked, because they can move figures somebody has already
               published. Every version keeps its address, so a citation can name the release it
               came from.

@@ -19,6 +19,11 @@
  *   that no descriptor sentence enumerates: state certified-vendor
  *   directories, regional chambers, artist directories and the rest.
  *
+ * - A `declared` entry is evidenced by the owner's direction for a Cedar NEED
+ *   enrichment (2026-09-27: patents and credit ratings), which no descriptor
+ *   sentence names yet. Each carries what supports it (`supportedBy`), and
+ *   the test allows this kind for Cedar NEED alone.
+ *
  * `pressSources.test.js` holds every entry to its evidence, and holds each
  * registry entry's declared count to the registry's real one, so the door
  * cannot advertise a source Cedar does not read and cannot quietly keep one
@@ -122,6 +127,14 @@ export const SOURCE_GROUPS = Object.freeze([
     ]),
   }),
   Object.freeze({
+    id: "enrichments",
+    label: "Cedar NEED enrichments",
+    sources: Object.freeze([
+      { name: "Patent records", declared: "owner, 2026-09-27", supportedBy: "company, tribal, SEC and court evidence", collections: ["need"] },
+      { name: "Rating-agency announcements", declared: "owner, 2026-09-27", supportedBy: "issuer and tribal releases, filings, regulator records and labeled secondary sources", collections: ["need"] },
+    ]),
+  }),
+  Object.freeze({
     id: "registry",
     label: "The tribal business source registry",
     sources: Object.freeze([
@@ -178,6 +191,7 @@ const fold = (text) =>
  */
 export function isEvidenced(source, prose = SOURCE_PROSE) {
   if (source.registry) return true; // the test checks these against the registry
+  if (source.declared) return true; // the test holds these to Cedar NEED
   const needle = fold(evidenceFor(source));
   return source.collections.some((id) => fold(prose[id]).includes(needle));
 }

@@ -19,7 +19,11 @@ import {
   labelLines,
   say,
 } from "../../features/grove/pressEcosystem.js";
-import { BUILD_NEXT_STEPS, CONSTRUCTION_STEPS } from "../../features/grove/pressMethod.js";
+import { BUILD_NEXT_STEPS, CONSTRUCTION_STEPS, NEED_ENRICHMENTS } from "../../features/grove/pressMethod.js";
+import { PRESS_SOURCES } from "../../features/grove/pressSources.js";
+
+/** Cedar NEED's enrichment sources, as the sources list declares them. */
+const NEED_ENRICHMENT_SOURCES = PRESS_SOURCES.filter((source) => source.declared && source.collections.includes("need"));
 import {
   IDENTIFIERS,
   KEPT_OUTSIDE,
@@ -485,6 +489,18 @@ export function MethodsByCollection() {
               <div>
                 <span className="cp-mbc__cap">Sources</span>
                 <p>{launch.sources}</p>
+              </div>
+            ) : null}
+            {/* Enrichments within Cedar NEED, not collections of their own
+                (owner, 2026-09-27): patents and credit ratings, where
+                records are available, each kept with its own entity. */}
+            {entry.id === "need" ? (
+              <div data-testid="need-enrichments">
+                <span className="cp-mbc__cap">Patents and credit ratings</span>
+                <p>{NEED_ENRICHMENTS.patents} {NEED_ENRICHMENTS.ratings} {NEED_ENRICHMENTS.attachment}</p>
+                <p>
+                  {NEED_ENRICHMENT_SOURCES.map((source) => `${source.name}, supported by ${source.supportedBy}`).join("; ")}.
+                </p>
               </div>
             ) : null}
           </div>

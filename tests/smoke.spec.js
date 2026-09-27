@@ -132,6 +132,19 @@ test.describe("the gate", () => {
     await expect(page.getByTestId("press-preview-note")).toHaveCount(0);
   });
 
+  // The maintenance story and the NEED enrichment sources (owner,
+  // 2026-09-27), on the door; the 500+ figure is unchanged.
+  test("the door says how Cedar Press is maintained and names the NEED enrichment sources", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.getByTestId("door-maintenance")).toContainText(
+      "Cedar Press maintains its datasets weekly with human review, expands their source coverage and useful fields over time and develops new collections.",
+    );
+    const panel = page.locator(".cp-hero3__proof");
+    await expect(panel.locator(".cp-hero3__run").first()).toContainText("Patent records");
+    await expect(panel.locator(".cp-hero3__run").first()).toContainText("Rating-agency announcements");
+    await expect(panel.locator(".cp-hero3__proofcount")).toContainText("500+ source websites");
+  });
+
   test("a reader who closed the old private-preview note sees the early access note once", async ({ page }) => {
     await page.goto("/");
     await page.evaluate(() => sessionStorage.setItem("cedar-press-private-preview-notice", "dismissed"));

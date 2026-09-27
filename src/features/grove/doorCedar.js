@@ -63,7 +63,7 @@ import { LAUNCH_COLLECTION } from "./collection.js";
 import { coverageLabel } from "./pressAccess.js";
 import { PRESS_CATALOG_BY_ID, PRESS_TIERS, STOREFRONT_CATALOG, spellCount } from "./pressCatalog.js";
 import { visibleAudiences } from "./pressJobs.js";
-import { ECOSYSTEM_EXAMPLES } from "./pressMethod.js";
+import { ECOSYSTEM_EXAMPLES, MAINTENANCE, NEED_ENRICHMENTS } from "./pressMethod.js";
 import { recordStructure } from "./pressRecordStructure.js";
 import { formatUpdated, freshnessLine, recentlyUpdated } from "./pressReleases.js";
 import { REGISTRY_PROGRAMS } from "./pressSources.js";
@@ -87,7 +87,7 @@ const COLLECTION_WORDS = Object.freeze({
   // joined the shelf; a reader asking about foundations means their giving.
   "foundation-corporate-giving": ["foundation", "foundations", "philanthropy", "philanthropic", "grantmaker", "grantmakers", "corporate giving", "bank giving", "private giving", "private funding", "donor", "donors", "990-pf"],
   plot: ["parcel", "parcels", "land", "property", "properties", "permit", "permits", "real estate", "land ownership", "assessor", "owns these parcels", "owns this parcel", "owns the parcel", "owns the land", "owns this land", "parcel records", "land records", "property records", "development activity"],
-  need: ["enterprise", "enterprises", "subsidiary", "subsidiaries", "ownership", "who owns", "holding company", "structure"],
+  need: ["enterprise", "enterprises", "subsidiary", "subsidiaries", "ownership", "who owns", "holding company", "structure", "patent", "patents", "credit rating", "credit ratings", "bond rating", "ratings"],
   "natural-resources": ["royalty", "royalties", "oil", "gas", "coal", "mineral", "minerals", "timber", "severance", "onrr"],
 });
 
@@ -125,6 +125,8 @@ function collectionAnswer(entry) {
   const descriptor = DESCRIPTOR[entry.id];
   const fresh = freshnessLine(entry.id);
   const lines = [entry.blurb];
+  // Cedar NEED's enrichments, in the Methods wording.
+  if (entry.id === "need") lines.push(`${NEED_ENRICHMENTS.patents} ${NEED_ENRICHMENTS.ratings} ${NEED_ENRICHMENTS.attachment}`);
   const facts = [`Coverage: ${coverageLabel(entry)}.`];
   if (descriptor?.rowsLabel) facts.push(`${descriptor.rowsLabel} in the current release.`);
   if (fresh) facts.push(`${fresh}.`);
@@ -258,7 +260,9 @@ const GENERAL_INTENTS = [
       `federalregister.gov), advocacy and docket records (Senate and House lobbying disclosure, FERC and NRC ` +
       `dockets, IBIA and IBLA appeals, regulations.gov), tax filings (IRS Business Master File, Form 990), ` +
       `resource revenue (ONRR, OSMRE, ANCSA 7(i) and 7(j) filings, the Osage Minerals Council), and what ` +
-      `nations and corporations publish about themselves.\n\n` +
+      `nations and corporations publish about themselves. For Cedar NEED there are also patent records, ` +
+      `supported by company, tribal, SEC and court evidence, and rating-agency announcements, supported by ` +
+      `issuer and tribal releases, filings, regulator records and labeled secondary sources.\n\n` +
       `Not all of it is public. The Native-Owned Businesses collection comes from tribal TERO and commerce ` +
       `offices under each nation's stated terms, and publishers whose terms forbid reuse are excluded by ` +
       `every route and named as excluded.`,
@@ -295,16 +299,15 @@ const GENERAL_INTENTS = [
     triggers: ["how current", "how often updated", "how fresh", "update", "updated", "cadence", "how often", "is it current", "snapshot", "how recent", "up to date", "latest release", "last updated"],
     answer:
       NEWEST
-        ? `Records are added, ownership changes and corrections arrive every week, and the collections are ` +
-          `kept current against them. The most recent release was ${formatUpdated(NEWEST.updated)}.\n\n` +
+        ? `${MAINTENANCE.sentence} The most recent release was ${formatUpdated(NEWEST.updated)}.\n\n` +
           `Every release is dated and versioned, and the release history records what changed, so a figure ` +
           `you cited last quarter still reproduces.`
-        : `Records are added, ownership changes and corrections arrive every week, and every release is ` +
-          `dated and versioned so a figure you cited last quarter still reproduces.`,
+        : `${MAINTENANCE.sentence} Every release is dated and versioned so a figure you cited last ` +
+          `quarter still reproduces.`,
     expanded:
-      `Going deeper: each collection keeps its own cadence, stated on the collection, because its sources ` +
-      `publish on their own clocks. Federal award systems post continuously and the collection follows them; ` +
-      `a roster collection states the date it was captured rather than a span, because its sources archive nothing.` +
+      `Going deeper: the sources publish on their own clocks, and each week a person reviews what they ` +
+      `published into the collection. A roster collection states the date it was captured rather than a span, ` +
+      `because its sources archive nothing. ${MAINTENANCE.goal}` +
       (recentLine ? `\n\nThe latest releases: ${recentLine}.` : ""),
   },
   {

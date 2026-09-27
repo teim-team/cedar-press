@@ -308,6 +308,37 @@ test("the owner's launch sentences are the ones shown", () => {
   assert.deepEqual(ids(byId["foundations-philanthropy"]), ["foundation-corporate-giving", "funding", "nonprofits"]);
 });
 
+// Owner direction, 2026-09-27, verbatim: the renamed consultants audience
+// and the new government audience, each with its job and with chips that
+// back the explanation's claims in the order it makes them.
+test("the consultants and government use cases carry the owner's copy and chips in claim order", () => {
+  const byId = Object.fromEntries(AUDIENCE_JOBS.map((audience) => [audience.id, audience]));
+  const advisors = byId.advisors;
+  assert.equal(advisors.audience, "Consultants and advisors");
+  assert.equal(advisors.job, "Client strategy");
+  assert.equal(advisors.outcome, "Build sourced analyses for clients without reconstructing records across agencies and vendors.");
+  assert.equal(advisors.explanation, "Research organizations, markets and prospective clients through funding, contracting, ownership, policy and transaction records.");
+  assert.deepEqual([...advisors.collections], ["funding", "contractors", "need", "federal-register", "deals"]);
+  assert.deepEqual([...advisors.imagePool], ["context-lattice", "context-cedar"]);
+  const government = byId["government-officials"];
+  assert.equal(government.audience, "Government and public agency officials");
+  assert.equal(government.job, "Tribal consultation");
+  assert.equal(government.outcome, "Prepare more informed tribal consultations, build stronger government-to-government relationships, and better serve the communities you represent.");
+  assert.equal(government.explanation, "Bring funding, legislation, agency actions and Native-entity records together with sources you can check.");
+  assert.deepEqual([...government.collections], ["funding", "legislation", "federal-register", "lobbying", "need"]);
+  assert.deepEqual([...government.imagePool], ["utilities", "transportation", "context-cedar"]);
+  // Placement: after the researchers, before the journalists; Tribal
+  // Nations stays its own audience.
+  const ids = AUDIENCE_JOBS.map((audience) => audience.id);
+  assert.equal(ids.indexOf("government-officials"), ids.indexOf("universities-researchers") + 1);
+  assert.equal(ids.indexOf("journalists"), ids.indexOf("government-officials") + 1);
+  assert.ok(ids.includes("tribal-nations"));
+  // No contact database, and support for engagement rather than a stand-in.
+  for (const text of [advisors.outcome, advisors.explanation, government.outcome, government.explanation]) {
+    assert.doesNotMatch(text, /contacts?\b|leads? list|outreach list|replace|instead of|\bimpact\b|—|&/i, text);
+  }
+});
+
 test("Foundations and philanthropy says that it is not a need score", () => {
   // The owner's caution: observable indicators of funding and activity, never
   // a definitive need score.

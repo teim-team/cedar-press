@@ -365,3 +365,18 @@ test("who made it reads the same way everywhere the door says it", () => {
     if (/built by Lumecon/i.test(text)) assert.match(text, /built by Lumecon in partnership with Tribal Business News/i);
   }
 });
+
+test("maintenance and Cedar NEED's enrichments: door Cedar says weekly, and keeps each record with its entity", () => {
+  const current = DOOR_INTENTS.find((intent) => intent.id === "current");
+  assert.match(current.answer, /maintains its datasets weekly with human review/);
+  assert.match(current.expanded, /exceptionally useful, well-documented data and tools/);
+  assert.equal(classify("do you have patents")?.id, "collection:need");
+  assert.equal(classify("credit ratings for tribal enterprises")?.id, "collection:need");
+  const need = intentForCollection("need").answer;
+  assert.match(need, /later acquired/);
+  assert.match(need, /never presented as its parent's/);
+  const sources = DOOR_INTENTS.find((intent) => intent.id === "sources").answer;
+  assert.match(sources, /patent records, supported by company, tribal, SEC and court evidence/);
+  assert.match(sources, /rating-agency announcements, supported by issuer and tribal releases, filings, regulator records and labeled secondary sources/);
+  for (const text of everything()) assert.doesNotMatch(text, /updated (monthly|quarterly|annually)|every quarter/i, text.slice(0, 60));
+});

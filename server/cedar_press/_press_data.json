@@ -534,7 +534,7 @@
         "kind": "series",
         "from": 2016
       },
-      "blurb": "Enterprises owned or controlled by Native nations, Alaska Native corporations and other Native entities, including subsidiaries, holding companies and joint ventures. Follow parent relationships and organizational changes over time.",
+      "blurb": "Enterprises owned or controlled by Native nations, Alaska Native corporations and other Native entities, including subsidiaries, holding companies and joint ventures. Follow parent relationships and organizational changes over time. Where records are available, profiles also carry patents, assigned or later acquired, and dated credit ratings, each kept with the entity it concerns.",
       "linkage": "This is the structure the rest of the record resolves against, published as a collection in its own right: every tie names the nation or corporation behind it."
     },
     {
@@ -554,7 +554,7 @@
       "name": "Federal Funding to Indian Country",
       "version": "v2",
       "updated": "2026-09-26",
-      "cadence": "Updated monthly",
+      "cadence": "Updated weekly",
       "retired": false,
       "history": [
         {
@@ -590,7 +590,7 @@
       "name": "Federal Register — Indian Affairs",
       "version": "v2",
       "updated": "2026-09-26",
-      "cadence": "Updated as records arrive",
+      "cadence": "Updated weekly",
       "retired": false,
       "history": [
         {
@@ -626,7 +626,7 @@
       "name": "Native Legislation and Votes",
       "version": "v2",
       "updated": "2026-09-26",
-      "cadence": "Updated monthly",
+      "cadence": "Updated weekly",
       "retired": false,
       "history": [
         {
@@ -662,7 +662,7 @@
       "name": "Indian Country Deals",
       "version": "v2",
       "updated": "2026-09-26",
-      "cadence": "Updated continuously",
+      "cadence": "Updated weekly",
       "retired": false,
       "history": [
         {
@@ -698,7 +698,7 @@
       "name": "NAGPRA Notices",
       "version": "v2",
       "updated": "2026-09-26",
-      "cadence": "Updated as records arrive",
+      "cadence": "Updated weekly",
       "retired": false,
       "history": [
         {
@@ -734,7 +734,7 @@
       "name": "Native Federal Advocacy and Engagement",
       "version": "v2",
       "updated": "2026-09-26",
-      "cadence": "Updated as records arrive",
+      "cadence": "Updated weekly",
       "retired": false,
       "history": [
         {
@@ -770,7 +770,7 @@
       "name": "Native Federal Contractors",
       "version": "v2",
       "updated": "2026-09-26",
-      "cadence": "Updated monthly",
+      "cadence": "Updated weekly",
       "retired": false,
       "history": [
         {
@@ -806,7 +806,7 @@
       "name": "Native Federal Subcontracting",
       "version": "v2",
       "updated": "2026-09-26",
-      "cadence": "Updated monthly",
+      "cadence": "Updated weekly",
       "retired": false,
       "history": [
         {
@@ -842,7 +842,7 @@
       "name": "Native-Owned Businesses",
       "version": "v2",
       "updated": "2026-09-26",
-      "cadence": "Updated as records arrive",
+      "cadence": "Updated weekly",
       "retired": false,
       "history": [
         {
@@ -879,7 +879,7 @@
       "name": "Cedar Native Entity Enterprise Dataset (NEED)",
       "version": "v2",
       "updated": "2026-09-26",
-      "cadence": "Updated as records arrive",
+      "cadence": "Updated weekly",
       "retired": false,
       "history": [
         {
@@ -915,7 +915,7 @@
       "name": "Tribal Natural Resource Revenue",
       "version": "v2",
       "updated": "2026-09-26",
-      "cadence": "Updated quarterly",
+      "cadence": "Updated weekly",
       "retired": false,
       "history": [
         {
@@ -951,7 +951,7 @@
       "name": "Native Nonprofits",
       "version": "v2",
       "updated": "2026-09-26",
-      "cadence": "Updated annually",
+      "cadence": "Updated weekly",
       "retired": false,
       "history": [
         {
