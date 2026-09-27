@@ -199,6 +199,8 @@ data/restricted/
 !/data/cedar/codebook.json
 !/data/cedar/collections.manifest.json
 !/data/cedar/field_map.json
+# The one Cedar Grove release pin (immutable Lumecon release IDs and hashes only).
+!/data/cedar/grove_release_pin.json
 !/data/cedar/releases.json
 !/data/cedar/samples.published.json
 

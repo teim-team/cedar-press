@@ -5994,6 +5994,726 @@
      "column": "business_entity_id"
     }
    ]
+  },
+  "gaming/gaming_government_payments": {
+   "collection": "gaming",
+   "public_file": "gaming_government_payments.csv",
+   "row": "One government payment line as published: one payer, one recipient, one fund, one period, one status (paid/forecast/obligation/suppressed), one amount.",
+   "opening": [],
+   "entity_uid": "party_cedar_uid",
+   "plural": false,
+   "entity_role": "Source-declared payer, recipient, or licensee-attributed tribe; not ownership",
+   "columns_today": 45,
+   "columns_target": 45,
+   "default_viewer": [
+    "payment_observation_id",
+    "source_system",
+    "source_record_id",
+    "source_metric",
+    "state",
+    "fund",
+    "payer_name",
+    "payer_type"
+   ],
+   "header_source": "Lumecon-data gaming/revenue.py CONTRACTS; logical partition contract matches every part of the PINNED release; no independent Cedar producer",
+   "fields": [
+    {
+     "column": "payment_observation_id",
+     "decision": "keep",
+     "why": "Registered CEDAR-EVENT ID (Gaming block) bound to the stable key (source table, source record id) [rights class: public_derived]",
+     "spec": "Lumecon-data gaming/revenue.py CONTRACTS",
+     "rights_class": "public_derived"
+    },
+    {
+     "column": "source_system",
+     "decision": "keep",
+     "why": "Upstream clean table the line was read from [rights class: public_official]",
+     "spec": "Lumecon-data gaming/revenue.py CONTRACTS",
+     "rights_class": "public_official"
+    },
+    {
+     "column": "source_record_id",
+     "decision": "keep",
+     "why": "Upstream id (payment_id / observation_id / revenue_id), preserved [rights class: public_official]",
+     "spec": "Lumecon-data gaming/revenue.py CONTRACTS",
+     "rights_class": "public_official"
+    },
+    {
+     "column": "source_metric",
+     "decision": "keep",
+     "why": "Upstream metric name, unchanged [rights class: public_official]",
+     "spec": "Lumecon-data gaming/revenue.py CONTRACTS",
+     "rights_class": "public_official"
+    },
+    {
+     "column": "state",
+     "decision": "keep",
+     "why": "State whose regulator/agency published the line [rights class: public_official]",
+     "spec": "Lumecon-data gaming/revenue.py CONTRACTS",
+     "rights_class": "public_official"
+    },
+    {
+     "column": "fund",
+     "decision": "keep",
+     "why": "Fund or programme named by the source (RSTF, TNGF, revenue share ...) [rights class: public_official]",
+     "spec": "Lumecon-data gaming/revenue.py CONTRACTS",
+     "rights_class": "public_official"
+    },
+    {
+     "column": "payer_name",
+     "decision": "keep",
+     "why": "Paying party as published [rights class: public_official]",
+     "spec": "Lumecon-data gaming/revenue.py CONTRACTS",
+     "rights_class": "public_official"
+    },
+    {
+     "column": "payer_type",
+     "decision": "keep",
+     "why": "Kind of paying party [rights class: public_official]",
+     "spec": "Lumecon-data gaming/revenue.py CONTRACTS",
+     "rights_class": "public_official"
+    },
+    {
+     "column": "recipient_name",
+     "decision": "keep",
+     "why": "Receiving party as published or as named by the source's own fund [rights class: public_official]",
+     "spec": "Lumecon-data gaming/revenue.py CONTRACTS",
+     "rights_class": "public_official"
+    },
+    {
+     "column": "recipient_type",
+     "decision": "keep",
+     "why": "Kind of receiving party [rights class: public_official]",
+     "spec": "Lumecon-data gaming/revenue.py CONTRACTS",
+     "rights_class": "public_official"
+    },
+    {
+     "column": "party_cedar_uid",
+     "decision": "keep",
+     "why": "Canonical CE- cedar_uid carried from the source row (never name-joined here) [rights class: public_derived]",
+     "spec": "Lumecon-data gaming/revenue.py CONTRACTS",
+     "rights_class": "public_derived"
+    },
+    {
+     "column": "party_cedar_uid_role",
+     "decision": "keep",
+     "why": "Which side the cedar_uid identifies: payer, recipient, or licensee_attributed_tribe [rights class: public_derived]",
+     "spec": "Lumecon-data gaming/revenue.py CONTRACTS",
+     "rights_class": "public_derived"
+    },
+    {
+     "column": "direction",
+     "decision": "keep",
+     "why": "inflow (to a government), redistribution (government pays onward), internal_allocation (split inside a government) [rights class: public_official]",
+     "spec": "Lumecon-data gaming/revenue.py CONTRACTS",
+     "rights_class": "public_official"
+    },
+    {
+     "column": "amount_kind",
+     "decision": "keep",
+     "why": "Substantive kind of money [rights class: public_official]",
+     "spec": "Lumecon-data gaming/revenue.py CONTRACTS",
+     "rights_class": "public_official"
+    },
+    {
+     "column": "amount_role",
+     "decision": "keep",
+     "why": "total or component of a total printed on another line; never add a component to its total [rights class: public_official]",
+     "spec": "Lumecon-data gaming/revenue.py CONTRACTS",
+     "rights_class": "public_official"
+    },
+    {
+     "column": "payment_status",
+     "decision": "keep",
+     "why": "paid, forecast, obligation_stated, suppressed or empty_cell; a forecast is never paid [rights class: public_official]",
+     "spec": "Lumecon-data gaming/revenue.py CONTRACTS",
+     "rights_class": "public_official"
+    },
+    {
+     "column": "is_forecast",
+     "decision": "keep",
+     "why": "yes/no [rights class: public_official]",
+     "spec": "Lumecon-data gaming/revenue.py CONTRACTS",
+     "rights_class": "public_official"
+    },
+    {
+     "column": "amount_nominal_usd",
+     "decision": "keep",
+     "why": "Amount in NOMINAL US dollars (blank when suppressed or an empty cell) [rights class: public_official]",
+     "spec": "Lumecon-data gaming/revenue.py CONTRACTS",
+     "rights_class": "public_official"
+    },
+    {
+     "column": "amount_as_published",
+     "decision": "keep",
+     "why": "Figure as printed [rights class: public_official]",
+     "spec": "Lumecon-data gaming/revenue.py CONTRACTS",
+     "rights_class": "public_official"
+    },
+    {
+     "column": "published_unit",
+     "decision": "keep",
+     "why": "Unit, as printed, normalised to the declared vocabulary (USD, USD millions) [rights class: public_official]",
+     "spec": "Lumecon-data gaming/revenue.py CONTRACTS",
+     "rights_class": "public_official"
+    },
+    {
+     "column": "period_start",
+     "decision": "keep",
+     "why": "Period start (ISO) [rights class: public_official]",
+     "spec": "Lumecon-data gaming/revenue.py CONTRACTS",
+     "rights_class": "public_official"
+    },
+    {
+     "column": "period_end",
+     "decision": "keep",
+     "why": "Period end (ISO) [rights class: public_official]",
+     "spec": "Lumecon-data gaming/revenue.py CONTRACTS",
+     "rights_class": "public_official"
+    },
+    {
+     "column": "period_cadence",
+     "decision": "keep",
+     "why": "Cadence of the period; ytd/inception-to-date/cumulative are never summable [rights class: public_official]",
+     "spec": "Lumecon-data gaming/revenue.py CONTRACTS",
+     "rights_class": "public_official"
+    },
+    {
+     "column": "fiscal_year_definition",
+     "decision": "keep",
+     "why": "Fiscal-year basis of the period [rights class: public_official]",
+     "spec": "Lumecon-data gaming/revenue.py CONTRACTS",
+     "rights_class": "public_official"
+    },
+    {
+     "column": "basis",
+     "decision": "keep",
+     "why": "Revenue concept / base the payment is computed on, if the source or compact states it [rights class: public_official]",
+     "spec": "Lumecon-data gaming/revenue.py CONTRACTS",
+     "rights_class": "public_official"
+    },
+    {
+     "column": "compact_reference",
+     "decision": "keep",
+     "why": "Governing compact id given on the source row (compacts lane namespace) [rights class: public_official]",
+     "spec": "Lumecon-data gaming/revenue.py CONTRACTS",
+     "rights_class": "public_official"
+    },
+    {
+     "column": "compact_rate_text",
+     "decision": "keep",
+     "why": "Compact rate schedule text given on the source row [rights class: public_official]",
+     "spec": "Lumecon-data gaming/revenue.py CONTRACTS",
+     "rights_class": "public_official"
+    },
+    {
+     "column": "value_suppressed_by_source",
+     "decision": "keep",
+     "why": "yes when the publisher suppressed the amount [rights class: public_official]",
+     "spec": "Lumecon-data gaming/revenue.py CONTRACTS",
+     "rights_class": "public_official"
+    },
+    {
+     "column": "sum_exclusion_flag",
+     "decision": "keep",
+     "why": "Upstream exclusion flag (restated, superseded, cumulative, suppressed ...) [rights class: public_official]",
+     "spec": "Lumecon-data gaming/revenue.py CONTRACTS",
+     "rights_class": "public_official"
+    },
+    {
+     "column": "sum_exclusion_reason",
+     "decision": "keep",
+     "why": "Upstream exclusion reason text [rights class: public_official]",
+     "spec": "Lumecon-data gaming/revenue.py CONTRACTS",
+     "rights_class": "public_official"
+    },
+    {
+     "column": "summable_within_series",
+     "decision": "keep",
+     "why": "yes only for paid, non-excluded, non-cumulative lines; add only within nonadditive_series_key [rights class: public_derived]",
+     "spec": "Lumecon-data gaming/revenue.py CONTRACTS",
+     "rights_class": "public_derived"
+    },
+    {
+     "column": "nonadditive_series_key",
+     "decision": "keep",
+     "why": "Lines may be added only when this key is equal [rights class: public_derived]",
+     "spec": "Lumecon-data gaming/revenue.py CONTRACTS",
+     "rights_class": "public_derived"
+    },
+    {
+     "column": "upstream_revenue_evidence_class",
+     "decision": "keep",
+     "why": "Upstream revenue_evidence_class (a payment is never a revenue figure) [rights class: public_official]",
+     "spec": "Lumecon-data gaming/revenue.py CONTRACTS",
+     "rights_class": "public_official"
+    },
+    {
+     "column": "overlaps_online_sportsbook_observation_id",
+     "decision": "keep",
+     "why": "financial_observation_id (CEDAR-OBS) of the online-sports package observation for the same state/month/licensee (digital sportsbook tax rows); never add both [rights class: public_derived]",
+     "spec": "Lumecon-data gaming/revenue.py CONTRACTS",
+     "rights_class": "public_derived"
+    },
+    {
+     "column": "nonadditive_with_table",
+     "decision": "keep",
+     "why": "Component table this row must never be summed with (it measures the same activity); set whenever the overlap pointer is [rights class: public_derived]",
+     "spec": "Lumecon-data gaming/revenue.py CONTRACTS",
+     "rights_class": "public_derived"
+    },
+    {
+     "column": "document_status",
+     "decision": "keep",
+     "why": "original / revised / latest_statement_for_period, as upstream [rights class: public_official]",
+     "spec": "Lumecon-data gaming/revenue.py CONTRACTS",
+     "rights_class": "public_official"
+    },
+    {
+     "column": "source_authority",
+     "decision": "keep",
+     "why": "Publishing agency [rights class: public_official]",
+     "spec": "Lumecon-data gaming/revenue.py CONTRACTS",
+     "rights_class": "public_official"
+    },
+    {
+     "column": "source_document_type",
+     "decision": "keep",
+     "why": "Kind of source document [rights class: public_official]",
+     "spec": "Lumecon-data gaming/revenue.py CONTRACTS",
+     "rights_class": "public_official"
+    },
+    {
+     "column": "source_url",
+     "decision": "keep",
+     "why": "Source document URL [rights class: public_official]",
+     "spec": "Lumecon-data gaming/revenue.py CONTRACTS",
+     "rights_class": "public_official"
+    },
+    {
+     "column": "source_page",
+     "decision": "keep",
+     "why": "Page in the source document [rights class: public_official]",
+     "spec": "Lumecon-data gaming/revenue.py CONTRACTS",
+     "rights_class": "public_official"
+    },
+    {
+     "column": "source_quote",
+     "decision": "keep",
+     "why": "Printed line the figure was read from [rights class: public_official]",
+     "spec": "Lumecon-data gaming/revenue.py CONTRACTS",
+     "rights_class": "public_official"
+    },
+    {
+     "column": "source_date",
+     "decision": "keep",
+     "why": "Issue/conference date of the document (ISO) where given [rights class: public_official]",
+     "spec": "Lumecon-data gaming/revenue.py CONTRACTS",
+     "rights_class": "public_official"
+    },
+    {
+     "column": "retrieved_date",
+     "decision": "keep",
+     "why": "Date retrieved [rights class: public_official]",
+     "spec": "Lumecon-data gaming/revenue.py CONTRACTS",
+     "rights_class": "public_official"
+    },
+    {
+     "column": "rights_class",
+     "decision": "keep",
+     "why": "Row-level rights class [rights class: public_official]",
+     "spec": "Lumecon-data gaming/revenue.py CONTRACTS",
+     "rights_class": "public_official"
+    },
+    {
+     "column": "publication_status",
+     "decision": "keep",
+     "why": "Row-level publication status [rights class: public_official]",
+     "spec": "Lumecon-data gaming/revenue.py CONTRACTS",
+     "rights_class": "public_official"
+    }
+   ],
+   "new": [],
+   "order": [
+    "payment_observation_id",
+    "source_system",
+    "source_record_id",
+    "source_metric",
+    "state",
+    "fund",
+    "payer_name",
+    "payer_type",
+    "recipient_name",
+    "recipient_type",
+    "party_cedar_uid",
+    "party_cedar_uid_role",
+    "direction",
+    "amount_kind",
+    "amount_role",
+    "payment_status",
+    "is_forecast",
+    "amount_nominal_usd",
+    "amount_as_published",
+    "published_unit",
+    "period_start",
+    "period_end",
+    "period_cadence",
+    "fiscal_year_definition",
+    "basis",
+    "compact_reference",
+    "compact_rate_text",
+    "value_suppressed_by_source",
+    "sum_exclusion_flag",
+    "sum_exclusion_reason",
+    "summable_within_series",
+    "nonadditive_series_key",
+    "upstream_revenue_evidence_class",
+    "overlaps_online_sportsbook_observation_id",
+    "nonadditive_with_table",
+    "document_status",
+    "source_authority",
+    "source_document_type",
+    "source_url",
+    "source_page",
+    "source_quote",
+    "source_date",
+    "retrieved_date",
+    "rights_class",
+    "publication_status"
+   ],
+   "retire": []
+  },
+  "gaming/gaming_regional_revenue": {
+   "collection": "gaming",
+   "public_file": "gaming_regional_revenue.csv",
+   "row": "One NIGC-published gross gaming revenue figure for one geography (a region under one region-system version, or the printed national total) and one NIGC fiscal year, from one report.",
+   "opening": [],
+   "entity_uid": "cedar_uid",
+   "plural": false,
+   "entity_role": "none: the rows attribute no Native entity",
+   "columns_today": 38,
+   "columns_target": 38,
+   "default_viewer": [
+    "revenue_observation_id",
+    "geography_level",
+    "region_system_code",
+    "region_system_version",
+    "administrative_region_id",
+    "region_name",
+    "region_states_in_force",
+    "fiscal_year"
+   ],
+   "header_source": "Lumecon-data Gaming contract (gaming--gaming_regional_revenue, lumecon_data/gaming/revenue.py); Cedar keeps this presentation entry only. The server validates it against the PINNED release's embedded DatasetContract (data/cedar/grove_release_pin.json) and refuses on drift; change field rights in Lumecon-data, then update this entry",
+   "fields": [
+    {
+     "column": "revenue_observation_id",
+     "decision": "keep",
+     "why": "Grove field rights public_derived: Computed only from public_official fields by a documented method",
+     "spec": "Lumecon-data lumecon_data/gaming/revenue.py CONTRACTS",
+     "rights_class": "public_derived"
+    },
+    {
+     "column": "geography_level",
+     "decision": "keep",
+     "why": "Grove field rights public_official: Official government/tribal publication; attributed, publishable after transformation review",
+     "spec": "Lumecon-data lumecon_data/gaming/revenue.py CONTRACTS",
+     "rights_class": "public_official"
+    },
+    {
+     "column": "region_system_code",
+     "decision": "keep",
+     "why": "Grove field rights public_official: Official government/tribal publication; attributed, publishable after transformation review",
+     "spec": "Lumecon-data lumecon_data/gaming/revenue.py CONTRACTS",
+     "rights_class": "public_official"
+    },
+    {
+     "column": "region_system_version",
+     "decision": "keep",
+     "why": "Grove field rights public_official: Official government/tribal publication; attributed, publishable after transformation review",
+     "spec": "Lumecon-data lumecon_data/gaming/revenue.py CONTRACTS",
+     "rights_class": "public_official"
+    },
+    {
+     "column": "administrative_region_id",
+     "decision": "keep",
+     "why": "Grove field rights public_official: Official government/tribal publication; attributed, publishable after transformation review",
+     "spec": "Lumecon-data lumecon_data/gaming/revenue.py CONTRACTS",
+     "rights_class": "public_official"
+    },
+    {
+     "column": "region_name",
+     "decision": "keep",
+     "why": "Grove field rights public_official: Official government/tribal publication; attributed, publishable after transformation review",
+     "spec": "Lumecon-data lumecon_data/gaming/revenue.py CONTRACTS",
+     "rights_class": "public_official"
+    },
+    {
+     "column": "region_states_in_force",
+     "decision": "keep",
+     "why": "Grove field rights public_official: Official government/tribal publication; attributed, publishable after transformation review",
+     "spec": "Lumecon-data lumecon_data/gaming/revenue.py CONTRACTS",
+     "rights_class": "public_official"
+    },
+    {
+     "column": "fiscal_year",
+     "decision": "keep",
+     "why": "Grove field rights public_official: Official government/tribal publication; attributed, publishable after transformation review",
+     "spec": "Lumecon-data lumecon_data/gaming/revenue.py CONTRACTS",
+     "rights_class": "public_official"
+    },
+    {
+     "column": "fiscal_year_definition",
+     "decision": "keep",
+     "why": "Grove field rights public_official: Official government/tribal publication; attributed, publishable after transformation review",
+     "spec": "Lumecon-data lumecon_data/gaming/revenue.py CONTRACTS",
+     "rights_class": "public_official"
+    },
+    {
+     "column": "figure_vintage",
+     "decision": "keep",
+     "why": "Grove field rights public_official: Official government/tribal publication; attributed, publishable after transformation review",
+     "spec": "Lumecon-data lumecon_data/gaming/revenue.py CONTRACTS",
+     "rights_class": "public_official"
+    },
+    {
+     "column": "preferred_figure_for_fy",
+     "decision": "keep",
+     "why": "Grove field rights public_derived: Computed only from public_official fields by a documented method",
+     "spec": "Lumecon-data lumecon_data/gaming/revenue.py CONTRACTS",
+     "rights_class": "public_derived"
+    },
+    {
+     "column": "preferred_figure_rule",
+     "decision": "keep",
+     "why": "Grove field rights public_official: Official government/tribal publication; attributed, publishable after transformation review",
+     "spec": "Lumecon-data lumecon_data/gaming/revenue.py CONTRACTS",
+     "rights_class": "public_official"
+    },
+    {
+     "column": "figure_precision",
+     "decision": "keep",
+     "why": "Grove field rights public_official: Official government/tribal publication; attributed, publishable after transformation review",
+     "spec": "Lumecon-data lumecon_data/gaming/revenue.py CONTRACTS",
+     "rights_class": "public_official"
+    },
+    {
+     "column": "ggr_nominal_usd",
+     "decision": "keep",
+     "why": "Grove field rights public_official: Official government/tribal publication; attributed, publishable after transformation review",
+     "spec": "Lumecon-data lumecon_data/gaming/revenue.py CONTRACTS",
+     "rights_class": "public_official"
+    },
+    {
+     "column": "operation_count",
+     "decision": "keep",
+     "why": "Grove field rights public_official: Official government/tribal publication; attributed, publishable after transformation review",
+     "spec": "Lumecon-data lumecon_data/gaming/revenue.py CONTRACTS",
+     "rights_class": "public_official"
+    },
+    {
+     "column": "ggr_real_usd",
+     "decision": "keep",
+     "why": "Grove field rights public_derived: Computed only from public_official fields by a documented method",
+     "spec": "Lumecon-data lumecon_data/gaming/revenue.py CONTRACTS",
+     "rights_class": "public_derived"
+    },
+    {
+     "column": "real_usd_base_year",
+     "decision": "keep",
+     "why": "Grove field rights public_official: Official government/tribal publication; attributed, publishable after transformation review",
+     "spec": "Lumecon-data lumecon_data/gaming/revenue.py CONTRACTS",
+     "rights_class": "public_official"
+    },
+    {
+     "column": "deflator_series",
+     "decision": "keep",
+     "why": "Grove field rights public_official: Official government/tribal publication; attributed, publishable after transformation review",
+     "spec": "Lumecon-data lumecon_data/gaming/revenue.py CONTRACTS",
+     "rights_class": "public_official"
+    },
+    {
+     "column": "deflator_factor",
+     "decision": "keep",
+     "why": "Grove field rights public_derived: Computed only from public_official fields by a documented method",
+     "spec": "Lumecon-data lumecon_data/gaming/revenue.py CONTRACTS",
+     "rights_class": "public_derived"
+    },
+    {
+     "column": "ggr_change_pct",
+     "decision": "keep",
+     "why": "Grove field rights public_derived: Computed only from public_official fields by a documented method",
+     "spec": "Lumecon-data lumecon_data/gaming/revenue.py CONTRACTS",
+     "rights_class": "public_derived"
+    },
+    {
+     "column": "ggr_change_pct_basis",
+     "decision": "keep",
+     "why": "Grove field rights public_official: Official government/tribal publication; attributed, publishable after transformation review",
+     "spec": "Lumecon-data lumecon_data/gaming/revenue.py CONTRACTS",
+     "rights_class": "public_official"
+    },
+    {
+     "column": "check_sum_of_regions_usd",
+     "decision": "keep",
+     "why": "Grove field rights public_derived: Computed only from public_official fields by a documented method",
+     "spec": "Lumecon-data lumecon_data/gaming/revenue.py CONTRACTS",
+     "rights_class": "public_derived"
+    },
+    {
+     "column": "check_sum_of_region_operations",
+     "decision": "keep",
+     "why": "Grove field rights public_derived: Computed only from public_official fields by a documented method",
+     "spec": "Lumecon-data lumecon_data/gaming/revenue.py CONTRACTS",
+     "rights_class": "public_derived"
+    },
+    {
+     "column": "check_printed_minus_sum_usd",
+     "decision": "keep",
+     "why": "Grove field rights public_derived: Computed only from public_official fields by a documented method",
+     "spec": "Lumecon-data lumecon_data/gaming/revenue.py CONTRACTS",
+     "rights_class": "public_derived"
+    },
+    {
+     "column": "check_tolerance_usd",
+     "decision": "keep",
+     "why": "Grove field rights public_derived: Computed only from public_official fields by a documented method",
+     "spec": "Lumecon-data lumecon_data/gaming/revenue.py CONTRACTS",
+     "rights_class": "public_derived"
+    },
+    {
+     "column": "check_reconciles",
+     "decision": "keep",
+     "why": "Grove field rights public_derived: Computed only from public_official fields by a documented method",
+     "spec": "Lumecon-data lumecon_data/gaming/revenue.py CONTRACTS",
+     "rights_class": "public_derived"
+    },
+    {
+     "column": "printed_total_found_in_source_text",
+     "decision": "keep",
+     "why": "Grove field rights public_derived: Computed only from public_official fields by a documented method",
+     "spec": "Lumecon-data lumecon_data/gaming/revenue.py CONTRACTS",
+     "rights_class": "public_derived"
+    },
+    {
+     "column": "revenue_measure",
+     "decision": "keep",
+     "why": "Grove field rights public_official: Official government/tribal publication; attributed, publishable after transformation review",
+     "spec": "Lumecon-data lumecon_data/gaming/revenue.py CONTRACTS",
+     "rights_class": "public_official"
+    },
+    {
+     "column": "includes_nongaming_revenue",
+     "decision": "keep",
+     "why": "Grove field rights public_official: Official government/tribal publication; attributed, publishable after transformation review",
+     "spec": "Lumecon-data lumecon_data/gaming/revenue.py CONTRACTS",
+     "rights_class": "public_official"
+    },
+    {
+     "column": "measure_note",
+     "decision": "keep",
+     "why": "Grove field rights public_official: Official government/tribal publication; attributed, publishable after transformation review",
+     "spec": "Lumecon-data lumecon_data/gaming/revenue.py CONTRACTS",
+     "rights_class": "public_official"
+    },
+    {
+     "column": "source_system",
+     "decision": "keep",
+     "why": "Grove field rights public_official: Official government/tribal publication; attributed, publishable after transformation review",
+     "spec": "Lumecon-data lumecon_data/gaming/revenue.py CONTRACTS",
+     "rights_class": "public_official"
+    },
+    {
+     "column": "source_record_id",
+     "decision": "keep",
+     "why": "Grove field rights public_official: Official government/tribal publication; attributed, publishable after transformation review",
+     "spec": "Lumecon-data lumecon_data/gaming/revenue.py CONTRACTS",
+     "rights_class": "public_official"
+    },
+    {
+     "column": "source_document",
+     "decision": "keep",
+     "why": "Grove field rights public_official: Official government/tribal publication; attributed, publishable after transformation review",
+     "spec": "Lumecon-data lumecon_data/gaming/revenue.py CONTRACTS",
+     "rights_class": "public_official"
+    },
+    {
+     "column": "source_document_title",
+     "decision": "keep",
+     "why": "Grove field rights public_official: Official government/tribal publication; attributed, publishable after transformation review",
+     "spec": "Lumecon-data lumecon_data/gaming/revenue.py CONTRACTS",
+     "rights_class": "public_official"
+    },
+    {
+     "column": "source_url",
+     "decision": "keep",
+     "why": "Grove field rights public_official: Official government/tribal publication; attributed, publishable after transformation review",
+     "spec": "Lumecon-data lumecon_data/gaming/revenue.py CONTRACTS",
+     "rights_class": "public_official"
+    },
+    {
+     "column": "source_date",
+     "decision": "keep",
+     "why": "Grove field rights public_official: Official government/tribal publication; attributed, publishable after transformation review",
+     "spec": "Lumecon-data lumecon_data/gaming/revenue.py CONTRACTS",
+     "rights_class": "public_official"
+    },
+    {
+     "column": "retrieved_date",
+     "decision": "keep",
+     "why": "Grove field rights public_official: Official government/tribal publication; attributed, publishable after transformation review",
+     "spec": "Lumecon-data lumecon_data/gaming/revenue.py CONTRACTS",
+     "rights_class": "public_official"
+    },
+    {
+     "column": "rights_class",
+     "decision": "keep",
+     "why": "Grove field rights public_official: Official government/tribal publication; attributed, publishable after transformation review",
+     "spec": "Lumecon-data lumecon_data/gaming/revenue.py CONTRACTS",
+     "rights_class": "public_official"
+    }
+   ],
+   "new": [],
+   "order": [
+    "revenue_observation_id",
+    "geography_level",
+    "region_system_code",
+    "region_system_version",
+    "administrative_region_id",
+    "region_name",
+    "region_states_in_force",
+    "fiscal_year",
+    "fiscal_year_definition",
+    "figure_vintage",
+    "preferred_figure_for_fy",
+    "preferred_figure_rule",
+    "figure_precision",
+    "ggr_nominal_usd",
+    "operation_count",
+    "ggr_real_usd",
+    "real_usd_base_year",
+    "deflator_series",
+    "deflator_factor",
+    "ggr_change_pct",
+    "ggr_change_pct_basis",
+    "check_sum_of_regions_usd",
+    "check_sum_of_region_operations",
+    "check_printed_minus_sum_usd",
+    "check_tolerance_usd",
+    "check_reconciles",
+    "printed_total_found_in_source_text",
+    "revenue_measure",
+    "includes_nongaming_revenue",
+    "measure_note",
+    "source_system",
+    "source_record_id",
+    "source_document",
+    "source_document_title",
+    "source_url",
+    "source_date",
+    "retrieved_date",
+    "rights_class"
+   ],
+   "retire": []
   }
  }
 }

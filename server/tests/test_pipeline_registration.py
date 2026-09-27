@@ -45,21 +45,14 @@ class ProducerRegistrationTest(unittest.TestCase):
             source.write_bytes(b"fixture source bytes")
             actions = source.with_name("native_bill_actions.csv")
             actions.write_bytes(b"fixture action bytes")
-            args = argparse.Namespace(
-                collection="legislation",
-                source=str(source),
-                output_root=str(base / "store"),
-                as_of="2026-09-24",
-            )
-            with (
-                patch.dict(sys.modules, modules),
-                patch.object(
-                    publication, "field_map", return_value={"legislation": {"fixture": "map"}}
-                ),
-                patch.object(publication, "register", return_value={}),
-                patch.object(publication, "scopes", return_value={}),
-                contextlib.redirect_stdout(io.StringIO()),
-            ):
+            args = argparse.Namespace(collection="legislation", source=str(source),
+                                      output_root=str(base / "store"), as_of="2026-09-24")
+            with (patch.dict(sys.modules, modules),
+                  patch.object(publication, "field_map",
+                               return_value={"legislation": {"fixture": "map"}}),
+                  patch.object(publication, "register", return_value={}),
+                  patch.object(publication, "scopes", return_value={}),
+                  contextlib.redirect_stdout(io.StringIO())):
                 self.assertEqual(runner.cmd_release_pilot(args), 0)
             call = pipeline.build_collection_release.call_args
             self.assertEqual(call.args, (base / "store", "legislation"))
@@ -70,23 +63,11 @@ class ProducerRegistrationTest(unittest.TestCase):
             self.assertEqual(source.read_bytes(), b"fixture source bytes")
 
     def test_twelve_collection_allowlist_excludes_other_products(self):
-        self.assertEqual(
-            set(PIPELINE.RELEASE_PILOTS),
-            {
-                "funding",
-                "federal-register",
-                "legislation",
-                "deals",
-                "nagpra",
-                "lobbying",
-                "contractors",
-                "subcontracting",
-                "native-owned-businesses",
-                "nonprofits",
-                "natural-resources",
-                "need",
-            },
-        )
+        self.assertEqual(set(PIPELINE.RELEASE_PILOTS), {
+            "funding", "federal-register", "legislation", "deals", "nagpra", "lobbying",
+            "contractors", "subcontracting", "native-owned-businesses", "nonprofits",
+            "natural-resources", "need",
+        })
 
     def test_blocked_adapter_streams_source_and_returns_failure_receipt(self):
         spec = importlib.util.spec_from_file_location("blocked_build", ROOT / "code/build.py")

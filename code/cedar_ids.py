@@ -66,7 +66,7 @@ PREFIXES = {
     "CCP":  ("facility", 0),
     "VP":   ("facility", 0),
     "TPL":  ("facility", 0),
-    # --- new, minted by this service ---
+    # --- shared namespaces; issuance is further restricted below ---
     "CEDAR-ENT":     ("entity", 6),
     "CEDAR-FAC":     ("facility", 6),
     "CEDAR-EVENT":   ("event", 6),
@@ -123,6 +123,21 @@ PREFIXES = {
     # to learn what it was.
     "CEDAR-HOLD":    ("enterprise", 6),
 }
+
+# These names remain readable in historical registers, but no new value may
+# be issued. Width alone is insufficient: CEDAR-ENT and CEDAR-HOLD have widths.
+RETIRED_ISSUANCE_PREFIXES = frozenset({
+    "TRBF", "TRBS", "AKNF", "ANVC", "ANRC", "CNSF", "NHO", "ITO",
+    "TCU", "CDFI", "BIE", "UIO", "SGVF", "CNSS", "CCP", "VP", "TPL",
+    "CEDAR-ENT", "CEDAR-HOLD",
+})
+
+
+def _require_issuable(prefix):
+    if prefix not in PREFIXES:
+        raise KeyError(f"unknown prefix {prefix!r} - add it to PREFIXES first")
+    if prefix in RETIRED_ISSUANCE_PREFIXES or PREFIXES[prefix][1] == 0:
+        raise ValueError(f"{prefix} is read-only historical compatibility; issuance is retired")
 
 # Reserved so a concurrent build cannot collide with another agent's block.
 RESERVED_BLOCKS = {
@@ -184,8 +199,7 @@ def declare_static_block(prefix, lo, hi, owner, why):
     declared. Declaring the SAME block twice with the same owner is a no-op,
     so a module that is imported twice does not fail.
     """
-    if prefix not in PREFIXES:
-        raise KeyError(f"unknown prefix {prefix!r} - add it to PREFIXES first")
+    _require_issuable(prefix)
     if lo > hi:
         raise ValueError(f"{prefix}: block {lo}-{hi} is empty")
     blocks = STATIC_BLOCKS.setdefault(prefix, [])
@@ -223,12 +237,57 @@ def format_id(prefix, n):
     than mint one. Keeping the zero-padding in the ID service means a caller
     cannot render `CEDAR-ADMREG-100001` one way here and another way there.
     """
-    if prefix not in PREFIXES:
-        raise KeyError(f"unknown prefix {prefix!r}")
+    _require_issuable(prefix)
     _kind, width = PREFIXES[prefix]
     if width == 0:
         raise ValueError(f"{prefix} is GRANDFATHERED - it has no minted width")
     return f"{prefix}-{n:0{width}d}"
+
+
+# --------------------------------------------------------------------------
+# GAMING ID BLOCKS - declared HERE, persistently (repository split 2026-09-24)
+#
+# Cedar's identity service is the ONE issuer of Gaming object IDs. Lumecon-data
+# (lumecon_data/gaming/, Lumecon-data PR #9 + Gaming hardening) builds the Gaming
+# components and PROPOSES bindings (stable source key -> an ordinal inside
+# these blocks) against a pinned, read-only snapshot of Cedar's Gaming registry;
+# it never marks an ID issued. Only `code/build.py gaming-issue-ids` (Cedar,
+# owner-authorized, not yet run) turns PROPOSED into ISSUED in Cedar's live
+# register and emits the versioned registry snapshot Lumecon pins.
+#
+# Declared at import so every `allocate()` in any process steps over them
+# (before the split they were declared only when gaming_grove.py was imported).
+# Same values as ratified 2026-09-24 (docs/IDENTIFIER_STANDARD.md): chosen far
+# above every live counter then measured in data/spine/_id_registry.json.
+# server/tests/test_gaming_release.py checks Lumecon's proposal constants
+# against these, never the other way round.
+# --------------------------------------------------------------------------
+GAMING_BLOCKS = {
+    "CEDAR-OBS": (500_000_001, 509_999_999),
+    "CEDAR-EVENT": (500_001, 799_999),
+    "CEDAR-REL": (50_000_001, 50_999_999),
+    "CEDAR-SRC": (500_000_001, 500_999_999),
+    "CEDAR-CONTRACT": (10_000_001, 10_099_999),
+}
+GAMING_BLOCK_OWNER = "cedar_ids (Cedar Grove Gaming ID issuance)"
+GAMING_BLOCK_WHY = ("Gaming component objects: PROPOSED by Lumecon-data from stable source keys, "
+                    "ISSUED only by Cedar (build.py gaming-issue-ids); ratified contract "
+                    "docs/IDENTIFIER_STANDARD.md 2026-09-24")
+for _prefix, (_lo, _hi) in GAMING_BLOCKS.items():
+    declare_static_block(_prefix, _lo, _hi, GAMING_BLOCK_OWNER, GAMING_BLOCK_WHY)
+del _prefix, _lo, _hi
+
+
+def gaming_block_ordinal(value, prefix=None):
+    """Ordinal of a Gaming object ID inside its declared block, else None."""
+    for p, (lo, hi) in GAMING_BLOCKS.items():
+        if prefix and p != prefix:
+            continue
+        match = re.fullmatch(r"%s-(\d{%d})" % (re.escape(p), PREFIXES[p][1]), value or "")
+        if match:
+            n = int(match.group(1))
+            return n if lo <= n <= hi else None
+    return None
 
 
 class _Lock:
@@ -279,8 +338,7 @@ def _save(reg):
 
 def allocate(prefix, n=1, note=""):
     """Mint n IDs under `prefix`. Lock held across read-modify-write."""
-    if prefix not in PREFIXES:
-        raise KeyError(f"unknown prefix {prefix!r} - add it to PREFIXES first")
+    _require_issuable(prefix)
     kind, width = PREFIXES[prefix]
     if width == 0:
         raise ValueError(
@@ -449,8 +507,8 @@ ENTITY_ID_COLUMN_MEANINGS = {
     },
 }
 
-#: Prefixes that ARE canonical Cedar entity ids. `CEDAR-ENT` is minted by this
-#: service; the rest are grandfathered mnemonics.
+#: Historical entity-handle prefixes, retained for read-only parsing. The
+#: constant name is kept for old readers; none is a current cedar_uid.
 CANONICAL_ENTITY_PREFIXES = frozenset({
     "TRBF", "TRBS", "AKNF", "ANVC", "ANRC", "CNSF", "CNSS", "NHO", "ITO",
     "TCU", "CDFI", "BIE", "UIO", "SGVF", "CEDAR-ENT",
@@ -545,7 +603,7 @@ def count_drift(register_path=None):
                         "drift": m - d})
     return out
 
-#: entity_class -> the prefix a NEW entity of that class gets. The inverse of
+#: entity_class -> historical prefix, for reading old rows only. The inverse of
 #: PREFIX_CLASS_OBSERVED with the ambiguity resolved by a decision, not by a
 #: majority: `ANCSA Group Corporation` keeps ANVC because six live ids already
 #: use it and an id is never re-minted to tidy a scheme.
@@ -571,13 +629,12 @@ CLASS_PREFIX = {
 
 
 def class_prefix(entity_class):
-    """The prefix a NEW entity of `entity_class` should be minted under.
+    """Retired issuance API: class may change, but a CE- uid does not."""
+    raise ValueError("class-prefixed entity issuance is retired; use 503_identity.mint")
 
-    Returns None for an unrecognised class, deliberately: a class nobody has
-    ruled on must not silently acquire a prefix that asserts something about
-    it. Same polarity as `cedar_domain.np_ruling_is_native` - unknown is not a
-    yes.
-    """
+
+def historical_class_prefix(entity_class):
+    """Read-only historical classification hint, never mint authority."""
     return CLASS_PREFIX.get((entity_class or "").strip())
 
 
@@ -896,6 +953,7 @@ def reclassify(old_entity_id, new_entity_class, token=None,
         `reclassify()` on a rename would mint a second id for one entity and
         break rule 1.
     """
+    raise ValueError("class-prefixed entity issuance is retired; preserve the CE- uid and record a class event")
     parsed = parse_entity_id(old_entity_id)
     if parsed is None:
         raise ValueError(f"{old_entity_id!r} is not a canonical Cedar entity "
@@ -1112,6 +1170,21 @@ def validate_identifier(value, contract, registered_ids=None, *, source_system=N
     return value
 
 
+def validate_gaming_facility_id(value, registered_place_ids):
+    """Require an issued physical-place ID, never a source facility key."""
+    if registered_place_ids is None:
+        raise IdentifierContractError("pinned place register required")
+    match = re.fullmatch(r"CEDAR-PLACE-([0-9]{6})-([0-9A-HJKMNP-TV-Z]{2})", value or "")
+    if not match:
+        raise IdentifierContractError("Gaming facility must use CEDAR-PLACE")
+    identity = _entity_validator()
+    if match[2] != identity.check_chars(identity.encode(int(match[1]))):
+        raise IdentifierContractError("invalid CEDAR-PLACE check characters")
+    if value not in registered_place_ids:
+        raise IdentifierContractError("Gaming facility absent from pinned place register")
+    return value
+
+
 def validate_identity_join(left, right, mapping_contract=None):
     """Validate declared identity joins, never ownership or inferred equivalence.
 
@@ -1269,9 +1342,12 @@ if __name__ == "__main__":
             print(f"  {p:8s} {n:>5}  facility, grandfathered "
                   f"({PREFIXES.get(p, ('unregistered',))[0]})")
 
-    print("\n  minting test:")
-    for p in ("CEDAR-ENT", "CEDAR-ADMREG"):
-        print(f"    {p:14s} -> {allocate(p, 2)}")
+    print("\n  retired issuance test (read-only):")
+    for p in ("CEDAR-ENT", "CEDAR-HOLD", "TRBF"):
+        try:
+            _require_issuable(p)
+        except ValueError as e:
+            print(f"    {p:14s} -> refused: {e}")
     print(f"\n  id_type('CCP-000123')      = {id_type('CCP-000123')}")
     print(f"  id_type('TRBF-CHKSWN-00')  = {id_type('TRBF-CHKSWN-00')}")
     print(f"  is_internal('CEDAR-ENT-1') = {is_internal('CEDAR-ENT-000001')}")

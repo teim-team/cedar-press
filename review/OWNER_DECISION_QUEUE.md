@@ -2771,6 +2771,11 @@ make.*
 
 ## PL-1. Two casinos are filed to two different tribes each. Which tribe operates them?
 
+> **RESOLVED 2026-09-25 — removed from the owner queue (7 Clans).** Owner ruling from first-party evidence: https://sevenclans.com/about/ states "7 Clans Casinos are entities owned and operated by the Otoe-Missouria Development Authority (OMDA), the official enterprise and economic branch of the Otoe-Missouria Tribe of Indians." The Ponca Tribe affiliation is rejected; "Ponca City" is geographic, never affiliation evidence. Chain: Otoe-Missouria Tribe (CE-00181-J2) → OMDA (operator/enterprise; ID held) → Paradise, First Council, Chilocco, Red Rock and Perry. Implemented with a Ponca-City regression test on Lumecon-data PR #10 (`decisions/gaming/`).
+
+> **RESOLVED 2026-09-25 by engineering research — removed from the owner queue (The Stables)** (owner standing rule: linkages resolvable from official records are not owner questions). One property at 530 H St SE, Miami OK (NIGC marker 177): CEDAR-PLACE-000710-JP survives, 000709-CX (VP-0153) is an internal alias. Miami Tribe of Oklahoma (CE-0016Y-PQ) and Modoc Nation (CE-00175-5P) are joint owners and operators per the 1995 joint compact (FR 96-2449, "pursuant to a joint venture agreement entered into between the Miami and Modoc Tribes") and the NIGC-approved management agreement amendment (2003, "joint venture partners"); Butler National managed 1998–2018-09-30. Implemented on Lumecon-data PR #10.
+
+
 These are the only two duplicate groups where the SAME PLACE is filed to
 DIFFERENT SOVEREIGNS, so a duplicate sweep cannot settle them — merging would
 decide an ownership question by way of a de-duplication.
@@ -3162,6 +3167,9 @@ to, and **either answer moves the settled denominator of 717.**
 
 ## GP-1 — THE STABLES (Miami, Oklahoma). One property, two operators, both real.
 
+> **RESOLVED 2026-09-25 by engineering research — removed from the owner queue** (owner standing rule: linkages resolvable from official records are not owner questions). One property at 530 H St SE, Miami OK (NIGC marker 177): CEDAR-PLACE-000710-JP survives, 000709-CX (VP-0153) is an internal alias. Miami Tribe of Oklahoma (CE-0016Y-PQ) and Modoc Nation (CE-00175-5P) are joint owners and operators per the 1995 joint compact (FR 96-2449, "pursuant to a joint venture agreement entered into between the Miami and Modoc Tribes") and the NIGC-approved management agreement amendment (2003, "joint venture partners"); Butler National managed 1998–2018-09-30. Implemented on Lumecon-data PR #10.
+
+
 **The facts are settled.** `VP-0153` and `CCP-305300` are the same casino at
 530 H Street SE, Miami OK 74354 — same address, coordinates 1.1 km apart. It is
 a genuine **joint operation of the Miami Tribe of Oklahoma and the Modoc
@@ -3181,6 +3189,9 @@ the place, and this place has two operators.
 ---
 
 ## GP-2 — 7 CLANS FIRST COUNCIL (Newkirk, Oklahoma). One vintage names the wrong nation.
+
+> **RESOLVED 2026-09-25 — removed from the owner queue.** Owner ruling from first-party evidence: https://sevenclans.com/about/ states "7 Clans Casinos are entities owned and operated by the Otoe-Missouria Development Authority (OMDA), the official enterprise and economic branch of the Otoe-Missouria Tribe of Indians." The Ponca Tribe affiliation is rejected; "Ponca City" is geographic, never affiliation evidence. Chain: Otoe-Missouria Tribe (CE-00181-J2) → OMDA (operator/enterprise; ID held) → Paradise, First Council, Chilocco, Red Rock and Perry. Implemented with a Ponca-City regression test on Lumecon-data PR #10 (`decisions/gaming/`).
+
 
 **One property**: `VP-0170` and `CCP-843900`, both `7 Clans First Council
 Casino`, both at **12875 N Highway 77, Newkirk OK 74647**. `CCP-843900` files

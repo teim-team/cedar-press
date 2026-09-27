@@ -29,10 +29,9 @@ class CandidateReviewTest(unittest.TestCase):
                     with self.assertRaisesRegex(ValueError, "Lumecon Data collection-build"):
                         customer.build(dry=False, only=(collection,))
                     contracts.assert_not_called()
+                listed = {collection: {filename: True}}
                 with (
-                    patch.object(
-                        bundle, "collections", return_value={collection: {filename: True}}
-                    ),
+                    patch.object(bundle, "collections", return_value=listed),
                     patch.object(bundle, "find") as find,
                 ):
                     with self.assertRaisesRegex(ValueError, "RETIRED PRODUCER"):

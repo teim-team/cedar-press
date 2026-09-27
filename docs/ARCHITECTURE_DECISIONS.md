@@ -3960,3 +3960,7 @@ Elijah; production publication, identity promotion and Claude frontend edits
 remain prohibited. Original canonical data and active review artifacts stay pinned.
 
 <!-- END CODEX-EARLY-ACCESS-TAKEOVER -->
+
+<!-- BEGIN CEDAR-CONVERGENCE-20260926 -->
+Coordinator owns this isolated integration worktree and the common release consumers, entitlement registration, producer pins, generated inventory and convergence handoff. Existing sources and active identity review stay preserved. The user authorized commits, review-branch pushes and draft PRs for this recovery; no production release or identity issuance.
+<!-- END CEDAR-CONVERGENCE-20260926 -->
