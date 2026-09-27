@@ -9055,7 +9055,7 @@
    "rows": 1610,
    "n_cols": 59,
    "grain_declared": true,
-   "grain": "one row per ENTERPRISE that a Native entity owns or has published a tie to - a sub-hub of its owner, never a spine entity in its own right (docs/IDENTIFIER_STANDARD.md §2). Identity is the Cedar-minted `enterprise_id`; the owner is `owner_hub_cedar_uid`, which is always a spine entity. NOT one row per assertion - a firm named in ten annual reports is ONE row here and ten rows in need_enterprise_relations.csv. NOT one row per legal entity either: the grain is (owner hub, enterprise), so a joint venture between two Native owners is correctly two rows, one per parent, which is what ENTITY_MATCH_RULES rule 11 says a JV is.",
+   "grain": "one row per ENTERPRISE that a Native entity owns or has published a tie to - a sub-hub of its owner, never a spine entity in its own right (docs/IDENTIFIER_STANDARD.md \u00a72). Identity is the Cedar-minted `enterprise_id`; the owner is `owner_hub_cedar_uid`, which is always a spine entity. NOT one row per assertion - a firm named in ten annual reports is ONE row here and ten rows in need_enterprise_relations.csv. NOT one row per legal entity either: the grain is (owner hub, enterprise), so a joint venture between two Native owners is correctly two rows, one per parent, which is what ENTITY_MATCH_RULES rule 11 says a JV is.",
    "primary_key": [
     "enterprise_id"
    ],
@@ -29243,61 +29243,61 @@
      "target": "<unresolved>/data/clean/<unresolved>",
      "scope": "protected_surface",
      "table": null,
-     "signature": "680b712925f0f274f9bee94de178bb1a5a6fa00d0bddbb2dbfeb703f1f154ebe"
+     "signature": "e86b13b27442f716fba2649439777b3c23e3f05192de06d771107bbf1f217704"
     },
     {
-     "line": 472,
+     "line": 479,
      "operation": ".open",
      "target": "<unresolved>/dist/review/MANIFEST.csv",
      "scope": "protected_surface",
      "table": null,
-     "signature": "dc14990a2b75b117c50dd64d85407ec5fca8d5fb1ae04a5c77fc272182ec0c0a"
+     "signature": "1ca67ea7f4af74865df456571aa8c51b2023031d4cccb699bdfa1976d70104db"
     },
     {
-     "line": 740,
+     "line": 747,
      "operation": "partial.open",
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "158ef26281571b0235b9e4c97db84c739257a1a0ace20a82763d5179d9c5d606"
+     "signature": "ef22e206e9b814300f45f350e8eb6d3057f499225e11cdc5dac4bd539b0f0c58"
     },
     {
-     "line": 859,
+     "line": 866,
      "operation": ".write_text",
      "target": "<unresolved>/<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "bdc2510610af0fab62f1e17c2a8c0c6bb971a3bf57936ae90a9a860b1b8ec133"
-    },
-    {
-     "line": 864,
-     "operation": ".write_text",
-     "target": "<unresolved>/index.html",
-     "scope": "unresolved_target",
-     "table": null,
-     "signature": "21aacf7d61b69d2ab19705f43a32c75adda7174d3a1ba9530409c7ec5d4446ea"
-    },
-    {
-     "line": 869,
-     "operation": ".write_text",
-     "target": "<unresolved>/run-context.json",
-     "scope": "unresolved_target",
-     "table": null,
-     "signature": "95bc61b869f13d50f553dcbf0684dbc417a641ab9a9caa2df78d3f8af923d954"
+     "signature": "edd3a5d36cf6f53fc85e372943467b0ee52e9abca12a333d8f55822ef6784e86"
     },
     {
      "line": 871,
      "operation": ".write_text",
+     "target": "<unresolved>/index.html",
+     "scope": "unresolved_target",
+     "table": null,
+     "signature": "ba82331412745044624cbe178f2798e782b88ed0388d42187f217ee7af0258a1"
+    },
+    {
+     "line": 876,
+     "operation": ".write_text",
+     "target": "<unresolved>/run-context.json",
+     "scope": "unresolved_target",
+     "table": null,
+     "signature": "3842e4d48415755b507b5f11c7777d21adc73e1a093b699eba4f6601d8cd0f0a"
+    },
+    {
+     "line": 878,
+     "operation": ".write_text",
      "target": "<unresolved>/measurements.json",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "b9a3a644d718b787fc755ecb27e327dce81e851758c4e17265c1c81fde1ebecc"
+     "signature": "3fe60b47502a8bf19898db887dd4a0c7faeadac8c8e5f5e73447d5a7f8504ee0"
     }
    ],
    "writer_analysis_error": null,
    "writer_risk": "P1_protected_surface_write_candidate",
    "undeclared_governed_tables": [],
-   "source_sha256": "29eaa7dd4a7b0561b08761186e1037ed86e5a700379414049777c866502416ae",
+   "source_sha256": "1a2b196ef937457ea2a184e022dc8744b2f8aed9a088e2c66dfe73e01c6a0bab",
    "maintenance_status": "ACTIVE",
    "maintenance_evidence": {
     "reason": "Candidate review retained; build calls refuse_migrated_producers; ancillary full-table route distinct",
@@ -32430,26 +32430,26 @@
    },
    "writer_evidence": [
     {
-     "line": 363,
+     "line": 369,
      "operation": ".open",
      "target": "<unresolved>/dist/preview/<unresolved>",
      "scope": "protected_surface",
      "table": null,
-     "signature": "e499c0d8344e0396a2d92081850ca0d88f9f87a1c333c8e4ea67a36d16689ef4"
+     "signature": "12f2c4b8c63c5be3513e11c68fe2cd2e34189fe178a37c8da257e5caffaa2228"
     },
     {
-     "line": 380,
+     "line": 386,
      "operation": ".write_text",
      "target": "<unresolved>/dist/preview/MANIFEST.json",
      "scope": "protected_surface",
      "table": null,
-     "signature": "ceffdecc6c7c852a91a36901a5d19cf0500ee6d029ffc907ccfd84c397df6ed0"
+     "signature": "292335b4f6cc2bbddd93a2e9e2d880a57b0907286c209c7173ee42b5c5a0a363"
     }
    ],
    "writer_analysis_error": null,
    "writer_risk": "P1_protected_surface_write_candidate",
    "undeclared_governed_tables": [],
-   "source_sha256": "c5b0430b158e2548129b649ef264f46e94ad799e8c5bb64064a5c25313d3415c",
+   "source_sha256": "c052a96df89691688021c118ae1e0b249e483326d9272a9eedfc58f35247ceeb",
    "maintenance_status": "ACTIVE",
    "maintenance_evidence": {
     "reason": "1162 calls verify; DATASET_NORTH_STAR documents dist/preview producer",
@@ -45054,7 +45054,7 @@
    },
    "unknown_io_literals": [
     "documents.json",
-    "…unresolved_candidates.csv"
+    "\u2026unresolved_candidates.csv"
    ],
    "embedded_test_functions": 0,
    "standalone_test_evidence": {
@@ -75419,7 +75419,7 @@
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "ef0acb9a59714c63fd97ff5fa98de9dcfe987c0e85fb4b4d15a4241a27836b83"
+     "signature": "9fc5bd88c23e0890b1f767995b8f15e750b5ebee38f2995e717f43a75c3a622e"
     },
     {
      "line": 642,
@@ -75427,7 +75427,7 @@
      "target": "<unresolved>/docs/schema/inventory.json",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "6c932c9e5a68d346796c3a313769b4720654a88796c7e599f8df808743f490cc"
+     "signature": "802f69c5599b875c1e6f8a481ef6241b062bba25795a5b856b4a14a345c6eac2"
     },
     {
      "line": 1810,
@@ -75435,7 +75435,7 @@
      "target": "<unresolved>/docs/INVENTORY.md",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "df62a2cdf5c42fe4cc739f39efbb03fc16ed6849e8c2be83bb149200692bb157"
+     "signature": "fd625570fca56fc0b06b66ac33f444da35b934f59370fdbb8fcab021dd31befa"
     },
     {
      "line": 1811,
@@ -75443,13 +75443,13 @@
      "target": "<unresolved>/docs/schema/inventory.json",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "6c932c9e5a68d346796c3a313769b4720654a88796c7e599f8df808743f490cc"
+     "signature": "802f69c5599b875c1e6f8a481ef6241b062bba25795a5b856b4a14a345c6eac2"
     }
    ],
    "writer_analysis_error": null,
    "writer_risk": "P2_unresolved_write_target",
    "undeclared_governed_tables": [],
-   "source_sha256": "c02297cbf877584da7cdd66f9a9785b10009a9956d517c2383b7cdf38dc9b965",
+   "source_sha256": "32e489cfa781232648815198d7890153f56e1b915c6b895a5cec1635ebc81dc3",
    "maintenance_status": "REQUIRES-REVIEW",
    "maintenance_evidence": {
     "reason": "writer targets/callers need runtime confirmation before ownership or retirement: <unresolved>, <unresolved>/docs/INVENTORY.md, <unresolved>/docs/schema/inventory.json",

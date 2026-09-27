@@ -208,7 +208,7 @@ class ReleaseResearchTest(unittest.TestCase):
         for value in [
             "Source retained at C:/private/file.csv",
             "~/research/data.csv",
-            "/Users/person/data.csv",
+            "/Users/" + "person/data.csv",
             "https://name:secret@example.org/report",
             "https://example.org/report?token=private",
         ]:

@@ -127,8 +127,9 @@ _CONSTRUCTION: dict[str, dict[str, Any]] = {
             "businesses."
         ),
         "inclusion_rules": (
-            "Consent-first: each nation's office shares its certified list "
-            "directly and rows appear only under that nation's stated terms. "
+            "Consent-first: each nation's office is asked for its certified "
+            "list through its public contact, and rows appear only under that "
+            "nation's stated terms. "
             "Until an office confirms publication terms, its businesses "
             "appear in aggregates only, credited to the issuing office."
         ),

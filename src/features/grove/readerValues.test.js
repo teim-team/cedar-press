@@ -142,6 +142,6 @@ test("no published sample carries a path on somebody's machine", () => {
   assert.deepEqual(hits, []);
   // And the guard fires on the value that was published.
   assert.ok(LOCAL.test("dataset, on this machine at ~/Desktop/dissertation/data/clean/)"));
-  assert.ok(LOCAL.test("C:\\Users\\someone\\data.csv"));
+  assert.ok(LOCAL.test(["C:", "Users", "someone", "data.csv"].join("\\")));
   assert.ok(!LOCAL.test("https://www.example.com/home/about"));
 });

@@ -2894,6 +2894,25 @@ test.describe("the loop between the records and the journalism", () => {
     expect(errors).toEqual([]);
   });
 
+  // The index is a menu of square cards (owner, 2026-09-27), one per brief,
+  // each picture in its piece's own wash, and every card opens the brief.
+  test("Research Briefs lists every brief as a square card in its own tone", async ({ page }) => {
+    const errors = watchConsole(page);
+    await signIn(page);
+    await page.goto("/articles");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Research Briefs.");
+    const cards = page.locator(".cp-briefgrid .cp-art--square");
+    expect(await cards.count()).toBeGreaterThanOrEqual(4);
+    const tones = await page.locator(".cp-briefgrid img.cp-art__img").evaluateAll((imgs) =>
+      imgs.map((img) => getComputedStyle(img).filter),
+    );
+    expect(new Set(tones).size).toBeGreaterThan(1);
+    await cards.filter({ hasText: "Federal contracting to Native" }).click();
+    await expect(page).toHaveURL(/\/articles\/brief-contractors/);
+    await expect(page.getByRole("link", { name: /All Research Briefs/ })).toBeVisible();
+    expect(errors).toEqual([]);
+  });
+
   // A research brief opens on what it is (owner, 2026-09-27): title,
   // authors and picture first, then its key facts and the collections it
   // used, each one open to this reader; and its figures sit in the text,
@@ -2905,9 +2924,11 @@ test.describe("the loop between the records and the journalism", () => {
     const hero = page.locator(".cp-ar__hero");
     await expect(hero.getByRole("heading", { level: 1 })).toContainText("Announced deals");
     await expect(hero.locator(".cp-ar__by")).toContainText("Cedar Press research desk");
-    await expect(page.locator(".cp-ar__lead img.cp-ar__art")).toBeVisible();
-    // Three headlines from the piece, in a box beside the picture.
-    await expect(page.locator(".cp-ar__highlights li")).toHaveCount(3);
+    await expect(hero.locator("img.cp-ar__heroart")).toBeVisible();
+    // Three headlines from the piece, in the band's top right.
+    await expect(hero.locator(".cp-ar__highlights li")).toHaveCount(3);
+    // The rest of the research, as cards down the rail.
+    expect(await page.locator(".cp-ar__related .cp-ar__rel").count()).toBeGreaterThanOrEqual(2);
     const uses = page.locator(".cp-ar__uses .cp-ar__use");
     await expect(uses.first()).toContainText("Deals");
     expect(await page.locator(".cp-ar__body .cp-ar__fig").count()).toBeGreaterThanOrEqual(2);
@@ -2918,6 +2939,29 @@ test.describe("the loop between the records and the journalism", () => {
     await expect(page.locator(".cp-ad--example .cp-ad__cap").first()).toHaveText("Sponsored · Example");
     await uses.first().getByRole("link", { name: /Open the data/ }).click();
     await expect(page).toHaveURL(/\/data\?c=deals/);
+    expect(errors).toEqual([]);
+  });
+
+  // Share (owner, 2026-09-27): the brief as a PDF, with its figures and the
+  // way to Cedar Press+, to pass around.
+  test("a research brief downloads as a PDF with its figures", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop", "one download is enough");
+    const errors = watchConsole(page);
+    await signIn(page);
+    await page.goto("/articles/brief-contractors");
+    const share = page.getByRole("group", { name: "Share this brief" });
+    await expect(share.getByRole("button", { name: "Email this brief" })).toBeVisible();
+    const [download] = await Promise.all([
+      page.waitForEvent("download"),
+      share.getByRole("button", { name: "Download PDF" }).click(),
+    ]);
+    expect(download.suggestedFilename()).toMatch(/^federal-contracting-to-native-entities.*\.pdf$/);
+    const bytes = await (await download.createReadStream()).toArray().then((c) => Buffer.concat(c));
+    expect(bytes.subarray(0, 5).toString()).toBe("%PDF-");
+    // Two charts and the lead picture: a figure that failed to rasterize
+    // would leave the file small.
+    expect(bytes.length).toBeGreaterThan(60_000);
+    expect(bytes.toString("latin1")).toContain("tribalbusinessnews.com/subscribe");
     expect(errors).toEqual([]);
   });
 

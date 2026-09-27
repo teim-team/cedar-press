@@ -672,7 +672,12 @@ class TestApplyFieldMap(unittest.TestCase):
     def test_the_samples_the_retirement_rule_refuses_are_refused_by_name(self):
         for coll, (cols, exc) in REFUSED_AS_SAMPLED.items():
             table = pub.field_map()[coll]["key"].split("/")[1]
-            header, rows = sample(coll, table)
+            if coll == "need":
+                self.assertFalse((SAMPLES / "need" / "need_enterprises__10.csv").exists())
+                # A collection-wide quarantine refuses before identity or field processing.
+                header, rows = ["enterprise_id"], [{"enterprise_id": "synthetic-held-fixture"}]
+            else:
+                header, rows = sample(coll, table)
             with self.subTest(collection=coll), self.assertRaises(exc) as caught:
                 pub.apply_field_map(coll, header, rows, set(header))
             self.assertIn(caught.exception.columns[0], cols)

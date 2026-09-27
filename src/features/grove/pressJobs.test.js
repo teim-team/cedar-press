@@ -18,6 +18,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
+import { join, relative, sep } from "node:path";
+import { fileURLToPath } from "node:url";
 
 import codebookJson from "../../../data/cedar/codebook.json" with { type: "json" };
 import { PRESS_CATALOG, STOREFRONT_CATALOG } from "./pressCatalog.js";
@@ -61,8 +63,8 @@ function runtimeSources() {
   for (const entry of readdirSync(SRC, { recursive: true, withFileTypes: true })) {
     if (!entry.isFile() || !/\.(jsx?|mjs)$/.test(entry.name) || /\.test\./.test(entry.name)) continue;
     const dir = entry.parentPath ?? entry.path;
-    const full = `${dir}/${entry.name}`;
-    out.push({ rel: full.slice(SRC.pathname.length), text: readFileSync(full, "utf8") });
+    const full = join(dir, entry.name);
+    out.push({ rel: relative(fileURLToPath(SRC), full).split(sep).join("/"), text: readFileSync(full, "utf8") });
   }
   return out;
 }
