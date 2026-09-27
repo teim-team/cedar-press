@@ -103,7 +103,7 @@ export function graph() {
         url: `${SITE}/`,
         name: "Cedar Press",
         description:
-          "Trusted intelligence for Indian Country: original economic collections, data-driven research and transparent method.",
+          "Trusted intelligence for Indian Country: maintained collections on federal funding, contracting, deals, policy, giving, land and Native enterprise ownership, each traced to its source and resolved to the Native entities behind it.",
         inLanguage: "en",
         keywords: KEYWORDS,
         publisher: { "@id": ORG },
