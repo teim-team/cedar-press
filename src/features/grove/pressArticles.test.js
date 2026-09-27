@@ -21,7 +21,7 @@ test("every article draws from a real dataset with a real figure", () => {
 // This was "every launch dataset has an article slot filled", and it held
 // while the shelf was the four pilot datasets. The shelf is twelve now, and
 // there are still four articles: the eight collections that arrived with the
-// real descriptors have no Data Brief written about them, and writing eight to
+// real descriptors have no Research Brief written about them, and writing eight to
 // turn this green would be inventing the product's editorial output.
 //
 // So the invariant is stated as the fact it actually is: THESE datasets have
@@ -30,7 +30,7 @@ test("every article draws from a real dataset with a real figure", () => {
 // protected. What it no longer does is claim coverage the page does not have.
 const DATASETS_WITH_AN_ARTICLE = ["owned", "deals", "contractors", "funding"];
 
-test("the datasets with a Data Brief are exactly the ones listed", () => {
+test("the datasets with a Research Brief are exactly the ones listed", () => {
   const written = [...new Set(PRESS_ARTICLES.map((a) => a.datasetId))].sort();
   assert.deepEqual(written, [...DATASETS_WITH_AN_ARTICLE].sort());
 });

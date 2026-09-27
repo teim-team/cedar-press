@@ -93,7 +93,7 @@ export const WORKSPACE_TIERS = Object.freeze({
     maxUsers: 1,
     accessLabel: "Cedar Press, with part of the collection",
     features: Object.freeze([
-      "The Data Briefs and the collection's figures",
+      "The Research Briefs and the collection's figures",
       "The collections on the Cedar Press shelf, with their methods and versions",
       "The citation register",
       "Available only through a Tribal Business News access code",

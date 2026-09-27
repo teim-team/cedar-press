@@ -71,7 +71,7 @@ in the browser -- because nothing compared the two maps.
 
 PROTOTYPE LIMITATIONS
 The three articles are demonstration placeholders, one per launch dataset,
-written to be replaced by the real first Data Briefs. The citation register
+written to be replaced by the real first Research Briefs. The citation register
 launches EMPTY on purpose: inventing entries would be fabricated proof, which
 is the thing the datasets exist to replace.
 """
@@ -126,7 +126,7 @@ def _frozen(rows: list[dict[str, Any]]) -> tuple[Mapping[str, Any], ...]:
     return tuple(_deep_freeze(row) for row in rows)
 
 
-#: Where the Data Briefs publish, and where the collection lives.
+#: Where the Research Briefs publish, and where the collection lives.
 TBN_URL: str = _DATA["tbnUrl"]
 LUMECON_URL: str = _DATA["lumeconUrl"]
 

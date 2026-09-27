@@ -85,8 +85,21 @@ export function shareEmail(article, url) {
   };
 }
 
+/** The shape the page crops the lead photograph to for the PDF's band. */
+export const PDF_LEAD = Object.freeze({ w: 480, h: 540 });
+
 /**
  * Build the PDF.
+ *
+ * An editorial layout rather than a printout (owner, 2026-09-27: "more
+ * asymmetric ... it seems too utilitarian"). The first page opens on a navy
+ * band with the title on the left and the photograph, smaller, bleeding off
+ * the right edge. Under it the text runs in a column on the left while a rail
+ * on the right carries the highlights, the collections and the way to
+ * subscribe. Figures break out of the column to the full width, the quote is
+ * set large between hairlines, and the last page closes on a navy panel with
+ * two buttons: open the brief, and get Cedar Press+ through Tribal Business
+ * News.
  *
  * @param {object} input
  * @param {object} input.article   the PRESS_ARTICLES entry
@@ -102,15 +115,22 @@ export function shareEmail(article, url) {
 export async function buildArticlePdf({ article, url, collections = [], lead = null, figures = [], jsPDF }) {
   const Ctor = jsPDF ?? (await import("jspdf")).jsPDF;
   const doc = new Ctor({ unit: "pt", format: "letter", compress: true });
+  const names = (article.authors ?? []).map((a) => a.name).join(", ") || article.byline;
   doc.setProperties({
     title: pdfText(article.title),
     subject: pdfText(article.dek),
-    author: pdfText((article.authors ?? []).map((a) => a.name).join(", ") || article.byline),
+    author: pdfText(names),
     creator: "Cedar Press",
   });
 
-  const W = PAGE.w - 2 * PAGE.m;
+  const M = 48;
+  const COL = 336; // the text column
+  const RAILX = M + COL + 28;
+  const RAILW = PAGE.w - M - RAILX;
+  const FULL = PAGE.w - 2 * M;
+  const BOTTOM = PAGE.h - 58;
   let y = 0;
+  let railBottom = 0; // page 1 only: where the rail ends, so text can widen below it
 
   const fill = (rgb) => doc.setFillColor(...rgb);
   const ink = (rgb) => doc.setTextColor(...rgb);
@@ -118,188 +138,313 @@ export async function buildArticlePdf({ article, url, collections = [], lead = n
     doc.setFont("helvetica", style);
     doc.setFontSize(size);
   };
-  const newPage = () => {
-    doc.addPage();
-    y = PAGE.m;
-  };
-  const room = (h) => {
-    if (y + h > PAGE.h - PAGE.m - 18) newPage();
-  };
-  // Wrapped text, broken across pages a line at a time.
-  const lines = (text, { size = 10.5, style = "normal", color = INK, lead: leading = 1.45, width = W, x = PAGE.m } = {}) => {
-    font(style, size);
-    ink(color);
-    for (const line of doc.splitTextToSize(pdfText(text), width)) {
-      room(size * leading);
-      doc.text(line, x, y + size);
-      y += size * leading;
-    }
-  };
-  const link = (label, href, { size = 10.5, x = PAGE.m } = {}) => {
-    font("bold", size);
+  const pageNo = () => doc.getCurrentPageInfo().pageNumber;
+  // The text column is narrow beside the rail on page 1 and full width after.
+  const colWidth = () => (pageNo() === 1 && y < railBottom ? COL : FULL);
+
+  const runningHead = () => {
+    font("bold", 7.5);
     ink(DTEAL);
-    room(size * 1.6);
-    doc.textWithLink(pdfText(label), x, y + size, { url: href });
-    y += size * 1.6;
-  };
-
-  // The band: publication, title, dek, authors and date, on navy.
-  font("bold", 22);
-  const titleLines = doc.splitTextToSize(pdfText(article.title), W);
-  font("normal", 11);
-  const dekLines = doc.splitTextToSize(pdfText(article.dek), W);
-  const bandH = 58 + titleLines.length * 26 + 10 + dekLines.length * 15 + 34;
-  fill(NAVY);
-  doc.rect(0, 0, PAGE.w, bandH, "F");
-  font("bold", 8);
-  ink(TEAL);
-  doc.text("CEDAR PRESS  ·  RESEARCH BRIEF", PAGE.m, 40, { charSpace: 1.2 });
-  font("bold", 22);
-  ink([255, 255, 255]);
-  y = 50;
-  for (const line of titleLines) {
-    doc.text(line, PAGE.m, y + 22);
-    y += 26;
-  }
-  fill(TEAL);
-  doc.rect(PAGE.m, y + 6, 48, 3, "F");
-  y += 16;
-  font("normal", 11);
-  ink([205, 214, 228]);
-  for (const line of dekLines) {
-    doc.text(line, PAGE.m, y + 11);
-    y += 15;
-  }
-  const names = (article.authors ?? []).map((a) => a.name).join(", ") || article.byline;
-  font("bold", 9);
-  ink([255, 255, 255]);
-  doc.text(pdfText(`By ${names}  ·  ${article.date}`), PAGE.m, y + 20);
-  y = bandH + 18;
-
-  if (lead?.src) {
-    const h = Math.round((W * lead.h) / lead.w);
-    doc.addImage(lead.src, "JPEG", PAGE.m, y, W, h);
-    y += h + 6;
-    if (article.caption) lines(article.caption, { size: 8.5, color: MUTED, lead: 1.35 });
-    y += 8;
-  }
-
-  if (article.highlights?.length) {
-    font("normal", 10.5);
-    const wrapped = article.highlights.map((h) => doc.splitTextToSize(pdfText(h), W - 44));
-    const boxH = 38 + wrapped.reduce((n, l) => n + l.length * 14.5 + 6, 0);
-    room(boxH);
-    fill(TINT);
+    doc.text("CEDAR PRESS  ·  RESEARCH BRIEF", M, 36, { charSpace: 1 });
+    font("normal", 7.5);
+    ink(MUTED);
+    const short = pdfText(article.title);
+    doc.text(short.length > 70 ? `${short.slice(0, 68)}…` : short, PAGE.w - M, 36, { align: "right" });
     doc.setDrawColor(...TEAL);
     doc.setLineWidth(0.6);
-    doc.roundedRect(PAGE.m, y, W, boxH, 6, 6, "FD");
-    font("bold", 11);
-    ink(NAVY);
-    doc.text("Article highlights", PAGE.m + 16, y + 24);
-    let hy = y + 40;
-    font("normal", 10.5);
-    ink(INK);
-    for (const l of wrapped) {
-      fill(DTEAL);
-      doc.circle(PAGE.m + 20, hy + 3.5, 2, "F");
-      for (const line of l) {
-        doc.text(line, PAGE.m + 30, hy + 7);
-        hy += 14.5;
-      }
-      hy += 6;
+    doc.line(M, 44, PAGE.w - M, 44);
+  };
+  // A figure that will not fit where it falls waits for the top of the next
+  // page while the text keeps flowing, the way a printed page floats it,
+  // rather than leaving half a page blank.
+  const deferred = [];
+  let drawFigure = () => {};
+  const newPage = () => {
+    doc.addPage();
+    runningHead();
+    y = 64;
+    while (deferred.length) drawFigure(deferred.shift());
+  };
+  const room = (h) => {
+    if (y + h > BOTTOM) newPage();
+  };
+  const para = (text, { size = 10.5, style = "normal", color = INK, lead: leading = 1.5, x = M, width } = {}) => {
+    font(style, size);
+    ink(color);
+    let words = pdfText(text);
+    // Re-wrap whenever the available width changes (the rail ends mid-paragraph).
+    while (words) {
+      room(size * leading);
+      // Set on every line: a page break draws the running head in its own face.
+      font(style, size);
+      ink(color);
+      const w = width ?? colWidth();
+      const [line] = doc.splitTextToSize(words, w);
+      if (!line) break;
+      doc.text(line, x, y + size);
+      y += size * leading;
+      words = words.slice(line.length).replace(/^\s+/, "");
     }
-    y += boxH + 18;
-  }
+  };
 
+  // ── Page 1: the band. Title on the left, the photograph bleeding right.
+  const bandH = 300;
+  const photoW = 214;
+  fill(NAVY);
+  doc.rect(0, 0, PAGE.w, bandH, "F");
+  if (lead?.src) {
+    doc.addImage(lead.src, "JPEG", PAGE.w - photoW, 0, photoW, bandH);
+    fill(TEAL);
+    doc.rect(PAGE.w - photoW, bandH - 4, photoW, 4, "F");
+  }
+  const textW = PAGE.w - photoW - M - 30;
+  font("bold", 8);
+  ink(TEAL);
+  doc.text("CEDAR PRESS  ·  RESEARCH BRIEF", M, 58, { charSpace: 1.4 });
+  // The title takes the largest size at which title, dek and byline all fit
+  // the band.
+  const dekLines = (() => {
+    font("normal", 10.5);
+    return doc.splitTextToSize(pdfText(article.dek), textW).slice(0, 4);
+  })();
+  let tSize = 25;
+  let titleLines = [];
+  for (const size of [25, 23, 21, 19, 17]) {
+    tSize = size;
+    font("bold", size);
+    titleLines = doc.splitTextToSize(pdfText(article.title), textW);
+    const needed = 76 + titleLines.length * size * 1.16 + 24 + dekLines.length * 15 + 22;
+    if (needed <= bandH - 22) break;
+  }
+  let ty = 76;
+  ink([255, 255, 255]);
+  font("bold", tSize);
+  for (const line of titleLines) {
+    doc.text(line, M, ty + tSize);
+    ty += tSize * 1.16;
+  }
+  fill(TEAL);
+  doc.rect(M, ty + 10, 40, 3, "F");
+  ty += 24;
+  font("normal", 10.5);
+  ink([200, 210, 225]);
+  for (const line of dekLines) {
+    doc.text(line, M, ty + 10.5);
+    ty += 15;
+  }
+  font("bold", 8.5);
+  ink([255, 255, 255]);
+  doc.text(pdfText(`${names}  ·  ${article.date}`).toUpperCase(), M, Math.max(ty + 22, bandH - 30), { charSpace: 0.6 });
+
+  // ── Page 1: the rail. Highlights, collections, and the way in.
+  let ry = bandH + 30;
+  font("bold", 7.5);
+  ink(DTEAL);
+  doc.text("ARTICLE HIGHLIGHTS", RAILX, ry, { charSpace: 1.2 });
+  ry += 14;
+  for (const h of article.highlights ?? []) {
+    font("bold", 9.5);
+    const hl = doc.splitTextToSize(pdfText(h), RAILW - 16);
+    fill(TEAL);
+    doc.rect(RAILX, ry + 4.5, 9, 1.6, "F");
+    ink(NAVY);
+    hl.forEach((line, i) => doc.text(line, RAILX + 16, ry + 9 + i * 12.5));
+    ry += hl.length * 12.5 + 10;
+  }
+  if (collections.length) {
+    ry += 6;
+    doc.setDrawColor(...TEAL);
+    doc.setLineWidth(0.5);
+    doc.line(RAILX, ry, RAILX + RAILW, ry);
+    ry += 16;
+    font("bold", 7.5);
+    ink(DTEAL);
+    doc.text(collections.length > 1 ? "COLLECTIONS USED" : "COLLECTION USED", RAILX, ry, { charSpace: 1.2 });
+    ry += 6;
+    for (const c of collections) {
+      font("bold", 9.5);
+      ink(NAVY);
+      const cl = doc.splitTextToSize(pdfText(c.name), RAILW);
+      cl.forEach((line, i) => doc.textWithLink(line, RAILX, ry + 12 + i * 12, { url: c.href }));
+      ry += cl.length * 12 + 6;
+    }
+  }
+  // The subscribe card, navy, with its link on the whole card.
+  ry += 12;
+  font("normal", 9);
+  const pitch = doc.splitTextToSize("Cedar Press+ opens every collection behind this brief, through a Tribal Business News membership.", RAILW - 24);
+  const cardH = 36 + pitch.length * 12.5 + 26;
+  fill(NAVY);
+  doc.roundedRect(RAILX, ry, RAILW, cardH, 6, 6, "F");
+  font("bold", 11);
+  ink([255, 255, 255]);
+  doc.text("Read the data", RAILX + 12, ry + 22);
+  font("normal", 9);
+  ink([200, 210, 225]);
+  pitch.forEach((line, i) => doc.text(line, RAILX + 12, ry + 38 + i * 12.5));
+  font("bold", 9.5);
+  ink([95, 217, 204]);
+  doc.text("Subscribe now", RAILX + 12, ry + cardH - 14);
+  doc.link(RAILX, ry, RAILW, cardH, { url: TBN_PLANS_URL });
+  railBottom = ry + cardH + 8;
+
+  // ── The text.
+  y = bandH + 26;
   if (article.demonstration) {
-    lines("Illustrative figures: this brief's charts use example data while the research behind it is completed.", {
+    para("Illustrative figures: this brief's charts use example data while the research behind it is completed.", {
       size: 8.5,
       style: "italic",
       color: MUTED,
     });
-    y += 6;
+    y += 4;
   }
-
+  const imgHeight = (chart) => (chart?.src ? Math.min(300, Math.round((FULL * chart.h) / chart.w)) : 0);
+  const notesHeight = (block) => {
+    font("normal", 8);
+    return (block.notes ?? []).reduce((n, note) => n + doc.splitTextToSize(pdfText(note), FULL - 40).length * 10.5, 0);
+  };
+  const figureHeight = ({ block, chart }) => 40 + imgHeight(chart) + notesHeight(block) + 16;
+  drawFigure = (fig) => {
+    // Figures break out of the column to the full width.
+    const { block, chart, n } = fig;
+    if (y < railBottom && pageNo() === 1) y = railBottom;
+    const imgH = imgHeight(chart);
+    const boxH = figureHeight(fig);
+    room(Math.min(boxH, BOTTOM - 70));
+    fill(TINT);
+    doc.roundedRect(M, y, FULL, boxH, 6, 6, "F");
+    font("bold", 7.5);
+    ink(DTEAL);
+    doc.text(`FIGURE ${n}`, M + 14, y + 18, { charSpace: 1.2 });
+    font("bold", 11);
+    ink(NAVY);
+    doc.text(pdfText(block.caption), M + 14, y + 33, { maxWidth: FULL - 28 });
+    let fy = y + 42;
+    if (chart?.src) {
+      const w = Math.min(FULL - 28, Math.round((imgH * chart.w) / chart.h));
+      doc.addImage(chart.src, "PNG", M + 14, fy, w, imgH);
+      fy += imgH + 8;
+    }
+    font("normal", 8);
+    ink(MUTED);
+    for (const note of block.notes ?? []) {
+      for (const line of doc.splitTextToSize(pdfText(note), FULL - 40)) {
+        doc.text(line, M + 14, fy + 8);
+        fy += 10.5;
+      }
+    }
+    y += boxH + 18;
+  };
   let figureAt = 0;
   for (const block of article.body ?? []) {
     if (block.kind === BLOCK.H2) {
-      room(40);
-      y += 8;
-      fill(TEAL);
-      doc.rect(PAGE.m, y, 24, 2.5, "F");
-      y += 8;
-      lines(block.text, { size: 13.5, style: "bold", color: NAVY, lead: 1.3 });
-      y += 4;
-    } else if (block.kind === BLOCK.PULL) {
-      font("bold", 13);
-      const q = doc.splitTextToSize(pdfText(block.text), W - 56);
-      const boxH = q.length * 18 + 30;
-      room(boxH + 12);
-      fill(NAVY);
-      doc.roundedRect(PAGE.m, y, W, boxH, 6, 6, "F");
-      font("bold", 30);
-      ink(TEAL);
-      doc.text("“", PAGE.m + 14, y + 34);
-      font("bold", 13);
-      ink([255, 255, 255]);
-      q.forEach((line, i) => doc.text(line, PAGE.m + 42, y + 26 + i * 18));
-      y += boxH + 16;
-    } else if (block.kind === BLOCK.FIGURE) {
-      const chart = figures[figureAt];
-      figureAt += 1;
-      const imgH = chart?.src ? Math.round((W * chart.h) / chart.w) : 0;
-      room(Math.min(imgH, 360) + 60);
-      y += 6;
-      lines(block.caption, { size: 10.5, style: "bold", color: NAVY, lead: 1.35 });
-      if (chart?.src) {
-        const h = Math.min(imgH, 360);
-        const w = Math.round((h * chart.w) / chart.h);
-        doc.addImage(chart.src, "PNG", PAGE.m, y + 4, w, h);
-        y += h + 10;
-      }
-      for (const note of block.notes ?? []) lines(`•  ${note}`, { size: 8.5, color: MUTED, lead: 1.35 });
+      room(46);
       y += 10;
+      fill(TEAL);
+      doc.rect(M, y, 22, 2.5, "F");
+      y += 9;
+      para(block.text, { size: 14, style: "bold", color: NAVY, lead: 1.3 });
+      y += 3;
+    } else if (block.kind === BLOCK.PULL) {
+      // Set large between hairlines: in the column beside the rail on page 1,
+      // across the page after it, so it never leaves the column half empty.
+      const shape = () => {
+        const w = pageNo() === 1 && y < railBottom ? COL : FULL;
+        font("bold", w === COL ? 14 : 16);
+        const lead = w === COL ? 18.5 : 21;
+        const lines = doc.splitTextToSize(pdfText(block.text), w - 30);
+        return { qW: w, qLead: lead, q: lines, h: lines.length * lead + 30 };
+      };
+      let { qW, qLead, q, h } = shape();
+      if (y + h + 10 > BOTTOM) {
+        newPage();
+        ({ qW, qLead, q, h } = shape());
+      }
+      doc.setDrawColor(...TEAL);
+      doc.setLineWidth(0.8);
+      doc.line(M, y + 4, M + qW, y + 4);
+      font("bold", 34);
+      ink(TEAL);
+      doc.text("\u201c", M - 2, y + 38);
+      font("bold", qW === COL ? 14 : 16);
+      ink(NAVY);
+      q.forEach((line, i) => doc.text(line, M + 30, y + 30 + i * qLead));
+      y += h;
+      doc.setDrawColor(...TEAL);
+      doc.line(M, y, M + qW, y);
+      y += 18;
+    } else if (block.kind === BLOCK.FIGURE) {
+      const fig = { block, chart: figures[figureAt], n: figureAt + 1 };
+      figureAt += 1;
+      // A figure runs full width, so on page 1 it can only start below the
+      // rail. Defer it when it will not fit there but the column still has a
+      // real stretch of page for the text that follows.
+      const top = pageNo() === 1 ? Math.max(y, railBottom) : y;
+      if (figureHeight(fig) > BOTTOM - top && BOTTOM - y > 150) deferred.push(fig);
+      else drawFigure(fig);
     } else if (block.kind === BLOCK.P) {
-      lines(block.text);
-      y += 7;
+      para(block.text);
+      y += 8;
     }
   }
 
-  // The way in, at the end: the brief, its collections, and Cedar Press+.
-  // Measured first, so the box is drawn to fit what goes in it.
-  const inner = W - 32;
-  font("bold", 12);
-  const headH = doc.splitTextToSize("Read the full brief, and the data behind it, on Cedar Press", inner).length * 12 * 1.45;
-  font("normal", 10);
-  const pitch = "Not a subscriber? Cedar Press+ is available through a Tribal Business News membership.";
-  const pitchH = doc.splitTextToSize(pitch, inner).length * 10 * 1.45;
-  const endH = 16 + headH + 10.5 * 1.6 + (collections.length ? 9 * 1.45 + collections.length * 10 * 1.6 : 0) + 6 + pitchH + 10.5 * 1.6 + 12;
-  room(endH + 10);
-  y += 10;
-  fill(TINT);
-  doc.setDrawColor(...TEAL);
-  doc.roundedRect(PAGE.m, y, W, endH, 6, 6, "FD");
-  const top = y;
-  y += 16;
-  lines("Read the full brief, and the data behind it, on Cedar Press", { size: 12, style: "bold", color: NAVY, x: PAGE.m + 16, width: inner });
-  link("Open this brief on Cedar Press", url, { x: PAGE.m + 16 });
-  if (collections.length) {
-    lines("Collections used", { size: 9, style: "bold", color: MUTED, x: PAGE.m + 16 });
-    for (const c of collections) link(c.name, c.href, { size: 10, x: PAGE.m + 16 });
-  }
-  y += 6;
-  lines(pitch, { size: 10, color: INK, x: PAGE.m + 16, width: inner });
-  link("Get Cedar Press+ through Tribal Business News", TBN_PLANS_URL, { x: PAGE.m + 16 });
-  y = Math.max(y, top + endH);
+  while (deferred.length) drawFigure(deferred.shift());
 
-  // A footer on every page, with the brief's address.
+  // ── The close: a navy panel with two buttons.
+  if (y < railBottom && pageNo() === 1) y = railBottom;
+  const endH = 150;
+  room(endH + 10);
+  y += 8;
+  fill(NAVY);
+  doc.roundedRect(M, y, FULL, endH, 8, 8, "F");
+  font("bold", 7.5);
+  ink(TEAL);
+  doc.text("KEEP READING", M + 22, y + 28, { charSpace: 1.4 });
+  font("bold", 17);
+  ink([255, 255, 255]);
+  doc.text("The research, and the data behind it, on Cedar Press", M + 22, y + 52, { maxWidth: FULL - 44 });
+  font("normal", 9.5);
+  ink([200, 210, 225]);
+  doc.text("Not a subscriber? Cedar Press+ is available through a Tribal Business News membership.", M + 22, y + 72, { maxWidth: FULL - 44 });
+  const btn = (label, href, x, primary) => {
+    font("bold", 10);
+    const w = doc.getTextWidth(label) + 32;
+    if (primary) {
+      fill(DTEAL);
+      doc.roundedRect(x, y + 96, w, 30, 6, 6, "F");
+      ink([255, 255, 255]);
+    } else {
+      doc.setDrawColor(255, 255, 255);
+      doc.setLineWidth(0.8);
+      doc.roundedRect(x, y + 96, w, 30, 6, 6, "S");
+      ink([255, 255, 255]);
+    }
+    doc.text(label, x + 16, y + 115);
+    doc.link(x, y + 96, w, 30, { url: href });
+    return w;
+  };
+  const w1 = btn("Get Cedar Press+", TBN_PLANS_URL, M + 22, true);
+  btn("Open this brief on Cedar Press", url, M + 22 + w1 + 12, false);
+  y += endH;
+
+  // ── Footer on every page.
   const pages = doc.getNumberOfPages();
+  const host = (() => {
+    try {
+      return new URL(url).host;
+    } catch {
+      return "";
+    }
+  })();
   for (let i = 1; i <= pages; i += 1) {
     doc.setPage(i);
-    font("normal", 8);
+    doc.setDrawColor(222, 228, 232);
+    doc.setLineWidth(0.5);
+    doc.line(M, PAGE.h - 40, PAGE.w - M, PAGE.h - 40);
+    font("normal", 7.5);
     ink(MUTED);
-    doc.textWithLink("Cedar Press, from Lumecon and Tribal Business News", PAGE.m, PAGE.h - 28, { url: TBN_URL });
-    doc.text(`Page ${i} of ${pages}`, PAGE.w - PAGE.m, PAGE.h - 28, { align: "right" });
+    doc.textWithLink("Cedar Press, from Lumecon and Tribal Business News", M, PAGE.h - 26, { url: TBN_URL });
+    doc.textWithLink(`${host || "Cedar Press"}  ·  ${i} / ${pages}`, PAGE.w - M, PAGE.h - 26, { url, align: "right" });
   }
 
   return doc.output("blob");
