@@ -16,7 +16,7 @@ export function researchComponents(target) {
 export function researchFields(packet) {
   const fields = new Map((packet?.codebook?.fields || []).map((field) => [field.name, field]));
   return (packet?.display_order || []).map((name) => fields.get(name)).filter((field) => field
-    && !["internal", "remove", "keep_internal"].includes(field.display_disposition));
+    && !["internal", "remove", "keep_internal", "keep_internally"].includes(field.display_disposition));
 }
 
 export function researchValue(value) {

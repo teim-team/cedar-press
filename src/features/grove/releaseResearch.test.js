@@ -13,6 +13,14 @@ test("component and native requests preserve exact pins without treating a held 
   assert.equal(parts[1].available, false);
 });
 
+test("both maintained internal display dispositions remain hidden", () => {
+  const names = ["show", "internal", "remove", "keep_internal", "keep_internally"];
+  const packet = { display_order: names, codebook: { fields: names.map((name) => ({
+    name, display_disposition: name === "show" ? "keep" : name,
+  })) } };
+  assert.deepEqual(researchFields(packet).map((field) => field.name), ["show"]);
+});
+
 test("display labels and order do not rename exports or collapse money meanings", () => {
   const packet = { display_order: ["cedar_uid", "obligations", "ceiling", "secret"], codebook: { fields: [
     { name: "ceiling", label: "Award ceiling" }, { name: "cedar_uid", label: "Cedar entity ID" },

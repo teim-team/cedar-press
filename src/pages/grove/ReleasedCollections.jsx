@@ -3,6 +3,23 @@ import { fetchReleaseCollections, fetchReleaseResearch, releaseDownloadUrl } fro
 import { researchComponents, researchFields, researchValue } from "../../features/grove/releaseResearch.js";
 import SourceCitation from "./SourceCitation.jsx";
 
+export function PlotGeometryPreview({ packet }) {
+  const map = packet.map_preview;
+  if (packet.collection !== "plot" || !map || map.release_id !== packet.release_id) return null;
+  return <details><summary>Verified geometry examples ({map.features.length})</summary>
+    <p>Representative source outlines in longitude and latitude. Each outline is fitted separately; sizes cannot be compared. These observations do not certify ownership or title.</p>
+    <p>{map.omitted.length} selected rows have no drawable preview. Their unchanged source geometry remains in the verified download.</p>
+    {map.outlines.map((outline) => <figure key={outline.id}>
+      {outline.path ? <svg role="img" aria-label={`Source geometry ${outline.id}`} viewBox={outline.view_box} width="240" height="160" preserveAspectRatio="xMidYMid meet">
+        <path d={outline.path} fill="currentColor" fillOpacity="0.3" fillRule="evenodd" stroke="currentColor" strokeWidth="1" vectorEffect="non-scaling-stroke" />
+      </svg> : <p>This outline cannot be drawn without changing its geographic interpretation.</p>}
+      <figcaption>{outline.id}. Bounds (west, south, east, north): {outline.bbox.join(", ")}.
+        <SourceCitation source={outline.source} compact />
+      </figcaption>
+    </figure>)}
+  </details>;
+}
+
 function ResearchRows({ collection, part }) {
   const [state, setState] = useState({ status: "loading", packet: null });
   useEffect(() => {
@@ -17,6 +34,7 @@ function ResearchRows({ collection, part }) {
   const fields = researchFields(packet);
   return <>
     <p>{packet.sample_rows} real examples from {packet.source_rows.toLocaleString("en-US")} permitted rows in this component. This sample does not establish complete collection coverage.</p>
+    <PlotGeometryPreview packet={packet} />
     <div className="cp-ex__tablewrap" style={{ overflowX: "auto" }}>
       <table className="cp-ex__table"><thead><tr>{fields.map((field) => <th key={field.name}>{field.label || field.name}</th>)}<th>Original source and citation</th></tr></thead>
         <tbody>{packet.rows.map((selected) => <tr key={selected.release_row_sha256}>

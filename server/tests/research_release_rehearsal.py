@@ -164,6 +164,9 @@ def run_one(item, output):
                     "source_rows": payload["source_rows"],
                     "sample_rows": payload["sample_rows"],
                     "fields": len(payload["codebook"]["fields"]),
+                    "map_features": len(payload.get("map_preview", {}).get("features", [])),
+                    "map_omitted": len(payload.get("map_preview", {}).get("omitted", [])),
+                    "map_artifact_sha256": payload["provenance"].get("map_artifact_sha256"),
                     "response_sha256": hashlib.sha256(
                         repository._canonical_bytes(payload)
                     ).hexdigest(),

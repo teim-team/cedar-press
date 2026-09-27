@@ -247,6 +247,19 @@ def packet(tier: str, collection: str, release_id: str, component: str | None = 
             "Internal path values are omitted from display; the stable export schema is unchanged.",
         ],
     }
+    map_artifact = logical + ".map.json"
+    if collection == "plot" and map_artifact in artifacts:
+        from cedar_press import plot_map
+
+        result["map_preview"] = plot_map.present(
+            _public_value(artifact(map_artifact)),
+            release_id=release_id,
+            component=logical,
+            scope=preview["scope"],
+            source_rows=preview["source_rows"],
+            selected=rows,
+        )
+        result["provenance"]["map_artifact_sha256"] = artifacts[map_artifact]
     if len(repository._canonical_bytes(result)) > 4 * 1024 * 1024:
         raise repository.FullReleaseUnavailable("Research response exceeds boundary size")
     return result
