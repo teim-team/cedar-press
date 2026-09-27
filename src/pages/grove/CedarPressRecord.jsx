@@ -50,6 +50,7 @@ import {
   codebookColumns,
   codebookFor,
   contractFor,
+  declaresSource,
   decodeCut,
   explorableCollections,
   filterRows,
@@ -58,6 +59,7 @@ import {
   sortRows,
 } from "../../features/grove/explore.js";
 import { collectionCitation } from "../../features/grove/collection.js";
+import { isBareScheme, isInternalProvenanceColumn, isWellFormedUrl, readerText } from "../../features/grove/readerValues.js";
 import { PRESS_CATALOG_BY_ID } from "../../features/grove/pressCatalog.js";
 import { releaseFor } from "../../features/grove/pressReleases.js";
 import {
@@ -94,15 +96,20 @@ function readJsonList(text) {
 
 /** One value, as a reader reads it. The table's own formatter, unchanged. */
 function Value({ column, value, contract, item }) {
-  if (value === "" || value == null) return <span className="cp-rec__blank">not recorded</span>;
-  const text = String(value);
-  if (/^https?:\/\/\S+$/i.test(text)) {
+  if (value === "" || value == null || isBareScheme(value)) return <span className="cp-rec__blank">not recorded</span>;
+  const raw = String(value);
+  if (isWellFormedUrl(raw)) {
+    const href = raw.trim();
     return (
-      <a href={text} target="_blank" rel="noreferrer">
-        {text.replace(/^https?:\/\/(www\.)?/, "").slice(0, 72)}{text.length > 80 ? "…" : ""}
+      <a href={href} target="_blank" rel="noreferrer">
+        {href.replace(/^https?:\/\/(www\.)?/, "").slice(0, 72)}{href.length > 80 ? "…" : ""}
       </a>
     );
   }
+  // The same rule as the table (readerValues.js): a path or file name of
+  // Cedar's own reads as a Cedar working file or pipeline script, never as a
+  // path a reader could follow. The download keeps the value as released.
+  const text = readerText(raw);
   if (contract?.amount === column || /(_usd|_amt|obligations|_amount|amount_usd)$/i.test(column) || /^(income|expenses|spend)_/i.test(column)) {
     const n = Number(text.replace(/[$,\s]/g, ""));
     if (Number.isFinite(n)) return money.format(n);
@@ -317,7 +324,10 @@ export default function CedarPressRecord() {
     .filter((c) => columns.includes(c) && String(row[c] ?? "").trim());
   const attributionSet = new Set(attribution);
   const spoken = (c) => !shownInHead.has(c) && !shownInSummary.has(c) && !attributionSet.has(c);
-  const declaredDetail = (declared.length ? declared : listed.slice(0, 8)).filter(spoken);
+  // Cedar's lineage columns (a file a row came through, the basis for a
+  // step) are never the first screen; they stay in the additional details.
+  const firstScreen = listed.filter((c) => !isInternalProvenanceColumn(c));
+  const declaredDetail = (declared.length ? declared : firstScreen.slice(0, 8)).filter(spoken);
   // A DECLARED VIEW CAN BE THIN ONCE THE SUMMARY HAS TAKEN ITS SHARE.
   //
   // Federal Funding declares seven columns; the summary carries three of
@@ -328,7 +338,7 @@ export default function CedarPressRecord() {
   // the additional details") and a bare flag, which is a classification
   // rather than a detail. Both are still one click away, in their groups.
   const LONG_KEY = /(_key$|_id$|_uid$|unique)/i;
-  const topUp = listed.filter((c) => {
+  const topUp = firstScreen.filter((c) => {
     if (!spoken(c) || declaredDetail.includes(c)) return false;
     if (/_flag$/.test(c)) return false;
     // A normalized column beside the column it normalizes is the same fact
@@ -575,7 +585,14 @@ export default function CedarPressRecord() {
                   {item.source ? (
                     <a href={item.source} target="_blank" rel="noreferrer">Open the source record <span aria-hidden="true">&#8599;</span></a>
                   ) : (
-                    <span className="cp-rec__fine">This row&rsquo;s table carries no per-record link.</span>
+                    <span className="cp-rec__fine" data-testid="record-no-link">
+                      {/* A table that names a source column, or builds its
+                          link from the row's identifiers, does carry
+                          per-record links; this row simply has none. */}
+                      {declaresSource(contract)
+                        ? "No link was recorded for this row."
+                        : <>This row&rsquo;s table carries no per-record link.</>}
+                    </span>
                   )}
                   <span className="cp-rec__fine">
                     {entry?.short ?? collectionId}

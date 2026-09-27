@@ -59,6 +59,7 @@ export const AD_SLOT = Object.freeze({
   ARTICLE_RAIL: "article-rail",
   ARTICLE_RAIL_LOWER: "article-rail-lower",
   ARTICLE_RAIL_END: "article-rail-end",
+  ARTICLE_INLINE: "article-inline",
   ARTICLE_END: "article-end",
 });
 
@@ -149,6 +150,15 @@ export const AD_SLOTS = Object.freeze([
     note: "Only on the longest pieces. The rail is sticky, so this is the unit still beside the text when a reader is most of the way down.",
   }),
   Object.freeze({
+    id: AD_SLOT.ARTICLE_INLINE,
+    name: "Article inline",
+    where: "A hosted article, in the text before its second section",
+    size: "728 × 90",
+    shape: "strip",
+    height: "5.6rem",
+    note: "Inside the read, at a section break, never between a paragraph and the figure it introduces.",
+  }),
+  Object.freeze({
     id: AD_SLOT.ARTICLE_END,
     name: "Article end",
     where: "A hosted article, after the body and before the data it draws on",
@@ -216,3 +226,17 @@ export function adsPreview(search) {
   if (typeof search !== "string") return false;
   return new URLSearchParams(search).get("ads") === "demo";
 }
+
+/**
+ * What an unsold slot shows when the page asks for an example (owner,
+ * 2026-09-27: the briefs "need ad space examples"). Not an invitation, which
+ * stays one per page, and not a real advertiser, which nobody has booked: a
+ * unit labelled as an example, the size a buyer supplies, and where to book
+ * it. No invented sponsor and no audience figure.
+ */
+export const AD_EXAMPLE = Object.freeze({
+  cap: "Sponsored · Example",
+  title: "Your message, beside the research",
+  body: "An example of the unit a sponsor books here. Creative is supplied by the advertiser and sold through Tribal Business News.",
+  action: "Book this space",
+});

@@ -788,7 +788,12 @@
 .teim-rd .cp-art__art .cp-art__img,
 .teim-rd .cp-ar__figure .cp-ar__art,
 .teim-rd .cp-ar__inline img {
-  filter: grayscale(1) sepia(1) hue-rotate(137deg) saturate(2.3) contrast(1.16) brightness(0.74);
+  /* The house duotone (owner, 2026-09-27: "we don't have that blue
+     duotone"). The tone chain above came out cyan and flat. This maps each
+     pixel's luminance between the two colours the lumecon.ai headshots use,
+     shadow #09444A and highlight #86BFBA, through the SVG filter defined
+     once in index.html. */
+  filter: url(#cp-duotone);
 }
 /* The caption is not part of the picture, so it does not take the tone. */
 .teim-rd .cp-ar__figure .cp-ar__cap,
@@ -2133,6 +2138,80 @@
 .teim-rd .cp-ar__locked { font-size: 0.92rem; line-height: 1.5; color: var(--muted); margin: auto 0 0; }
 .teim-rd .cp-ar__locked .cp-m__more { display: inline-block; margin-top: 0.4rem; }
 
+/* ── A RESEARCH BRIEF, IN THE CICD SHAPE (owner, 2026-09-27) ──────────────
+ * "Title, authors, image, top three highlights in a box on the right that
+ * hovers over the image, then the article," modelled on the Center for
+ * Indian Country Development's research pages. A navy band carries the
+ * title, a short teal rule, the dek, the date and the authors with faces
+ * and roles. The lead picture runs the width of the page in the house
+ * duotone, and the highlights box sits over its right side on a desktop and
+ * under it on a phone. The collections the piece used follow, then the text
+ * with its figures, a quote box, and example sponsor units. */
+.teim-rd .cp-ar__hero { margin: 0.4rem 0 0; padding: clamp(1.8rem, 4vw, 3.4rem) clamp(1.4rem, 4vw, 3.6rem) clamp(1.6rem, 3vw, 2.6rem); border-radius: 10px 10px 0 0; color: #fff; background: radial-gradient(90% 120% at 100% 0%, rgba(15, 181, 165, 0.2) 0%, rgba(15, 181, 165, 0) 60%), linear-gradient(165deg, #0c1c3d 0%, #09132b 70%); }
+.teim-rd .cp-ar__tag { margin: 0; font-family: var(--mono); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #5fd9cc; }
+.teim-rd .cp-ar__hero .cp-ar__title { color: #fff; max-width: 22ch; margin-top: 0.8rem; font-size: clamp(2.1rem, 4.4vw, 3.6rem); }
+.teim-rd .cp-ar__rule { display: block; width: 5.5rem; height: 4px; margin: 1.3rem 0 0; border-radius: 2px; background: var(--teal); }
+.teim-rd .cp-ar__hero .cp-ar__dek { color: rgba(255, 255, 255, 0.84); font-size: clamp(1.08rem, 1.4vw, 1.25rem); text-align: left; max-width: 62ch; margin-top: 1.2rem; }
+.teim-rd .cp-ar__hero .cp-ar__meta { display: flex; flex-wrap: wrap; gap: 0.35rem 1.1rem; margin-top: 1.1rem; color: rgba(255, 255, 255, 0.66); }
+.teim-rd .cp-ar__authors { margin-top: clamp(1.6rem, 3vw, 2.4rem); }
+.teim-rd .cp-ar__authorscap { margin: 0; padding-bottom: 0.7rem; border-bottom: 1px solid rgba(95, 217, 204, 0.45); font-family: var(--mono); font-size: 0.74rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #fff; }
+.teim-rd .cp-ar__authorlist { list-style: none; margin: 1.1rem 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 1.1rem 2.6rem; }
+.teim-rd .cp-ar__author { display: flex; align-items: center; gap: 1rem; }
+.teim-rd .cp-ar__face { flex: 0 0 auto; width: 4.5rem; height: 4.5rem; border-radius: 50%; object-fit: cover; box-shadow: 0 0 0 2px rgba(95, 217, 204, 0.35); }
+.teim-rd .cp-ar__face--mark { display: inline-grid; place-items: center; background: #0e4a52; color: #bfe9e3; font-family: var(--sans); font-size: 1.15rem; font-weight: 750; letter-spacing: 0.02em; }
+.teim-rd .cp-ar__authorid { display: flex; flex-direction: column; gap: 0.25rem; }
+.teim-rd .cp-ar__by { font-family: var(--sans); font-size: 1.15rem; font-weight: 600; color: #fff; }
+.teim-rd .cp-ar__role { font-size: 0.92rem; line-height: 1.4; color: rgba(255, 255, 255, 0.72); }
+
+/* The lead picture and the highlights over it. */
+.teim-rd .cp-ar__lead { position: relative; margin: 0 0 1.6rem; }
+.teim-rd .cp-ar__heroimg { margin: 0; border-radius: 0 0 10px 10px; overflow: hidden; background-color: #09444a; }
+.teim-rd .cp-ar__heroimg .cp-ar__art { aspect-ratio: 16 / 7; object-fit: cover; }
+.teim-rd .cp-ar__heroimg .cp-ar__cap { margin: 0; padding: 0.7rem clamp(1.4rem, 4vw, 3.6rem); background: #fff; color: var(--ink-2); font-size: 0.84rem; }
+.teim-rd .cp-ar__highlights { position: absolute; top: clamp(1.4rem, 3vw, 2.6rem); right: clamp(1.4rem, 3vw, 2.6rem); width: min(24rem, 38%); padding: 1.3rem 1.4rem 1.2rem; border-radius: 10px; background: rgba(9, 19, 43, 0.9); color: #fff; box-shadow: 0 18px 44px -18px rgba(0, 0, 0, 0.6); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+.teim-rd .cp-ar__hlcap { margin: 0; font-family: var(--sans); font-size: 1.15rem; font-weight: 700; color: #fff; }
+.teim-rd .cp-ar__hllist { list-style: none; margin: 0.8rem 0 0; padding: 0; display: flex; flex-direction: column; gap: 0.75rem; }
+.teim-rd .cp-ar__hllist li { position: relative; padding-left: 1.15rem; font-size: 1rem; line-height: 1.45; color: rgba(255, 255, 255, 0.92); }
+.teim-rd .cp-ar__hllist li::before { content: ''; position: absolute; left: 0; top: 0.55em; width: 0.45rem; height: 0.45rem; border-top: 2px solid #5fd9cc; border-right: 2px solid #5fd9cc; transform: rotate(45deg); }
+@media (max-width: 900px) {
+  .teim-rd .cp-ar__heroimg { border-radius: 0; }
+  .teim-rd .cp-ar__heroimg .cp-ar__art { aspect-ratio: 4 / 3; }
+  .teim-rd .cp-ar__highlights { position: static; width: auto; border-radius: 0 0 10px 10px; background: #0e4a52; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
+}
+
+/* The collections the piece used. */
+.teim-rd .cp-ar__uses { display: flex; flex-wrap: wrap; align-items: center; gap: 0.7rem 1rem; margin: 0 0 2.4rem; }
+.teim-rd .cp-ar__usecap { font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--dteal); }
+.teim-rd .cp-ar__uselist { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.6rem; }
+.teim-rd .cp-ar__use { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.2rem 0.8rem; padding: 0.65rem 1rem; border: 1px solid var(--teal-line); border-radius: 10px; background: var(--teal-tint); }
+.teim-rd .cp-ar__usename { font-family: var(--sans); font-size: 0.98rem; font-weight: 700; color: var(--ink); }
+.teim-rd .cp-ar__usego { font-family: var(--sans); font-size: 0.88rem; font-weight: 700; color: var(--dteal); text-decoration: none; border-bottom: 1px solid var(--teal-line); }
+.teim-rd .cp-ar__usego:hover, .teim-rd .cp-ar__usego:focus-visible { border-bottom-color: var(--dteal); }
+
+/* The body, in the same two colours. A figure is a tinted card at the width
+ * of the text; the quote is a navy box with a teal mark; a section heading
+ * carries a short teal rule above it. */
+.teim-rd .cp-ar__body .cp-ar__fig { margin: 2.2rem 0; padding: 1.2rem 1.3rem 1.1rem; border: 1px solid var(--teal-line); border-radius: 10px; background: var(--teal-tint); }
+.teim-rd .cp-ar__body .cp-ar__chart { max-width: 640px; }
+.teim-rd .cp-ar__body .cp-ar__figcap { color: #09132b; }
+.teim-rd .cp-ar__quote { position: relative; margin: 2.4rem 0; padding: 1.6rem 1.8rem 1.6rem 4.2rem; border-radius: 10px; background: #09132b; }
+.teim-rd .cp-ar__quote::before { content: '\201C'; position: absolute; left: 1.2rem; top: 0.6rem; font-family: var(--sans); font-size: 4.4rem; font-weight: 800; line-height: 1; color: var(--teal); }
+.teim-rd .cp-ar__body .cp-ar__quote .cp-ar__pull { margin: 0; max-width: none; color: #fff; font-size: clamp(1.3rem, 2.1vw, 1.65rem); }
+.teim-rd .cp-ar__h2 { position: relative; padding-top: 0.9rem; }
+.teim-rd .cp-ar__h2::before { content: ''; position: absolute; top: 0; left: 0; width: 2.4rem; height: 3px; border-radius: 2px; background: var(--teal); }
+
+/* Example sponsor units: plainly labelled, the size a buyer supplies, and
+ * where to book it. Teal-tint on a dashed teal line, so nobody reads one as
+ * editorial or as a booked advertiser. */
+.teim-rd .cp-ad--example { display: flex; flex-direction: column; gap: 0.4rem; margin: 2rem 0; }
+.teim-rd .cp-ar__rail .cp-ad--example { margin: 0; }
+.teim-rd .cp-ad__ex { flex: 1 1 auto; display: flex; flex-direction: column; justify-content: center; gap: 0.35rem; padding: 1.1rem 1.3rem; border: 1px dashed var(--teal-line); border-radius: 10px; background: linear-gradient(135deg, var(--teal-tint), #fff); }
+.teim-rd .cp-ad__extitle { margin: 0; font-family: var(--sans); font-size: 1.05rem; font-weight: 700; color: #09132b; }
+.teim-rd .cp-ad__exbody { margin: 0; font-size: 0.88rem; line-height: 1.5; color: var(--ink-2); }
+.teim-rd .cp-ad__exfoot { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0.3rem 1rem; margin-top: 0.3rem; }
+.teim-rd .cp-ad__exsize { font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; color: var(--muted); }
+.teim-rd .cp-ad--strip.cp-ad--example .cp-ad__ex { min-height: 5.6rem; }
+
 /* ── Sponsorship ──────────────────────────────────────────────────────────
  * A slot with nothing booked renders no element, so none of this applies to
  * the live page today. The empty variant is the `?ads=demo` preview: a dashed
@@ -2785,6 +2864,7 @@
 .teim-rd .cp-why__runs::after { content: ''; position: absolute; inset: 0; z-index: 1; }
 .teim-rd .cp-why__sources .cp-hero3__marquee:hover, .teim-rd .cp-why__sources .cp-hero3__marquee:focus-within { animation-play-state: running; }
 .teim-rd .cp-why__sources .cp-hero3__proofcount { color: var(--door-action-bottom); }
+.teim-rd .cp-why__sources .cp-nowrap { white-space: nowrap; }
 .teim-rd .cp-why__sources .cp-hero3__run li { color: var(--door-navy); }
 .teim-rd .cp-why__sources .cp-hero3__run li::before { background: rgba(9, 19, 43, 0.18); }
 .teim-rd .cp-why__lede a { color: #fff; text-decoration: underline; text-decoration-color: rgba(255, 255, 255, 0.45); text-underline-offset: 0.18em; }
@@ -2967,6 +3047,27 @@
   body[data-cp-launcher-away] .teim-rd .cp-dc__fab { display: none; }
 }
 .teim-rd .cp-dc__statusdot { flex: 0 0 auto; width: 0.5rem; height: 0.5rem; border-radius: 50%; background: var(--teal); }
+
+/* THE GREETING NOTE (owner, 2026-09-27; CedarGreeting.jsx). It sits in the
+ * launcher's own column, so it rises from whatever corner the launcher is in,
+ * and it is hidden wherever the launcher is. White card, the launcher's teal
+ * hairline, a tail pointing down at the pill. The text itself is the button
+ * that opens Cedar; the cross dismisses it. */
+.teim-rd .cp-greet { position: relative; width: min(290px, calc(100vw - 2rem)); margin-bottom: 0.15rem; border: 1px solid var(--teal-line); border-radius: 10px; background: var(--door-surface, #fff); box-shadow: 0 12px 32px rgba(10, 15, 38, 0.14), 0 4px 12px rgba(10, 15, 38, 0.08); animation: cp-greet-in 0.28s var(--door-ease, ease) both; }
+.teim-rd .cp-greet::after { content: ''; position: absolute; right: 28px; bottom: -7px; width: 12px; height: 12px; background: var(--door-surface, #fff); border-right: 1px solid var(--teal-line); border-bottom: 1px solid var(--teal-line); transform: rotate(45deg); }
+.teim-rd .cp-greet__open { display: block; width: 100%; margin: 0; padding: 0.85rem 2.6rem 0.85rem 1rem; border: 0; background: none; color: var(--ink); font-family: var(--sans); font-size: 0.88rem; line-height: 1.45; text-align: left; cursor: pointer; border-radius: 10px; }
+.teim-rd .cp-greet__open:focus-visible { outline: 2px solid var(--dteal); outline-offset: 2px; }
+.teim-rd .cp-greet__dismiss { position: absolute; top: 0.2rem; right: 0.2rem; display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; padding: 0; border: 0; border-radius: 50%; background: none; color: var(--muted); cursor: pointer; }
+.teim-rd .cp-greet__dismiss:hover { color: var(--ink); background: var(--teal-tint); }
+.teim-rd .cp-greet__dismiss:focus-visible { outline: 2px solid var(--dteal); outline-offset: 2px; }
+@keyframes cp-greet-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .teim-rd .cp-greet { animation: none; } }
+/* Wherever the launcher steps aside, so does the note. */
+body[data-cp-preview-in-view] .teim-rd .cp-dc .cp-greet,
+body[data-cp-explore-in-view] .teim-rd .cedar-widget .cp-greet { display: none; }
+@media (max-width: 720px) {
+  body[data-cp-launcher-away] .teim-rd .cp-dc .cp-greet { display: none; }
+}
 
 /* Docked, not floating. The panel is `fixed` in its own right rather than a
    flex item above the launcher: pinned to the bottom edge, top corners only,

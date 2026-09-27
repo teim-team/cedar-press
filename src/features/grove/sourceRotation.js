@@ -14,7 +14,7 @@
  * payment records and gaming litigation) were removed on the owner's note of
  * 2026-09-27: gaming is not a Cedar Press collection, so a panel on the Cedar
  * Press door should not name its sources. Nothing counts this list: the
- * marquee's run time is its length, and the website figure never depended on it.
+ * marquee's run time is its length, and the 600+ figure never depended on it.
  *
  * The parcel, assessor, deed, permit and environmental-review labels name
  * the systems PLOT is built from; the foundation, 990-PF, bank, corporate,
@@ -32,15 +32,16 @@
  * state environmental label says "state" so it does not read as the federal
  * EPA line. `sourceRotation.test.js` refuses a repeated label.
  *
- * THE FIGURE IS NOT THIS LIST. SOURCE_REACH_FIGURE is a count of distinct
- * websites, stated by the owner (2026-09-27: 600+, up from the audited 560
+ * THE FIGURE IS NOT THIS LIST. SOURCE_REACH_FIGURE counts distinct upstream
+ * sources, stated by the owner (2026-09-27: 600+, up from the audited 560
  * behind 500+, with the Giving, PLOT, patent and ratings sources added and
- * deduplicated). Labels, patents and rating documents are not websites and
- * add nothing to it.
+ * deduplicated). It is worded "documented upstream sources", never
+ * "websites" (owner, 2026-09-27). The labels below name kinds of
+ * source, not a count, and add nothing to it.
  */
 
 export const SOURCE_REACH_CLAIM =
-  "Lumecon uses trusted publicly available records and source metadata from 600+ distinct source websites in dataset construction and research.";
+  "Lumecon builds its datasets and research from public material drawn from 600+ documented upstream sources.";
 
 export const SOURCE_REACH_FIGURE = "600+";
 

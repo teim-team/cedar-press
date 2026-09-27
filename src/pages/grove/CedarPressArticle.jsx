@@ -26,7 +26,7 @@
 // chart: a figure is its caption, its source and its provenance, because a
 // chart nobody can interrogate is the fake dashboard this product avoids.
 
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { Link, useParams } from "react-router";
 
 
@@ -42,6 +42,7 @@ import {
   BLOCK,
   LUMECON_URL,
   PRESS_ARTICLES,
+  TBN_PLANS_URL,
   TBN_URL,
 } from "../../features/grove/pressArticles";
 import { canOpenDataset, canReadCedarPress, upgradeFor } from "../../features/grove/pressAccess";
@@ -226,6 +227,42 @@ function DrawnFrom({ id, user }) {
   );
 }
 
+/**
+ * One collection the piece is built from, at the head of the page.
+ *
+ * Owner, 2026-09-27: the collection a brief used belongs up top, beside the
+ * title, so a reader who has it can dive straight in and one who does not
+ * sees what opens it. Open collections go to the viewer on that collection;
+ * a closed one says which plan includes it and links to where that plan is
+ * bought (a Tribal Business News membership for Cedar Press+, the Cedar
+ * Grove page for Grove).
+ */
+function UsedCollection({ id, user }) {
+  const entry = PRESS_CATALOG_BY_ID[id];
+  if (!entry) return null;
+  const open = canOpenDataset(user, entry);
+  const upgrade = upgradeFor(entry);
+  return (
+    <li className={`cp-ar__use${open ? "" : " is-locked"}`}>
+      <span className="cp-ar__usename">{entry.name}</span>
+      {open ? (
+        <Link className="cp-ar__usego" to={`${PRESS_DATA_PATH}?c=${entry.id}`}>
+          Open the data <span aria-hidden="true">&#8594;</span>
+        </Link>
+      ) : (
+        <a
+          className="cp-ar__usego"
+          href={upgrade.sameProduct ? TBN_PLANS_URL : GROVE_MARKETING_URL}
+          target="_blank"
+          rel="noreferrer"
+        >
+          Included in {upgrade.name}. Get access <span aria-hidden="true">&#8594;</span>
+        </a>
+      )}
+    </li>
+  );
+}
+
 export default function CedarPressArticle() {
   const { articleId } = useParams();
   const { user, loading } = useAuth();
@@ -289,13 +326,19 @@ export default function CedarPressArticle() {
   // runs past the last paragraph and the grid row stretches to match it,
   // which leaves a hole where the article should have ended.
   const longEnough = article.body.length >= 12;
-  // The piece's principal figure, lifted out of the body to lead the page.
-  // Only the FIRST figure moves: the rest stay where the argument put them.
-  // A brief with no figure keeps its photograph at the top and `body` is the
-  // body unchanged.
-  const leadIndex = article.body.findIndex((b) => b.kind === BLOCK.FIGURE);
-  const lead = leadIndex >= 0 ? article.body[leadIndex] : null;
-  const body = lead ? article.body.filter((_, i) => i !== leadIndex) : article.body;
+  // Figures stay where the argument put them (owner, 2026-09-27). The first
+  // one used to be lifted out to lead the page at full width, where its type
+  // scaled to headline size and the piece opened on a chart instead of on
+  // what it is and who wrote it.
+  const body = article.body;
+  // Authors with a face and a role; a piece that names only a byline still
+  // gets a row, with initials where the photograph would be.
+  const authors = article.authors?.length ? article.authors : [{ name: article.byline }];
+  // An example sponsor unit sits in the text before the second section
+  // heading, where a reader has settled into the piece (owner, 2026-09-27:
+  // "it needs ad space examples").
+  const headings = body.flatMap((b, i) => (b.kind === BLOCK.H2 ? [i] : []));
+  const inlineAdAt = headings[1] ?? -1;
 
   return (
     <div className="teim-rd teim-rd--paper">
@@ -307,31 +350,46 @@ export default function CedarPressArticle() {
         <PressBack label="All Data Briefs" to={PRESS_ARTICLES_PATH} />
 
         <article className="cp-ar">
-          <header className="cp-ar__head cp-fade">
-            <p className="cp-hero__access">{article.tag}</p>
+          {/* THE HEAD OF THE PAGE, IN THE SHAPE THE CENTER FOR INDIAN COUNTRY
+              DEVELOPMENT'S RESEARCH USES (owner, 2026-09-27): a navy band with
+              the title, the dek, the date and the authors, each with a face
+              and a role; then the lead picture, with three headlines from the
+              piece in a box over its right side; then the collections the
+              piece used, open to a reader who has them and priced for one who
+              does not. */}
+          <header className="cp-ar__hero cp-fade">
+            <p className="cp-ar__tag">{article.tag}</p>
             <h1 className="cp-ar__title">{article.title}</h1>
+            <span className="cp-ar__rule" aria-hidden="true" />
             <p className="cp-ar__dek">{article.dek}</p>
             <p className="cp-ar__meta">
-              {article.byline} · {article.date}
-              {article.minutes ? ` · ${article.minutes} min read` : ""}
+              <span>{article.date}</span>
+              {article.minutes ? <span>{article.minutes} min read</span> : null}
             </p>
-            {/* Invented numbers never read as findings: a demonstration
-                placeholder states what it is before the reader reaches a
-                statistic. The notice leaves with the flag, when sourced
-                research replaces the piece. */}
+            <section className="cp-ar__authors" aria-label="Authors">
+              <h2 className="cp-ar__authorscap">{authors.length > 1 ? "Authors" : "Author"}</h2>
+              <ul className="cp-ar__authorlist">
+                {authors.map((author) => (
+                  <li className="cp-ar__author" key={author.name}>
+                    {author.photo ? (
+                      <img className="cp-ar__face" src={author.photo} alt="" width="72" height="72" loading="lazy" />
+                    ) : (
+                      <span className="cp-ar__face cp-ar__face--mark" aria-hidden="true">
+                        {author.name.split(/\s+/).filter((w) => /^[A-Z]/.test(w)).slice(0, 2).map((w) => w[0]).join("")}
+                      </span>
+                    )}
+                    <span className="cp-ar__authorid">
+                      <span className="cp-ar__by">{author.name}</span>
+                      {author.role ? <span className="cp-ar__role">{author.role}</span> : null}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </section>
           </header>
 
-          {/* THE EVIDENCE COMES BEFORE THE STOCK PHOTOGRAPH.
-              The lead picture used to be the first thing under the headline —
-              on a data-led brief that means a reader passes a generic
-              meeting-room photograph to reach the one thing the piece is for.
-              If the article has a figure, the figure leads and the photograph
-              drops to where the prose reaches it; a piece with no figure
-              keeps the picture at the top, because then it is the only image
-              there is. Nothing is added or removed, only ordered. */}
-          {lead ? <Figure block={lead} lead /> : null}
-          {lead ? null : (
-            <figure className="cp-ar__figure">
+          <div className="cp-ar__lead cp-fade">
+            <figure className="cp-ar__figure cp-ar__heroimg">
               <img
                 className="cp-ar__art"
                 src={article.image}
@@ -345,32 +403,44 @@ export default function CedarPressArticle() {
                 {article.credit ? <span className="cp-ar__credit">{article.credit}</span> : null}
               </figcaption>
             </figure>
-          )}
+            {article.highlights?.length ? (
+              <aside className="cp-ar__highlights" aria-label="Article highlights">
+                <h2 className="cp-ar__hlcap">Article highlights</h2>
+                <ul className="cp-ar__hllist">
+                  {article.highlights.map((line) => <li key={line}>{line}</li>)}
+                </ul>
+              </aside>
+            ) : null}
+          </div>
+
+          <div className="cp-ar__uses">
+            <span className="cp-ar__usecap">
+              {drawn.length > 1 ? "Collections used" : "Collection used"}
+            </span>
+            <ul className="cp-ar__uselist">
+              {drawn.map((id) => <UsedCollection key={id} id={id} user={user} />)}
+            </ul>
+          </div>
 
           <div className="cp-ar__grid">
             <div className="cp-ar__body">
-              {lead ? (
-                <figure className="cp-ar__figure cp-ar__figure--inline">
-                  <img
-                    className="cp-ar__art"
-                    src={article.image}
-                    alt={article.imageAlt}
-                    width={ARTICLE_IMAGE.width}
-                    height={ARTICLE_IMAGE.height}
-                    loading="lazy"
-                  />
-                  <figcaption className="cp-ar__cap">
-                    {article.caption ?? article.imageAlt}
-                    {article.credit ? <span className="cp-ar__credit">{article.credit}</span> : null}
-                  </figcaption>
-                </figure>
-              ) : null}
               {body.map((block, index) => {
                 if (block.kind === BLOCK.H2) {
-                  return <h2 key={index} className="cp-ar__h2">{block.text}</h2>;
+                  return (
+                    <Fragment key={index}>
+                      {index === inlineAdAt ? <PressAd slot={AD_SLOT.ARTICLE_INLINE} example /> : null}
+                      <h2 className="cp-ar__h2">{block.text}</h2>
+                    </Fragment>
+                  );
                 }
                 if (block.kind === BLOCK.PULL) {
-                  return <p key={index} className="cp-ar__pull">{block.text}</p>;
+                  // The quote box: the line from the piece a reader should
+                  // leave with, set apart rather than italicised in place.
+                  return (
+                    <blockquote key={index} className="cp-ar__quote">
+                      <p className="cp-ar__pull">{block.text}</p>
+                    </blockquote>
+                  );
                 }
                 if (block.kind === BLOCK.FIGURE) {
                   return <Figure key={index} block={block} />;
@@ -410,13 +480,13 @@ export default function CedarPressArticle() {
                   How these are built <span aria-hidden="true">&#8594;</span>
                 </Link>
               </div>
-              {longEnough ? <PressAd slot={AD_SLOT.ARTICLE_RAIL_LOWER} /> : null}
-              {longEnough ? <PressAd slot={AD_SLOT.ARTICLE_RAIL_END} /> : null}
+              {longEnough ? <PressAd slot={AD_SLOT.ARTICLE_RAIL_LOWER} example /> : null}
+              {longEnough ? <PressAd slot={AD_SLOT.ARTICLE_RAIL_END} example /> : null}
             </aside>
           </div>
         </article>
 
-        <PressAd slot={AD_SLOT.ARTICLE_END} />
+        <PressAd slot={AD_SLOT.ARTICLE_END} example />
 
         {/* The end of every hosted piece: the data it came from, resolved
             against what this reader can open. */}

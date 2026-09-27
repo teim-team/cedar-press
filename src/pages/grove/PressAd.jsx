@@ -15,6 +15,7 @@
 
 import {
   AD_ENQUIRY_HREF,
+  AD_EXAMPLE,
   AD_HOUSE,
   adsPreview,
   creativeFor,
@@ -24,7 +25,7 @@ import {
 const preview = () =>
   adsPreview(typeof window === "undefined" ? "" : window.location.search);
 
-export default function PressAd({ slot }) {
+export default function PressAd({ slot, example = false }) {
   const spec = slotSpec(slot);
   if (!spec) return null;
 
@@ -53,6 +54,30 @@ export default function PressAd({ slot }) {
           <a className="cp-ad__houseact" href={AD_ENQUIRY_HREF} target="_blank" rel="noreferrer">
             {AD_HOUSE.action} <span aria-hidden="true">&#8594;</span>
           </a>
+        </div>
+      </aside>
+    );
+  }
+
+  // An example unit where the page asks for one: what the space looks like
+  // booked, labelled as an example, with its size and where to book it.
+  if (example) {
+    return (
+      <aside
+        className={`cp-ad cp-ad--${spec.shape} cp-ad--example`}
+        aria-label="Sponsored example"
+        style={spec.shape === "box" ? { aspectRatio: spec.ratio } : undefined}
+      >
+        <span className="cp-ad__cap">{AD_EXAMPLE.cap}</span>
+        <div className="cp-ad__ex">
+          <p className="cp-ad__extitle">{AD_EXAMPLE.title}</p>
+          <p className="cp-ad__exbody">{AD_EXAMPLE.body}</p>
+          <span className="cp-ad__exfoot">
+            <span className="cp-ad__exsize">{spec.size}</span>
+            <a className="cp-ad__houseact" href={AD_ENQUIRY_HREF} target="_blank" rel="noreferrer">
+              {AD_EXAMPLE.action} <span aria-hidden="true">&#8594;</span>
+            </a>
+          </span>
         </div>
       </aside>
     );

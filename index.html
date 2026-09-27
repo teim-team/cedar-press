@@ -671,6 +671,20 @@
     </script>
   </head>
   <body>
+    <!-- The house duotone for photography (owner, 2026-09-27): luminance
+         mapped from shadow #09444A to highlight #86BFBA, the same pair the
+         lumecon.ai team headshots use. Referenced from press.css as
+         filter: url(#cp-duotone). -->
+    <svg width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute;width:0;height:0;overflow:hidden">
+      <filter id="cp-duotone" color-interpolation-filters="sRGB">
+        <feColorMatrix type="matrix" values="0.2126 0.7152 0.0722 0 0 0.2126 0.7152 0.0722 0 0 0.2126 0.7152 0.0722 0 0 0 0 0 1 0" />
+        <feComponentTransfer>
+          <feFuncR type="table" tableValues="0.0353 0.5255" />
+          <feFuncG type="table" tableValues="0.2667 0.7490" />
+          <feFuncB type="table" tableValues="0.2902 0.7294" />
+        </feComponentTransfer>
+      </filter>
+    </svg>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

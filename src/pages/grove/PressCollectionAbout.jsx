@@ -36,6 +36,7 @@ import { PRESS_CATALOG_BY_ID } from "../../features/grove/pressCatalog.js";
 import { collectionQuestions } from "../../features/grove/pressJobs.js";
 import { MAINTENANCE, NEED_ENRICHMENTS } from "../../features/grove/pressMethod.js";
 import { formatUpdated, ledgerFor } from "../../features/grove/pressReleases.js";
+import { tableLabel } from "../../features/grove/readerValues.js";
 import { PRESS_METHODS_PATH, PRESS_WHATS_NEW_PATH } from "../../features/grove/pressRoutes.js";
 import { COLLECTION_ICONS } from "./pressCollectionIcons";
 
@@ -198,7 +199,11 @@ export default function PressCollectionAbout({ entry, flagship, onClose }) {
           {tables.length ? (
             <ul className="cp-ab__tables">
               {tables.map((table) => (
-                <li key={table.table ?? table.key}>{table.table ?? table.key}</li>
+                /* The table's name for a reader, not its file name: the
+                   manifest's title where it has one, else the stem in words
+                   (readerValues.js). The file keeps its own name in the
+                   download, where a reader handling files needs it. */
+                <li key={table.table ?? table.key}>{tableLabel(table)}</li>
               ))}
             </ul>
           ) : null}
