@@ -30,7 +30,6 @@ import { catalogDescription } from "../../../scripts/seo-head.mjs";
 import {
   ALL_COLLECTION_JOBS,
   AUDIENCE_JOBS,
-  BAND_NOTE,
   CEDAR_CHANGES_QUESTION,
   COLLECTION_JOBS,
   ENTITY_JOBS,
@@ -72,7 +71,7 @@ function runtimeSources() {
 
 /** Every string the jobs layer owns, which no other runtime file may state. */
 function ownedStrings() {
-  const out = new Set([BAND_NOTE, ENTITY_JOBS.line, CEDAR_CHANGES_QUESTION.q]);
+  const out = new Set([ENTITY_JOBS.line, CEDAR_CHANGES_QUESTION.q]);
   for (const jobs of Object.values(ALL_COLLECTION_JOBS)) {
     for (const item of [...jobs.questions, ...(jobs.cedar ?? [])]) out.add(item.q);
   }
@@ -102,7 +101,7 @@ test("no page hard-codes a question, outcome, example or line the jobs layer own
 
 test("every surface the brief names reads the layer", () => {
   const readers = {
-    "pages/grove/PressAudienceExample.jsx": /visibleAudiences|BAND_NOTE/,
+    "pages/grove/PressAudienceExample.jsx": /visibleAudiences/,
     "pages/grove/PressCollectionAbout.jsx": /collectionQuestions/,
     "features/grove/readerCedar.js": /cedarQuestions|openCedarQuestions/,
     "pages/grove/CedarPress.jsx": /openCedarQuestions/,
@@ -318,14 +317,14 @@ test("the consultants and government use cases carry the owner's copy and chips 
   assert.equal(advisors.job, "Client strategy");
   assert.equal(advisors.outcome, "Build sourced analyses for clients without reconstructing records across agencies and vendors.");
   assert.equal(advisors.explanation, "Research organizations, markets and prospective clients through funding, contracting, ownership, policy and transaction records.");
-  assert.deepEqual([...advisors.collections], ["funding", "contractors", "need", "federal-register", "deals"]);
+  assert.deepEqual([...advisors.collections], ["contractors", "subcontracting", "federal-register", "lobbying"]);
   assert.deepEqual([...advisors.imagePool], ["context-lattice", "context-cedar"]);
   const government = byId["government-officials"];
   assert.equal(government.audience, "Government and public agency officials");
   assert.equal(government.job, "Tribal consultation");
   assert.equal(government.outcome, "Prepare more informed tribal consultations, build stronger government-to-government relationships, and better serve the communities you represent.");
   assert.equal(government.explanation, "Bring funding, legislation, agency actions and Native-entity records together with sources you can check.");
-  assert.deepEqual([...government.collections], ["funding", "legislation", "federal-register", "lobbying", "need"]);
+  assert.deepEqual([...government.collections], ["funding", "legislation", "federal-register", "nagpra"]);
   assert.deepEqual([...government.imagePool], ["utilities", "transportation", "context-cedar"]);
   // Placement: after the researchers, before the journalists; Tribal
   // Nations stays its own audience.
@@ -337,6 +336,15 @@ test("the consultants and government use cases carry the owner's copy and chips 
   for (const text of [advisors.outcome, advisors.explanation, government.outcome, government.explanation]) {
     assert.doesNotMatch(text, /contacts?\b|leads? list|outreach list|replace|instead of|\bimpact\b|—|&/i, text);
   }
+});
+
+// Owner, 2026-09-27: every collection is used, and the use cases should not
+// all lean on the same few. No collection sits on more than five of them.
+test("the use cases spread the collections rather than repeat the same few", () => {
+  const uses = {};
+  for (const audience of AUDIENCE_JOBS) for (const id of audience.collections) uses[id] = (uses[id] ?? 0) + 1;
+  for (const entry of STOREFRONT_CATALOG) assert.ok(uses[entry.id] >= 1, `${entry.id} is on no use case`);
+  for (const [id, n] of Object.entries(uses)) assert.ok(n <= 5, `${id} is on ${n} use cases`);
 });
 
 test("Foundations and philanthropy says that it is not a need score", () => {
@@ -393,7 +401,7 @@ test("labels, outcomes and sentences keep the house style", () => {
     assert.match(audience.explanation, /^[A-Z].*\.$/, `${audience.id}: complete sentences`);
     assert.ok(audience.collections.length >= MIN_COLLECTIONS && audience.collections.length <= 6, audience.id);
   }
-  for (const line of [BAND_NOTE, ENTITY_JOBS.line]) assert.match(line, /^[A-Z][^&—]*\.$/, line);
+  for (const line of [ENTITY_JOBS.line]) assert.match(line, /^[A-Z][^&—]*\.$/, line);
 });
 
 test("the layer names collections by id only: no second catalog", () => {

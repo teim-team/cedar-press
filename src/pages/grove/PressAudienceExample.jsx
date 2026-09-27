@@ -65,7 +65,7 @@ import { useEffect, useReducer, useRef, useState } from "react";
 import { coverageLabel } from "../../features/grove/pressAccess";
 import { PRESS_TIERS } from "../../features/grove/pressCatalog";
 import { imageSources } from "../../features/grove/pressImagery";
-import { BAND_NOTE, visibleAudiences } from "../../features/grove/pressJobs";
+import { visibleAudiences } from "../../features/grove/pressJobs";
 import {
   INITIAL_ROTATION,
   RESUME_MS,
@@ -422,7 +422,6 @@ export default function PressAudienceExample({ selected, onPick, onPoint }) {
           </>
         ) : null}
       </p>
-      <p className="cp-aud__quiet">{BAND_NOTE}</p>
     </section>
   );
 }

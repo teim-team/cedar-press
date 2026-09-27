@@ -24,7 +24,6 @@ import { STOREFRONT_CATALOG } from "../src/features/grove/pressCatalog.js";
 import { LUMECON_URL, TBN_URL } from "../src/features/grove/pressArticles.js";
 import {
   AUDIENCE_JOBS,
-  BAND_NOTE,
   ENTITY_JOBS,
   collectionQuestions,
   researchExamples,
@@ -133,17 +132,17 @@ test.describe("the gate", () => {
   });
 
   // The maintenance story and the NEED enrichment sources (owner,
-  // 2026-09-27), on the door; the 500+ figure is unchanged.
+  // 2026-09-27), on the door; the figure is 600+ (owner, 2026-09-27).
   test("the door says how Cedar Press is maintained and names the NEED enrichment sources", async ({ page }) => {
     await page.goto("/");
     await expect(page.getByTestId("door-maintenance")).toContainText(
       "Cedar Press maintains its datasets weekly with human review, expands their source coverage and useful fields over time and develops new collections.",
     );
     const panel = page.locator(".cp-hero3__proof");
-    for (const label of ["USPTO patent grants", "USPTO patent assignment records", "PatentsView patent data", "Credit rating agency announcements"]) {
+    for (const label of ["Patent publication and family records", "Historical S&P and Fitch ratings", "AM Best insurance financial-strength releases", "IRS Form 990-PF grant schedules", "Recorded deeds and land transfers"]) {
       await expect(panel).toContainText(label);
     }
-    await expect(panel.locator(".cp-hero3__proofcount")).toContainText("500+ source websites");
+    await expect(panel.locator(".cp-hero3__proofcount")).toContainText("600+ source websites");
   });
 
   // The sticky masthead is opaque (owner, 2026-09-27): no alpha, no blur,
@@ -155,7 +154,7 @@ test.describe("the gate", () => {
     await expect(bar).toHaveCSS("backdrop-filter", "none");
     await expect(page.locator(".cp-hero3__reach")).toHaveCount(0);
     await expect(page.locator(".cp-hero3")).not.toContainText("distinct source websites in dataset construction");
-    await expect(page.locator(".cp-hero3__proofcount")).toContainText("500+ source websites");
+    await expect(page.locator(".cp-hero3__proofcount")).toContainText("600+ source websites");
   });
 
   // The landing layout of 2026-09-27: the source banner in the navy
@@ -1019,11 +1018,21 @@ test.describe("Explore the collections", () => {
     expect(errors).toEqual([]);
   });
 
-  test("the Cedar Grove fragment reaches the compact workspace handoff", async ({ page }) => {
+  // Owner, 2026-09-27: the viewer page carries no Cedar Grove line under the
+  // table, and on a wide window the frame runs the full width.
+  test("the viewer runs full width with no Cedar Grove line under it", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop", "a wide-window question");
     const errors = watchConsole(page);
+    await page.setViewportSize({ width: 1680, height: 900 });
     await signIn(page);
-    await page.goto("/data#grove");
-    await expect(page.locator("#grove")).toBeInViewport({ timeout: 10_000 });
+    await page.goto("/data");
+    const frame = page.locator(".cp-ex__frame");
+    await expect(frame).toBeVisible({ timeout: 10_000 });
+    const box = await frame.boundingBox();
+    expect(box.x).toBeLessThanOrEqual(1);
+    expect(box.x + box.width).toBeGreaterThanOrEqual(1680 - 20);
+    await expect(page.locator("#grove")).toHaveCount(0);
+    await expect(page.getByText("brings these collections into a shared workspace")).toHaveCount(0);
     expect(errors).toEqual([]);
   });
 });
@@ -1682,14 +1691,16 @@ test.describe("the use-case card", () => {
   const band = (page) => page.locator(".cp-aud");
   const on = (page) => page.locator(".cp-aud__panel.is-on");
 
-  test("leads with the outcome and the job, and ends on the owner's quiet line", async ({ page }) => {
+  test("leads with the outcome and the job, with no quiet line under it", async ({ page }) => {
     const errors = watchConsole(page);
     await page.goto("/");
     await band(page).evaluate((el) => el.scrollIntoView({ block: "center", behavior: "instant" }));
     const first = AUDIENCE_JOBS[0];
     await expect(on(page).locator(".cp-aud__outcome")).toHaveText(first.outcome);
     await expect(on(page).locator(".cp-aud__job")).toHaveText(first.job);
-    await expect(page.locator(".cp-aud__quiet")).toHaveText(BAND_NOTE);
+    // The quiet line under the band was removed (owner, 2026-09-27).
+    await expect(page.locator(".cp-aud__quiet")).toHaveCount(0);
+    await expect(page.locator("body")).not.toContainText("not rebuilding public data");
     expect(errors).toEqual([]);
   });
 
@@ -2153,7 +2164,8 @@ test.describe("house style", () => {
    * ring sets a long name on two SVG lines ("Foundation &" / "Corporate
    * Giving") and the text of two <tspan>s joins with no space between them.
    */
-  const AMPERSAND_EXEMPT = /Foundation &\s*Corporate Giving/g;
+  // S&P is a company's legal name (the ratings source on the door's banner).
+  const AMPERSAND_EXEMPT = /Foundation &\s*Corporate Giving|\bS&P\b/g;
 
   const QUOTED = [
     ".cp-ex__table",
@@ -2297,7 +2309,7 @@ test.describe("the bundle", () => {
     }
     const citing = AUDIENCE_JOBS.filter((audience) => audience.collections.some((id) => ids.includes(id)));
     expect(citing.map((audience) => audience.id).sort()).toEqual(
-      ["ancs-nhos", "banks-lenders", "foundations-philanthropy", "journalists", "native-nonprofits"],
+      ["ancs-nhos", "banks-lenders", "economic-development", "foundations-philanthropy", "journalists", "native-nonprofits"],
     );
     for (const audience of citing) needles.push(audience.explanation);
     needles.push("Foundations and philanthropy");
@@ -2380,7 +2392,7 @@ test.describe("crawlers", () => {
     // The HTML escapes the one ampersand a collection name carries.
     for (const name of names) expect(body.includes(name) || body.includes(name.replaceAll("&", "&amp;")), name).toBe(true);
     // The count is the hero's own fact line, read from the catalog.
-    expect(body).toMatch(new RegExp(`<b>${names.length}</b> collections`));
+    expect(body).toMatch(new RegExp(`<b[^>]*>${names.length}</b> collections`));
   });
 
   test("a page behind the gate is not offered to crawlers", async ({ request }) => {

@@ -14,19 +14,35 @@
  * payment records and gaming litigation) were removed on the owner's note of
  * 2026-09-27: gaming is not a Cedar Press collection, so a panel on the Cedar
  * Press door should not name its sources. Nothing counts this list: the
- * marquee's run time is its length, and the 500+ figure never depended on it.
+ * marquee's run time is its length, and the website figure never depended on it.
  *
- * The parcel, assessor, permit and environmental-review labels name the
- * systems PLOT is built from. The three USPTO labels and the one broad
- * credit-rating label name the Cedar NEED patent and rating enrichment
- * (owner, 2026-09-27); the USPTO is the one federal patent office, so its
- * separate public systems are listed rather than several offices.
+ * The parcel, assessor, deed, permit and environmental-review labels name
+ * the systems PLOT is built from; the foundation, 990-PF, bank, corporate,
+ * tribal-foundation, recipient and charity-registration labels name the
+ * Foundation & Corporate Giving sources (owner, 2026-09-27). The patent and
+ * ratings labels name the Cedar NEED enrichment: patent publication and
+ * family records, historical S&P and Fitch ratings, and AM Best insurance
+ * financial-strength releases, a different measure from a credit rating and
+ * so its own line. Patent assignment histories are not named until their
+ * source is verified.
+ *
+ * NO DOUBLE COUNTING. Each label is one kind of source, stated once. Where a
+ * new label covered an old one, the old one went: "State and local permit
+ * registers" replaced "Building permit and inspection records", and the
+ * state environmental label says "state" so it does not read as the federal
+ * EPA line. `sourceRotation.test.js` refuses a repeated label.
+ *
+ * THE FIGURE IS NOT THIS LIST. SOURCE_REACH_FIGURE is a count of distinct
+ * websites, stated by the owner (2026-09-27: 600+, up from the audited 560
+ * behind 500+, with the Giving, PLOT, patent and ratings sources added and
+ * deduplicated). Labels, patents and rating documents are not websites and
+ * add nothing to it.
  */
 
 export const SOURCE_REACH_CLAIM =
-  "Lumecon uses trusted publicly available records and source metadata from 500+ distinct source websites in dataset construction and research.";
+  "Lumecon uses trusted publicly available records and source metadata from 600+ distinct source websites in dataset construction and research.";
 
-export const SOURCE_REACH_FIGURE = "500+";
+export const SOURCE_REACH_FIGURE = "600+";
 
 export const SOURCE_ROTATION = Object.freeze([
   "USAspending contract awards",
@@ -88,13 +104,21 @@ export const SOURCE_ROTATION = Object.freeze([
   "Statewide parcel and cadastral GIS",
   "County parcel GIS",
   "County assessor and property-tax records",
-  "Building permit and inspection records",
-  "Environmental permits and CEQA reviews",
-  // Cedar NEED's enrichments (owner, 2026-09-27). The 500+ figure is unchanged.
-  "USPTO patent grants",
-  "USPTO patent assignment records",
-  "PatentsView patent data",
-  "Credit rating agency announcements",
+  "State and local permit registers",
+  "State environmental permits and CEQA reviews",
+  "Recorded deeds and land transfers",
+  "EPA facility and permit records",
+  "Foundation grant databases and award lists",
+  "IRS Form 990-PF grant schedules",
+  "Bank charitable-giving disclosures",
+  "Corporate foundation award announcements",
+  "Tribal foundation award records",
+  "Grant-recipient announcements",
+  "State charity registrations",
+  "Municipal bond disclosure filings",
+  "Patent publication and family records",
+  "Historical S&P and Fitch ratings",
+  "AM Best insurance financial-strength releases",
 ]);
 
 /**

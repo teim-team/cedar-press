@@ -101,9 +101,9 @@ export default function CedarPressData() {
       if (finished) return true;
       const target = document.getElementById(id);
       if (!target) return false;
-      // `#grove` is mounted before the lazy collection frame has real
-      // height. Wait for its first useful content so the one anchor scroll
-      // lands on the handoff, then leave a reader in control of the page.
+      // A fragment target can mount before the lazy collection frame has
+      // real height. Wait for its first useful content so the one anchor
+      // scroll lands where it should, then leave a reader in control.
       const ready = document.getElementById("cp-main")?.querySelector(".cp-ex__table tbody tr, .cp-ex__cardbtn, [data-testid='explore-unavailable']");
       if (!ready && !force) return false;
       target.scrollIntoView({ behavior: "auto", block: "start" });
