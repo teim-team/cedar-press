@@ -115,8 +115,8 @@ Lumecon cards). Nothing around the lifted element moves.
 the provenance marquee (hover or focus stops it; reduced motion turns it into
 a wrapped list) and the use-case band (`PressAudienceExample`), which changes
 its example every eight seconds by a 0.35s crossfade in place. The band pauses
-while hovered or focused, stops for good once the visitor picks anything in
-it, does not turn while off screen, and never turns under reduced motion. It
+while hovered or focused, holds the example once the visitor picks anything in
+it and turns again after twelve idle seconds, does not turn while off screen, and never turns under reduced motion. It
 changes the EXAMPLE only, never the selected collection. Every example sits in
 one grid cell, so the band is as tall as its longest example and nothing
 below it moves. Its chips preview a collection in the hero frame only above
@@ -177,10 +177,13 @@ shown use case is reported for review rather than enforced:
 `pressJobs.test.js` prints it ("coverage report") on every run and never
 fails on it. Every collection stays one click away in the hero viewer's rail.
 
-As of 2026-09-27: **no collection is uncovered** (14 of 14, eleven use cases
+As of 2026-09-27: **no collection is uncovered** (14 of 14, twelve use cases
 shown). PLOT and Foundation & Corporate Giving joined Cedar Press that day,
-and the owner's sentences that name them are the ones shown. Update this line
-when the report changes.
+and the owner's sentences that name them are the ones shown. The same day
+"Advisors and professional services" became "Consultants and advisors" and
+"Government and public agency officials" was added; both name only
+collections other use cases already cite. Update this line when the report
+changes.
 
 ## Where this is deliberately not the Lumecon website
 

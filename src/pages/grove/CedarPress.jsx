@@ -28,6 +28,7 @@ import { AD_SLOT } from "../../features/grove/pressAds";
 import { useDocumentTitle } from "../../features/grove/useDocumentTitle";
 import { PRESS_CATALOG_BY_ID } from "../../features/grove/pressCatalog";
 import { anchorOf, formatUpdated, latestRelease, recentlyUpdated } from "../../features/grove/pressReleases";
+import { MAINTENANCE } from "../../features/grove/pressMethod.js";
 import { Contours } from "./pressAtmosphere";
 import { PressCedarFab } from "./PressCedarFab";
 import { PressFoot, PressMast } from "./PressChrome";
@@ -136,9 +137,8 @@ export default function CedarPress() {
             <div className="cp-close__say">
               <h2 className="cp-close__head">Nothing here is a snapshot.</h2>
               <p className="cp-close__body">
-                Records are added, ownership changes and corrections come in every week, and
-                the collections are kept current against them. Releases stay versioned so work
-                done today remains checkable as the data and the tools used to analyze it change.
+                {MAINTENANCE.sentence} Releases stay versioned so work done today remains
+                checkable as the data and the tools used to analyze it change.
               </p>
             </div>
             {/* The three most recently changed collections, read from the

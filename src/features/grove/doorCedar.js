@@ -27,12 +27,27 @@
  * lumecon.ai's Cedar sets, and then it holds a conversation.
  *
  * WHERE THE DATASET ANSWERS COME FROM
- * The twelve collection answers are assembled from the catalog and the
+ * One answer per storefront collection, assembled from the catalog and the
  * release record at module load: name, shelf, blurb, coverage, row count,
  * update date, sources, linkage, and for the deeper answer the collection's
  * own method note. Nothing about a collection is typed here, so an answer
  * cannot drift from the collection it describes, and the day a release
  * changes the row count the door's answer changes with it.
+ *
+ * Foundation & Corporate Giving and PLOT are live like the others (owner,
+ * 2026-09-27) and are presented by their record structure: their answers say
+ * what each record holds (`pressRecordStructure.js`), how the records link
+ * to Native entities, and how the collection reads beside the others (the
+ * owner's own examples in `pressMethod.js`). No count, span or figure is
+ * stated for either, because none is measured here.
+ *
+ * WHO IT IS FOR
+ * The audience answers are the landing's use cases (`AUDIENCE_JOBS` in
+ * `pressJobs.js`): the same twelve audiences, their outcomes and the
+ * collections behind each, read rather than retyped. The only copy written
+ * here is the one line a door answer owes each audience about what Cedar
+ * Press is not (`AUDIENCE_NOTES`): not a need score, not a contact database,
+ * and not a substitute for engaging Native nations directly.
  *
  * The general answers ARE written here, because "what is Cedar Press" is a
  * position, not a measurement. Every number inside them is interpolated.
@@ -46,7 +61,10 @@ import {
 } from "./cedarConversation.js";
 import { LAUNCH_COLLECTION } from "./collection.js";
 import { coverageLabel } from "./pressAccess.js";
-import { PRESS_CATALOG_BY_ID, PRESS_TIERS, STOREFRONT_CATALOG } from "./pressCatalog.js";
+import { PRESS_CATALOG_BY_ID, PRESS_TIERS, STOREFRONT_CATALOG, spellCount } from "./pressCatalog.js";
+import { visibleAudiences } from "./pressJobs.js";
+import { ECOSYSTEM_EXAMPLES, MAINTENANCE, NEED_ENRICHMENTS } from "./pressMethod.js";
+import { recordStructure } from "./pressRecordStructure.js";
 import { formatUpdated, freshnessLine, recentlyUpdated } from "./pressReleases.js";
 import { REGISTRY_PROGRAMS } from "./pressSources.js";
 
@@ -68,8 +86,8 @@ const COLLECTION_WORDS = Object.freeze({
   // "Foundation" reached Native Nonprofits until the giving collection
   // joined the shelf; a reader asking about foundations means their giving.
   "foundation-corporate-giving": ["foundation", "foundations", "philanthropy", "philanthropic", "grantmaker", "grantmakers", "corporate giving", "bank giving", "private giving", "private funding", "donor", "donors", "990-pf"],
-  plot: ["parcel", "parcels", "land", "property", "properties", "permit", "permits", "real estate", "land ownership", "assessor"],
-  need: ["enterprise", "enterprises", "subsidiary", "subsidiaries", "ownership", "who owns", "holding company", "structure"],
+  plot: ["parcel", "parcels", "land", "property", "properties", "permit", "permits", "real estate", "land ownership", "assessor", "owns these parcels", "owns this parcel", "owns the parcel", "owns the land", "owns this land", "parcel records", "land records", "property records", "development activity"],
+  need: ["enterprise", "enterprises", "subsidiary", "subsidiaries", "ownership", "who owns", "holding company", "structure", "patent", "patents", "credit rating", "credit ratings", "bond rating", "ratings"],
   "natural-resources": ["royalty", "royalties", "oil", "gas", "coal", "mineral", "minerals", "timber", "severance", "onrr"],
 });
 
@@ -81,12 +99,34 @@ function leadSentences(text, count) {
   return lead || clean;
 }
 
+/**
+ * How a collection presented by its record structure reads beside the
+ * others: the owner's own cross-collection example from Methods that names
+ * it, so the door says nothing Methods does not.
+ */
+const CONNECTION = Object.freeze({
+  plot: ECOSYSTEM_EXAMPLES.find((text) => text.includes("PLOT")) ?? null,
+  "foundation-corporate-giving": ECOSYSTEM_EXAMPLES.find((text) => text.startsWith("Foundation, corporate and bank giving")) ?? null,
+});
+
 /** One answer per collection, assembled from what the catalog holds. */
 function collectionAnswer(entry) {
-  const descriptor = DESCRIPTOR[entry.id];
   const tier = TIER_BY_SHELF[entry.shelf];
+  const structure = recordStructure(entry.id);
+  if (structure) {
+    // What it contains and how it connects, and no figure: no count, span
+    // or date is measured here for either of these two.
+    const lines = [entry.blurb, structure.summary];
+    if (entry.linkage) lines.push(entry.linkage);
+    if (CONNECTION[entry.id]) lines.push(CONNECTION[entry.id]);
+    if (tier) lines.push(`It is included in ${tier.name}.`);
+    return lines.join("\n\n");
+  }
+  const descriptor = DESCRIPTOR[entry.id];
   const fresh = freshnessLine(entry.id);
   const lines = [entry.blurb];
+  // Cedar NEED's enrichments, in the Methods wording.
+  if (entry.id === "need") lines.push(`${NEED_ENRICHMENTS.patents} ${NEED_ENRICHMENTS.ratings} ${NEED_ENRICHMENTS.attachment}`);
   const facts = [`Coverage: ${coverageLabel(entry)}.`];
   if (descriptor?.rowsLabel) facts.push(`${descriptor.rowsLabel} in the current release.`);
   if (fresh) facts.push(`${fresh}.`);
@@ -99,6 +139,13 @@ function collectionAnswer(entry) {
 
 /** The deeper answer for a collection: how it is constructed, off its own method note. */
 function collectionExpanded(entry) {
+  if (recordStructure(entry.id)) {
+    return [
+      `Going deeper on ${entry.short || entry.name}: ${lowerFirst(entry.linkage ?? entry.blurb)}`,
+      `Open it in Cedar Press to see what each record holds, field by field, and the methods page sets out ` +
+        `how its records connect to the other collections.`,
+    ].join("\n\n");
+  }
   const descriptor = DESCRIPTOR[entry.id];
   const method = descriptor?.method ? leadSentences(descriptor.method, 2) : null;
   const lines = [];
@@ -166,7 +213,7 @@ const GENERAL_INTENTS = [
   {
     id: "what",
     chip: "What is Cedar Press?",
-    followUps: ["collections", "entities", "plans"],
+    followUps: ["collections", "audiences", "plans"],
     triggers: ["what is cedar press", "what is this", "what does cedar press do", "what is cedar", "about cedar press", "explain cedar press", "what do you do", "what is press", "cedar press", "what is it", "what are you"],
     answer:
       `Cedar Press is a research and intelligence service about Indian Country's economy. ` +
@@ -213,7 +260,9 @@ const GENERAL_INTENTS = [
       `federalregister.gov), advocacy and docket records (Senate and House lobbying disclosure, FERC and NRC ` +
       `dockets, IBIA and IBLA appeals, regulations.gov), tax filings (IRS Business Master File, Form 990), ` +
       `resource revenue (ONRR, OSMRE, ANCSA 7(i) and 7(j) filings, the Osage Minerals Council), and what ` +
-      `nations and corporations publish about themselves.\n\n` +
+      `nations and corporations publish about themselves. For Cedar NEED there are also patent records, ` +
+      `supported by company, tribal, SEC and court evidence, and rating-agency announcements, supported by ` +
+      `issuer and tribal releases, filings, regulator records and labeled secondary sources.\n\n` +
       `Not all of it is public. The Native-Owned Businesses collection comes from tribal TERO and commerce ` +
       `offices under each nation's stated terms, and publishers whose terms forbid reuse are excluded by ` +
       `every route and named as excluded.`,
@@ -250,17 +299,52 @@ const GENERAL_INTENTS = [
     triggers: ["how current", "how often updated", "how fresh", "update", "updated", "cadence", "how often", "is it current", "snapshot", "how recent", "up to date", "latest release", "last updated"],
     answer:
       NEWEST
-        ? `Records are added, ownership changes and corrections arrive every week, and the collections are ` +
-          `kept current against them. The most recent release was ${formatUpdated(NEWEST.updated)}.\n\n` +
+        ? `${MAINTENANCE.sentence} The most recent release was ${formatUpdated(NEWEST.updated)}.\n\n` +
           `Every release is dated and versioned, and the release history records what changed, so a figure ` +
           `you cited last quarter still reproduces.`
-        : `Records are added, ownership changes and corrections arrive every week, and every release is ` +
-          `dated and versioned so a figure you cited last quarter still reproduces.`,
+        : `${MAINTENANCE.sentence} Every release is dated and versioned so a figure you cited last ` +
+          `quarter still reproduces.`,
     expanded:
-      `Going deeper: each collection keeps its own cadence, stated on the collection, because its sources ` +
-      `publish on their own clocks. Federal award systems post continuously and the collection follows them; ` +
-      `a roster collection states the date it was captured rather than a span, because its sources archive nothing.` +
+      `Going deeper: the sources publish on their own clocks, and each week a person reviews what they ` +
+      `published into the collection. A roster collection states the date it was captured rather than a span, ` +
+      `because its sources archive nothing. ${MAINTENANCE.goal}` +
       (recentLine ? `\n\nThe latest releases: ${recentLine}.` : ""),
+  },
+  // Institutional accounts (owner, 2026-09-27). Declared before "plans" so
+  // a question about an organization's account wins a tie with the price
+  // words it shares. No seat limits, seat counts or prices are stated.
+  {
+    id: "institutional",
+    chip: "Can my organization share an account?",
+    followUps: ["plans", "collaboration", "who"],
+    triggers: ["share an account", "share my account", "share one account", "shared account", "share a login", "institutional", "institutional plan", "institutional account", "multiple users", "several users", "more than one user", "organization account", "organizational account", "organization plan", "team account", "team plan", "invite colleagues", "invite my colleagues", "invite my team", "invite teammates", "invite people", "add colleagues", "add users", "admin", "administrator", "my team", "our team", "my colleagues", "seats"],
+    answer:
+      `Cedar Press and Cedar Press+ are individual plans, one person each. For an organization with several ` +
+      `people there is the institutional Cedar Press plan: an admin invites colleagues by email, and members ` +
+      `share the organization's details and its Cedar context.\n\n` +
+      `Each person keeps their own sign-in, and their conversations and activity stay private to them, so ` +
+      `teammates do not see each other's conversations. Access comes through the organization's plan: someone ` +
+      `removed from the organization loses that access at once and keeps anything they hold individually.\n\n` +
+      `To set one up, contact elijah.moreno@lumecon.ai.`,
+    expanded:
+      `Going deeper: the organization's plan is what opens the collections for its members, and the admin ` +
+      `manages who is in it by email invitation. Collaborative analysis and shared projects are part of ` +
+      `Cedar Grove rather than Cedar Press.\n\nTo set up an institutional plan, contact elijah.moreno@lumecon.ai.`,
+  },
+  {
+    id: "collaboration",
+    chip: "Can we work on analysis together?",
+    followUps: ["institutional", "plans", "who"],
+    triggers: ["collaborate", "collaboration", "collaborative", "collaborative analysis", "shared project", "shared projects", "work together", "shared workspace", "team workspace", "co-author", "coauthor"],
+    answer:
+      `Collaborative analysis and shared projects are part of Cedar Grove, not Cedar Press. In Cedar Press ` +
+      `each person's conversations and activity stay private to them; on the institutional plan, members ` +
+      `share the organization's details and its Cedar context.\n\nTo ask about either, contact ` +
+      `elijah.moreno@lumecon.ai.`,
+    expanded:
+      `Going deeper: Cedar Press is where the collections are read, cited and downloaded, one person at a ` +
+      `time or through an organization's institutional plan. Work that a team builds together belongs in ` +
+      `Cedar Grove.`,
   },
   {
     id: "plans",
@@ -326,7 +410,8 @@ const GENERAL_INTENTS = [
     followUps: ["entities", "limits", "plans"],
     triggers: ["who builds", "who made", "who are you", "who is behind", "lumecon", "team", "tribal business news", "credentials", "who runs", "who makes", "who wrote"],
     answer:
-      `Cedar Press is built by Lumecon and distributed exclusively through Tribal Business News.\n\n` +
+      `Cedar Press is built by Lumecon in partnership with Tribal Business News, and is available ` +
+      `exclusively through a Tribal Business News membership.\n\n` +
       `The collections are assembled by Indigenous researchers with Federal Reserve and university ` +
       `experience. Inclusion rules, known limitations and corrections ship with every collection rather ` +
       `than sitting in a document somewhere.`,
@@ -339,14 +424,15 @@ const GENERAL_INTENTS = [
     id: "limits",
     chip: "What are the limits?",
     followUps: ["entities", "sources", "plans"],
-    triggers: ["limitations", "limits", "what is missing", "gaps", "caveats", "accuracy", "how accurate", "problems", "what can't", "cannot", "known issues", "reliable", "trust"],
+    triggers: ["limitations", "limits", "what is missing", "gaps", "caveats", "accuracy", "how accurate", "problems", "what can't", "cannot", "known issues", "reliable", "trust", "need score", "need scores", "contact list", "contact lists", "contact information", "email addresses", "leads list", "lead list", "outreach list", "mailing list", "causal", "caused", "causation"],
     answer:
       `Every collection publishes its own. The common ones: federal publication lags, so a current year is ` +
       `partial and labelled as partial; some records name a party the source cannot place, and those keep ` +
       `the printed name with a blank key rather than a guess; and roster collections state a capture date ` +
       `rather than a span, because their sources publish who is on the list now and archive nothing.\n\n` +
       `Cedar does not invent a date, an owner or a boundary to make a column tidy. Where a figure is not ` +
-      `measured it is absent, not zero.`,
+      `measured it is absent, not zero. And it claims only what the records show: no need scores, no ` +
+      `contact or outreach lists, and no claim that one thing caused another.`,
     expanded:
       `Going deeper: a smaller true collection always beats a larger padded one, and that rule costs rows. ` +
       `A record whose party cannot be placed is kept and marked unresolved rather than dropped or guessed; ` +
@@ -356,6 +442,107 @@ const GENERAL_INTENTS = [
     links: ["methods"],
   },
 ];
+
+// ── Who it is for ─────────────────────────────────────────────────────────
+//
+// The landing's use cases, read from `pressJobs.js`: the same audiences, in
+// the same order, with the same outcomes, explanations and collections.
+
+const AUDIENCES = visibleAudiences();
+
+/**
+ * Extra words that should reach an audience's answer beyond its own label.
+ * A collection's own name still wins a tie (collections are declared first),
+ * so "what is in Native Nonprofits" is the collection and "for Native
+ * nonprofits" is the audience.
+ */
+const AUDIENCE_WORDS = Object.freeze({
+  "tribal-nations": ["tribal nations", "peer nations", "tribal leader", "tribal leaders", "tribal planning"],
+  "ancs-nhos": ["anc", "ancs", "nho", "nhos", "alaska native corporation", "alaska native corporations", "native hawaiian organization", "native hawaiian organizations"],
+  "native-enterprises": ["native enterprise", "native enterprises", "tribal enterprise", "tribal enterprises", "tribally owned business", "partner discovery"],
+  "banks-lenders": ["bank", "banks", "lender", "lenders", "lending", "cdfi", "cdfis", "investor", "investors", "due diligence", "underwriting"],
+  "native-nonprofits": ["for native nonprofits", "our nonprofit", "my nonprofit", "nonprofit leader", "grant writer", "grant writing", "competitive funding"],
+  "foundations-philanthropy": ["for foundations", "i work at a foundation", "i work for a foundation", "our foundation", "program officer", "grantmaking", "capital allocation", "allocating capital", "philanthropic strategy"],
+  businesses: ["businesses working in indian country", "doing business in indian country", "work in indian country", "market entry", "enter the market", "our company", "my company"],
+  "universities-researchers": ["university", "universities", "research institution", "research question"],
+  "government-officials": ["government official", "government officials", "public official", "public officials", "public agency", "agency official", "agency officials", "federal agency", "federal official", "federal officials", "state agency", "state government", "state official", "local government", "local official", "county government", "city government", "tribal consultation", "tribal consultations", "government to government", "consultation with tribes"],
+  journalists: ["journalists", "newsrooms", "news story", "reporting on"],
+  advisors: ["consultant", "consultants", "consulting", "consulting firm", "advisor", "advisors", "adviser", "advisers", "advisory", "client work", "our clients", "my clients", "for clients", "professional services", "law firm", "accounting firm", "client strategy"],
+  "economic-development": ["economic development", "economic development organization", "economic development corporation", "outside partner", "outside partners", "corporate development", "infrastructure developer", "suppliers"],
+});
+
+/**
+ * What Cedar Press is not, said once where an audience could reasonably
+ * expect it to be. Owner direction, 2026-09-27, for the two audiences added
+ * or renamed that day; Foundations and philanthropy already says it in the
+ * owner's own sentence ("not a need score").
+ */
+const AUDIENCE_NOTES = Object.freeze({
+  advisors:
+    "Cedar Press is research for client work and outreach, not a contact database: it holds no contact lists, leads lists or outreach lists.",
+  "government-officials":
+    "Cedar Press supports consultation and government-to-government relationships; it does not replace direct engagement with Native nations.",
+  "tribal-nations":
+    "A federally recognized tribal government can also request and review the Cedar records about its own nation, with no subscription.",
+});
+
+/** Where an audience's answer sends a reader next. */
+const AUDIENCE_LINKS = Object.freeze({
+  "tribal-nations": ["request", "plans"],
+  "universities-researchers": ["research", "plans"],
+  journalists: ["research", "plans"],
+});
+
+const AUDIENCE_FOLLOW_UPS = Object.freeze({
+  "tribal-nations": ["tribal", "collections", "plans"],
+  "universities-researchers": ["research", "sources", "plans"],
+  journalists: ["research", "sources", "plans"],
+});
+
+const audienceCollections = (audience) => {
+  const labels = audience.collections.map((entry) => entry.short || entry.name);
+  return labels.length > 1 ? `${labels.slice(0, -1).join(", ")} and ${labels.at(-1)}` : labels.join("");
+};
+
+/** One answer per landing audience: its outcome, explanation and collections. */
+const AUDIENCE_INTENTS = AUDIENCES.map((audience) => ({
+  id: `audience:${audience.id}`,
+  audienceId: audience.id,
+  chip: audience.audience,
+  triggers: [audience.audience.toLowerCase(), ...(AUDIENCE_WORDS[audience.id] ?? [])],
+  answer: [
+    // The owner's outcome and explanation, verbatim.
+    `${audience.audience}: ${audience.outcome}`,
+    audience.explanation,
+    `The collections behind it: ${audienceCollections(audience)}.`,
+    AUDIENCE_NOTES[audience.id],
+  ]
+    .filter(Boolean)
+    .join("\n\n"),
+  expanded:
+    `Going deeper: each of those collections keys to the same entity layer, so a nation, corporation or ` +
+    `organization reads as one entity across all of them, and every record carries the source it came ` +
+    `from.\n\nAsk me about any of them by name and I will say what it holds and how it is built.`,
+  followUps: AUDIENCE_FOLLOW_UPS[audience.id] ?? ["collections", "entities", "plans"],
+  links: AUDIENCE_LINKS[audience.id] ?? ["plans"],
+}));
+
+/** "Who is it for?": every landing audience, with its outcome. */
+const AUDIENCES_INTENT = {
+  id: "audiences",
+  chip: "Who is it for?",
+  followUps: ["collections", "tribal", "plans"],
+  triggers: ["who is it for", "who is this for", "who is cedar press for", "who uses", "who uses it", "who uses cedar press", "is this for me", "who should use", "audiences", "use cases", "use case", "who benefits"],
+  answer:
+    `Cedar Press is built for ${spellCount(AUDIENCES.length)} audiences, each with its own use case:\n\n` +
+    AUDIENCES.map((audience) => `${audience.audience}: ${audience.outcome}`).join("\n\n") +
+    `\n\nTell me which is yours and I will say which collections carry that work.`,
+  expanded:
+    `Going deeper: every use case names the collections its work rests on, and nothing more. ` +
+    `Cedar Press shows what the public and private record says, with the source attached; it does not ` +
+    `score need, supply contact lists or stand in for engaging Native nations directly.\n\n` +
+    `Name an audience, such as ${AUDIENCES.slice(0, 2).map((a) => a.audience).join(" or ")}, and I will go through it.`,
+};
 
 /**
  * Conversational filler. None of these is a topic: "thanks" then "tell me
@@ -368,8 +555,8 @@ const FILLER_INTENTS = [
     chip: null,
     triggers: ["hi", "hello", "hey", "hiya", "good morning", "good afternoon", "good evening", "howdy", "yo"],
     answer:
-      `Hi, I'm Cedar. Here on the front page I can tell you what Cedar Press holds, where the records come ` +
-      `from, how they reach the right nation and how to get access. What brings you in?`,
+      `Hi, I'm Cedar. Here on the front page I can tell you what Cedar Press holds, who it is for, where ` +
+      `the records come from, how they reach the right nation and how to get access. What brings you in?`,
     variants: [
       "Hello again. Ask me about any collection by name, or how to get in.",
       "Still here. We can pick up where we left off, or start somewhere new.",
@@ -413,8 +600,18 @@ const FILLER_INTENTS = [
   },
 ];
 
-/** Every intent: general first so a general question wins a shared word, then the twelve, then filler. */
-export const DOOR_INTENTS = Object.freeze([...GENERAL_INTENTS, ...COLLECTION_INTENTS, ...FILLER_INTENTS]);
+/**
+ * Every intent: general first so a general question wins a shared word, then
+ * the collections, then the audiences (so a collection's own name wins a tie
+ * with an audience that shares it), then filler.
+ */
+export const DOOR_INTENTS = Object.freeze([
+  ...GENERAL_INTENTS,
+  AUDIENCES_INTENT,
+  ...COLLECTION_INTENTS,
+  ...AUDIENCE_INTENTS,
+  ...FILLER_INTENTS,
+]);
 
 /** The ids that never become "the last topic". */
 export const NON_TOPIC_IDS = Object.freeze(new Set(FILLER_INTENTS.map((intent) => intent.id)));
@@ -431,6 +628,7 @@ export const DOOR_STARTERS = Object.freeze([
   "tribal",
   "research",
   "who",
+  "audiences",
 ]);
 
 /** The chip row, resolved to intents. */
@@ -470,6 +668,8 @@ export const OUT_OF_SCOPE_TRIGGERS = Object.freeze([
 export const DOOR_AUDIENCES = Object.freeze([
   { key: "tribal", intentId: "tribal", words: ["tribal government", "my nation", "our nation", "our tribe", "my tribe", "tribal council", "our records", "our office"] },
   { key: "research", intentId: "research", words: ["researcher", "journalist", "reporter", "student", "academic", "professor", "newsroom", "thesis", "my paper", "my story"] },
+  { key: "government", intentId: "audience:government-officials", words: ["federal agency", "state agency", "public agency", "government official", "public official", "state government", "local government", "county government", "city government"] },
+  { key: "consultant", intentId: "audience:advisors", words: ["consultant", "consulting firm", "our clients", "my clients", "advisory firm"] },
 ]);
 
 const MATCHER = createMatcher(DOOR_INTENTS, { outOfScopeTriggers: OUT_OF_SCOPE_TRIGGERS });
@@ -548,7 +748,7 @@ export function intentForCollection(id) {
  * The classifier: the best intent for a question, or null. Whole-phrase
  * triggers, longer phrases weigh more, ties fall to whichever intent is
  * declared first, which is why the general intents are listed before the
- * twelve. See `createMatcher`.
+ * collections. See `createMatcher`.
  */
 export function classify(question) {
   return MATCHER.classify(question);

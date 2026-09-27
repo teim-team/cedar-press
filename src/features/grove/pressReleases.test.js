@@ -46,9 +46,9 @@ test("every released collection has a release and nothing else does", () => {
     LAUNCH_COLLECTION.map((dataset) => dataset.id).sort(),
   );
   for (const entry of PRESS_CATALOG) {
-    // The two on the shelf ahead of a first release have none, and the feed
-    // does not invent one for them.
-    if (entry.coverage.kind === "pending") assert.equal(releaseFor(entry.id), null, `${entry.id} has a release it never shipped`);
+    // The two presented by their record structure have no release in the
+    // manifest, and the feed does not invent one for them.
+    if (entry.coverage.kind === "structure") assert.equal(releaseFor(entry.id), null, `${entry.id} has a release it never shipped`);
     else assert.ok(releaseFor(entry.id), `${entry.id} has no release`);
   }
 });
@@ -325,7 +325,7 @@ test("dates are spelled one way everywhere", () => {
   // refresh fail a formatting test, which teaches the next person to edit the
   // date rather than read the failure.
   assert.match(freshnessLine("funding"),
-               /^Updated [A-Z][a-z]+\.? \d{1,2} · monthly$/);
+               /^Updated [A-Z][a-z]+\.? \d{1,2} · weekly$/);
   assert.equal(freshnessLine("not-a-collection"), "");
   assert.equal(latestRelease("need").version, releaseFor("need").version);
   assert.equal(latestRelease("not-a-collection"), null);

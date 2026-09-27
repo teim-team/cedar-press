@@ -59,10 +59,10 @@
  * CADENCE IS A PROMISE, NOT A MEASUREMENT
  * Cedar's cadence measurement has produced no vintage for any collection
  * (`UNMEASURED_FIELDS` in collection.js), so the cadence here is what Cedar
- * commits to maintain, declared per collection because the sources move at
- * different speeds: the Federal Register moves when the agencies move,
- * lobbying disclosures on filing quarters. A collection with no declared cadence
- * states none rather than borrowing one.
+ * commits to maintain: weekly, with human review, for every collection
+ * (owner, 2026-09-27). The sources still publish on their own clocks; the
+ * weekly pass is when their changes are reviewed in. A collection with no
+ * declared cadence states none rather than borrowing one.
  */
 
 import ledger from "../../../data/cedar/releases.json" with { type: "json" };
@@ -70,13 +70,16 @@ import ledger from "../../../data/cedar/releases.json" with { type: "json" };
 import { PRESS_CATALOG_BY_ID } from "./pressCatalog.js";
 import { LAUNCH_COLLECTION, hasSample } from "./collection.js";
 
-/** How often a collection changes. The label is what a reader sees. */
+/**
+ * How often a collection is maintained. The label is what a reader sees.
+ *
+ * One cadence for every collection (owner, 2026-09-27): Cedar Press maintains
+ * its datasets weekly, with human review. The sources still publish on their
+ * own clocks; the weekly pass is when their changes are reviewed into the
+ * collection.
+ */
 export const CADENCE = Object.freeze({
-  MONTHLY: "Updated monthly",
-  QUARTERLY: "Updated quarterly",
-  CONTINUOUS: "Updated continuously",
-  ON_CHANGE: "Updated as records arrive",
-  ANNUAL: "Updated annually",
+  WEEKLY: "Updated weekly",
 });
 
 /** A release changes the data, or it changes how the data is made. */
@@ -91,27 +94,11 @@ export const RELEASE_KIND = Object.freeze({
  * says how often a collection moves, and a test requires every storefront
  * collection to declare one here so a new collection cannot arrive silent.
  */
-export const DECLARED_CADENCE = Object.freeze({
-  funding: CADENCE.MONTHLY,
-  "federal-register": CADENCE.ON_CHANGE,
-  legislation: CADENCE.MONTHLY,
-  deals: CADENCE.CONTINUOUS,
-  nagpra: CADENCE.ON_CHANGE,
-  // Advocacy: the LDA half arrives on filing quarters, but consultations,
-  // dockets, appeals and testimony arrive as the agencies publish them, so
-  // the collection as a whole moves as records arrive.
-  lobbying: CADENCE.ON_CHANGE,
-  contractors: CADENCE.MONTHLY,
-  subcontracting: CADENCE.MONTHLY,
-  "natural-resources": CADENCE.QUARTERLY,
-  // Office by office: a nation's TERO or commerce office shares its list when
-  // it confirms terms, and there is no filing calendar behind that.
-  owned: CADENCE.ON_CHANGE,
-  nonprofits: CADENCE.ANNUAL,
-  // Structures change when a parent publishes a new edition of its filings or
-  // its enterprise register, which is not a calendar either.
-  need: CADENCE.ON_CHANGE,
-});
+export const DECLARED_CADENCE = Object.freeze(
+  Object.fromEntries(
+    ["funding", "federal-register", "legislation", "deals", "nagpra", "lobbying", "contractors", "subcontracting", "natural-resources", "owned", "nonprofits", "need"].map((id) => [id, CADENCE.WEEKLY]),
+  ),
+);
 
 /**
  * Editorial change notes, keyed by collection id, then by the version they
@@ -256,7 +243,7 @@ export function formatUpdated(iso) {
   return `${MONTHS[month - 1]} ${day}, ${year}`;
 }
 
-/** The short form for a metadata rail: `Updated Aug. 6 · Monthly`. */
+/** The short form for a metadata rail: `Updated Aug. 6 · weekly`. */
 export function freshnessLine(id) {
   const release = releaseFor(id);
   if (!release?.updated) return "";

@@ -579,7 +579,7 @@ export default function CedarPressRecord() {
                   )}
                   <span className="cp-rec__fine">
                     {entry?.short ?? collectionId}
-                    {/* `cadence` is already a sentence ("Updated monthly"). */}
+                    {/* `cadence` is already a sentence ("Updated weekly"). */}
                     {release ? ` · release ${release.version} · ${release.cadence.toLowerCase()}` : ""}
                   </span>
                 </div>

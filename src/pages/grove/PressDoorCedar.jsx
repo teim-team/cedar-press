@@ -3,8 +3,8 @@
 // Cedar on the door: a floating control and a conversation.
 //
 // It never reaches the network. `doorCedar.js` says why, and says where the
-// twelve dataset answers come from (the catalog, at module load, so they
-// cannot drift from the collections they describe). The conversation around
+// collection and audience answers come from (the catalog and the landing's
+// use cases, at module load, so they cannot drift from what they describe). The conversation around
 // that bank (memory, drill-downs, repeats, quick replies, the graceful miss)
 // is `cedarConversation.js`, shared with the reader's panel through
 // `useCedarThread`, and the panel itself is `CedarPanel`, shared the same way.
@@ -209,8 +209,9 @@ export default function PressDoorCedar() {
           contextLine="Cedar Press · Questions about the collections"
           welcome={
             <p>
-              Hi, I'm Cedar. Ask me what any collection holds, where the records come from, how they
-              reach the right nation, or how to get access. Pick a question or type your own.
+              Hi, I'm Cedar. Ask me what any collection holds, who Cedar Press is for, where the
+              records come from, how they reach the right nation, or how to get access. Pick a
+              question or type your own.
             </p>
           }
           starters={starters}

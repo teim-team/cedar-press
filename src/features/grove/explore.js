@@ -47,6 +47,7 @@ import scopesJson from "../../../data/cedar/scopes.json" with { type: "json" };
 
 import { collectionCitation, collectionSample, collectionTables, sampleUnavailableReason } from "./collection.js";
 import { canOpenDataset } from "./pressAccess.js";
+import { recordStructure } from "./pressRecordStructure.js";
 import { PRESS_CATALOG_BY_ID, STOREFRONT_CATALOG } from "./pressCatalog.js";
 
 export const CONTRACTS = Object.freeze(explore.tables);
@@ -136,12 +137,18 @@ export function flagshipKey(collectionId) {
 export function explorableCollections(user) {
   return STOREFRONT_CATALOG.map((entry) => {
     const tables = exploreTables(entry.id);
+    // A collection presented by its record structure (Foundation & Corporate
+    // Giving, PLOT) has no sample rows to preview and is not missing one:
+    // its viewer shows what each record holds instead.
+    const structure = recordStructure(entry.id);
+    const flagship = tables.find((t) => t.flagship) ?? null;
     return {
       entry,
       open: canOpenDataset(user, entry),
       tables,
-      flagship: tables.find((t) => t.flagship) ?? null,
-      previewUnavailable: tables.some((t) => t.flagship) ? null : (sampleUnavailableReason(entry.id) ?? "No preview file for this collection's dataset."),
+      flagship,
+      structure,
+      previewUnavailable: flagship || structure ? null : (sampleUnavailableReason(entry.id) ?? "No preview file for this collection's dataset."),
     };
   });
 }

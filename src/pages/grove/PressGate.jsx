@@ -46,7 +46,8 @@ import { coverageFrom } from "../../features/grove/pressAccess";
 import { LUMECON_URL, TBN_PLANS_URL, TBN_URL } from "../../features/grove/pressArticles";
 import { PRESS_TIERS, STOREFRONT_CATALOG, collectionsOnShelf } from "../../features/grove/pressCatalog";
 import { formatUpdated, recentlyUpdated } from "../../features/grove/pressReleases";
-import { SOURCE_REACH_CLAIM, SOURCE_REACH_FIGURE, SOURCE_ROTATION } from "../../features/grove/sourceRotation.js";
+import { SOURCE_REACH_FIGURE, SOURCE_ROTATION } from "../../features/grove/sourceRotation.js";
+import { MAINTENANCE } from "../../features/grove/pressMethod.js";
 import {
   PRESS_METHODS_PATH,
   PRESS_REQUEST_PATH,
@@ -571,7 +572,6 @@ export default function PressGate({ user }) {
               partnership with{" "}
               <a href={TBN_URL} target="_blank" rel="noreferrer">Tribal Business News</a>.
             </p>
-            <p className="cp-hero3__reach cp-fade">{SOURCE_REACH_CLAIM}</p>
             <div className="cp-hero3__cta cp-fade">
               <a className="cp-btn cp-btn--primary cp-btn--lg" href={TBN_PLANS_URL} target="_blank" rel="noreferrer">
                 View plans <span className="cp-btn__arrow" aria-hidden="true">&#8594;</span>
@@ -823,7 +823,7 @@ export default function PressGate({ user }) {
               <span className="cp-ways__label">Methods</span>
               <div>
                 <h3>How a collection is built, and how it is kept current.</h3>
-                <p>How records are sourced, resolved to Native entities and maintained: the reference to open before citing a number.</p>
+                <p data-testid="door-maintenance">{MAINTENANCE.sentence} Methods shows how records are sourced and resolved to Native entities: the reference to open before citing a number.</p>
                 <Link className="cp-ways__act" to={PRESS_METHODS_PATH}>How Cedar builds its collections <span aria-hidden="true">&#8594;</span></Link>
               </div>
             </li>

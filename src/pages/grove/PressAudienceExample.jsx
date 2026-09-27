@@ -54,7 +54,7 @@
 //
 // ROTATION (rules in `pressRotation.js`, held by its tests): a step every
 // eight seconds while the band is on screen; paused while it is hovered or
-// holds focus; stopped for good by any choice, including a chip; never under
+// holds focus; held by any choice, including a chip, and turning again after twelve idle seconds; never under
 // prefers-reduced-motion. Rotation changes the EXAMPLE only, never the
 // selected collection: only a visitor's click does that. Every example is
 // laid in the same grid cell and only the chosen one is shown, so the band is
@@ -68,6 +68,7 @@ import { imageSources } from "../../features/grove/pressImagery";
 import { BAND_NOTE, visibleAudiences } from "../../features/grove/pressJobs";
 import {
   INITIAL_ROTATION,
+  RESUME_MS,
   ROTATE_MS,
   counterLabel,
   imageFor,
@@ -208,6 +209,14 @@ export default function PressAudienceExample({ selected, onPick, onPoint }) {
     return () => observer.disconnect();
   }, []);
 
+  // A choice holds the example; after RESUME_MS without another choice the
+  // band turns again (never under reduced motion: shouldRotate says so).
+  useEffect(() => {
+    if (!state.stopped) return undefined;
+    const timer = window.setTimeout(() => dispatch({ type: "resume" }), RESUME_MS);
+    return () => window.clearTimeout(timer);
+  }, [state.stopped, state.choices]);
+
   // One timeout per step, restarted whenever the example or a pause changes.
   useEffect(() => {
     if (!rotating) return undefined;
@@ -268,8 +277,11 @@ export default function PressAudienceExample({ selected, onPick, onPoint }) {
       ref={rootRef}
       data-rotating={rotating ? "true" : "false"}
       data-stopped={state.stopped ? "true" : "false"}
-      onMouseEnter={() => dispatch({ type: "hover", on: true })}
-      onMouseLeave={() => dispatch({ type: "hover", on: false })}
+      // A mouse hover pauses the band. A finger's tap fires a compatibility
+      // mouseenter with no mouseleave, which would pause it for good now that
+      // it resumes after a choice, so only a real mouse counts as hovering.
+      onPointerEnter={(event) => { if (event.pointerType === "mouse") dispatch({ type: "hover", on: true }); }}
+      onPointerLeave={(event) => { if (event.pointerType === "mouse") dispatch({ type: "hover", on: false }); }}
       onFocus={() => dispatch({ type: "focus", on: true })}
       onBlur={(event) => {
         if (!rootRef.current?.contains(event.relatedTarget)) dispatch({ type: "focus", on: false });
@@ -405,7 +417,7 @@ export default function PressAudienceExample({ selected, onPick, onPoint }) {
             <b>{described.name}.</b> {described.blurb}{" "}
             <span className="cp-aud__meta">
               {coverageLabel(described)}
-              {tier ? <> &middot; <TierName name={tier.name} /></> : null}
+              {tier ? <>{coverageLabel(described) ? <> &middot; </> : null}<TierName name={tier.name} /></> : null}
             </span>
           </>
         ) : null}

@@ -158,6 +158,48 @@ class TestCatalog(unittest.TestCase):
         client.cookies.clear()
         self.assertEqual(client.get("/press/profile").status_code, 401)
 
+    def test_every_legacy_work_answer_round_trips_unchanged(self) -> None:
+        """A stored answer keeps its id, including the two preserved ones.
+
+        `federal` and `state_local` predate the government audience
+        (2026-09-27). They are shown under it, keeping their level, but the
+        stored value is never rewritten: a federal agency is not an economic
+        development organization, and rewriting a reader's answer on save or
+        read would change what they said. So the service accepts both
+        unchanged, alongside the new `government`, and hands back exactly what
+        it was given.
+        """
+        legacy = (
+            "tribal_government",
+            "tribal_enterprise",
+            "anc_nho",
+            "native_nonprofit",
+            "federal",
+            "state_local",
+            "lender_investor",
+            "advisor",
+            "media",
+            "academic",
+        )
+        current = ("foundation", "business", "economic_development", "government")
+
+        def save(work: str) -> str:
+            return client.patch("/press/profile", json={"work": work}).json()["work"]
+
+        for work in legacy + current:
+            with self.subTest(work=work):
+                self.assertIn(work, press_catalog.WORK_KINDS)
+                self.assertEqual(save(work), work)
+                self.assertEqual(client.get("/press/profile").json()["work"], work)
+        # One answer per landing audience, plus the two preserved ones: the
+        # dump is the client's list, so the count is read from it, not typed.
+        kinds = press_catalog._DATA["workKinds"]
+        preserved = sorted(kind["id"] for kind in kinds if kind.get("retired"))
+        self.assertEqual(preserved, ["federal", "state_local"])
+        self.assertEqual(len(press_catalog.WORK_KINDS), len(kinds))
+        self.assertIn("government", press_catalog.WORK_KINDS)
+        client.patch("/press/profile", json={"work": None})
+
     def test_articles_are_served(self) -> None:
         self.assertTrue(client.get("/press/articles").json()["articles"])
 
@@ -340,16 +382,20 @@ class TestCatalog(unittest.TestCase):
         ratelimit.reset_for_tests()
 
     def test_a_catalog_only_collection_says_it_has_no_figures(self) -> None:
-        # A quantity question about an unreleased collection is answered with
-        # the honest state of the numbers, never a routing miss or a made-up
-        # figure.
+        # A quantity question about a collection presented by its record
+        # structure is answered with the honest state of the numbers, never a
+        # routing miss or a made-up figure, and never as a collection that is
+        # waiting to be published.
         with _catalog_only_collection() as entry:
             response = client.post(
                 "/cedar/ask",
                 json={"question": "How many records are in it?", "collectionId": entry["id"]},
             )
             self.assertEqual(response.status_code, 200)
-            self.assertIn("no published figures", response.json()["answer"])
+            answer = response.json()["answer"]
+            self.assertIn("states no figures", answer)
+            self.assertNotIn("preparation", answer)
+            self.assertNotRegex(answer, r"\d")
 
     def test_a_shipping_collection_without_a_figure_says_so_too(self) -> None:
         # Eight of the twelve have real row counts and no figure series, which
@@ -431,13 +477,13 @@ class TestCatalog(unittest.TestCase):
 
     def test_every_released_catalog_collection_ships_with_a_version(self) -> None:
         # No released entry answers from its catalog copy alone, because every
-        # released entry has a descriptor behind it. The two on the shelf
-        # ahead of a first release (coverage kind "pending") answer from the
+        # released entry has a descriptor behind it. The two presented by
+        # their record structure (coverage kind "structure") answer from the
         # catalog and claim no version.
         for entry in press_catalog.CATALOG:
             with self.subTest(collection=entry["id"]):
                 profile = client.get(f"/press/collections/{entry['id']}/profile").json()
-                if entry["coverage"]["kind"] == "pending":
+                if entry["coverage"]["kind"] == "structure":
                     self.assertIsNone(profile["version"])
                 else:
                     self.assertIsNotNone(profile["version"])

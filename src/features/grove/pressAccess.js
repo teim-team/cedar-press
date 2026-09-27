@@ -154,11 +154,11 @@ export function shelfReach(user) {
  * already answers this way: it names Cedar Grove, `sameProduct: false`, for a
  * grove-shelf dataset whatever the reader's plan.
  *
- * A collection on the shelf with no release yet (`coverage: PENDING`,
- * Foundation & Corporate Giving and PLOT today) opens for nobody either: the
- * plan that includes it is stated by its shelf, but there is no record, sample
- * or file to open, and the API serves none. Every surface shows its "not yet
- * published" state instead of a lock or a download.
+ * A collection presented by its record structure (`coverage: STRUCTURE`,
+ * Foundation & Corporate Giving and PLOT) opens exactly like any other
+ * collection on its shelf (owner, 2026-09-27): included for the plans that
+ * reach its shelf, offered as an upgrade to the rest. What opening it shows
+ * is its record structure rather than sample rows, because it has none here.
  *
  * `server/tests/test_access.py` compares this function's answers, per tier and
  * per collection, against `repository.may_open`.
@@ -166,7 +166,6 @@ export function shelfReach(user) {
 export function canOpenDataset(user, dataset) {
   const shelf = shelfOf(dataset);
   if (shelf === SHELF.GROVE) return false;
-  if (coverageOf(dataset)?.kind === "pending") return false;
   const reach = shelfReach(user);
   if (!reach) return false;
   const need = SHELF_ORDER.indexOf(shelf);
@@ -242,8 +241,9 @@ export function coverageFrom(dataset) {
 export function coverageLabel(dataset) {
   const coverage = coverageOf(dataset);
   if (!coverage) return "Coverage varies";
-  // A collection on the shelf with no release has measured nothing yet.
-  if (coverage.kind === "pending") return "Not yet published";
+  // Presented by its record structure: nothing is measured, so no span is
+  // stated, and callers leave the line out rather than print a placeholder.
+  if (coverage.kind === "structure") return null;
   if (coverage.kind === "roster") {
     return `Current roster, captured ${formatUpdated(coverage.captured)}`;
   }
