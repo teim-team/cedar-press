@@ -46,12 +46,14 @@ const CATALOG_PHRASE = {
   deals: "deals",
   nagpra: "NAGPRA",
   lobbying: "advocacy",
+  "foundation-corporate-giving": "foundation and corporate giving",
   contractors: "prime contracting",
   subcontracting: "subcontracting",
   "natural-resources": "natural resources",
   owned: "Native-owned businesses",
   nonprofits: "Native nonprofits",
   need: "the enterprise register",
+  plot: "PLOT parcel records",
 };
 
 export function catalogDescription(catalog = STOREFRONT_CATALOG) {

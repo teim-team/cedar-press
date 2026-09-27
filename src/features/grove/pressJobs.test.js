@@ -6,16 +6,14 @@
  *   answerable      every collection question names codebook fields that
  *                   exist; Cedar's suggestions are held to the profile router
  *                   by the Python suite (server/tests/test_cedar_questions.py)
- *   the gate        runtime code holds released collections only; the
- *                   announced ones and every sentence about them live in
- *                   `pressAnnounced.js` and `pressAnnouncedIcons.jsx`, which
- *                   only tests import, and when they ARE merged in the
- *                   runtime gate picks the owner's copy with no other change
+ *   the owner's copy every audience shows the owner's sentence, and all
+ *                   eleven show against the fourteen-collection catalog
  *   coverage        a REPORT, not a rule (owner, 2026-09-26)
  *   imagery         every photograph a use case can show is copied in, at
  *                   the sizes declared, and has a license record
  *
- * The smoke suite's "the bundle" test proves the gate against the real build.
+ * The smoke suite's "the bundle" test proves both new collections, their
+ * questions and the owner's sentences are in the real build.
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
@@ -23,24 +21,13 @@ import { readFileSync, readdirSync } from "node:fs";
 
 import codebookJson from "../../../data/cedar/codebook.json" with { type: "json" };
 import { PRESS_CATALOG, STOREFRONT_CATALOG } from "./pressCatalog.js";
-import {
-  ANNOUNCED_AUDIENCES,
-  ANNOUNCED_COLLECTIONS,
-  ANNOUNCED_COLLECTION_JOBS,
-  ANNOUNCED_ECOSYSTEM_EXAMPLES,
-  ANNOUNCED_IDS,
-  LAUNCH_COPY,
-  gatedPhrases,
-  isAnnounced,
-  isCitable,
-  launchedCatalog,
-  withLaunchCopy,
-} from "./pressAnnounced.js";
+import { PENDING_RELEASE, isReleased } from "./collection.js";
 import { SECTOR_IMAGES, imageFile, imageSources } from "./pressImagery.js";
 import { BUILD_NEXT_QUESTION, BUILD_NEXT_STEPS, ECOSYSTEM_EXAMPLES } from "./pressMethod.js";
 import { PRIORITY_EXAMPLES } from "./pressPriorities.js";
 import { catalogDescription } from "../../../scripts/seo-head.mjs";
 import {
+  ALL_COLLECTION_JOBS,
   AUDIENCE_JOBS,
   BAND_NOTE,
   CEDAR_CHANGES_QUESTION,
@@ -53,7 +40,6 @@ import {
   citedIds,
   collectionQuestions,
   entityActions,
-  liveCollection,
   liveIdsOf,
   openCedarQuestions,
   researchExamples,
@@ -66,11 +52,8 @@ const read = (rel) => readFileSync(new URL(rel, import.meta.url), "utf8");
 const SRC = new URL("../../", import.meta.url);
 const ROOT = new URL("../../../", import.meta.url);
 
-/** Every audience as it will stand at launch, with the gated sentences merged in. */
-const ALL = withLaunchCopy();
-
-/** Words an interim sentence may not use while the giving and parcel collections are gated. */
-const GATED_SUBJECT = /parcel|property|\bland\b|permit|philanthrop|private giving|private support|foundation|funders\b/i;
+/** Every audience. */
+const ALL = AUDIENCE_JOBS;
 
 /** Every non-test source file under src/, with its path relative to src/. */
 function runtimeSources() {
@@ -89,12 +72,12 @@ function runtimeSources() {
 /** Every string the jobs layer owns, which no other runtime file may state. */
 function ownedStrings() {
   const out = new Set([BAND_NOTE, ENTITY_JOBS.line, CEDAR_CHANGES_QUESTION.q]);
-  for (const jobs of Object.values(COLLECTION_JOBS)) {
-    for (const item of [...jobs.questions, ...jobs.cedar]) out.add(item.q);
+  for (const jobs of Object.values(ALL_COLLECTION_JOBS)) {
+    for (const item of [...jobs.questions, ...(jobs.cedar ?? [])]) out.add(item.q);
   }
   for (const audience of AUDIENCE_JOBS) {
     out.add(audience.outcome);
-    for (const version of [audience.atLaunch, audience.now]) if (version) out.add(version.explanation);
+    out.add(audience.explanation);
     if (audience.researchExample) out.add(audience.researchExample.text);
   }
   for (const action of ENTITY_JOBS.actions) out.add(action.label);
@@ -140,14 +123,23 @@ function codebookTable(id) {
   return keys.length === 1 ? codebookJson.tables[keys[0]] : null;
 }
 
-test("every live collection has two or three questions, and nothing else does", () => {
+test("every collection has two or three questions, and nothing else does", () => {
   const live = liveIdsOf();
+  assert.equal(STOREFRONT_CATALOG.length, 14);
   for (const entry of STOREFRONT_CATALOG) {
     const questions = collectionQuestions(entry.id);
     assert.ok(questions.length >= 2 && questions.length <= 3, `${entry.id} has ${questions.length} questions`);
-    assert.ok(cedarQuestions(entry.id).length >= 2, `${entry.id} offers Cedar nothing to answer`);
+    // Cedar answers from a release profile, so only a released collection
+    // offers it anything; a pending one offers nothing rather than a
+    // question the router would refuse.
+    if (isReleased(entry.id)) {
+      assert.ok(cedarQuestions(entry.id).length >= 2, `${entry.id} offers Cedar nothing to answer`);
+    } else {
+      assert.deepEqual(cedarQuestions(entry.id), [], `${entry.id} has no release for Cedar to answer from`);
+    }
   }
-  for (const id of Object.keys(COLLECTION_JOBS)) assert.ok(live.has(id), `questions for ${id}, which is not live`);
+  for (const id of Object.keys(ALL_COLLECTION_JOBS)) assert.ok(live.has(id), `questions for ${id}, which is not in the catalog`);
+  for (const id of Object.keys(COLLECTION_JOBS)) assert.ok(isReleased(id), `${id} carries Cedar questions with no release`);
   assert.deepEqual(collectionQuestions("not-a-collection"), []);
   assert.deepEqual(cedarQuestions("not-a-collection"), []);
 });
@@ -169,11 +161,57 @@ test("every collection question rests on fields its codebook table holds", () =>
   assert.ok(checked > 60, `only ${checked} fields checked`);
 });
 
+/**
+ * The columns the producer declares for Foundation & Corporate Giving's
+ * reviewed-disclosure table: `FIELDS` in `src/lumecon_data/collections/
+ * foundation_release.py`, teim-team/Lumecon-data at f917e6e (branch
+ * codex/foundation-corporate-giving). Copied, not invented, and only until a
+ * release brings the collection's codebook table here; then that table is
+ * what the questions are held to and this list goes.
+ */
+const PRODUCER_FIELDS = Object.freeze({
+  "foundation-corporate-giving": Object.freeze([
+    "disclosure_id", "award_id", "version_kind", "funder_name", "recipient_name", "cedar_uid",
+    "recipient_entity_type", "recipient_affiliation", "purpose", "amount_exact_usd", "amount_lower_usd",
+    "amount_upper_usd", "amount_aggregate_usd", "financial_status", "announcement_date", "report_year",
+    "award_period_text", "project_geography", "source_url", "source_document_sha256",
+    "source_retrieved_date", "source_class", "source_id", "publication_rights_status", "overlap_status",
+    "addability_status", "observation",
+  ]),
+});
+
+/** Collections with no codebook and no producer anywhere: named, and only these. */
+const NO_PRODUCER = Object.freeze(["plot"]);
+
+test("a collection with no release holds its questions to the producer's fields, or is named as having none", () => {
+  assert.deepEqual([...PENDING_RELEASE].sort(), ["foundation-corporate-giving", "plot"]);
+  for (const id of PENDING_RELEASE) {
+    const questions = collectionQuestions(id);
+    assert.ok(questions.length >= 2, `${id} has no questions`);
+    if (codebookTable(id)) {
+      assert.fail(`${id} has a codebook table now: move its questions into COLLECTION_JOBS and hold them to it`);
+    }
+    if (NO_PRODUCER.includes(id)) {
+      // No producer exists, so there is nothing to name; the day one does,
+      // its fields go on these questions and the id comes off NO_PRODUCER.
+      assert.ok(!PRODUCER_FIELDS[id], `${id} has a producer contract: take it off NO_PRODUCER`);
+      for (const item of questions) assert.deepEqual([...item.fields], [], `"${item.q}" names a field nothing declares`);
+      continue;
+    }
+    const columns = new Set(PRODUCER_FIELDS[id] ?? []);
+    assert.ok(columns.size, `${id} has neither a codebook table nor a producer contract to check against`);
+    for (const item of questions) {
+      assert.ok(item.fields.length, `"${item.q}" names no field`);
+      for (const column of item.fields) assert.ok(columns.has(column), `"${item.q}" rests on ${column}, which the producer does not declare`);
+    }
+  }
+});
+
 test("every question carries a kind, and each collection mixes them", () => {
   const kinds = new Set(Object.values(QUESTION_KINDS));
   assert.deepEqual([...kinds].sort(), ["Compare", "Describe", "Trace"]);
-  for (const [id, jobs] of Object.entries(COLLECTION_JOBS)) {
-    for (const item of [...jobs.questions, ...jobs.cedar]) assert.ok(kinds.has(item.kind), `${id}: "${item.q}" has kind ${item.kind}`);
+  for (const [id, jobs] of Object.entries(ALL_COLLECTION_JOBS)) {
+    for (const item of [...jobs.questions, ...(jobs.cedar ?? [])]) assert.ok(kinds.has(item.kind), `${id}: "${item.q}" has kind ${item.kind}`);
     const mix = new Set(jobs.questions.map((item) => item.kind));
     assert.ok(mix.size >= 2, `${id}'s questions are all ${[...mix][0]}`);
   }
@@ -203,167 +241,61 @@ test("an unscoped Cedar panel offers one question per collection, varied by posi
 });
 
 test("questions keep the house style", () => {
-  for (const [id, jobs] of Object.entries(COLLECTION_JOBS)) {
-    for (const item of [...jobs.questions, ...jobs.cedar]) {
+  for (const [id, jobs] of Object.entries(ALL_COLLECTION_JOBS)) {
+    for (const item of [...jobs.questions, ...(jobs.cedar ?? [])]) {
       assert.match(item.q, /^[A-Z][^&—]*\?$/, `${id}: "${item.q}" is not one plain question`);
     }
   }
-  for (const jobs of Object.values(ANNOUNCED_COLLECTION_JOBS)) {
-    for (const question of jobs.questions) assert.match(question, /^[A-Z][^&—]*\?$/, question);
-  }
 });
 
-// ── The gate: the page never loads the announced material ─────────────────
+// ── Every audience shows the owner's sentence ──────────────────────────────
 
-test("nothing the page loads imports the announced material", () => {
-  const sources = runtimeSources();
-  assert.ok(sources.length > 50, "found the source tree");
-  for (const { rel, text } of sources) {
-    if (rel.endsWith("features/grove/pressAnnounced.js") || rel.endsWith("pages/grove/pressAnnouncedIcons.jsx")) continue;
-    assert.doesNotMatch(text, /from\s+["'][^"']*pressAnnounced(Icons)?(\.jsx?)?["']/, `${rel} imports the announced material`);
-    assert.doesNotMatch(text, /import\(\s*["'][^"']*pressAnnounced/, `${rel} imports the announced material dynamically`);
+test("every collection an audience cites is in the catalog, and all eleven audiences show", () => {
+  const catalogIds = liveIdsOf();
+  for (const id of citedIds(ALL)) assert.ok(catalogIds.has(id), `${id} is not in the catalog`);
+  const shown = visibleAudiences();
+  assert.equal(shown.length, 11, "all eleven, Foundations included");
+  assert.equal(shown.length, AUDIENCE_JOBS.length, "no audience is hidden");
+  assert.equal(shown[5].id, "foundations-philanthropy", "in its place, after Native nonprofits");
+  for (const audience of shown) {
+    const declared = AUDIENCE_JOBS.find((a) => a.id === audience.id);
+    assert.equal(audience.explanation, declared.explanation, audience.id);
+    assert.deepEqual(audience.collections.map((entry) => entry.id), [...declared.collections], audience.id);
+    assert.ok(audience.collections.length >= MIN_COLLECTIONS, `${audience.id} is too thin to show`);
   }
+  assert.equal(resolveAudience({ ...AUDIENCE_JOBS[0], collections: ["funding", "deals", "gaming"] }), null, "an id nobody declared hides the audience");
 });
 
-test("no runtime module states a gated name, description, question or sentence", () => {
-  // The bundle test proves this against the build; this names the file first.
-  const phrases = gatedPhrases().filter((phrase) => phrase.length > 4);
-  for (const { rel, text } of runtimeSources()) {
-    if (/pressAnnounced(Icons)?\.jsx?$/.test(rel)) continue;
-    const body = flat(text);
-    for (const phrase of phrases) assert.ok(!body.includes(flat(phrase)), `${rel} states "${phrase.slice(0, 40)}"`);
+test("the owner's launch sentences are the ones shown", () => {
+  // Land in Journalists, property activity for ANCs and NHOs and for Banks,
+  // and private giving for Native nonprofits: the sentences the interim copy
+  // stood in for until both collections joined Cedar Press.
+  const byId = Object.fromEntries(visibleAudiences().map((a) => [a.id, a]));
+  const ids = (audience) => audience.collections.map((entry) => entry.id);
+  assert.match(byId.journalists.explanation, /ownership, land and transactions/);
+  assert.ok(ids(byId.journalists).includes("plot"));
+  for (const id of ["ancs-nhos", "banks-lenders"]) {
+    assert.match(byId[id].explanation, /property activity/, id);
+    assert.ok(ids(byId[id]).includes("plot"), id);
   }
+  assert.match(byId["native-nonprofits"].explanation, /combine federal and private support/);
+  assert.ok(ids(byId["native-nonprofits"]).includes("foundation-corporate-giving"));
+  assert.deepEqual(ids(byId["foundations-philanthropy"]), ["foundation-corporate-giving", "funding", "nonprofits"]);
 });
 
-test("the announced collections are declared once, and are not in the catalog or the jobs layer", () => {
-  assert.deepEqual([...ANNOUNCED_IDS].sort(), ["foundation-corporate-giving", "plot"]);
-  const catalogIds = new Set(PRESS_CATALOG.map((entry) => entry.id));
-  for (const id of ANNOUNCED_IDS) {
-    assert.ok(!catalogIds.has(id), `${id} is both announced and in the catalog: move it, do not copy it`);
-    assert.ok(!COLLECTION_JOBS[id], `${id}'s questions are in the runtime layer before launch`);
-    assert.ok(ANNOUNCED_COLLECTION_JOBS[id]?.questions.length >= 2, `${id} has no questions waiting for launch`);
-  }
-  for (const entry of ANNOUNCED_COLLECTIONS) {
-    assert.ok(entry.name && entry.short && entry.blurb && entry.icon, entry.id);
-  }
-});
-
-test("launch copy whose collections are all released has been moved into the page", () => {
-  const live = liveIdsOf();
-  for (const [id, copy] of Object.entries(LAUNCH_COPY)) {
-    assert.ok(AUDIENCE_JOBS.some((audience) => audience.id === id), `launch copy for an unknown audience: ${id}`);
-    assert.ok(
-      !copy.collections.every((cid) => live.has(cid)),
-      `${id}'s launch copy cites only released collections: move it into pressJobs.js as atLaunch`,
-    );
-  }
-  for (const { after, audience } of ANNOUNCED_AUDIENCES) {
-    assert.ok(AUDIENCE_JOBS.some((a) => a.id === after), `${audience.id} anchors on unknown ${after}`);
-    assert.ok(!AUDIENCE_JOBS.some((a) => a.id === audience.id), `${audience.id} is both announced and on the page`);
-    assert.ok(!audience.atLaunch.collections.every((cid) => live.has(cid)), `${audience.id} is fully released: move it`);
-  }
-});
-
-test("the public resolver never returns an announced collection", () => {
-  for (const id of ANNOUNCED_IDS) {
-    assert.equal(liveCollection(id), null, id);
-    assert.ok(!liveIdsOf().has(id), id);
-    assert.ok(isAnnounced(id));
-  }
-  assert.equal(liveCollection("funding")?.id, "funding");
-  assert.equal(isAnnounced("funding"), false);
-});
-
-test("every collection an audience cites is live or deliberately gated", () => {
-  for (const id of citedIds(ALL)) {
-    assert.ok(isCitable(id), `${id} is neither in the catalog nor announced`);
-  }
-  assert.equal(isCitable("gaming"), false, "an id nobody declared is refused");
-});
-
-test("today, no shown audience cites a gated collection, and no interim sentence talks about one", () => {
-  for (const audiences of [AUDIENCE_JOBS, ALL]) {
-    const shown = visibleAudiences(STOREFRONT_CATALOG, audiences);
-    assert.ok(shown.length);
-    for (const audience of shown) {
-      for (const entry of audience.collections) {
-        assert.ok(entry, `${audience.id} resolved a missing collection`);
-        assert.ok(!isAnnounced(entry.id), `${audience.id} shows ${entry.id}`);
-      }
-      if (audience.version === "now") {
-        assert.doesNotMatch(audience.explanation, GATED_SUBJECT, `${audience.id}'s interim copy names a gated subject`);
-      }
-      assert.ok(audience.collections.length >= MIN_COLLECTIONS, `${audience.id} is too thin to show`);
-    }
-  }
-});
-
-test("every interim sentence cites live collections only and names no gated subject", () => {
-  // The bundle proof cannot see this case: a gated sentence moved into
-  // AUDIENCE_JOBS is, by that move, declared released. So the interim copy
-  // itself is held to naming nothing only a gated collection covers.
-  const gated = new Set(ANNOUNCED_IDS);
-  for (const audience of AUDIENCE_JOBS) {
-    if (!audience.now) continue;
-    for (const id of audience.now.collections) assert.ok(!gated.has(id), `${audience.id} now cites ${id}`);
-    assert.doesNotMatch(audience.now.explanation, GATED_SUBJECT, audience.id);
-  }
-});
-
-test("an audience that exists only for a gated collection is hidden until launch", () => {
-  const ids = visibleAudiences(STOREFRONT_CATALOG, ALL).map((audience) => audience.id);
-  assert.ok(!ids.includes("foundations-philanthropy"));
-  assert.equal(ids.length, ALL.length - 1);
-  assert.equal(resolveAudience(ALL.find((a) => a.id === "foundations-philanthropy")), null);
-  assert.deepEqual(visibleAudiences().map((a) => a.id), ids, "the page shows exactly what the merged set shows today");
-});
-
-test("Foundations and philanthropy says, at launch, that it is not a need score", () => {
+test("Foundations and philanthropy says that it is not a need score", () => {
   // The owner's caution: observable indicators of funding and activity, never
-  // a definitive need score. Held here so the launch cannot drop it.
-  const foundations = ANNOUNCED_AUDIENCES.find(({ audience }) => audience.id === "foundations-philanthropy").audience;
-  assert.match(foundations.atLaunch.explanation, /not a need score/);
+  // a definitive need score.
+  const foundations = AUDIENCE_JOBS.find((audience) => audience.id === "foundations-philanthropy");
+  assert.match(foundations.explanation, /not a need score/);
   // And nowhere else does it claim to measure need.
-  const rest = `${foundations.outcome} ${foundations.atLaunch.explanation}`.replace(/not a need score/g, "");
+  const rest = `${foundations.outcome} ${foundations.explanation}`.replace(/not a need score/g, "");
   assert.doesNotMatch(rest, /need score|scores? (of|for) need|need index|rank\w* need|most in need/i);
 });
 
 test("an audience with fewer than three live collections is hidden rather than shown thin", () => {
-  const thin = { id: "thin", audience: "Thin", job: "Research", outcome: "x", atLaunch: { explanation: "x", collections: ["funding", "deals"] }, now: null };
+  const thin = { id: "thin", audience: "Thin", job: "Research", outcome: "x", explanation: "x", collections: ["funding", "deals"] };
   assert.equal(resolveAudience(thin), null);
-});
-
-// ── Flipping the gate ─────────────────────────────────────────────────────
-
-test("launching both collections switches every audience to the owner's copy", () => {
-  const shown = visibleAudiences(launchedCatalog(), ALL);
-  assert.equal(shown.length, 11, "all eleven, Foundations included");
-  assert.equal(shown[5].id, "foundations-philanthropy", "back in its place, after Native nonprofits");
-  for (const audience of shown) {
-    const declared = ALL.find((a) => a.id === audience.id);
-    assert.equal(audience.version, "atLaunch", audience.id);
-    assert.equal(audience.explanation, declared.atLaunch.explanation, audience.id);
-    assert.equal(audience.outcome, declared.outcome, audience.id);
-    assert.deepEqual(audience.collections.map((entry) => entry.id), [...declared.atLaunch.collections]);
-  }
-});
-
-test("launching one collection switches only the audiences that cite nothing else gated", () => {
-  const byId = Object.fromEntries(visibleAudiences(launchedCatalog(["plot"]), ALL).map((a) => [a.id, a]));
-  // Cites PLOT and nothing else gated: the owner's copy.
-  assert.equal(byId["ancs-nhos"].version, "atLaunch");
-  assert.equal(byId["banks-lenders"].version, "atLaunch");
-  // Cites the giving collection: still interim, or still hidden.
-  assert.equal(byId["native-nonprofits"].version, "now");
-  assert.equal(byId["foundations-philanthropy"], undefined);
-});
-
-test("where the owner's sentence cites only live collections, it is the copy today", () => {
-  const byId = Object.fromEntries(visibleAudiences().map((a) => [a.id, a]));
-  for (const id of ["tribal-nations", "native-enterprises", "businesses", "universities-researchers", "advisors", "economic-development"]) {
-    assert.equal(byId[id].version, "atLaunch", id);
-  }
-  assert.equal(byId["economic-development"].audience, "Economic development, investors and outside partners");
 });
 
 // ── Coverage: a report for review, not a rule ─────────────────────────────
@@ -373,21 +305,17 @@ test("coverage report: live collections no shown use case names", (t) => {
   // Cedar Press, not prove that each dataset got a turn." So this reports and
   // never fails; docs/DESIGN_SYSTEM.md carries the same list for review.
   const today = uncoveredIds();
-  const atLaunch = uncoveredIds(launchedCatalog(), ALL);
-  t.diagnostic(`uncovered today: ${today.length ? today.join(", ") : "none"}`);
-  t.diagnostic(`uncovered with the gate open: ${atLaunch.length ? atLaunch.join(", ") : "none"}`);
+  t.diagnostic(`uncovered: ${today.length ? today.join(", ") : "none"}`);
 });
 
 test("the coverage report names a collection that loses its last use case", () => {
   // The report's mechanism, not a coverage rule: it has to be able to see a gap.
+  assert.ok(!uncoveredIds().includes("nagpra"));
   const withoutNagpra = AUDIENCE_JOBS.map((audience) => ({
     ...audience,
-    atLaunch: audience.atLaunch && {
-      ...audience.atLaunch,
-      collections: audience.atLaunch.collections.map((id) => (id === "nagpra" ? "funding" : id)),
-    },
+    collections: audience.collections.map((id) => (id === "nagpra" ? "funding" : id)),
   }));
-  assert.deepEqual(uncoveredIds(STOREFRONT_CATALOG, withoutNagpra), ["nagpra"]);
+  assert.ok(uncoveredIds(STOREFRONT_CATALOG, withoutNagpra).includes("nagpra"));
 });
 
 // ── Copy and data rules ───────────────────────────────────────────────────
@@ -402,21 +330,18 @@ test("labels, outcomes and sentences keep the house style", () => {
   for (const audience of ALL) {
     assert.doesNotMatch(audience.audience, /&/, `${audience.id}: "and", never an ampersand`);
     assert.match(audience.outcome, /^[A-Z][^&—]*\.$/, `${audience.id}: the outcome is one plain sentence`);
-    for (const version of [audience.atLaunch, audience.now]) {
-      if (!version) continue;
-      assert.doesNotMatch(version.explanation, /[—&]/, `${audience.id}: no em dash, no ampersand`);
-      assert.doesNotMatch(version.explanation, /\bimpact\b/i, `${audience.id}: "contribution", not "impact"`);
-      assert.match(version.explanation, /^[A-Z].*\.$/, `${audience.id}: complete sentences`);
-      assert.ok(version.collections.length >= MIN_COLLECTIONS && version.collections.length <= 6, audience.id);
-    }
+    assert.doesNotMatch(audience.explanation, /[—&]/, `${audience.id}: no em dash, no ampersand`);
+    assert.doesNotMatch(audience.explanation, /\bimpact\b/i, `${audience.id}: "contribution", not "impact"`);
+    assert.match(audience.explanation, /^[A-Z].*\.$/, `${audience.id}: complete sentences`);
+    assert.ok(audience.collections.length >= MIN_COLLECTIONS && audience.collections.length <= 6, audience.id);
   }
   for (const line of [BAND_NOTE, ENTITY_JOBS.line]) assert.match(line, /^[A-Z][^&—]*\.$/, line);
 });
 
 test("the layer names collections by id only: no second catalog", () => {
   const catalogIds = new Set(PRESS_CATALOG.map((entry) => entry.id));
-  for (const id of citedIds(ALL)) assert.ok(catalogIds.has(id) || isAnnounced(id), id);
-  for (const file of ["./pressJobs.js", "./pressAnnounced.js"]) {
+  for (const id of citedIds(ALL)) assert.ok(catalogIds.has(id), id);
+  for (const file of ["./pressJobs.js"]) {
     const src = read(file);
     for (const entry of PRESS_CATALOG) {
       assert.ok(!src.includes(`name: "${entry.name}"`), `${file} restates ${entry.id}`);
@@ -434,8 +359,8 @@ test("research access examples cite live collections, and name each one they cit
       assert.ok(example.text.includes(entry.short), `${example.id} cites ${entry.id} without naming it`);
     }
   }
-  const gated = [{ id: "x", researchExample: { text: "PLOT only.", collections: ["plot"] } }];
-  assert.deepEqual(researchExamples(STOREFRONT_CATALOG, gated), [], "an example citing a gated collection is not offered");
+  const missing = [{ id: "x", researchExample: { text: "Gaming only.", collections: ["gaming"] } }];
+  assert.deepEqual(researchExamples(STOREFRONT_CATALOG, missing), [], "an example citing a collection not in the catalog is not offered");
 });
 
 test("the entity page offers only the actions that work today", () => {
@@ -448,41 +373,20 @@ test("the entity page offers only the actions that work today", () => {
   assert.ok(liveIdsOf().has(related.collection), "related enterprises needs a live collection");
 });
 
-test("every live collection has a mark, and both announced marks are drawn with the family", () => {
+test("every collection has a mark, and the two new marks are drawn with the family", () => {
   const family = read("../../pages/grove/pressCollectionIcons.jsx");
-  const announced = read("../../pages/grove/pressAnnouncedIcons.jsx");
   const keyedIn = (src, id) =>
     new RegExp(`(^|\\s)(${id}|"${id}"):\\s*\\w+Icon,`, "m").test(src.slice(src.search(/export const \w+_ICONS/)));
   for (const entry of STOREFRONT_CATALOG) assert.ok(keyedIn(family, entry.id), `no mark for ${entry.id}`);
-  for (const entry of ANNOUNCED_COLLECTIONS) {
-    assert.ok(keyedIn(announced, entry.icon), `no announced mark for ${entry.id}`);
-    assert.ok(!keyedIn(family, entry.icon), `${entry.id}'s mark is in the runtime family before launch`);
-  }
-  const glyph = (src) => src.slice(src.indexOf("const glyph = {"), src.indexOf("};", src.indexOf("const glyph = {")));
-  assert.equal(glyph(announced), glyph(family), "the announced marks use the family's exact glyph props");
   for (const name of ["GivingIcon", "PlotIcon"]) {
-    const start = announced.indexOf(`const ${name} = (`);
+    const start = family.indexOf(`const ${name} = (`);
     assert.ok(start >= 0, name);
-    const body = announced.slice(start, announced.indexOf(");", start));
+    const body = family.slice(start, family.indexOf(");", start));
     assert.match(body, /<svg \{\.\.\.glyph\}>/, name);
     assert.doesNotMatch(body, /fill=|Gradient|<text/, name);
     const shapes = (body.match(/<(path|circle|rect)\b/g) ?? []).length;
     assert.ok(shapes >= 2 && shapes <= 4, `${name} has ${shapes} shapes`);
   }
-});
-
-test("the gated phrase list covers every name, description, question and gated sentence", () => {
-  const phrases = gatedPhrases();
-  for (const entry of ANNOUNCED_COLLECTIONS) {
-    for (const value of [entry.name, entry.blurb, entry.id]) assert.ok(phrases.includes(value), value);
-  }
-  for (const jobs of Object.values(ANNOUNCED_COLLECTION_JOBS)) {
-    for (const question of jobs.questions) assert.ok(phrases.includes(question), question);
-  }
-  for (const copy of Object.values(LAUNCH_COPY)) assert.ok(phrases.includes(copy.explanation), copy.explanation);
-  assert.ok(phrases.includes("Foundations and philanthropy"));
-  const foundations = ANNOUNCED_AUDIENCES[0].audience;
-  assert.ok(phrases.includes(foundations.outcome) && phrases.includes(foundations.atLaunch.explanation));
 });
 
 test("the owner's collection descriptions keep the brief's limits", () => {
@@ -566,33 +470,33 @@ test("no runtime string states a collection count: every count is derived from t
     assert.equal(found, null, `${rel} types a count: ${found}`);
   }
   // The crawler's description is generated, and counts the storefront.
-  assert.match(catalogDescription(), /^Twelve collections on Indian Country's economy: federal funding, /);
+  assert.match(catalogDescription(), /^Fourteen collections on Indian Country's economy: federal funding, /);
+  assert.match(catalogDescription(), /foundation and corporate giving/);
+  assert.match(catalogDescription(), /PLOT parcel records/);
   assert.match(catalogDescription(STOREFRONT_CATALOG.slice(0, 3)), /^Three collections on /);
-  assert.throws(() => catalogDescription(launchedCatalog()), /no catalog phrase for (plot|foundation-corporate-giving)/, "launching one names the phrase the generator needs");
+  assert.throws(() => catalogDescription([{ id: "not-a-collection" }]), /no catalog phrase for not-a-collection/, "a collection with no phrase stops the generator by name");
 });
 
-test("at promotion the fourteen split seven and seven: giving in Cedar Press, PLOT in Cedar Press+", () => {
+test("the fourteen split seven and seven: giving in Cedar Press, PLOT in Cedar Press+", () => {
   const shelves = (catalog) => ({
     standard: catalog.filter((entry) => entry.shelf === "standard").length,
     pro: catalog.filter((entry) => entry.shelf === "pro").length,
   });
-  assert.deepEqual(shelves(STOREFRONT_CATALOG), { standard: 6, pro: 6 });
-  assert.deepEqual(shelves(launchedCatalog()), { standard: 7, pro: 7 });
-  const byId = Object.fromEntries(ANNOUNCED_COLLECTIONS.map((entry) => [entry.id, entry]));
+  assert.equal(STOREFRONT_CATALOG.length, 14);
+  assert.deepEqual(shelves(STOREFRONT_CATALOG), { standard: 7, pro: 7 });
+  const byId = Object.fromEntries(STOREFRONT_CATALOG.map((entry) => [entry.id, entry]));
   assert.equal(byId["foundation-corporate-giving"].shelf, "standard");
   assert.equal(byId.plot.shelf, "pro");
-  for (const entry of ANNOUNCED_COLLECTIONS) assert.ok(entry.methods, `${entry.id} has no Methods concepts waiting for launch`);
+  // The owner's Methods concepts are each collection's linkage line.
+  assert.match(byId["foundation-corporate-giving"].linkage, /^Philanthropic, corporate and bank giving/);
+  assert.match(byId.plot.linkage, /^Land ownership, transfers, permitting and development/);
 });
 
-test("cross-collection examples that need a gated collection wait in the gated layer", () => {
-  assert.equal(ANNOUNCED_ECOSYSTEM_EXAMPLES.length, 2);
-  for (const example of ANNOUNCED_ECOSYSTEM_EXAMPLES) {
-    assert.ok(example.collections.some(isAnnounced), `${example.text.slice(0, 40)} needs nothing gated: move it into ECOSYSTEM_EXAMPLES`);
-    for (const id of example.collections) assert.ok(isCitable(id), id);
-    assert.ok(!ECOSYSTEM_EXAMPLES.includes(example.text));
-    assert.ok(gatedPhrases().includes(example.text));
-  }
-  assert.deepEqual(ANNOUNCED_ECOSYSTEM_EXAMPLES.map((e) => [...e.collections].sort()), [["deals", "plot"], ["foundation-corporate-giving", "funding", "nonprofits"]]);
+test("the owner's cross-collection examples for the two new collections are in Methods", () => {
+  const deals = ECOSYSTEM_EXAMPLES.find((text) => text.includes("PLOT"));
+  assert.match(deals, /Indian Country Deals links to the parcels PLOT follows/);
+  const giving = ECOSYSTEM_EXAMPLES.find((text) => text.startsWith("Foundation, corporate and bank giving"));
+  assert.match(giving, /federal funding and the Native Nonprofits roster/);
 });
 
 test("the time-savings sentence appears exactly once, on Research access", () => {
@@ -601,7 +505,7 @@ test("the time-savings sentence appears exactly once, on Research access", () =>
   assert.deepEqual(where, ["pages/grove/CedarPressResearchAccess.jsx"]);
 });
 
-test("Priorities asks what should exist next: examples, ambitious, and nothing gated", () => {
+test("Priorities asks what should exist next: examples, ambitious, and nothing Cedar Press already carries", () => {
   const { datasets, research, expansions } = PRIORITY_EXAMPLES;
   assert.deepEqual(datasets.map((d) => d.theme), ["Infrastructure", "Capital access", "Housing", "Healthcare", "Energy", "Workforce"]);
   assert.ok(research.descriptive.length >= 2 && research.causal.length >= 2);
@@ -610,7 +514,7 @@ test("Priorities asks what should exist next: examples, ambitious, and nothing g
   for (const text of all) {
     assert.doesNotMatch(text, /[&\u2014]/, text);
     assert.doesNotMatch(text, /\bimpact\b/i, text);
-    assert.doesNotMatch(text, /parcel|permit|land ownership|philanthrop|foundation|corporate giving|PLOT/i, `${text}: names a gated subject before launch`);
+    assert.doesNotMatch(text, /parcel|permit|land ownership|philanthrop|foundation|corporate giving|PLOT/i, `${text}: asks for a collection Cedar Press already carries`);
   }
   for (const text of research.causal) assert.match(text, /^(Did|Does|How much|Why|What caused)/, `${text} does not read as causal`);
 });

@@ -48,16 +48,19 @@
  *              structure" lands on the release notes, a confident answer to
  *              a question nobody asked.
  *
- * TWO VERSIONS OF EACH AUDIENCE'S INTELLIGENCE, AND A GATE BETWEEN THEM
- *   atLaunch  the owner's sentence and its collections
- *   now       a sentence citing released collections only, where the owner's
- *             cites an announced one
- * `atLaunch` is chosen when every collection it cites is live, `now`
- * otherwise; an audience with neither live, or fewer than `MIN_COLLECTIONS`
- * live, is hidden. The owner's sentences that cite PLOT or Foundation &
- * Corporate Giving, those collections' questions, and the one audience that
- * exists only for them are NOT here: they live in `pressAnnounced.js`, which
- * nothing the page loads imports, so none of it is in the shipped bundle.
+ * ONE SENTENCE PER AUDIENCE: THE OWNER'S
+ * Every audience carries the owner's intelligence sentence and the
+ * collections it names. All fourteen collections are on the shelf (owner,
+ * 2026-09-27), so every sentence the owner wrote is the one the page shows;
+ * an audience is hidden only when a collection it names is not in the catalog
+ * it is resolved against, or when it names fewer than `MIN_COLLECTIONS`.
+ *
+ * TWO COLLECTIONS HAVE NO RELEASE YET
+ * Foundation & Corporate Giving and PLOT are on the shelf with no release
+ * (`coverage: PENDING`). Their profile questions are held to the producer's
+ * declared fields where a producer exists (`PENDING_FIELDS`), and they carry
+ * no Cedar questions: Cedar answers from a release profile, and neither has
+ * one. See `COLLECTION_JOBS` below.
  *
  * COVERAGE IS A REVIEW CHECK, NOT A RULE (owner, 2026-09-26: "The landing
  * page should show the best reasons to use Cedar Press, not prove that each
@@ -282,9 +285,47 @@ export const COLLECTION_JOBS = Object.freeze({
   }),
 });
 
+// ── The two collections with no release yet ─────────────────────────────
+//
+// The owner's questions (2026-09-26) for Foundation & Corporate Giving and
+// PLOT. Neither has a release, so neither has a codebook table in this
+// repository, and neither carries `cedar` questions: Cedar answers from a
+// release profile and there is none to answer from. `cedarQuestions` returns
+// nothing for them, and the Python suite, which runs every Cedar question
+// through the profile router, has none to run.
+//
+// Foundation & Corporate Giving's `fields` name the producer's declared
+// columns (Lumecon-data, `foundation_release.py`, `FIELDS`), and the node
+// suite holds them to that list until a codebook table replaces it. PLOT has
+// no producer in any repository, so its questions name no field; the suite
+// pins that as the one named exception and fails the day a PLOT codebook
+// table exists and the fields are still empty.
+//
+// "Organizations like this one" is made exact the way Federal Funding's is:
+// "like" is the recipient's entity type, not a similarity measure.
+const PENDING_JOBS = Object.freeze({
+  "foundation-corporate-giving": Object.freeze({
+    questions: Object.freeze([
+      q(describe, "Which funders support organizations of the same type as this one?", ["funder_name", "recipient_entity_type", "recipient_name"]),
+      q(describe, "What purposes and geographies are receiving disclosed private funding?", ["purpose", "project_geography", "amount_exact_usd"]),
+      q(compare, "How does private giving compare with federal support?", ["cedar_uid", "amount_exact_usd", "financial_status"]),
+    ]),
+  }),
+  plot: Object.freeze({
+    questions: Object.freeze([
+      q(trace, "Where does this entity hold or acquire property?", []),
+      q(describe, "What permits or development activity are associated with those parcels?", []),
+      q(compare, "How has recorded activity around a property changed over time?", []),
+    ]),
+  }),
+});
+
+/** Every collection's questions, released or not, by catalog id. */
+export const ALL_COLLECTION_JOBS = Object.freeze({ ...COLLECTION_JOBS, ...PENDING_JOBS });
+
 /** The questions a collection's fields can answer, or none. */
 export function collectionQuestions(id) {
-  return COLLECTION_JOBS[id]?.questions ?? [];
+  return ALL_COLLECTION_JOBS[id]?.questions ?? [];
 }
 
 /** What Cedar can answer about a collection, the release question last. */
@@ -312,12 +353,7 @@ export function openCedarQuestions(entries) {
 //
 // One use case per audience: { audience, job, outcome, explanation (the
 // brief's "intelligence"), collections, imagePool }. Outcome and explanation are
-// the owner's, verbatim, except where a `now` version stands in for a
-// sentence that cites an announced collection. The `now` sentences were
-// written on 2026-09-26 and are interim copy for review: ANCs and NHOs and
-// Banks are the owner's sentence with the gated subject taken out and nothing
-// added; the Native nonprofits one is rewritten, because the owner's is about
-// private funders throughout.
+// the owner's, verbatim.
 //
 // `collections` are the collections the sentence actually names, in the
 // order it names them, and nothing added for coverage.
@@ -333,14 +369,11 @@ export const AUDIENCE_JOBS = Object.freeze([
     audience: "Tribal Nations",
     job: "Economic development",
     outcome: "Learn from how peer nations are building their economies.",
-    // Every phrase has a live collection: enterprise growth (Cedar NEED),
+    // Every phrase has a collection: enterprise growth (Cedar NEED),
     // contracts (Prime Contracting), major transactions (Deals), resource
-    // activity (Natural Resources), funding (Federal Funding). No `now`.
-    atLaunch: Object.freeze({
-      explanation: "Follow enterprise growth, contracts, major transactions, resource activity and funding across Indian Country to identify strategies worth examining in your own planning.",
-      collections: Object.freeze(["need", "contractors", "deals", "natural-resources", "funding"]),
-    }),
-    now: null,
+    // activity (Natural Resources), funding (Federal Funding).
+    explanation: "Follow enterprise growth, contracts, major transactions, resource activity and funding across Indian Country to identify strategies worth examining in your own planning.",
+    collections: Object.freeze(["need", "contractors", "deals", "natural-resources", "funding"]),
     // Owner: economy sectors (hospitality, energy, construction,
     // manufacturing, healthcare), and not "Tribal Nations = council
     // chamber", so no government photograph. An exterior scene leads; the
@@ -355,10 +388,8 @@ export const AUDIENCE_JOBS = Object.freeze([
     // shared vocabulary for it.
     job: "Competitive intelligence",
     outcome: "Understand the competitive environment around your portfolio.",
-    now: Object.freeze({
-      explanation: "Track subsidiaries, joint ventures, federal business and major transactions to see where peer organizations are expanding and where new opportunities may be forming.",
-      collections: Object.freeze(["need", "contractors", "subcontracting", "deals"]),
-    }),
+    explanation: "Track subsidiaries, joint ventures, federal business, major transactions and property activity to see where peer organizations are expanding and where new opportunities may be forming.",
+    collections: Object.freeze(["need", "contractors", "subcontracting", "deals", "plot"]),
     imagePool: Object.freeze(["transportation", "manufacturing", "construction"]),
   }),
   Object.freeze({
@@ -366,11 +397,8 @@ export const AUDIENCE_JOBS = Object.freeze([
     audience: "Native enterprises",
     job: "Partner discovery",
     outcome: "Find opportunities, partners and competitive signals.",
-    atLaunch: Object.freeze({
-      explanation: "Compare ownership networks, contracting, transactions and Native-owned businesses to identify partners, suppliers, competitors and markets worth watching.",
-      collections: Object.freeze(["need", "contractors", "subcontracting", "deals", "owned"]),
-    }),
-    now: null,
+    explanation: "Compare ownership networks, contracting, transactions and Native-owned businesses to identify partners, suppliers, competitors and markets worth watching.",
+    collections: Object.freeze(["need", "contractors", "subcontracting", "deals", "owned"]),
     imagePool: Object.freeze(["manufacturing-v2", "agriculture", "retail", "wholesale"]),
   }),
   Object.freeze({
@@ -381,10 +409,8 @@ export const AUDIENCE_JOBS = Object.freeze([
     audience: "Banks, lenders and investors",
     job: "Due diligence",
     outcome: "Do more informed diligence and spot opportunities earlier.",
-    now: Object.freeze({
-      explanation: "Understand ownership, federal business, funding relationships and transactions before financing, investing in or partnering with a Native enterprise.",
-      collections: Object.freeze(["need", "contractors", "funding", "deals"]),
-    }),
+    explanation: "Understand ownership, federal business, funding relationships, transactions and property activity before financing, investing in or partnering with a Native enterprise.",
+    collections: Object.freeze(["need", "contractors", "funding", "deals", "plot"]),
     imagePool: Object.freeze(["finance", "realestate"]),
   }),
   Object.freeze({
@@ -392,22 +418,34 @@ export const AUDIENCE_JOBS = Object.freeze([
     audience: "Native nonprofits",
     job: "Competitive funding",
     outcome: "Make a stronger case for competitive funding.",
-    now: Object.freeze({
-      explanation: "See which federal programs support peer organizations, follow their documented federal engagement, and see where your own federal funding differs before pursuing the next grant.",
-      collections: Object.freeze(["nonprofits", "funding", "lobbying"]),
-    }),
+    explanation: "See which funders support peer organizations, how similar nonprofits combine federal and private support, and where your own funding mix differs before pursuing the next grant.",
+    collections: Object.freeze(["nonprofits", "funding", "foundation-corporate-giving", "lobbying"]),
     imagePool: Object.freeze(["otherservices", "context-cedar"]),
+  }),
+  Object.freeze({
+    id: "foundations-philanthropy",
+    audience: "Foundations and philanthropy",
+    // "Capital allocation" in the owner's note; the nearest job in the
+    // shared vocabulary.
+    job: "Investment opportunity",
+    // Owner copy, revised 2026-09-26.
+    outcome: "Put need and existing support in context before allocating capital.",
+    // The owner's caution: the collections show observable indicators of
+    // funding, activity, service footprint and organizational presence, and
+    // must not claim a definitive need score. The body says so.
+    explanation: "Compare disclosed private giving with federal support and see which organizations and places already attract funding. Cedar Press shows observable public and private funding and activity, not a need score.",
+    collections: Object.freeze(["foundation-corporate-giving", "funding", "nonprofits"]),
+    // The owner's list: health, housing, education, community services.
+    // Lumecon's health and education photographs show faces.
+    imagePool: Object.freeze(["otherservices", "realestate"]),
   }),
   Object.freeze({
     id: "businesses",
     audience: "Businesses working in Indian Country",
     job: "Market entry",
     outcome: "Understand the market before entering it.",
-    atLaunch: Object.freeze({
-      explanation: "Identify Native enterprises, Native-owned businesses, active sectors, contracting patterns and major transactions before choosing markets, partners or outreach targets.",
-      collections: Object.freeze(["need", "owned", "contractors", "deals"]),
-    }),
-    now: null,
+    explanation: "Identify Native enterprises, Native-owned businesses, active sectors, contracting patterns and major transactions before choosing markets, partners or outreach targets.",
+    collections: Object.freeze(["need", "owned", "contractors", "deals"]),
     // The owner's list: construction, logistics, professional services,
     // tech, finance. Lumecon's professional-services and information
     // photographs show faces, so logistics is carried twice instead.
@@ -421,11 +459,8 @@ export const AUDIENCE_JOBS = Object.freeze([
     // "Federal, tribal and institutional datasets": federal funding,
     // advocacy and legislation, the tribal entity structure, and NAGPRA's
     // institutional records.
-    atLaunch: Object.freeze({
-      explanation: "Start with cleaned, linked and source-backed records instead of rebuilding separate federal, tribal and institutional datasets from scratch.",
-      collections: Object.freeze(["funding", "lobbying", "legislation", "need", "nagpra"]),
-    }),
-    now: null,
+    explanation: "Start with cleaned, linked and source-backed records instead of rebuilding separate federal, tribal and institutional datasets from scratch.",
+    collections: Object.freeze(["funding", "lobbying", "legislation", "need", "nagpra"]),
     // Research is not a sector, and Lumecon's education photograph shows a
     // seated audience's faces: the two context textures, in slate.
     imagePool: Object.freeze(["context-lattice", "context-cedar"]),
@@ -439,13 +474,8 @@ export const AUDIENCE_JOBS = Object.freeze([
     audience: "Journalists and newsrooms",
     job: "Journalism",
     outcome: "Get to the story faster and show the record behind it.",
-    // The owner's sentence adds land at launch (PLOT), in `pressAnnounced.js`.
-    // Until then it is the owner's earlier sentence, which names nothing
-    // gated.
-    now: Object.freeze({
-      explanation: "Follow organizations and events across funding, policy, advocacy, ownership and transactions while keeping the underlying source attached.",
-      collections: Object.freeze(["funding", "federal-register", "lobbying", "need", "deals"]),
-    }),
+    explanation: "Follow organizations and events across funding, policy, advocacy, ownership, land and transactions while keeping the underlying source attached.",
+    collections: Object.freeze(["funding", "federal-register", "lobbying", "need", "plot", "deals"]),
     imagePool: Object.freeze(["context-cedar", "context-lattice"]),
     researchExample: Object.freeze({
       text: "A reporter needs Deals and Cedar NEED to trace an acquisition and the enterprise structure behind it.",
@@ -457,11 +487,8 @@ export const AUDIENCE_JOBS = Object.freeze([
     audience: "Advisors and professional services",
     job: "Due diligence",
     outcome: "Walk into the client conversation already understanding the landscape.",
-    atLaunch: Object.freeze({
-      explanation: "Review peer organizations, competitive activity, federal relationships and major transactions before strategy work, diligence, negotiations or market entry.",
-      collections: Object.freeze(["need", "contractors", "lobbying", "deals"]),
-    }),
-    now: null,
+    explanation: "Review peer organizations, competitive activity, federal relationships and major transactions before strategy work, diligence, negotiations or market entry.",
+    collections: Object.freeze(["need", "contractors", "lobbying", "deals"]),
     // Lumecon's professional-services and management photographs both show
     // faces, and a handshake beside this sentence reads as an endorsement.
     imagePool: Object.freeze(["context-lattice", "context-cedar"]),
@@ -470,18 +497,15 @@ export const AUDIENCE_JOBS = Object.freeze([
     // NEW, owner's brief of 2026-09-26: investors, CDFIs, banks, corporate
     // development teams, foundations, government agencies, suppliers,
     // infrastructure developers and economic development organizations, as
-    // one audience rather than nine. Every collection it names is live, so
-    // it shows today. "Philanthropy" here is a kind of outside support that
-    // may fit, not a claim on the giving collection's records.
+    // one audience rather than nine. "Philanthropy" here is a kind of
+    // outside support that may fit, not a claim on the giving collection's
+    // records.
     id: "economic-development",
     audience: "Economic development, investors and outside partners",
     job: "Economic development",
     outcome: "See where capital, support or partnership may fit.",
-    atLaunch: Object.freeze({
-      explanation: "Compare public funding, enterprise activity, contracting, transactions and organizational presence to understand where outside investment, procurement, philanthropy or technical support may fit.",
-      collections: Object.freeze(["funding", "need", "contractors", "deals", "nonprofits"]),
-    }),
-    now: null,
+    explanation: "Compare public funding, enterprise activity, contracting, transactions and organizational presence to understand where outside investment, procurement, philanthropy or technical support may fit.",
+    collections: Object.freeze(["funding", "need", "contractors", "deals", "nonprofits"]),
     imagePool: Object.freeze(["utilities", "agriculture", "construction"]),
   }),
 ]);
@@ -491,28 +515,21 @@ export const BAND_NOTE =
   "Spend staff time on strategy, grants, diligence, reporting and decisions, not rebuilding public data.";
 
 /**
- * The version of an audience's copy a page may show against `catalog`, with
- * its collections resolved to live catalog entries, or null when the audience
- * is hidden until launch.
+ * An audience as a page shows it against `catalog`, with its collections
+ * resolved to catalog entries, or null when a collection it names is not in
+ * that catalog or it names fewer than `MIN_COLLECTIONS`.
  *
- * Returns `{ id, audience, job, outcome, version: "atLaunch" | "now",
- * explanation, collections, imagePool }`.
+ * Returns `{ id, audience, job, outcome, explanation, collections, imagePool }`.
  */
 export function resolveAudience(useCase, catalog = STOREFRONT_CATALOG) {
-  const live = liveIdsOf(catalog);
-  const allLive = (version) => Boolean(version) && version.collections.every((id) => live.has(id));
-  const pick = allLive(useCase.atLaunch) ? "atLaunch" : allLive(useCase.now) ? "now" : null;
-  if (!pick) return null;
-  const version = useCase[pick];
-  const collections = version.collections.map((id) => liveCollection(id, catalog));
-  if (collections.length < MIN_COLLECTIONS) return null;
+  const collections = useCase.collections.map((id) => liveCollection(id, catalog));
+  if (collections.some((entry) => !entry) || collections.length < MIN_COLLECTIONS) return null;
   return Object.freeze({
     id: useCase.id,
     audience: useCase.audience,
     job: useCase.job,
     outcome: useCase.outcome,
-    version: pick,
-    explanation: version.explanation,
+    explanation: useCase.explanation,
     collections: Object.freeze(collections),
     imagePool: useCase.imagePool ?? Object.freeze([]),
   });
@@ -523,15 +540,9 @@ export function visibleAudiences(catalog = STOREFRONT_CATALOG, audiences = AUDIE
   return audiences.map((audience) => resolveAudience(audience, catalog)).filter(Boolean);
 }
 
-/** Every collection id an audience cites, in either version, for the gate test. */
+/** Every collection id an audience cites. */
 export function citedIds(audiences = AUDIENCE_JOBS) {
-  const ids = new Set();
-  for (const audience of audiences) {
-    for (const version of [audience.atLaunch, audience.now]) {
-      for (const id of version?.collections ?? []) ids.add(id);
-    }
-  }
-  return ids;
+  return new Set(audiences.flatMap((audience) => audience.collections));
 }
 
 /**

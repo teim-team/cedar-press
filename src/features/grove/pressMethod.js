@@ -38,6 +38,10 @@ export const EXPERTISE_DOMAINS = Object.freeze([
   "Native nonprofits",
   "Tribal enterprises and economic development",
   "Native business certification and ownership",
+  // The owner's Methods concepts for the two collections that joined Cedar
+  // Press on 2026-09-27 (Foundation & Corporate Giving, PLOT).
+  "Philanthropic, corporate and bank giving",
+  "Land ownership, transfers, permitting and development",
 ]);
 
 /**
@@ -86,6 +90,16 @@ export const EXPERTISE_STRIP = Object.freeze([
       "Tribal enterprises and economic development",
       "Native business certification and ownership",
     ]),
+  }),
+  Object.freeze({
+    id: "giving",
+    label: "Private giving",
+    covers: Object.freeze(["Philanthropic, corporate and bank giving"]),
+  }),
+  Object.freeze({
+    id: "land",
+    label: "Land ownership",
+    covers: Object.freeze(["Land ownership, transfers, permitting and development"]),
   }),
 ]);
 
@@ -239,6 +253,8 @@ export const ECOSYSTEM_EXAMPLES = Object.freeze([
   "Advocacy records, from lobbying filings to consultations, docket comments and testimony, connect organizations to legislation, and bill histories and votes show what followed.",
   "A nation's own enterprise register or audited filing names the subsidiaries the federal record files under unrelated names.",
   "Federal funding and contracting records add economic activity to an entity profile.",
+  "A site acquisition recorded in Indian Country Deals links to the parcels PLOT follows, so a transaction and the land it bought read together without being collapsed into one record.",
+  "Foundation, corporate and bank giving read beside federal funding and the Native Nonprofits roster shows how an organization's private and public support combine, with the legal recipient and the Native beneficiary kept apart.",
   "Better entity resolution then improves matching across every collection above.",
 ]);
 

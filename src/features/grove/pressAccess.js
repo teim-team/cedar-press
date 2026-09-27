@@ -137,7 +137,7 @@ export function shelfReach(user) {
  *
  * The client is the wrong side, and the reason is a product ruling rather than
  * a symmetry. `code/cedar_publication.py` splits the shelves in two:
- * STOREFRONT_SHELVES ("standard", "pro") is the twelve a paying Cedar Press
+ * STOREFRONT_SHELVES ("standard", "pro") is what a paying Cedar Press
  * customer sees and GROVE_SHELVES ("grove") is the one built to the same
  * standard and sold through Cedar Grove; BUILD_SHELVES is the thirteen.
  * `scripts/import_cedar_manifest.py` carries that split into the manifest, so
@@ -154,12 +154,19 @@ export function shelfReach(user) {
  * already answers this way: it names Cedar Grove, `sameProduct: false`, for a
  * grove-shelf dataset whatever the reader's plan.
  *
+ * A collection on the shelf with no release yet (`coverage: PENDING`,
+ * Foundation & Corporate Giving and PLOT today) opens for nobody either: the
+ * plan that includes it is stated by its shelf, but there is no record, sample
+ * or file to open, and the API serves none. Every surface shows its "not yet
+ * published" state instead of a lock or a download.
+ *
  * `server/tests/test_access.py` compares this function's answers, per tier and
  * per collection, against `repository.may_open`.
  */
 export function canOpenDataset(user, dataset) {
   const shelf = shelfOf(dataset);
   if (shelf === SHELF.GROVE) return false;
+  if (coverageOf(dataset)?.kind === "pending") return false;
   const reach = shelfReach(user);
   if (!reach) return false;
   const need = SHELF_ORDER.indexOf(shelf);
@@ -235,6 +242,8 @@ export function coverageFrom(dataset) {
 export function coverageLabel(dataset) {
   const coverage = coverageOf(dataset);
   if (!coverage) return "Coverage varies";
+  // A collection on the shelf with no release has measured nothing yet.
+  if (coverage.kind === "pending") return "Not yet published";
   if (coverage.kind === "roster") {
     return `Current roster, captured ${formatUpdated(coverage.captured)}`;
   }

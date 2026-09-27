@@ -455,6 +455,17 @@
       "linkage": "Each activity, from a lobbying registration to a consultation, a docket filing or testimony, resolved to the tribe or Native organization behind it where the record supports the link; a row the record cannot place keeps its printed party name and a blank key rather than a guess."
     },
     {
+      "id": "foundation-corporate-giving",
+      "short": "Foundation & Corporate Giving",
+      "name": "Foundation & Corporate Giving",
+      "shelf": "standard",
+      "coverage": {
+        "kind": "pending"
+      },
+      "blurb": "Foundation, corporate and bank funding publicly disclosed for Native nations, organizations and initiatives. Follow the funder, legal recipient, purpose, geography, amount and timing while keeping commitments, payments, authorizations and other reported financial statuses distinct.",
+      "linkage": "Philanthropic, corporate and bank giving, each disclosure kept as its own record: commitments and payments are separate facts, and the legal recipient is kept distinct from the Native beneficiary."
+    },
+    {
       "id": "contractors",
       "short": "Prime Contracting",
       "name": "Federal Prime Contracting",
@@ -525,6 +536,17 @@
       },
       "blurb": "Enterprises owned or controlled by Native nations, Alaska Native corporations and other Native entities, including subsidiaries, holding companies and joint ventures. Follow parent relationships and organizational changes over time.",
       "linkage": "This is the structure the rest of the record resolves against, published as a collection in its own right: every tie names the nation or corporation behind it."
+    },
+    {
+      "id": "plot",
+      "short": "PLOT",
+      "name": "PLOT",
+      "shelf": "pro",
+      "coverage": {
+        "kind": "pending"
+      },
+      "blurb": "Parcel-level ownership and development records associated with Native nations, organizations and enterprises. Follow ownership, transfers, parcel characteristics, geometry, permits and other recorded property activity over time.",
+      "linkage": "Land ownership, transfers, permitting and development, followed parcel by parcel: each parcel and the recorded events attached to it, linked to the Native entity that holds it."
     }
   ],
   "releases": {

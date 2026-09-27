@@ -178,7 +178,7 @@
             "@id": "https://cedarpress.ai/#catalog",
             "name": "The Cedar Press collections",
             "url": "https://cedarpress.ai/",
-            "description": "Twelve collections on Indian Country's economy: federal funding, the Federal Register, legislation, deals, NAGPRA, advocacy, prime contracting, subcontracting, natural resources, Native-owned businesses, Native nonprofits and the enterprise register, each resolved to the tribal governments and Native entities behind the records.",
+            "description": "Fourteen collections on Indian Country's economy: federal funding, the Federal Register, legislation, deals, NAGPRA, advocacy, foundation and corporate giving, prime contracting, subcontracting, natural resources, Native-owned businesses, Native nonprofits, the enterprise register and PLOT parcel records, each resolved to the tribal governments and Native entities behind the records.",
             "provider": {
               "@id": "https://lumecon.ai/#organization"
             },
@@ -202,6 +202,9 @@
                 "@id": "https://cedarpress.ai/#dataset-lobbying"
               },
               {
+                "@id": "https://cedarpress.ai/#dataset-foundation-corporate-giving"
+              },
+              {
                 "@id": "https://cedarpress.ai/#dataset-contractors"
               },
               {
@@ -218,6 +221,9 @@
               },
               {
                 "@id": "https://cedarpress.ai/#dataset-need"
+              },
+              {
+                "@id": "https://cedarpress.ai/#dataset-plot"
               }
             ]
           },
@@ -411,6 +417,36 @@
           },
           {
             "@type": "Dataset",
+            "@id": "https://cedarpress.ai/#dataset-foundation-corporate-giving",
+            "name": "Foundation & Corporate Giving",
+            "description": "Foundation, corporate and bank funding publicly disclosed for Native nations, organizations and initiatives. Follow the funder, legal recipient, purpose, geography, amount and timing while keeping commitments, payments, authorizations and other reported financial statuses distinct. Philanthropic, corporate and bank giving, each disclosure kept as its own record: commitments and payments are separate facts, and the legal recipient is kept distinct from the Native beneficiary.",
+            "url": "https://cedarpress.ai/",
+            "creator": {
+              "@id": "https://lumecon.ai/#organization"
+            },
+            "publisher": {
+              "@id": "https://lumecon.ai/#organization"
+            },
+            "includedInDataCatalog": {
+              "@id": "https://cedarpress.ai/#catalog"
+            },
+            "temporalCoverage": "Not yet published",
+            "spatialCoverage": "United States",
+            "keywords": [
+              "Foundation & Corporate Giving",
+              "Indian Country data",
+              "tribal data",
+              "tribal government",
+              "tribal economy",
+              "Native American economic data",
+              "Alaska Native Corporations"
+            ],
+            "isAccessibleForFree": false,
+            "license": "https://cedarpress.ai/methods",
+            "inLanguage": "en"
+          },
+          {
+            "@type": "Dataset",
             "@id": "https://cedarpress.ai/#dataset-contractors",
             "name": "Federal Prime Contracting",
             "alternateName": "Prime Contracting",
@@ -588,6 +624,36 @@
             "keywords": [
               "Cedar Native Entity Enterprise Dataset (NEED)",
               "Cedar NEED",
+              "Indian Country data",
+              "tribal data",
+              "tribal government",
+              "tribal economy",
+              "Native American economic data",
+              "Alaska Native Corporations"
+            ],
+            "isAccessibleForFree": false,
+            "license": "https://cedarpress.ai/methods",
+            "inLanguage": "en"
+          },
+          {
+            "@type": "Dataset",
+            "@id": "https://cedarpress.ai/#dataset-plot",
+            "name": "PLOT",
+            "description": "Parcel-level ownership and development records associated with Native nations, organizations and enterprises. Follow ownership, transfers, parcel characteristics, geometry, permits and other recorded property activity over time. Land ownership, transfers, permitting and development, followed parcel by parcel: each parcel and the recorded events attached to it, linked to the Native entity that holds it.",
+            "url": "https://cedarpress.ai/",
+            "creator": {
+              "@id": "https://lumecon.ai/#organization"
+            },
+            "publisher": {
+              "@id": "https://lumecon.ai/#organization"
+            },
+            "includedInDataCatalog": {
+              "@id": "https://cedarpress.ai/#catalog"
+            },
+            "temporalCoverage": "Not yet published",
+            "spatialCoverage": "United States",
+            "keywords": [
+              "PLOT",
               "Indian Country data",
               "tribal data",
               "tribal government",

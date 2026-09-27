@@ -66,7 +66,7 @@ import {
 import { useSampleRows } from "../../features/grove/useSamples.js";
 import { recordHref, rememberReturn, takeReturn } from "../../features/grove/pressRecord.js";
 import { PRESS_METHODS_PATH } from "../../features/grove/pressRoutes.js";
-import { LAUNCH_COLLECTION } from "../../features/grove/collection.js";
+import { LAUNCH_COLLECTION, isReleased } from "../../features/grove/collection.js";
 import { formatUpdated } from "../../features/grove/pressReleases.js";
 import { downloadCsv, hasReleaseFile, saveZip } from "../../features/grove/pressDownload.js";
 import { PRESS_CATALOG_BY_ID } from "../../features/grove/pressCatalog.js";
@@ -568,7 +568,7 @@ function CollectionAtlas({ collections, query, onSelect }) {
               const unavailable = !flagship;
               const locked = !open && !unavailable;
               const access = (compact = false) => {
-                if (unavailable) return <span className={compact ? "cp-atlas__mobileaccess is-pending" : "cp-atlas__pending"} title={previewUnavailable}>Preview pending</span>;
+                if (unavailable) return <span className={compact ? "cp-atlas__mobileaccess is-pending" : "cp-atlas__pending"} title={previewUnavailable}>{isReleased(entry.id) ? "Preview pending" : "Not yet published"}</span>;
                 if (open) return <span className={compact ? "cp-atlas__mobileaccess is-included" : "cp-atlas__included"}>Included</span>;
                 return <span className={compact ? "cp-atlas__mobileaccess is-locked" : "cp-atlas__locked"}><TierName name={upgrade.name} /></span>;
               };
@@ -703,6 +703,8 @@ function UnavailableCollection({ collection, onAbout }) {
   const release = LAUNCH_COLLECTION.find((item) => item.id === entry.id);
   const rows = ROWS_BY_ID[entry.id];
   const reason = previewUnavailable ?? "No public preview is available for this collection in the current release.";
+  // On the shelf with no release: the same panel, saying that instead.
+  const unpublished = !isReleased(entry.id);
 
   return (
     <div className="cp-lock cp-lock--unavailable" data-testid="explore-unavailable">
@@ -710,9 +712,9 @@ function UnavailableCollection({ collection, onAbout }) {
       <div className="cp-ex__card">
         <div className="cp-lock__unavailable">
           <p className="cp-lock__eyebrow">Collection status</p>
-          <h2>Preview unavailable</h2>
+          <h2>{unpublished ? "Not yet published" : "Preview unavailable"}</h2>
           <dl className="cp-lock__status">
-            <div><dt>Access</dt><dd>Not available for self-service browsing</dd></div>
+            <div><dt>Access</dt><dd>{unpublished ? "With its first release" : "Not available for self-service browsing"}</dd></div>
             {release?.version ? <div><dt>Release</dt><dd>{release.version}</dd></div> : null}
           </dl>
           <p>{reason}</p>
@@ -725,8 +727,9 @@ function UnavailableCollection({ collection, onAbout }) {
             {release?.updated ? ` · updated ${formatUpdated(release.updated)}` : ""}
           </p>
           <p className="cp-lock__say">
-            This collection is listed for transparency. The current release does not offer a
-            public preview or self-service table access.
+            {unpublished
+              ? "This collection is part of Cedar Press and has no published release yet."
+              : "This collection is listed for transparency. The current release does not offer a public preview or self-service table access."}
           </p>
         </div>
       </div>

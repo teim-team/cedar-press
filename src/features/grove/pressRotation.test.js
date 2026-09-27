@@ -75,7 +75,7 @@ test("reduced motion never cycles, and one example has nothing to cycle", () => 
 });
 
 test("the counter counts what is shown", () => {
-  assert.equal(counterLabel(0, visibleAudiences().length), "01 / 10");
+  assert.equal(counterLabel(0, visibleAudiences().length), "01 / 11");
   assert.equal(counterLabel(9, 10), "10 / 10");
 });
 

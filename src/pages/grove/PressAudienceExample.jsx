@@ -314,7 +314,6 @@ export default function PressAudienceExample({ selected, onPick, onPoint }) {
               className={`cp-aud__panel${on ? " is-on" : ""}`}
               aria-hidden={on ? undefined : "true"}
               data-audience={useCase.id}
-              data-version={useCase.version}
               data-side={i % 2 ? "end" : "start"}
               inert={on ? undefined : true}
             >

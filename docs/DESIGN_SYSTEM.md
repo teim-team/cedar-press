@@ -177,9 +177,10 @@ shown use case is reported for review rather than enforced:
 `pressJobs.test.js` prints it ("coverage report") on every run and never
 fails on it. Every collection stays one click away in the hero viewer's rail.
 
-As of 2026-09-26: **no live collection is uncovered**, today (12 of 12, ten
-use cases shown) or with PLOT and Foundation and Corporate Giving launched
-(14 of 14, eleven use cases). Update this line when the report changes.
+As of 2026-09-27: **no collection is uncovered** (14 of 14, eleven use cases
+shown). PLOT and Foundation & Corporate Giving joined Cedar Press that day,
+and the owner's sentences that name them are the ones shown. Update this line
+when the report changes.
 
 ## Where this is deliberately not the Lumecon website
 

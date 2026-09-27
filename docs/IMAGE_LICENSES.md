@@ -88,8 +88,7 @@ textures come from 1000px masters and are 840x560, 600x400 and 1000x400.
 ## Image pools by use case
 
 Each use case rotates through its pool, one photograph per visit
-(`AUDIENCE_JOBS[].imagePool` in `src/features/grove/pressJobs.js`; Foundations
-and philanthropy in `pressAnnounced.js`, gated).
+(`AUDIENCE_JOBS[].imagePool` in `src/features/grove/pressJobs.js`).
 
 | Use case | Job | Pool, in order | Why |
 | --- | --- | --- | --- |
@@ -98,7 +97,7 @@ and philanthropy in `pressAnnounced.js`, gated).
 | Native enterprises | Partner discovery | `manufacturing-v2`, `agriculture`, `retail`, `wholesale` | Rotating sectors, as the owner asked: manufacturing, agriculture, retail, wholesale. |
 | Banks, lenders and investors | Due diligence | `finance`, `realestate` | Finance, then property: diligence before financing. Hands only; no face. |
 | Native nonprofits | Competitive funding | `otherservices`, `context-cedar` | Community organization (hands only), then the cedar texture where no sector fits. |
-| Foundations and philanthropy | Investment opportunity | `otherservices`, `realestate` | Owner: health, housing, education, community services. Health and education show faces; community services and housing remain. Gated until Foundation and Corporate Giving launches. |
+| Foundations and philanthropy | Investment opportunity | `otherservices`, `realestate` | Owner: health, housing, education, community services. Health and education show faces; community services and housing remain. |
 | Businesses working in Indian Country | Market entry | `construction`, `wholesale`, `transportation`, `finance` | Owner: construction, logistics, professional services, tech, finance. Professional services and tech show faces, so logistics is carried twice. |
 | Universities and researchers | Research | `context-lattice`, `context-cedar` | Research is not a sector, and the education photograph shows faces: the two slate context textures. |
 | Journalists and newsrooms | Journalism | `context-cedar`, `context-lattice` | No sector: the two slate context textures, in the other order. |

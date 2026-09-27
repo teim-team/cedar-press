@@ -22,7 +22,7 @@
  * is a promise about a cadence and a scope nobody has measured. The
  * workspace still lists it in the manifest's `excluded`, with its reason, and
  * it comes back to this catalog when the workspace rules it ready. So the
- * catalog is exactly the storefront, twelve collections, and
+ * catalog is exactly the storefront, fourteen collections, and
  * `server/tests/test_access.py` compares this file's shelf assignment against
  * the workspace's so the site cannot move a collection across the boundary
  * on its own authority.
@@ -44,8 +44,8 @@
  *
  * ONE AXIS: WHICH COLLECTIONS YOU GET
  * A reader can be short of a collection. That is the only thing an upgrade
- * fixes. Cedar Press carries its six collections for every year Cedar holds;
- * Cedar Press+ adds six more, at the same depth.
+ * fixes. Cedar Press carries its seven collections for every year Cedar
+ * holds; Cedar Press+ adds seven more, at the same depth.
  *
  * This used to be two axes. Cedar Press was capped at 2010 and Cedar Press+
  * sold the years behind that cap as the other half of its value, so every
@@ -65,11 +65,17 @@
  * and history layer instead, where the rest of the catalog reads it.
  *
  * THE CATALOG IS THE STOREFRONT
- * Every collection the ladder is designed around, and every one of them ships:
- * `collection.js` reads the same twelve out of the manifest, with the measured
- * descriptor behind each. A test pins the two sets equal in both directions,
- * so a collection cannot be sold here without a descriptor, or measured there
- * without a place on a shelf.
+ * Every collection the ladder is designed around: fourteen, seven on each
+ * shelf. Twelve have a release, and `collection.js` reads those twelve out of
+ * the manifest with the measured descriptor behind each. The other two,
+ * Foundation & Corporate Giving and PLOT (owner, 2026-09-27: part of Cedar
+ * Press now), are on the shelf with `coverage: PENDING` and no release: the
+ * pages name them, tier them and describe them, and wherever a page would
+ * show their records it shows the same "not yet published" state it shows for
+ * any collection whose preview is missing. A test pins the manifest to
+ * exactly the catalog's released entries, and the pending ones to exactly the
+ * catalog entries the manifest lacks, so a release cannot land without the
+ * entry changing, and nothing can be measured there without a shelf here.
  *
  * THE NUMBERS IN THE TIER COPY ARE DERIVED
  * "Six collections" and "twelve collections" used to be typed into the
@@ -91,7 +97,7 @@ export function isOnStorefront(entry) {
 /** Small counts as words, the way the tier copy spells them. */
 const COUNT_WORDS = Object.freeze([
   "no", "one", "two", "three", "four", "five", "six",
-  "seven", "eight", "nine", "ten", "eleven", "twelve",
+  "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen",
 ]);
 export function spellCount(n) {
   return COUNT_WORDS[n] ?? String(n);
@@ -136,7 +142,7 @@ const TIER_DECLARATIONS = Object.freeze([
     // undersells the tier, and there is no second axis left to carry it. The
     // count is derived and a test holds the names to the shelf.
     promise: (count) =>
-      `${capitalise(spellCount(count))} more collections on top of Cedar Press: federal contracting, subcontracting, resource revenue, individually owned Native businesses, enterprise structures and the nonprofit sector.`,
+      `${capitalise(spellCount(count))} more collections on top of Cedar Press: federal contracting, subcontracting, resource revenue, individually owned Native businesses, enterprise structures, the nonprofit sector and parcel-level property records.`,
     coverageNote: (count, total) =>
       `${capitalise(spellCount(total))} collections, at the same depth as Cedar Press.`,
   }),
@@ -215,6 +221,21 @@ const TIER_DECLARATIONS = Object.freeze([
  * definition, so it goes through the data workspace and a regenerated
  * release, not through this file. Until then the two blurbs stay as ruled.
  */
+/**
+ * The coverage of a collection that is on the shelf and has no release yet.
+ *
+ * Not a year and not a capture date, because nothing has been measured: a
+ * value in `coverage` is a claim to a paying customer, and a collection with
+ * no delivered file has no span to claim. The pages say "Not yet published"
+ * (`coverageLabel`), the viewer shows the same state it shows for a
+ * collection whose preview is not in the repository, and the entry changes to
+ * a measured `series` or `roster` in the change that adds its release to
+ * `data/cedar/collections.manifest.json`. `collection.js` holds the two in
+ * step: a catalog entry is pending exactly when the manifest has no release
+ * for it.
+ */
+export const PENDING = Object.freeze({ kind: "pending" });
+
 export const PRESS_CATALOG = Object.freeze([
   Object.freeze({
     id: "funding",
@@ -301,6 +322,33 @@ export const PRESS_CATALOG = Object.freeze([
       "Documented federal advocacy and engagement involving Native nations and organizations, including registered lobbying, agency meetings, tribal consultations, regulatory comments, congressional testimony and nonprofit lobbying disclosures. Each row represents one entity-linked activity or source record.",
     linkage:
       "Each activity, from a lobbying registration to a consultation, a docket filing or testimony, resolved to the tribe or Native organization behind it where the record supports the link; a row the record cannot place keeps its printed party name and a blank key rather than a guess.",
+  }),
+  Object.freeze({
+    id: "foundation-corporate-giving",
+    // The owner keeps this name with its ampersand. It is the one ampersand
+    // the house style allows in visible copy, and `tests/smoke.spec.js`
+    // ("uses no ampersand in visible copy") exempts this exact name and
+    // nothing else.
+    short: "Foundation & Corporate Giving",
+    name: "Foundation & Corporate Giving",
+    // Owner, 2026-09-26: Cedar Press, which with PLOT in Cedar Press+ makes
+    // the fourteen a seven and seven split.
+    shelf: "standard",
+    // No release yet, so no coverage to state: see PENDING below. The
+    // producer (Lumecon-data, codex/foundation-corporate-giving) has built
+    // only an unpromoted rehearsal release.
+    coverage: PENDING,
+    // Owner copy, 2026-09-26, bound by the producer contract: one row is one
+    // source disclosure or award version; commitments and payments are
+    // separate facts; legal recipient and Native beneficiary are separate
+    // concepts; a non-Native intermediary does not become a Native entity
+    // because a grant benefits Native people; possible duplicates are never
+    // silently summed.
+    blurb:
+      "Foundation, corporate and bank funding publicly disclosed for Native nations, organizations and initiatives. Follow the funder, legal recipient, purpose, geography, amount and timing while keeping commitments, payments, authorizations and other reported financial statuses distinct.",
+    // The owner's Methods concepts for this collection (2026-09-26).
+    linkage:
+      "Philanthropic, corporate and bank giving, each disclosure kept as its own record: commitments and payments are separate facts, and the legal recipient is kept distinct from the Native beneficiary.",
   }),
   Object.freeze({
     id: "contractors",
@@ -423,6 +471,25 @@ export const PRESS_CATALOG = Object.freeze([
     linkage:
       "This is the structure the rest of the record resolves against, published as a collection in its own right: every tie names the nation or corporation behind it.",
   }),
+  Object.freeze({
+    id: "plot",
+    short: "PLOT",
+    name: "PLOT",
+    // Owner, 2026-09-26: PLOT is in Cedar Press+.
+    shelf: "pro",
+    // No release yet, so no coverage to state: see PENDING below. No
+    // producer exists for it in any repository (checked 2026-09-27).
+    coverage: PENDING,
+    // Owner copy, 2026-09-26. Deals follows a transaction or a capital event
+    // between parties; PLOT follows a parcel and the recorded events attached
+    // to it. A nation's site acquisition may be a Deal while the parcels it
+    // bought appear separately in PLOT: link the two, never collapse them.
+    blurb:
+      "Parcel-level ownership and development records associated with Native nations, organizations and enterprises. Follow ownership, transfers, parcel characteristics, geometry, permits and other recorded property activity over time.",
+    // The owner's Methods concepts for this collection (2026-09-26).
+    linkage:
+      "Land ownership, transfers, permitting and development, followed parcel by parcel: each parcel and the recorded events attached to it, linked to the Native entity that holds it.",
+  }),
 ]);
 
 /**
@@ -441,6 +508,12 @@ export const PRESS_TAXONOMY = Object.freeze([
     name: "Public Finance and Spending",
     lede: "Where federal money goes, and who it reaches.",
     collections: Object.freeze(["funding", "contractors", "subcontracting"]),
+  }),
+  Object.freeze({
+    id: "philanthropy",
+    name: "Philanthropy and Private Funding",
+    lede: "The giving foundations, companies and banks disclose, and who receives it.",
+    collections: Object.freeze(["foundation-corporate-giving"]),
   }),
   Object.freeze({
     id: "policy",
@@ -464,7 +537,7 @@ export const PRESS_TAXONOMY = Object.freeze([
     id: "enterprises",
     name: "Enterprises and Ownership",
     lede: "Who owns what across Indian Country, and how that changes.",
-    collections: Object.freeze(["owned", "need"]),
+    collections: Object.freeze(["owned", "need", "plot"]),
   }),
   Object.freeze({
     id: "institutions",
@@ -502,7 +575,7 @@ export const NATIVE_LINKAGE = Object.freeze({
   // duller one it can.
   claim: "Every record gets the right context.",
   // The door-sized version, for the gate's collection-name strip: the one
-  // sentence that keeps twelve federal-sounding names from reading as
+  // sentence that keeps fourteen collection names from reading as
   // keyword filters over open data. Same discipline as `claim`: connected
   // to the Native entities each record touches, never "every record is
   // Native", which the counterparties would break.
@@ -606,7 +679,7 @@ function earliestOnShelf(shelf) {
  * The shelves below, as one badge each.
  *
  * Cedar Press+ does not redraw the Cedar Press collections to say it
- * includes them, and Grove should not redraw twelve. Listing every collection
+ * includes them, and Grove should not redraw fourteen. Listing every collection
  * on the top tier made it the busiest band on the page, which reads as
  * clutter rather than as abundance.
  *
@@ -637,7 +710,7 @@ export const GROVE_INCLUDES = Object.freeze([
     shelf: "pro",
     blurb: `The ${spellCount(collectionsOnShelf("pro").length)} specialized collections Cedar Press does not carry.`,
     linkage:
-      "Contracting, subcontracting, resources, individually owned Native businesses, enterprise structures and nonprofits: awards roll up to the parent nation or corporation, and each owned business carries its certifying nation.",
+      "Contracting, subcontracting, resources, individually owned Native businesses, enterprise structures, nonprofits and parcels: awards roll up to the parent nation or corporation, and each owned business carries its certifying nation.",
   }),
 ]);
 
@@ -649,7 +722,7 @@ export const GROVE_INCLUDES = Object.freeze([
  * What Cedar Grove does, rather than what it contains.
  *
  * The contents argument is weak on its own, because a reader who has just
- * been shown twelve collections already believes there is a lot of data. What
+ * been shown fourteen collections already believes there is a lot of data. What
  * they cannot see from the shelf is that Grove analyses across all of it,
  * finds things nobody went looking for, opens to a whole organization at
  * once, and keeps growing as Lumecon builds. Every line here is a capability

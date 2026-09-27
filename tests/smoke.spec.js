@@ -18,16 +18,13 @@ import { fileURLToPath } from "node:url";
 import { expect, test } from "@playwright/test";
 
 import { EMAIL, HASH, PASSWORD, PRESS_EMAIL } from "./demoAccount.js";
-// The twelve, read from the catalog rather than typed: a list typed here
+// The fourteen, read from the catalog rather than typed: a list typed here
 // would pass while the door advertised something else.
 import { STOREFRONT_CATALOG } from "../src/features/grove/pressCatalog.js";
 import { LUMECON_URL, TBN_URL } from "../src/features/grove/pressArticles.js";
-// Test-only: the announced material, to prove the build carries none of it.
-import { gatedPhrases } from "../src/features/grove/pressAnnounced.js";
 import {
   AUDIENCE_JOBS,
   BAND_NOTE,
-  COLLECTION_JOBS,
   ENTITY_JOBS,
   collectionQuestions,
   researchExamples,
@@ -222,9 +219,9 @@ test.describe("the gate", () => {
     expect(errors).toEqual([]);
   });
 
-  // The door stages the product: the twelve collections down the frame's
+  // The door stages the product: the fourteen collections down the frame's
   // rail, one group a shelf, and the pane with real sample records of the
-  // one in hand. Twelve is the
+  // one in hand. Fourteen is the
   // catalog's count; the records are the point, since a preview with a
   // description and no rows is a brochure. The reader's shelf (#catalog)
   // stays absent — asserted above — because the preview reads the public
@@ -235,7 +232,8 @@ test.describe("the gate", () => {
     // `.cp-rail__item` rather than `.cp-app__item`: the frame drew its own
     // navy list until the door started mounting the shared rail. Scoped to
     // the frame, since the strip below it is the same twelve again.
-    await expect(page.getByTestId("press-frame").locator(".cp-rail__item")).toHaveCount(12);
+    await expect(page.getByTestId("press-frame").locator(".cp-rail__item")).toHaveCount(STOREFRONT_CATALOG.length);
+    expect(STOREFRONT_CATALOG.length).toBe(14);
     await expect(page.locator('[data-testid="collection-stage"]')).toHaveCount(1);
     await expect(page.locator('[data-testid="stage-record"]').first()).toBeVisible();
     // Scoped to the frame: the door now also carries a full-size strip of the
@@ -862,13 +860,18 @@ test.describe("Explore the collections", () => {
     const atlas = page.locator(".cp-atlas");
     await expect(atlas).toBeVisible();
     await expect(atlas.getByTestId("atlas-row")).toHaveCount(STOREFRONT_CATALOG.length);
+    // A collection with no release yet (coverage "pending") is neither
+    // included nor locked: it reads "Not yet published" on either shelf.
+    const pending = (entry) => entry.coverage.kind === "pending";
     await expect(atlas.locator(".cp-atlas__included")).toHaveCount(
-      STOREFRONT_CATALOG.filter((entry) => entry.shelf === "standard").length,
+      STOREFRONT_CATALOG.filter((entry) => entry.shelf === "standard" && !pending(entry)).length,
     );
     await expect(atlas.locator(".cp-atlas__locked")).toHaveCount(
-      STOREFRONT_CATALOG.filter((entry) => entry.shelf === "pro" && entry.id !== "owned").length,
+      STOREFRONT_CATALOG.filter((entry) => entry.shelf === "pro" && entry.id !== "owned" && !pending(entry)).length,
     );
-    await expect(atlas.locator(".cp-atlas__pending")).toHaveCount(1);
+    // Owned's preview is pending; the two new collections are not yet published.
+    await expect(atlas.locator(".cp-atlas__pending")).toHaveCount(3);
+    await expect(atlas.locator(".cp-atlas__pending", { hasText: "Not yet published" })).toHaveCount(2);
     await expect(page.locator(".cp-ex__pages")).toHaveCount(0);
 
     await atlas.getByRole("button", { name: "Federal Prime Contracting" }).click();
@@ -1329,19 +1332,13 @@ test.describe("the door's use cases", () => {
     const cited = await page.locator(".cp-aud__col").evaluateAll((els) => [...new Set(els.map((el) => el.dataset.collection))]);
     const sold = new Set(STOREFRONT_CATALOG.map((entry) => entry.id));
     for (const id of cited) expect(sold.has(id), `${id} is not a live collection`).toBe(true);
-    // The two announced collections render nowhere on the door: no tile, no
-    // chip, no audience that exists only for them, no sentence about them.
-    for (const id of ["plot", "foundation-corporate-giving"]) {
-      await expect(page.locator(`[data-collection="${id}"]`)).toHaveCount(0);
-    }
-    const body = await page.locator("body").innerText();
-    for (const phrase of ["PLOT", "Corporate Giving", "Foundations and philanthropy", "private giving"]) {
-      expect(body, phrase).not.toContain(phrase);
-    }
-    // "Philanthropy" is allowed: the owner's outside-partners sentence names
-    // it as a kind of support that may fit, not as the giving collection.
-    const bandText = await band(page).evaluate((el) => el.textContent);
-    expect(bandText).not.toMatch(/parcel|private giving|disclosed private/i);
+    // All eleven use cases, Foundations and philanthropy among them, and the
+    // two newest collections on its chips and on the others the owner wrote
+    // them into.
+    expect(shown).toBe(11);
+    await expect(counter(page)).toHaveText("01 / 11");
+    await expect(page.locator('.cp-aud__panel[data-audience="foundations-philanthropy"]')).toHaveCount(1);
+    for (const id of ["plot", "foundation-corporate-giving"]) expect(cited, id).toContain(id);
     expect(errors).toEqual([]);
   });
 
@@ -1943,6 +1940,13 @@ test.describe("house style", () => {
   //      asserting something the source does not say, which is the one thing
   //      the whole identity layer exists to prevent.
   //
+  //   3. "Foundation & Corporate Giving" is a COLLECTION NAME the owner keeps
+  //      with its ampersand (2026-09-27). It is exempted by exact name, not by
+  //      selector: the name is removed from the text before the check, so the
+  //      same line carrying any other ampersand still fails, and a variant
+  //      spelling ("Foundation &amp; Corporate Giving" rendered literally, or
+  //      "Foundations & Corporate Giving") is not exempt.
+  //
   // So the table and the register's name cells are excluded by selector,
   // which keeps the rule enforceable as new names arrive rather than needing
   // a string added here every time one does.
@@ -1950,6 +1954,14 @@ test.describe("house style", () => {
   // draws as a table. Missing it was the whole reason this test failed on the
   // phone project and passed on desktop, which is a useful reminder that
   // "visible copy" is per-composition, not per-page.
+  /**
+   * The one collection name allowed its ampersand (exemption 3 above). The
+   * only tolerance is whitespace after the ampersand, because the Methods
+   * ring sets a long name on two SVG lines ("Foundation &" / "Corporate
+   * Giving") and the text of two <tspan>s joins with no space between them.
+   */
+  const AMPERSAND_EXEMPT = /Foundation &\s*Corporate Giving/g;
+
   const QUOTED = [
     ".cp-ex__table",
     ".cp-ex__cards",
@@ -1983,7 +1995,7 @@ test.describe("house style", () => {
       }, QUOTED);
       const offending = text
         .split("\n")
-        .map((line) => line.trim())
+        .map((line) => line.trim().replaceAll(AMPERSAND_EXEMPT, ""))
         .filter((line) => line.includes("&"));
       expect(offending, `ampersand in visible copy on ${path}`).toEqual([]);
     });
@@ -2047,90 +2059,57 @@ test.describe("the bundle", () => {
     expect(digestSeen, "the configured digest is not in the build").toBe(true);
   });
 
-  // THE ANNOUNCED COLLECTIONS ARE NOT IN THE BUILD AT ALL.
+  // BOTH NEW COLLECTIONS ARE IN THE BUILD.
   //
-  // PLOT has no producer and Foundation & Corporate Giving is under rights
-  // review, so neither may be readable in the shipped JavaScript, not merely
-  // unrendered: a string in a bundle is public to anyone with devtools. The
-  // gate is that nothing the page loads imports `pressAnnounced.js` or
-  // `pressAnnouncedIcons.jsx`. This checks the result: every name, id,
-  // description and gated sentence those files declare, and the path data of
-  // both marks, read from the files themselves so the list cannot drift, and
-  // searched for in every file the production build emitted.
-  test("carries nothing about the announced collections", async () => {
+  // Foundation & Corporate Giving and PLOT were held out of the bundle while
+  // they were gated: this test used to prove every string about them was
+  // ABSENT from dist-site. The owner made them part of Cedar Press on
+  // 2026-09-27, so the proof runs the other way: their ids, names, owner
+  // descriptions, profile questions, the owner's use-case sentences that
+  // name them and the path data of both marks must all be PRESENT in what
+  // the production build emitted. A collection that renders on a developer's
+  // machine and is missing from the build fails here.
+  test("carries both new collections, their questions, sentences and marks", async () => {
     const dir = fileURLToPath(new URL("../dist-site/", import.meta.url));
     const assets = await readdir(dir, { recursive: true, withFileTypes: true });
     const files = assets.filter((entry) => entry.isFile() && /\.(js|css|html|json|map|xml|txt)$/.test(entry.name));
     expect(files.length, "nothing was built to check").toBeGreaterThan(0);
+    const bodies = await Promise.all(files.map((entry) => readFile(`${entry.parentPath}/${entry.name}`, "utf8")));
+    const build = bodies.join("\n");
 
-    const icons = await readFile(new URL("../src/pages/grove/pressAnnouncedIcons.jsx", import.meta.url), "utf8");
-    const paths = [...icons.matchAll(/\bd="([^"]+)"/g)].map((m) => m[1]);
-    expect(paths.length, "path data read from the announced marks").toBeGreaterThanOrEqual(5);
-    // Whole strings, and every run of five consecutive words from them: a
-    // partial quote typed into a page ("Foundation, corporate and bank
-    // funding publicly disclosed.") leaks as surely as the whole description,
-    // and the first version of this test, matching whole strings only, let
-    // exactly that through. A run the released copy also uses ("Native
-    // nations, organizations and enterprises") is not a secret and is skipped.
-    const words = (text) => text.split(/\s+/).filter(Boolean);
-    const runs = (text) => {
-      const w = words(text);
-      return w.length < 5 ? [] : w.slice(0, w.length - 4).map((_, i) => w.slice(i, i + 5).join(" "));
-    };
-    const releasedText = [
-      ...STOREFRONT_CATALOG.flatMap((entry) => [entry.blurb, entry.linkage ?? ""]),
-      // Everything the shared jobs layer ships: outcomes, both versions of
-      // each intelligence line, every collection and Cedar question, the
-      // research examples and the quiet line.
-      ...AUDIENCE_JOBS.flatMap((audience) => [
-        audience.outcome,
-        audience.now?.explanation ?? "",
-        audience.atLaunch?.explanation ?? "",
-        audience.researchExample?.text ?? "",
-      ]),
-      ...Object.values(COLLECTION_JOBS).flatMap((jobs) => [...jobs.questions, ...jobs.cedar].map((item) => item.q)),
-      BAND_NOTE,
-      ENTITY_JOBS.line,
-    ];
-    // And every string in the released data files the build bundles (the
-    // codebook, the collection descriptors, the manifest): pipeline output
-    // about released collections, not page copy. Without them a gated
-    // sentence that shares a common run with a released record's own
-    // description ("linked to the Native entity that received it") reads as
-    // a leak when it is only English.
-    const strings = (value) =>
-      typeof value === "string" ? [value] : value && typeof value === "object" ? Object.values(value).flatMap(strings) : [];
-    for (const file of ["codebook.json", "collection_descriptors.json", "collections.manifest.json"]) {
-      releasedText.push(...strings(JSON.parse(await readFile(new URL(`../data/cedar/${file}`, import.meta.url), "utf8"))));
+    const ids = ["plot", "foundation-corporate-giving"];
+    const needles = [];
+    for (const id of ids) {
+      const entry = STOREFRONT_CATALOG.find((item) => item.id === id);
+      expect(entry, `${id} is not in the catalog`).toBeTruthy();
+      needles.push(id, entry.name, entry.short, entry.blurb, entry.linkage);
+      const questions = collectionQuestions(id);
+      expect(questions.length, `${id} has no questions`).toBeGreaterThanOrEqual(2);
+      needles.push(...questions.map((item) => item.q));
     }
-    const releasedRuns = new Set(releasedText.flatMap(runs));
-    const fragments = gatedPhrases().flatMap(runs).filter((run) => !releasedRuns.has(run));
-    expect(fragments.length, "fragments derived from the gated copy").toBeGreaterThan(80);
-    const needles = [...new Set([...gatedPhrases(), ...fragments, ...paths])];
-    // A short token ("PLOT", "plot") is matched as a whole word; a sentence or
-    // a path as an exact substring.
-    const escape = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    const matchers = needles.map((needle) => ({
-      needle,
-      test: needle.length <= 5 ? (body) => new RegExp(`\\b${escape(needle)}\\b`).test(body) : (body) => body.includes(needle),
-    }));
-
-    expect(matchers.length, "nothing to search for: the proof would pass vacuously").toBeGreaterThan(50);
-
-    // The control: a released description IS in the build, so a scan of the
-    // wrong directory, or of nothing, cannot pass.
-    const released = STOREFRONT_CATALOG.find((entry) => entry.id === "funding").blurb;
-    let releasedSeen = false;
-    const found = [];
-    for (const entry of files) {
-      const body = await readFile(`${entry.parentPath}/${entry.name}`, "utf8");
-      if (body.includes(released)) releasedSeen = true;
-      for (const { needle, test: hit } of matchers) {
-        if (hit(body)) found.push(`${entry.name}: ${needle.slice(0, 60)}`);
-      }
+    const citing = AUDIENCE_JOBS.filter((audience) => audience.collections.some((id) => ids.includes(id)));
+    expect(citing.map((audience) => audience.id).sort()).toEqual(
+      ["ancs-nhos", "banks-lenders", "foundations-philanthropy", "journalists", "native-nonprofits"],
+    );
+    for (const audience of citing) needles.push(audience.explanation);
+    needles.push("Foundations and philanthropy");
+    // The marks, read from the family file so the list cannot drift from it.
+    const icons = await readFile(new URL("../src/pages/grove/pressCollectionIcons.jsx", import.meta.url), "utf8");
+    for (const name of ["GivingIcon", "PlotIcon"]) {
+      const start = icons.indexOf(`const ${name} = (`);
+      expect(start, `${name} is not in the family`).toBeGreaterThanOrEqual(0);
+      const body = icons.slice(start, icons.indexOf(");", start));
+      const paths = [...body.matchAll(/\bd="([^"]+)"/g)].map((m) => m[1]);
+      expect(paths.length, `${name}'s path data`).toBeGreaterThanOrEqual(2);
+      needles.push(...paths);
     }
-    expect(releasedSeen, "the scan did not find a released description: wrong or empty build").toBe(true);
-    expect(found, "announced material shipped in the build").toEqual([]);
+
+    // A strict string search, whole needle, so a partial string cannot pass
+    // for the whole description. JSX-escaped ampersands are compared both
+    // ways, since the minifier may keep either spelling.
+    const missing = needles.filter((needle) => !build.includes(needle) && !build.includes(needle.replaceAll("&", "\\u0026")));
+    expect(needles.length, "nothing to search for: the proof would pass vacuously").toBeGreaterThan(20);
+    expect(missing, "new-collection material missing from the build").toEqual([]);
   });
 });
 
@@ -2182,15 +2161,16 @@ test.describe("crawlers", () => {
     });
   }
 
-  test("the door names all twelve collections in the HTML a crawler fetches", async ({ request }) => {
+  test("the door names all fourteen collections in the HTML a crawler fetches", async ({ request }) => {
     // The viewer's rail and the use cases' chips (every example is in the
     // document, one shown at a time) spell the collections out. Prerendered,
     // so it is text in the document rather than something that appears after
     // a script runs; a crawler and a reader with JS off both get the list.
     const body = await (await request.get("/")).text();
     const names = STOREFRONT_NAMES;
-    expect(names).toHaveLength(12);
-    for (const name of names) expect(body).toContain(name);
+    expect(names).toHaveLength(14);
+    // The HTML escapes the one ampersand a collection name carries.
+    for (const name of names) expect(body.includes(name) || body.includes(name.replaceAll("&", "&amp;")), name).toBe(true);
     // The count is the hero's own fact line, read from the catalog.
     expect(body).toMatch(new RegExp(`<b>${names.length}</b> collections`));
   });
@@ -2313,7 +2293,7 @@ test.describe("Methods", () => {
           })),
         };
       });
-      expect(boxes.nodes.length).toBe(12);
+      expect(boxes.nodes.length).toBe(STOREFRONT_CATALOG.length);
       const GAP = 8;
       for (const node of boxes.nodes) {
         const apart =
@@ -2398,14 +2378,14 @@ test.describe("Methods", () => {
     expect(boxes.svg.bottom).toBeLessThanOrEqual(boxes.text.top);
   });
 
-  test("the twelve marks index the collections, and one profile opens beneath", async ({ page }) => {
+  test("the fourteen marks index the collections, and one profile opens beneath", async ({ page }) => {
     const errors = watchConsole(page);
     await page.goto("/methods");
-    // The section was twelve stacked accordions; it is the twelve marks now,
-    // and the count is the catalog's, so a collection cannot go missing here
+    // The section was twelve stacked accordions; it is the marks now, and
+    // the count is the catalog's, so a collection cannot go missing here
     // without going missing from the shelf too.
     const tiles = page.locator(".cp-mbc__tile");
-    await expect(tiles).toHaveCount(12);
+    await expect(tiles).toHaveCount(STOREFRONT_CATALOG.length);
     await expect(page.locator("#mbc-panel")).toBeVisible();
     const first = await page.locator(".cp-mbc__name").innerText();
     await tiles.nth(5).click();

@@ -55,6 +55,7 @@ test("the Cedar Press+ promise names every pro-shelf collection", () => {
     owned: "individually owned native businesses",
     need: "enterprise structures",
     nonprofits: "nonprofit",
+    plot: "parcel-level property records",
   };
   for (const entry of collectionsOnShelf("pro")) {
     assert.ok(mention[entry.id], `${entry.id} has no keyword to look for; add one`);
@@ -66,7 +67,8 @@ test("spellCount spells the small numbers and falls back to digits", () => {
   assert.equal(spellCount(0), "no");
   assert.equal(spellCount(6), "six");
   assert.equal(spellCount(12), "twelve");
-  assert.equal(spellCount(13), "13");
+  assert.equal(spellCount(14), "fourteen");
+  assert.equal(spellCount(15), "15");
 });
 
 // Subject first, access second: every storefront collection has one home in

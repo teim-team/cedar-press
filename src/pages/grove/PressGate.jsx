@@ -725,7 +725,7 @@ export default function PressGate({ user }) {
                 track. Lumecon draws on more than 500 source websites to settle that question,
                 giving every organization it can resolve a permanent identifier and keeping it
                 current as organizations rename, merge and change hands. That is how{" "}
-                {LAUNCH_COLLECTION.length} datasets come to answer as one collection.
+                {STOREFRONT_CATALOG.length} datasets come to answer as one collection.
               </p>
               {/* Owner copy, 2026-09-25. The records say what happened; the
                   reporting says what it means. No count of relationships is
