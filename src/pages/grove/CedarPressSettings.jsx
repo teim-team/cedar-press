@@ -87,7 +87,8 @@ function WorkCard() {
         <select id="cp-work" value={work} onChange={(event) => setWork(event.target.value)}>
           <option value="">Rather not say</option>
           {/* The landing audiences, plus the reader's own stored answer
-              first when it is a retired one, so saving never drops it. */}
+              when it is a preserved one (shown under the audience it
+              belongs to), so saving never drops it. */}
           {workOptions(saved).map((kind) => (
             <option key={kind.id} value={kind.id}>
               {kind.label}

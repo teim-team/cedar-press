@@ -115,6 +115,10 @@ export const JOBS = Object.freeze([
   "Research",
   "Journalism",
   "Policy monitoring",
+  // The owner's own wording for consultants and advisors (2026-09-27).
+  "Client strategy",
+  // Government and public agency officials (owner, 2026-09-27).
+  "Tribal consultation",
 ]);
 
 // ── COLLECTION_JOBS ───────────────────────────────────────────────────────
@@ -470,6 +474,27 @@ export const AUDIENCE_JOBS = Object.freeze([
     }),
   }),
   Object.freeze({
+    // NEW, owner, 2026-09-27: federal, state and local officials. Not a
+    // Native audience, so it sits after the researchers rather than beside
+    // Tribal Nations, which stays its own audience. Cedar SUPPORTS
+    // consultation and government-to-government relationships; no sentence
+    // here may present it as a substitute for engaging Native nations
+    // directly.
+    id: "government-officials",
+    audience: "Government and public agency officials",
+    job: "Tribal consultation",
+    outcome: "Prepare more informed tribal consultations, build stronger government-to-government relationships, and better serve the communities you represent.",
+    // Every claim has a collection, in the sentence's order: funding
+    // (Federal Funding), legislation (Legislation), agency actions (Federal
+    // Register), and Native-entity records (Cedar NEED). Advocacy's release
+    // carries tribal consultations, which is what backs the outcome.
+    explanation: "Bring funding, legislation, agency actions and Native-entity records together with sources you can check.",
+    collections: Object.freeze(["funding", "legislation", "federal-register", "lobbying", "need"]),
+    // Public infrastructure with no faces and no council chamber: utilities,
+    // transportation, then the cedar texture.
+    imagePool: Object.freeze(["utilities", "transportation", "context-cedar"]),
+  }),
+  Object.freeze({
     id: "journalists",
     audience: "Journalists and newsrooms",
     job: "Journalism",
@@ -484,11 +509,18 @@ export const AUDIENCE_JOBS = Object.freeze([
   }),
   Object.freeze({
     id: "advisors",
-    audience: "Advisors and professional services",
-    job: "Due diligence",
-    outcome: "Walk into the client conversation already understanding the landscape.",
-    explanation: "Review peer organizations, competitive activity, federal relationships and major transactions before strategy work, diligence, negotiations or market entry.",
-    collections: Object.freeze(["need", "contractors", "lobbying", "deals"]),
+    // Renamed by the owner, 2026-09-27, from "Advisors and professional
+    // services"; the id is kept. Research for client work and outreach, NOT
+    // a contact database: nothing here may promise contacts, leads lists or
+    // outreach lists, because no collection holds them.
+    audience: "Consultants and advisors",
+    job: "Client strategy",
+    outcome: "Build sourced analyses for clients without reconstructing records across agencies and vendors.",
+    // Every claim has a collection, in the sentence's order: funding
+    // (Federal Funding), contracting (Prime Contracting), ownership (Cedar
+    // NEED), policy (Federal Register), transaction records (Deals).
+    explanation: "Research organizations, markets and prospective clients through funding, contracting, ownership, policy and transaction records.",
+    collections: Object.freeze(["funding", "contractors", "need", "federal-register", "deals"]),
     // Lumecon's professional-services and management photographs both show
     // faces, and a handshake beside this sentence reads as an endorsement.
     imagePool: Object.freeze(["context-lattice", "context-cedar"]),

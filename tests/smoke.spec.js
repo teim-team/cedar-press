@@ -1332,12 +1332,14 @@ test.describe("the door's use cases", () => {
     const cited = await page.locator(".cp-aud__col").evaluateAll((els) => [...new Set(els.map((el) => el.dataset.collection))]);
     const sold = new Set(STOREFRONT_CATALOG.map((entry) => entry.id));
     for (const id of cited) expect(sold.has(id), `${id} is not a live collection`).toBe(true);
-    // All eleven use cases, Foundations and philanthropy among them, and the
-    // two newest collections on its chips and on the others the owner wrote
-    // them into.
-    expect(shown).toBe(11);
-    await expect(counter(page)).toHaveText("01 / 11");
-    await expect(page.locator('.cp-aud__panel[data-audience="foundations-philanthropy"]')).toHaveCount(1);
+    // Every declared use case, counted from the layer rather than typed:
+    // Foundations and philanthropy and the government audience among them,
+    // and the two newest collections on the chips the owner wrote them into.
+    expect(shown).toBe(AUDIENCE_JOBS.length);
+    await expect(counter(page)).toHaveText(`01 / ${String(AUDIENCE_JOBS.length).padStart(2, "0")}`);
+    for (const id of ["foundations-philanthropy", "government-officials", "advisors"]) {
+      await expect(page.locator(`.cp-aud__panel[data-audience="${id}"]`)).toHaveCount(1);
+    }
     for (const id of ["plot", "foundation-corporate-giving"]) expect(cited, id).toContain(id);
     expect(errors).toEqual([]);
   });
@@ -1428,15 +1430,57 @@ test.describe("the door's use cases", () => {
     }
   });
 
+  // At most two lines above 1100; at or below it, one row that scrolls
+  // sideways inside itself while the page does not. The phone project
+  // measures 390 on its own viewport.
   test("the audience names are one row until there is room for two lines", async ({ page }, testInfo) => {
-    test.skip(testInfo.project.name !== "desktop", "measured at 1040 and 1440");
-    for (const [width, maxLines] of [[1040, 1], [1440, 2]]) {
-      await page.setViewportSize({ width, height: 900 });
+    const widths = testInfo.project.name === "desktop" ? [1440, 1040, 720] : [null];
+    for (const width of widths) {
+      if (width) await page.setViewportSize({ width, height: 900 });
       await page.goto("/");
+      const at = width ?? page.viewportSize().width;
       const lines = await page.locator(".cp-aud__tab").evaluateAll((tabs) => new Set(tabs.map((tab) => Math.round(tab.getBoundingClientRect().top))).size);
-      expect(lines, `at ${width}`).toBeLessThanOrEqual(maxLines);
+      expect(lines, `at ${at}`).toBeLessThanOrEqual(at > 1100 ? 2 : 1);
+      if (at <= 1100) {
+        const row = await page.locator(".cp-aud__tabs").evaluate((el) => ({ scroll: el.scrollWidth, client: el.clientWidth, overflow: getComputedStyle(el).overflowX }));
+        expect(row.overflow, `the row scrolls at ${at}`).toBe("auto");
+        expect(row.scroll, `the names overflow the row at ${at}, so it scrolls`).toBeGreaterThan(row.client);
+      }
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
-      expect(overflow, `the page scrolls sideways at ${width}`).toBeLessThanOrEqual(0);
+      expect(overflow, `the page scrolls sideways at ${at}`).toBeLessThanOrEqual(0);
+    }
+  });
+
+  // The government card carries the longest headline the band has. It must
+  // fit its card at every width: nothing clipped, nothing spilling, and on a
+  // phone the card is its own height (the test above checks the gap).
+  test("the longest headline fits its card at every width", async ({ page }, testInfo) => {
+    const widths = testInfo.project.name === "desktop" ? [1440, 1040, 720] : [null];
+    const index = visibleAudiences().findIndex((audience) => audience.id === "government-officials");
+    expect(index).toBeGreaterThanOrEqual(0);
+    for (const width of widths) {
+      if (width) await page.setViewportSize({ width, height: 900 });
+      await page.goto("/");
+      await band(page).evaluate((el) => el.scrollIntoView({ block: "center", behavior: "instant" }));
+      await page.locator(".cp-aud__tab").nth(index).click();
+      const panel = page.locator('.cp-aud__panel.is-on[data-audience="government-officials"]');
+      await expect(panel).toHaveCount(1);
+      const fit = await panel.evaluate((el) => {
+        const box = el.getBoundingClientRect();
+        const stack = el.closest(".cp-aud__stack").getBoundingClientRect();
+        const parts = [...el.querySelectorAll(".cp-aud__outcome, .cp-aud__use, .cp-aud__cols")].map((node) => ({
+          name: node.className,
+          right: node.getBoundingClientRect().right,
+          bottom: node.getBoundingClientRect().bottom,
+          clipped: node.scrollWidth > node.clientWidth + 1 || node.scrollHeight > node.clientHeight + 1,
+        }));
+        return { right: Math.min(box.right, stack.right), bottom: Math.min(box.bottom, stack.bottom), parts };
+      });
+      for (const part of fit.parts) {
+        expect(part.clipped, `${part.name} is clipped at ${width ?? "phone"}`).toBe(false);
+        expect(part.right, `${part.name} spills right at ${width ?? "phone"}`).toBeLessThanOrEqual(fit.right + 0.5);
+        expect(part.bottom, `${part.name} spills below the card at ${width ?? "phone"}`).toBeLessThanOrEqual(fit.bottom + 0.5);
+      }
     }
   });
 
@@ -2712,36 +2756,36 @@ test.describe("dead ends", () => {
 });
 
 test.describe("Settings: your work", () => {
-  // The offered answers are the landing audiences; a retired stored answer
-  // is shown under its own label, to its holder only (readerWork.js).
-  const OFFERED = [
-    "Tribal Nation or tribal government",
-    "ANC or NHO",
-    "Native enterprise",
-    "Bank, lender or investor (CDFIs included)",
-    "Native nonprofit",
-    "Foundation or philanthropy",
-    "Business working in Indian Country",
-    "University or research institution",
-    "Newsroom or journalist",
-    "Advisor or professional services firm",
-    "Economic development organization or outside partner",
-  ];
+  // The offered answers are the landing audiences: same set, same order,
+  // same labels (readerWork.js reads them from pressJobs.js). A preserved
+  // stored answer is shown under the government audience with its level, to
+  // its holder only, and its stored value is never rewritten.
+  const OFFERED = visibleAudiences().map((audience) => audience.audience);
 
-  test("offers the landing audiences, in order", async ({ page }) => {
+  test("offers the landing audiences, in order, as the landing names them", async ({ page }) => {
+    await page.goto("/");
+    const landing = await page.locator(".cp-aud__tab").allTextContents();
+    expect(landing).toEqual(OFFERED);
     await signIn(page);
     await page.goto("/settings");
-    await expect(page.locator("#cp-work option")).toHaveText(["Rather not say", ...OFFERED]);
+    await expect(page.locator("#cp-work option")).toHaveText(["Rather not say", ...landing]);
+    await expect(page.locator("#cp-work option", { hasText: "Consultants and advisors" })).toHaveAttribute("value", "advisor");
+    await expect(page.locator("#cp-work option", { hasText: /^Government and public agency officials$/ })).toHaveAttribute("value", "government");
   });
 
-  test("keeps a retired stored answer under its original label", async ({ page }) => {
-    await signIn(page);
-    await page.evaluate(() => localStorage.setItem("cedar-press-work", "federal"));
-    await page.goto("/settings");
-    const select = page.locator("#cp-work");
-    await expect(select).toHaveValue("federal");
-    await expect(select.locator("option")).toHaveText(["Rather not say", "Federal agency", ...OFFERED]);
-  });
+  for (const [id, level] of [["federal", "federal"], ["state_local", "state or local"]]) {
+    test(`keeps a stored ${id} answer under the government audience, unchanged`, async ({ page }) => {
+      await signIn(page);
+      await page.evaluate((value) => localStorage.setItem("cedar-press-work", value), id);
+      await page.goto("/settings");
+      const select = page.locator("#cp-work");
+      await expect(select).toHaveValue(id);
+      const at = OFFERED.indexOf("Government and public agency officials");
+      const expected = ["Rather not say", ...OFFERED.slice(0, at + 1), `Government and public agency officials (${level})`, ...OFFERED.slice(at + 1)];
+      await expect(select.locator("option")).toHaveText(expected);
+      expect(await page.evaluate(() => localStorage.getItem("cedar-press-work"))).toBe(id);
+    });
+  }
 });
 
 /* ── Interaction: arrival, response, state ─────────────────────────────────

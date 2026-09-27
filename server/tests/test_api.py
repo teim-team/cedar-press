@@ -159,13 +159,15 @@ class TestCatalog(unittest.TestCase):
         self.assertEqual(client.get("/press/profile").status_code, 401)
 
     def test_every_legacy_work_answer_round_trips_unchanged(self) -> None:
-        """A stored answer keeps its id, including the two retired ones.
+        """A stored answer keeps its id, including the two preserved ones.
 
-        `federal` and `state_local` left the offered list (2026-09-26) but are
-        not remapped: a federal agency is not an economic development
-        organization, and rewriting a reader's answer on read would change
-        what they said. So the service still accepts both, and hands back
-        exactly what it was given.
+        `federal` and `state_local` predate the government audience
+        (2026-09-27). They are shown under it, keeping their level, but the
+        stored value is never rewritten: a federal agency is not an economic
+        development organization, and rewriting a reader's answer on save or
+        read would change what they said. So the service accepts both
+        unchanged, alongside the new `government`, and hands back exactly what
+        it was given.
         """
         legacy = (
             "tribal_government",
@@ -179,18 +181,23 @@ class TestCatalog(unittest.TestCase):
             "media",
             "academic",
         )
+        current = ("foundation", "business", "economic_development", "government")
+
         def save(work: str) -> str:
             return client.patch("/press/profile", json={"work": work}).json()["work"]
 
-        for work in legacy:
+        for work in legacy + current:
             with self.subTest(work=work):
                 self.assertIn(work, press_catalog.WORK_KINDS)
                 self.assertEqual(save(work), work)
                 self.assertEqual(client.get("/press/profile").json()["work"], work)
-        for work in ("foundation", "business", "economic_development"):
-            with self.subTest(work=work):
-                self.assertEqual(save(work), work)
-        self.assertEqual(len(press_catalog.WORK_KINDS), 13)
+        # One answer per landing audience, plus the two preserved ones: the
+        # dump is the client's list, so the count is read from it, not typed.
+        kinds = press_catalog._DATA["workKinds"]
+        preserved = sorted(kind["id"] for kind in kinds if kind.get("retired"))
+        self.assertEqual(preserved, ["federal", "state_local"])
+        self.assertEqual(len(press_catalog.WORK_KINDS), len(kinds))
+        self.assertIn("government", press_catalog.WORK_KINDS)
         client.patch("/press/profile", json={"work": None})
 
     def test_articles_are_served(self) -> None:

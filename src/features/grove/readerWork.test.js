@@ -1,17 +1,20 @@
 /**
- * "Your work": the landing audiences as the offered list, and every answer a
- * reader has already given kept exactly as they gave it.
+ * "Your work": the landing audiences as the offered list (same set, same
+ * order, same labels), and every answer a reader has already given kept
+ * exactly as they gave it.
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
+import { AUDIENCE_JOBS, visibleAudiences } from "./pressJobs.js";
 import {
   OFFERED_WORK_KINDS,
   WORK_KINDS,
   loadWork,
   normalizeWork,
   saveWork,
+  workAudience,
   workLabel,
   workOptions,
 } from "./readerWork.js";
@@ -30,48 +33,30 @@ const LEGACY = Object.freeze({
   academic: "University or research institute",
 });
 
-/**
- * Landing audience id to the work id a reader in that audience picks. The
- * landing ids are the band's own (`pressJobs.js` once it lands on this base,
- * `pressAudiences.js` and `pressAnnounced.js` before that); the work ids are
- * stored answers and never change.
- */
-const LANDING_TO_WORK = Object.freeze({
-  "tribal-nations": "tribal_government",
-  "ancs-nhos": "anc_nho",
-  "native-enterprises": "tribal_enterprise",
-  "banks-lenders": "lender_investor",
-  "native-nonprofits": "native_nonprofit",
-  "foundations-philanthropy": "foundation",
-  businesses: "business",
-  "universities-researchers": "academic",
-  journalists: "media",
-  advisors: "advisor",
-  "economic-development": "economic_development",
+/** The ids added since, which a reader may also hold. */
+const CURRENT = Object.freeze(["foundation", "business", "economic_development", "government"]);
+
+test("the offered list is the landing's audiences: same set, same order, same labels", () => {
+  const landing = visibleAudiences().map((audience) => audience.audience);
+  assert.deepEqual(OFFERED_WORK_KINDS.map((kind) => kind.label), landing);
+  assert.equal(OFFERED_WORK_KINDS.length, landing.length, "one answer per landing audience");
+  assert.equal(new Set(OFFERED_WORK_KINDS.map((kind) => kind.id)).size, OFFERED_WORK_KINDS.length, "ids are distinct");
 });
 
-test("the offered list is the eleven landing audiences, in landing order", () => {
-  assert.deepEqual(
-    OFFERED_WORK_KINDS.map((kind) => kind.label),
-    [
-      "Tribal Nation or tribal government",
-      "ANC or NHO",
-      "Native enterprise",
-      "Bank, lender or investor (CDFIs included)",
-      "Native nonprofit",
-      "Foundation or philanthropy",
-      "Business working in Indian Country",
-      "University or research institution",
-      "Newsroom or journalist",
-      "Advisor or professional services firm",
-      "Economic development organization or outside partner",
-    ],
-  );
-  assert.deepEqual(OFFERED_WORK_KINDS.map((kind) => kind.id), Object.values(LANDING_TO_WORK));
+test("every declared landing audience has a stored id, so none can go missing from Settings", () => {
+  const known = WORK_KINDS.filter((kind) => !kind.retired);
+  assert.deepEqual(known.map((kind) => kind.label), AUDIENCE_JOBS.map((audience) => audience.audience));
 });
 
-test("every legacy id is still known, and round-trips unchanged", () => {
-  for (const id of Object.keys(LEGACY)) {
+test("the renamed and the new audience keep the ids the owner named", () => {
+  const byLabel = Object.fromEntries(OFFERED_WORK_KINDS.map((kind) => [kind.label, kind.id]));
+  assert.equal(byLabel["Consultants and advisors"], "advisor");
+  assert.equal(byLabel["Government and public agency officials"], "government");
+  assert.equal(byLabel["Tribal Nations"], "tribal_government", "Tribal Nations stays its own answer");
+});
+
+test("every legacy and current id is still known, and normalizes to itself", () => {
+  for (const id of [...Object.keys(LEGACY), ...CURRENT]) {
     assert.equal(normalizeWork(id), id, id);
     assert.ok(workLabel(id), `${id} has no label`);
   }
@@ -81,25 +66,36 @@ test("every legacy id is still known, and round-trips unchanged", () => {
   assert.equal(workLabel("astronaut"), null);
 });
 
-test("the two retired answers keep their original labels and are not remapped", () => {
-  assert.equal(workLabel("federal"), LEGACY.federal);
-  assert.equal(workLabel("state_local"), LEGACY.state_local);
-  const retired = WORK_KINDS.filter((kind) => kind.retired).map((kind) => kind.id);
-  assert.deepEqual(retired, ["federal", "state_local"]);
-  for (const id of retired) {
+test("federal and state_local are preserved under the government audience, with their level", () => {
+  assert.equal(workLabel("federal"), "Government and public agency officials (federal)");
+  assert.equal(workLabel("state_local"), "Government and public agency officials (state or local)");
+  const preserved = WORK_KINDS.filter((kind) => kind.retired).map((kind) => kind.id);
+  assert.deepEqual(preserved, ["federal", "state_local"]);
+  for (const id of preserved) {
     assert.ok(!OFFERED_WORK_KINDS.some((kind) => kind.id === id), `${id} is offered to new readers`);
+    assert.doesNotMatch(workLabel(id), /economic development|outside partner/i, `${id} is not an outside partner`);
   }
 });
 
-test("a retired answer appears in the select only for the reader who holds it", () => {
+test("workAudience groups the preserved answers with government, and changes nothing else", () => {
+  for (const id of ["federal", "state_local", "government"]) assert.equal(workAudience(id), "government", id);
+  for (const id of ["advisor", "media", "economic_development", "tribal_government"]) assert.equal(workAudience(id), id);
+  assert.equal(workAudience("astronaut"), null);
+  assert.equal(workAudience(null), null);
+});
+
+test("a preserved answer appears in the select only for the reader who holds it, under its audience", () => {
   assert.equal(workOptions(null), OFFERED_WORK_KINDS);
   assert.equal(workOptions("media"), OFFERED_WORK_KINDS);
+  assert.equal(workOptions("government"), OFFERED_WORK_KINDS);
   assert.equal(workOptions("astronaut"), OFFERED_WORK_KINDS);
-  const federal = workOptions("federal");
-  assert.equal(federal.length, OFFERED_WORK_KINDS.length + 1);
-  assert.deepEqual(federal[0], { id: "federal", label: "Federal agency", retired: true });
-  assert.ok(!federal.slice(1).some((kind) => kind.id === "state_local"));
-  assert.equal(workOptions("state_local")[0].label, "State or local government");
+  for (const id of ["federal", "state_local"]) {
+    const options = workOptions(id).map((kind) => kind.id);
+    assert.equal(options.length, OFFERED_WORK_KINDS.length + 1, id);
+    assert.equal(options[options.indexOf("government") + 1], id, `${id} sits under the government audience`);
+    const other = id === "federal" ? "state_local" : "federal";
+    assert.ok(!options.includes(other), `${other} is shown to a reader who does not hold it`);
+  }
 });
 
 test("every label follows the copy rules", () => {
@@ -107,6 +103,7 @@ test("every label follows the copy rules", () => {
     assert.doesNotMatch(label, /&|—/, label);
     assert.equal(label[0], label[0].toUpperCase(), label);
   }
+  assert.ok(!WORK_KINDS.some((kind) => /professional services/i.test(kind.label)), "the old advisor label is gone");
 });
 
 test("standalone mode stores and reads back every legacy id verbatim", async () => {
@@ -118,9 +115,16 @@ test("standalone mode stores and reads back every legacy id verbatim", async () 
     removeItem: (key) => store.delete(key),
   };
   try {
-    for (const id of Object.keys(LEGACY)) {
+    for (const id of [...Object.keys(LEGACY), ...CURRENT]) {
       assert.equal(await saveWork(id), id);
+      assert.equal(store.get("cedar-press-work"), id, `${id} is stored as given`);
       assert.equal(await loadWork(), id, id);
+    }
+    // Written before this build, read by it: never rewritten on read.
+    for (const id of ["federal", "state_local"]) {
+      store.set("cedar-press-work", id);
+      assert.equal(await loadWork(), id);
+      assert.equal(store.get("cedar-press-work"), id);
     }
     assert.equal(await saveWork(""), null);
     assert.equal(await loadWork(), null);
@@ -134,46 +138,5 @@ test("the service accepts exactly the ids this module knows", () => {
     readFileSync(new URL("../../../server/cedar_press/_press_data.json", import.meta.url), "utf8"),
   ).workKinds;
   assert.deepEqual(dumped, JSON.parse(JSON.stringify(WORK_KINDS)), "regenerate with scripts/dump-press.mjs");
-});
-
-/** Import a sibling module that may not exist on this base yet; any other failure is real. */
-async function optional(path) {
-  try {
-    return await import(path);
-  } catch (error) {
-    if (error?.code === "ERR_MODULE_NOT_FOUND" && String(error.message).includes(path.slice(2))) return null;
-    throw error;
-  }
-}
-
-/** The landing's audiences, in order, with announced ones back in their place. */
-async function landingIds() {
-  const jobs = await optional("./pressJobs.js");
-  const audiences = jobs?.AUDIENCE_JOBS ?? (await import("./pressAudiences.js")).PRESS_AUDIENCES;
-  const ids = audiences.map((audience) => audience.id);
-  const announced = (await optional("./pressAnnounced.js"))?.ANNOUNCED_AUDIENCES ?? [];
-  for (const { after, audience } of announced) {
-    if (ids.includes(audience.id)) continue;
-    const at = ids.indexOf(after);
-    ids.splice(at < 0 ? ids.length : at + 1, 0, audience.id);
-  }
-  return { ids, fromJobs: Boolean(jobs) };
-}
-
-test("the offered list stays aligned with the landing page's audiences", async () => {
-  const { ids, fromJobs } = await landingIds();
-  for (const id of ids) {
-    assert.ok(id in LANDING_TO_WORK, `landing audience ${id} has no "Your work" answer: add one`);
-  }
-  const mapped = ids.map((id) => LANDING_TO_WORK[id]);
-  const offered = OFFERED_WORK_KINDS.map((kind) => kind.id);
-  assert.deepEqual(offered.filter((id) => mapped.includes(id)), mapped, "same order as the landing");
-  const missing = offered.filter((id) => !mapped.includes(id));
-  if (fromJobs) {
-    assert.deepEqual(missing, [], "every offered answer is a landing audience");
-  } else {
-    // Before `pressJobs.js` reaches this base, the band has no economic
-    // development audience yet; it is the eleventh in that file.
-    assert.deepEqual(missing, ["economic_development"]);
-  }
+  for (const id of Object.keys(LEGACY)) assert.ok(dumped.some((kind) => kind.id === id), `the service would refuse ${id}`);
 });

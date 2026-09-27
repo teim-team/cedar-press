@@ -6,8 +6,8 @@
  *   answerable      every collection question names codebook fields that
  *                   exist; Cedar's suggestions are held to the profile router
  *                   by the Python suite (server/tests/test_cedar_questions.py)
- *   the owner's copy every audience shows the owner's sentence, and all
- *                   eleven show against the fourteen-collection catalog
+ *   the owner's copy every audience shows the owner's sentence, and every
+ *                   declared audience shows against the full catalog
  *   coverage        a REPORT, not a rule (owner, 2026-09-26)
  *   imagery         every photograph a use case can show is copied in, at
  *                   the sizes declared, and has a license record
@@ -250,11 +250,10 @@ test("questions keep the house style", () => {
 
 // ── Every audience shows the owner's sentence ──────────────────────────────
 
-test("every collection an audience cites is in the catalog, and all eleven audiences show", () => {
+test("every collection an audience cites is in the catalog, and every declared audience shows", () => {
   const catalogIds = liveIdsOf();
   for (const id of citedIds(ALL)) assert.ok(catalogIds.has(id), `${id} is not in the catalog`);
   const shown = visibleAudiences();
-  assert.equal(shown.length, 11, "all eleven, Foundations included");
   assert.equal(shown.length, AUDIENCE_JOBS.length, "no audience is hidden");
   assert.equal(shown[5].id, "foundations-philanthropy", "in its place, after Native nonprofits");
   for (const audience of shown) {
@@ -321,8 +320,10 @@ test("the coverage report names a collection that loses its last use case", () =
 // ── Copy and data rules ───────────────────────────────────────────────────
 
 test("every use case has a job from the shared vocabulary", () => {
-  assert.equal(JOBS.length, 11);
+  assert.equal(new Set(JOBS).size, JOBS.length, "no job is listed twice");
   assert.ok(JOBS.includes("Competitive intelligence"), "the owner's job for ANCs and NHOs");
+  assert.ok(JOBS.includes("Client strategy"), "the owner's job for consultants and advisors");
+  assert.ok(JOBS.includes("Tribal consultation"), "the owner's job for government officials");
   for (const audience of ALL) assert.ok(JOBS.includes(audience.job), `${audience.id}: "${audience.job}" is not a job`);
 });
 

@@ -8,7 +8,7 @@
  * component only turns events into actions.
  */
 
-/** "01 / 10": the counter, from the shown set, never from the declared ten. */
+/** "01 / 12": the counter, from the shown set, never from a declared total. */
 export function counterLabel(index, total) {
   const pad = (n) => String(n).padStart(2, "0");
   return `${pad(index + 1)} / ${pad(total)}`;

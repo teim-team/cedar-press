@@ -987,57 +987,63 @@
   "workKinds": [
     {
       "id": "tribal_government",
-      "label": "Tribal Nation or tribal government"
+      "label": "Tribal Nations"
     },
     {
       "id": "anc_nho",
-      "label": "ANC or NHO"
+      "label": "ANCs and NHOs"
     },
     {
       "id": "tribal_enterprise",
-      "label": "Native enterprise"
+      "label": "Native enterprises"
     },
     {
       "id": "lender_investor",
-      "label": "Bank, lender or investor (CDFIs included)"
+      "label": "Banks, lenders and investors"
     },
     {
       "id": "native_nonprofit",
-      "label": "Native nonprofit"
+      "label": "Native nonprofits"
     },
     {
       "id": "foundation",
-      "label": "Foundation or philanthropy"
+      "label": "Foundations and philanthropy"
     },
     {
       "id": "business",
-      "label": "Business working in Indian Country"
+      "label": "Businesses working in Indian Country"
     },
     {
       "id": "academic",
-      "label": "University or research institution"
+      "label": "Universities and researchers"
+    },
+    {
+      "id": "government",
+      "label": "Government and public agency officials"
     },
     {
       "id": "media",
-      "label": "Newsroom or journalist"
+      "label": "Journalists and newsrooms"
     },
     {
       "id": "advisor",
-      "label": "Advisor or professional services firm"
+      "label": "Consultants and advisors"
     },
     {
       "id": "economic_development",
-      "label": "Economic development organization or outside partner"
+      "label": "Economic development, investors and outside partners"
     },
     {
       "id": "federal",
-      "label": "Federal agency",
-      "retired": true
+      "label": "Government and public agency officials (federal)",
+      "retired": true,
+      "audience": "government"
     },
     {
       "id": "state_local",
-      "label": "State or local government",
-      "retired": true
+      "label": "Government and public agency officials (state or local)",
+      "retired": true,
+      "audience": "government"
     }
   ],
   "cedarQuestions": {
