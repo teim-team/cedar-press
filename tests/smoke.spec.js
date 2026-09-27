@@ -133,17 +133,17 @@ test.describe("the gate", () => {
   });
 
   // The maintenance story and the NEED enrichment sources (owner,
-  // 2026-09-27), on the door; the 500+ figure is unchanged.
+  // 2026-09-27), on the door; the figure is 600+ (owner, 2026-09-27).
   test("the door says how Cedar Press is maintained and names the NEED enrichment sources", async ({ page }) => {
     await page.goto("/");
     await expect(page.getByTestId("door-maintenance")).toContainText(
       "Cedar Press maintains its datasets weekly with human review, expands their source coverage and useful fields over time and develops new collections.",
     );
     const panel = page.locator(".cp-hero3__proof");
-    for (const label of ["USPTO patent grants", "USPTO patent assignment records", "PatentsView patent data", "Credit rating agency announcements"]) {
+    for (const label of ["Patent publication and family records", "Historical S&P and Fitch ratings", "AM Best insurance financial-strength releases", "IRS Form 990-PF grant schedules", "Recorded deeds and land transfers"]) {
       await expect(panel).toContainText(label);
     }
-    await expect(panel.locator(".cp-hero3__proofcount")).toContainText("500+ source websites");
+    await expect(panel.locator(".cp-hero3__proofcount")).toContainText("600+ source websites");
   });
 
   // The sticky masthead is opaque (owner, 2026-09-27): no alpha, no blur,
@@ -155,7 +155,7 @@ test.describe("the gate", () => {
     await expect(bar).toHaveCSS("backdrop-filter", "none");
     await expect(page.locator(".cp-hero3__reach")).toHaveCount(0);
     await expect(page.locator(".cp-hero3")).not.toContainText("distinct source websites in dataset construction");
-    await expect(page.locator(".cp-hero3__proofcount")).toContainText("500+ source websites");
+    await expect(page.locator(".cp-hero3__proofcount")).toContainText("600+ source websites");
   });
 
   // The landing layout of 2026-09-27: the source banner in the navy
@@ -2153,7 +2153,8 @@ test.describe("house style", () => {
    * ring sets a long name on two SVG lines ("Foundation &" / "Corporate
    * Giving") and the text of two <tspan>s joins with no space between them.
    */
-  const AMPERSAND_EXEMPT = /Foundation &\s*Corporate Giving/g;
+  // S&P is a company's legal name (the ratings source on the door's banner).
+  const AMPERSAND_EXEMPT = /Foundation &\s*Corporate Giving|\bS&P\b/g;
 
   const QUOTED = [
     ".cp-ex__table",

@@ -217,7 +217,7 @@ const GENERAL_INTENTS = [
     triggers: ["what is cedar press", "what is this", "what does cedar press do", "what is cedar", "about cedar press", "explain cedar press", "what do you do", "what is press", "cedar press", "what is it", "what are you"],
     answer:
       `Cedar Press is a research and intelligence service about Indian Country's economy. ` +
-      `It publishes ${COUNT} maintained collections, built from more than 500 source websites and ` +
+      `It publishes ${COUNT} maintained collections, built from more than 600 source websites and ` +
       `resolved to the nations, corporations and organizations the records belong to.\n\n` +
       `A federal contract names the company that won it but not the nation that owns the company, so ` +
       `Cedar does the work between the record and the entity, publishes what it could not resolve, and keeps the ` +
@@ -254,7 +254,7 @@ const GENERAL_INTENTS = [
     followUps: ["current", "entities", "limits"],
     triggers: ["where does the data come from", "what are the sources", "what sources", "source systems", "is this public data", "where do you get", "how do you get the data", "provenance", "the sources", "data sources", "where is it from", "where does it come from"],
     answer:
-      `Lumecon draws on more than 500 source websites for the ${COUNT} collections and the research behind ` +
+      `Lumecon draws on more than 600 source websites for the ${COUNT} collections and the research behind ` +
       `them. They include federal spending and award systems ` +
       `(USAspending, FPDS, FSRS, SAM, FAADS), Congress and the Federal Register (Congress.gov, Voteview, ` +
       `federalregister.gov), advocacy and docket records (Senate and House lobbying disclosure, FERC and NRC ` +
