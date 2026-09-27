@@ -12,7 +12,7 @@ system's named components to where each lives today.
 | ActionPill | `.cp-start__act` | The overview's start-here verbs. Reuse for any future inline CTA row; do not restyle per page. |
 | SponsorshipUnit | `PressAd` + `AD_SLOT` (`pressAds.js`) | One component, shape variants per slot (banner on the overview, sidebar in articles). Same `SPONSORSHIP` cap, border, tint and CTA everywhere. Enquiries go to TBN's media kit (`AD_ENQUIRY_HREF`). |
 | AskCedarFAB | `PressCedarFab` | Identical launcher, offset and dimensions on every page; context arrives via props (`examples`, `gated`) and events (`cedar:open`, `cedar:ask-collection`), never via per-page styling. The PANEL is `.cp-dc__*`, shared with the door and with lumecon.ai's `CedarFAB.astro` — see "Cedar" below. |
-| UseCaseBand | `PressAudienceExample` + `pressAudiences.js` | The door's band under the hero, in the slot the collection shelf held until 2026-09-26: one audience, its task, the collections it combines as chips that preview and pick in the hero frame, and the picked collection's description. Audiences are data; collections are catalog ids, so names and marks come from the catalog. Announced but unreleased collections, their marks and every sentence about them live in `pressAnnounced.js` and `pressAnnouncedIcons.jsx`, which nothing the page loads imports, so none of it is in the shipped bundle (the smoke suite greps the production build for it). Every live collection is cited by some audience, held by a test. |
+| UseCaseBand | `PressAudienceExample` + `pressJobs.js` (`AUDIENCE_JOBS`) + `pressRotation.js` + `pressImagery.js` | The door's band under the hero, in the slot the collection shelf held until 2026-09-26. One use case at a time as a card: a duotone sector photograph as a panel beside the text (a 5:2 banner on top on a phone; the side alternates by use case above 720px), the audience and its job, the outcome as the headline, what Cedar Press lets that audience understand, and the collections it names as chips that preview and pick in the hero frame; then the picked collection's description and the owner's quiet line. Use cases are data in the shared jobs layer, which the collection profile, Cedar's suggestions, the entity page and Research access also read; collections are catalog ids, so names and marks come from the catalog. Each use case rotates through its image pool, one photograph per visit; photographs are lazy and only the shown and next use cases hold one. Announced but unreleased collections, their marks and every sentence and question about them live in `pressAnnounced.js` and `pressAnnouncedIcons.jsx`, which nothing the page loads imports, so none of it is in the shipped bundle (the smoke suite greps the production build for it). Coverage of every collection is a review report, not a rule (see below). |
 | CollectionRail | `PressCollectionRail` (`src/pages/grove/PressCollectionRail.jsx`) | The twelve collections, once. Two modes: `preview` on the door, `app` behind the paywall, where a collection the plan cannot open stays in the rail and is visibly locked. Never a second list of the same twelve. |
 | CollectionAtlas | `CollectionAtlas` (in `PressExplore`) | The catalogue, in the table: one row a collection, its coverage, size, release and what opens it, locked ones included. What "show me everything" means when nothing has been asked yet; the pooled records come back the moment a search or filter turns the question back into one about records. |
 | LockedCollection | `LockedCollection` (in `PressExplore`) | The same toolbar, the collection's own declared column headers, the same row density, the same status bar — with the values withheld by never being fetched. One line says what opens it. A blank page with an upsell box asks somebody to buy a thing they have not been shown. |
@@ -165,7 +165,21 @@ Measured by: `the use-case chips respond` (2), `the door's use cases` (6),
 `the use cases drive the viewer` (4), `a finger gets no hover state`,
 `Methods' seven stages arrive as a sequence` in `tests/smoke.spec.js`;
 `src/features/grove/pressMotion.test.js`; and the rotation rules in
-`src/features/grove/pressAudiences.test.js`.
+`src/features/grove/pressRotation.test.js`.
+
+## Use-case coverage (review check)
+
+The owner's ruling of 2026-09-26: "The landing page should show the best
+reasons to use Cedar Press, not prove that each dataset got a turn." So a use
+case's chips are the collections its sentence names, and nothing is added so
+that a collection appears. Whether every live collection is named by some
+shown use case is reported for review rather than enforced:
+`pressJobs.test.js` prints it ("coverage report") on every run and never
+fails on it. Every collection stays one click away in the hero viewer's rail.
+
+As of 2026-09-26: **no live collection is uncovered**, today (12 of 12, ten
+use cases shown) or with PLOT and Foundation and Corporate Giving launched
+(14 of 14, eleven use cases). Update this line when the report changes.
 
 ## Where this is deliberately not the Lumecon website
 

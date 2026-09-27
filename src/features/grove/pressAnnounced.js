@@ -9,7 +9,7 @@
  * the bundle, so these names, descriptions and sentences cannot be read out of
  * the shipped JavaScript by anyone with devtools. Foundation & Corporate
  * Giving is still under rights review, and PLOT has no producer. Two checks
- * hold it: `pressAudiences.test.js` fails if any non-test module imports this
+ * hold it: `pressJobs.test.js` fails if any non-test module imports this
  * file or `pressAnnouncedIcons.jsx`, and the smoke suite's "the bundle" test
  * greps the production build for every string declared here and for the two
  * icons' path data.
@@ -26,9 +26,12 @@
  *
  * WHAT IS HERE
  *   ANNOUNCED_COLLECTIONS  the owner's names and descriptions (2026-09-26)
- *   LAUNCH_COPY            the owner's use-case sentences that cite either
- *                          collection, keyed by audience id; the page shows
- *                          each audience's interim `now` copy until then
+ *   ANNOUNCED_COLLECTION_JOBS
+ *                          the owner's questions for each collection's
+ *                          profile, the gated half of `COLLECTION_JOBS`
+ *   LAUNCH_COPY            the owner's intelligence sentences that cite
+ *                          either collection, keyed by audience id; the page
+ *                          shows each audience's interim `now` copy until then
  *   ANNOUNCED_AUDIENCES    audiences that exist only for a gated collection
  *                          (Foundations and philanthropy), with where each
  *                          goes in the selector
@@ -40,12 +43,23 @@
  *      its measured coverage and shelf;
  *   2. move its mark from `pressAnnouncedIcons.jsx` into `COLLECTION_ICONS`;
  *   3. move every LAUNCH_COPY entry and ANNOUNCED_AUDIENCES entry whose
- *      collections are now all live into `PRESS_AUDIENCES` as its `atLaunch`.
+ *      collections are now all live into `AUDIENCE_JOBS` as its `atLaunch`;
+ *   4. move its ANNOUNCED_COLLECTION_JOBS entry into `COLLECTION_JOBS`, with
+ *      the codebook fields each question rests on and the questions Cedar
+ *      can answer from its release profile;
+ *   5. move its `methods` concepts into Methods and every
+ *      ANNOUNCED_ECOSYSTEM_EXAMPLES entry whose collections are now all live
+ *      into `ECOSYSTEM_EXAMPLES` (`pressMethod.js`).
+ * The catalog entry keeps its `shelf`: Foundation & Corporate Giving in
+ * Cedar Press, PLOT in Cedar Press+, a seven and seven split of fourteen.
+ * Every count on the site is derived from the catalog, so none needs
+ * editing.
  * The tests name each step that was missed: a collection in both places, a
- * live collection with no mark, and launch copy left here whose collections
- * are all live each fail.
+ * live collection with no mark, launch copy left here whose collections are
+ * all live, and a live collection with no questions, or questions naming no
+ * field its codebook holds, each fail.
  */
-import { PRESS_AUDIENCES, liveIdsOf } from "./pressAudiences.js";
+import { AUDIENCE_JOBS, liveIdsOf } from "./pressJobs.js";
 import { STOREFRONT_CATALOG } from "./pressCatalog.js";
 
 export const ANNOUNCED_COLLECTIONS = Object.freeze([
@@ -54,6 +68,11 @@ export const ANNOUNCED_COLLECTIONS = Object.freeze([
     short: "PLOT",
     name: "PLOT",
     icon: "plot",
+    // Owner, 2026-09-26: PLOT launches in Cedar Press+.
+    shelf: "pro",
+    // What Methods will say about it at launch (owner's concepts).
+    methods:
+      "Land ownership, transfers, permitting and development, followed parcel by parcel: each parcel and the recorded events attached to it, linked to the Native entity that holds it.",
     // Owner copy, 2026-09-26. Deals follows a transaction or a capital event
     // between parties; PLOT follows a parcel and the recorded events attached
     // to it. A nation's site acquisition may be a Deal while the parcels it
@@ -73,6 +92,12 @@ export const ANNOUNCED_COLLECTIONS = Object.freeze([
     short: "Foundation & Corporate Giving",
     name: "Foundation & Corporate Giving",
     icon: "foundation-corporate-giving",
+    // Owner, 2026-09-26: it launches in Cedar Press, which with PLOT in
+    // Cedar Press+ makes the fourteen a seven and seven split.
+    shelf: "standard",
+    // What Methods will say about it at launch (owner's concepts).
+    methods:
+      "Philanthropic, corporate and bank giving, each disclosure kept as its own record: commitments and payments are separate facts, and the legal recipient is kept distinct from the Native beneficiary.",
     // Owner copy, 2026-09-26, bound by the producer contract: one row is one
     // source disclosure or award version; commitments and payments are
     // separate facts; legal recipient and Native beneficiary are separate
@@ -86,6 +111,21 @@ export const ANNOUNCED_COLLECTIONS = Object.freeze([
 
 export const ANNOUNCED_IDS = Object.freeze(ANNOUNCED_COLLECTIONS.map((entry) => entry.id));
 
+/**
+ * Worked examples of collections combining (Methods' `ECOSYSTEM_EXAMPLES`)
+ * that need a gated collection. They join that list at launch.
+ */
+export const ANNOUNCED_ECOSYSTEM_EXAMPLES = Object.freeze([
+  Object.freeze({
+    collections: Object.freeze(["deals", "plot"]),
+    text: "A site acquisition recorded in Indian Country Deals links to the parcels PLOT follows, so a transaction and the land it bought read together without being collapsed into one record.",
+  }),
+  Object.freeze({
+    collections: Object.freeze(["foundation-corporate-giving", "funding", "nonprofits"]),
+    text: "Foundation, corporate and bank giving read beside federal funding and the Native Nonprofits roster shows how an organization's private and public support combine, with the legal recipient and the Native beneficiary kept apart.",
+  }),
+]);
+
 /** Whether an id is announced and not yet released. */
 export function isAnnounced(id) {
   return ANNOUNCED_IDS.includes(id);
@@ -97,39 +137,49 @@ export function isCitable(id, catalog = STOREFRONT_CATALOG) {
 }
 
 /**
- * The owner's sentences (2026-09-26) that cite a gated collection, by audience
- * id. Two are EXTENDED from the owner's text so every collection has a home,
- * marked where they are.
+ * The owner's questions (2026-09-26) for each announced collection's profile.
+ * No `fields` yet: neither collection has a codebook in this repository, so
+ * there is nothing to check a question against. Moving one into
+ * `COLLECTION_JOBS` at launch requires them (step 4 above).
+ */
+export const ANNOUNCED_COLLECTION_JOBS = Object.freeze({
+  "foundation-corporate-giving": Object.freeze({
+    questions: Object.freeze([
+      "Which funders support organizations like this one?",
+      "What purposes and geographies are receiving disclosed private funding?",
+      "How does private giving compare with federal support?",
+    ]),
+  }),
+  plot: Object.freeze({
+    questions: Object.freeze([
+      "Where does this entity hold or acquire property?",
+      "What permits or development activity are associated with those parcels?",
+      "How has recorded activity around a property changed over time?",
+    ]),
+  }),
+});
+
+/**
+ * The owner's intelligence sentences (2026-09-26) that cite a gated
+ * collection, by audience id, with the evidence each will cite at launch.
+ * Each audience's outcome is not gated and lives with it in `AUDIENCE_JOBS`.
  */
 export const LAUNCH_COPY = Object.freeze({
-  // EXTENDED: "and resource revenue" added so Natural Resources has a home.
-  // Advocacy carries "agency and congressional activity", so the Federal
-  // Register chip made way for it; the Register stays on Journalists and
-  // Advisors. "Associated with" implies no payment chain the royalty records
-  // do not establish.
-  "tribal-nations": Object.freeze({
-    use: "Review federal and philanthropic funding and resource revenue associated with your nation, follow relevant agency and congressional activity, and connect enterprise and property records to the same Native entities.",
-    collections: Object.freeze(["funding", "foundation-corporate-giving", "natural-resources", "lobbying", "plot"]),
-  }),
   "ancs-nhos": Object.freeze({
-    use: "Follow subsidiaries and joint ventures, federal contracting, announced transactions and property activity across an enterprise network.",
+    explanation: "Track subsidiaries, joint ventures, federal business, major transactions and property activity to see where peer organizations are expanding and where new opportunities may be forming.",
     collections: Object.freeze(["need", "contractors", "subcontracting", "deals", "plot"]),
   }),
   "banks-lenders": Object.freeze({
-    use: "Resolve an organization to the Native entity and enterprise structure behind it, then review federal business, public funding, announced financings and parcel activity as part of diligence.",
+    explanation: "Understand ownership, federal business, funding relationships, transactions and property activity before financing, investing in or partnering with a Native enterprise.",
     collections: Object.freeze(["need", "contractors", "funding", "deals", "plot"]),
   }),
-  "native-nonprofits": Object.freeze({
-    use: "Compare an organization's public record with federal assistance and disclosed private giving, research prospective funders, and examine funding relationships among peer organizations.",
-    collections: Object.freeze(["nonprofits", "funding", "foundation-corporate-giving", "lobbying"]),
-  }),
   journalists: Object.freeze({
-    use: "Start with a nation, organization or event and follow the underlying record across policy, money, organizations, property and transactions while retaining the original sources.",
-    collections: Object.freeze(["federal-register", "lobbying", "deals", "foundation-corporate-giving", "plot"]),
+    explanation: "Follow organizations and events across funding, policy, advocacy, ownership, land and transactions while keeping the underlying source attached.",
+    collections: Object.freeze(["funding", "federal-register", "lobbying", "need", "plot", "deals"]),
   }),
-  advisors: Object.freeze({
-    use: "Build a sourced picture of an organization, market or project before diligence, strategy work, negotiations or client outreach.",
-    collections: Object.freeze(["need", "deals", "federal-register", "lobbying", "plot"]),
+  "native-nonprofits": Object.freeze({
+    explanation: "See which funders support peer organizations, how similar nonprofits combine federal and private support, and where your own funding mix differs before pursuing the next grant.",
+    collections: Object.freeze(["nonprofits", "funding", "foundation-corporate-giving", "lobbying"]),
   }),
 });
 
@@ -139,12 +189,24 @@ export const ANNOUNCED_AUDIENCES = Object.freeze([
     after: "native-nonprofits",
     audience: Object.freeze({
       id: "foundations-philanthropy",
-      label: "Foundations and philanthropy",
+      audience: "Foundations and philanthropy",
+      // "Capital allocation" in the owner's note; the nearest job in the
+      // shared vocabulary.
+      job: "Investment opportunity",
+      // Owner copy, revised 2026-09-26.
+      outcome: "Put need and existing support in context before allocating capital.",
+      // The owner's caution: the collections show observable indicators of
+      // funding, activity, service footprint and organizational presence,
+      // and must not claim a definitive need score. The owner asked for the
+      // body to say so; this sentence is written for review, 2026-09-26.
       atLaunch: Object.freeze({
-        use: "See which Native nations and organizations appear in disclosed private giving, compare philanthropic activity with federal funding, and examine funding patterns by recipient, geography and purpose.",
-        collections: Object.freeze(["foundation-corporate-giving", "nonprofits", "funding"]),
+        explanation: "Compare disclosed private giving with federal support and see which organizations and places already attract funding. Cedar Press shows observable public and private funding and activity, not a need score.",
+        collections: Object.freeze(["foundation-corporate-giving", "funding", "nonprofits"]),
       }),
       now: null,
+      // The owner's list: health, housing, education, community services.
+      // Lumecon's health and education photographs show faces.
+      imagePool: Object.freeze(["otherservices", "realestate"]),
     }),
   }),
 ]);
@@ -152,10 +214,10 @@ export const ANNOUNCED_AUDIENCES = Object.freeze([
 /**
  * The page's audiences as they will stand at launch: each gated sentence
  * restored as its audience's `atLaunch`, and each gated audience put back in
- * its place. What `pressAudiences.js`'s own gate then does with them is the
+ * its place. What `pressJobs.js`'s own gate then does with them is the
  * runtime code, unchanged.
  */
-export function withLaunchCopy(audiences = PRESS_AUDIENCES) {
+export function withLaunchCopy(audiences = AUDIENCE_JOBS) {
   const merged = [];
   for (const audience of audiences) {
     const launch = LAUNCH_COPY[audience.id];
@@ -171,7 +233,7 @@ export function withLaunchCopy(audiences = PRESS_AUDIENCES) {
 export function launchedCatalog(ids = ANNOUNCED_IDS, catalog = STOREFRONT_CATALOG) {
   return Object.freeze([
     ...catalog,
-    ...ANNOUNCED_COLLECTIONS.filter((entry) => ids.includes(entry.id)).map((entry) => ({ ...entry, shelf: "pro" })),
+    ...ANNOUNCED_COLLECTIONS.filter((entry) => ids.includes(entry.id)),
   ]);
 }
 
@@ -179,17 +241,22 @@ export function launchedCatalog(ids = ANNOUNCED_IDS, catalog = STOREFRONT_CATALO
 export function gatedPhrases() {
   const out = new Set();
   for (const entry of ANNOUNCED_COLLECTIONS) {
-    for (const value of [entry.id, entry.short, entry.name, entry.blurb]) out.add(value);
+    for (const value of [entry.id, entry.short, entry.name, entry.blurb, entry.methods]) out.add(value);
   }
+  for (const example of ANNOUNCED_ECOSYSTEM_EXAMPLES) out.add(example.text);
+  for (const jobs of Object.values(ANNOUNCED_COLLECTION_JOBS)) {
+    for (const question of jobs.questions) out.add(question);
+  }
+  const shipped = new Set(AUDIENCE_JOBS.flatMap((audience) => [audience.now?.explanation, audience.atLaunch?.explanation]));
   for (const copy of Object.values(LAUNCH_COPY)) {
-    // The advisors sentence is the owner's and ships today as interim copy;
-    // only sentences the page does not already say are secrets.
-    if (!PRESS_AUDIENCES.some((audience) => audience.now?.use === copy.use)) out.add(copy.use);
+    // Only sentences the page does not already say are secrets.
+    if (!shipped.has(copy.explanation)) out.add(copy.explanation);
   }
   for (const { audience } of ANNOUNCED_AUDIENCES) {
     out.add(audience.id);
-    out.add(audience.label);
-    out.add(audience.atLaunch.use);
+    out.add(audience.audience);
+    out.add(audience.outcome);
+    out.add(audience.atLaunch.explanation);
   }
   return [...out];
 }

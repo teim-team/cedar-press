@@ -1003,5 +1003,211 @@
       "id": "academic",
       "label": "University or research institute"
     }
-  ]
+  ],
+  "cedarQuestions": {
+    "funding": [
+      {
+        "q": "What does this collection let me compare across peer organizations?",
+        "kind": "Describe",
+        "route": "content"
+      },
+      {
+        "q": "How are awards to subsidiaries and housing authorities credited to their Nation?",
+        "kind": "Trace",
+        "route": "construct"
+      },
+      {
+        "q": "What changed since I last used this collection?",
+        "kind": "Compare",
+        "route": "changes"
+      }
+    ],
+    "federal-register": [
+      {
+        "q": "What does this collection let me follow across agencies?",
+        "kind": "Describe",
+        "route": "content"
+      },
+      {
+        "q": "How are notices matched to the tribes they name?",
+        "kind": "Trace",
+        "route": "construct"
+      },
+      {
+        "q": "What changed since I last used this collection?",
+        "kind": "Compare",
+        "route": "changes"
+      }
+    ],
+    "legislation": [
+      {
+        "q": "What does this collection let me follow on a bill?",
+        "kind": "Describe",
+        "route": "content"
+      },
+      {
+        "q": "How are bills tied to the tribes they affect?",
+        "kind": "Trace",
+        "route": "construct"
+      },
+      {
+        "q": "What changed since I last used this collection?",
+        "kind": "Compare",
+        "route": "changes"
+      }
+    ],
+    "deals": [
+      {
+        "q": "What does this collection track about each transaction?",
+        "kind": "Describe",
+        "route": "content"
+      },
+      {
+        "q": "How are buyers, sellers and borrowers tied to the Native entity behind them?",
+        "kind": "Trace",
+        "route": "construct"
+      },
+      {
+        "q": "What changed since I last used this collection?",
+        "kind": "Compare",
+        "route": "changes"
+      }
+    ],
+    "nagpra": [
+      {
+        "q": "What does this collection hold about each notice?",
+        "kind": "Describe",
+        "route": "content"
+      },
+      {
+        "q": "How are notices matched to the Nations and Native Hawaiian organizations they name?",
+        "kind": "Trace",
+        "route": "construct"
+      },
+      {
+        "q": "What changed since I last used this collection?",
+        "kind": "Compare",
+        "route": "changes"
+      }
+    ],
+    "lobbying": [
+      {
+        "q": "What does this collection include beyond registered lobbying?",
+        "kind": "Describe",
+        "route": "content"
+      },
+      {
+        "q": "How is each activity tied to the tribe or organization behind it?",
+        "kind": "Trace",
+        "route": "construct"
+      },
+      {
+        "q": "What changed since I last used this collection?",
+        "kind": "Compare",
+        "route": "changes"
+      }
+    ],
+    "contractors": [
+      {
+        "q": "What does this collection let me examine on an award?",
+        "kind": "Describe",
+        "route": "content"
+      },
+      {
+        "q": "How are vendors rolled up to their parent Nation or corporation?",
+        "kind": "Trace",
+        "route": "construct"
+      },
+      {
+        "q": "What changed since I last used this collection?",
+        "kind": "Compare",
+        "route": "changes"
+      }
+    ],
+    "subcontracting": [
+      {
+        "q": "What does this collection show about the prime relationship?",
+        "kind": "Describe",
+        "route": "content"
+      },
+      {
+        "q": "How are subawards tied to the same entities as their primes?",
+        "kind": "Trace",
+        "route": "construct"
+      },
+      {
+        "q": "What changed since I last used this collection?",
+        "kind": "Compare",
+        "route": "changes"
+      }
+    ],
+    "natural-resources": [
+      {
+        "q": "What does this collection let me compare across commodities?",
+        "kind": "Describe",
+        "route": "content"
+      },
+      {
+        "q": "How are production and disbursements matched to Nations and allottees?",
+        "kind": "Trace",
+        "route": "construct"
+      },
+      {
+        "q": "What changed since I last used this collection?",
+        "kind": "Compare",
+        "route": "changes"
+      }
+    ],
+    "owned": [
+      {
+        "q": "What does this collection hold about each business?",
+        "kind": "Describe",
+        "route": "content"
+      },
+      {
+        "q": "How does a business come to be listed, and on whose terms?",
+        "kind": "Trace",
+        "route": "construct"
+      },
+      {
+        "q": "What changed since I last used this collection?",
+        "kind": "Compare",
+        "route": "changes"
+      }
+    ],
+    "nonprofits": [
+      {
+        "q": "What does this collection hold about each organization?",
+        "kind": "Describe",
+        "route": "content"
+      },
+      {
+        "q": "How are Native-led and Native-serving organizations told apart?",
+        "kind": "Trace",
+        "route": "construct"
+      },
+      {
+        "q": "What changed since I last used this collection?",
+        "kind": "Compare",
+        "route": "changes"
+      }
+    ],
+    "need": [
+      {
+        "q": "What does this collection hold about an enterprise's owner and parent?",
+        "kind": "Describe",
+        "route": "content"
+      },
+      {
+        "q": "How are subsidiaries and joint ventures tied to the Nation or corporation behind them?",
+        "kind": "Trace",
+        "route": "construct"
+      },
+      {
+        "q": "What changed since I last used this collection?",
+        "kind": "Compare",
+        "route": "changes"
+      }
+    ]
+  }
 }

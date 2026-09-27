@@ -244,6 +244,32 @@ export default function PressGate({ user }) {
       document.body.removeAttribute("data-cp-preview-in-view");
     };
   }, []);
+  // THE SAME, ON A PHONE, FOR THE FIRST SCREEN AND THE USE CASES. At 390 the
+  // launcher sat on the hero's facts row and, lower down, on the use-case
+  // card's last lines. While either is on screen it stays away (the
+  // stylesheet applies this below 720 only); the door's other ways into
+  // Cedar are a scroll away, and from the navy passage down it is back.
+  const heroCopyRef = useRef(null);
+  useEffect(() => {
+    const nodes = [heroCopyRef.current, document.querySelector(".cp-aud")].filter(Boolean);
+    if (!nodes.length || typeof IntersectionObserver !== "function") return undefined;
+    const showing = new Set();
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) showing.add(entry.target);
+          else showing.delete(entry.target);
+        }
+        document.body.toggleAttribute("data-cp-launcher-away", showing.size > 0);
+      },
+      { threshold: 0 },
+    );
+    for (const node of nodes) observer.observe(node);
+    return () => {
+      observer.disconnect();
+      document.body.removeAttribute("data-cp-launcher-away");
+    };
+  }, []);
   useEffect(() => {
     if (!panel) return undefined;
     const onKey = (event) => { if (event.key === "Escape") setPanel(null); };
@@ -523,7 +549,7 @@ export default function PressGate({ user }) {
       {/* ── The hero: the promise, and beside it the product ─────────── */}
       <section className="cp-hero3" aria-label="Cedar Press">
         <div className="cp-hero3__in">
-          <div className="cp-hero3__copy">
+          <div className="cp-hero3__copy" ref={heroCopyRef}>
             <p className="cp-kicker cp-fade">Original intelligence collections</p>
             {/* Two messages, on purpose: the door sells the asset, the
                 signed-in overview keeps the editorial "Know what's shaping
@@ -631,8 +657,9 @@ export default function PressGate({ user }) {
             what the viewer already shows) with the use-case band, which keeps
             the shelf's jobs: its chips preview a collection in the frame on
             point and commit it on click through the same `pick`, and the
-            selected collection's description sits under it. Every live
-            collection is cited by some use case (pressAudiences.test.js). */}
+            selected collection's description sits under it. Whether every live
+            collection is named by some use case is a review report
+            (pressJobs.test.js), not a rule. */}
         <PressAudienceExample
           selected={selected}
           onPick={pick}
@@ -738,6 +765,14 @@ export default function PressGate({ user }) {
               </li>
             ))}
           </ol>
+          {/* The owner's long-run trust line (2026-09-26): here, where the
+              passage argues for the maintained record, and never on a use
+              case card. */}
+          <p className="cp-why__trust cp-fade">
+            As search and analytical tools improve, Cedar Press keeps the underlying evidence
+            consistent: the same maintained sources, entities, releases and provenance beneath new
+            ways of working with the data.
+          </p>
           <p className="cp-why__note cp-fade">Photography is illustrative and does not identify Cedar Press customers.</p>
         </div>
       </section>

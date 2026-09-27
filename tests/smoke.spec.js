@@ -24,7 +24,16 @@ import { STOREFRONT_CATALOG } from "../src/features/grove/pressCatalog.js";
 import { LUMECON_URL, TBN_URL } from "../src/features/grove/pressArticles.js";
 // Test-only: the announced material, to prove the build carries none of it.
 import { gatedPhrases } from "../src/features/grove/pressAnnounced.js";
-import { PRESS_AUDIENCES } from "../src/features/grove/pressAudiences.js";
+import {
+  AUDIENCE_JOBS,
+  BAND_NOTE,
+  COLLECTION_JOBS,
+  ENTITY_JOBS,
+  collectionQuestions,
+  researchExamples,
+  uncoveredIds,
+  visibleAudiences,
+} from "../src/features/grove/pressJobs.js";
 
 // The throwaway account playwright.config.js provisions into the build it
 // starts. It is not a credential and it opens nothing that is deployed
@@ -1084,6 +1093,13 @@ test.describe("About this collection", () => {
     // The unit of observation, in the codebook's own words: the sentence
     // anyone about to cite a count needs and the old disclosure never had.
     await expect(panel).toContainText("One row is");
+    // Immediately after what it holds: the questions its fields can answer,
+    // read from COLLECTION_JOBS rather than typed into the page.
+    const asks = panel.locator(".cp-ab__block", { has: page.getByRole("heading", { name: "Questions this collection can help answer" }) });
+    await expect(asks).toBeVisible();
+    await expect(asks.locator("li")).toHaveText(collectionQuestions("contractors").map((item) => item.q));
+    const order = await panel.locator(".cp-ab__h").allInnerTexts();
+    expect(order.indexOf("Questions this collection can help answer")).toBe(order.indexOf("What is in this collection") + 1);
     const notes = panel.locator(".cp-ab__more");
     await expect(notes.getByText("Read the full collection notes")).toBeVisible();
     await notes.getByText("Read the full collection notes").click();
@@ -1136,7 +1152,10 @@ test.describe("the use cases drive the viewer", () => {
     // A choice inside the band stops it turning.
     await expect(page.locator(".cp-aud")).toHaveAttribute("data-stopped", "true");
 
-    // The address brings the same collection back.
+    // The address brings the same collection back. The pointer is moved off
+    // first: left where the chip was, it rests over the hero rail after the
+    // reload, and a rail row under a mouse previews its own collection.
+    if (testInfo.project.name === "desktop") await page.mouse.move(2, 2);
     await page.goto(`/?collection=${id}`);
     await expect(page.locator(".cp-aud__note")).toContainText(entry.blurb);
     expect(errors).toEqual([]);
@@ -1189,10 +1208,12 @@ test.describe("the use cases drive the viewer", () => {
     expect(new URL(page.url()).searchParams.get("collection")).toBeNull();
   });
 
-  test("every collection is reachable through the use cases, at this width", async ({ page }) => {
+  test("every collection a use case names is reachable through it, at this width", async ({ page }, testInfo) => {
     // Run on both projects: on the phone (390 wide) this is the answer to "how
-    // does a visitor reach each collection": pick a use case in the scrolling
-    // selector, then tap one of its chips.
+    // does a visitor reach a collection from a use case": pick one in the
+    // scrolling selector, then tap one of its chips. Whether EVERY live
+    // collection is named by some use case is a review report, not a rule
+    // (owner, 2026-09-26): it is attached to this test as an annotation.
     await page.goto("/");
     await page.locator(".cp-aud").scrollIntoViewIfNeeded();
     const reached = new Set();
@@ -1211,7 +1232,10 @@ test.describe("the use cases drive the viewer", () => {
         reached.add(id);
       }
     }
-    expect([...reached].sort()).toEqual(STOREFRONT_CATALOG.map((entry) => entry.id).sort());
+    const named = new Set(visibleAudiences().flatMap((audience) => audience.collections.map((entry) => entry.id)));
+    expect([...reached].sort()).toEqual([...named].sort());
+    const uncovered = uncoveredIds();
+    testInfo.annotations.push({ type: "coverage report", description: uncovered.length ? `not named by any use case: ${uncovered.join(", ")}` : "every live collection is named by some use case" });
   });
 
   test("the plan split is on the chips and in the line under them", async ({ page }) => {
@@ -1226,7 +1250,7 @@ test.describe("the use cases drive the viewer", () => {
     await expect(page.locator(".cp-aud__meta .cp-plus")).toHaveCount(1);
   });
 
-  test("the rotation never changes the collection in hand", async ({ page }) => {
+  test("the rotation never changes the collection in hand, and the note follows the card", async ({ page }) => {
     await page.clock.install();
     await page.goto("/");
     await page.locator(".cp-aud").evaluate((el) => el.scrollIntoView({ block: "center", behavior: "instant" }));
@@ -1234,19 +1258,48 @@ test.describe("the use cases drive the viewer", () => {
     // Turning before the clock is advanced: the band starts once it is seen
     // on screen, which is an observer callback, not a timer.
     await expect(page.locator(".cp-aud")).toHaveAttribute("data-rotating", "true");
-    const note = page.locator(".cp-aud__note");
-    const before = await note.innerText();
+    const pane = page.locator(".cp-app__pane");
+    const before = await pane.innerText();
     const url = page.url();
     await page.clock.runFor(40_000);
     await expect(page.locator(".cp-aud__count")).not.toHaveText(/^01 \//);
-    expect(await note.innerText()).toBe(before);
+    // The frame and the address keep the collection in hand...
+    expect(await pane.innerText()).toBe(before);
     expect(page.url()).toBe(url);
+    // ...and the line under the card describes a collection the card shows.
+    const onCard = await page.locator(".cp-aud__panel.is-on .cp-aud__col").evaluateAll((els) => els.map((el) => el.dataset.collection));
+    expect(onCard).toContain(await page.locator(".cp-aud__note").getAttribute("data-collection"));
+  });
+
+  test("the note never describes a collection the card does not show", async ({ page }) => {
+    await page.goto("/");
+    await page.locator(".cp-aud").evaluate((el) => el.scrollIntoView({ block: "center", behavior: "instant" }));
+    const note = page.locator(".cp-aud__note");
+    const tabs = page.locator(".cp-aud__tab");
+    const count = await tabs.count();
+    for (let i = 0; i < count; i += 1) {
+      await tabs.nth(i).click();
+      const onCard = await page.locator(".cp-aud__panel.is-on .cp-aud__col").evaluateAll((els) => els.map((el) => el.dataset.collection));
+      const described = await note.getAttribute("data-collection");
+      expect(onCard, `use case ${i + 1}`).toContain(described);
+      const entry = STOREFRONT_CATALOG.find((e) => e.id === described);
+      await expect(note).toContainText(entry.blurb);
+    }
+    // A collection picked in the hero frame that this card does not name is
+    // not described under it: the card's first chip is.
+    const last = page.locator(".cp-aud__panel.is-on .cp-aud__col");
+    const shown = await last.evaluateAll((els) => els.map((el) => el.dataset.collection));
+    const elsewhere = STOREFRONT_CATALOG.find((entry) => !shown.includes(entry.id));
+    await page.goto(`/?collection=${elsewhere.id}`);
+    await page.locator(".cp-aud").evaluate((el) => el.scrollIntoView({ block: "center", behavior: "instant" }));
+    await page.locator(".cp-aud__tab").nth(count - 1).click();
+    await expect(note).toHaveAttribute("data-collection", shown[0]);
   });
 });
 
 test.describe("the door's use cases", () => {
   // One audience at a time, under the hero (PressAudienceExample). The rules
-  // are held in milliseconds by pressAudiences.test.js; these check that the
+  // are held in milliseconds by pressRotation.test.js; these check that the
   // built page actually obeys them. The clock is Playwright's, so eight
   // seconds of rotation cost nothing.
   const band = (page) => page.locator(".cp-aud");
@@ -1285,8 +1338,10 @@ test.describe("the door's use cases", () => {
     for (const phrase of ["PLOT", "Corporate Giving", "Foundations and philanthropy", "private giving"]) {
       expect(body, phrase).not.toContain(phrase);
     }
+    // "Philanthropy" is allowed: the owner's outside-partners sentence names
+    // it as a kind of support that may fit, not as the giving collection.
     const bandText = await band(page).evaluate((el) => el.textContent);
-    expect(bandText).not.toMatch(/parcel|philanthrop/i);
+    expect(bandText).not.toMatch(/parcel|private giving|disclosed private/i);
     expect(errors).toEqual([]);
   });
 
@@ -1332,7 +1387,10 @@ test.describe("the door's use cases", () => {
     await expect(counter(page)).toHaveText(/^02 \//);
   });
 
-  test("changing the example does not move the page", async ({ page }) => {
+  test("changing the example does not move the page", async ({ page }, testInfo) => {
+    // Above 720 wide. On a phone each card takes its own height (the test
+    // below), so a shorter card does not stand over a block of empty card.
+    test.skip(testInfo.project.name === "phone", "on a phone each card is its own height");
     await page.goto("/");
     await reach(page);
     // Page coordinates, not viewport ones: a click may scroll the window, and
@@ -1355,6 +1413,49 @@ test.describe("the door's use cases", () => {
       expect(Math.abs(now.height - before.height), "band height").toBeLessThan(0.5);
       expect(Math.abs(now.below - before.below), "the band below it").toBeLessThan(0.5);
     }
+  });
+
+  test("on a phone each card is its own height, with no empty block under the chips", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "phone", "a phone layout");
+    await page.goto("/");
+    await reach(page);
+    const total = await page.locator(".cp-aud__panel").count();
+    for (let i = 0; i < total; i += 1) {
+      await page.locator(".cp-aud__tab").nth(i).click();
+      const gap = await page.locator(".cp-aud__panel.is-on").evaluate((panel) => {
+        const chips = panel.querySelector(".cp-aud__cols").getBoundingClientRect();
+        return panel.getBoundingClientRect().bottom - chips.bottom;
+      });
+      // The text's own bottom padding, and no more.
+      expect(gap, `use case ${i + 1}`).toBeLessThan(24);
+    }
+  });
+
+  test("the audience names are one row until there is room for two lines", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop", "measured at 1040 and 1440");
+    for (const [width, maxLines] of [[1040, 1], [1440, 2]]) {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto("/");
+      const lines = await page.locator(".cp-aud__tab").evaluateAll((tabs) => new Set(tabs.map((tab) => Math.round(tab.getBoundingClientRect().top))).size);
+      expect(lines, `at ${width}`).toBeLessThanOrEqual(maxLines);
+      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+      expect(overflow, `the page scrolls sideways at ${width}`).toBeLessThanOrEqual(0);
+    }
+  });
+
+  test("on a phone the facts keep one line each and the launcher waits past the first screen and the use cases", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "phone", "a phone layout");
+    await page.goto("/");
+    const heights = await page.locator(".cp-hero3__facts li").evaluateAll((items) => items.map((li) => li.getBoundingClientRect().height));
+    const one = Math.min(...heights);
+    for (const h of heights) expect(h).toBeLessThan(one * 1.5);
+    await expect(page.locator(".cp-dc__fab")).toBeHidden();
+    // Nor over the use cases, whose card and note run to the screen's edge.
+    await page.locator(".cp-aud").evaluate((el) => el.scrollIntoView({ block: "center", behavior: "instant" }));
+    await expect(page.locator(".cp-dc__fab")).toBeHidden();
+    // From the navy passage down it is back.
+    await page.locator(".cp-why").evaluate((el) => el.scrollIntoView({ block: "start", behavior: "instant" }));
+    await expect(page.locator(".cp-dc__fab")).toBeVisible();
   });
 
   test("the partners are named on the first screen, and each name links to its site", async ({ page }) => {
@@ -1381,6 +1482,108 @@ test.describe("the door's use cases", () => {
     await signIn(page, PRESS_ACCOUNT);
     await expect(page.locator(".cp-aud")).toHaveCount(0);
     expect(errors).toEqual([]);
+  });
+});
+
+test.describe("the use-case card", () => {
+  // Owner's brief, 2026-09-26, second pass: an outcome as the headline, what
+  // Cedar Press lets the audience understand, the collections as chips, and
+  // a duotone sector photograph as a panel of the card.
+  const band = (page) => page.locator(".cp-aud");
+  const on = (page) => page.locator(".cp-aud__panel.is-on");
+
+  test("leads with the outcome and the job, and ends on the owner's quiet line", async ({ page }) => {
+    const errors = watchConsole(page);
+    await page.goto("/");
+    await band(page).evaluate((el) => el.scrollIntoView({ block: "center", behavior: "instant" }));
+    const first = AUDIENCE_JOBS[0];
+    await expect(on(page).locator(".cp-aud__outcome")).toHaveText(first.outcome);
+    await expect(on(page).locator(".cp-aud__job")).toHaveText(first.job);
+    await expect(page.locator(".cp-aud__quiet")).toHaveText(BAND_NOTE);
+    expect(errors).toEqual([]);
+  });
+
+  test("the photograph is a lazy panel with a responsive source, and it lands", async ({ page }, testInfo) => {
+    await page.goto("/");
+    // Before the band is reached, only the first use case holds a photograph,
+    // and it is lazy: a visitor who never scrolls here downloads none.
+    const imgs = page.locator(".cp-aud__media img");
+    await expect(imgs).toHaveCount(1);
+    await expect(imgs.first()).toHaveAttribute("loading", "lazy");
+    await expect(imgs.first()).toHaveAttribute("srcset", /-sm\.webp 600w, .*\.webp 1200w/);
+    await expect(page.locator(".cp-aud__media source")).toHaveAttribute("srcset", /-wide\.webp \d+w/);
+    await band(page).evaluate((el) => el.scrollIntoView({ block: "center", behavior: "instant" }));
+    const img = on(page).locator(".cp-aud__media img");
+    await expect.poll(() => img.evaluate((el) => el.complete && el.naturalWidth > 0)).toBe(true);
+    // The photograph fills its panel and the panel is the card's own height.
+    const media = await on(page).locator(".cp-aud__media").boundingBox();
+    const shot = await img.boundingBox();
+    expect(Math.abs(media.height - shot.height)).toBeLessThan(1);
+    expect(Math.abs(media.width - shot.width)).toBeLessThan(1);
+    if (testInfo.project.name === "phone") {
+      // A banner on top, at 5:2.
+      expect(Math.abs(media.width / media.height - 2.5)).toBeLessThan(0.05);
+      const text = await on(page).locator(".cp-aud__text").boundingBox();
+      expect(media.y + media.height).toBeLessThanOrEqual(text.y + 1);
+    } else {
+      // Beside the text, and the side alternates from one use case to the next.
+      const text = await on(page).locator(".cp-aud__text").boundingBox();
+      expect(media.x + media.width).toBeLessThanOrEqual(text.x + 1);
+      await page.getByRole("button", { name: "Next use case" }).click();
+      const media2 = await on(page).locator(".cp-aud__media").boundingBox();
+      const text2 = await on(page).locator(".cp-aud__text").boundingBox();
+      expect(text2.x + text2.width).toBeLessThanOrEqual(media2.x + 1);
+    }
+  });
+
+  test("a use case shows the next photograph in its pool on each visit", async ({ page }) => {
+    await page.goto("/");
+    await band(page).evaluate((el) => el.scrollIntoView({ block: "center", behavior: "instant" }));
+    const pool = AUDIENCE_JOBS[0].imagePool;
+    const shown = () => on(page).locator(".cp-aud__media img").getAttribute("data-image");
+    await expect.poll(shown).toBe(pool[0]);
+    await page.getByRole("button", { name: "Next use case" }).click();
+    await page.getByRole("button", { name: "Previous use case" }).click();
+    await expect.poll(shown).toBe(pool[1]);
+  });
+});
+
+test.describe("the product copy reads the jobs layer", () => {
+  test("the signed-in homepage, its briefing, and the entity page's actions", async ({ page }) => {
+    const errors = watchConsole(page);
+    await signIn(page);
+    await expect(page.locator(".cp-hero__deck")).toHaveText(
+      "Compare peers, follow funding and business activity, spot changes worth investigating and trace the evidence behind them.",
+    );
+    const caps = await page.locator(".cp-brief__cap").allInnerTexts();
+    expect(caps.map((c) => c.toLowerCase())).toEqual(expect.arrayContaining(["what changed", "explore the records"]));
+    expect(caps.join(" ")).not.toMatch(/worth watching|open today|insight|opportunit/i);
+
+    await page.goto("/data?c=funding");
+    await page.getByTestId("explore-record").first().locator("a").first().click();
+    await page.waitForURL(/\/record\?/);
+    await page.locator(".cp-rec__name a").first().click();
+    await page.waitForURL(/\/entity\/CE-/);
+    const head = page.getByTestId("entity-head");
+    await expect(head.locator(".cp-ent__line")).toHaveText(ENTITY_JOBS.line);
+    // Only what works today: no dead button for the two that are not built.
+    for (const action of ENTITY_JOBS.actions.filter((a) => !a.available)) {
+      await expect(page.getByRole("link", { name: action.label })).toHaveCount(0);
+      await expect(page.getByRole("button", { name: action.label })).toHaveCount(0);
+    }
+    const overTime = head.locator('[data-action="over-time"]');
+    await expect(overTime).toHaveAttribute("href", /\?e=CE-[^&]+&s=date:asc$/);
+    await overTime.click();
+    await page.waitForURL(/s=date(%3A|:)asc/);
+    await expect(page.getByTestId("explore-record").first()).toBeVisible();
+    expect(errors).toEqual([]);
+  });
+
+  test("Research access shows the owner's two examples, from the layer", async ({ page }) => {
+    await page.goto("/research-access");
+    const fit = page.locator(".cp-fit__side--yes p");
+    await expect(fit).toHaveText(researchExamples().map((example) => example.text));
+    await expect(page.locator(".cp-trh__sub")).toContainText("without rebuilding the underlying collection yourself");
   });
 });
 
@@ -1473,7 +1676,19 @@ test.describe("Shape the research", () => {
     const errors = watchConsole(page);
     await signIn(page);
     await page.goto("/priorities");
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("What should Cedar research and build next?");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Help set the research agenda.");
+    // Points inform the agenda and do not decide it, said in the deck itself.
+    await expect(page.locator(".cp-mh__sub")).toContainText("do not decide it");
+    // The owner's examples, visibly examples and not a roadmap, with causal
+    // research questions told apart from descriptive ones.
+    const examples = page.getByTestId("priority-examples");
+    await expect(examples).toContainText("Examples, not a roadmap");
+    await expect(examples.locator(".cp-pri__exkind")).toHaveCount(2);
+    await expect(examples.locator(".cp-pri__exkind").nth(1)).toContainText("Causal");
+    // The narrower asks are smaller than the ambitious ones.
+    const small = await examples.locator(".cp-pri__exsmall li").first().evaluate((el) => parseFloat(getComputedStyle(el).fontSize));
+    const lead = await examples.locator(".cp-pri__exlist li").first().evaluate((el) => parseFloat(getComputedStyle(el).fontSize));
+    expect(small).toBeLessThan(lead);
     await expect(page.getByTestId("priorities-research_question").getByTestId("priority").first()).toBeVisible();
     await expect(page.getByTestId("priorities-dataset").getByTestId("priority").first()).toBeVisible();
     // The influence card carries the "no service" sentence; the note under it
@@ -1860,11 +2075,33 @@ test.describe("the bundle", () => {
     };
     const releasedText = [
       ...STOREFRONT_CATALOG.flatMap((entry) => [entry.blurb, entry.linkage ?? ""]),
-      ...PRESS_AUDIENCES.flatMap((audience) => [audience.now?.use ?? "", audience.atLaunch?.use ?? ""]),
+      // Everything the shared jobs layer ships: outcomes, both versions of
+      // each intelligence line, every collection and Cedar question, the
+      // research examples and the quiet line.
+      ...AUDIENCE_JOBS.flatMap((audience) => [
+        audience.outcome,
+        audience.now?.explanation ?? "",
+        audience.atLaunch?.explanation ?? "",
+        audience.researchExample?.text ?? "",
+      ]),
+      ...Object.values(COLLECTION_JOBS).flatMap((jobs) => [...jobs.questions, ...jobs.cedar].map((item) => item.q)),
+      BAND_NOTE,
+      ENTITY_JOBS.line,
     ];
+    // And every string in the released data files the build bundles (the
+    // codebook, the collection descriptors, the manifest): pipeline output
+    // about released collections, not page copy. Without them a gated
+    // sentence that shares a common run with a released record's own
+    // description ("linked to the Native entity that received it") reads as
+    // a leak when it is only English.
+    const strings = (value) =>
+      typeof value === "string" ? [value] : value && typeof value === "object" ? Object.values(value).flatMap(strings) : [];
+    for (const file of ["codebook.json", "collection_descriptors.json", "collections.manifest.json"]) {
+      releasedText.push(...strings(JSON.parse(await readFile(new URL(`../data/cedar/${file}`, import.meta.url), "utf8"))));
+    }
     const releasedRuns = new Set(releasedText.flatMap(runs));
     const fragments = gatedPhrases().flatMap(runs).filter((run) => !releasedRuns.has(run));
-    expect(fragments.length, "fragments derived from the gated copy").toBeGreaterThan(50);
+    expect(fragments.length, "fragments derived from the gated copy").toBeGreaterThan(80);
     const needles = [...new Set([...gatedPhrases(), ...fragments, ...paths])];
     // A short token ("PLOT", "plot") is matched as a whole word; a sentence or
     // a path as an exact substring.

@@ -6,7 +6,7 @@
 // NOTHING THE PAGE LOADS IMPORTS THIS FILE, so neither mark is in the shipped
 // bundle. It lives here to be reviewed with the family before launch; at
 // launch each mark moves into `COLLECTION_ICONS`, keyed by its collection id.
-// `pressAudiences.test.js` holds these to the family's rules (same glyph
+// `pressJobs.test.js` holds these to the family's rules (same glyph
 // props, no fills, two to four shapes) and fails if anything imports this
 // file; the smoke suite greps the production build for their path data.
 

@@ -19,10 +19,12 @@
 //                        same `pick()` the shelf called: `?collection=`, the
 //                        frame and the `collectionViewed` event). Leaving the
 //                        chips puts the committed collection back.
-//   reach every one      every live collection is cited by at least one
-//                        shown audience, held by `uncoveredIds` in the tests
-//                        rather than by hand, and every audience is one tap
-//                        away in the selector.
+//   reach every one      the chips are the collections each sentence
+//                        names, never one added to give a collection a turn
+//                        (owner, 2026-09-26). Whether every live collection
+//                        is named somewhere is a review report
+//                        (`uncoveredIds`, printed by the tests), and the
+//                        hero viewer's rail still lists all of them.
 //   the plan split       a Cedar Press+ collection's chip carries the plus,
 //                        in the same raised treatment as the plan's name
 //                        (`TierName`), and the description line names the
@@ -31,7 +33,26 @@
 //                        under the band, so chip, frame and description stay
 //                        tied together.
 //
-// ROTATION (rules in `pressAudiences.js`, held by its tests): a step every
+// THE CARD (owner's brief, 2026-09-26, second pass): an outcome as the
+// headline, what Cedar Press lets that audience understand, the collections
+// that support it as chips, and a duotone photograph from Lumecon's sector
+// image system as a panel beside the text, not a thumbnail. The panel
+// alternates sides from one use case to the next on a wide screen and sits
+// on top as a banner on a phone. Copy and imagery are `AUDIENCE_JOBS`
+// (`pressJobs.js`); the photographs, their sizes and licensing are
+// `pressImagery.js` and docs/IMAGE_LICENSES.md.
+//
+// PHOTOGRAPHS AND THE PAGE'S WEIGHT
+// The band sits below the first screen, so every photograph is lazy and
+// none can be the page's largest paint. A photograph is only put in the page
+// once its use case has been shown or is next in the rotation, so a visitor
+// who never scrolls here downloads none of them and one who watches the
+// rotation downloads one ahead. The panel's size comes from the grid, never
+// from the image, so a photograph arriving late moves nothing. A use case
+// with several photographs shows the next on each visit (`imageFor`), never
+// while it is on screen.
+//
+// ROTATION (rules in `pressRotation.js`, held by its tests): a step every
 // eight seconds while the band is on screen; paused while it is hovered or
 // holds focus; stopped for good by any choice, including a chip; never under
 // prefers-reduced-motion. Rotation changes the EXAMPLE only, never the
@@ -42,15 +63,17 @@
 import { useEffect, useReducer, useRef, useState } from "react";
 
 import { coverageLabel } from "../../features/grove/pressAccess";
+import { PRESS_TIERS } from "../../features/grove/pressCatalog";
+import { imageSources } from "../../features/grove/pressImagery";
+import { BAND_NOTE, visibleAudiences } from "../../features/grove/pressJobs";
 import {
   INITIAL_ROTATION,
   ROTATE_MS,
   counterLabel,
+  imageFor,
   rotationReducer,
   shouldRotate,
-  visibleAudiences,
-} from "../../features/grove/pressAudiences";
-import { PRESS_TIERS } from "../../features/grove/pressCatalog";
+} from "../../features/grove/pressRotation";
 import { COLLECTION_ICONS } from "./pressCollectionIcons";
 import { TierName } from "./TierName";
 
@@ -82,6 +105,32 @@ function useMedia(query) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query]);
   return matches;
+}
+
+/**
+ * The photograph beside a use case: the 3:2 cut for the side panel and the
+ * 5:2 banner on a phone. Decorative, so it carries no alternative text; the
+ * door says once that its photography is illustrative.
+ */
+function UseCaseImage({ slug }) {
+  const image = imageSources(slug);
+  if (!image) return null;
+  return (
+    <picture>
+      <source media="(max-width: 720px)" srcSet={image.wideSrcSet} sizes="100vw" />
+      <img
+        src={image.src}
+        srcSet={image.srcSet}
+        sizes="(max-width: 1100px) 38vw, 520px"
+        width={image.width}
+        height={image.height}
+        alt=""
+        loading="lazy"
+        decoding="async"
+        data-image={slug}
+      />
+    </picture>
+  );
 }
 
 /** A chip's name, with the plan's raised plus when the collection is Cedar Press+. */
@@ -121,6 +170,24 @@ export default function PressAudienceExample({ selected, onPick, onPoint }) {
   const rootRef = useRef(null);
   const tabRefs = useRef([]);
   const rotating = shouldRotate(state, { reducedMotion, total });
+  // How many times each use case has been the one in view, so a use case with
+  // several photographs shows the next one each time it comes round. Updated
+  // while rendering, on a change of index, rather than in an effect: it is
+  // derived from the index and needs no second pass.
+  const [seen, setSeen] = useState(() => ({ index: 0, visits: { 0: 1 } }));
+  if (seen.index !== state.index) {
+    setSeen({ index: state.index, visits: { ...seen.visits, [state.index]: (seen.visits[state.index] ?? 0) + 1 } });
+  }
+  const upNext = rotating ? (state.index + 1) % total : -1;
+  // The photograph a panel carries, or none. Every use case shown so far
+  // keeps the one it showed (so a panel fading out keeps its photograph until
+  // it has gone), and the next in the rotation already holds the one it is
+  // about to show, so the crossfade never waits on a download.
+  const slugFor = (useCase, i) => {
+    const visits = seen.visits[i] ?? 0;
+    if (i === upNext && i !== state.index) return imageFor(useCase.imagePool, visits + 1);
+    return visits ? imageFor(useCase.imagePool, visits) : null;
+  };
 
   // Off screen, nothing advances: a visitor who scrolls down to the band
   // starts on the first example, not on whichever one a timer reached.
@@ -183,7 +250,16 @@ export default function PressAudienceExample({ selected, onPick, onPoint }) {
     dispatch({ type: "stop" });
     onPick?.(entry);
   };
-  const tier = selected ? TIER_BY_SHELF[selected.shelf] : null;
+  // The line under the card describes a collection ON the card: the one in
+  // hand when the card names it (a chip pointed at or clicked), otherwise
+  // the card's first chip. It follows the use case as it changes, and never
+  // describes a collection the card does not show, even when the hero frame
+  // holds one picked elsewhere.
+  const card = AUDIENCES[state.index] ?? null;
+  const described = card
+    ? card.collections.find((entry) => entry.id === selected?.id) ?? card.collections[0] ?? null
+    : selected;
+  const tier = described ? TIER_BY_SHELF[described.shelf] : null;
 
   return (
     <section
@@ -226,22 +302,33 @@ export default function PressAudienceExample({ selected, onPick, onPoint }) {
           region only announces once the visitor is driving it, so a screen
           reader is not read a new example every eight seconds. */}
       <div className="cp-aud__stack" aria-live={state.stopped ? "polite" : "off"}>
-        {AUDIENCES.map((audience, i) => {
+        {AUDIENCES.map((useCase, i) => {
           const on = i === state.index;
+          const slug = slugFor(useCase, i);
           return (
             <div
-              key={audience.id}
-              id={`cp-aud-panel-${audience.id}`}
+              key={useCase.id}
+              id={`cp-aud-panel-${useCase.id}`}
               role="tabpanel"
-              aria-labelledby={`cp-aud-tab-${audience.id}`}
+              aria-labelledby={`cp-aud-tab-${useCase.id}`}
               className={`cp-aud__panel${on ? " is-on" : ""}`}
               aria-hidden={on ? undefined : "true"}
-              data-audience={audience.id}
-              data-version={audience.version}
+              data-audience={useCase.id}
+              data-version={useCase.version}
+              data-side={i % 2 ? "end" : "start"}
               inert={on ? undefined : true}
             >
-              <p className="cp-aud__label">{audience.label}</p>
-              <p className="cp-aud__use">{audience.use}</p>
+              <div className="cp-aud__media" aria-hidden="true">
+                {slug ? <UseCaseImage slug={slug} /> : null}
+              </div>
+              <div className="cp-aud__text">
+              {/* Who, and the job it is for, from the shared vocabulary. */}
+              <p className="cp-aud__label">
+                <span>{useCase.audience}</span>
+                {useCase.job ? <span className="cp-aud__job">{useCase.job}</span> : null}
+              </p>
+              <p className="cp-aud__outcome">{useCase.outcome}</p>
+              <p className="cp-aud__use">{useCase.explanation}</p>
               {/* Pointing previews; only a click commits. Leaving the set
                   hands the frame back to the committed collection.
 
@@ -259,7 +346,7 @@ export default function PressAudienceExample({ selected, onPick, onPoint }) {
                   if (!event.currentTarget.contains(event.relatedTarget)) clearPreview();
                 }}
               >
-                {audience.collections.map((entry) => {
+                {useCase.collections.map((entry) => {
                   const chosen = selected?.id === entry.id;
                   return (
                     <li key={entry.id}>
@@ -280,47 +367,51 @@ export default function PressAudienceExample({ selected, onPick, onPoint }) {
                   );
                 })}
               </ul>
+              </div>
             </div>
           );
         })}
       </div>
 
       <div className="cp-aud__tabs" role="tablist" aria-label="Audiences" ref={tabsRef}>
-        {AUDIENCES.map((audience, i) => {
+        {AUDIENCES.map((useCase, i) => {
           const on = i === state.index;
           return (
             <button
-              key={audience.id}
+              key={useCase.id}
               ref={(node) => { tabRefs.current[i] = node; }}
               type="button"
               role="tab"
-              id={`cp-aud-tab-${audience.id}`}
+              id={`cp-aud-tab-${useCase.id}`}
               aria-selected={on}
-              aria-controls={`cp-aud-panel-${audience.id}`}
+              aria-controls={`cp-aud-panel-${useCase.id}`}
               tabIndex={on ? 0 : -1}
               className={`cp-aud__tab${on ? " is-on" : ""}`}
               onClick={() => choose(i)}
               onKeyDown={(event) => onTabKey(event, i)}
             >
-              {audience.label}
+              {useCase.audience}
             </button>
           );
         })}
       </div>
 
-      {/* The collection in hand, in the owner's words. aria-live, so a reader
-          who cannot see the frame above still hears what was picked. */}
-      <p className="cp-aud__note" aria-live="polite">
-        {selected ? (
+      {/* The card's collection, in the owner's words. Live once the visitor
+          is driving the band, so a reader who cannot see the frame hears what
+          was picked, and is not read a new description every eight seconds
+          while the rotation turns it. */}
+      <p className="cp-aud__note" aria-live={state.stopped ? "polite" : "off"} data-collection={described?.id}>
+        {described ? (
           <>
-            <b>{selected.name}.</b> {selected.blurb}{" "}
+            <b>{described.name}.</b> {described.blurb}{" "}
             <span className="cp-aud__meta">
-              {coverageLabel(selected)}
+              {coverageLabel(described)}
               {tier ? <> &middot; <TierName name={tier.name} /></> : null}
             </span>
           </>
         ) : null}
       </p>
+      <p className="cp-aud__quiet">{BAND_NOTE}</p>
     </section>
   );
 }

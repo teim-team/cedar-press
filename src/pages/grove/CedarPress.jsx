@@ -33,6 +33,7 @@ import { PressCedarFab } from "./PressCedarFab";
 import { PressFoot, PressMast } from "./PressChrome";
 import PressAd from "./PressAd";
 import { LAUNCH_COLLECTION } from "../../features/grove/collection";
+import { openCedarQuestions } from "../../features/grove/pressJobs";
 import { PRESS_WHATS_NEW_PATH } from "../../features/grove/pressRoutes";
 import PressGate from "./PressGate";
 import PressBriefing from "./PressBriefing";
@@ -57,13 +58,12 @@ export default function CedarPress() {
     );
   }
 
-  // Cedar's suggestions on the overview: one real question per level, each
-  // already scoped to a collection so every suggestion is answerable today.
-  const cedarExamples = [
-    { q: "How was this collection constructed?", scope: LAUNCH_COLLECTION[1] },
-    { q: "What are its headline figures?", scope: LAUNCH_COLLECTION[2] },
-    { q: "What does this collection cover?", scope: LAUNCH_COLLECTION[3] },
-  ].map((item) => ({ q: item.q, scope: { id: item.scope.id, name: item.scope.name } }));
+  // Cedar's suggestions on the overview: one question each for three
+  // collections, from `COLLECTION_JOBS`, each scoped to its collection and
+  // checked against the profile router, so every suggestion is answerable
+  // today. No headline-figures question: most collections' figures are still
+  // demonstration data, and a suggestion answered with them is a poor offer.
+  const cedarExamples = openCedarQuestions(LAUNCH_COLLECTION.slice(1, 4));
   return (
     <div className="teim-rd teim-rd--paper">
       <main id="cp-main" className="cp cp-page cp--screens cp--deepfoot" ref={fadeRoot}>
@@ -100,6 +100,12 @@ export default function CedarPress() {
               premise, at the size of a premise rather than of a poster. */}
           <section className="cp-hero cp-hero--brief cp-fade">
             <h1>Know what&rsquo;s shaping Indian Country.</h1>
+            {/* Owner, 2026-09-26: what a subscriber does here, in one line
+                under the premise. */}
+            <p className="cp-hero__deck">
+              Compare peers, follow funding and business activity, spot changes worth
+              investigating and trace the evidence behind them.
+            </p>
           </section>
           {/* THE BRIEFING, WHERE THE NAVIGATION USED TO BE REPEATED.
               `PressHub` drew six cards — Collections, Research Briefs,
@@ -131,8 +137,8 @@ export default function CedarPress() {
               <h2 className="cp-close__head">Nothing here is a snapshot.</h2>
               <p className="cp-close__body">
                 Records are added, ownership changes and corrections come in every week, and
-                the collections are kept current against them. A figure you cited last quarter
-                still reproduces.
+                the collections are kept current against them. Releases stay versioned so work
+                done today remains checkable as the data and the tools used to analyze it change.
               </p>
             </div>
             {/* The three most recently changed collections, read from the

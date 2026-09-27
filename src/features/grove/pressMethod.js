@@ -160,6 +160,46 @@ export const CONSTRUCTION_STEPS = Object.freeze([
   }),
 ]);
 
+/**
+ * How Cedar decides what to build next (owner, 2026-09-26): from a question
+ * the collections cannot answer yet to a maintained release. The Methods
+ * chapter draws these in order; Priorities is where the questions come in.
+ */
+export const BUILD_NEXT_QUESTION = "What important question can I not answer today?";
+
+export const BUILD_NEXT_STEPS = Object.freeze([
+  Object.freeze({
+    id: "question",
+    label: "Question",
+    note: "A question the current collections cannot answer, from a subscriber's priority, a Nation's request or Cedar's own research.",
+  }),
+  Object.freeze({
+    id: "sources",
+    label: "Source investigation",
+    note: "Which public records could answer it, who publishes them, how far back they reach and what they leave out.",
+  }),
+  Object.freeze({
+    id: "design",
+    label: "Research and collection design",
+    note: "What one record is, which fields it carries and how each record reaches the Native entity it is about.",
+  }),
+  Object.freeze({
+    id: "validate",
+    label: "Validation",
+    note: "Records checked against their sources and against the other collections; ambiguous matches go to a researcher.",
+  }),
+  Object.freeze({
+    id: "release",
+    label: "Release",
+    note: "Published with a version, a coverage span, its sources and what it does not contain.",
+  }),
+  Object.freeze({
+    id: "maintain",
+    label: "Maintenance",
+    note: "Kept current as sources update, organizations change and corrections arrive, each change logged against a release.",
+  }),
+]);
+
 /** What research judgment looks like when direct reporting runs out. */
 export const DISCOVERY_MOVES = Object.freeze([
   "Identifying indirect evidence",

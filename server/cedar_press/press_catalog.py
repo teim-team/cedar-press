@@ -151,6 +151,13 @@ CATALOG = _frozen(_DATA["catalog"])
 #: release. Keyed by collection id.
 RELEASES = _deep_freeze(_DATA["releases"])
 
+#: Cedar's suggested questions per collection (``COLLECTION_JOBS`` in
+#: ``pressJobs.js``), each with the profile branch (``route``) it must land in.
+#: Nothing serves these; ``tests/test_cedar_questions.py`` runs every one
+#: through ``answer_from_profile`` so a suggestion the router would refuse or
+#: misroute fails the build.
+CEDAR_QUESTIONS = _deep_freeze(_DATA.get("cedarQuestions", {}))
+
 #: Where a reader reports a citation the register missed.
 REPORT_CITATION_HREF: str = _DATA["reportCitationHref"]
 
