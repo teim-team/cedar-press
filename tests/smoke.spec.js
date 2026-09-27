@@ -2382,7 +2382,7 @@ test.describe("crawlers", () => {
     // The HTML escapes the one ampersand a collection name carries.
     for (const name of names) expect(body.includes(name) || body.includes(name.replaceAll("&", "&amp;")), name).toBe(true);
     // The count is the hero's own fact line, read from the catalog.
-    expect(body).toMatch(new RegExp(`<b>${names.length}</b> collections`));
+    expect(body).toMatch(new RegExp(`<b[^>]*>${names.length}</b> collections`));
   });
 
   test("a page behind the gate is not offered to crawlers", async ({ request }) => {

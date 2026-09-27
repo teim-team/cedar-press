@@ -83,6 +83,7 @@ import PressAudienceExample from "./PressAudienceExample";
 import { PressPreviewNotice } from "./PressChrome";
 import { TierName } from "./TierName";
 import PressReleaseSpecimen from "./PressReleaseSpecimen";
+import { useTicker } from "../../features/grove/useTicker";
 
 /** The source list dealt into rows for the navy banner, from the scrambled
  * order, so no row reads as a list someone could copy in sequence. */
@@ -90,6 +91,16 @@ const SOURCE_ROW_COUNT = 7;
 const SOURCE_ROWS = Array.from({ length: SOURCE_ROW_COUNT }, (_, r) =>
   SOURCE_ROTATION_ORDER.filter((_, i) => i % SOURCE_ROW_COUNT === r),
 ).filter((row) => row.length);
+
+/** A hero figure that ticks to its value once, in view (owner, 2026-09-27).
+ * The year counts back from this year to the earliest record, the others up
+ * from zero. The final value is what is prerendered and what a reader who
+ * prefers reduced motion sees. */
+const formatCount = (n) => n.toLocaleString("en-US");
+function Tick({ value, from = 0, format = String }) {
+  const ref = useTicker(value, { from, format });
+  return <b ref={ref} className="cp-tick">{format(value)}</b>;
+}
 
 /** The brand mark, served from public/. The all-teal mark is the current one. */
 const MARK = "/brand/lumecon-logo-mark-teal.png";
@@ -649,9 +660,9 @@ export default function PressGate({ user }) {
                 2026-09-27), so nothing sits below the hero's button and the
                 use cases start higher. */}
             <ul className="cp-hero3__facts" aria-label="What Cedar Press holds">
-              <li><b>{STOREFRONT_CATALOG.length}</b> collections</li>
-              {LAUNCH_ROWS_TOTAL ? <li><b>{LAUNCH_ROWS_TOTAL.toLocaleString("en-US")}</b> records</li> : null}
-              {EARLIEST_YEAR ? <li>as far back as <b>{EARLIEST_YEAR}</b></li> : null}
+              <li><Tick value={STOREFRONT_CATALOG.length} /> collections</li>
+              {LAUNCH_ROWS_TOTAL ? <li><Tick value={LAUNCH_ROWS_TOTAL} format={formatCount} /> records</li> : null}
+              {EARLIEST_YEAR ? <li>as far back as <Tick value={EARLIEST_YEAR} from={new Date().getFullYear()} /></li> : null}
               {recentlyUpdated(1)[0] ? <li>updated <b>{formatUpdated(recentlyUpdated(1)[0].updated)}</b></li> : null}
             </ul>
           </figure>
