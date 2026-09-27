@@ -24,7 +24,6 @@ import { STOREFRONT_CATALOG } from "../src/features/grove/pressCatalog.js";
 import { LUMECON_URL, TBN_URL } from "../src/features/grove/pressArticles.js";
 import {
   AUDIENCE_JOBS,
-  BAND_NOTE,
   ENTITY_JOBS,
   collectionQuestions,
   researchExamples,
@@ -1682,14 +1681,16 @@ test.describe("the use-case card", () => {
   const band = (page) => page.locator(".cp-aud");
   const on = (page) => page.locator(".cp-aud__panel.is-on");
 
-  test("leads with the outcome and the job, and ends on the owner's quiet line", async ({ page }) => {
+  test("leads with the outcome and the job, with no quiet line under it", async ({ page }) => {
     const errors = watchConsole(page);
     await page.goto("/");
     await band(page).evaluate((el) => el.scrollIntoView({ block: "center", behavior: "instant" }));
     const first = AUDIENCE_JOBS[0];
     await expect(on(page).locator(".cp-aud__outcome")).toHaveText(first.outcome);
     await expect(on(page).locator(".cp-aud__job")).toHaveText(first.job);
-    await expect(page.locator(".cp-aud__quiet")).toHaveText(BAND_NOTE);
+    // The quiet line under the band was removed (owner, 2026-09-27).
+    await expect(page.locator(".cp-aud__quiet")).toHaveCount(0);
+    await expect(page.locator("body")).not.toContainText("not rebuilding public data");
     expect(errors).toEqual([]);
   });
 
@@ -2298,7 +2299,7 @@ test.describe("the bundle", () => {
     }
     const citing = AUDIENCE_JOBS.filter((audience) => audience.collections.some((id) => ids.includes(id)));
     expect(citing.map((audience) => audience.id).sort()).toEqual(
-      ["ancs-nhos", "banks-lenders", "foundations-philanthropy", "journalists", "native-nonprofits"],
+      ["ancs-nhos", "banks-lenders", "economic-development", "foundations-philanthropy", "journalists", "native-nonprofits"],
     );
     for (const audience of citing) needles.push(audience.explanation);
     needles.push("Foundations and philanthropy");
