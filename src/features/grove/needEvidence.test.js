@@ -1,0 +1,36 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+import { evidenceSections, isEnterpriseSubject, NEED_EVIDENCE_EMPTY } from "./needEvidence.js";
+
+test("NEED preserves issued enterprise IDs and distinguishes a Native entity", () => {
+  assert.equal(isEnterpriseSubject("CEDAR-NEST-000570-HT"), true);
+  assert.equal(isEnterpriseSubject("CB-SYNTHETIC"), true);
+  assert.equal(isEnterpriseSubject("CE-SYNTHETIC"), false);
+  assert.equal(isEnterpriseSubject(null), false);
+  assert.match(NEED_EVIDENCE_EMPTY, /does not establish/);
+});
+
+test("Held, missing and unsafe-source facts never become visible evidence", () => {
+  const row = { publication_status: "eligible", source_url: "https://example.org", hold_reason: "" };
+  assert.deepEqual(evidenceSections({ status: "publication_held", patent_observations: [row] }), []);
+  assert.deepEqual(evidenceSections(null), []);
+  assert.deepEqual(evidenceSections({ status: "available", patent_observations: [
+    { ...row, hold_reason: "rights" }, { ...row, publication_status: "held" },
+    { ...row, source_url: "javascript:alert(1)" }, { ...row, source_url: "https://u:p@example.org" },
+    { ...row, source_url: "invalid" },
+  ] }), []);
+});
+
+test("Issuer, instrument, historical status and patent assignment caution remain visible", () => {
+  const row = { publication_status: "eligible", source_url: "https://example.org", hold_reason: "" };
+  const sections = evidenceSections({ status: "available",
+    patent_observations: [{ ...row, observation_id: "p", subject_name: "Enterprise A", publication_id: "SYNTH", relationship_type: "grant" }],
+    credit_rating_actions: [{ ...row, observation_id: "r", issuer_name: "Enterprise B", agency: "Agency", rating: "BBB-", instrument: "Secured notes", action: "Withdrawn", outlook: "Negative" }],
+    rating_availability: [{ ...row, availability_id: "a", subject_name: "Enterprise C", agency: "Agency", availability_status: "not_rated" }],
+  });
+  assert.equal(sections.length, 3);
+  assert.match(sections[0].items[0].detail, /ownership is not established/);
+  assert.match(sections[1].items[0].label, /Enterprise B.*BBB-.*Withdrawn/);
+  assert.match(sections[1].items[0].detail, /Secured notes.*Negative.*not a verified current/);
+  assert.match(sections[2].items[0].detail, /not a rating grade/);
+});

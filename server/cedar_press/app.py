@@ -65,6 +65,7 @@ from starlette.background import BackgroundTask
 from cedar_press import (
     cedar_service,
     codes,
+    need_profiles,
     press_catalog,
     priorities,
     ratelimit,
@@ -487,6 +488,32 @@ def collections(session: Session = Depends(require_session)) -> dict[str, object
 def release_collections(session: Session = Depends(require_session)) -> dict[str, object]:
     """Collection release integration targets with verified metadata when available."""
     return repository.release_targets_for(session.tier)
+
+
+@app.get("/press/need/enterprises/{enterprise_id}/evidence")
+def need_enterprise_evidence(
+    enterprise_id: str,
+    response: Response,
+    session: Session = Depends(require_session),
+) -> dict:
+    """Sourced patent and rating observations, subject to the NEED publication hold."""
+    if not repository.may_download_full(session.tier, "need"):
+        raise HTTPException(status_code=403, detail="Collection not included")
+    try:
+        subscriber = subscribers.find(session.email)
+    except Exception as error:
+        raise HTTPException(status_code=503, detail="Authorization unavailable") from error
+    if subscriber is None:
+        raise HTTPException(status_code=401, detail="Authentication required")
+    if not repository.may_download_full(subscriber.tier, "need"):
+        raise HTTPException(status_code=403, detail="Collection not included")
+    response.headers["Cache-Control"] = "private, no-store"
+    try:
+        return need_profiles.enterprise_evidence(enterprise_id)
+    except repository.FullReleaseUnavailable as error:
+        raise HTTPException(status_code=503, detail="Verified NEED evidence unavailable") from error
+    except ValueError as error:
+        raise HTTPException(status_code=400, detail="Invalid enterprise identifier") from error
 
 
 @app.get("/press/shelf", response_class=HTMLResponse)

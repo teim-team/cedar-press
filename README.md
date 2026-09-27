@@ -12,6 +12,14 @@ Built by [Lumecon](https://lumecon.ai). Available exclusively through
 
 ## The service
 
+NEED enterprise profiles use the same pinned, verified collection releases as
+downloads. Patent observations and rating histories attach to exact enterprise
+IDs; affiliated Native entities do not inherit them. The NEED collection
+publication hold currently returns an explicit empty state before release
+transport. Internal review candidates remain separate from customer eligibility.
+The authenticated evidence endpoint is
+`GET /press/need/enterprises/{enterprise_id}/evidence`.
+
 | Section | What it holds |
 | --- | --- |
 | Overview | The service at a glance, with each section's current standing. |

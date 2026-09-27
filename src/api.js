@@ -219,3 +219,7 @@ export async function submitResearchRequest({ text, useCase, priorityId, support
 }
 
 export { ApiError };
+
+export function getNeedEnterpriseEvidence(enterpriseId, { signal } = {}) {
+  return request(`/press/need/enterprises/${encodeURIComponent(enterpriseId)}/evidence`, { signal });
+}

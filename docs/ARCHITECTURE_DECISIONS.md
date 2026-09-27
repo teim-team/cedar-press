@@ -3963,6 +3963,14 @@ remain prohibited. Original canonical data and active review artifacts stay pinn
 
 <!-- BEGIN CEDAR-CONVERGENCE-20260926 -->
 Coordinator owns this isolated integration worktree and the common release consumers, entitlement registration, producer pins, generated inventory and convergence handoff. Existing sources and active identity review stay preserved. The user authorized commits, review-branch pushes and draft PRs for this recovery; no production release or identity issuance.
+2026-09-27 continuation: the coordinator also owns the NEED enterprise evidence
+adapter and profile presentation. PR #131 is merged upstream; PR #133's product
+work is incorporated at its tested head without writing that branch. Exact
+enterprise IDs are preserved under the September 23 identity contract, including
+CEDAR-NEST and NESTREL. NEED is the collection name. Publication review is enforced
+before pin or source access. Parent Native entities do not inherit patents or
+ratings. Profile preview amounts are no longer summed across collections because
+their financial measures and overlapping grains differ.
 <!-- END CEDAR-CONVERGENCE-20260926 -->
 
 <!-- BEGIN CEDAR-GIVING-PLOT-CONSUMER-20260926 -->

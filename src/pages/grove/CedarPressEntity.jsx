@@ -42,7 +42,9 @@ import { useScrollToTop } from "../../features/grove/useScrollToTop";
 import { COLLECTION_ICONS } from "./pressCollectionIcons";
 import { PressCedarFab } from "./PressCedarFab";
 import { PressFoot, PressMast } from "./PressChrome";
+import NeedEnterpriseEvidence from "./NeedEnterpriseEvidence";
 import PressGate from "./PressGate";
+import { isEnterpriseSubject } from "../../features/grove/needEvidence.js";
 
 /** Where an entity action goes: the table, narrowed and ordered for it. */
 function entityActionHref(action, uid) {
@@ -80,7 +82,8 @@ export default function CedarPressEntity() {
   const entity = register.byUid.get(uid) ?? null;
   // The register has loaded and this id is not in it. The page then has no
   // entity to describe records for, and no table to open narrowed to it.
-  const unknown = !entity && register.entities.length > 0;
+  const enterpriseSubject = isEnterpriseSubject(uid);
+  const unknown = !entity && !enterpriseSubject && register.entities.length > 0;
   const mine = useMemo(
     () => rows.filter((item) => item.entity.entities.some((e) => e.uid === uid)),
     [rows, uid],
@@ -110,16 +113,8 @@ export default function CedarPressEntity() {
 
   // Grouped by collection, in the catalog's order, so the profile reads as
   // the shelf does.
-  // What the rows on this screen add up to, where they carry money at all.
-  // `count` travels with it so the label can never be read as a total for
-  // the entity: it is a sum of a preview, and the preview is ten rows a
-  // table.
-  const shown = useMemo(() => {
-    const amounts = mine.filter((item) => typeof item.amount === "number");
-    return amounts.length
-      ? { total: amounts.reduce((sum, item) => sum + item.amount, 0), count: amounts.length }
-      : { total: null, count: 0 };
-  }, [mine]);
+  // Amounts remain on their source rows. Obligations, payments, deal values,
+  // ceilings and overlapping awards do not form one entity-wide sum.
   const groups = useMemo(() => {
     const byCollection = new Map();
     for (const item of mine) {
@@ -142,10 +137,10 @@ export default function CedarPressEntity() {
   const notice = samplesLoading
     ? "Reading the published previews…"
     : `Records Cedar Press has resolved to this entity, from the published previews — up to ten sample rows per table, never a count of a release. The name each source used stays visible.${locked ? ` ${locked} more collections open on Cedar Press+.` : ""}`;
-  const name = entity?.withheld ? WITHHELD_TEXT : entity?.name ?? null;
+  const name = entity?.withheld ? WITHHELD_TEXT : entity?.name ?? (enterpriseSubject ? "Enterprise profile" : null);
 
   /**
-   * FOUR DERIVED FIGURES, AND WHERE THEY GO ON A PHONE.
+   * DERIVED FIGURES, AND WHERE THEY GO ON A PHONE.
    *
    * They are a summary OF the records, and on a 390x664 screen they stood
    * 125px tall between the reader and the first one — two-column stacks of
@@ -175,16 +170,6 @@ export default function CedarPressEntity() {
         <div>
           <dt>Visible span</dt>
           <dd>{dates[0] === dates[dates.length - 1] ? dates[0] : `${dates[0]} to ${dates[dates.length - 1]}`}</dd>
-        </div>
-      ) : null}
-      {/* Only where the rows carry money. A sum of what is on the screen,
-          labelled as that and nothing wider: the preview is ten rows a table,
-          so this is never a total for the entity and the label may not let
-          anybody read it as one. */}
-      {shown.total != null ? (
-        <div>
-          <dt>{shown.count === 1 ? "On this row" : `On these ${shown.count} rows`}</dt>
-          <dd>{money.format(shown.total)}</dd>
         </div>
       ) : null}
     </dl>
@@ -308,6 +293,8 @@ export default function CedarPressEntity() {
             </p>
           ) : null}
         </header>
+
+        {opened.has("need") ? <NeedEnterpriseEvidence enterpriseId={uid} /> : null}
 
         {samplesLoading && !groups.length ? (
           <p className="cp-rec__fine cp-ent__empty">Reading the published samples…</p>
