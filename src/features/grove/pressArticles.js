@@ -116,6 +116,9 @@ export const PRESS_ARTICLES = Object.freeze([
     // Not a placeholder: the aggregates cited are from the roster White Earth
     // Nation's TERO actually supplied on 2026-08-28.
     demonstration: false,
+    // House duotone for this piece's photographs (owner, 2026-09-27: not
+    // one colour for everything). One of duotone.js's five washes.
+    tone: "gold",
     image: "/pitch/lanes/construction-wide.webp",
     imageAlt: "Crews working a large construction site",
     caption:
@@ -183,6 +186,7 @@ export const PRESS_ARTICLES = Object.freeze([
       Object.freeze({
         kind: BLOCK.IMAGE,
         src: "/pitch/lanes/professional-wide.webp",
+        tone: "green",
         alt: "A meeting around a conference table",
         caption:
           "Each nation's office decides the terms: publication, aggregates only, or a process of its own design.",
@@ -198,6 +202,7 @@ export const PRESS_ARTICLES = Object.freeze([
     id: "brief-deals",
     hosted: true,
     demonstration: true,
+    tone: "teal",
     image: "/pitch/lanes/professional-wide.webp",
     imageAlt: "A negotiation around a conference table",
     caption:
@@ -278,11 +283,13 @@ export const PRESS_ARTICLES = Object.freeze([
         images: Object.freeze([
           Object.freeze({
             src: "/pitch/lanes/publicadmin-wide.webp",
+            tone: "bronze",
             alt: "The United States Capitol",
             caption: "Federal programs remain the counterparty on a large share of project financings.",
           }),
           Object.freeze({
             src: "/pitch/lanes/construction-wide.webp",
+            tone: "gold",
             alt: "Crews working a large construction site",
             caption: "Construction starts trail announcements by two to four quarters in most of the series.",
           }),
@@ -344,6 +351,7 @@ export const PRESS_ARTICLES = Object.freeze([
     id: "brief-contractors",
     hosted: true,
     demonstration: true,
+    tone: "green",
     image: "/pitch/lanes/construction-wide.webp",
     imageAlt: "Crews working a large construction site",
     caption:
@@ -426,6 +434,7 @@ export const PRESS_ARTICLES = Object.freeze([
       Object.freeze({
         kind: BLOCK.IMAGE,
         src: "/pitch/lanes/professional-wide.webp",
+        tone: "gold",
         alt: "A meeting around a conference table",
         caption:
           "Professional and technical services carry the quarters that moved, on smaller awards spread across more firms.",
@@ -480,6 +489,7 @@ export const PRESS_ARTICLES = Object.freeze([
     // point, and a piece that runs on TBN is the one doing the work of
     // bringing somebody to the product in the first place.
     href: TBN_URL,
+    tone: "slate",
     image: "/pitch/lanes/publicadmin-wide.webp",
     imageAlt: "The United States Capitol",
     datasetId: "funding",

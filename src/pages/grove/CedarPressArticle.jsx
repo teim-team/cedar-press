@@ -55,9 +55,12 @@ import {
   PRESS_DATA_PATH,
   PRESS_METHODS_PATH,
   PRESS_PATH,
+  pressArticlePath,
 } from "../../features/grove/pressRoutes";
 import { useScrollToTop } from "../../features/grove/useScrollToTop";
 import { GROVE_MARKETING_URL } from "../../features/grove/appLink.js";
+import { toneClass } from "../../features/grove/duotone.js";
+import { ShareArticle } from "./ShareArticle";
 import PressAd from "./PressAd";
 import { PressCedarFab } from "./PressCedarFab";
 import { TierName } from "./TierName";
@@ -120,12 +123,13 @@ function Figure({ block, lead = false }) {
  * that breaks out past the column collides with whatever is in the rail at
  * that moment. The lead picture is the one that gets the page.
  */
-function BodyImage({ src, alt, caption, credit }) {
+function BodyImage({ src, alt, caption, credit, tone }) {
   return (
     <figure className="cp-ar__inline">
       {/* Sized so the column does not reflow when the picture lands: the
           text below a body image is what a reader is in the middle of. */}
       <img
+        className={toneClass(tone)}
         src={src}
         alt={alt}
         width={ARTICLE_IMAGE.width}
@@ -339,6 +343,8 @@ export default function CedarPressArticle() {
   // "it needs ad space examples").
   const headings = body.flatMap((b, i) => (b.kind === BLOCK.H2 ? [i] : []));
   const inlineAdAt = headings[1] ?? -1;
+  // The rest of the research, beside the piece: newest first, three at most.
+  const related = PRESS_ARTICLES.filter((other) => other.id !== article.id && other.image).slice(0, 3);
 
   return (
     <div className="teim-rd teim-rd--paper">
@@ -350,68 +356,69 @@ export default function CedarPressArticle() {
         <PressBack label="All Data Briefs" to={PRESS_ARTICLES_PATH} />
 
         <article className="cp-ar">
-          {/* THE HEAD OF THE PAGE, IN THE SHAPE THE CENTER FOR INDIAN COUNTRY
-              DEVELOPMENT'S RESEARCH USES (owner, 2026-09-27): a navy band with
-              the title, the dek, the date and the authors, each with a face
-              and a role; then the lead picture, with three headlines from the
-              piece in a box over its right side; then the collections the
-              piece used, open to a reader who has them and priced for one who
-              does not. */}
+          {/* THE HEAD OF THE PAGE (owner, 2026-09-27). The structure of the
+              Center for Indian Country Development's research pages, drawn
+              as Cedar Press rather than copied: one navy band with the
+              piece's own photograph in its duotone behind the right half,
+              the title, dek, date, share actions and authors on the left,
+              and the three highlights in the top right, over the picture. */}
           <header className="cp-ar__hero cp-fade">
-            <p className="cp-ar__tag">{article.tag}</p>
-            <h1 className="cp-ar__title">{article.title}</h1>
-            <span className="cp-ar__rule" aria-hidden="true" />
-            <p className="cp-ar__dek">{article.dek}</p>
-            <p className="cp-ar__meta">
-              <span>{article.date}</span>
-              {article.minutes ? <span>{article.minutes} min read</span> : null}
-            </p>
-            <section className="cp-ar__authors" aria-label="Authors">
-              <h2 className="cp-ar__authorscap">{authors.length > 1 ? "Authors" : "Author"}</h2>
-              <ul className="cp-ar__authorlist">
-                {authors.map((author) => (
-                  <li className="cp-ar__author" key={author.name}>
-                    {author.photo ? (
-                      <img className="cp-ar__face" src={author.photo} alt="" width="72" height="72" loading="lazy" />
-                    ) : (
-                      <span className="cp-ar__face cp-ar__face--mark" aria-hidden="true">
-                        {author.name.split(/\s+/).filter((w) => /^[A-Z]/.test(w)).slice(0, 2).map((w) => w[0]).join("")}
+            <img
+              className={`cp-ar__heroart ${toneClass(article.tone)}`}
+              src={article.image}
+              alt={article.imageAlt}
+              width={ARTICLE_IMAGE.width}
+              height={ARTICLE_IMAGE.height}
+              fetchPriority="high"
+            />
+            <div className="cp-ar__herogrid">
+              <div className="cp-ar__herotext">
+                <p className="cp-ar__tag">{article.tag}</p>
+                <h1 className="cp-ar__title">{article.title}</h1>
+                <p className="cp-ar__dek">{article.dek}</p>
+                <p className="cp-ar__meta">
+                  <span>{article.date}</span>
+                  {article.minutes ? <span>{article.minutes} min read</span> : null}
+                </p>
+                <ShareArticle
+                  article={article}
+                  path={pressArticlePath(article.id)}
+                  collections={drawn
+                    .filter((id) => PRESS_CATALOG_BY_ID[id])
+                    .map((id) => ({ name: PRESS_CATALOG_BY_ID[id].name, path: `${PRESS_DATA_PATH}?c=${id}` }))}
+                />
+                <ul className="cp-ar__authorlist" aria-label="Authors">
+                  {authors.map((author) => (
+                    <li className="cp-ar__author" key={author.name}>
+                      {author.photo ? (
+                        <img className="cp-ar__face" src={author.photo} alt="" width="72" height="72" loading="lazy" />
+                      ) : (
+                        <span className="cp-ar__face cp-ar__face--mark" aria-hidden="true">
+                          {author.name.split(/\s+/).filter((w) => /^[A-Z]/.test(w)).slice(0, 2).map((w) => w[0]).join("")}
+                        </span>
+                      )}
+                      <span className="cp-ar__authorid">
+                        <span className="cp-ar__by">{author.name}</span>
+                        {author.role ? <span className="cp-ar__role">{author.role}</span> : null}
                       </span>
-                    )}
-                    <span className="cp-ar__authorid">
-                      <span className="cp-ar__by">{author.name}</span>
-                      {author.role ? <span className="cp-ar__role">{author.role}</span> : null}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          </header>
-
-          <div className="cp-ar__lead cp-fade">
-            <figure className="cp-ar__figure cp-ar__heroimg">
-              <img
-                className="cp-ar__art"
-                src={article.image}
-                alt={article.imageAlt}
-                width={ARTICLE_IMAGE.width}
-                height={ARTICLE_IMAGE.height}
-                fetchPriority="high"
-              />
-              <figcaption className="cp-ar__cap">
-                {article.caption ?? article.imageAlt}
-                {article.credit ? <span className="cp-ar__credit">{article.credit}</span> : null}
-              </figcaption>
-            </figure>
-            {article.highlights?.length ? (
-              <aside className="cp-ar__highlights" aria-label="Article highlights">
-                <h2 className="cp-ar__hlcap">Article highlights</h2>
-                <ul className="cp-ar__hllist">
-                  {article.highlights.map((line) => <li key={line}>{line}</li>)}
+                    </li>
+                  ))}
                 </ul>
-              </aside>
-            ) : null}
-          </div>
+              </div>
+              {article.highlights?.length ? (
+                <aside className="cp-ar__highlights" aria-label="Article highlights">
+                  <h2 className="cp-ar__hlcap">Article highlights</h2>
+                  <ul className="cp-ar__hllist">
+                    {article.highlights.map((line) => <li key={line}>{line}</li>)}
+                  </ul>
+                </aside>
+              ) : null}
+            </div>
+          </header>
+          <p className="cp-ar__herocap">
+            {article.caption ?? article.imageAlt}
+            {article.credit ? <span className="cp-ar__credit">{article.credit}</span> : null}
+          </p>
 
           <div className="cp-ar__uses">
             <span className="cp-ar__usecap">
@@ -480,6 +487,44 @@ export default function CedarPressArticle() {
                   How these are built <span aria-hidden="true">&#8594;</span>
                 </Link>
               </div>
+              {related.length ? (
+                <nav className="cp-ar__related" aria-label="Related research">
+                  <span className="cp-ar__railcap">Related research</span>
+                  <ul className="cp-ar__rellist">
+                    {related.map((other) => {
+                      const inner = (
+                        <>
+                          <img
+                            className={`cp-ar__relimg ${toneClass(other.tone)}`}
+                            src={other.image}
+                            alt=""
+                            width={ARTICLE_IMAGE.width}
+                            height={ARTICLE_IMAGE.height}
+                            loading="lazy"
+                          />
+                          <span className="cp-ar__reltext">
+                            <span className="cp-ar__reltag">{PRESS_CATALOG_BY_ID[other.datasetId]?.name ?? other.tag}</span>
+                            <span className="cp-ar__reltitle">{other.title}</span>
+                            <span className="cp-ar__reldate">
+                              {other.date}
+                              {other.hosted ? "" : " · on Tribal Business News"}
+                            </span>
+                          </span>
+                        </>
+                      );
+                      return (
+                        <li key={other.id}>
+                          {other.hosted ? (
+                            <Link className="cp-ar__rel" to={pressArticlePath(other.id)}>{inner}</Link>
+                          ) : (
+                            <a className="cp-ar__rel" href={other.href} target="_blank" rel="noreferrer">{inner}</a>
+                          )}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </nav>
+              ) : null}
               {longEnough ? <PressAd slot={AD_SLOT.ARTICLE_RAIL_LOWER} example /> : null}
               {longEnough ? <PressAd slot={AD_SLOT.ARTICLE_RAIL_END} example /> : null}
             </aside>

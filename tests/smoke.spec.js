@@ -2905,9 +2905,11 @@ test.describe("the loop between the records and the journalism", () => {
     const hero = page.locator(".cp-ar__hero");
     await expect(hero.getByRole("heading", { level: 1 })).toContainText("Announced deals");
     await expect(hero.locator(".cp-ar__by")).toContainText("Cedar Press research desk");
-    await expect(page.locator(".cp-ar__lead img.cp-ar__art")).toBeVisible();
-    // Three headlines from the piece, in a box beside the picture.
-    await expect(page.locator(".cp-ar__highlights li")).toHaveCount(3);
+    await expect(hero.locator("img.cp-ar__heroart")).toBeVisible();
+    // Three headlines from the piece, in the band's top right.
+    await expect(hero.locator(".cp-ar__highlights li")).toHaveCount(3);
+    // The rest of the research, as cards down the rail.
+    expect(await page.locator(".cp-ar__related .cp-ar__rel").count()).toBeGreaterThanOrEqual(2);
     const uses = page.locator(".cp-ar__uses .cp-ar__use");
     await expect(uses.first()).toContainText("Deals");
     expect(await page.locator(".cp-ar__body .cp-ar__fig").count()).toBeGreaterThanOrEqual(2);
@@ -2918,6 +2920,29 @@ test.describe("the loop between the records and the journalism", () => {
     await expect(page.locator(".cp-ad--example .cp-ad__cap").first()).toHaveText("Sponsored · Example");
     await uses.first().getByRole("link", { name: /Open the data/ }).click();
     await expect(page).toHaveURL(/\/data\?c=deals/);
+    expect(errors).toEqual([]);
+  });
+
+  // Share (owner, 2026-09-27): the brief as a PDF, with its figures and the
+  // way to Cedar Press+, to pass around.
+  test("a research brief downloads as a PDF with its figures", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop", "one download is enough");
+    const errors = watchConsole(page);
+    await signIn(page);
+    await page.goto("/articles/brief-contractors");
+    const share = page.getByRole("group", { name: "Share this brief" });
+    await expect(share.getByRole("button", { name: "Email this brief" })).toBeVisible();
+    const [download] = await Promise.all([
+      page.waitForEvent("download"),
+      share.getByRole("button", { name: "Download PDF" }).click(),
+    ]);
+    expect(download.suggestedFilename()).toMatch(/^federal-contracting-to-native-entities.*\.pdf$/);
+    const bytes = await (await download.createReadStream()).toArray().then((c) => Buffer.concat(c));
+    expect(bytes.subarray(0, 5).toString()).toBe("%PDF-");
+    // Two charts and the lead picture: a figure that failed to rasterize
+    // would leave the file small.
+    expect(bytes.length).toBeGreaterThan(60_000);
+    expect(bytes.toString("latin1")).toContain("tribalbusinessnews.com/subscribe");
     expect(errors).toEqual([]);
   });
 
