@@ -1,7 +1,8 @@
 """Approved additive collection targets and public component presentation order.
 
-These declarations contain no row counts, publication claims or release pins.
-Exact reviewed Lumecon manifests remain the authority for those facts.
+Declarations preserve machine columns and display metadata from verified releases.
+Their source pins record provenance; configured runtime pins, entitlements and
+publication policy remain the authority for serving bytes.
 """
 
 import json

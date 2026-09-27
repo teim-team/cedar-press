@@ -1355,7 +1355,7 @@ def grove_release_metadata(collection_id):
             KeyError, TypeError, sqlite3.Error):
         return unavailable
     out = []
-    for component, missing in zip(components, unavailable):
+    for component, missing in zip(components, unavailable, strict=True):
         try:
             out.append(_grove_component_release(pin, manifest, component, metadata_only=True))
         except (FullReleaseUnavailable, OSError, HTTPException, ValueError,

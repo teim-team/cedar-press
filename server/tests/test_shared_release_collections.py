@@ -132,7 +132,9 @@ class SharedCollectionReleaseTest(unittest.TestCase):
         with (
             patch.object(repository, "_release_json", return_value=manifest) as fetch,
             patch.object(repository, "_grove_catalog", wraps=repository._grove_catalog) as catalog,
-            patch.object(repository, "_release_bytes", side_effect=AssertionError("No row download")),
+            patch.object(
+                repository, "_release_bytes", side_effect=AssertionError("No row download")
+            ),
         ):
             first = repository.grove_release_metadata("plot")
             self.assertEqual(len(first), len(repository.grove_components("plot")))
@@ -146,8 +148,13 @@ class SharedCollectionReleaseTest(unittest.TestCase):
             self.assertEqual(fetch.call_count, 3)
 
     def test_held_discovery_does_not_read_pins_or_sources(self):
-        with patch.object(repository, "grove_release_pin", side_effect=AssertionError("No pin lookup")):
-            self.assertTrue(all(row["status"] == "unavailable" for row in repository.grove_release_metadata("need")))
+        with patch.object(
+            repository, "grove_release_pin", side_effect=AssertionError("No pin lookup")
+        ):
+            self.assertTrue(all(
+                row["status"] == "unavailable"
+                for row in repository.grove_release_metadata("need")
+            ))
 
     def test_fifteen_targets_preserve_tiers_and_never_invent_samples(self):
         with (

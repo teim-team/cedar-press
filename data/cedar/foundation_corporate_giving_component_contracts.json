@@ -1,0 +1,1536 @@
+{
+  "collection": "foundation-corporate-giving",
+  "components": {
+    "held_disclosures": {
+      "collection": "foundation-corporate-giving",
+      "display_order": [
+        "disclosure_id",
+        "source_id",
+        "source_url",
+        "source_record_id",
+        "addability_status",
+        "amount_class",
+        "amount_exact_usd",
+        "amount_lower_usd",
+        "amount_upper_usd",
+        "financial_status",
+        "overlap_status",
+        "partition",
+        "recipient_role",
+        "record_kind",
+        "review_action",
+        "rights_classification",
+        "source_document_sha256",
+        "version_kind",
+        "funder_name",
+        "funder_class",
+        "funder_ein",
+        "recipient_name_reported",
+        "recipient_ein",
+        "recipient_city",
+        "recipient_state",
+        "recipient_country",
+        "amount_basis",
+        "currency",
+        "transfer_kind",
+        "report_year",
+        "report_year_basis",
+        "approval_date",
+        "payment_date",
+        "term_start",
+        "term_end",
+        "term_start_precision",
+        "term_end_precision",
+        "event_type",
+        "award_family_source",
+        "fiscal_sponsor_name",
+        "beneficiary_name",
+        "source_locator",
+        "publication_status",
+        "source_policy_eligibility",
+        "aggregation_status",
+        "hold_reason",
+        "temporal_caveat",
+        "source_observation_status",
+        "source_qa_flags",
+        "asserted_recipient_cedar_uid",
+        "asserted_funder_cedar_uid"
+      ],
+      "fields": [
+        {
+          "column": "addability_status",
+          "decision": "keep",
+          "description": "Source disclosure metadata: addability status",
+          "display_disposition": "keep",
+          "label": "addability status",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "amount_class",
+          "decision": "keep",
+          "description": "Source disclosure metadata: amount class",
+          "display_disposition": "keep",
+          "label": "amount class",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "amount_exact_usd",
+          "decision": "keep",
+          "description": "Exact nominal USD decimal text. Never sum differing financial states or duplicate disclosures.",
+          "display_disposition": "keep",
+          "label": "amount exact usd",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "amount_lower_usd",
+          "decision": "keep",
+          "description": "Exact nominal USD decimal text. Never sum differing financial states or duplicate disclosures.",
+          "display_disposition": "keep",
+          "label": "amount lower usd",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "amount_upper_usd",
+          "decision": "keep",
+          "description": "Exact nominal USD decimal text. Never sum differing financial states or duplicate disclosures.",
+          "display_disposition": "keep",
+          "label": "amount upper usd",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "disclosure_id",
+          "decision": "keep",
+          "description": "Source disclosure metadata: disclosure id",
+          "display_disposition": "keep",
+          "label": "disclosure id",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "financial_status",
+          "decision": "keep",
+          "description": "Source disclosure metadata: financial status",
+          "display_disposition": "keep",
+          "label": "financial status",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "overlap_status",
+          "decision": "keep",
+          "description": "Source disclosure metadata: overlap status",
+          "display_disposition": "keep",
+          "label": "overlap status",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "partition",
+          "decision": "keep",
+          "description": "Source disclosure metadata: partition",
+          "display_disposition": "keep",
+          "label": "partition",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "recipient_role",
+          "decision": "keep",
+          "description": "Source disclosure metadata: recipient role",
+          "display_disposition": "keep",
+          "label": "recipient role",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "record_kind",
+          "decision": "keep",
+          "description": "Source disclosure metadata: record kind",
+          "display_disposition": "keep",
+          "label": "record kind",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "review_action",
+          "decision": "keep",
+          "description": "Source disclosure metadata: review action",
+          "display_disposition": "keep",
+          "label": "review action",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "rights_classification",
+          "decision": "keep",
+          "description": "Source disclosure metadata: rights classification",
+          "display_disposition": "keep",
+          "label": "rights classification",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "source_document_sha256",
+          "decision": "keep",
+          "description": "Source disclosure metadata: source document sha256",
+          "display_disposition": "keep",
+          "label": "source document sha256",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "source_id",
+          "decision": "keep",
+          "description": "Source disclosure metadata: source id",
+          "display_disposition": "keep",
+          "label": "source id",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "source_url",
+          "decision": "keep",
+          "description": "Source disclosure metadata: source url",
+          "display_disposition": "keep",
+          "label": "source url",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "version_kind",
+          "decision": "keep",
+          "description": "Source disclosure metadata: version kind",
+          "display_disposition": "keep",
+          "label": "version kind",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "funder_name",
+          "decision": "keep",
+          "description": "Source disclosure metadata: funder name",
+          "display_disposition": "keep",
+          "label": "funder name",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "funder_class",
+          "decision": "keep",
+          "description": "Source disclosure metadata: funder class",
+          "display_disposition": "keep",
+          "label": "funder class",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "funder_ein",
+          "decision": "keep",
+          "description": "Source disclosure metadata: funder ein",
+          "display_disposition": "keep",
+          "label": "funder ein",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "recipient_name_reported",
+          "decision": "keep",
+          "description": "Source disclosure metadata: recipient name reported",
+          "display_disposition": "keep",
+          "label": "recipient name reported",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "recipient_ein",
+          "decision": "keep",
+          "description": "Source disclosure metadata: recipient ein",
+          "display_disposition": "keep",
+          "label": "recipient ein",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "recipient_city",
+          "decision": "keep",
+          "description": "Source disclosure metadata: recipient city",
+          "display_disposition": "keep",
+          "label": "recipient city",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "recipient_state",
+          "decision": "keep",
+          "description": "Source disclosure metadata: recipient state",
+          "display_disposition": "keep",
+          "label": "recipient state",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "recipient_country",
+          "decision": "keep",
+          "description": "Source disclosure metadata: recipient country",
+          "display_disposition": "keep",
+          "label": "recipient country",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "amount_basis",
+          "decision": "keep",
+          "description": "Source disclosure metadata: amount basis",
+          "display_disposition": "keep",
+          "label": "amount basis",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "currency",
+          "decision": "keep",
+          "description": "Source disclosure metadata: currency",
+          "display_disposition": "keep",
+          "label": "currency",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "transfer_kind",
+          "decision": "keep",
+          "description": "Source disclosure metadata: transfer kind",
+          "display_disposition": "keep",
+          "label": "transfer kind",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "report_year",
+          "decision": "keep",
+          "description": "Source year label; use only with report_year_basis; never infer event year.",
+          "display_disposition": "keep",
+          "label": "report year",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "report_year_basis",
+          "decision": "keep",
+          "description": "Source fiscal/calendar/reporting basis; blank means unestablished.",
+          "display_disposition": "keep",
+          "label": "report year basis",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "approval_date",
+          "decision": "keep",
+          "description": "Source reported approval date, distinct from publication and payment.",
+          "display_disposition": "keep",
+          "label": "approval date",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "payment_date",
+          "decision": "keep",
+          "description": "Source reported payment date; blank does not establish paid status.",
+          "display_disposition": "keep",
+          "label": "payment date",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "term_start",
+          "decision": "keep",
+          "description": "Source award-period start, interpreted with term_start_precision.",
+          "display_disposition": "keep",
+          "label": "term start",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "term_end",
+          "decision": "keep",
+          "description": "Source award-period end, interpreted with term_end_precision.",
+          "display_disposition": "keep",
+          "label": "term end",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "term_start_precision",
+          "decision": "keep",
+          "description": "Source disclosure metadata: term start precision",
+          "display_disposition": "keep",
+          "label": "term start precision",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "term_end_precision",
+          "decision": "keep",
+          "description": "Source disclosure metadata: term end precision",
+          "display_disposition": "keep",
+          "label": "term end precision",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "event_type",
+          "decision": "keep",
+          "description": "Source disclosure metadata: event type",
+          "display_disposition": "keep",
+          "label": "event type",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "source_record_id",
+          "decision": "keep",
+          "description": "Source disclosure metadata: source record id",
+          "display_disposition": "keep",
+          "label": "source record id",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "award_family_source",
+          "decision": "keep",
+          "description": "Source disclosure metadata: award family source",
+          "display_disposition": "keep",
+          "label": "award family source",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "fiscal_sponsor_name",
+          "decision": "keep",
+          "description": "Source disclosure metadata: fiscal sponsor name",
+          "display_disposition": "keep",
+          "label": "fiscal sponsor name",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "beneficiary_name",
+          "decision": "keep",
+          "description": "Source disclosure metadata: beneficiary name",
+          "display_disposition": "keep",
+          "label": "beneficiary name",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "source_locator",
+          "decision": "keep",
+          "description": "Source disclosure metadata: source locator",
+          "display_disposition": "keep",
+          "label": "source locator",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "publication_status",
+          "decision": "keep",
+          "description": "Source disclosure metadata: publication status",
+          "display_disposition": "keep",
+          "label": "publication status",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "source_policy_eligibility",
+          "decision": "keep",
+          "description": "Source disclosure metadata: source policy eligibility",
+          "display_disposition": "keep",
+          "label": "source policy eligibility",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "aggregation_status",
+          "decision": "keep",
+          "description": "Source disclosure metadata: aggregation status",
+          "display_disposition": "keep",
+          "label": "aggregation status",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "hold_reason",
+          "decision": "keep",
+          "description": "Source disclosure metadata: hold reason",
+          "display_disposition": "keep",
+          "label": "hold reason",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "temporal_caveat",
+          "decision": "keep",
+          "description": "Source disclosure metadata: temporal caveat",
+          "display_disposition": "keep",
+          "label": "temporal caveat",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "source_observation_status",
+          "decision": "keep",
+          "description": "Source disclosure metadata: source observation status",
+          "display_disposition": "keep",
+          "label": "source observation status",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "source_qa_flags",
+          "decision": "keep",
+          "description": "Source disclosure metadata: source qa flags",
+          "display_disposition": "keep",
+          "label": "source qa flags",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "asserted_recipient_cedar_uid",
+          "decision": "keep",
+          "description": "Preserved identity assertion, not an approved linkage.",
+          "display_disposition": "keep",
+          "label": "asserted recipient cedar uid",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "asserted_funder_cedar_uid",
+          "decision": "keep",
+          "description": "Preserved identity assertion, not an approved linkage.",
+          "display_disposition": "keep",
+          "label": "asserted funder cedar uid",
+          "rights_class": "restricted"
+        }
+      ],
+      "order": [
+        "addability_status",
+        "amount_class",
+        "amount_exact_usd",
+        "amount_lower_usd",
+        "amount_upper_usd",
+        "disclosure_id",
+        "financial_status",
+        "overlap_status",
+        "partition",
+        "recipient_role",
+        "record_kind",
+        "review_action",
+        "rights_classification",
+        "source_document_sha256",
+        "source_id",
+        "source_url",
+        "version_kind",
+        "funder_name",
+        "funder_class",
+        "funder_ein",
+        "recipient_name_reported",
+        "recipient_ein",
+        "recipient_city",
+        "recipient_state",
+        "recipient_country",
+        "amount_basis",
+        "currency",
+        "transfer_kind",
+        "report_year",
+        "report_year_basis",
+        "approval_date",
+        "payment_date",
+        "term_start",
+        "term_end",
+        "term_start_precision",
+        "term_end_precision",
+        "event_type",
+        "source_record_id",
+        "award_family_source",
+        "fiscal_sponsor_name",
+        "beneficiary_name",
+        "source_locator",
+        "publication_status",
+        "source_policy_eligibility",
+        "aggregation_status",
+        "hold_reason",
+        "temporal_caveat",
+        "source_observation_status",
+        "source_qa_flags",
+        "asserted_recipient_cedar_uid",
+        "asserted_funder_cedar_uid"
+      ]
+    },
+    "policy_eligible_disclosures": {
+      "collection": "foundation-corporate-giving",
+      "display_order": [
+        "disclosure_id",
+        "source_id",
+        "source_url",
+        "source_record_id",
+        "addability_status",
+        "amount_class",
+        "amount_exact_usd",
+        "amount_lower_usd",
+        "amount_upper_usd",
+        "financial_status",
+        "overlap_status",
+        "partition",
+        "recipient_role",
+        "record_kind",
+        "review_action",
+        "rights_classification",
+        "source_document_sha256",
+        "version_kind",
+        "funder_name",
+        "funder_class",
+        "funder_ein",
+        "recipient_name_reported",
+        "recipient_ein",
+        "recipient_city",
+        "recipient_state",
+        "recipient_country",
+        "amount_basis",
+        "currency",
+        "transfer_kind",
+        "report_year",
+        "report_year_basis",
+        "approval_date",
+        "payment_date",
+        "term_start",
+        "term_end",
+        "term_start_precision",
+        "term_end_precision",
+        "event_type",
+        "award_family_source",
+        "fiscal_sponsor_name",
+        "beneficiary_name",
+        "source_locator",
+        "publication_status",
+        "source_policy_eligibility",
+        "aggregation_status",
+        "hold_reason",
+        "temporal_caveat",
+        "source_observation_status",
+        "source_qa_flags"
+      ],
+      "fields": [
+        {
+          "column": "addability_status",
+          "decision": "keep",
+          "description": "Source disclosure metadata: addability status",
+          "display_disposition": "keep",
+          "label": "addability status",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "amount_class",
+          "decision": "keep",
+          "description": "Source disclosure metadata: amount class",
+          "display_disposition": "keep",
+          "label": "amount class",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "amount_exact_usd",
+          "decision": "keep",
+          "description": "Exact nominal USD decimal text. Never sum differing financial states or duplicate disclosures.",
+          "display_disposition": "keep",
+          "label": "amount exact usd",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "amount_lower_usd",
+          "decision": "keep",
+          "description": "Exact nominal USD decimal text. Never sum differing financial states or duplicate disclosures.",
+          "display_disposition": "keep",
+          "label": "amount lower usd",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "amount_upper_usd",
+          "decision": "keep",
+          "description": "Exact nominal USD decimal text. Never sum differing financial states or duplicate disclosures.",
+          "display_disposition": "keep",
+          "label": "amount upper usd",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "disclosure_id",
+          "decision": "keep",
+          "description": "Source disclosure metadata: disclosure id",
+          "display_disposition": "keep",
+          "label": "disclosure id",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "financial_status",
+          "decision": "keep",
+          "description": "Source disclosure metadata: financial status",
+          "display_disposition": "keep",
+          "label": "financial status",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "overlap_status",
+          "decision": "keep",
+          "description": "Source disclosure metadata: overlap status",
+          "display_disposition": "keep",
+          "label": "overlap status",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "partition",
+          "decision": "keep",
+          "description": "Source disclosure metadata: partition",
+          "display_disposition": "keep",
+          "label": "partition",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "recipient_role",
+          "decision": "keep",
+          "description": "Source disclosure metadata: recipient role",
+          "display_disposition": "keep",
+          "label": "recipient role",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "record_kind",
+          "decision": "keep",
+          "description": "Source disclosure metadata: record kind",
+          "display_disposition": "keep",
+          "label": "record kind",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "review_action",
+          "decision": "keep",
+          "description": "Source disclosure metadata: review action",
+          "display_disposition": "keep",
+          "label": "review action",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "rights_classification",
+          "decision": "keep",
+          "description": "Source disclosure metadata: rights classification",
+          "display_disposition": "keep",
+          "label": "rights classification",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "source_document_sha256",
+          "decision": "keep",
+          "description": "Source disclosure metadata: source document sha256",
+          "display_disposition": "keep",
+          "label": "source document sha256",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "source_id",
+          "decision": "keep",
+          "description": "Source disclosure metadata: source id",
+          "display_disposition": "keep",
+          "label": "source id",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "source_url",
+          "decision": "keep",
+          "description": "Source disclosure metadata: source url",
+          "display_disposition": "keep",
+          "label": "source url",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "version_kind",
+          "decision": "keep",
+          "description": "Source disclosure metadata: version kind",
+          "display_disposition": "keep",
+          "label": "version kind",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "funder_name",
+          "decision": "keep",
+          "description": "Source disclosure metadata: funder name",
+          "display_disposition": "keep",
+          "label": "funder name",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "funder_class",
+          "decision": "keep",
+          "description": "Source disclosure metadata: funder class",
+          "display_disposition": "keep",
+          "label": "funder class",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "funder_ein",
+          "decision": "keep",
+          "description": "Source disclosure metadata: funder ein",
+          "display_disposition": "keep",
+          "label": "funder ein",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "recipient_name_reported",
+          "decision": "keep",
+          "description": "Source disclosure metadata: recipient name reported",
+          "display_disposition": "keep",
+          "label": "recipient name reported",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "recipient_ein",
+          "decision": "keep",
+          "description": "Source disclosure metadata: recipient ein",
+          "display_disposition": "keep",
+          "label": "recipient ein",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "recipient_city",
+          "decision": "keep",
+          "description": "Source disclosure metadata: recipient city",
+          "display_disposition": "keep",
+          "label": "recipient city",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "recipient_state",
+          "decision": "keep",
+          "description": "Source disclosure metadata: recipient state",
+          "display_disposition": "keep",
+          "label": "recipient state",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "recipient_country",
+          "decision": "keep",
+          "description": "Source disclosure metadata: recipient country",
+          "display_disposition": "keep",
+          "label": "recipient country",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "amount_basis",
+          "decision": "keep",
+          "description": "Source disclosure metadata: amount basis",
+          "display_disposition": "keep",
+          "label": "amount basis",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "currency",
+          "decision": "keep",
+          "description": "Source disclosure metadata: currency",
+          "display_disposition": "keep",
+          "label": "currency",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "transfer_kind",
+          "decision": "keep",
+          "description": "Source disclosure metadata: transfer kind",
+          "display_disposition": "keep",
+          "label": "transfer kind",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "report_year",
+          "decision": "keep",
+          "description": "Source year label; use only with report_year_basis; never infer event year.",
+          "display_disposition": "keep",
+          "label": "report year",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "report_year_basis",
+          "decision": "keep",
+          "description": "Source fiscal/calendar/reporting basis; blank means unestablished.",
+          "display_disposition": "keep",
+          "label": "report year basis",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "approval_date",
+          "decision": "keep",
+          "description": "Source reported approval date, distinct from publication and payment.",
+          "display_disposition": "keep",
+          "label": "approval date",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "payment_date",
+          "decision": "keep",
+          "description": "Source reported payment date; blank does not establish paid status.",
+          "display_disposition": "keep",
+          "label": "payment date",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "term_start",
+          "decision": "keep",
+          "description": "Source award-period start, interpreted with term_start_precision.",
+          "display_disposition": "keep",
+          "label": "term start",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "term_end",
+          "decision": "keep",
+          "description": "Source award-period end, interpreted with term_end_precision.",
+          "display_disposition": "keep",
+          "label": "term end",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "term_start_precision",
+          "decision": "keep",
+          "description": "Source disclosure metadata: term start precision",
+          "display_disposition": "keep",
+          "label": "term start precision",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "term_end_precision",
+          "decision": "keep",
+          "description": "Source disclosure metadata: term end precision",
+          "display_disposition": "keep",
+          "label": "term end precision",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "event_type",
+          "decision": "keep",
+          "description": "Source disclosure metadata: event type",
+          "display_disposition": "keep",
+          "label": "event type",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "source_record_id",
+          "decision": "keep",
+          "description": "Source disclosure metadata: source record id",
+          "display_disposition": "keep",
+          "label": "source record id",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "award_family_source",
+          "decision": "keep",
+          "description": "Source disclosure metadata: award family source",
+          "display_disposition": "keep",
+          "label": "award family source",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "fiscal_sponsor_name",
+          "decision": "keep",
+          "description": "Source disclosure metadata: fiscal sponsor name",
+          "display_disposition": "keep",
+          "label": "fiscal sponsor name",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "beneficiary_name",
+          "decision": "keep",
+          "description": "Source disclosure metadata: beneficiary name",
+          "display_disposition": "keep",
+          "label": "beneficiary name",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "source_locator",
+          "decision": "keep",
+          "description": "Source disclosure metadata: source locator",
+          "display_disposition": "keep",
+          "label": "source locator",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "publication_status",
+          "decision": "keep",
+          "description": "Source disclosure metadata: publication status",
+          "display_disposition": "keep",
+          "label": "publication status",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "source_policy_eligibility",
+          "decision": "keep",
+          "description": "Source disclosure metadata: source policy eligibility",
+          "display_disposition": "keep",
+          "label": "source policy eligibility",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "aggregation_status",
+          "decision": "keep",
+          "description": "Source disclosure metadata: aggregation status",
+          "display_disposition": "keep",
+          "label": "aggregation status",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "hold_reason",
+          "decision": "keep",
+          "description": "Source disclosure metadata: hold reason",
+          "display_disposition": "keep",
+          "label": "hold reason",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "temporal_caveat",
+          "decision": "keep",
+          "description": "Source disclosure metadata: temporal caveat",
+          "display_disposition": "keep",
+          "label": "temporal caveat",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "source_observation_status",
+          "decision": "keep",
+          "description": "Source disclosure metadata: source observation status",
+          "display_disposition": "keep",
+          "label": "source observation status",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "source_qa_flags",
+          "decision": "keep",
+          "description": "Source disclosure metadata: source qa flags",
+          "display_disposition": "keep",
+          "label": "source qa flags",
+          "rights_class": "publishable"
+        }
+      ],
+      "order": [
+        "addability_status",
+        "amount_class",
+        "amount_exact_usd",
+        "amount_lower_usd",
+        "amount_upper_usd",
+        "disclosure_id",
+        "financial_status",
+        "overlap_status",
+        "partition",
+        "recipient_role",
+        "record_kind",
+        "review_action",
+        "rights_classification",
+        "source_document_sha256",
+        "source_id",
+        "source_url",
+        "version_kind",
+        "funder_name",
+        "funder_class",
+        "funder_ein",
+        "recipient_name_reported",
+        "recipient_ein",
+        "recipient_city",
+        "recipient_state",
+        "recipient_country",
+        "amount_basis",
+        "currency",
+        "transfer_kind",
+        "report_year",
+        "report_year_basis",
+        "approval_date",
+        "payment_date",
+        "term_start",
+        "term_end",
+        "term_start_precision",
+        "term_end_precision",
+        "event_type",
+        "source_record_id",
+        "award_family_source",
+        "fiscal_sponsor_name",
+        "beneficiary_name",
+        "source_locator",
+        "publication_status",
+        "source_policy_eligibility",
+        "aggregation_status",
+        "hold_reason",
+        "temporal_caveat",
+        "source_observation_status",
+        "source_qa_flags"
+      ]
+    },
+    "repeat_decisions": {
+      "collection": "foundation-corporate-giving",
+      "display_order": [
+        "disclosure_id",
+        "paired_disclosure_id",
+        "decision",
+        "evidence_key",
+        "reason"
+      ],
+      "fields": [
+        {
+          "column": "disclosure_id",
+          "decision": "keep",
+          "description": "Source disclosure metadata: disclosure id",
+          "display_disposition": "keep",
+          "label": "disclosure id",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "paired_disclosure_id",
+          "decision": "keep",
+          "description": "Source disclosure metadata: paired disclosure id",
+          "display_disposition": "keep",
+          "label": "paired disclosure id",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "decision",
+          "decision": "keep",
+          "description": "Source disclosure metadata: decision",
+          "display_disposition": "keep",
+          "label": "decision",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "evidence_key",
+          "decision": "keep",
+          "description": "Source disclosure metadata: evidence key",
+          "display_disposition": "keep",
+          "label": "evidence key",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "reason",
+          "decision": "keep",
+          "description": "Source disclosure metadata: reason",
+          "display_disposition": "keep",
+          "label": "reason",
+          "rights_class": "restricted"
+        }
+      ],
+      "order": [
+        "disclosure_id",
+        "paired_disclosure_id",
+        "decision",
+        "evidence_key",
+        "reason"
+      ]
+    },
+    "reviewed_disclosures": {
+      "collection": "foundation-corporate-giving",
+      "display_order": [
+        "disclosure_id",
+        "source_url",
+        "source_id",
+        "award_id",
+        "version_kind",
+        "funder_name",
+        "recipient_name",
+        "cedar_uid",
+        "recipient_entity_type",
+        "recipient_affiliation",
+        "purpose",
+        "amount_exact_usd",
+        "amount_lower_usd",
+        "amount_upper_usd",
+        "amount_aggregate_usd",
+        "financial_status",
+        "announcement_date",
+        "report_year",
+        "award_period_text",
+        "project_geography",
+        "source_document_sha256",
+        "source_retrieved_date",
+        "source_class",
+        "publication_rights_status",
+        "overlap_status",
+        "addability_status",
+        "observation"
+      ],
+      "fields": [
+        {
+          "column": "disclosure_id",
+          "decision": "keep",
+          "description": "disclosure id",
+          "display_disposition": "keep",
+          "label": "disclosure id",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "award_id",
+          "decision": "keep",
+          "description": "award id",
+          "display_disposition": "keep",
+          "label": "award id",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "version_kind",
+          "decision": "keep",
+          "description": "version kind",
+          "display_disposition": "keep",
+          "label": "version kind",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "funder_name",
+          "decision": "keep",
+          "description": "funder name",
+          "display_disposition": "keep",
+          "label": "funder name",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "recipient_name",
+          "decision": "keep",
+          "description": "recipient name",
+          "display_disposition": "keep",
+          "label": "recipient name",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "cedar_uid",
+          "decision": "keep",
+          "description": "cedar uid",
+          "display_disposition": "keep",
+          "label": "cedar uid",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "recipient_entity_type",
+          "decision": "keep",
+          "description": "recipient entity type",
+          "display_disposition": "keep",
+          "label": "recipient entity type",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "recipient_affiliation",
+          "decision": "keep",
+          "description": "recipient affiliation",
+          "display_disposition": "keep",
+          "label": "recipient affiliation",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "purpose",
+          "decision": "keep",
+          "description": "purpose",
+          "display_disposition": "keep",
+          "label": "purpose",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "amount_exact_usd",
+          "decision": "keep",
+          "description": "Exact decimal USD text, never a float",
+          "display_disposition": "keep",
+          "label": "amount exact usd",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "amount_lower_usd",
+          "decision": "keep",
+          "description": "Exact decimal USD text, never a float",
+          "display_disposition": "keep",
+          "label": "amount lower usd",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "amount_upper_usd",
+          "decision": "keep",
+          "description": "Exact decimal USD text, never a float",
+          "display_disposition": "keep",
+          "label": "amount upper usd",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "amount_aggregate_usd",
+          "decision": "keep",
+          "description": "Exact decimal USD text, never a float",
+          "display_disposition": "keep",
+          "label": "amount aggregate usd",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "financial_status",
+          "decision": "keep",
+          "description": "financial status",
+          "display_disposition": "keep",
+          "label": "financial status",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "announcement_date",
+          "decision": "keep",
+          "description": "announcement date",
+          "display_disposition": "keep",
+          "label": "announcement date",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "report_year",
+          "decision": "keep",
+          "description": "report year",
+          "display_disposition": "keep",
+          "label": "report year",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "award_period_text",
+          "decision": "keep",
+          "description": "award period text",
+          "display_disposition": "keep",
+          "label": "award period text",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "project_geography",
+          "decision": "keep",
+          "description": "project geography",
+          "display_disposition": "keep",
+          "label": "project geography",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "source_url",
+          "decision": "keep",
+          "description": "source url",
+          "display_disposition": "keep",
+          "label": "source url",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "source_document_sha256",
+          "decision": "keep",
+          "description": "source document sha256",
+          "display_disposition": "keep",
+          "label": "source document sha256",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "source_retrieved_date",
+          "decision": "keep",
+          "description": "source retrieved date",
+          "display_disposition": "keep",
+          "label": "source retrieved date",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "source_class",
+          "decision": "keep",
+          "description": "source class",
+          "display_disposition": "keep",
+          "label": "source class",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "source_id",
+          "decision": "keep",
+          "description": "source id",
+          "display_disposition": "keep",
+          "label": "source id",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "publication_rights_status",
+          "decision": "keep",
+          "description": "publication rights status",
+          "display_disposition": "keep",
+          "label": "publication rights status",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "overlap_status",
+          "decision": "keep",
+          "description": "overlap status",
+          "display_disposition": "keep",
+          "label": "overlap status",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "addability_status",
+          "decision": "keep",
+          "description": "addability status",
+          "display_disposition": "keep",
+          "label": "addability status",
+          "rights_class": "publishable"
+        },
+        {
+          "column": "observation",
+          "decision": "keep",
+          "description": "observation",
+          "display_disposition": "keep",
+          "label": "observation",
+          "rights_class": "publishable"
+        }
+      ],
+      "order": [
+        "disclosure_id",
+        "award_id",
+        "version_kind",
+        "funder_name",
+        "recipient_name",
+        "cedar_uid",
+        "recipient_entity_type",
+        "recipient_affiliation",
+        "purpose",
+        "amount_exact_usd",
+        "amount_lower_usd",
+        "amount_upper_usd",
+        "amount_aggregate_usd",
+        "financial_status",
+        "announcement_date",
+        "report_year",
+        "award_period_text",
+        "project_geography",
+        "source_url",
+        "source_document_sha256",
+        "source_retrieved_date",
+        "source_class",
+        "source_id",
+        "publication_rights_status",
+        "overlap_status",
+        "addability_status",
+        "observation"
+      ]
+    },
+    "source_policies": {
+      "collection": "foundation-corporate-giving",
+      "display_order": [
+        "source_id",
+        "source_url",
+        "attribution",
+        "copyright_language",
+        "domain",
+        "proposed_public_fields",
+        "public_method",
+        "recommended_classification",
+        "retrieved_date",
+        "reuse_language",
+        "robots_access_result",
+        "source_document_sha256",
+        "source_owner",
+        "source_type",
+        "stored_material",
+        "terms_language"
+      ],
+      "fields": [
+        {
+          "column": "attribution",
+          "decision": "keep",
+          "description": "Source disclosure metadata: attribution",
+          "display_disposition": "keep",
+          "label": "attribution",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "copyright_language",
+          "decision": "keep",
+          "description": "Source disclosure metadata: copyright language",
+          "display_disposition": "keep",
+          "label": "copyright language",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "domain",
+          "decision": "keep",
+          "description": "Source disclosure metadata: domain",
+          "display_disposition": "keep",
+          "label": "domain",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "proposed_public_fields",
+          "decision": "keep",
+          "description": "Source disclosure metadata: proposed public fields",
+          "display_disposition": "keep",
+          "label": "proposed public fields",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "public_method",
+          "decision": "keep",
+          "description": "Source disclosure metadata: public method",
+          "display_disposition": "keep",
+          "label": "public method",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "recommended_classification",
+          "decision": "keep",
+          "description": "Source disclosure metadata: recommended classification",
+          "display_disposition": "keep",
+          "label": "recommended classification",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "retrieved_date",
+          "decision": "keep",
+          "description": "Source disclosure metadata: retrieved date",
+          "display_disposition": "keep",
+          "label": "retrieved date",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "reuse_language",
+          "decision": "keep",
+          "description": "Source disclosure metadata: reuse language",
+          "display_disposition": "keep",
+          "label": "reuse language",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "robots_access_result",
+          "decision": "keep",
+          "description": "Source disclosure metadata: robots access result",
+          "display_disposition": "keep",
+          "label": "robots access result",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "source_document_sha256",
+          "decision": "keep",
+          "description": "Source disclosure metadata: source document sha256",
+          "display_disposition": "keep",
+          "label": "source document sha256",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "source_id",
+          "decision": "keep",
+          "description": "Source disclosure metadata: source id",
+          "display_disposition": "keep",
+          "label": "source id",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "source_owner",
+          "decision": "keep",
+          "description": "Source disclosure metadata: source owner",
+          "display_disposition": "keep",
+          "label": "source owner",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "source_type",
+          "decision": "keep",
+          "description": "Source disclosure metadata: source type",
+          "display_disposition": "keep",
+          "label": "source type",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "source_url",
+          "decision": "keep",
+          "description": "Source disclosure metadata: source url",
+          "display_disposition": "keep",
+          "label": "source url",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "stored_material",
+          "decision": "keep",
+          "description": "Source disclosure metadata: stored material",
+          "display_disposition": "keep",
+          "label": "stored material",
+          "rights_class": "restricted"
+        },
+        {
+          "column": "terms_language",
+          "decision": "keep",
+          "description": "Source disclosure metadata: terms language",
+          "display_disposition": "keep",
+          "label": "terms language",
+          "rights_class": "restricted"
+        }
+      ],
+      "order": [
+        "attribution",
+        "copyright_language",
+        "domain",
+        "proposed_public_fields",
+        "public_method",
+        "recommended_classification",
+        "retrieved_date",
+        "reuse_language",
+        "robots_access_result",
+        "source_document_sha256",
+        "source_id",
+        "source_owner",
+        "source_type",
+        "source_url",
+        "stored_material",
+        "terms_language"
+      ]
+    }
+  },
+  "release_class": "rehearsal",
+  "schema_version": 1,
+  "scope": "Presentation metadata; publication and entitlement gates remain authoritative.",
+  "source_consumer_manifest_sha256": "c3399057f54e119605c097d2e66ed8126b64f95e45963267af90a505d98e2ee6",
+  "source_manifest_file_sha256": "f817cdf5d66b466a981fc8b2eba048c084be1f1cb18959b7684ed5b5067029dd",
+  "source_release_id": "4e1867df875b5a3549afa2a39c8f1d29668a3b1f7ceebf4d5c28b0ebad2e1dc0"
+}
