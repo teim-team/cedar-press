@@ -558,7 +558,6 @@ export default function PressGate({ user }) {
       <section className="cp-hero3" aria-label="Cedar Press">
         <div className="cp-hero3__in">
           <div className="cp-hero3__copy" ref={heroCopyRef}>
-            <p className="cp-kicker cp-fade">Original intelligence collections</p>
             {/* Two messages, on purpose: the door sells the asset, the
                 signed-in overview keeps the editorial "Know what's shaping
                 Indian Country." */}
