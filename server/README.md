@@ -253,3 +253,12 @@ server.tests.test_gaming_release server.tests.test_shared_release_collections
 server.tests.test_grove_exchange` from the repository root, with `server` on
 `PYTHONPATH` and the pinned Lumecon runtime installed. Fixture tests require the
 explicit review environment already used by CI.
+
+The Grove container installs only this consumer's dependencies from the
+committed `server/uv.lock`, using `uv sync --locked --no-dev --no-install-project
+--project server`. It imports the pinned checkout through `PYTHONPATH`. The
+producer remains behind the authenticated Lumecon API; producer source code is
+not a runtime dependency of the Grove container. The producer commit in the
+application contract identifies the tested API pair, not an extra local service.
+Regenerate this lock from `server/pyproject.toml` with `uv lock --project server`
+when changing dependencies and rerun the pinned container and consumer tests.
