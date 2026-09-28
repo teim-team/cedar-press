@@ -16,8 +16,8 @@ skips. Whole-file-read mutations were deliberately rejected by the new memory
 controls. Hosted CI must prove the complete repository gates. These tests do not
 replay the terminal's real Windows releases or authorize customer publication.
 
-Resume from Lumecon `docs/cedar-convergence.md` and its ledger for the current
-15-collection inventory. The older generated September 2 readiness scoreboard
+Resume from the [Lumecon convergence record](https://github.com/teim-team/Lumecon-data/blob/codex/cedar-convergence-20260926/docs/cedar-convergence.md)
+and its ledger for the current 15-collection inventory. The older generated September 2 readiness scoreboard
 uses a different collection set and is not publication evidence. Preserve any
 local terminal changes before integrating this pushed commit; do not reset them.
 The sections below retain earlier NEED evidence and instructions, not a claim
