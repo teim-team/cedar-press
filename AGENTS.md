@@ -9596,3 +9596,14 @@ the id carries two check characters over the uid's alphabet, and the
 individually owned entity class closes to new mints. Documentation only; no
 code changed.
 
+
+## 2026-09-28: mobile preview rails must scroll inside their frame
+
+The preview wrapper must constrain its shared rail with a zero-minimum grid
+column and restore horizontal overflow at the rail breakpoint. The desktop
+`overflow: visible` override otherwise expands the rail beyond the phone and
+the frame clips the remaining collections. Touch must commit on click without
+compatibility hover/focus changing the specimen first. `tests/mobile-navigation.spec.js`
+reproduces the old rail at 2,291px inside a 390px viewport and checks native touch
+swiping plus a one-tap selection at the far end. Audience-name tabs remain at
+720px and below; wider cards use their existing previous/next controls.
