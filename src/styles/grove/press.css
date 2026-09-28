@@ -1523,11 +1523,12 @@
 /* Between a phone and 720 the full-width banner at 5:2 ran to 270px; a
  * slimmer cut keeps the text in the first view. */
 @media (min-width: 561px) and (max-width: 720px) { .teim-rd .cp-aud__media { aspect-ratio: 3 / 1; } }
-/* One scrollable row wherever the names would otherwise stack three deep
- * (at 1040 they did); above 1100 they wrap to at most two lines. The row
- * keeps the chosen name in view (the component scrolls the row, not the
- * page). */
-@media (max-width: 1100px) {
+/* Phones keep the audience selector. On wider screens the illustrated card
+ * already names its audience; the previous/next controls navigate it. */
+@media (min-width: 721px) {
+  .teim-rd .cp-aud__tabs { display: none; }
+}
+@media (max-width: 720px) {
   .teim-rd .cp-aud__tabs { white-space: nowrap; text-wrap: nowrap; overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: thin; padding-bottom: 0.25rem; margin-inline: calc(-1 * var(--door-pad)); padding-inline: var(--door-pad); }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -3587,6 +3588,12 @@ body[data-cp-explore-in-view] .teim-rd .cedar-widget .cp-greet { display: none; 
 @media (max-width: 900px) {
   .teim-rd .cp-ex__frame { grid-template-columns: minmax(0, 1fr); }
   .teim-rd .cp-rail { flex-direction: row; gap: 1rem; padding: 0.7rem 0.8rem; position: sticky; top: 0; z-index: 3; max-height: none; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x proximity; }
+  /* The preview's desktop override used overflow: visible and an intrinsic
+   * grid column, making this rail wider than its clipped frame. Constrain
+   * the column and restore scrolling on the actual shared rail. */
+  .teim-rd .cp-app__railwrap { min-width: 0; grid-template-columns: minmax(0, 1fr); }
+  .teim-rd .cp-app__railwrap > .cp-rail { min-width: 0; overflow-x: auto; overflow-y: hidden; }
+  .teim-rd .cp-app__railwrap::after { display: none; }
   .teim-rd .cp-rail__tier { flex-direction: column; align-items: flex-start; }
   .teim-rd .cp-rail__all { display: none; }
   .teim-rd .cp-rail__shelf { flex-direction: row; align-items: center; gap: 0.5rem; }

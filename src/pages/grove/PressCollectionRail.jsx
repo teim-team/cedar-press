@@ -146,8 +146,15 @@ export default function PressCollectionRail({
                     className={`cp-rail__item${on ? " is-on" : ""}${locked ? " is-locked" : ""}${pending ? " is-pending" : ""}`}
                     aria-pressed={on}
                     onClick={() => onSelect(entry)}
-                    onMouseEnter={onPoint ? () => onPoint(entry.id) : undefined}
-                    onFocus={onPoint ? () => onPoint(entry.id) : undefined}
+                    // Preview only where changing the specimen cannot move
+                    // the rail. Touch compatibility hover/focus can otherwise
+                    // shift the target before the tap commits its selection.
+                    onPointerEnter={onPoint ? (event) => {
+                      if (event.pointerType === "mouse" && window.matchMedia("(min-width: 1101px) and (hover: hover) and (pointer: fine)").matches) onPoint(entry.id);
+                    } : undefined}
+                    onFocus={onPoint ? (event) => {
+                      if (event.currentTarget.matches(":focus-visible") && window.matchMedia("(min-width: 1101px)").matches) onPoint(entry.id);
+                    } : undefined}
                   >
                     <span className="cp-rail__mark" aria-hidden="true">
                       {COLLECTION_ICONS[entry.id] ?? null}
