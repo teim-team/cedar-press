@@ -9638,3 +9638,26 @@ curated transaction title never establishes a row's original publisher/report.
 path; missing evidence stays explicit. NEED publication holds and Grove-only
 Gaming placement remain in force. Current Giving adds three trailing fields;
 `compatible_orders` explicitly preserves its prior pinned schema.
+
+
+## 2026-09-28: mobile preview rails must scroll inside their frame
+
+The preview wrapper must constrain its shared rail with a zero-minimum grid
+column and restore horizontal overflow at the rail breakpoint. The desktop
+`overflow: visible` override otherwise expands the rail beyond the phone and
+the frame clips the remaining collections. Touch must commit on click without
+compatibility hover/focus changing the specimen first. `tests/mobile-navigation.spec.js`
+reproduces the old rail at 2,291px inside a 390px viewport and checks native touch
+swiping plus a one-tap selection at the far end. Audience-name tabs remain at
+720px and below; wider cards use their existing previous/next controls.
+
+## 2026-09-28 Living datasets use dates and one cohesive spreadsheet
+
+Owner direction: present each collection as a living dataset. Show Updated dates,
+not public release numbers or component/table counts. Cite the collection name,
+update date and access date. Keep immutable release pins and change history internal.
+A CSV file, storage partition or component is not an upstream source. Attribute
+registered publishers and source systems; never relabel table counts as sources.
+Final delivery is one cohesive data table per collection, with compatible columns,
+explicit record grain and provenance, and blanks for inapplicable fields. Preserve
+all rights and identity holds; joins must not multiply observations or money.

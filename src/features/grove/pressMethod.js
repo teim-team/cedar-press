@@ -239,7 +239,7 @@ export const BUILD_NEXT_STEPS = Object.freeze([
   Object.freeze({
     id: "release",
     label: "Release",
-    note: "Published with a version, a coverage span, its sources and what it does not contain.",
+    note: "Published with an update date, a coverage span, its sources and what it does not contain.",
   }),
   Object.freeze({
     id: "maintain",

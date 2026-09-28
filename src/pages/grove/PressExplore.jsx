@@ -558,7 +558,7 @@ function CollectionAtlas({ collections, query, onSelect }) {
               <th scope="col" className="cp-ex__c-text">Collection</th>
               <th scope="col" className="cp-ex__c-text">Coverage</th>
               <th scope="col" className="cp-ex__c-amount">Records</th>
-              <th scope="col" className="cp-ex__c-text">Release</th>
+              <th scope="col" className="cp-ex__c-text">Updated</th>
               <th scope="col" className="cp-ex__c-text">Access</th>
             </tr>
           </thead>
@@ -574,7 +574,7 @@ function CollectionAtlas({ collections, query, onSelect }) {
               // the cell is left empty rather than holding a placeholder.
               const coverage = coverageLabel(entry);
               const rows = ROWS_BY_ID[entry.id] ?? (structure ? "" : "—");
-              const version = release?.version ?? (structure ? "" : "—");
+              const updated = release?.updated ? formatUpdated(release.updated) : "";
               const access = (compact = false) => {
                 if (unavailable) return <span className={compact ? "cp-atlas__mobileaccess is-pending" : "cp-atlas__pending"} title={previewUnavailable}>Preview pending</span>;
                 if (open) return <span className={compact ? "cp-atlas__mobileaccess is-included" : "cp-atlas__included"}>Included</span>;
@@ -597,15 +597,14 @@ function CollectionAtlas({ collections, query, onSelect }) {
                     <small className="cp-atlas__mobilemeta">
                       {coverage ? <span>{coverage}</span> : null}
                       {rows ? <span>{rows}</span> : null}
-                      {version ? <span>{version}</span> : null}
+                      {updated ? <span>Updated {updated}</span> : null}
                       {access(true)}
                     </small>
                   </td>
                   <td>{coverage}</td>
                   <td className="cp-ex__amount" data-testid="atlas-rows">{rows}</td>
                   <td>
-                    {version}
-                    {release?.updated ? <small className="cp-ex__uid">updated {formatUpdated(release.updated)}</small> : null}
+                    {updated}
                   </td>
                   <td>{access()}</td>
                 </tr>
@@ -695,7 +694,6 @@ function LockedCollection({ collection, onAbout }) {
           <p className="cp-ex__caption">
             {entry.name}
             {rows ? ` · ${rows}` : ""}
-            {release?.version ? ` · ${release.version}` : ""}
             {release?.updated ? ` · updated ${formatUpdated(release.updated)}` : ""}
           </p>
           <p className="cp-lock__say">
@@ -728,7 +726,6 @@ function UnavailableCollection({ collection, onAbout }) {
           <h2>Preview unavailable</h2>
           <dl className="cp-lock__status">
             <div><dt>Access</dt><dd>Not available for self-service browsing</dd></div>
-            {release?.version ? <div><dt>Release</dt><dd>{release.version}</dd></div> : null}
           </dl>
           <p>{reason}</p>
         </div>
@@ -736,7 +733,6 @@ function UnavailableCollection({ collection, onAbout }) {
           <p className="cp-ex__caption">
             {entry.name}
             {rows ? ` · ${rows}` : ""}
-            {release?.version ? ` · ${release.version}` : ""}
             {release?.updated ? ` · updated ${formatUpdated(release.updated)}` : ""}
           </p>
           <p className="cp-lock__say">
@@ -1218,7 +1214,7 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
                 {saved.map((s) => (
                   <li key={s.id}>
                     <button type="button" className="cp-ex__link" onClick={() => setParams(s.cut, { replace: false })}>{s.name}</button>
-                    <span className="cp-ex__fine"> · {s.releases.join(", ")} · {s.savedAt.slice(0, 10)}</span>
+                    <span className="cp-ex__fine"> · {s.savedAt.slice(0, 10)}</span>
                     <button type="button" className="cp-ex__clear" onClick={() => forget(s.id)}>Remove</button>
                   </li>
                 ))}

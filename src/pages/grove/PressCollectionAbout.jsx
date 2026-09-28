@@ -26,8 +26,6 @@ import { Link } from "react-router";
 
 import {
   LAUNCH_COLLECTION,
-  collectionCedarFacts,
-  collectionTables,
 } from "../../features/grove/collection.js";
 import { codebookFor } from "../../features/grove/explore.js";
 import { coverageLabel } from "../../features/grove/pressAccess.js";
@@ -36,7 +34,6 @@ import { PRESS_CATALOG_BY_ID } from "../../features/grove/pressCatalog.js";
 import { collectionQuestions } from "../../features/grove/pressJobs.js";
 import { MAINTENANCE, NEED_ENRICHMENTS } from "../../features/grove/pressMethod.js";
 import { formatUpdated, ledgerFor } from "../../features/grove/pressReleases.js";
-import { tableLabel } from "../../features/grove/readerValues.js";
 import { PRESS_METHODS_PATH, PRESS_WHATS_NEW_PATH } from "../../features/grove/pressRoutes.js";
 import { COLLECTION_ICONS } from "./pressCollectionIcons";
 
@@ -74,11 +71,9 @@ export default function PressCollectionAbout({ entry, flagship, onClose }) {
   if (!entry) return null;
   const launch = LAUNCH_COLLECTION.find((item) => item.id === entry.id) ?? {};
   const catalog = PRESS_CATALOG_BY_ID[entry.id] ?? entry;
-  const facts = collectionCedarFacts(entry.id);
-  const tables = collectionTables(entry.id);
   const book = flagship ? codebookFor(flagship.key) : null;
   const releases = ledgerFor(entry.id) ?? [];
-  const latest = releases[0] ?? null;
+  const latest = releases.at(-1) ?? null;
   const questions = collectionQuestions(entry.id);
 
   return (
@@ -98,11 +93,9 @@ export default function PressCollectionAbout({ entry, flagship, onClose }) {
         {/* The header's facts, as fields. A reader checking a figure wants
             the release and the coverage before they want the prose. */}
         <dl className="cp-ab__facts">
-          {launch.version ? (<div><dt>Release</dt><dd>{launch.version}</dd></div>) : null}
           {launch.updated ? (<div><dt>Updated</dt><dd>{formatUpdated(launch.updated)}</dd></div>) : null}
           {coverageLabel(catalog) ? (<div><dt>Coverage</dt><dd>{coverageLabel(catalog)}</dd></div>) : null}
           {launch.rowsLabel ? (<div><dt>Records</dt><dd>{launch.rowsLabel}</dd></div>) : null}
-          {Number.isInteger(facts?.n_tables) ? (<div><dt>Tables</dt><dd>{facts.n_tables}</dd></div>) : null}
           <div><dt>Maintained</dt><dd>{MAINTENANCE.label}</dd></div>
         </dl>
 
@@ -168,9 +161,9 @@ export default function PressCollectionAbout({ entry, flagship, onClose }) {
         <Block title="What is not in it">
           <>
             <p>
-              This viewer reads the published preview: up to ten sample rows per table. A search
+              This viewer reads the published preview: up to ten sample observations per record type. A search
               that returns nothing may mean the collection holds nothing, or that the sampled rows
-              did not include it. The release is the whole table.
+              did not include it. The downloadable dataset contains the permitted observations.
             </p>
             {catalog?.limits ? <p>{catalog.limits}</p> : null}
           </>
@@ -179,7 +172,7 @@ export default function PressCollectionAbout({ entry, flagship, onClose }) {
         <Block title="Fields and definitions">
           {book?.fields?.length ? (
             <details className="cp-ab__fields">
-              <summary>{book.fields.length} fields in {flagship?.label ?? "the flagship table"}</summary>
+              <summary>{book.fields.length} fields in {flagship?.label ?? "the dataset"}</summary>
               <dl>
                 {book.fields.map((field) => (
                   <div key={field.column}>
@@ -195,30 +188,17 @@ export default function PressCollectionAbout({ entry, flagship, onClose }) {
           ) : null}
         </Block>
 
-        <Block title="Tables in this release">
-          {tables.length ? (
-            <ul className="cp-ab__tables">
-              {tables.map((table) => (
-                /* The table's name for a reader, not its file name: the
-                   manifest's title where it has one, else the stem in words
-                   (readerValues.js). The file keeps its own name in the
-                   download, where a reader handling files needs it. */
-                <li key={table.table ?? table.key}>{tableLabel(table)}</li>
-              ))}
-            </ul>
-          ) : null}
-        </Block>
 
-        <Block title="Changes in this release">
+        <Block title="Latest update">
           {latest ? (
             <>
               <p className="cp-ab__rel">
-                <b>{latest.version}</b>
+                <b>Updated</b>
                 {latest.date ? ` · ${formatUpdated(latest.date)}` : ""}
               </p>
               {latest.note ? <p>{latest.note}</p> : null}
               <Link className="cp-ab__link" to={`${PRESS_WHATS_NEW_PATH}#${entry.id}-${String(latest.version).replace(/\./g, "-")}`}>
-                This release in the change ledger <span aria-hidden="true">&#8594;</span>
+                See what changed <span aria-hidden="true">&#8594;</span>
               </Link>
             </>
           ) : null}

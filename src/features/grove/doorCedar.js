@@ -152,7 +152,7 @@ function collectionExpanded(entry) {
   if (method) lines.push(`Going deeper on how ${entry.short || entry.name} is built: ${lowerFirst(method)}`);
   else if (entry.linkage) lines.push(`Going deeper: ${lowerFirst(entry.linkage)}`);
   lines.push(
-    `Every release is dated and versioned, and the methods page states the inclusion rules and known gaps ` +
+    `Every release is maintained with dated updates, and the methods page states the inclusion rules and known gaps ` +
       `for this collection, which is what a citation needs.`,
   );
   return lines.join("\n\n");
@@ -226,8 +226,7 @@ const GENERAL_INTENTS = [
     expanded:
       `Going deeper: the collections are one product rather than ${COUNT} downloads. Every one keys to the ` +
       `same entity layer, so a nation's contracts, awards, deals, notices and subsidiaries read as one ` +
-      `nation across all of them, and a figure you cite reproduces because every release is dated and ` +
-      `versioned.\n\n` +
+      `nation across all of them, and a figure you cite reproduces because the update history preserves changes.\n\n` +
       `The briefs are written from the collections, the release history says what changed and when, and ` +
       `the methods page states the inclusion rules and the known gaps for each collection.`,
   },
@@ -297,9 +296,9 @@ const GENERAL_INTENTS = [
     answer:
       NEWEST
         ? `${MAINTENANCE.sentence} The most recent release was ${formatUpdated(NEWEST.updated)}.\n\n` +
-          `Every release is dated and versioned, and the release history records what changed, so a figure ` +
+          `Every release is maintained with dated updates, and the release history records what changed, so a figure ` +
           `you cited last quarter still reproduces.`
-        : `${MAINTENANCE.sentence} Every release is dated and versioned so a figure you cited last ` +
+        : `${MAINTENANCE.sentence} Every release is maintained with dated updates so a figure you cited last ` +
           `quarter still reproduces.`,
     expanded:
       `Going deeper: the sources publish on their own clocks, and each week a person reviews what they ` +
@@ -393,10 +392,10 @@ const GENERAL_INTENTS = [
       `Research access covers one or two collections for a defined project, for researchers, journalists, ` +
       `students, nonprofits and public-interest work. It needs no subscription.\n\n` +
       `If you are going to cite a figure, read the methods page first: it states inclusion rules, known ` +
-      `gaps and how each collection is versioned, which is what a citation needs.`,
+      `gaps and when each collection was updated, which is what a citation needs.`,
     expanded:
-      `Going deeper: every CSV cites itself, with the collection name and the release version written into ` +
-      `the file, so a figure in a story or a paper points at the exact release it came from.\n\n` +
+      `Going deeper: every CSV cites itself, with the collection name and the update date written into ` +
+      `the file, so a figure in a story or a paper points at the dataset it came from.\n\n` +
       `The research access page asks for the project and the collections it needs; a person reads it and ` +
       `replies.`,
     links: ["research", "methods"],

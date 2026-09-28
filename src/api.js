@@ -129,6 +129,13 @@ export function releaseDownloadUrl(collection, releaseId, component = null) {
   return `${API_URL}/press/collections/${collection}/full-download?${query}`;
 }
 
+export function spreadsheetDownloadUrl(collection, metadata, parts) {
+  if (metadata?.kind !== "spreadsheet" || metadata.format !== "csv"
+      || !parts.some((part) => part.available && part.releaseId === metadata.release_id)
+      || !releaseDownloadUrl(collection, metadata.release_id)) return null;
+  return `${API_URL}/press/collections/${collection}/spreadsheet-download?${new URLSearchParams({ release_id: metadata.release_id })}`;
+}
+
 export function fetchReleaseResearch(collection, releaseId, component = null, { signal } = {}) {
   if (!releaseDownloadUrl(collection, releaseId, component)) return Promise.reject(new Error("Invalid release"));
   const query = new URLSearchParams({ release_id: releaseId });

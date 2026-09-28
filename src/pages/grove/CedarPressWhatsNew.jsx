@@ -155,9 +155,8 @@ export default function CedarPressWhatsNew() {
           <div className="cp-nh__say">
             <p className="cp-nh__sub">
               Collections are maintained weekly with human review, and every change lands here.
-              Methodology releases are marked, because they can move figures somebody has already
-              published. Every version keeps its address, so a citation can name the release it
-              came from.
+              Methodology changes are marked because they can affect published figures.
+              Each collection is a living dataset; dated updates explain what changed.
             </p>
             <p className="cp-nh__sub cp-nh__sub--use">
               Use the release history to see what changed before reusing an earlier figure or
@@ -281,7 +280,7 @@ export default function CedarPressWhatsNew() {
                           names one, and #funding-v4-2 gives the name a stable
                           address to point at. */}
                       <a className="cp-feed__ver" href={`#${anchor}`} title="Link to this release">
-                        {entry.version}
+                        Updated
                       </a>
                     </h2>
                     {entry.note ? <p className="cp-feed__note">{entry.note}</p> : null}
@@ -350,7 +349,7 @@ export default function CedarPressWhatsNew() {
                               detail: {
                                 id: entry.id,
                                 name,
-                                q: `What changed in ${name} ${entry.version}?`,
+                                q: `What changed in ${name} on ${entry.date}?`,
                               },
                             }),
                           )

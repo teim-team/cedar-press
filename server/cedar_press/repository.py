@@ -291,11 +291,11 @@ def sample_unavailable_reason(collection_id: str) -> str | None:
 
 def download_name(collection_id: str) -> str:
     dataset = next((item for item in launch.LAUNCH_COLLECTION if item.id == collection_id), None)
-    version = dataset.version if dataset else "v0"
+    updated = dataset.updated if dataset else "undated"
     # The filename says it is a sample. A file called `deals-v0.csv` sitting in
     # somebody's downloads folder a month later cannot be told apart from the
     # release, and ten rows of a 2,662-row collection is not the release.
-    return f"{collection_id}-{version}-sample.csv"
+    return f"{collection_id}-{updated}-sample.csv"
 
 
 def releases() -> list[dict[str, Any]]:
@@ -612,9 +612,10 @@ def _partitioned_release(catalog, collection_id, requested_release_id, metadata_
         "format": "jsonl",
         "schema_version": 1,
         "scope": "Development rehearsal; complete pinned logical table in manifest ordinal order",
-        "filename": f"{collection_id}-{rid}.jsonl",
+        "filename": f"{collection_id}.jsonl",
         "media_type": "application/x-ndjson",
-        "citation": f"Cedar Press {collection_id}/{table}, release {rid}",
+        "citation": launch.collection_citation(collection_id)
+        or f"Lumecon, {collection_id}, Cedar Press collection.",
         "download_path": f"/press/collections/{collection_id}/full-download?release_id={rid}",
     }
     if metadata_only:
@@ -911,8 +912,9 @@ def full_release(collection_id, requested_release_id=None, *, metadata_only=Fals
             "record_count": count,
             "sha256": expected["sha256"],
             "fields": header,
-            "citation": f"Cedar Press {collection_id}/{table_id}, release {release_id}",
-            "filename": f"{collection_id}-{release_id}.jsonl",
+            "citation": launch.collection_citation(collection_id)
+            or f"Lumecon, {collection_id}, Cedar Press collection.",
+            "filename": f"{collection_id}.jsonl",
             "media_type": "application/x-ndjson",
         }
     except (OSError, HTTPException, ValueError, KeyError, TypeError, sqlite3.Error) as error:
@@ -1316,8 +1318,11 @@ def _grove_partitioned_release(pin, manifest, logical, *, metadata_only=False):
             "sha256": digest,
             "fields": header,
             "component": component,
-            "citation": (f"{product_name} {collection_id}/{component}, release {release_id}"),
-            "filename": f"{collection_id}--{component}-{release_id}.jsonl",
+            "citation": (
+                launch.collection_citation(collection_id)
+                or f"Lumecon, {collection_id}, {product_name} collection."
+            ),
+            "filename": f"{collection_id}--{component}.jsonl",
             "media_type": "application/x-ndjson",
         }
     except BaseException:
@@ -1375,8 +1380,11 @@ def _grove_component_release(pin, manifest, component, *, metadata_only=False):
         "sha256": digest,
         "fields": header,
         "component": component,
-        "citation": (f"{product_name} {collection_id}/{component}, release {release_id}"),
-        "filename": f"{collection_id}--{component}-{release_id}.jsonl",
+        "citation": (
+            launch.collection_citation(collection_id)
+            or f"Lumecon, {collection_id}, {product_name} collection."
+        ),
+        "filename": f"{collection_id}--{component}.jsonl",
         "media_type": "application/x-ndjson",
     }
 
@@ -1505,7 +1513,16 @@ def release_targets_for(tier: str) -> dict[str, Any]:
         metadata = (
             grove_release_metadata(key) if is_component_release(key) else full_release_metadata(key)
         )
-        visible.append({**target, "release": metadata, "sample": None})
+        from cedar_press.spreadsheet import metadata as spreadsheet_metadata
+
+        visible.append(
+            {
+                **target,
+                "release": metadata,
+                "sample": None,
+                "spreadsheet": spreadsheet_metadata(key),
+            }
+        )
     return {
         "kind": "release_target_registry",
         "target_count": len(targets),

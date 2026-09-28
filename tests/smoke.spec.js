@@ -38,6 +38,21 @@ const ACCOUNT = { email: EMAIL, password: PASSWORD };
 const PRESS_ACCOUNT = { email: PRESS_EMAIL, password: PASSWORD };
 const STOREFRONT_NAMES = STOREFRONT_CATALOG.map((entry) => entry.short || entry.name);
 
+/** Use the visible controls: audience tabs on phones, arrows on desktop. */
+async function chooseAudience(page, index) {
+  const tabs = page.locator(".cp-aud__tab");
+  if (await tabs.nth(index).isVisible()) {
+    await tabs.nth(index).click();
+    return;
+  }
+  const total = await tabs.count();
+  for (let step = 0; step < total; step += 1) {
+    if (await tabs.nth(index).getAttribute("aria-selected") === "true") return;
+    await page.getByRole("button", { name: "Next use case" }).click();
+  }
+  await expect(tabs.nth(index)).toHaveAttribute("aria-selected", "true");
+}
+
 /** The pages behind the gate, by the route a reader reaches them at. */
 const SECTIONS = [
   { name: "Articles", path: "/articles" },
@@ -1278,7 +1293,7 @@ test.describe("About this collection", () => {
     await expect(panel).toBeVisible();
     await expect(panel).toContainText("Awardees are matched to a Native entity");
     // The release facts a reader checks a figure against.
-    for (const field of ["Release", "Updated", "Coverage", "Records"]) {
+    for (const field of ["Updated", "Coverage", "Records"]) {
       await expect(panel.locator("dt", { hasText: new RegExp(`^${field}$`) }).first()).toBeVisible();
     }
     // The unit of observation, in the codebook's own words: the sentence
@@ -1295,11 +1310,9 @@ test.describe("About this collection", () => {
     await expect(notes.getByText("Read the full collection notes")).toBeVisible();
     await notes.getByText("Read the full collection notes").click();
     await expect(panel.getByRole("heading", { name: "What is not in it" })).toBeVisible();
-    // The release's tables by name, not by file name (2026-09-27).
-    const tables = await panel.locator(".cp-ab__tables li").allInnerTexts();
-    expect(tables.length).toBeGreaterThan(1);
-    expect(tables).toContain("Prime contracts");
-    for (const name of tables) expect(name).not.toMatch(/\.csv$|_/);
+    await expect(panel.locator(".cp-ab__tables")).toHaveCount(0);
+    await expect(panel.locator("dt")).not.toContainText(["Release", "Tables"]);
+    expect(await panel.innerText()).not.toMatch(/\bv[0-9]+(?:\.[0-9]+)?\b/);
 
     // Closing returns the reader to the cut they opened it from.
     await panel.getByRole("button", { name: /close the collection profile/i }).click();
@@ -1416,7 +1429,7 @@ test.describe("the use cases drive the viewer", () => {
     const tabs = page.locator(".cp-aud__tab");
     const count = await tabs.count();
     for (let i = 0; i < count; i += 1) {
-      await tabs.nth(i).click();
+      await chooseAudience(page, i);
       const visible = chips(page);
       const n = await visible.count();
       for (let j = 0; j < n; j += 1) {
@@ -1474,7 +1487,7 @@ test.describe("the use cases drive the viewer", () => {
     const tabs = page.locator(".cp-aud__tab");
     const count = await tabs.count();
     for (let i = 0; i < count; i += 1) {
-      await tabs.nth(i).click();
+      await chooseAudience(page, i);
       const onCard = await page.locator(".cp-aud__panel.is-on .cp-aud__col").evaluateAll((els) => els.map((el) => el.dataset.collection));
       const described = await note.getAttribute("data-collection");
       expect(onCard, `use case ${i + 1}`).toContain(described);
@@ -1488,7 +1501,7 @@ test.describe("the use cases drive the viewer", () => {
     const elsewhere = STOREFRONT_CATALOG.find((entry) => !shown.includes(entry.id));
     await page.goto(`/?collection=${elsewhere.id}`);
     await page.locator(".cp-aud").evaluate((el) => el.scrollIntoView({ block: "center", behavior: "instant" }));
-    await page.locator(".cp-aud__tab").nth(count - 1).click();
+    await chooseAudience(page, count - 1);
     await expect(note).toHaveAttribute("data-collection", shown[0]);
   });
 });
@@ -1556,7 +1569,7 @@ test.describe("the door's use cases", () => {
     }
 
     const tab = page.locator(".cp-aud__tab").nth(4);
-    await tab.click();
+    await chooseAudience(page, 4);
     await expect(tab).toHaveAttribute("aria-selected", "true");
     await expect(counter(page)).toHaveText(/^05 \//);
     await expect(band(page)).toHaveAttribute("data-stopped", "true");
@@ -1564,7 +1577,7 @@ test.describe("the door's use cases", () => {
     // pointer would stay over the band and hold it; a finger leaves nothing
     // hovering, so the pointer is moved off in both projects.
     await page.mouse.move(2, 2);
-    await page.locator(".cp-aud__tab").nth(4).evaluate((el) => el.blur());
+    await page.evaluate(() => document.activeElement?.blur());
     // Held while the visitor is still about (under twelve seconds)...
     await page.clock.runFor(11_000);
     await expect(counter(page)).toHaveText(/^05 \//);
@@ -1622,7 +1635,7 @@ test.describe("the door's use cases", () => {
     await reach(page);
     const total = await page.locator(".cp-aud__panel").count();
     for (let i = 0; i < total; i += 1) {
-      await page.locator(".cp-aud__tab").nth(i).click();
+      await chooseAudience(page, i);
       const gap = await page.locator(".cp-aud__panel.is-on").evaluate((panel) => {
         const chips = panel.querySelector(".cp-aud__cols").getBoundingClientRect();
         return panel.getBoundingClientRect().bottom - chips.bottom;
@@ -1632,21 +1645,21 @@ test.describe("the door's use cases", () => {
     }
   });
 
-  // At most two lines above 1100; at or below it, one row that scrolls
-  // sideways inside itself while the page does not. The phone project
-  // measures 390 on its own viewport.
-  test("the audience names are one row until there is room for two lines", async ({ page }, testInfo) => {
-    const widths = testInfo.project.name === "desktop" ? [1440, 1040, 720] : [null];
+  test("audience names are mobile-only and scroll within the page", async ({ page }, testInfo) => {
+    const widths = testInfo.project.name === "desktop" ? [1440, 1040, 721, 720] : [null];
     for (const width of widths) {
       if (width) await page.setViewportSize({ width, height: 900 });
       await page.goto("/");
       const at = width ?? page.viewportSize().width;
-      const lines = await page.locator(".cp-aud__tab").evaluateAll((tabs) => new Set(tabs.map((tab) => Math.round(tab.getBoundingClientRect().top))).size);
-      expect(lines, `at ${at}`).toBeLessThanOrEqual(at > 1100 ? 2 : 1);
-      if (at <= 1100) {
-        const row = await page.locator(".cp-aud__tabs").evaluate((el) => ({ scroll: el.scrollWidth, client: el.clientWidth, overflow: getComputedStyle(el).overflowX }));
+      const tabs = page.locator(".cp-aud__tabs");
+      if (at > 720) await expect(tabs).toBeHidden();
+      else {
+        await expect(tabs).toBeVisible();
+        const lines = await page.locator(".cp-aud__tab").evaluateAll((items) => new Set(items.map((tab) => Math.round(tab.getBoundingClientRect().top))).size);
+        expect(lines, `at ${at}`).toBe(1);
+        const row = await tabs.evaluate((el) => ({ scroll: el.scrollWidth, client: el.clientWidth, overflow: getComputedStyle(el).overflowX }));
         expect(row.overflow, `the row scrolls at ${at}`).toBe("auto");
-        expect(row.scroll, `the names overflow the row at ${at}, so it scrolls`).toBeGreaterThan(row.client);
+        expect(row.scroll).toBeGreaterThan(row.client);
       }
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
       expect(overflow, `the page scrolls sideways at ${at}`).toBeLessThanOrEqual(0);
@@ -1664,7 +1677,7 @@ test.describe("the door's use cases", () => {
       if (width) await page.setViewportSize({ width, height: 900 });
       await page.goto("/");
       await band(page).evaluate((el) => el.scrollIntoView({ block: "center", behavior: "instant" }));
-      await page.locator(".cp-aud__tab").nth(index).click();
+      await chooseAudience(page, index);
       const panel = page.locator('.cp-aud__panel.is-on[data-audience="government-officials"]');
       await expect(panel).toHaveCount(1);
       const fit = await panel.evaluate((el) => {

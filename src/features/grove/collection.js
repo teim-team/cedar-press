@@ -56,6 +56,7 @@
  * drawn.
  */
 
+import { parseCsv, csvCell } from "./csv.js";
 import manifest from "../../../data/cedar/collections.manifest.json" with { type: "json" };
 import published from "../../../data/cedar/samples.published.json" with { type: "json" };
 
@@ -281,9 +282,8 @@ export function collectionShort(dataset) {
 
 /** One line for the context strip: versions and the latest refresh date. */
 export function collectionContextLine() {
-  const versions = LAUNCH_COLLECTION.map((d) => `${collectionShort(d)} ${d.version}`).join(" · ");
   const updated = LAUNCH_COLLECTION.map((d) => d.updated).sort().slice(-1)[0];
-  return `${versions} · all current as of ${updated}`;
+  return `Updated ${updated}`;
 }
 
 /**
@@ -306,7 +306,7 @@ export function collectionContextLine() {
 export function collectionFindings() {
   const basis = (datasetId, detail) => {
     const dataset = LAUNCH_COLLECTION.find((item) => item.id === datasetId);
-    return `${collectionShort(dataset) ?? datasetId} ${dataset?.version ?? "v0"}, ${detail}`;
+    return `${collectionShort(dataset) ?? datasetId}, ${detail}`;
   };
 
   const supported = [
@@ -402,7 +402,7 @@ export function collectionFindings() {
 /** A figure's basis line, derived so it cannot name a stale version. */
 function basisFor(datasetId, fallback) {
   const dataset = LAUNCH_COLLECTION.find((item) => item.id === datasetId);
-  return dataset ? `${collectionShort(dataset)} ${dataset.version}` : fallback;
+  return dataset ? `${collectionShort(dataset)}, updated ${dataset.updated}` : fallback;
 }
 
 /**
@@ -517,35 +517,12 @@ export function figuresInShelfOrder() {
 export function collectionCitation(datasetId, accessedOn = null) {
   const dataset = LAUNCH_COLLECTION.find((item) => item.id === datasetId);
   if (!dataset) return null;
-  const vintage = dataset.vintage ? `, vintage ${dataset.vintage}` : "";
+  const updated = dataset.updated ? ` Updated ${dataset.updated}.` : "";
   const accessed = accessedOn ? ` Accessed ${accessedOn}.` : "";
   return (
-    `Lumecon, "${dataset.name}" (${dataset.version}${vintage}), ` +
-    `Cedar Press collection, cedarpress.ai.${accessed}`
+    `Lumecon, "${dataset.name}", ` +
+    `Cedar Press collection, cedarpress.ai.${updated}${accessed}`
   );
-}
-
-// One CSV cell, quoted only when the value needs it, so ordinary cells stay
-// byte-identical to what they were before quoting existed.
-function csvCell(value) {
-  const text = String(value ?? "");
-  return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
-}
-
-/**
- * The number of columns in a CSV header line, respecting quoted cells.
- *
- * A header like `a,"b,c",d` is three columns, not four, and the citation row
- * has to be padded to the real width or the file is ragged.
- */
-function columnCount(headerLine) {
-  let count = 1;
-  let quoted = false;
-  for (const character of headerLine) {
-    if (character === '"') quoted = !quoted;
-    else if (character === "," && !quoted) count += 1;
-  }
-  return count;
 }
 
 /**
@@ -561,7 +538,7 @@ function columnCount(headerLine) {
  * the rows a tile promises is the failure this avoids, and `hasReleaseFile` in
  * pressDownload.js reads this to keep the tile honest.
  *
- * The last row is the citation. A downloaded file outlives the page it came
+ * The citation is a column on each observation, never an extra data row. A downloaded file outlives the page it came
  * from, so the file itself must say what it is, whose work it is and how to
  * credit it; provenance that lives only in the UI is provenance the reader
  * loses on save.
@@ -575,10 +552,12 @@ export function collectionCsv(datasetId, sampleText) {
   if (collectionPublicationHold(datasetId)) return null;
   const sample = SAMPLES[datasetId];
   if (!sample?.path || sampleText == null) return null;
-  const lines = sampleText.replace(/\r\n/g, "\n").replace(/\n+$/, "").split("\n");
-  const width = columnCount(lines[0]);
-  const citation = ["cite_as", collectionCitation(datasetId) ?? "", ...Array(Math.max(0, width - 2)).fill("")];
-  return [...lines, citation.map(csvCell).join(",")].join("\n");
+  const { columns, rows } = parseCsv(sampleText);
+  const citation = collectionCitation(datasetId) ?? "";
+  return [
+    [...columns, "cite_as"],
+    ...rows.map((row) => [...columns.map((name) => row[name]), citation]),
+  ].map((row) => row.map(csvCell).join(",")).join("\n");
 }
 
 /**

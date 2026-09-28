@@ -18,7 +18,7 @@ import sys
 import tempfile
 from pathlib import Path
 
-from cedar_press import need_profiles, release_research, repository
+from cedar_press import need_profiles, release_research, repository, spreadsheet
 
 PROTOCOL_VERSION = 1
 MAX_REQUEST_BYTES = 16 * 1024
@@ -43,6 +43,7 @@ def _validate(request: dict) -> str:
         "discover": set(),
         "profile": {"cedar_uid"},
         "download": {"collection", "release_id", "component"},
+        "spreadsheet": {"collection", "release_id"},
         "research": {"collection", "release_id", "component"},
     }.get(operation)
     if extra is None or set(request) - ({"protocol_version", "tier", "operation"} | extra):
@@ -68,10 +69,13 @@ def exchange(request: dict, output_directory: Path | None = None) -> dict:
         or not re.fullmatch(r"[a-z][a-z0-9-]{0,63}", collection)
         or not isinstance(rid, str)
         or not re.fullmatch(r"[0-9a-f]{64}", rid)
-        or (component is not None and (
-            not isinstance(component, str)
-            or not re.fullmatch(r"[a-z0-9][a-z0-9_]{0,59}", component)
-        ))
+        or (
+            component is not None
+            and (
+                not isinstance(component, str)
+                or not re.fullmatch(r"[a-z0-9][a-z0-9_]{0,59}", component)
+            )
+        )
     ):
         raise ExchangeRefusal(400, "Invalid collection, component or release identity")
     if not repository.may_download_full(request["tier"], collection):
@@ -81,7 +85,9 @@ def exchange(request: dict, output_directory: Path | None = None) -> dict:
         return release_research.packet(request["tier"], collection, rid, component)
     if output_directory is None or not output_directory.is_dir() or output_directory.is_symlink():
         raise ExchangeRefusal(503, "Private download storage is unavailable")
-    if repository.is_component_release(collection):
+    if operation == "spreadsheet":
+        release = spreadsheet.download(collection, rid)
+    elif repository.is_component_release(collection):
         release = repository.grove_full_release(collection, rid, component=component)
     else:
         if component is not None:
@@ -99,7 +105,11 @@ def exchange(request: dict, output_directory: Path | None = None) -> dict:
         digest = hashlib.sha256()
         size = 0
         with tempfile.NamedTemporaryFile(
-            mode="wb", dir=output_directory, prefix="cedar-", suffix=".jsonl", delete=False
+            mode="wb",
+            dir=output_directory,
+            prefix="cedar-",
+            suffix=".csv" if operation == "spreadsheet" else ".jsonl",
+            delete=False,
         ) as saved:
             destination = Path(saved.name)
             while chunk := stream.read(64 * 1024):

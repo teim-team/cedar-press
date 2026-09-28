@@ -198,3 +198,9 @@ source paths and ingest filenames remain outside displayed citation labels.
 Giving declarations append recipient state, source locator and award-family
 evidence. The earlier exact 27-column schema remains explicitly supported for
 pinned rollback; undeclared extra columns still refuse delivery.
+
+## Living datasets and the researcher spreadsheet
+
+Public labels and citations use the collection name and its recorded Updated date. Version labels and internal file/table counts are not product descriptions or source counts. The authenticated spreadsheet-download route returns one CSV per collection through the same pinned, rights-checked download verifier. Existing component routes remain internal compatibility interfaces. Compatible columns align; conflicting definitions or units stay separate until reviewed, and record type/key/grain prevent accidental aggregation across observations. Preview extracts remain explicitly labeled as samples.
+
+Rebuild and inspect the real collection exports in the data workspace before publication. Review conflicting column definitions, duplicate keys, missing values and original-source provenance; preserve publication holds. The code change itself does not rebuild the external data store or deploy the service.

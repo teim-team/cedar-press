@@ -186,10 +186,9 @@ def _freshness(collection_id: str) -> str | None:
     release = press_catalog.RELEASES.get(collection_id)
     if not release:
         return None
-    version = release.get("version")
     updated = release.get("updated")
     cadence = release.get("cadence")
-    parts = [part for part in (version, updated, cadence) if part]
+    parts = [part for part in (f"Updated {updated}" if updated else None, cadence) if part]
     return " · ".join(parts) or None
 
 

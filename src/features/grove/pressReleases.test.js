@@ -244,7 +244,7 @@ test("the first release keeps its own facts, the latest matches the manifest", (
     const first = releaseFor(dataset.id).history.at(-1);
     assert.equal(first.kind, RELEASE_KIND.DATA);
     assert.ok(first.changed.length >= 2, dataset.id);
-    assert.match(first.changed[0], /^First release on Cedar Press: /);
+    assert.match(first.changed[0], /^First published on Cedar Press: /);
     // it states SOME measured row count - its own, not necessarily today's
     assert.match(first.changed[0], /[\d,]+ rows|row count unresolved/,
                  `${dataset.id}: ${first.changed[0]}`);
@@ -258,9 +258,9 @@ test("the first release keeps its own facts, the latest matches the manifest", (
   }
   // The collection that had no preview file said so rather than promising one.
   const owned = releaseFor("owned").history.at(-1);
-  assert.ok(owned.changed.some((line) => line.startsWith("No preview file yet")));
+  assert.ok(owned.changed.some((line) => line.startsWith("No public preview is available yet")));
   const funding = releaseFor("funding").history.at(-1);
-  assert.ok(funding.changed.some((line) => /-row preview of /.test(line)));
+  assert.ok(funding.changed.some((line) => /-row preview/.test(line)));
 });
 
 // Editorial notes describe shipped releases: a note names a version the

@@ -129,26 +129,17 @@ export function ledgerFor(id, source = ledger) {
  * a file a reader can still take (Codex, PR #52).
  */
 function describe(record, { isFirst, isCurrent, served }) {
-  const lead = isFirst ? "First release on Cedar Press" : "Release";
-  const tables = record.tables
-    ? `${record.tables} ${record.tables === 1 ? "table" : "tables"}, ${record.rowsLabel}`
-    : record.rowsLabel;
-  const changed = [`${lead}: ${tables}.`];
+  const lead = isFirst ? "First published on Cedar Press" : "Dataset updated";
+  const changed = [`${lead}: ${record.rowsLabel}.`];
   if (record.preview) {
-    const preview = `A ${record.preview.rows}-row preview of ${record.preview.table}, the collection's flagship table`;
-    // A current preview the repository does not hold yet (samples.published
-    // .json) is not on the shelf, and saying it is would be the 404 in prose.
-    changed.push(
-      isCurrent && served
-        ? `${preview}, downloads from the shelf.`
-        : isCurrent
-          ? `${preview}, was produced with this release and is not published on the shelf yet.`
-          : `${preview}, was published with this release; the shelf now serves the current release's preview.`,
-    );
+    const preview = `A ${record.preview.rows}-row preview`;
+    changed.push(isCurrent && served
+      ? `${preview} downloads from the shelf.`
+      : isCurrent
+        ? `${preview} is not published on the shelf yet.`
+        : `${preview} accompanied this update; the shelf now serves the current preview.`);
   } else {
-    changed.push(
-      "No preview file yet: the collection's flagship table is unsettled, and no sample is published until it is.",
-    );
+    changed.push("No public preview is available yet.");
   }
   const blockers = Array.isArray(record.blockers) ? record.blockers.length : 0;
   if (blockers) {

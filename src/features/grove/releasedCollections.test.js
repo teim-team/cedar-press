@@ -21,3 +21,16 @@ test("PLOT preview renders cited geometry with its exact release and no ownershi
       assert.equal(renderToStaticMarkup(jsx(PlotGeometryPreview, { packet: { ...packet, ...change } })), "");
   } finally { await vite.close(); }
 });
+
+
+test("the spreadsheet download requires matching verified metadata", async () => {
+  const { spreadsheetDownloadUrl } = await import("../../api.js");
+  const pin = "a".repeat(64);
+  const meta = { kind: "spreadsheet", format: "csv", release_id: pin };
+  const parts = [{ available: true, releaseId: pin }];
+  assert.equal(spreadsheetDownloadUrl("plot", meta, parts), `/press/collections/plot/spreadsheet-download?release_id=${pin}`);
+  assert.equal(spreadsheetDownloadUrl("plot", { ...meta, release_id: "b".repeat(64) }, parts), null);
+  assert.equal(spreadsheetDownloadUrl("plot", meta, []), null);
+  assert.equal(spreadsheetDownloadUrl("gaming", meta, parts), null);
+  assert.equal(spreadsheetDownloadUrl("../plot", meta, parts), null);
+});

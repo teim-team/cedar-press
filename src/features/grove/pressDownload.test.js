@@ -62,22 +62,18 @@ function parseCsv(text) {
   return rows;
 }
 
-test("a launch dataset downloads its sample rows, citation row included", async () => {
+test("a launch dataset downloads its sample rows with a citation column", async () => {
   const { csv, name } = await csvFor({ id: "deals", name: "Indian Country Deals" }, readSample);
   assert.equal(name, "deals.csv");
   const rows = parseCsv(csv);
-  // Ten real rows plus a header plus the citation. A preview that quietly
-  // shrank would otherwise still pass every assertion below it.
-  assert.equal(rows.length, 12, `expected header + 10 rows + citation, got ${rows.length}`);
-  const last = rows.at(-1);
-  assert.equal(last[0], "cite_as");
-  assert.ok(last[1].startsWith("Lumecon, "), last[1]);
-  // The version the descriptor carries, not one the release feed invented.
+  assert.equal(rows.length, 11, `expected header + 10 observations, got ${rows.length}`);
+  assert.equal(rows[0].at(-1), "cite_as");
   const deals = LAUNCH_COLLECTION.find((d) => d.id === "deals");
-  assert.ok(last[1].includes(`(${deals.version})`), last[1]);
-  // The citation row is padded to the table's real width, so the file is not
-  // ragged when a spreadsheet opens it.
-  assert.equal(last.length, rows[0].length);
+  for (const row of rows.slice(1)) {
+    assert.ok(row.at(-1).includes(`Updated ${deals.updated}`));
+    assert.ok(!row.at(-1).includes(`(${deals.version})`));
+    assert.equal(row.length, rows[0].length);
+  }
 });
 
 test("every collection with a sample downloads real rows for it", async () => {
@@ -90,10 +86,10 @@ test("every collection with a sample downloads real rows for it", async () => {
     // The manifest states how many rows and columns Cedar published for this
     // table; the file has to match, or the manifest is describing a file that
     // is not the one being handed over.
-    assert.equal(rows.length, sample.rows + 2, dataset.id);
-    assert.equal(rows[0].length, sample.columns, dataset.id);
-    assert.equal(rows.at(-1)[0], "cite_as", dataset.id);
-    assert.equal(rows.at(-1).length, sample.columns, dataset.id);
+    assert.equal(rows.length, sample.rows + 1, dataset.id);
+    assert.equal(rows[0].length, sample.columns + 1, dataset.id);
+    assert.equal(rows[0].at(-1), "cite_as", dataset.id);
+    assert.equal(rows.at(-1).length, sample.columns + 1, dataset.id);
   }
 });
 

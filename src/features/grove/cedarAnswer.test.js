@@ -29,7 +29,7 @@ test("no basis means no line, rather than an empty one", () => {
 test("an included collection is cited to its release and offers its records", () => {
   const line = answerSource(basis());
   assert.equal(line.tone, "release");
-  assert.equal(line.release, "Cedar Native Entity Enterprise Dataset (NEED) v1");
+  assert.equal(line.release, "Cedar Native Entity Enterprise Dataset (NEED)");
   assert.equal(line.updated, "2026-09-04");
   assert.equal(line.records, "need");
 });
@@ -38,7 +38,7 @@ test("a collection this plan does not include is cited and offers nothing", () =
   const line = answerSource(basis({ opened: false }));
   // Still read off the release, so it is still cited to it: the description
   // is a true reading and losing the citation would be the overcorrection.
-  assert.equal(line.release, "Cedar Native Entity Enterprise Dataset (NEED) v1");
+  assert.equal(line.release, "Cedar Native Entity Enterprise Dataset (NEED)");
   assert.equal(line.updated, "2026-09-04");
   // The part that matters.
   assert.equal(line.tone, "description");
@@ -74,7 +74,7 @@ test("a composed answer claims the scope and not the release", () => {
   assert.equal(line.records, null);
   // The scope is a real fact about the question, so the name survives; the
   // date does not, because nothing was read on that date.
-  assert.equal(line.release, "Cedar Native Entity Enterprise Dataset (NEED) v1");
+  assert.equal(line.release, "Cedar Native Entity Enterprise Dataset (NEED)");
   assert.equal(line.updated, null);
 });
 
@@ -90,6 +90,6 @@ test("a release with no name or version reads as an empty string, not `undefined
   // the failure mode a join with no filter produces.
   assert.equal(releaseOf({}), "");
   assert.equal(releaseOf({ collectionName: "Owned" }), "Owned");
-  assert.equal(releaseOf({ version: "v1" }), "v1");
+  assert.equal(releaseOf({ version: "v1" }), "");
   assert.equal(answerSource({ kind: "synthesis" }).release, "");
 });

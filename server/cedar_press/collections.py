@@ -56,7 +56,9 @@ WHAT IS STILL NOT MEASURED, AND SAYS SO
 from __future__ import annotations
 
 import csv
+import io
 import json
+import re
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -294,9 +296,8 @@ def collection_short(dataset: Any) -> str | None:
 
 def collection_context_line() -> str:
     """One line for the context strip: versions and the latest refresh date."""
-    versions = " · ".join(f"{collection_short(d)} {d.version}" for d in LAUNCH_COLLECTION)
     updated = sorted(d.updated for d in LAUNCH_COLLECTION)[-1]
-    return f"{versions} · all current as of {updated}"
+    return f"Updated {updated}"
 
 
 @dataclass(frozen=True)
@@ -364,8 +365,7 @@ def collection_findings() -> CollectionFindings:
     def basis(dataset_id: str, detail: str) -> str:
         dataset = _dataset_for(dataset_id)
         name = collection_short(dataset) if dataset else dataset_id
-        version = dataset.version if dataset else "v0"
-        return f"{name} {version}, {detail}"
+        return f"{name}, {detail}"
 
     supported = (
         CollectionSupported(
@@ -504,7 +504,7 @@ class CollectionFigure:
 def _basis_for(dataset_id: str, fallback: str) -> str:
     """A figure's basis line, derived so it cannot name a stale version."""
     dataset = _dataset_for(dataset_id)
-    return f"{collection_short(dataset)} {dataset.version}" if dataset else fallback
+    return f"{collection_short(dataset)}, updated {dataset.updated}" if dataset else fallback
 
 
 COLLECTION_FIGURES: tuple[CollectionFigure, ...] = (
@@ -599,18 +599,22 @@ def collection_citation(dataset_id: str, accessed_on: str | None = None) -> str 
     dataset = _dataset_for(dataset_id)
     if dataset is None:
         return None
-    vintage = f", vintage {dataset.vintage}" if dataset.vintage else ""
+    updated = f" Updated {dataset.updated}." if dataset.updated else ""
     accessed = f" Accessed {accessed_on}." if accessed_on else ""
     return (
-        f'Lumecon, "{dataset.name}" ({dataset.version}{vintage}), '
-        f"Cedar Press collection, cedarpress.ai.{accessed}"
+        f'Lumecon, "{dataset.name}", '
+        f"Cedar Press collection, cedarpress.ai.{updated}{accessed}"
     )
 
 
 def _csv_cell(value: object) -> str:
     """One CSV cell, quoted only when the value needs it."""
     text = "" if value is None else str(value)
-    if any(ch in text for ch in ('"', ",", "\n")):
+    if re.match(r"^[=+@\t\r]", text) or (
+        text.startswith("-") and not re.fullmatch(r"-?\s*(\d[\d,]*)?(\.\d+)?", text)
+    ):
+        text = "'" + text
+    if any(ch in text for ch in ('"', ",", "\n", "\r")):
         return '"' + text.replace('"', '""') + '"'
     return text
 
@@ -627,7 +631,7 @@ def collection_csv(dataset_id: str) -> str | None:
     ``sample_unavailable_reason`` says why; handing over a metadata file in
     place of the rows a tile promises is the failure this avoids.
 
-    The last row is the citation. A downloaded file outlives the page it came
+    The citation is a column, never an extra observation. A downloaded file outlives the page it came
     from, so the file itself must say what it is, whose work it is and how to
     credit it; provenance that lives only in the UI is provenance the reader
     loses on save.
@@ -638,14 +642,8 @@ def collection_csv(dataset_id: str) -> str | None:
     path = _SAMPLE_ROOT / str(sample["path"]).lstrip("/")
     if not path.exists():
         return None
-    # Normalized to \n so the two implementations are byte-comparable and the
-    # trailing citation row is appended to a known shape.
     text = path.read_text(encoding="utf-8").replace("\r\n", "\n").rstrip("\n")
-    lines = text.split("\n")
-    width = len(next(csv.reader([lines[0]])))
-    citation = [
-        "cite_as",
-        collection_citation(dataset_id) or "",
-        *[""] * max(0, width - 2),
-    ]
-    return "\n".join([*lines, ",".join(_csv_cell(cell) for cell in citation)])
+    rows = list(csv.reader(io.StringIO(text)))
+    citation = collection_citation(dataset_id) or ""
+    result = [[*rows[0], "cite_as"], *[[*row, citation] for row in rows[1:]]]
+    return "\n".join(",".join(_csv_cell(value) for value in row) for row in result)

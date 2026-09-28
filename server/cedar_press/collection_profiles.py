@@ -345,13 +345,13 @@ def _changes_sentence(profile: dict[str, Any], asked: str) -> str:
         )
     history = release["history"]
     entry = next(
-        (item for item in history if item["version"].lower() in asked),
+        (item for item in history if item["version"].lower() in asked or item["date"] in asked),
         history[0],
     )
     kind = "methodology release" if entry.get("kind") == "methodology" else "data release"
     note = f" Note: {entry['note']}" if entry.get("note") else ""
     changes = " ".join(entry["changed"])
-    return f"{name} {entry['version']} ({entry['date']}, {kind}): {changes}{note}"
+    return f"{name}, updated {entry['date']} ({kind}): {changes}{note}"
 
 
 def _coverage_sentence(profile: dict[str, Any]) -> str | None:
@@ -438,7 +438,7 @@ def answer_from_profile(question: str, dataset_id: str) -> dict[str, str] | None
     # printed -- a basis line naming a measurement that does not exist.
     if profile.get("version"):
         vintage = f", vintage {profile['vintage']}" if profile.get("vintage") else ""
-        basis = f"{profile['collection_name']} {profile['version']}{vintage}"
+        basis = f"{profile['collection_name']}, updated {profile['last_updated']}{vintage}"
     else:
         basis = f"{profile['collection_name']}, Cedar Press catalog entry"
 
@@ -458,10 +458,10 @@ def answer_from_profile(question: str, dataset_id: str) -> dict[str, str] | None
         # with no release says it is in preparation.
         if profile.get("version"):
             held = (
-                f" Its current release is {profile['version']}"
+                " The dataset was updated"
                 f" ({profile['last_updated']}), holding {profile['record_count_label']}."
                 if profile.get("record_count_label")
-                else f" Its current release is {profile['version']} ({profile['last_updated']})."
+                else f" The dataset was updated {profile['last_updated']}."
             )
             return {
                 "answer": (

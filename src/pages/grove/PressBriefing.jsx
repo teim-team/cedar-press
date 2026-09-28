@@ -115,7 +115,6 @@ export default function PressBriefing() {
                       {PRESS_CATALOG_BY_ID[release.id]?.name ?? release.id}
                     </span>
                     <span className="cp-brief__sigwhen">
-                      {latest?.version ? `${latest.version} · ` : ""}
                       {formatUpdated(release.updated)}
                     </span>
                   </Link>
@@ -124,7 +123,7 @@ export default function PressBriefing() {
             })}
           </ul>
           <Link className="cp-brief__more" to={PRESS_WHATS_NEW_PATH}>
-            Every release <span aria-hidden="true">&#8594;</span>
+            Every update <span aria-hidden="true">&#8594;</span>
           </Link>
         </div>
 

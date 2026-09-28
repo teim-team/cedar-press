@@ -63,8 +63,7 @@ export async function csvFor(entry, fetchText = defaultFetchText) {
     if (shipped) return { csv: shipped, name: `${entry.id}.csv` };
   }
   // The file outlives the page, so it carries its own citation. Launch
-  // datasets cite with their version; the rest of the shelf has no release
-  // bookkeeping yet and cites by name.
+  // datasets cite by name and update date; other shelf entries cite by name.
   const citation =
     collectionCitation(entry.id) ||
     `Lumecon, "${entry.name}", Cedar Press collection, cedarpress.ai.`;

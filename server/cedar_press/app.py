@@ -52,6 +52,7 @@ import re
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
+from urllib.parse import quote
 
 from fastapi import Depends, FastAPI, HTTPException, Request, Response
 from fastapi.exception_handlers import http_exception_handler
@@ -111,6 +112,7 @@ app.add_middleware(
         "X-Cedar-SHA256",
         "X-Cedar-Rows",
         "X-Cedar-Citation",
+        "X-Cedar-Citation-Encoding",
     ],
 )
 
@@ -666,9 +668,11 @@ class _VerifiedDownloadResponse(StreamingResponse):
             self.spool.close()
 
 
+@app.get("/press/collections/{collection_id}/spreadsheet-download")
 @app.get("/press/collections/{collection_id}/full-download")
 def full_download(
     collection_id: str,
+    request: Request,
     release_id: str | None = None,
     component: str | None = None,
     session: Session | None = Depends(current_session),
@@ -705,24 +709,33 @@ def full_download(
             audit("invalid_release_request", requested=None)
             raise HTTPException(status_code=400, detail="Explicit release ID required")
         repository.assert_collection_publishable(collection_id)
-        # Retain the exact legacy participant download when a native release is
-        # still pinned. New collection releases require an explicit component;
-        # no ambiguous combined table or silent release substitution is offered.
-        legacy_federal = collection_id == "federal-register" and component is None
-        if (
-            repository.is_component_release(collection_id)
-            and component is None
-            and not legacy_federal
-        ):
-            audit("invalid_release_request")
-            raise HTTPException(status_code=400, detail="Explicit component required")
-        if repository.is_component_release(collection_id) and not legacy_federal:
-            release = repository.grove_full_release(collection_id, release_id, component=component)
-        elif component is not None:
-            audit("invalid_release_request")
-            raise HTTPException(status_code=400, detail="A Press flagship has no components")
+        if request.url.path.endswith("/spreadsheet-download"):
+            from cedar_press.spreadsheet import download as spreadsheet_download
+
+            if component is not None:
+                raise HTTPException(status_code=400, detail="Choose the collection spreadsheet")
+            release = spreadsheet_download(collection_id, release_id)
         else:
-            release = repository.full_release(collection_id, release_id)
+            # Retain the exact legacy participant download when a native release is
+            # still pinned. New collection releases require an explicit component;
+            # no ambiguous combined table or silent release substitution is offered.
+            legacy_federal = collection_id == "federal-register" and component is None
+            if (
+                repository.is_component_release(collection_id)
+                and component is None
+                and not legacy_federal
+            ):
+                audit("invalid_release_request")
+                raise HTTPException(status_code=400, detail="Explicit component required")
+            if repository.is_component_release(collection_id) and not legacy_federal:
+                release = repository.grove_full_release(
+                    collection_id, release_id, component=component
+                )
+            elif component is not None:
+                audit("invalid_release_request")
+                raise HTTPException(status_code=400, detail="A Press flagship has no components")
+            else:
+                release = repository.full_release(collection_id, release_id)
     except repository.GroveReleaseNotPinned as error:
         # Production state until the Gaming IDs are issued: say so plainly,
         # never substitute a sample or an unpinned file.
@@ -739,7 +752,8 @@ def full_download(
         "X-Cedar-Release": release["release_id"],
         "X-Cedar-SHA256": release["sha256"],
         "X-Cedar-Rows": str(release["record_count"]),
-        "X-Cedar-Citation": release["citation"],
+        "X-Cedar-Citation": quote(release["citation"], safe=' ,.:/()"-'),
+        "X-Cedar-Citation-Encoding": "percent",
         "Cache-Control": "private, no-store",
     }
     if release.get("component"):

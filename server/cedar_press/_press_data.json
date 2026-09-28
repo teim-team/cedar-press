@@ -677,8 +677,8 @@
           "date": "2026-09-26",
           "kind": "data",
           "changed": [
-            "Release: 14 tables, 3,646,750 rows.",
-            "A 10-row preview of federal_funding_transactions.csv, the collection's flagship table, downloads from the shelf."
+            "Dataset updated: 3,646,750 rows.",
+            "A 10-row preview downloads from the shelf."
           ]
         },
         {
@@ -686,8 +686,8 @@
           "date": "2026-09-04",
           "kind": "data",
           "changed": [
-            "Release: 14 tables, 3,646,750 rows.",
-            "A 10-row preview of federal_funding_transactions.csv, the collection's flagship table, was published with this release; the shelf now serves the current release's preview."
+            "Dataset updated: 3,646,750 rows.",
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         },
         {
@@ -695,8 +695,8 @@
           "date": "2026-09-02",
           "kind": "data",
           "changed": [
-            "First release on Cedar Press: 14 tables, 3,646,750 rows.",
-            "A 10-row preview of federal_funding_transactions.csv, the collection's flagship table, was published with this release; the shelf now serves the current release's preview."
+            "First published on Cedar Press: 3,646,750 rows.",
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         }
       ]
@@ -713,8 +713,8 @@
           "date": "2026-09-26",
           "kind": "data",
           "changed": [
-            "Release: 23 tables, 502,483 rows.",
-            "A 10-row preview of consultation_events.csv, the collection's flagship table, downloads from the shelf."
+            "Dataset updated: 502,483 rows.",
+            "A 10-row preview downloads from the shelf."
           ]
         },
         {
@@ -722,8 +722,8 @@
           "date": "2026-09-04",
           "kind": "data",
           "changed": [
-            "Release: 23 tables, 502,483 rows.",
-            "A 10-row preview of consultation_events.csv, the collection's flagship table, was published with this release; the shelf now serves the current release's preview."
+            "Dataset updated: 502,483 rows.",
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         },
         {
@@ -731,8 +731,8 @@
           "date": "2026-09-02",
           "kind": "data",
           "changed": [
-            "First release on Cedar Press: 23 tables, 502,483 rows.",
-            "A 10-row preview of consultation_events.csv, the collection's flagship table, was published with this release; the shelf now serves the current release's preview."
+            "First published on Cedar Press: 502,483 rows.",
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         }
       ]
@@ -749,8 +749,8 @@
           "date": "2026-09-26",
           "kind": "data",
           "changed": [
-            "Release: 15 tables, 206,354 rows.",
-            "A 10-row preview of native_bills.csv, the collection's flagship table, downloads from the shelf."
+            "Dataset updated: 206,354 rows.",
+            "A 10-row preview downloads from the shelf."
           ]
         },
         {
@@ -758,8 +758,8 @@
           "date": "2026-09-04",
           "kind": "data",
           "changed": [
-            "Release: 15 tables, 206,354 rows.",
-            "A 10-row preview of native_bills.csv, the collection's flagship table, was published with this release; the shelf now serves the current release's preview."
+            "Dataset updated: 206,354 rows.",
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         },
         {
@@ -767,8 +767,8 @@
           "date": "2026-09-02",
           "kind": "data",
           "changed": [
-            "First release on Cedar Press: 11 tables, 149,293 rows.",
-            "A 10-row preview of native_bills.csv, the collection's flagship table, was published with this release; the shelf now serves the current release's preview."
+            "First published on Cedar Press: 149,293 rows.",
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         }
       ]
@@ -785,8 +785,8 @@
           "date": "2026-09-26",
           "kind": "data",
           "changed": [
-            "Release: 15 tables, 2,662 rows.",
-            "A 10-row preview of deals_classified.csv, the collection's flagship table, downloads from the shelf."
+            "Dataset updated: 2,662 rows.",
+            "A 10-row preview downloads from the shelf."
           ]
         },
         {
@@ -794,8 +794,8 @@
           "date": "2026-09-04",
           "kind": "data",
           "changed": [
-            "Release: 15 tables, 2,662 rows.",
-            "A 10-row preview of deals_classified.csv, the collection's flagship table, was published with this release; the shelf now serves the current release's preview."
+            "Dataset updated: 2,662 rows.",
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         },
         {
@@ -803,8 +803,8 @@
           "date": "2026-09-02",
           "kind": "data",
           "changed": [
-            "First release on Cedar Press: 15 tables, 2,662 rows.",
-            "A 10-row preview of deals_classified.csv, the collection's flagship table, was published with this release; the shelf now serves the current release's preview."
+            "First published on Cedar Press: 2,662 rows.",
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         }
       ]
@@ -821,8 +821,8 @@
           "date": "2026-09-26",
           "kind": "data",
           "changed": [
-            "Release: 12 tables, 100,786 rows.",
-            "A 10-row preview of nagpra_notices.csv, the collection's flagship table, downloads from the shelf."
+            "Dataset updated: 100,786 rows.",
+            "A 10-row preview downloads from the shelf."
           ]
         },
         {
@@ -830,8 +830,8 @@
           "date": "2026-09-04",
           "kind": "data",
           "changed": [
-            "Release: 12 tables, 100,786 rows.",
-            "A 10-row preview of nagpra_notices.csv, the collection's flagship table, was published with this release; the shelf now serves the current release's preview."
+            "Dataset updated: 100,786 rows.",
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         },
         {
@@ -839,8 +839,8 @@
           "date": "2026-09-02",
           "kind": "data",
           "changed": [
-            "First release on Cedar Press: 5 tables, 72,302 rows.",
-            "A 10-row preview of nagpra_notices.csv, the collection's flagship table, was published with this release; the shelf now serves the current release's preview."
+            "First published on Cedar Press: 72,302 rows.",
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         }
       ]
@@ -857,8 +857,8 @@
           "date": "2026-09-26",
           "kind": "data",
           "changed": [
-            "Release: 35 tables, 264,478 rows.",
-            "A 10-row preview of native_entity_lobbying_disclosures.csv, the collection's flagship table, downloads from the shelf."
+            "Dataset updated: 264,478 rows.",
+            "A 10-row preview downloads from the shelf."
           ]
         },
         {
@@ -866,8 +866,8 @@
           "date": "2026-09-04",
           "kind": "data",
           "changed": [
-            "Release: 35 tables, 264,478 rows.",
-            "A 10-row preview of native_entity_lobbying_disclosures.csv, the collection's flagship table, was published with this release; the shelf now serves the current release's preview."
+            "Dataset updated: 264,478 rows.",
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         },
         {
@@ -875,8 +875,8 @@
           "date": "2026-09-02",
           "kind": "data",
           "changed": [
-            "First release on Cedar Press: 35 tables, 264,478 rows.",
-            "A 10-row preview of native_entity_lobbying_disclosures.csv, the collection's flagship table, was published with this release; the shelf now serves the current release's preview."
+            "First published on Cedar Press: 264,478 rows.",
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         }
       ]
@@ -893,8 +893,8 @@
           "date": "2026-09-26",
           "kind": "data",
           "changed": [
-            "Release: 10 tables, 3,345,971 rows.",
-            "A 10-row preview of prime_contracts.csv, the collection's flagship table, downloads from the shelf."
+            "Dataset updated: 3,345,971 rows.",
+            "A 10-row preview downloads from the shelf."
           ]
         },
         {
@@ -902,8 +902,8 @@
           "date": "2026-09-04",
           "kind": "data",
           "changed": [
-            "Release: 10 tables, 3,345,971 rows.",
-            "A 10-row preview of prime_contracts.csv, the collection's flagship table, was published with this release; the shelf now serves the current release's preview."
+            "Dataset updated: 3,345,971 rows.",
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         },
         {
@@ -911,8 +911,8 @@
           "date": "2026-09-02",
           "kind": "data",
           "changed": [
-            "First release on Cedar Press: 10 tables, 3,345,971 rows.",
-            "A 10-row preview of prime_contracts.csv, the collection's flagship table, was published with this release; the shelf now serves the current release's preview."
+            "First published on Cedar Press: 3,345,971 rows.",
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         }
       ]
@@ -929,8 +929,8 @@
           "date": "2026-09-26",
           "kind": "data",
           "changed": [
-            "Release: 3 tables, 90,479 rows.",
-            "A 10-row preview of subawards.csv, the collection's flagship table, downloads from the shelf."
+            "Dataset updated: 90,479 rows.",
+            "A 10-row preview downloads from the shelf."
           ]
         },
         {
@@ -938,8 +938,8 @@
           "date": "2026-09-04",
           "kind": "data",
           "changed": [
-            "Release: 3 tables, 90,479 rows.",
-            "A 10-row preview of subawards.csv, the collection's flagship table, was published with this release; the shelf now serves the current release's preview."
+            "Dataset updated: 90,479 rows.",
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         },
         {
@@ -947,8 +947,8 @@
           "date": "2026-09-02",
           "kind": "data",
           "changed": [
-            "First release on Cedar Press: 3 tables, 90,479 rows.",
-            "A 10-row preview of subawards.csv, the collection's flagship table, was published with this release; the shelf now serves the current release's preview."
+            "First published on Cedar Press: 90,479 rows.",
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         }
       ]
@@ -965,8 +965,8 @@
           "date": "2026-09-26",
           "kind": "data",
           "changed": [
-            "Release: 7 tables, 5,930 rows.",
-            "A 10-row preview of native_owned_businesses.csv, the collection's flagship table, was produced with this release and is not published on the shelf yet."
+            "Dataset updated: 5,930 rows.",
+            "A 10-row preview is not published on the shelf yet."
           ]
         },
         {
@@ -974,8 +974,8 @@
           "date": "2026-09-04",
           "kind": "data",
           "changed": [
-            "Release: 7 tables, 5,930 rows.",
-            "A 10-row preview of native_owned_businesses.csv, the collection's flagship table, was published with this release; the shelf now serves the current release's preview."
+            "Dataset updated: 5,930 rows.",
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         },
         {
@@ -983,8 +983,8 @@
           "date": "2026-09-02",
           "kind": "data",
           "changed": [
-            "First release on Cedar Press: 6 tables, row count unresolved.",
-            "No preview file yet: the collection's flagship table is unsettled, and no sample is published until it is.",
+            "First published on Cedar Press: row count unresolved.",
+            "No public preview is available yet.",
             "Readiness is blocked, with 3 named blockers recorded in the manifest."
           ]
         }
@@ -1002,8 +1002,8 @@
           "date": "2026-09-27",
           "kind": "data",
           "changed": [
-            "Release: 3 tables, 14,868 rows.",
-            "No preview file yet: the collection's flagship table is unsettled, and no sample is published until it is.",
+            "Dataset updated: 14,868 rows.",
+            "No public preview is available yet.",
             "Readiness is blocked, with 1 named blocker recorded in the manifest."
           ]
         },
@@ -1012,8 +1012,8 @@
           "date": "2026-09-26",
           "kind": "data",
           "changed": [
-            "Release: 3 tables, 14,868 rows.",
-            "A 10-row preview of need_enterprises.csv, the collection's flagship table, was published with this release; the shelf now serves the current release's preview."
+            "Dataset updated: 14,868 rows.",
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         },
         {
@@ -1021,8 +1021,8 @@
           "date": "2026-09-04",
           "kind": "data",
           "changed": [
-            "Release: 3 tables, 14,868 rows.",
-            "A 10-row preview of need_enterprises.csv, the collection's flagship table, was published with this release; the shelf now serves the current release's preview."
+            "Dataset updated: 14,868 rows.",
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         },
         {
@@ -1030,8 +1030,8 @@
           "date": "2026-09-02",
           "kind": "data",
           "changed": [
-            "First release on Cedar Press: 3 tables, 5,757 rows.",
-            "A 10-row preview of need_enterprises.csv, the collection's flagship table, was published with this release; the shelf now serves the current release's preview."
+            "First published on Cedar Press: 5,757 rows.",
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         }
       ]
@@ -1048,8 +1048,8 @@
           "date": "2026-09-26",
           "kind": "data",
           "changed": [
-            "Release: 9 tables, 283,716 rows.",
-            "A 10-row preview of resource_revenue.csv, the collection's flagship table, downloads from the shelf."
+            "Dataset updated: 283,716 rows.",
+            "A 10-row preview downloads from the shelf."
           ]
         },
         {
@@ -1057,8 +1057,8 @@
           "date": "2026-09-04",
           "kind": "data",
           "changed": [
-            "Release: 9 tables, 283,716 rows.",
-            "A 10-row preview of resource_revenue.csv, the collection's flagship table, was published with this release; the shelf now serves the current release's preview."
+            "Dataset updated: 283,716 rows.",
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         },
         {
@@ -1066,8 +1066,8 @@
           "date": "2026-09-02",
           "kind": "data",
           "changed": [
-            "First release on Cedar Press: 9 tables, 283,716 rows.",
-            "A 10-row preview of resource_revenue.csv, the collection's flagship table, was published with this release; the shelf now serves the current release's preview."
+            "First published on Cedar Press: 283,716 rows.",
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         }
       ]
@@ -1084,8 +1084,8 @@
           "date": "2026-09-26",
           "kind": "data",
           "changed": [
-            "Release: 12 tables, 131,090 rows.",
-            "A 10-row preview of np_orgs.csv, the collection's flagship table, downloads from the shelf."
+            "Dataset updated: 131,090 rows.",
+            "A 10-row preview downloads from the shelf."
           ]
         },
         {
@@ -1093,8 +1093,8 @@
           "date": "2026-09-04",
           "kind": "data",
           "changed": [
-            "Release: 12 tables, 131,090 rows.",
-            "A 10-row preview of np_orgs.csv, the collection's flagship table, was published with this release; the shelf now serves the current release's preview."
+            "Dataset updated: 131,090 rows.",
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         },
         {
@@ -1102,8 +1102,8 @@
           "date": "2026-09-02",
           "kind": "data",
           "changed": [
-            "First release on Cedar Press: 10 tables, 123,293 rows.",
-            "A 10-row preview of np_orgs.csv, the collection's flagship table, was published with this release; the shelf now serves the current release's preview."
+            "First published on Cedar Press: 123,293 rows.",
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         }
       ]

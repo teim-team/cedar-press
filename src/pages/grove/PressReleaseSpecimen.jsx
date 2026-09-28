@@ -40,16 +40,15 @@ export default function PressReleaseSpecimen({ entry }) {
   // the one thing it exists to state.
   const release = RELEASE[entry.id] ?? {};
   const rows = rowsOf(release, facts);
-  const tables = Number.isInteger(facts?.n_tables) ? facts.n_tables : null;
   const coverage = coverageLabel(entry);
   // A collection presented by its record structure states its fields, and
   // no release, span or row count.
   const structure = recordStructure(entry.id);
 
   return (
-    <aside className="cp-spec cp-fade" aria-label="Current release">
+    <aside className="cp-spec cp-fade" aria-label="Living dataset">
       <p className="cp-spec__cap">
-        Cedar Press <span aria-hidden="true">/</span> {structure ? "Record structure" : "Current release"}
+        Cedar Press <span aria-hidden="true">/</span> {structure ? "Record structure" : "Living dataset"}
       </p>
       <p className="cp-spec__name">
         <span className="cp-spec__mark" aria-hidden="true">{COLLECTION_ICONS[entry.id] ?? null}</span>
@@ -59,22 +58,10 @@ export default function PressReleaseSpecimen({ entry }) {
       {/* The bookkeeping, as fields rather than as a sentence: a reader
           checking whether a release is current reads a date, not prose. */}
       <dl className="cp-spec__facts">
-        {release.version ? (
-          <div>
-            <dt>Release</dt>
-            <dd>{release.version}</dd>
-          </div>
-        ) : null}
         {release.updated ? (
           <div>
             <dt>Updated</dt>
             <dd>{formatUpdated(release.updated)}</dd>
-          </div>
-        ) : null}
-        {tables ? (
-          <div>
-            <dt>Tables</dt>
-            <dd>{tables}</dd>
           </div>
         ) : null}
         {structure ? (

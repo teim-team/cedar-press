@@ -879,7 +879,7 @@ class PinnedLumeconReleaseTest(_ServerCase):
                     str(self.a["components"][SERVED]["record_count"]),
                 )
                 self.assertIn(
-                    f'filename="gaming--{SERVED}-{self.a["release_id"]}.jsonl"',
+                    f'filename="gaming--{SERVED}.jsonl"',
                     response.headers["content-disposition"],
                 )
                 self.assertEqual(

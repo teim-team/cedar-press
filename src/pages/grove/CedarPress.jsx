@@ -137,8 +137,7 @@ export default function CedarPress() {
             <div className="cp-close__say">
               <h2 className="cp-close__head">Nothing here is a snapshot.</h2>
               <p className="cp-close__body">
-                {MAINTENANCE.sentence} Releases stay versioned so work done today remains
-                checkable as the data and the tools used to analyze it change.
+                {MAINTENANCE.sentence} Dated updates keep earlier work checkable as the dataset grows and corrections are made.
               </p>
             </div>
             {/* The three most recently changed collections, read from the
