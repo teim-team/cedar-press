@@ -1,5 +1,29 @@
 # Terminal handoff ? current Codex implementation checkpoint
 
+## Current continuation: 2026-09-28 download closure
+
+Cloud edits on this consumer branch consolidate governed component and multipart
+download validation into one disk-backed path. They preserve exact source bytes,
+rights, publication holds, release pins and primary-key checks. Reads are bounded
+and the response closes its private spool even on header-send failure or
+cancellation. CI pins Lumecon runtime `cc5ae36b17eb0ad1a66335b1888e630268de79c5`.
+The matching producer work is in Lumecon PR #17, stacked on #15. Its compatibility
+checks must test the consumer commit containing this entry before integration.
+
+The local transport suite ran 105 tests with one environment-dependent skip;
+72 component, partition, shared-collection and Grove-exchange tests passed without
+skips. Whole-file-read mutations were deliberately rejected by the new memory
+controls. Hosted CI must prove the complete repository gates. These tests do not
+replay the terminal's real Windows releases or authorize customer publication.
+
+Resume from Lumecon `docs/cedar-convergence.md` and its ledger for the current
+15-collection inventory. The older generated September 2 readiness scoreboard
+uses a different collection set and is not publication evidence. Preserve any
+local terminal changes before integrating this pushed commit; do not reset them.
+The sections below retain earlier NEED evidence and instructions, not a claim
+that their old delivery-status table describes this integration checkpoint.
+
+
 *Rewritten in place, never appended to. Updated 2026-09-23.*
 
 ## Workspace and ownership
@@ -155,3 +179,4 @@ customer communications are authorized by this checkpoint. Shared identity and
 publication remain single-writer. Preserve the active review while independent
 work continues. Candidate success is not a release, fresh-clone success is not a
 full-data rebuild, and no collection is certified ready by this handoff.
+

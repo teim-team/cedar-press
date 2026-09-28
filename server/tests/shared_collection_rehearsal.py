@@ -7,6 +7,7 @@ The output includes an isolated review catalog/pin and machine-readable receipt.
 
 import argparse
 import hashlib
+import io
 import json
 import os
 from pathlib import Path
@@ -92,7 +93,11 @@ def main():
 
             with (
                 TestClient(app) as consumer,
-                patch.object(repository, "_release_bytes", side_effect=fetch),
+                patch.object(
+                    repository,
+                    "_release_response",
+                    side_effect=lambda path: io.BytesIO(fetch(path)),
+                ),
                 patch.object(
                     subscribers,
                     "find",

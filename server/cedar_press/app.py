@@ -60,7 +60,6 @@ from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
-from starlette.background import BackgroundTask
 
 from cedar_press import (
     cedar_service,
@@ -649,6 +648,24 @@ def release_research_preview(
     )
 
 
+class _VerifiedDownloadResponse(StreamingResponse):
+    """Own the private spool even when sending headers fails or is cancelled."""
+
+    def __init__(self, spool, **kwargs):
+        self.spool = spool
+        super().__init__(self.chunks(), **kwargs)
+
+    def chunks(self):
+        while chunk := self.spool.read(64 * 1024):
+            yield chunk
+
+    async def __call__(self, scope, receive, send):
+        try:
+            await super().__call__(scope, receive, send)
+        finally:
+            self.spool.close()
+
+
 @app.get("/press/collections/{collection_id}/full-download")
 def full_download(
     collection_id: str,
@@ -694,7 +711,8 @@ def full_download(
         legacy_federal = collection_id == "federal-register" and component is None
         if (
             repository.is_component_release(collection_id)
-            and component is None and not legacy_federal
+            and component is None
+            and not legacy_federal
         ):
             audit("invalid_release_request")
             raise HTTPException(status_code=400, detail="Explicit component required")
@@ -730,19 +748,10 @@ def full_download(
     # flagship as a verified `spool`. Both are disk spools the response closes.
     spool = release.get("content_file") or release.get("spool")
     if spool is not None:
-
-        def verified_chunks():
-            try:
-                while chunk := spool.read(64 * 1024):
-                    yield chunk
-            finally:
-                spool.close()
-
-        return StreamingResponse(
-            verified_chunks(),
+        return _VerifiedDownloadResponse(
+            spool,
             media_type=release["media_type"],
             headers=headers,
-            background=BackgroundTask(spool.close),
         )
     return Response(content=release["content"], media_type=release["media_type"], headers=headers)
 

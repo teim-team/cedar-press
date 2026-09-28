@@ -232,3 +232,24 @@ producer schema exactly. Component rights, proposed-ID review restrictions and
 Grove-only entitlement remain runtime gates. Internal tables remain unavailable.
 The stream rehearsal now refuses to resume an old two-table receipt as evidence
 for the complete declaration. It checks each component, including held responses.
+
+
+### Verified download memory and lifetime
+
+Governed single components and multipart components use the same disk-backed
+validation path as partitioned Press tables. Network reads are at most 64 KiB;
+validation retains one JSON record at a time and uses SQLite for global key
+uniqueness. Every part must match its exact size, SHA-256, field set, row count
+and primary key before any response starts. Duplicate JSON fields, nonfinite
+constants, truncated records and duplicate keys are refused. Exact source bytes,
+including decimal spellings, remain unchanged. Temporary storage closes on
+validation failure, response completion, disconnect and cancellation.
+
+Size temporary storage for concurrent verified downloads; the configured
+per-component limit still applies. This change does not clear a publication
+hold, promote a rehearsal release or certify upstream transforms as streaming.
+Reproduce with `python -m unittest server.tests.test_partitioned_release
+server.tests.test_gaming_release server.tests.test_shared_release_collections
+server.tests.test_grove_exchange` from the repository root, with `server` on
+`PYTHONPATH` and the pinned Lumecon runtime installed. Fixture tests require the
+explicit review environment already used by CI.

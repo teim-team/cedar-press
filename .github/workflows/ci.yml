@@ -122,7 +122,7 @@ jobs:
     permissions:
       contents: read
     env:
-      LUMECON_DATA_SHA: 0d172f25fae362a48463c3980ab0593c26480065  # Producer integration PR #15
+      LUMECON_DATA_SHA: cc5ae36b17eb0ad1a66335b1888e630268de79c5  # Verified download runtime, producer PR #17
       CEDAR_REQUIRE_LUMECON_GAMING: "1"
     steps:
       - name: Require the Lumecon-data read token
@@ -218,3 +218,4 @@ jobs:
 # cannot agree with the owner's tree; the Makefile's `check-generated`
 # target carries the detail. Nor `code/1050_preflight.py`, which claims a
 # script number as a side effect of running.
+

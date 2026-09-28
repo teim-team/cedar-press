@@ -46,10 +46,14 @@ class SharedCollectionReleaseTest(unittest.TestCase):
             repository._release_json("/catalog")
         with patch.object(repository, "_release_response", return_value=io.BytesIO(payload)):
             self.assertEqual(
-                len(repository._release_json(
-                    "/manifest", limit=repository.MAX_COLLECTION_MANIFEST_BYTES
-                )["fixture"]), 4 * 1024 * 1024,
+                len(
+                    repository._release_json(
+                        "/manifest", limit=repository.MAX_COLLECTION_MANIFEST_BYTES
+                    )["fixture"]
+                ),
+                4 * 1024 * 1024,
             )
+
         class TooLarge:
             def __enter__(self):
                 return self
@@ -64,9 +68,7 @@ class SharedCollectionReleaseTest(unittest.TestCase):
             patch.object(repository, "_release_response", return_value=TooLarge()),
             self.assertRaisesRegex(repository.FullReleaseUnavailable, "safety limit"),
         ):
-            repository._release_json(
-                "/manifest", limit=repository.MAX_COLLECTION_MANIFEST_BYTES
-            )
+            repository._release_json("/manifest", limit=repository.MAX_COLLECTION_MANIFEST_BYTES)
 
     def session(self, tier):
         app.dependency_overrides[current_session] = lambda: Session(
@@ -157,7 +159,9 @@ class SharedCollectionReleaseTest(unittest.TestCase):
             ),
             patch.object(repository, "GROVE_SERVE_SYNTHETIC", True),
             patch.object(repository, "_release_json", return_value=manifest),
-            patch.object(repository, "_release_bytes", return_value=content),
+            patch.object(
+                repository, "_release_response", side_effect=lambda _: io.BytesIO(content)
+            ),
         ):
             patcher.start()
             self.addCleanup(patcher.stop)
@@ -169,7 +173,7 @@ class SharedCollectionReleaseTest(unittest.TestCase):
             patch.object(repository, "_release_json", return_value=manifest) as fetch,
             patch.object(repository, "_grove_catalog", wraps=repository._grove_catalog) as catalog,
             patch.object(
-                repository, "_release_bytes", side_effect=AssertionError("No row download")
+                repository, "_release_response", side_effect=AssertionError("No row download")
             ),
         ):
             first = repository.grove_release_metadata("plot")
@@ -187,10 +191,12 @@ class SharedCollectionReleaseTest(unittest.TestCase):
         with patch.object(
             repository, "grove_release_pin", side_effect=AssertionError("No pin lookup")
         ):
-            self.assertTrue(all(
-                row["status"] == "unavailable"
-                for row in repository.grove_release_metadata("need")
-            ))
+            self.assertTrue(
+                all(
+                    row["status"] == "unavailable"
+                    for row in repository.grove_release_metadata("need")
+                )
+            )
 
     def test_legacy_need_preview_obeys_collection_hold_before_reading_rows(self):
         self.session("press_pro")
@@ -271,9 +277,12 @@ class SharedCollectionReleaseTest(unittest.TestCase):
         self.session("press")
         content = b'{"consultation_record_key":"SYNTHETIC"}\n'
         released = {
-            "content": content, "release_id": "b" * 64,
-            "sha256": hashlib.sha256(content).hexdigest(), "record_count": 1,
-            "citation": "Synthetic compatibility fixture", "filename": "fixture.jsonl",
+            "content": content,
+            "release_id": "b" * 64,
+            "sha256": hashlib.sha256(content).hexdigest(),
+            "record_count": 1,
+            "citation": "Synthetic compatibility fixture",
+            "filename": "fixture.jsonl",
             "media_type": "application/x-ndjson",
         }
         with (
@@ -324,7 +333,9 @@ class SharedCollectionReleaseTest(unittest.TestCase):
     def test_giving_rights_hold_prevents_download_for_entitled_users(self):
         self.fixture("foundation-corporate-giving", "reviewed_disclosures", rights=False)
         self.session("press")
-        with patch.object(repository, "_release_bytes", side_effect=AssertionError("held fetch")):
+        with patch.object(
+            repository, "_release_response", side_effect=AssertionError("held fetch")
+        ):
             response = self.client.get(
                 "/press/collections/foundation-corporate-giving/full-download",
                 params={"release_id": "c" * 64, "component": "reviewed_disclosures"},
@@ -350,8 +361,10 @@ class SharedCollectionReleaseTest(unittest.TestCase):
     def test_tampered_component_and_metadata_refuse(self):
         manifest, pin, _content = self.fixture()
         with (
-            patch.object(repository, "_release_bytes", return_value=b"changed"),
-            self.assertRaisesRegex(repository.FullReleaseUnavailable, "Served bytes"),
+            patch.object(
+                repository, "_release_response", side_effect=lambda _: io.BytesIO(b"changed")
+            ),
+            self.assertRaisesRegex(repository.FullReleaseUnavailable, "Partition size"),
         ):
             repository.grove_full_release("plot", "c" * 64, component="environmental_events")
         changed = copy.deepcopy(manifest)
@@ -433,9 +446,11 @@ class SharedCollectionReleaseTest(unittest.TestCase):
                         "metadata": {"field_rights": rights},
                     }
                     with (
-                        patch.object(repository, "_field_map_tables", return_value={
-                            f"{collection}/facts": entry
-                        }),
+                        patch.object(
+                            repository,
+                            "_field_map_tables",
+                            return_value={f"{collection}/facts": entry},
+                        ),
                         self.assertRaisesRegex(
                             repository.FullReleaseUnavailable, "incomplete|held or unknown"
                         ),

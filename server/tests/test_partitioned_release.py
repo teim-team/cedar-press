@@ -1,11 +1,13 @@
 """Synthetic transport fixtures for generic development-only partition assembly."""
 
+import asyncio
 import copy
 import hashlib
 import io
 import json
 import os
 import tempfile
+import tracemalloc
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -13,7 +15,7 @@ from unittest.mock import patch
 from fastapi.testclient import TestClient
 
 from cedar_press import repository, subscribers
-from cedar_press.app import app
+from cedar_press.app import _VerifiedDownloadResponse, app
 from cedar_press.session import Session, current_session
 
 
@@ -300,6 +302,129 @@ class PartitionedReleaseTest(unittest.TestCase):
     def test_stale_pin_refused(self):
         self.rid = "d" * 64
         self.assertEqual(self.request().status_code, 503)
+
+
+class VerifiedRecordStreamTest(unittest.TestCase):
+    @staticmethod
+    def expected(content):
+        return {"bytes": len(content), "sha256": hashlib.sha256(content).hexdigest()}
+
+    def consume(self, content, count=1, *, response=None):
+        response = response if response is not None else io.BytesIO(content)
+        with patch.object(repository, "_release_response", return_value=response):
+            return repository._verified_component_spool(
+                {"collection_id": "gaming", "release_id": "a" * 64},
+                [("example", count, self.expected(content))],
+                ["id", "value"],
+                ["id"],
+            )
+
+    def test_large_artifact_uses_bounded_reads_and_one_record_memory(self):
+        content = b"".join(
+            (json.dumps({"id": str(i), "value": "x" * 8192}) + "\n").encode() for i in range(1500)
+        )
+
+        class BoundedRead(io.BytesIO):
+            def read(self, size=-1):
+                if not 0 < size <= 64 * 1024:
+                    raise AssertionError("Unbounded release read")
+                return super().read(size)
+
+        response = BoundedRead(content)
+        tracemalloc.start()
+        try:
+            spool, digest, count = self.consume(content, 1500, response=response)
+            _, peak = tracemalloc.get_traced_memory()
+        finally:
+            tracemalloc.stop()
+        try:
+            self.assertLess(peak, 2 * 1024 * 1024)
+            self.assertEqual(spool.read(), content)
+            self.assertEqual((digest, count), (hashlib.sha256(content).hexdigest(), 1500))
+            self.assertTrue(response.closed)
+        finally:
+            spool.close()
+
+    def test_short_reads_are_not_truncation(self):
+        class ShortRead(io.BytesIO):
+            def read(self, size=-1):
+                return super().read(min(size, 7))
+
+        content = b'{"id":"1","value":"\\u00e9"}\n'
+        spool, _, _ = self.consume(content, response=ShortRead(content))
+        try:
+            self.assertEqual(spool.read(), content)
+        finally:
+            spool.close()
+
+    def test_pinned_but_invalid_rows_refuse_and_close_storage(self):
+        invalid = [
+            (b'{"id":"1","id":"2","value":1}\n', "Duplicate JSON"),
+            (b'{"id":"1","value":NaN}\n', "Nonfinite"),
+            (b'{"id":true,"value":1}\n', "primary key"),
+            (b'{"id":[],"value":1}\n', "primary key"),
+            (b'{"id":"1","value":1}', "newline"),
+            (b'{"id":"1","extra":1}\n', "schema"),
+            (b'{"id":"1","value":1}\n' * 2, "Duplicate key"),
+        ]
+        original = tempfile.TemporaryFile
+        for content, message in invalid:
+            with self.subTest(message=message):
+                opened = []
+
+                def capture(*args, _opened=opened, **kwargs):
+                    value = original(*args, **kwargs)
+                    _opened.append(value)
+                    return value
+
+                with (
+                    patch.object(repository.tempfile, "TemporaryFile", side_effect=capture),
+                    self.assertRaisesRegex(ValueError, message),
+                ):
+                    self.consume(content, 2 if "Duplicate key" in message else 1)
+                self.assertTrue(opened and all(value.closed for value in opened))
+
+    def test_changed_truncated_extra_and_wrong_count_are_refused(self):
+        content = b'{"id":"1","value":"0.10"}\n'
+        for served, count in (
+            (content[:-1], 1),
+            (content + b"x", 1),
+            (content.replace(b"0.10", b"0.11"), 1),
+            (content, 2),
+        ):
+            with (
+                self.subTest(served=served, count=count),
+                self.assertRaises(repository.FullReleaseUnavailable),
+            ):
+                self.consume(content, count, response=io.BytesIO(served))
+
+
+class DownloadLifetimeTest(unittest.IsolatedAsyncioTestCase):
+    async def test_completion_header_failure_body_failure_and_cancellation_close_spool(self):
+        for failure in (None, "http.response.start", "http.response.body", "cancel"):
+            with self.subTest(failure=failure):
+                spool = io.BytesIO(b"verified\n")
+                response = _VerifiedDownloadResponse(spool)
+
+                async def receive():
+                    raise AssertionError("ASGI 2.4 does not need a disconnect listener")
+
+                async def send(message, _failure=failure):
+                    if _failure == "cancel":
+                        raise asyncio.CancelledError
+                    if message["type"] == _failure:
+                        raise RuntimeError("Disconnected")
+
+                scope = {"type": "http", "asgi": {"spec_version": "2.4"}}
+                try:
+                    if failure is None:
+                        await response(scope, receive, send)
+                    else:
+                        error = asyncio.CancelledError if failure == "cancel" else RuntimeError
+                        with self.assertRaises(error):
+                            await response(scope, receive, send)
+                finally:
+                    self.assertTrue(spool.closed)
 
 
 if __name__ == "__main__":

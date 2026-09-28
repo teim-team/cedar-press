@@ -26,6 +26,7 @@ Two layers:
 
 import copy
 import hashlib
+import io
 import json
 import os
 import shutil
@@ -367,9 +368,13 @@ class GamingConsumerBoundaryTest(_ServerCase):
             with self.assertRaisesRegex(repository.FullReleaseUnavailable, "Malformed"):
                 repository.grove_release_pin("gaming")
             self.write_pin({"gaming": good})
-            with patch.dict(os.environ, {
-                "CEDAR_PRESS_ENVIRONMENT": "production", "CEDAR_GROVE_ENVIRONMENT": "review"
-            }), self.assertRaisesRegex(repository.FullReleaseUnavailable, "never enabled"):
+            with (
+                patch.dict(
+                    os.environ,
+                    {"CEDAR_PRESS_ENVIRONMENT": "production", "CEDAR_GROVE_ENVIRONMENT": "review"},
+                ),
+                self.assertRaisesRegex(repository.FullReleaseUnavailable, "never enabled"),
+            ):
                 repository.grove_served_release_classes()
         self.assertEqual(json.loads(repository.GROVE_RELEASE_PIN.read_text())["pins"], {})
 
@@ -676,7 +681,11 @@ class PinnedLumeconReleaseTest(_ServerCase):
             # (CEDAR_GROVE_ENVIRONMENT=review, the Lumecon LUMECON_ENVIRONMENT
             # analogue) and alone widens the synthetic switch.
             patch.object(repository, "GROVE_SERVE_SYNTHETIC", True),
-            patch.object(repository, "_release_bytes", side_effect=self.lumecon_api),
+            patch.object(
+                repository,
+                "_release_response",
+                side_effect=lambda path: io.BytesIO(self.lumecon_api(path)),
+            ),
             patch.dict(
                 os.environ,
                 {"CEDAR_PRESS_ENVIRONMENT": "development", "CEDAR_GROVE_ENVIRONMENT": "review"},
@@ -784,7 +793,9 @@ class PinnedLumeconReleaseTest(_ServerCase):
                     body = original(path, limit)
                     return _served if path.endswith("/download") else body
 
-                with patch.object(repository, "_release_bytes", side_effect=api):
+                with patch.object(
+                    repository, "_release_response", side_effect=lambda path: io.BytesIO(api(path))
+                ):
                     response, events = self.get(SERVED, self.a["release_id"])
                 self.assertEqual(response.status_code, 503)
                 self.assertNotIn(good.splitlines()[0], response.content)
@@ -1072,7 +1083,11 @@ class PartitionedConsumerTest(_ServerCase):
                     }
                 },
             ),
-            patch.object(repository, "_release_bytes", side_effect=self.fetch),
+            patch.object(
+                repository,
+                "_release_response",
+                side_effect=lambda path: io.BytesIO(self.fetch(path)),
+            ),
         ):
             patcher.start()
             self.addCleanup(patcher.stop)
