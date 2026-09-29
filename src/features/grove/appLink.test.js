@@ -37,16 +37,22 @@ test("no page links Cedar Grove into the app", () => {
 test("every Grove call to action opens the marketing page in a new tab", () => {
   const found = [];
   for (const [name, source] of pageSources()) {
-    for (const match of source.matchAll(/<a\b([^>]*)>\s*(?:Open|Explore) Cedar Grove\b/g)) {
+    for (const match of source.matchAll(/<a\b([^>]*href=\{GROVE_MARKETING_URL\}[^>]*)>/g)) {
       found.push({ name, attrs: match[1] });
     }
   }
-  assert.ok(found.length >= 2, `expected the shelf and the closing statement to link Grove, found ${found.length}`);
+  // The closing statement on the door, and an article's figure credit and
+  // upgrade prompt. The viewer page carries none (owner, 2026-09-27).
+  assert.ok(found.length >= 3, `expected the door and an article to link Grove, found ${found.length}`);
   for (const { name, attrs } of found) {
-    assert.match(attrs, /href=\{GROVE_MARKETING_URL\}/, `${name}: ${attrs}`);
     assert.match(attrs, /target="_blank"/, name);
     assert.match(attrs, /rel="noreferrer"/, name);
   }
+});
+
+test("the collections viewer carries no Cedar Grove line", () => {
+  const shelf = readFileSync(new URL("PressShelf.jsx", PAGES), "utf8");
+  assert.doesNotMatch(shelf, /Cedar Grove|GROVE_MARKETING_URL/);
 });
 
 test("the platform link is still the app", () => {

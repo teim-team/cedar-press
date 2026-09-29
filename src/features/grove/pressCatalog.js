@@ -22,7 +22,7 @@
  * is a promise about a cadence and a scope nobody has measured. The
  * workspace still lists it in the manifest's `excluded`, with its reason, and
  * it comes back to this catalog when the workspace rules it ready. So the
- * catalog is exactly the storefront, twelve collections, and
+ * catalog is exactly the storefront, fourteen collections, and
  * `server/tests/test_access.py` compares this file's shelf assignment against
  * the workspace's so the site cannot move a collection across the boundary
  * on its own authority.
@@ -44,8 +44,8 @@
  *
  * ONE AXIS: WHICH COLLECTIONS YOU GET
  * A reader can be short of a collection. That is the only thing an upgrade
- * fixes. Cedar Press carries its six collections for every year Cedar holds;
- * Cedar Press+ adds six more, at the same depth.
+ * fixes. Cedar Press carries its seven collections for every year Cedar
+ * holds; Cedar Press+ adds seven more, at the same depth.
  *
  * This used to be two axes. Cedar Press was capped at 2010 and Cedar Press+
  * sold the years behind that cap as the other half of its value, so every
@@ -65,11 +65,20 @@
  * and history layer instead, where the rest of the catalog reads it.
  *
  * THE CATALOG IS THE STOREFRONT
- * Every collection the ladder is designed around, and every one of them ships:
- * `collection.js` reads the same twelve out of the manifest, with the measured
- * descriptor behind each. A test pins the two sets equal in both directions,
- * so a collection cannot be sold here without a descriptor, or measured there
- * without a place on a shelf.
+ * Every collection the ladder is designed around: fourteen, seven on each
+ * shelf. Twelve have a release, and `collection.js` reads those twelve out of
+ * the manifest with the measured descriptor behind each. The other two,
+ * Foundation & Corporate Giving and PLOT (owner, 2026-09-27: part of Cedar
+ * Press now) have no release in the manifest and carry `coverage:
+ * STRUCTURE`. They are live on their plans like every other collection on
+ * their shelf (owner, 2026-09-27: "treat PLOT and Foundation & Corporate
+ * Giving as published and live everywhere"): the pages name them, tier them,
+ * describe them and open them for the plan that includes them, and wherever
+ * a page would show sample records it shows what each record holds instead
+ * (`pressRecordStructure.js`). No row count and no year span is stated for
+ * either. A test pins the manifest to exactly the catalog's other entries,
+ * and the STRUCTURE ones to exactly the catalog entries the manifest lacks,
+ * so a release cannot land without the entry changing.
  *
  * THE NUMBERS IN THE TIER COPY ARE DERIVED
  * "Six collections" and "twelve collections" used to be typed into the
@@ -91,7 +100,7 @@ export function isOnStorefront(entry) {
 /** Small counts as words, the way the tier copy spells them. */
 const COUNT_WORDS = Object.freeze([
   "no", "one", "two", "three", "four", "five", "six",
-  "seven", "eight", "nine", "ten", "eleven", "twelve",
+  "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen",
 ]);
 export function spellCount(n) {
   return COUNT_WORDS[n] ?? String(n);
@@ -136,7 +145,7 @@ const TIER_DECLARATIONS = Object.freeze([
     // undersells the tier, and there is no second axis left to carry it. The
     // count is derived and a test holds the names to the shelf.
     promise: (count) =>
-      `${capitalise(spellCount(count))} more collections on top of Cedar Press: federal contracting, subcontracting, resource revenue, individually owned Native businesses, enterprise structures and the nonprofit sector.`,
+      `${capitalise(spellCount(count))} more collections on top of Cedar Press: federal contracting, subcontracting, resource revenue, individually owned Native businesses, enterprise structures, the nonprofit sector and parcel-level property records.`,
     coverageNote: (count, total) =>
       `${capitalise(spellCount(total))} collections, at the same depth as Cedar Press.`,
   }),
@@ -202,8 +211,35 @@ const TIER_DECLARATIONS = Object.freeze([
  *
  * Everything below was measured on 2026-09-02 against the file a subscriber
  * receives, `dist/customer/<id>.csv`. A value here is a claim to a paying
- * customer. It is not editable without re-measuring.
+ * customer. It is not editable without re-measuring. *
+ * THE BLURBS ARE THE OWNER'S, 2026-09-26
+ * Each says what kind of record the collection holds and what it lets a
+ * reader follow or compare; grain, inclusion rules and caveats belong on
+ * About and Methods. Ten were replaced verbatim from the owner's brief. Two
+ * were not, and on purpose: `deals` and `lobbying` carry the release
+ * system's canonical definition (`cedar_publication.DATASET_DEFINITION`),
+ * which the release gate (1169) compares with this file character for
+ * character and which also feeds the manifest's `tracks` and the codebooks.
+ * The owner's new text for those two is a change to a published data
+ * definition, so it goes through the data workspace and a regenerated
+ * release, not through this file. Until then the two blurbs stay as ruled.
  */
+/**
+ * The coverage of a collection presented by its record structure: no release
+ * in the manifest, so nothing has been measured.
+ *
+ * Not a year and not a capture date: a value in `coverage` is a claim to a
+ * paying customer, and a collection with no measured file has no span to
+ * claim. So no span is shown at all (`coverageLabel` returns null and every
+ * surface leaves the line out rather than printing a placeholder), and where
+ * a viewer would show sample records it shows what each record holds
+ * (`pressRecordStructure.js`). The entry changes to a measured `series` or
+ * `roster` in the change that adds its release to
+ * `data/cedar/collections.manifest.json`; `collection.js` holds the two in
+ * step.
+ */
+export const STRUCTURE = Object.freeze({ kind: "structure" });
+
 export const PRESS_CATALOG = Object.freeze([
   Object.freeze({
     id: "funding",
@@ -216,7 +252,7 @@ export const PRESS_CATALOG = Object.freeze([
     // three months of. The old catalog claimed 2001, which is in no file.
     coverage: Object.freeze({ kind: "series", from: 2007 }),
     blurb:
-      "Every award the federal government reports sending into Indian Country: grants, loans, direct payments and insurance. Trace a program's reach, a recipient's funding history or a year's totals, award by award.",
+      "Federal assistance transactions reported for Native nations, organizations, enterprises and other identified recipients, including grants, loans and direct payments. Follow funding by recipient, program, agency, amount and year.",
     linkage:
       "Recipients resolved to the Native entity behind them, so an award to a subsidiary, a housing authority or a consortium is attributed to the nation or organization it belongs to.",
   }),
@@ -228,7 +264,7 @@ export const PRESS_CATALOG = Object.freeze([
     // Series. Floor: min(notice_date) in dist/customer/federal-register.csv.
     coverage: Object.freeze({ kind: "series", from: 1994 }),
     blurb:
-      "The Federal Register is the government's daily record of proposed and final agency action. Catch every notice, rule and comment window touching tribes, lands, water or recognition while there is still time to respond.",
+      "Federal Register notices and agency actions concerning tribes, Native organizations, lands, resources, recognition and other Indian Country matters. Follow published actions, consultations and comment periods across agencies and time.",
     linkage:
       "Notices matched to the tribes, lands and organizations they name, including entities that appear under former or variant names.",
   }),
@@ -243,7 +279,7 @@ export const PRESS_CATALOG = Object.freeze([
     // this is the year the record opens, not a dense series from 1973.
     coverage: Object.freeze({ kind: "series", from: 1973 }),
     blurb:
-      "Bills, resolutions and roll-call votes from both chambers of Congress, the House and the Senate. Follow a measure from introduction to the floor and see who sponsored it, who voted and how.",
+      "Bills, resolutions, sponsorship and roll-call votes concerning tribes and Indian Country. Follow legislation from introduction through congressional action and examine sponsorship and voting records.",
     linkage:
       "Bills and votes tied to the tribes and Native organizations they affect, not only to the sponsors who filed them.",
   }),
@@ -271,7 +307,7 @@ export const PRESS_CATALOG = Object.freeze([
     // notice under it published in 1994.
     coverage: Object.freeze({ kind: "series", from: 1994 }),
     blurb:
-      "Activity under the Native American Graves Protection and Repatriation Act: notices, inventories and completed repatriations. Track an institution's progress or a nation's outstanding claims, item by item.",
+      "Public records of activity under the Native American Graves Protection and Repatriation Act, including notices, inventories and repatriation-related actions. Follow records by institution, Native entity, notice type and date.",
     linkage:
       "Notices matched to the tribes and Native Hawaiian organizations named in them, across the naming changes of three decades.",
   }),
@@ -292,6 +328,32 @@ export const PRESS_CATALOG = Object.freeze([
       "Each activity, from a lobbying registration to a consultation, a docket filing or testimony, resolved to the tribe or Native organization behind it where the record supports the link; a row the record cannot place keeps its printed party name and a blank key rather than a guess.",
   }),
   Object.freeze({
+    id: "foundation-corporate-giving",
+    // The owner keeps this name with its ampersand. It is the one ampersand
+    // the house style allows in visible copy, and `tests/smoke.spec.js`
+    // ("uses no ampersand in visible copy") exempts this exact name and
+    // nothing else.
+    short: "Foundation & Corporate Giving",
+    name: "Foundation & Corporate Giving",
+    // Owner, 2026-09-26: Cedar Press, which with PLOT in Cedar Press+ makes
+    // the fourteen a seven and seven split.
+    shelf: "standard",
+    // No measured span to state: see STRUCTURE above. The record structure
+    // is the producer's (Lumecon-data, `foundation_release.py`).
+    coverage: STRUCTURE,
+    // Owner copy, 2026-09-26, bound by the producer contract: one row is one
+    // source disclosure or award version; commitments and payments are
+    // separate facts; legal recipient and Native beneficiary are separate
+    // concepts; a non-Native intermediary does not become a Native entity
+    // because a grant benefits Native people; possible duplicates are never
+    // silently summed.
+    blurb:
+      "Foundation, corporate and bank funding publicly disclosed for Native nations, organizations and initiatives. Follow the funder, legal recipient, purpose, geography, amount and timing while keeping commitments, payments, authorizations and other reported financial statuses distinct.",
+    // The owner's Methods concepts for this collection (2026-09-26).
+    linkage:
+      "Philanthropic, corporate and bank giving, each disclosure kept as its own record: commitments and payments are separate facts, and the legal recipient is kept distinct from the Native beneficiary.",
+  }),
+  Object.freeze({
     id: "contractors",
     short: "Prime Contracting",
     name: "Federal Prime Contracting",
@@ -303,7 +365,7 @@ export const PRESS_CATALOG = Object.freeze([
     // roughly FY2000 (docs/datasets/native-owned-businesses.md).
     coverage: Object.freeze({ kind: "series", from: 2000 }),
     blurb:
-      "A prime contract is an award the government makes directly to a vendor, whether a firm, a tribal enterprise or a tribal government itself. Every prime award here names the agency, the dollars, the industry and the set-aside path it came through.",
+      "Federal contract transactions awarded directly to Native governments, enterprises, organizations and identified Native-owned businesses. Examine awarding agencies, recipients, industries, obligations, procurement mechanisms and set-asides.",
     linkage:
       "Vendors resolved to tribally owned firms, ANC and NHO subsidiaries and 8(a) participants, then rolled up to the parent nation or corporation.",
   }),
@@ -324,7 +386,7 @@ export const PRESS_CATALOG = Object.freeze([
     // floor to 2010 on the nose, which is the statutory floor.
     coverage: Object.freeze({ kind: "series", from: 2010 }),
     blurb:
-      "A subaward is work a prime vendor passes down to another. Follow the dollars below the prime layer to see which vendors do the work, under whom and in which sectors.",
+      "Reported federal subawards to Native entities and businesses beneath prime contracts. Follow the prime relationship, subrecipient, amount, industry and timing of reported subcontracting activity.",
     linkage:
       "Subawards matched to the same resolved entities as the prime contracts above them.",
   }),
@@ -338,7 +400,7 @@ export const PRESS_CATALOG = Object.freeze([
     // Council and carried as dated revenue events with amounts.
     coverage: Object.freeze({ kind: "series", from: 1880 }),
     blurb:
-      "Energy and mineral activity on trust and restricted lands: production volumes, the royalties it owes and the disbursements that follow. See what a commodity produced, what it paid and where the money went.",
+      "Public records of energy and mineral production, revenues, royalties and related disbursements associated with tribal trust and restricted lands. Compare reported activity by commodity, Native entity, location and period.",
     linkage:
       "Production and disbursements matched to the nations and allottees they belong to.",
   }),
@@ -358,7 +420,7 @@ export const PRESS_CATALOG = Object.freeze([
     // max(harvest_date) in dist/customer/native-owned-businesses.csv.
     coverage: Object.freeze({ kind: "roster", captured: "2026-09-01" }),
     blurb:
-      "Individually owned Native businesses, certified by their own nations' TERO and commerce offices and shared with the project office by office. The businesses no federal register counts: who they are, what trades they work and what preference status their nation certifies.",
+      "Individually owned Native businesses identified through tribal TERO offices, commerce programs and other documented Native-business registries. Records preserve the issuing source, reported affiliation or certification, location and industry where available.",
     linkage:
       "Every listing carries the nation whose office certified it, appears only under that nation's stated terms, and is credited to the issuing TERO or commerce office.",
   }),
@@ -373,14 +435,16 @@ export const PRESS_CATALOG = Object.freeze([
     // SNAPSHOT, not a series."
     //
     // min(bmf_tax_period) is 1983, and it is one defunct filer's last return,
-    // not the start of anything. The annual filings this collection's blurb
-    // describes live in np_financials (tax_year 1996-2025, thin to 2000) and
-    // are not folded into the delivered file; when they are, this becomes a
-    // series and this field should change shape with it. Captured:
+    // not the start of anything. The annual filings live in np_financials
+    // (tax_year 1996-2025, thin to 2000) and are not folded into the
+    // delivered file; when they are, this becomes a series and this field
+    // should change shape with it. The blurb says "available federal filing
+    // information" and promises no year-over-year comparison until the
+    // delivered release carries the annual series. Captured:
     // bmf_vintage_fetched, which is one value across all 12,764 rows.
     coverage: Object.freeze({ kind: "roster", captured: "2026-04-29" }),
     blurb:
-      "Native-led and Native-serving nonprofits with their annual federal filings. Compare budgets, revenue mixes, program spending and how an institution's finances move year over year.",
+      "A maintained roster of Native-led, Native-serving and Native-focused nonprofit organizations, with EINs and available federal filing information kept distinct by organization type. Identify organizations and connect them to other Cedar records without treating Native-led and Native-serving as the same thing.",
     linkage:
       "Filers classified as Native-led, Native-serving or Native-focused, which are three different things and are labeled separately.",
   }),
@@ -406,9 +470,28 @@ export const PRESS_CATALOG = Object.freeze([
     // series with a left edge rather than a roster.
     coverage: Object.freeze({ kind: "series", from: 2016 }),
     blurb:
-      "Who owns whom across Indian Country's enterprises: parent nations and corporations, their subsidiaries, holding companies and joint ventures, and how those ties change as entities are created, renamed, acquired and wound down.",
+      "Enterprises owned or controlled by Native nations, Alaska Native corporations and other Native entities, including subsidiaries, holding companies and joint ventures. Follow parent relationships and organizational changes over time. Where records are available, profiles also carry patents, assigned or later acquired, and dated credit ratings, each kept with the entity it concerns.",
     linkage:
       "This is the structure the rest of the record resolves against, published as a collection in its own right: every tie names the nation or corporation behind it.",
+  }),
+  Object.freeze({
+    id: "plot",
+    short: "PLOT",
+    name: "PLOT",
+    // Owner, 2026-09-26: PLOT is in Cedar Press+.
+    shelf: "pro",
+    // No measured span to state: see STRUCTURE above. The record structure
+    // is the owner's description (2026-09-27).
+    coverage: STRUCTURE,
+    // Owner copy, 2026-09-26. Deals follows a transaction or a capital event
+    // between parties; PLOT follows a parcel and the recorded events attached
+    // to it. A nation's site acquisition may be a Deal while the parcels it
+    // bought appear separately in PLOT: link the two, never collapse them.
+    blurb:
+      "Parcel-level ownership and development records associated with Native nations, organizations and enterprises. Follow ownership, transfers, parcel characteristics, geometry, permits and other recorded property activity over time.",
+    // The owner's Methods concepts for this collection (2026-09-26).
+    linkage:
+      "Land ownership, transfers, permitting and development, followed parcel by parcel: each parcel and the recorded events attached to it, linked to the Native entity that holds it.",
   }),
 ]);
 
@@ -428,6 +511,12 @@ export const PRESS_TAXONOMY = Object.freeze([
     name: "Public Finance and Spending",
     lede: "Where federal money goes, and who it reaches.",
     collections: Object.freeze(["funding", "contractors", "subcontracting"]),
+  }),
+  Object.freeze({
+    id: "philanthropy",
+    name: "Philanthropy and Private Funding",
+    lede: "The giving foundations, companies and banks disclose, and who receives it.",
+    collections: Object.freeze(["foundation-corporate-giving"]),
   }),
   Object.freeze({
     id: "policy",
@@ -451,7 +540,7 @@ export const PRESS_TAXONOMY = Object.freeze([
     id: "enterprises",
     name: "Enterprises and Ownership",
     lede: "Who owns what across Indian Country, and how that changes.",
-    collections: Object.freeze(["owned", "need"]),
+    collections: Object.freeze(["owned", "need", "plot"]),
   }),
   Object.freeze({
     id: "institutions",
@@ -489,7 +578,7 @@ export const NATIVE_LINKAGE = Object.freeze({
   // duller one it can.
   claim: "Every record gets the right context.",
   // The door-sized version, for the gate's collection-name strip: the one
-  // sentence that keeps twelve federal-sounding names from reading as
+  // sentence that keeps fourteen collection names from reading as
   // keyword filters over open data. Same discipline as `claim`: connected
   // to the Native entities each record touches, never "every record is
   // Native", which the counterparties would break.
@@ -593,7 +682,7 @@ function earliestOnShelf(shelf) {
  * The shelves below, as one badge each.
  *
  * Cedar Press+ does not redraw the Cedar Press collections to say it
- * includes them, and Grove should not redraw twelve. Listing every collection
+ * includes them, and Grove should not redraw fourteen. Listing every collection
  * on the top tier made it the busiest band on the page, which reads as
  * clutter rather than as abundance.
  *
@@ -624,7 +713,7 @@ export const GROVE_INCLUDES = Object.freeze([
     shelf: "pro",
     blurb: `The ${spellCount(collectionsOnShelf("pro").length)} specialized collections Cedar Press does not carry.`,
     linkage:
-      "Contracting, subcontracting, resources, individually owned Native businesses, enterprise structures and nonprofits: awards roll up to the parent nation or corporation, and each owned business carries its certifying nation.",
+      "Contracting, subcontracting, resources, individually owned Native businesses, enterprise structures, nonprofits and parcels: awards roll up to the parent nation or corporation, and each owned business carries its certifying nation.",
   }),
 ]);
 
@@ -636,7 +725,7 @@ export const GROVE_INCLUDES = Object.freeze([
  * What Cedar Grove does, rather than what it contains.
  *
  * The contents argument is weak on its own, because a reader who has just
- * been shown twelve collections already believes there is a lot of data. What
+ * been shown fourteen collections already believes there is a lot of data. What
  * they cannot see from the shelf is that Grove analyses across all of it,
  * finds things nobody went looking for, opens to a whole organization at
  * once, and keeps growing as Lumecon builds. Every line here is a capability

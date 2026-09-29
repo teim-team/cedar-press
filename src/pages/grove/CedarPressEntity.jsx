@@ -31,6 +31,7 @@ import {
   explorableCollections,
 } from "../../features/grove/explore.js";
 import { PRESS_CATALOG_BY_ID } from "../../features/grove/pressCatalog.js";
+import { ENTITY_JOBS, entityActions } from "../../features/grove/pressJobs.js";
 import { recordHref } from "../../features/grove/pressRecord.js";
 import { PRESS_DATA_PATH, PRESS_METHODS_PATH } from "../../features/grove/pressRoutes.js";
 import { useDocumentTitle } from "../../features/grove/useDocumentTitle";
@@ -42,6 +43,14 @@ import { COLLECTION_ICONS } from "./pressCollectionIcons";
 import { PressCedarFab } from "./PressCedarFab";
 import { PressFoot, PressMast } from "./PressChrome";
 import PressGate from "./PressGate";
+
+/** Where an entity action goes: the table, narrowed and ordered for it. */
+function entityActionHref(action, uid) {
+  const e = encodeURIComponent(uid);
+  if (action.id === "related") return `${PRESS_DATA_PATH}?c=${action.collection}&e=${e}`;
+  if (action.id === "over-time") return `${PRESS_DATA_PATH}?e=${e}&s=date:asc`;
+  return `${PRESS_DATA_PATH}?e=${e}`;
+}
 
 const money = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
 
@@ -65,6 +74,7 @@ export default function CedarPressEntity() {
     [collections],
   );
   const locked = collections.filter((c) => !c.open).length;
+  const opened = useMemo(() => new Set(collections.filter((c) => c.open).map((c) => c.entry.id)), [collections]);
   const { rows, missing, loading: samplesLoading } = useSampleRows(tables, register);
 
   const entity = register.byUid.get(uid) ?? null;
@@ -236,6 +246,27 @@ export default function CedarPressEntity() {
               <span className="cp-rec__uid"><code>{uid}</code></span>
               {entity?.type ? <span className="cp-rec__type">{entity.type}</span> : null}
             </p>
+            {/* Owner, 2026-09-26: what this page is for, beside who it is
+                about, and the contextual actions that work today (the
+                others are listed in `ENTITY_JOBS`, not shown as dead
+                buttons). An action that needs a collection the reader's
+                plan does not open is not offered. */}
+            {unknown ? null : (
+              <>
+                <p className="cp-ent__line">{ENTITY_JOBS.line}</p>
+                <ul className="cp-ent__acts" aria-label="What to do with this organization">
+                  {entityActions()
+                    .filter((action) => !action.collection || opened.has(action.collection))
+                    .map((action) => (
+                      <li key={action.id}>
+                        <Link className="cp-ent__act" data-action={action.id} to={entityActionHref(action, uid)}>
+                          {action.label} <span aria-hidden="true">&#8594;</span>
+                        </Link>
+                      </li>
+                    ))}
+                </ul>
+              </>
+            )}
             {groups.length ? (
               <ul className="cp-ent__marks" aria-label="Collections this entity appears in">
                 {groups.map(({ entry }) => (

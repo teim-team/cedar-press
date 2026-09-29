@@ -71,7 +71,7 @@ in the browser -- because nothing compared the two maps.
 
 PROTOTYPE LIMITATIONS
 The three articles are demonstration placeholders, one per launch dataset,
-written to be replaced by the real first Data Briefs. The citation register
+written to be replaced by the real first Research Briefs. The citation register
 launches EMPTY on purpose: inventing entries would be fabricated proof, which
 is the thing the datasets exist to replace.
 """
@@ -126,7 +126,7 @@ def _frozen(rows: list[dict[str, Any]]) -> tuple[Mapping[str, Any], ...]:
     return tuple(_deep_freeze(row) for row in rows)
 
 
-#: Where the Data Briefs publish, and where the collection lives.
+#: Where the Research Briefs publish, and where the collection lives.
 TBN_URL: str = _DATA["tbnUrl"]
 LUMECON_URL: str = _DATA["lumeconUrl"]
 
@@ -139,10 +139,11 @@ ARTICLES = _frozen(_DATA["articles"])
 CITATIONS = _frozen(_DATA["citations"])
 
 #: The full collection ladder (``pressCatalog.js``): every collection the
-#: product is designed around, including ones whose first release is still in
-#: preparation. Cedar's profile layer reads this for the collections that do
-#: not yet ship figures, so a catalog entry can describe itself without a
-#: second hand-typed copy of its blurb.
+#: storefront sells, including the two presented by their record structure
+#: (coverage kind ``structure``: Foundation & Corporate Giving and PLOT).
+#: Cedar's profile layer reads this for the collections that ship no figures,
+#: so a catalog entry can describe itself without a second hand-typed copy of
+#: its blurb.
 CATALOG = _frozen(_DATA["catalog"])
 
 #: Release history per collection (``pressReleases.js``): version, cadence and
@@ -150,6 +151,13 @@ CATALOG = _frozen(_DATA["catalog"])
 #: the same reason as the articles — a paraphrased change note misdescribes a
 #: release. Keyed by collection id.
 RELEASES = _deep_freeze(_DATA["releases"])
+
+#: Cedar's suggested questions per collection (``COLLECTION_JOBS`` in
+#: ``pressJobs.js``), each with the profile branch (``route``) it must land in.
+#: Nothing serves these; ``tests/test_cedar_questions.py`` runs every one
+#: through ``answer_from_profile`` so a suggestion the router would refuse or
+#: misroute fails the build.
+CEDAR_QUESTIONS = _deep_freeze(_DATA.get("cedarQuestions", {}))
 
 #: Where a reader reports a citation the register missed.
 REPORT_CITATION_HREF: str = _DATA["reportCitationHref"]

@@ -1,5 +1,5 @@
 // The structured data and the sitemap, generated from the catalog so a search
-// engine reads the twelve collections as what they are: datasets, each with
+// engine reads the collections as what they are: datasets, each with
 // its name, its description, what it covers and who built it.
 //
 //     node scripts/seo-head.mjs            rewrite index.html's JSON-LD block and public/sitemap.xml
@@ -13,7 +13,7 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
-import { PRESS_CATALOG, STOREFRONT_SHELVES } from "../src/features/grove/pressCatalog.js";
+import { PRESS_CATALOG, STOREFRONT_CATALOG, STOREFRONT_SHELVES, spellCount } from "../src/features/grove/pressCatalog.js";
 import { PRESS_RELEASES } from "../src/features/grove/pressReleases.js";
 import { coverageLabel } from "../src/features/grove/pressAccess.js";
 
@@ -35,6 +35,38 @@ const KEYWORDS = [
   "Native nonprofits", "Cedar Press", "Lumecon", "Tribal Business News",
 ];
 
+// How the catalog's one-line description names each collection. The count and
+// the list are derived from the storefront, so a collection that launches
+// changes both; one with no phrase here stops the generator by name rather
+// than shipping a description that leaves it out.
+const CATALOG_PHRASE = {
+  funding: "federal funding",
+  "federal-register": "the Federal Register",
+  legislation: "legislation",
+  deals: "deals",
+  nagpra: "NAGPRA",
+  lobbying: "advocacy",
+  "foundation-corporate-giving": "foundation and corporate giving",
+  contractors: "prime contracting",
+  subcontracting: "subcontracting",
+  "natural-resources": "natural resources",
+  owned: "Native-owned businesses",
+  nonprofits: "Native nonprofits",
+  need: "the enterprise register",
+  plot: "PLOT parcel records",
+};
+
+export function catalogDescription(catalog = STOREFRONT_CATALOG) {
+  const phrases = catalog.map((entry) => {
+    const phrase = CATALOG_PHRASE[entry.id];
+    if (!phrase) throw new Error(`seo-head: no catalog phrase for ${entry.id}; add one to CATALOG_PHRASE`);
+    return phrase;
+  });
+  const list = phrases.length > 1 ? `${phrases.slice(0, -1).join(", ")} and ${phrases.at(-1)}` : phrases.join("");
+  const count = spellCount(catalog.length);
+  return `${count[0].toUpperCase()}${count.slice(1)} collections on Indian Country's economy: ${list}, each resolved to the tribal governments and Native entities behind the records.`;
+}
+
 function latestReleaseDate() {
   const dates = Object.values(PRESS_RELEASES).map((r) => r.updated).filter(Boolean).sort();
   return dates.at(-1)?.slice(0, 10) ?? null;
@@ -51,7 +83,8 @@ export function datasets() {
     creator: { "@id": ORG },
     publisher: { "@id": ORG },
     includedInDataCatalog: { "@id": `${SITE}/#catalog` },
-    temporalCoverage: coverageLabel(entry),
+    // Left out for a collection that states no span, rather than a placeholder.
+    temporalCoverage: coverageLabel(entry) ?? undefined,
     spatialCoverage: "United States",
     keywords: [entry.name, entry.short, ...KEYWORDS.slice(0, 6)].filter((k, i, a) => k && a.indexOf(k) === i),
     isAccessibleForFree: false,
@@ -70,7 +103,7 @@ export function graph() {
         url: `${SITE}/`,
         name: "Cedar Press",
         description:
-          "Trusted intelligence for Indian Country: original economic collections, data-driven research and transparent method.",
+          "Trusted intelligence for Indian Country: maintained collections on federal funding, contracting, deals, policy, giving, land and Native enterprise ownership, each traced to its source and resolved to the Native entities behind it.",
         inLanguage: "en",
         keywords: KEYWORDS,
         publisher: { "@id": ORG },
@@ -96,8 +129,7 @@ export function graph() {
         "@id": `${SITE}/#catalog`,
         name: "The Cedar Press collections",
         url: `${SITE}/`,
-        description:
-          "Twelve collections on Indian Country's economy: federal funding, the Federal Register, legislation, deals, NAGPRA, advocacy, prime contracting, subcontracting, natural resources, Native-owned businesses, Native nonprofits and the enterprise register, each resolved to the tribal governments and Native entities behind the records.",
+        description: catalogDescription(),
         provider: { "@id": ORG },
         dataset: datasets().map((d) => ({ "@id": d["@id"] })),
       },

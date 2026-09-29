@@ -485,8 +485,12 @@ class TestPressCatalogSnapshot(unittest.TestCase):
         for entry in press_catalog.CATALOG:
             with self.subTest(collection=entry["id"]):
                 coverage = entry["coverage"]
-                self.assertIn(coverage["kind"], {"series", "roster"})
-                if coverage["kind"] == "series":
+                self.assertIn(coverage["kind"], {"series", "roster", "structure"})
+                if coverage["kind"] == "structure":
+                    # Presented by its record structure, nothing measured:
+                    # neither shape's field, and no span to state.
+                    self.assertEqual(coverage, {"kind": "structure"})
+                elif coverage["kind"] == "series":
                     self.assertIn("from", coverage)
                     self.assertNotIn("captured", coverage)
                 else:
@@ -518,6 +522,8 @@ class TestPressCatalogSnapshot(unittest.TestCase):
         for entry in press_catalog.CATALOG:
             coverage = entry["coverage"]
             with self.subTest(collection=entry["id"]):
+                if coverage["kind"] == "structure":
+                    continue
                 if coverage["kind"] == "series":
                     self.assertIsInstance(coverage["from"], int)
                     self.assertGreaterEqual(coverage["from"], 1800)
@@ -554,14 +560,17 @@ class TestPressCatalogSnapshot(unittest.TestCase):
                 self.assertIn("current roster rather than a series", sentence)
                 self.assertNotIn("Coverage from", sentence)
 
-    def test_the_ladder_is_six_collections_and_six_more(self) -> None:
+    def test_the_ladder_is_seven_collections_and_seven_more(self) -> None:
         # The owner's ruling of 2026-09-02: Cedar Press is the standard
         # shelf at full depth, Cedar Press+ is that plus the pro shelf. The
-        # counts are what the tier copy promises, so they are pinned.
+        # counts are what the tier copy promises, so they are pinned. Seven
+        # and seven since 2026-09-27: Foundation & Corporate Giving joined
+        # the standard shelf and PLOT the pro shelf.
         shelves: dict[str, set[str]] = {}
         for entry in press_catalog.CATALOG:
             shelves.setdefault(entry["shelf"], set()).add(entry["id"])
-        self.assertEqual(len(shelves["standard"]), 6)
+        self.assertEqual(len(shelves["standard"]), 7)
+        self.assertIn("foundation-corporate-giving", shelves["standard"])
         self.assertEqual(
             shelves["pro"],
             {
@@ -571,6 +580,7 @@ class TestPressCatalogSnapshot(unittest.TestCase):
                 "need",
                 "natural-resources",
                 "nonprofits",
+                "plot",
             },
         )
 
@@ -716,6 +726,64 @@ class TestGeneratorAndManifestAgree(unittest.TestCase):
             self.assertEqual(
                 self.script.sample_violations(path, names, uids), [],
                 f"{path} publishes a withheld field; run import_cedar_manifest.py --audit",
+            )
+
+    def test_a_local_path_never_reaches_a_served_sample(self) -> None:
+        # Found 2026-09-27: need_enterprises__10.csv served "the owner's
+        # research dataset, on this machine at ~/Desktop/dissertation/...".
+        # Injected, the scrub fires and keeps the file's own quoting; restored
+        # (a clean file), it changes nothing; and every sample the site serves
+        # today is clean.
+        import tempfile
+        leaked = (
+            'id,source_document,note\n'
+            '1,"native_entity_enterprise_dataset_v6_geocoded.csv (the owner\'s research '
+            'dataset, on this machine at '
+            '~/Desktop/dissertation/data/tribal_federal_spending/clean/) '
+            ':: https://www.bowhead.com/about/",kept\n'
+            '2,/Users/someone/work/x.csv,C:\\Users\\someone\\x.csv\n'
+            '3,https://www.example.com/home/about,~20% of rows\n'
+        )
+        clean = self.script.scrub_local_paths(leaked)
+        self.assertNotIn("Desktop", clean)
+        self.assertNotIn("/Users/", clean)
+        self.assertNotIn("C:\\Users", clean)
+        self.assertIn(
+            '"native_entity_enterprise_dataset_v6_geocoded.csv (Lumecon research dataset) '
+            ':: https://www.bowhead.com/about/",kept',
+            clean,
+        )
+        removed = self.script.LOCAL_PATH_REMOVED
+        self.assertIn(f"2,{removed},{removed}\n", clean)
+        # A URL's own /home/ segment and a "~" that is not a home directory stay.
+        self.assertIn("3,https://www.example.com/home/about,~20% of rows\n", clean)
+        # The same line count and the same quoting: raw-text substitution only.
+        self.assertEqual(clean.count("\n"), leaked.count("\n"))
+        self.assertEqual(clean.count('"'), leaked.count('"'))
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            served = root / "public" / "data" / "cedar" / "samples" / "fixture"
+            served.mkdir(parents=True)
+            (served / "leak__10.csv").write_text(leaked, encoding="utf-8", newline="")
+            (served / "clean__10.csv").write_text("id,x\n1,y\n", encoding="utf-8", newline="")
+            rewritten = self.script.scrub_public_samples(root)
+            self.assertEqual([p.name for p in rewritten], ["leak__10.csv"])
+            self.assertEqual((served / "leak__10.csv").read_text(encoding="utf-8"), clean)
+            self.assertEqual(
+                self.script.scrub_public_samples(root), [], "a second pass finds nothing")
+            # The import path writes through the same scrub.
+            target = root / "out" / "leak__10.csv"
+            self.assertFalse(
+                self.script.publish_sample(served / "leak__10.csv", target), "already clean")
+            source = root / "bundle.csv"
+            source.write_text(leaked, encoding="utf-8", newline="")
+            self.assertTrue(self.script.publish_sample(source, target))
+            self.assertEqual(target.read_text(encoding="utf-8"), clean)
+        for path in (_REPO / "public" / "data" / "cedar" / "samples").rglob("*.csv"):
+            text = path.read_text(encoding="utf-8")
+            self.assertEqual(
+                self.script.scrub_local_paths(text), text,
+                f"{path} carries a local filesystem path; run import_cedar_manifest.py --audit",
             )
 
     def test_the_explore_contracts_match_the_samples(self) -> None:

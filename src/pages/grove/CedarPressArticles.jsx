@@ -4,6 +4,7 @@
 // one-page reader when the hub split the surface: a front page, not a row
 // of tiles — the newest brief leads at double width, the rest stack beside
 // it, and growth appends to the stack with the archive living at TBN.
+import { toneClass } from "../../features/grove/duotone.js";
 import { Link } from "react-router";
 
 import { useAuth } from "../../context/useAuth";
@@ -26,9 +27,11 @@ import { PressCedarFab } from "./PressCedarFab";
 import { PressFoot, PressMast } from "./PressChrome";
 import PressGate from "./PressGate";
 
-function ArticleCard({ article, compact = false }) {
+function ArticleCard({ article }) {
   const dataset = LAUNCH_COLLECTION.find((item) => item.id === article.datasetId);
-  const className = compact ? "cp-art cp-art--compact" : "cp-art cp-art--lead";
+  // One square card per brief, all alike (owner, 2026-09-27: "a menu of
+  // cards, like squares you can click on").
+  const className = "cp-art cp-art--square";
   const inner = (
     <>
       {/* Sector photography stands in until the real brief publishes with
@@ -40,20 +43,15 @@ function ArticleCard({ article, compact = false }) {
           arrive, so the card is its final height from the first layout. It
           was measured without them: the lead card's body was laid out at
           y=446 and moved to y=783 when the picture landed — a 337px jump,
-          and 0.051 of the 0.052 CLS this page recorded.
-
-          The lead card is the largest thing on the first screen, so it is
-          fetched eagerly and at high priority; the ones stacked beside and
-          below it stay lazy. */}
+          and 0.051 of the 0.052 CLS this page recorded. */}
       <div className="cp-art__art">
         <img
-          className="cp-art__img"
+          className={`cp-art__img ${toneClass(article.tone)}`}
           src={article.image}
           alt={article.imageAlt}
           width={ARTICLE_IMAGE.width}
           height={ARTICLE_IMAGE.height}
-          loading={compact ? "lazy" : "eager"}
-          fetchPriority={compact ? undefined : "high"}
+          loading="lazy"
         />
       </div>
       <div className="cp-art__body">
@@ -65,9 +63,9 @@ function ArticleCard({ article, compact = false }) {
           <b>{dataset?.name || article.tag}</b>
         </span>
         <h2 className="cp-art__title">{article.title}</h2>
-        <p className="cp-art__dek">{article.dek}</p>
         <span className="cp-art__meta">
-          {article.date} · from {dataset?.name}
+          {/* The collection is already named in the tag above. */}
+          {article.date}
           {article.hosted ? null : " · on Tribal Business News"}
         </span>
       </div>
@@ -111,26 +109,27 @@ export default function CedarPressArticles() {
           <p className="cp-hero__access">Original research</p>
           <h1 className="cp-mh__title">Research Briefs.</h1>
           <p className="cp-mh__sub">
-            Original research built from the collections and written for people who work in
-            Indian Country&rsquo;s economy. Every brief names the collection behind it, and the
-            data it draws on is downloadable from the same subscription.
+            Cedar Press research briefs use the collections to examine changes in funding,
+            business activity, policy and institutions across Indian Country. Every brief names
+            the records behind it, and subscribers can inspect and download the same underlying
+            data. The briefs are examples of the kinds of questions the collections can answer,
+            not a substitute for working with the data directly.
           </p>
         </section>
 
         <section className="cp-surf cp-surf--paper cp-fade" id="briefs" aria-label="Latest research">
           <Contours strength={1} />
           <div className="cp-surf__in">
-            <div className="cp-artgrid">
-              <ArticleCard article={PRESS_ARTICLES[0]} />
-              <div className="cp-artstack">
-                {PRESS_ARTICLES.slice(1).map((article) => (
-                  <ArticleCard key={article.id} article={article} compact />
-                ))}
-                <a className="cp-artmore" href={TBN_URL} target="_blank" rel="noreferrer">
-                  Selected Cedar Press research also publishes with Tribal Business News →
-                </a>
-              </div>
-            </div>
+            <ul className="cp-briefgrid">
+              {PRESS_ARTICLES.map((article) => (
+                <li key={article.id}>
+                  <ArticleCard article={article} />
+                </li>
+              ))}
+            </ul>
+            <a className="cp-artmore" href={TBN_URL} target="_blank" rel="noreferrer">
+              Selected Cedar Press research also publishes with Tribal Business News →
+            </a>
             <PressAd slot={AD_SLOT.BRIEFS} />
           </div>
         </section>

@@ -132,3 +132,38 @@ test("the request policy covers nothing the storefront does not sell", () => {
   assert.equal(TRIBAL_REQUEST.steps[0].step, "Request");
   assert.equal(TRIBAL_REQUEST.steps.at(-1).step, "Correct");
 });
+
+// ── The maintenance story and Cedar NEED's enrichments (owner, 2026-09-27) ─
+
+import { MAINTENANCE, NEED_ENRICHMENTS } from "./pressMethod.js";
+import { STOREFRONT_CATALOG } from "./pressCatalog.js";
+import { DECLARED_CADENCE } from "./pressReleases.js";
+
+test("the maintenance story says weekly, human review, wider coverage and new collections", () => {
+  assert.match(MAINTENANCE.sentence, /weekly with human review/);
+  assert.match(MAINTENANCE.sentence, /expands their source coverage and useful fields over time/);
+  assert.match(MAINTENANCE.sentence, /develops new collections/);
+  assert.match(MAINTENANCE.goal, /exceptionally useful, well-documented data and tools for Indian Country/);
+  for (const line of Object.values(MAINTENANCE)) {
+    assert.doesNotMatch(line, /[—&]|\bimpact\b/i, line);
+  }
+  // No surface promises a different cadence.
+  for (const [id, cadence] of Object.entries(DECLARED_CADENCE)) assert.equal(cadence, "Updated weekly", id);
+});
+
+test("patents and credit ratings are enrichments within Cedar NEED, never collections of their own", () => {
+  assert.equal(STOREFRONT_CATALOG.length, 14);
+  assert.ok(!STOREFRONT_CATALOG.some((entry) => /patent|rating/i.test(`${entry.id} ${entry.name}`)), "no standalone collection");
+  const need = STOREFRONT_CATALOG.find((entry) => entry.id === "need");
+  assert.match(need.blurb, /Where records are available/);
+  assert.match(need.blurb, /patents, assigned or later acquired/);
+  assert.match(need.blurb, /dated credit ratings/);
+  assert.match(need.blurb, /each kept with the entity it concerns/);
+  const all = Object.values(NEED_ENRICHMENTS).join(" ");
+  assert.match(all, /where records are available/i);
+  assert.match(all, /acquired patent is shown as acquired rather than as the entity's own invention/);
+  assert.match(all, /issuer, instrument, agency and date/);
+  assert.match(all, /rather than as a current rating/);
+  assert.match(all, /never presented as its parent's/);
+  assert.doesNotMatch(`${all} ${need.blurb}`, /[—&]|\bimpact\b/i);
+});

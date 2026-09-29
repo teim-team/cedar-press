@@ -27,7 +27,7 @@ export const SITE_ORIGIN = "https://cedarpress.ai";
 
 /** The description index.html ships for the door; the fallback for every page. */
 export const SITE_DESCRIPTION =
-  "Trusted intelligence for Indian Country: original economic collections, data-driven research and transparent method. Built by Lumecon, available exclusively through Tribal Business News.";
+  "Trusted intelligence for Indian Country: maintained collections on federal funding, contracting, deals, policy, giving, land and Native enterprise ownership, each traced to its source and resolved to the Native entities behind it. Built by Lumecon, available exclusively through Tribal Business News.";
 
 function setMeta(selector, attribute, content) {
   const tag = document.head.querySelector(selector);

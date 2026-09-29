@@ -137,7 +137,7 @@ export function shelfReach(user) {
  *
  * The client is the wrong side, and the reason is a product ruling rather than
  * a symmetry. `code/cedar_publication.py` splits the shelves in two:
- * STOREFRONT_SHELVES ("standard", "pro") is the twelve a paying Cedar Press
+ * STOREFRONT_SHELVES ("standard", "pro") is what a paying Cedar Press
  * customer sees and GROVE_SHELVES ("grove") is the one built to the same
  * standard and sold through Cedar Grove; BUILD_SHELVES is the thirteen.
  * `scripts/import_cedar_manifest.py` carries that split into the manifest, so
@@ -153,6 +153,12 @@ export function shelfReach(user) {
  * it is not sold on this storefront and does not open on it. `upgradeFor`
  * already answers this way: it names Cedar Grove, `sameProduct: false`, for a
  * grove-shelf dataset whatever the reader's plan.
+ *
+ * A collection presented by its record structure (`coverage: STRUCTURE`,
+ * Foundation & Corporate Giving and PLOT) opens exactly like any other
+ * collection on its shelf (owner, 2026-09-27): included for the plans that
+ * reach its shelf, offered as an upgrade to the rest. What opening it shows
+ * is its record structure rather than sample rows, because it has none here.
  *
  * `server/tests/test_access.py` compares this function's answers, per tier and
  * per collection, against `repository.may_open`.
@@ -235,6 +241,9 @@ export function coverageFrom(dataset) {
 export function coverageLabel(dataset) {
   const coverage = coverageOf(dataset);
   if (!coverage) return "Coverage varies";
+  // Presented by its record structure: nothing is measured, so no span is
+  // stated, and callers leave the line out rather than print a placeholder.
+  if (coverage.kind === "structure") return null;
   if (coverage.kind === "roster") {
     return `Current roster, captured ${formatUpdated(coverage.captured)}`;
   }

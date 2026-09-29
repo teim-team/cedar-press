@@ -7,3 +7,9 @@ The licence record and the rules of use are in that repository's
 `scripts/naics/LICENSES.md`. The original photograph never enters this
 repository, and the page states that the photography is illustrative and
 identifies no Cedar Press customer.
+
+## Author photographs
+
+`authors/elijah-moreno.webp` is the headshot lumecon.ai publishes on its team
+page (`lumecon-website/public/team/elijah-moreno.webp`), in the same house
+duotone, copied here for the author block on the research briefs he wrote.

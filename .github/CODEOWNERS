@@ -1,0 +1,35 @@
+# Who is asked to review what in Cedar Press. GitHub requests review from the
+# owners of every file a pull request touches. The LAST matching line wins, so
+# the specific areas below override the default at the top.
+#
+# Ari (ArihantSwainLumecon): backend platform.
+# Havala (Havala-Hanson): research and data. Ingested data should make sense,
+#   stay secure and be sustainable to maintain. Also security.
+# Brian (bkim28964): accounts, provisioning and entitlement. Also security.
+#
+# A code owner needs write access for their approval to count.
+
+# Default: the Cedar Press platform team.
+*                                   @ArihantSwainLumecon @Havala-Hanson
+
+# Backend service.
+/server/                            @ArihantSwainLumecon @bkim28964
+
+# Accounts, sign-in, subscriptions and provisioning.
+/server/cedar_press/subscribers.py  @bkim28964 @ArihantSwainLumecon
+/server/cedar_press/migrations/     @bkim28964 @ArihantSwainLumecon
+/docs/SUBSCRIBERS.md                @bkim28964 @ArihantSwainLumecon
+
+# Research data: ingestion, the source registry and published data.
+/code/                              @Havala-Hanson @ArihantSwainLumecon
+/cedar_source_registry/             @Havala-Hanson @ArihantSwainLumecon
+/data/                              @Havala-Hanson
+/public/data/                       @Havala-Hanson
+/docs/schema/                       @Havala-Hanson
+/docs/codebooks/                    @Havala-Hanson
+
+# Security: CI, dependency policy and the security policy itself.
+/.github/                           @bkim28964 @Havala-Hanson
+/SECURITY.md                        @bkim28964 @Havala-Hanson
+/requirements.txt                   @bkim28964 @Havala-Hanson @ArihantSwainLumecon
+/package-lock.json                  @bkim28964 @Havala-Hanson @ArihantSwainLumecon

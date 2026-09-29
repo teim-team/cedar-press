@@ -47,6 +47,7 @@ import { isConnected } from "../../config.js";
 import { EVENT, track, trackError } from "../../features/grove/telemetry.js";
 import { useCedarThread } from "../../features/grove/useCedarThread.js";
 import { CedarPanel, Paragraphs } from "./CedarPanel";
+import { CedarGreeting } from "./CedarGreeting";
 
 /** "2026-09-04" as a person would say it. */
 function said(date) {
@@ -390,6 +391,7 @@ export function PressCedarFab({ gated = null, examples = OPEN_EXAMPLES }) {
           inputRef={inputRef}
         />
       ) : null}
+      <CedarGreeting cedarOpen={open} onOpen={() => setOpen(true)} />
       <button
         type="button"
         className="cedar-widget__launcher"

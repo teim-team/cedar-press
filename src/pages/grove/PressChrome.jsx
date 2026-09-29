@@ -168,7 +168,10 @@ function SectionMenu({ section }) {
   );
 }
 
-const PREVIEW_NOTICE_KEY = "cedar-press-private-preview-notice";
+// A new key for new wording (owner, 2026-09-27): a reader who closed the old
+// "Private preview" note sees the early-access one once. The old key,
+// "cedar-press-private-preview-notice", is no longer read.
+export const PREVIEW_NOTICE_KEY = "cedar-press-early-access-notice";
 
 function previewNoticeIsDismissed() {
   try {
@@ -181,7 +184,10 @@ function previewNoticeIsDismissed() {
 }
 
 /**
- * The arrival note for the limited pre-launch circulation.
+ * The arrival note for the limited pre-launch circulation: early access
+ * for attendees of the Great Lakes Tribal Economic Summit (owner, 2026-09-27;
+ * it replaced the "Private preview" wording, same note, same close, same
+ * landing-only scope, same address).
  *
  * IT BELONGS TO THE DOOR AND NOWHERE ELSE.
  * It used to render inside `PressMast`, which every signed-in page mounts,
@@ -208,10 +214,10 @@ export function PressPreviewNotice() {
 
   if (!visible) return null;
   return (
-    <aside className="cp-preview" data-testid="press-preview-note" aria-label="Private preview">
+    <aside className="cp-preview" data-testid="press-preview-note" aria-label="Early access">
       <p className="cp-preview__copy">
-        <b>Private preview.</b> We&rsquo;ve shared Cedar Press with a small group while we
-        prepare its launch, and we&rsquo;d value your read on it. Need a login?{" "}
+        <b>Early access.</b> Cedar Press is open early to attendees of the Great Lakes Tribal
+        Economic Summit ahead of its public launch. Need a login?{" "}
         <a href="mailto:elijah.moreno@lumecon.ai?subject=Cedar%20Press%20preview%20access">elijah.moreno@lumecon.ai</a>
       </p>
       {/* A CLOSE CONTROL THAT LOOKS LIKE ONE.

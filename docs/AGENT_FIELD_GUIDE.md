@@ -454,3 +454,11 @@ to 2 and the untranslatable values to **0**. One of those 68 rows — a single
 `Oneida Nation (Wisconsin)` row keyed to the New York uid — was on its own
 responsible for **290 retired identifiers across four delivered datasets**.
 <!-- END IDENTITY-AND-DELIVERY-SCRIPTS-2026-09-03 -->
+
+## 2026-09-28: test a preview rail with touch, not only programmatic scrolling
+
+A desktop wrapper override can defeat the shared rail's mobile `overflow-x`
+rule. Measure the rail itself against the viewport, dispatch a touch swipe,
+and tap a collection outside the initial view. A selected highlight alone
+does not prove the tap committed: compatibility hover can update the preview
+and move the target before click. Verify the collection URL as well.

@@ -1,11 +1,14 @@
 /**
  * PURPOSE
- * The launch collection: the twelve datasets Cedar Press sells.
+ * The launch collection: the datasets Cedar Press sells that have a release.
+ * Twelve of the catalog's fourteen do; Foundation & Corporate Giving and PLOT
+ * are live on their shelves and presented by their record structure
+ * (`STRUCTURE_ONLY`, below).
  *
  * This said "what the standalone Cedar Grove license reads", from the model in
  * which Cedar Grove published a slice of itself as Cedar Press. That model was
  * retired on 2026-09-02: Cedar Press is a standalone product, and Cedar Grove
- * reads the same twelve because Grove carries all the datasets, not because
+ * reads the same collections because Grove carries all the datasets, not because
  * Press is a view of Grove. `EXCLUDED_COLLECTIONS` records where the two
  * diverge.
  *
@@ -85,7 +88,7 @@ export const UNMEASURED_FIELDS = deepFreeze(manifest.unmeasured_fields);
 export const EXCLUDED_COLLECTIONS = deepFreeze(manifest.excluded);
 
 /**
- * The twelve collections the storefront carries, in shelf order.
+ * The collections the storefront carries that have a release, in shelf order.
  *
  * Descriptor fields mirror the manifest contract: what it tracks, the period,
  * the sources, plus the release bookkeeping a subscriber checks before
@@ -173,6 +176,24 @@ const TABLES = deepFreeze(
     manifest.collections.map((entry) => [entry.id, entry.tables.map(tableWithPublication)]),
   ),
 );
+
+/**
+ * Catalog collections with no release in the manifest: live on their shelves,
+ * named, tiered, described and opened by plan like any other, and presented
+ * by their record structure (`pressRecordStructure.js`) because there are no
+ * sample rows here to show. Derived rather than listed, so it cannot disagree
+ * with the manifest; the tests pin it to the two collections it is today and
+ * fail when a release lands until the catalog entry's coverage is measured.
+ */
+const RELEASED = new Set(manifest.collections.map((entry) => entry.id));
+export const STRUCTURE_ONLY = Object.freeze(
+  PRESS_CATALOG.filter((entry) => !RELEASED.has(entry.id)).map((entry) => entry.id),
+);
+
+/** Whether a collection has a release this repository serves. */
+export function isReleased(datasetId) {
+  return RELEASED.has(datasetId);
+}
 
 /** Readiness, blockers and measured counts for a dataset, or `null`. */
 export function collectionCedarFacts(datasetId) {

@@ -69,7 +69,7 @@ import { Link } from "react-router";
 import { contactHref } from "../../features/grove/appLink.js";
 
 
-import { PRESS_DATA_PATH, PRESS_REQUEST_PATH, PRESS_WHATS_NEW_PATH } from "../../features/grove/pressRoutes";
+import { PRESS_DATA_PATH, PRESS_PRIORITIES_PATH, PRESS_REQUEST_PATH, PRESS_WHATS_NEW_PATH } from "../../features/grove/pressRoutes";
 import { collectionCitation } from "../../features/grove/collection";
 import { REPORT_CITATION_HREF } from "../../features/grove/pressCitations";
 import { PRESS_CATALOG } from "../../features/grove/pressCatalog";
@@ -77,6 +77,8 @@ import { useDocumentTitle } from "../../features/grove/useDocumentTitle";
 import { useFadeIn } from "../../features/grove/useFadeIn";
 import { useScrollToTop } from "../../features/grove/useScrollToTop";
 import {
+  BUILD_NEXT_QUESTION,
+  MAINTENANCE,
   CREDIBILITY_DISCLAIMER,
   CREDIBILITY_STRIP,
   METHOD_COMMITMENTS,
@@ -84,6 +86,7 @@ import {
 } from "../../features/grove/pressMethod";
 import { LINKAGE_COVERAGE, WITHHELD_NOTE } from "../../features/grove/pressIdentity";
 import {
+  BuildNextRail,
   EcosystemDiagram,
   FeedbackLoop,
   IdentityPair,
@@ -123,6 +126,7 @@ const CHAPTERS = [
   { id: "collections", label: "What the collections are", icon: ByCollectionIcon },
   { id: "records", label: "How records are built and checked", icon: ProcessIcon },
   { id: "limits", label: "What the limits are", icon: LinkageIcon },
+  { id: "next", label: "What gets built next", icon: ProcessIcon },
   { id: "cite", label: "How to cite", icon: CiteIcon },
   { id: "team", label: "Who builds it", icon: ExpertiseIcon },
 ];
@@ -327,7 +331,9 @@ export default function CedarPressMethods() {
             Source records use inconsistent names and identifiers, so one organization appears
             under several spellings. Cedar assigns a permanent identifier to each Native
             government, enterprise and firm it can resolve, and maintains it through renames,
-            acquisitions and changes in legal status.
+            acquisitions and changes in legal status. Maintaining that identity layer is what
+            lets the same organization be compared across collections, releases and new
+            analytical tools without rebuilding the underlying record each time.
           </p>
 
           {/* THE CHAIN, IN ONE LINE.
@@ -362,7 +368,7 @@ export default function CedarPressMethods() {
           <div className="cp-meth__body">
             <Chapter
               id="collections"
-              title="Twelve collections, one register of who is who."
+              title="Every collection uses the same maintained entity register."
               claim="Each collection is a published table built from named source documents and resolved to the same entity register, so a nation, an enterprise or a firm is the same subject in every one of them."
             >
               {/* The figure beside the text, a third of the page on desktop,
@@ -382,10 +388,12 @@ export default function CedarPressMethods() {
                   <p>
                     Every source is available to the public: government records, regulatory
                     and securities filings, and published reporting, so the document a record
-                    cites is one anyone can obtain. The one exception is Owned, where a nation
-                    may share its certified-business roster with Lumecon directly. Those listings
-                    are published only on the terms the nation sets, and until it sets them
-                    Owned reports aggregates from the roster, not its entries.
+                    cites is one anyone can obtain. Owned&rsquo;s certified-business rosters
+                    are requested from each nation&rsquo;s TERO or commerce office through its
+                    publicly listed contact, and whether the office releases one is the
+                    office&rsquo;s decision. Owned listings are published only on the terms the
+                    nation sets, and until it sets them Owned reports aggregates from the
+                    roster, not its entries.
                   </p>
                   <p>
                     Select a collection in the figure to see which sources it is built from and
@@ -409,6 +417,11 @@ export default function CedarPressMethods() {
               claim="Sources are gathered, normalized, resolved to entities and checked against each other; ambiguous matches go to a researcher rather than to a score, and every ruling goes back into the evidence."
             >
               <ProcessRail />
+              {/* How the collections are maintained, and what for (owner,
+                  2026-09-27), under the pipeline whose last stage it is. */}
+              <p className="cp-ch__note" data-testid="methods-maintenance">
+                {MAINTENANCE.sentence} {MAINTENANCE.goal}
+              </p>
 
               {/* THE ARGUMENT THIS PAGE EXISTS FOR. The two identifiers are
                   load-bearing, so they are named, shown at transcription size
@@ -460,12 +473,15 @@ export default function CedarPressMethods() {
                 <LinkageMoves />
               </Reasoning>
               <Reasoning label="Why an identified collection answers differently">
+                {/* Owner, 2026-09-26: the data infrastructure is the hero, not
+                    the model. The passage used to open "A model reading
+                    twelve unjoined files" and close on Cedar training its
+                    own models. */}
                 <p>
-                  A model reading twelve unjoined files can retrieve text. A model reading an
-                  identified collection can count, compare and trace, because the rows already
-                  agree on who they are about. Cedar builds and trains its own models on its own
-                  resolved records. The collection is the input to the next pass over it, so the
-                  specific questions it can answer get more specific over time.
+                  Unjoined files can be searched. Identified records can be counted, compared and
+                  traced across sources. The identified evidence also outlasts the tools used to
+                  read it: Cedar, and whatever analytical tools come next, work from the same
+                  maintained records rather than rebuilding them.
                 </p>
               </Reasoning>
               <Acts>
@@ -510,6 +526,23 @@ export default function CedarPressMethods() {
                   withheld is much narrower, and WITHHELD_NOTE holds the wording
                   with the rule it comes from cited beside it. */}
               <p className="cp-msec__aside">{WITHHELD_NOTE}</p>
+            </Chapter>
+
+            {/* Owner, 2026-09-26: how a question becomes a collection. The
+                owner's question leads, the six stages follow, and the way in
+                is Priorities, where subscribers ask. */}
+            <Chapter
+              id="next"
+              title="How Cedar decides what to build next."
+              claim="Priorities, Nations' requests and Cedar's own research all start in the same place, and go through the same stages before anything is released."
+            >
+              <p className="cp-bnx__q">{BUILD_NEXT_QUESTION}</p>
+              <BuildNextRail />
+              <Acts>
+                <Link className="cp-ch__act" to={PRESS_PRIORITIES_PATH}>
+                  Help set the research agenda <span aria-hidden="true">&#8594;</span>
+                </Link>
+              </Acts>
             </Chapter>
 
             <Chapter

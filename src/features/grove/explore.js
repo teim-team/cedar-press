@@ -47,7 +47,9 @@ import scopesJson from "../../../data/cedar/scopes.json" with { type: "json" };
 
 import { collectionCitation, collectionSample, collectionTables, sampleUnavailableReason } from "./collection.js";
 import { canOpenDataset } from "./pressAccess.js";
+import { recordStructure } from "./pressRecordStructure.js";
 import { PRESS_CATALOG_BY_ID, STOREFRONT_CATALOG } from "./pressCatalog.js";
+import { firstUrl } from "./readerValues.js";
 
 export const CONTRACTS = Object.freeze(explore.tables);
 
@@ -136,12 +138,18 @@ export function flagshipKey(collectionId) {
 export function explorableCollections(user) {
   return STOREFRONT_CATALOG.map((entry) => {
     const tables = exploreTables(entry.id);
+    // A collection presented by its record structure (Foundation & Corporate
+    // Giving, PLOT) has no sample rows to preview and is not missing one:
+    // its viewer shows what each record holds instead.
+    const structure = recordStructure(entry.id);
+    const flagship = tables.find((t) => t.flagship) ?? null;
     return {
       entry,
       open: canOpenDataset(user, entry),
       tables,
-      flagship: tables.find((t) => t.flagship) ?? null,
-      previewUnavailable: tables.some((t) => t.flagship) ? null : (sampleUnavailableReason(entry.id) ?? "No preview file for this collection's dataset."),
+      flagship,
+      structure,
+      previewUnavailable: flagship || structure ? null : (sampleUnavailableReason(entry.id) ?? "No preview file for this collection's dataset."),
     };
   });
 }
@@ -480,10 +488,21 @@ const BILL_TYPES = {
 
 /**
  * A record-level link the table does not carry as a column but its own
- * identifiers determine: a USAspending award page from the award key (the
- * subawards table records that same pattern as its source_url), or a
- * congress.gov bill page from congress, type and number. Declared per table
- * in the overrides; nothing is built for a table without a declaration.
+ * identifiers determine. Declared per table in the overrides; nothing is
+ * built for a table without a declaration, and each pattern is one the
+ * repository already records elsewhere, never a guessed one:
+ *
+ *   usaspending_award          a USAspending award page from the award key
+ *                              (the subawards table records that same
+ *                              pattern as its source_url).
+ *   congress_bill              a congress.gov bill page from congress, type
+ *                              and number.
+ *   federal_register_document  a federalregister.gov page from the document
+ *                              number (the pattern code/130 and code/1187
+ *                              write as their own source_url).
+ *   propublica_ein             a ProPublica Nonprofit Explorer page from the
+ *                              EIN, leading zeros dropped (code/33 writes the
+ *                              same `propublica_url`).
  */
 function builtSource(row, contract) {
   const builder = contract?.source_builder;
@@ -499,14 +518,49 @@ function builtSource(row, contract) {
     if (!congress || !type || !/^\d+$/.test(number)) return null;
     return `https://www.congress.gov/bill/${ORDINAL(congress)}-congress/${type}/${number}`;
   }
+  if (builder.kind === "federal_register_document") {
+    // "2012-4517", "94-915", "E7-9453", "X94-11116": the shapes the
+    // published tables carry. Anything else is not a document number.
+    const number = cell(row, builder.column);
+    return /^[A-Z]?\d{1,4}-\d+$/.test(number) ? `https://www.federalregister.gov/d/${number}` : null;
+  }
+  if (builder.kind === "propublica_ein") {
+    const ein = cell(row, builder.column).replace(/-/g, "");
+    return /^\d{9}$/.test(ein) && Number(ein) > 0
+      ? `https://projects.propublica.org/nonprofits/organizations/${Number.parseInt(ein, 10)}`
+      : null;
+  }
   return null;
 }
 
+/** The builder kinds `builtSource` knows, for the derive step's validation. */
+export const SOURCE_BUILDER_KINDS = Object.freeze([
+  "usaspending_award", "congress_bill", "federal_register_document", "propublica_ein",
+]);
+
+/**
+ * The row's link to its originating record: the first well-formed address
+ * in the table's declared source column, else the one its identifiers
+ * determine. A cell that only STARTS with "https://" is not an address when
+ * it goes on to list a second one or a note ("https://a | https://b",
+ * "https://portal/  (AS 45.55.139 filing)"), so the first real address in it
+ * is the link and the rest stays in the record as data.
+ */
 export function rowSource(row, contract) {
-  const url = cell(row, contract?.source);
-  if (/^https?:\/\//i.test(url)) return url;
-  return builtSource(row, contract);
+  return firstUrl(cell(row, contract?.source)) ?? builtSource(row, contract);
 }
+
+/** Whether the table says where a record's link comes from at all. */
+export function declaresSource(contract) {
+  return Boolean(contract?.source || contract?.source_builder);
+}
+
+/**
+ * The column the viewer adds for a table whose link is built rather than
+ * carried: it has no cell of its own, so the table shows `item.source` under
+ * it. Not a name any release uses.
+ */
+export const SOURCE_LINK_COLUMN = "__source";
 
 export function rowRecordId(row, contract) {
   return cell(row, contract?.record_id) || null;
@@ -529,7 +583,7 @@ export function rowReplacement(row, contract) {
   const by = cell(row, contract?.superseded_by);
   if (!by) return null;
   const own = rowRecordId(row, contract);
-  const url = cell(row, contract?.source);
+  const url = firstUrl(cell(row, contract?.source)) ?? "";
   const link = own && url.includes(own) ? url.replace(own, by) : null;
   return { id: by, url: link };
 }
@@ -823,7 +877,8 @@ function sortKey(item, by) {
     case "year": return item.year;
     case "amount": return item.amount;
     case "observation": return item.observation;
-    case "source": return item.source;
+    case "source":
+    case SOURCE_LINK_COLUMN: return item.source;
     default: {
       const raw = item.row[by];
       if (raw == null || raw === "") return null;

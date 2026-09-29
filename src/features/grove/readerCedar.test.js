@@ -6,9 +6,12 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { freshMemory, remember } from "./cedarConversation.js";
-import { OPEN_EXAMPLES, SCOPED_EXAMPLES, fabFollowUps, fabStarters, isDrillDown, topicOf, unavailableReply } from "./readerCedar.js";
+import { cedarQuestions } from "./pressJobs.js";
+import { OPEN_EXAMPLES, SCOPED_EXAMPLES, fabFollowUps, fabStarters, isDrillDown, scopedQuestions, topicOf, unavailableReply } from "./readerCedar.js";
 
 const SCOPE = { id: "deals", name: "Deals in Indian Country" };
+// The scoped questions are the collection's own, from `COLLECTION_JOBS`.
+const DEALS_QS = scopedQuestions(SCOPE);
 
 test("a bare drill-down phrase is recognised, a real question is not", () => {
   assert.ok(isDrillDown("Tell me more"));
@@ -25,20 +28,20 @@ test("a topic id is the question at its scope, so the same words at two scopes a
 
 test("scoped quick replies are the profile's own questions, minus the one just asked", () => {
   let memory = freshMemory();
-  const topic = topicOf(SCOPED_EXAMPLES[0], SCOPE);
+  const topic = topicOf(DEALS_QS[0], SCOPE);
   memory = remember(memory, { intent: topic, kind: "answer", missed: false });
   const chips = fabFollowUps(memory, { intent: topic, kind: "answer", source: "profile" }, { scope: SCOPE, examples: OPEN_EXAMPLES });
-  assert.deepEqual(chips.map((c) => c.label), SCOPED_EXAMPLES.slice(1, 4));
+  assert.deepEqual(chips.map((c) => c.label), DEALS_QS.slice(1, 4));
   assert.ok(chips.every((c) => c.scope === SCOPE));
 });
 
 test("a question already asked in this thread is not offered again", () => {
   let memory = freshMemory();
-  for (const q of SCOPED_EXAMPLES.slice(0, 3)) {
+  for (const q of DEALS_QS.slice(0, -1)) {
     memory = remember(memory, { intent: topicOf(q, SCOPE), kind: "answer", missed: false });
   }
   const chips = fabFollowUps(memory, { intent: topicOf("anything", SCOPE), kind: "answer", source: "profile" }, { scope: SCOPE, examples: [] });
-  assert.deepEqual(chips.map((c) => c.label), [SCOPED_EXAMPLES[3]]);
+  assert.deepEqual(chips.map((c) => c.label), [DEALS_QS.at(-1)]);
 });
 
 test("tell me more is offered only when Cedar itself composed the answer", () => {
@@ -82,7 +85,7 @@ test("a panel that cannot reach the collections offers no starters: they would a
 
 test("connected, the starters are the profile's questions when scoped and the collection starters when not", () => {
   const scoped = fabStarters({ scope: SCOPE, examples: OPEN_EXAMPLES, connected: true });
-  assert.deepEqual(scoped.map((s) => s.label), SCOPED_EXAMPLES);
+  assert.deepEqual(scoped.map((s) => s.label), DEALS_QS);
   assert.ok(scoped.every((s) => s.scope === SCOPE));
   const open = fabStarters({ scope: null, examples: OPEN_EXAMPLES, connected: true });
   assert.equal(open.length, Math.min(5, OPEN_EXAMPLES.length));
@@ -99,4 +102,19 @@ test("a disconnected request is unavailable whatever its scope, never a call", (
   assert.match(unavailableReply({ connected: false, scope: SCOPE }).text, /can't reach the collections/);
   assert.equal(unavailableReply({ connected: true, scope: null })?.kind, "routing");
   assert.equal(unavailableReply({ connected: true, scope: SCOPE }), null);
+});
+
+test("a scoped panel offers the collection's own questions, and the fallback only where it has none", () => {
+  assert.deepEqual(DEALS_QS, cedarQuestions("deals").map((item) => item.q));
+  assert.ok(DEALS_QS.length >= 3);
+  assert.notDeepEqual(DEALS_QS, SCOPED_EXAMPLES);
+  assert.deepEqual(scopedQuestions({ id: "not-a-collection" }), SCOPED_EXAMPLES);
+  assert.deepEqual(scopedQuestions(null), SCOPED_EXAMPLES);
+});
+
+test("the unscoped starters come from the jobs layer, one per collection", () => {
+  for (const example of OPEN_EXAMPLES) {
+    assert.ok(cedarQuestions(example.scope.id).some((item) => item.q === example.q), example.q);
+  }
+  assert.equal(new Set(OPEN_EXAMPLES.map((e) => e.scope.id)).size, OPEN_EXAMPLES.length);
 });

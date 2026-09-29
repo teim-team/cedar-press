@@ -127,8 +127,9 @@ _CONSTRUCTION: dict[str, dict[str, Any]] = {
             "businesses."
         ),
         "inclusion_rules": (
-            "Consent-first: each nation's office shares its certified list "
-            "directly and rows appear only under that nation's stated terms. "
+            "Consent-first: each nation's office is asked for its certified "
+            "list through its public contact, and rows appear only under that "
+            "nation's stated terms. "
             "Until an office confirms publication terms, its businesses "
             "appear in aggregates only, credited to the issuing office."
         ),
@@ -154,11 +155,12 @@ def _catalog_profile(dataset_id: str) -> dict[str, Any] | None:
     """A profile for a collection the catalog carries but the pilot does not.
 
     The wider ladder (``pressCatalog.js``, dumped into ``_press_data.json``)
-    describes collections whose first release is still in preparation. Cedar
-    can honestly answer what such a collection is designed to hold and how its
-    records connect to Native entities — that is the catalog's own copy — but
-    it has no release, so every release-shaped field is ``None`` and the
-    limitations say so. No number is invented for a collection with no data.
+    carries collections presented by their record structure (Foundation &
+    Corporate Giving and PLOT). Cedar can honestly answer what such a
+    collection holds and how its records connect to Native entities and to
+    the other collections — that is the catalog's own copy — but it states no
+    figures for it, so every release-shaped field is ``None`` and the
+    limitations say so. No number is invented.
     """
     entry = _catalog_entry(dataset_id)
     if entry is None:
@@ -177,9 +179,9 @@ def _catalog_profile(dataset_id: str) -> dict[str, Any] | None:
         "entity_resolution_method": entry.get("linkage"),
         "inclusion_rules": None,
         "known_limitations": (
-            "This collection's first release is in preparation: the catalog "
-            "entry describes its design, and no records or figures are "
-            "published through Cedar yet."
+            "Cedar describes this collection by what each record holds and "
+            "how its records connect to the other collections; it states no "
+            "counts, figures or date ranges for it."
         ),
         "method": None,
         "version": None,
@@ -471,9 +473,9 @@ def answer_from_profile(question: str, dataset_id: str) -> dict[str, str] | None
             }
         return {
             "answer": (
-                f"{profile['collection_name']} has no published figures yet: its "
-                "first release is in preparation. Ask what it covers or how it "
-                "is being constructed."
+                f"{profile['collection_name']} is described by what each record "
+                "holds, and Cedar states no figures for it. Ask what it covers "
+                "or how its records connect to the other collections."
             ),
             "basis": basis,
         }

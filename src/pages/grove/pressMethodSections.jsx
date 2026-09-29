@@ -19,7 +19,11 @@ import {
   labelLines,
   say,
 } from "../../features/grove/pressEcosystem.js";
-import { CONSTRUCTION_STEPS } from "../../features/grove/pressMethod.js";
+import { BUILD_NEXT_STEPS, CONSTRUCTION_STEPS, NEED_ENRICHMENTS } from "../../features/grove/pressMethod.js";
+import { PRESS_SOURCES } from "../../features/grove/pressSources.js";
+
+/** Cedar NEED's enrichment sources, as the sources list declares them. */
+const NEED_ENRICHMENT_SOURCES = PRESS_SOURCES.filter((source) => source.declared && source.collections.includes("need"));
 import {
   IDENTIFIERS,
   KEPT_OUTSIDE,
@@ -46,6 +50,26 @@ import { COLLECTION_ICONS } from "./pressCollectionIcons.jsx";
  * reads one process with seven moments in it. Seven separate cards read as
  * seven separate things, which is the opposite of the claim.
  */
+/**
+ * How Cedar decides what to build next: the question first, then the six
+ * stages from it to a maintained release, as one numbered row. Its own
+ * classes rather than `.cp-proc`'s, so the seven construction stages keep
+ * their sequence and their count.
+ */
+export function BuildNextRail() {
+  return (
+    <ol className="cp-bnx" aria-label="From a question to a maintained release">
+      {BUILD_NEXT_STEPS.map((stage, index) => (
+        <li className="cp-bnx__stage" key={stage.id}>
+          <span className="cp-bnx__n">{String(index + 1).padStart(2, "0")}</span>
+          <h3 className="cp-bnx__name">{stage.label}</h3>
+          <p className="cp-bnx__body">{stage.note}</p>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
 export function ProcessRail() {
   return (
     <ol className="cp-proc">
@@ -439,11 +463,14 @@ export function MethodsByCollection() {
             <span className="cp-mbc__pic" aria-hidden="true">{COLLECTION_ICONS[entry.id] ?? null}</span>
             <div>
               <h3 className="cp-mbc__name">{entry.name}</h3>
-              <p className="cp-mbc__meta">
-                {release ? `${release.version} · ` : ""}
-                {coverageLabel(entry)}
-                {release ? ` · ${release.cadence}` : ""}
-              </p>
+              {/* Version, span and cadence where the collection states them;
+                  one presented by its record structure states none, and the
+                  line is left out rather than left empty. */}
+              {release || coverageLabel(entry) ? (
+                <p className="cp-mbc__meta">
+                  {[release?.version, coverageLabel(entry), release?.cadence].filter(Boolean).join(" · ")}
+                </p>
+              ) : null}
             </div>
           </header>
           <p className="cp-mbc__blurb">{entry.blurb}</p>
@@ -462,6 +489,18 @@ export function MethodsByCollection() {
               <div>
                 <span className="cp-mbc__cap">Sources</span>
                 <p>{launch.sources}</p>
+              </div>
+            ) : null}
+            {/* Enrichments within Cedar NEED, not collections of their own
+                (owner, 2026-09-27): patents and credit ratings, where
+                records are available, each kept with its own entity. */}
+            {entry.id === "need" ? (
+              <div data-testid="need-enrichments">
+                <span className="cp-mbc__cap">Patents and credit ratings</span>
+                <p>{NEED_ENRICHMENTS.patents} {NEED_ENRICHMENTS.ratings} {NEED_ENRICHMENTS.attachment}</p>
+                <p>
+                  {NEED_ENRICHMENT_SOURCES.map((source) => `${source.name}, supported by ${source.supportedBy}`).join("; ")}.
+                </p>
               </div>
             ) : null}
           </div>

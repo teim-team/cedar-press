@@ -68,6 +68,13 @@ process.stdout.write(
       // against the collections manifest, whose `excluded` entries carry the
       // shelf the Cedar data workspace assigned.
       catalogByShelf: Object.fromEntries(Object.entries(byShelf).sort()),
+      // Catalog entries presented by their record structure (`coverage:
+      // STRUCTURE`): live on their shelves and opened by plan, with no release
+      // file. The launch collection holds only the ones with a release, so
+      // the Python side compares the catalog minus these against it, and
+      // holds this list to the manifest: structure exactly when there is no
+      // release.
+      structureOnly: PRESS_CATALOG.filter((entry) => entry.coverage?.kind === "structure").map((entry) => entry.id).sort(),
       // What the CLIENT decides, collection by collection, over the whole
       // catalog rather than the storefront subset. This is the decision the
       // browser acts on -- it is what puts a download control on a tile --
