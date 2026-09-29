@@ -741,7 +741,7 @@ class TestGeneratorAndManifestAgree(unittest.TestCase):
             'dataset, on this machine at '
             '~/Desktop/dissertation/data/tribal_federal_spending/clean/) '
             ':: https://www.bowhead.com/about/",kept\n'
-            '2,/Users/someone/work/x.csv,C:\\Users\\someone\\x.csv\n'
+            "2,/Users/" "someone/work/x.csv,C:" "\\Users\\" "someone\\x.csv\n"
             '3,https://www.example.com/home/about,~20% of rows\n'
         )
         clean = self.script.scrub_local_paths(leaked)
