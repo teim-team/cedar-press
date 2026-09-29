@@ -7,6 +7,7 @@
 // component file exports only components is kept.
 import { normalise } from "./cedarConversation.js";
 import { LAUNCH_COLLECTION } from "./collection.js";
+import { cedarQuestions, openCedarQuestions } from "./pressJobs.js";
 
 // The collection-scoped prompt set, from the implementation brief §3, minus
 // one.
@@ -24,6 +25,12 @@ import { LAUNCH_COLLECTION } from "./collection.js";
 // "3,345,971 rows", confidently and in the release's name. That is the exact
 // failure the answer-basis work exists to prevent, so the prompt is withheld
 // until the router is fixed rather than shipped as a demonstration of it.
+//
+// These four are now the FALLBACK. A collection's own suggestions come from
+// `COLLECTION_JOBS` (`pressJobs.js`, owner's brief of 2026-09-26: outcome-
+// oriented once the reader is inside the product), and the Python suite runs
+// each of those through `answer_from_profile` too, holding it to the branch
+// it names. A collection with no entry there falls back to these.
 export const SCOPED_EXAMPLES = [
   "What does this collection cover?",
   "How are entities resolved?",
@@ -47,17 +54,13 @@ export const SCOPED_EXAMPLES = [
  * answer with no release behind it is the thing the basis line exists to
  * mark.
  */
-export const OPEN_EXAMPLES = [
-  { q: "What does this collection cover?", at: 0 },
-  { q: "How was this collection built?", at: 1 },
-  { q: "What sources are included?", at: 2 },
-  { q: "What changed in the latest release?", at: 3 },
-]
-  .map(({ q, at }) => {
-    const entry = LAUNCH_COLLECTION[at];
-    return entry ? { q, scope: { id: entry.id, name: entry.name } } : null;
-  })
-  .filter(Boolean);
+export const OPEN_EXAMPLES = openCedarQuestions(LAUNCH_COLLECTION.slice(0, 4));
+
+/** A scoped panel's questions: the collection's own, else the fallback set. */
+export function scopedQuestions(scope) {
+  const own = cedarQuestions(scope?.id).map((item) => item.q);
+  return own.length ? own : SCOPED_EXAMPLES;
+}
 
 /** The phrases that mean "more on what you just said" rather than a new question. */
 const DRILL_DOWN = ["tell me more", "go deeper", "more detail", "more details", "say more", "keep going", "continue", "what else", "elaborate", "go on", "more please"];
@@ -89,7 +92,7 @@ export function fabFollowUps(memory, reply, { scope, examples }) {
     out.push({ label: "Tell me more", text: "tell me more", intent: null });
   }
   const candidates = scope
-    ? SCOPED_EXAMPLES.map((q) => ({ q, scope }))
+    ? scopedQuestions(scope).map((q) => ({ q, scope }))
     : examples.map((example) => (typeof example === "string" ? { q: example, scope: null } : { q: example.q, scope: example.scope ?? null }));
   for (const candidate of candidates) {
     if (out.length >= 3) break;
@@ -118,7 +121,7 @@ export function fabFollowUps(memory, reply, { scope, examples }) {
 export function fabStarters({ scope, examples, connected }) {
   if (!connected) return [];
   const items = scope
-    ? SCOPED_EXAMPLES.map((q) => ({ q, scope }))
+    ? scopedQuestions(scope).map((q) => ({ q, scope }))
     : examples.map((example) => (typeof example === "string" ? { q: example, scope: null } : { q: example.q, scope: example.scope ?? null }));
   return items.slice(0, 5).map((item) => ({
     label: item.scope && !scope ? `${item.q} (${item.scope.name})` : item.q,

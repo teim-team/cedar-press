@@ -62,9 +62,12 @@ test("the ring is the first chapter's figure, beside the text and outside any di
   }
 });
 
-test("five chapters, in the order a reader trusts a figure", () => {
+test("six chapters, in the order a reader trusts a figure", () => {
+  // "next" (how Cedar decides what to build next) joins after the limits,
+  // owner 2026-09-26: what the collections cannot tell you, then how a
+  // question they cannot answer becomes one they can.
   const ids = [...PAGE.matchAll(/\{ id: "([a-z]+)", label: "[^"]+", icon: \w+ \}/g)].map((m) => m[1]);
-  assert.deepEqual(ids, ["collections", "records", "limits", "cite", "team"]);
+  assert.deepEqual(ids, ["collections", "records", "limits", "next", "cite", "team"]);
   for (const id of ids) assert.match(PAGE, new RegExp(`<Chapter\\s+id="${id}"`), `chapter ${id} is not rendered`);
 });
 

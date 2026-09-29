@@ -18,9 +18,18 @@ import { fileURLToPath } from "node:url";
 import { expect, test } from "@playwright/test";
 
 import { EMAIL, HASH, PASSWORD, PRESS_EMAIL } from "./demoAccount.js";
-// The twelve, read from the catalog rather than typed: a list typed here
+// The fourteen, read from the catalog rather than typed: a list typed here
 // would pass while the door advertised something else.
 import { STOREFRONT_CATALOG } from "../src/features/grove/pressCatalog.js";
+import { LUMECON_URL, TBN_URL } from "../src/features/grove/pressArticles.js";
+import {
+  AUDIENCE_JOBS,
+  ENTITY_JOBS,
+  collectionQuestions,
+  researchExamples,
+  uncoveredIds,
+  visibleAudiences,
+} from "../src/features/grove/pressJobs.js";
 
 // The throwaway account playwright.config.js provisions into the build it
 // starts. It is not a credential and it opens nothing that is deployed
@@ -28,6 +37,21 @@ import { STOREFRONT_CATALOG } from "../src/features/grove/pressCatalog.js";
 const ACCOUNT = { email: EMAIL, password: PASSWORD };
 const PRESS_ACCOUNT = { email: PRESS_EMAIL, password: PASSWORD };
 const STOREFRONT_NAMES = STOREFRONT_CATALOG.map((entry) => entry.short || entry.name);
+
+/** Use the visible controls: audience tabs on phones, arrows on desktop. */
+async function chooseAudience(page, index) {
+  const tabs = page.locator(".cp-aud__tab");
+  if (await tabs.nth(index).isVisible()) {
+    await tabs.nth(index).click();
+    return;
+  }
+  const total = await tabs.count();
+  for (let step = 0; step < total; step += 1) {
+    if (await tabs.nth(index).getAttribute("aria-selected") === "true") return;
+    await page.getByRole("button", { name: "Next use case" }).click();
+  }
+  await expect(tabs.nth(index)).toHaveAttribute("aria-selected", "true");
+}
 
 /** The pages behind the gate, by the route a reader reaches them at. */
 const SECTIONS = [
@@ -103,17 +127,131 @@ async function openDoorCedar(page) {
 }
 
 test.describe("the gate", () => {
-  test("the private preview note invites feedback and gives an access contact", async ({ page }) => {
+  test("the early access note names the summit and gives an access contact", async ({ page }) => {
     await page.goto("/");
     const notice = page.getByTestId("press-preview-note");
     await expect(notice).toBeVisible();
-    await expect(notice).toContainText("small group");
+    await expect(notice.locator("b")).toHaveText("Early access.");
+    await expect(notice.locator(".cp-preview__copy")).toHaveText(
+      "Early access. Cedar Press is open early to attendees of the Great Lakes Tribal Economic Summit ahead of its public launch. Need a login? elijah.moreno@lumecon.ai",
+    );
+    await expect(notice).not.toContainText("small group");
     await expect(notice.getByRole("link", { name: "elijah.moreno@lumecon.ai" }))
-      .toHaveAttribute("href", /mailto:elijah\.moreno@lumecon\.ai/);
+      .toHaveAttribute("href", "mailto:elijah.moreno@lumecon.ai?subject=Cedar%20Press%20preview%20access");
     // The way out is a close control, not a "Continue →" pill. A reader who
     // does not want to continue anywhere still has to be able to shut it.
     await notice.getByRole("button", { name: "Close this notice" }).click();
     await expect(notice).toHaveCount(0);
+    await page.reload();
+    await expect(page.getByTestId("press-preview-note")).toHaveCount(0);
+  });
+
+  // The maintenance story and the NEED enrichment sources (owner,
+  // 2026-09-27), on the door; the figure is 600+ (owner, 2026-09-27).
+  test("the door says how Cedar Press is maintained and names the NEED enrichment sources", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.getByTestId("door-maintenance")).toContainText(
+      "Cedar Press maintains its datasets weekly with human review, expands their source coverage and useful fields over time and develops new collections.",
+    );
+    const panel = page.locator(".cp-hero3__proof");
+    for (const label of ["Patent publication and family records", "Historical S&P and Fitch ratings", "AM Best insurance financial-strength releases", "IRS Form 990-PF grant schedules", "Recorded deeds and land transfers"]) {
+      await expect(panel).toContainText(label);
+    }
+    await expect(panel.locator(".cp-hero3__proofcount")).toContainText("600+ documented upstream sources");
+  });
+
+  // The greeting note above Ask Cedar (owner, 2026-09-27): it rises once the
+  // reader scrolls in, stays until answered, and dismissing it holds for the
+  // visit. No emoji.
+  test("the door's Cedar greets on scroll and stays dismissed once dismissed", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop", "the phone launcher waits out the hero");
+    await page.goto("/");
+    const note = page.locator(".cp-greet");
+    await expect(note).toHaveCount(0);
+    await page.evaluate(() => window.scrollTo(0, window.innerHeight * 1.6));
+    await expect(note).toBeVisible({ timeout: 5_000 });
+    await expect(note).toContainText("Hi, I’m Cedar.");
+    await expect(note).not.toContainText(/\p{Extended_Pictographic}/u);
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+    await page.waitForTimeout(400);
+    await expect(note).toBeVisible();
+    await note.getByRole("button", { name: "Dismiss this message" }).click();
+    await expect(note).toHaveCount(0);
+    await page.reload();
+    await page.evaluate(() => window.scrollTo(0, window.innerHeight * 1.6));
+    await page.waitForTimeout(2_500);
+    await expect(note).toHaveCount(0);
+  });
+
+  test("clicking the greeting opens the door's Cedar", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop", "the phone launcher waits out the hero");
+    await page.goto("/");
+    await page.evaluate(() => window.scrollTo(0, window.innerHeight * 1.6));
+    const note = page.locator(".cp-greet");
+    await expect(note).toBeVisible({ timeout: 5_000 });
+    await note.locator(".cp-greet__open").click();
+    await expect(page.locator(".cp-dc.is-open")).toHaveCount(1);
+    await expect(note).toHaveCount(0);
+  });
+
+  // The sticky masthead is opaque (owner, 2026-09-27): no alpha, no blur,
+  // and the hero's old source-reach line under the partners is gone.
+  test("the masthead is opaque and the hero carries no source-reach line", async ({ page }) => {
+    await page.goto("/");
+    const bar = page.locator(".cp-door__bar");
+    await expect(bar).toHaveCSS("background-color", "rgb(255, 255, 255)");
+    await expect(bar).toHaveCSS("backdrop-filter", "none");
+    await expect(page.locator(".cp-hero3__reach")).toHaveCount(0);
+    await expect(page.locator(".cp-hero3")).not.toContainText("Lumecon builds its datasets and research from");
+    await expect(page.locator(".cp-hero3__proofcount")).toContainText("600+ documented upstream sources");
+  });
+
+  // The landing layout of 2026-09-27: the source banner in the navy
+  // passage's right column, the summary figures one line under the viewer
+  // caption with nothing below the hero's button, the passage in three
+  // paragraphs with Lumecon, its team page and Tribal Business News linked,
+  // and the long-run trust line gone.
+  test("the source banner sits in the navy passage and the figures sit under the viewer", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.locator(".cp-why .cp-why__side .cp-hero3__proof")).toHaveCount(1);
+    await expect(page.locator(".cp-hero3__copy .cp-hero3__facts")).toHaveCount(0);
+    await expect(page.locator(".cp-hero3__stage figcaption + .cp-hero3__facts")).toHaveCount(1);
+    const ledes = page.locator(".cp-why__lede");
+    await expect(ledes).toHaveCount(3);
+    await expect(ledes.nth(1).locator('a[href="https://lumecon.ai"]')).toHaveCount(1);
+    await expect(ledes.nth(1).locator('a[href="https://lumecon.ai/team/"]')).toHaveCount(1);
+    await expect(ledes.nth(2).locator('a[href="https://tribalbusinessnews.com"]')).toHaveCount(1);
+    await expect(page.locator("body")).not.toContainText("As search and analytical tools improve");
+  });
+
+  // The navy banner does not pause, cannot be selected, and is not in the
+  // order the source list is written in (owner, 2026-09-27).
+  test("the source banner keeps moving, cannot be selected, and is not in list order", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop", "a pointer question");
+    await page.goto("/");
+    const runs = page.locator(".cp-why__runs");
+    await runs.scrollIntoViewIfNeeded();
+    await runs.hover();
+    const states = await page.locator(".cp-why__sources .cp-hero3__marquee").evaluateAll((els) => els.map((el) => getComputedStyle(el).animationPlayState));
+    expect(states.every((s) => s === "running")).toBe(true);
+    await expect(runs).toHaveCSS("user-select", "none");
+    const covered = await runs.evaluate((el) => {
+      const r = el.getBoundingClientRect();
+      const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+      return hit === el;
+    });
+    expect(covered, "the layer over the runs takes the pointer").toBe(true);
+    const shown = await page.locator(".cp-why__runs .cp-hero3__run:not([aria-hidden])").evaluateAll((uls) => uls.flatMap((ul) => [...ul.querySelectorAll("li")].map((li) => li.textContent)));
+    const sorted = [...shown].sort((a, b) => a.localeCompare(b));
+    expect(shown).not.toEqual(sorted);
+  });
+
+  test("a reader who closed the old private-preview note sees the early access note once", async ({ page }) => {
+    await page.goto("/");
+    await page.evaluate(() => sessionStorage.setItem("cedar-press-private-preview-notice", "dismissed"));
+    await page.reload();
+    await expect(page.getByTestId("press-preview-note")).toBeVisible();
+    await expect(page.getByTestId("press-preview-note")).toContainText("Early access.");
   });
 
   test("every signed-in route wears the same masthead", async ({ page }) => {
@@ -209,9 +347,9 @@ test.describe("the gate", () => {
     expect(errors).toEqual([]);
   });
 
-  // The door stages the product: the twelve collections down the frame's
+  // The door stages the product: the fourteen collections down the frame's
   // rail, one group a shelf, and the pane with real sample records of the
-  // one in hand. Twelve is the
+  // one in hand. Fourteen is the
   // catalog's count; the records are the point, since a preview with a
   // description and no rows is a brochure. The reader's shelf (#catalog)
   // stays absent — asserted above — because the preview reads the public
@@ -222,7 +360,8 @@ test.describe("the gate", () => {
     // `.cp-rail__item` rather than `.cp-app__item`: the frame drew its own
     // navy list until the door started mounting the shared rail. Scoped to
     // the frame, since the strip below it is the same twelve again.
-    await expect(page.getByTestId("press-frame").locator(".cp-rail__item")).toHaveCount(12);
+    await expect(page.getByTestId("press-frame").locator(".cp-rail__item")).toHaveCount(STOREFRONT_CATALOG.length);
+    expect(STOREFRONT_CATALOG.length).toBe(14);
     await expect(page.locator('[data-testid="collection-stage"]')).toHaveCount(1);
     await expect(page.locator('[data-testid="stage-record"]').first()).toBeVisible();
     // Scoped to the frame: the door now also carries a full-size strip of the
@@ -400,7 +539,10 @@ test.describe("the gate", () => {
     await page.waitForSelector('[data-testid="stage-record"]');
     await page.locator('[data-testid="collection-stage"]').getByRole("button", { name: /Ask Cedar/ }).click();
     await expect(page.locator(".cp-dc__msg--you").last()).toContainText("Federal Funding");
-    await expect(page.locator(".cp-dc__msg--bot").last()).toContainText("federal government");
+    // The catalog's own words, not a phrase typed here: the blurb is owner copy
+    // and changes on the owner's say.
+    const blurb = STOREFRONT_CATALOG.find((entry) => entry.id === "funding").blurb;
+    await expect(page.locator(".cp-dc__msg--bot").last()).toContainText(blurb.slice(0, 60));
   });
 
   test("the door does not scroll sideways", async ({ page }) => {
@@ -815,6 +957,58 @@ test.describe("Explore the collections", () => {
     expect(errors).toEqual([]);
   });
 
+  // FOUNDATION & CORPORATE GIVING AND PLOT ARE LIVE ON THEIR PLANS (owner,
+  // 2026-09-27). Each opens for the plan that includes it like any other
+  // collection on its shelf, and where another collection shows sample
+  // records it shows what each record holds. No row count, span or version
+  // is stated for either, anywhere a reader can see.
+  const NUMERIC_COUNT = /\d[\d,.]*\s*(k|m|million|thousand)?\s*(rows?|records?)\b/i;
+  for (const { id, fields, cases } of [
+    { id: "foundation-corporate-giving", fields: 27, cases: [{ account: PRESS_ACCOUNT, open: true }, { account: ACCOUNT, open: true }] },
+    { id: "plot", fields: 9, cases: [{ account: PRESS_ACCOUNT, open: false }, { account: ACCOUNT, open: true }] },
+  ]) {
+    for (const { account, open } of cases) {
+      test(`${id} ${open ? "opens on what each record holds" : "is offered on Cedar Press+"} for ${account === ACCOUNT ? "Cedar Press+" : "Cedar Press"}`, async ({ page }) => {
+        const errors = watchConsole(page);
+        await signIn(page, account);
+        await page.goto(`/data?c=${id}`);
+        const explore = page.getByTestId("explore");
+        await expect(explore).not.toContainText(/not yet published|first release/i);
+        await expect(page.getByTestId("explore-unavailable")).toHaveCount(0);
+        if (open) {
+          const view = page.getByTestId("explore-structure");
+          await expect(view).toBeVisible();
+          await expect(page.getByTestId("explore-locked")).toHaveCount(0);
+          await expect(view).toContainText("What each record holds");
+          await expect(view.getByTestId("record-structure").locator("tbody tr")).toHaveCount(fields);
+          expect(await view.innerText()).not.toMatch(NUMERIC_COUNT);
+        } else {
+          const locked = page.getByTestId("explore-locked");
+          await expect(locked).toBeVisible();
+          await expect(locked.locator(".cp-lock__say")).toContainText("Available with Cedar Press+");
+          expect((await locked.locator("thead th").allInnerTexts()).join(" | ").toUpperCase()).toContain("OWNER OR ENTITY");
+          expect(await locked.innerText()).not.toMatch(NUMERIC_COUNT);
+        }
+        const rail = page.locator(".cp-rail__item").filter({ has: page.locator(`text=${id === "plot" ? "PLOT" : "Foundation & Corporate Giving"}`) }).first();
+        await expect(rail.locator(".cp-rail__lock")).toHaveText(open ? [] : ["Plus"]);
+        expect(errors).toEqual([]);
+      });
+    }
+
+    test(`the door shows ${id} by what each record holds, with no count`, async ({ page }) => {
+      const errors = watchConsole(page);
+      await page.goto(`/?collection=${id}`);
+      const stage = page.locator(`[data-testid="collection-stage"][data-collection="${id}"]`);
+      await expect(stage).toBeVisible();
+      await expect(stage.getByTestId("record-structure").locator("tbody tr")).toHaveCount(fields);
+      await expect(stage).toContainText("What each record holds");
+      await expect(stage).not.toContainText(/not yet published|first release/i);
+      await expect(stage.locator(".cp-pane__facts")).not.toContainText(/\d/);
+      expect(await stage.innerText()).not.toMatch(NUMERIC_COUNT);
+      expect(errors).toEqual([]);
+    });
+  }
+
   for (const { label, account } of [
     { label: "Cedar Press", account: PRESS_ACCOUNT },
     { label: "Cedar Press+", account: ACCOUNT },
@@ -846,6 +1040,10 @@ test.describe("Explore the collections", () => {
     const atlas = page.locator(".cp-atlas");
     await expect(atlas).toBeVisible();
     await expect(atlas.getByTestId("atlas-row")).toHaveCount(STOREFRONT_CATALOG.length);
+    // Every collection on the reader's shelf is included and every one on
+    // the Plus shelf is offered, Foundation & Corporate Giving and PLOT like
+    // the rest (owner, 2026-09-27). Owned alone is its own state: a release
+    // whose sample preview is not published.
     await expect(atlas.locator(".cp-atlas__included")).toHaveCount(
       STOREFRONT_CATALOG.filter((entry) => entry.shelf === "standard").length,
     );
@@ -853,6 +1051,15 @@ test.describe("Explore the collections", () => {
       STOREFRONT_CATALOG.filter((entry) => entry.shelf === "pro" && entry.id !== "owned").length,
     );
     await expect(atlas.locator(".cp-atlas__pending")).toHaveCount(1);
+    await expect(atlas).not.toContainText(/not yet published|first release/i);
+    // Neither states a row count, a span or a version: the cells are empty
+    // rather than holding a placeholder.
+    for (const name of ["PLOT", "Foundation & Corporate Giving"]) {
+      const row = atlas.getByTestId("atlas-row").filter({ has: page.getByRole("button", { name, exact: true }) });
+      await expect(row.getByTestId("atlas-rows")).toHaveText("");
+      await expect(row.locator("td").nth(1)).toHaveText("");
+      await expect(row.locator("td").nth(3)).toHaveText("");
+    }
     await expect(page.locator(".cp-ex__pages")).toHaveCount(0);
 
     await atlas.getByRole("button", { name: "Federal Prime Contracting" }).click();
@@ -860,11 +1067,21 @@ test.describe("Explore the collections", () => {
     expect(errors).toEqual([]);
   });
 
-  test("the Cedar Grove fragment reaches the compact workspace handoff", async ({ page }) => {
+  // Owner, 2026-09-27: the viewer page carries no Cedar Grove line under the
+  // table, and on a wide window the frame runs the full width.
+  test("the viewer runs full width with no Cedar Grove line under it", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop", "a wide-window question");
     const errors = watchConsole(page);
+    await page.setViewportSize({ width: 1680, height: 900 });
     await signIn(page);
-    await page.goto("/data#grove");
-    await expect(page.locator("#grove")).toBeInViewport({ timeout: 10_000 });
+    await page.goto("/data");
+    const frame = page.locator(".cp-ex__frame");
+    await expect(frame).toBeVisible({ timeout: 10_000 });
+    const box = await frame.boundingBox();
+    expect(box.x).toBeLessThanOrEqual(1);
+    expect(box.x + box.width).toBeGreaterThanOrEqual(1680 - 20);
+    await expect(page.locator("#grove")).toHaveCount(0);
+    await expect(page.getByText("brings these collections into a shared workspace")).toHaveCount(0);
     expect(errors).toEqual([]);
   });
 });
@@ -885,12 +1102,17 @@ test.describe("the table's default columns", () => {
     await page.goto("/data?c=contractors");
     await page.locator(".cp-ex__table thead th").first().waitFor();
     const heads = await page.locator(".cp-ex__table thead th").allInnerTexts();
-    // The declared seven, plus the pinned uid and the row opener.
-    expect(heads.length).toBeLessThanOrEqual(10);
+    // The declared seven, plus the pinned uid, the row opener and the source
+    // link. Prime Contracting carries no source column: its link is built
+    // from the award key, and the table shows it as the record page does
+    // (recordColumns.js columnPlan, 2026-09-27).
+    expect(heads.length).toBeLessThanOrEqual(11);
     const text = heads.join(" | ").toUpperCase();
-    for (const wanted of ["NATIVE ENTITY", "ACTION DATE", "AWARDEE", "FUNDING AGENCY", "DESCRIPTION", "AMOUNT"]) {
+    for (const wanted of ["NATIVE ENTITY", "ACTION DATE", "AWARDEE", "FUNDING AGENCY", "DESCRIPTION", "AMOUNT", "SOURCE RECORD"]) {
       expect(text).toContain(wanted);
     }
+    // The built link is the originating award, the same one the record opens.
+    await expect(page.locator('.cp-ex__table tbody a[href^="https://www.usaspending.gov/award/"]').first()).toBeVisible();
     // The raw keys stay in the open record, where the reviewer asked for them.
     for (const raw of ["TRANSACTION ID", "AWARDEE UEI", "PRODUCT OR SERVICE CODE", "RECIPIENT COUNTY FIPS"]) {
       expect(text).not.toContain(raw);
@@ -1077,10 +1299,22 @@ test.describe("About this collection", () => {
     // The unit of observation, in the codebook's own words: the sentence
     // anyone about to cite a count needs and the old disclosure never had.
     await expect(panel).toContainText("One row is");
+    // Immediately after what it holds: the questions its fields can answer,
+    // read from COLLECTION_JOBS rather than typed into the page.
+    const asks = panel.locator(".cp-ab__block", { has: page.getByRole("heading", { name: "Questions this collection can help answer" }) });
+    await expect(asks).toBeVisible();
+    await expect(asks.locator("li")).toHaveText(collectionQuestions("contractors").map((item) => item.q));
+    const order = await panel.locator(".cp-ab__h").allInnerTexts();
+    expect(order.indexOf("Questions this collection can help answer")).toBe(order.indexOf("What is in this collection") + 1);
     const notes = panel.locator(".cp-ab__more");
     await expect(notes.getByText("Read the full collection notes")).toBeVisible();
     await notes.getByText("Read the full collection notes").click();
     await expect(panel.getByRole("heading", { name: "What is not in it" })).toBeVisible();
+    // The release's tables by name, not by file name (2026-09-27).
+    const tables = await panel.locator(".cp-ab__tables li").allInnerTexts();
+    expect(tables.length).toBeGreaterThan(1);
+    expect(tables).toContain("Prime contracts");
+    for (const name of tables) expect(name).not.toMatch(/\.csv$|_/);
 
     // Closing returns the reader to the cut they opened it from.
     await panel.getByRole("button", { name: /close the collection profile/i }).click();
@@ -1091,30 +1325,529 @@ test.describe("About this collection", () => {
   });
 });
 
-test.describe("the door's twelve", () => {
-  // A visitor deciding whether to subscribe should be able to see what the
-  // twelve are and what each holds without signing in. The product frame's
-  // rail has always been clickable, but the frame renders at about 0.63
-  // scale: seventeen-pixel rows in six-point type.
-  test("the pre-login page previews all twelve and drives the frame", async ({ page }, testInfo) => {
+test.describe("the use cases drive the viewer", () => {
+  // The door's collection shelf was replaced by the use-case band
+  // (owner, 2026-09-26). The shelf existed because the frame's rail renders at
+  // about 0.63 scale, seventeen-pixel rows in six-point type; the band's chips
+  // do its job now, and these hold them to everything the shelf's test held
+  // it to: every collection reachable, the plan split visible, the selected
+  // description shown, the address round-tripping.
+  const chips = (page) => page.locator(".cp-aud__panel.is-on .cp-aud__col");
+
+  test("pointing previews, a click commits, and the address round-trips", async ({ page }, testInfo) => {
     const errors = watchConsole(page);
     await page.goto("/");
-    const tiles = page.locator(".cp-dcol__tile");
-    await tiles.first().waitFor();
-    await expect(tiles).toHaveCount(12);
-    // Grouped by the plan each comes with, which is the question a visitor has.
-    await expect(page.locator(".cp-dcol__tier")).toHaveCount(2);
-    await expect(page.locator(".cp-dcol__shelf").first()).toContainText("See what's happening");
+    await page.locator(".cp-aud").scrollIntoViewIfNeeded();
+    const pane = page.locator(".cp-app__pane");
+    const note = page.locator(".cp-aud__note");
+    const first = STOREFRONT_CATALOG[0];
+    await expect(note).toContainText(first.blurb);
 
+    // The first example cites something other than the collection in hand.
+    const chip = page.locator(`.cp-aud__panel.is-on .cp-aud__col:not([data-collection="${first.id}"])`).first();
+    const id = await chip.getAttribute("data-collection");
+    const entry = STOREFRONT_CATALOG.find((e) => e.id === id);
+    const before = await pane.innerText();
+    if (testInfo.project.name === "desktop") {
+      await chip.hover();
+      // A preview: the frame and the line follow, the address does not.
+      await expect(note).toContainText(entry.blurb);
+      await expect(pane).not.toHaveText(before);
+      expect(new URL(page.url()).searchParams.get("collection")).toBeNull();
+    }
+    await chip.click();
+    await expect(page).toHaveURL(new RegExp(`[?&]collection=${id}(&|$)`));
+    await expect(chip).toHaveAttribute("aria-pressed", "true");
+    await expect(note).toContainText(entry.blurb);
+    await expect(pane).not.toHaveText(before);
+    // A choice inside the band stops it turning.
+    await expect(page.locator(".cp-aud")).toHaveAttribute("data-stopped", "true");
+
+    // The address brings the same collection back. The pointer is moved off
+    // first: left where the chip was, it rests over the hero rail after the
+    // reload, and a rail row under a mouse previews its own collection.
+    if (testInfo.project.name === "desktop") await page.mouse.move(2, 2);
+    await page.goto(`/?collection=${id}`);
+    await expect(page.locator(".cp-aud__note")).toContainText(entry.blurb);
+    expect(errors).toEqual([]);
+  });
+
+  test("a preview is cleared when hover preview switches off under the pointer", async ({ page }, testInfo) => {
+    // PR #131, Codex thread 4113064956: if the preview media flips off (a
+    // narrowed window, a pointer change) while a mouse is on a chip, the
+    // leave that follows was guarded on the *current* media and skipped its
+    // clear, so the frame kept a collection the address does not name.
+    // The fine-pointer query is flipped directly, with no layout change, so
+    // the chip stays under the pointer and nothing else can clear it.
+    test.skip(testInfo.project.name !== "desktop", "hover preview exists on desktop only");
+    await page.addInitScript(() => {
+      const real = window.matchMedia.bind(window);
+      const listeners = new Set();
+      let fine = true;
+      window.__setFinePointer = (on) => {
+        fine = on;
+        for (const fn of listeners) fn({ matches: fine });
+      };
+      window.matchMedia = (query) => {
+        if (!query.includes("pointer: fine")) return real(query);
+        return {
+          get matches() { return fine; },
+          media: query,
+          addEventListener: (_type, fn) => listeners.add(fn),
+          removeEventListener: (_type, fn) => listeners.delete(fn),
+          addListener: (fn) => listeners.add(fn),
+          removeListener: (fn) => listeners.delete(fn),
+        };
+      };
+    });
+    await page.goto("/");
+    await page.locator(".cp-aud").scrollIntoViewIfNeeded();
+    const note = page.locator(".cp-aud__note");
+    const first = STOREFRONT_CATALOG[0];
+    await expect(note).toContainText(first.blurb);
+    const chip = page.locator(`.cp-aud__panel.is-on .cp-aud__col:not([data-collection="${first.id}"])`).first();
+    const id = await chip.getAttribute("data-collection");
+    const entry = STOREFRONT_CATALOG.find((e) => e.id === id);
+    await chip.hover();
+    await expect(note).toContainText(entry.blurb);
+    await page.evaluate(() => window.__setFinePointer(false));
+    const box = await page.locator(".cp-aud").boundingBox();
+    // Inside the band, outside the chip list: the hero rail also sets the
+    // preview on hover, so leaving through it would mask the bug.
+    await page.mouse.move(box.x + 2, box.y + 2);
+    await expect(note).toContainText(first.blurb);
+    expect(new URL(page.url()).searchParams.get("collection")).toBeNull();
+  });
+
+  test("every collection a use case names is reachable through it, at this width", async ({ page }, testInfo) => {
+    // Run on both projects: on the phone (390 wide) this is the answer to "how
+    // does a visitor reach a collection from a use case": pick one in the
+    // scrolling selector, then tap one of its chips. Whether EVERY live
+    // collection is named by some use case is a review report, not a rule
+    // (owner, 2026-09-26): it is attached to this test as an annotation.
+    await page.goto("/");
+    await page.locator(".cp-aud").scrollIntoViewIfNeeded();
+    const reached = new Set();
+    const tabs = page.locator(".cp-aud__tab");
+    const count = await tabs.count();
+    for (let i = 0; i < count; i += 1) {
+      await chooseAudience(page, i);
+      const visible = chips(page);
+      const n = await visible.count();
+      for (let j = 0; j < n; j += 1) {
+        const chip = visible.nth(j);
+        const id = await chip.getAttribute("data-collection");
+        if (reached.has(id)) continue;
+        await chip.click();
+        await expect(page).toHaveURL(new RegExp(`[?&]collection=${id}(&|$)`));
+        reached.add(id);
+      }
+    }
+    const named = new Set(visibleAudiences().flatMap((audience) => audience.collections.map((entry) => entry.id)));
+    expect([...reached].sort()).toEqual([...named].sort());
+    const uncovered = uncoveredIds();
+    testInfo.annotations.push({ type: "coverage report", description: uncovered.length ? `not named by any use case: ${uncovered.join(", ")}` : "every live collection is named by some use case" });
+  });
+
+  test("the plan split is on the chips and in the line under them", async ({ page }) => {
+    await page.goto("/");
+    const all = page.locator(".cp-aud__col");
+    const shelves = await all.evaluateAll((els) => els.map((el) => [el.dataset.shelf, Boolean(el.querySelector(".cp-plus"))]));
+    expect(shelves.length).toBeGreaterThan(0);
+    for (const [shelf, plus] of shelves) expect(plus, `a ${shelf} chip`).toBe(shelf === "pro");
+    const pro = STOREFRONT_CATALOG.find((entry) => entry.shelf === "pro");
+    await page.goto(`/?collection=${pro.id}`);
+    await expect(page.locator(".cp-aud__meta")).toContainText("Cedar Press");
+    await expect(page.locator(".cp-aud__meta .cp-plus")).toHaveCount(1);
+  });
+
+  test("the rotation never changes the collection in hand, and the note follows the card", async ({ page }) => {
+    await page.clock.install();
+    await page.goto("/");
+    await page.locator(".cp-aud").evaluate((el) => el.scrollIntoView({ block: "center", behavior: "instant" }));
+    if (!test.info().project.use.hasTouch) await page.mouse.move(2, 2);
+    // Turning before the clock is advanced: the band starts once it is seen
+    // on screen, which is an observer callback, not a timer.
+    await expect(page.locator(".cp-aud")).toHaveAttribute("data-rotating", "true");
     const pane = page.locator(".cp-app__pane");
     const before = await pane.innerText();
-    const target = tiles.nth(8);
-    if (testInfo.project.name === "desktop") await target.hover(); else await target.tap();
-    // The line under the strip answers whether or not the frame is on screen,
-    // and the frame above follows the same selection.
-    await expect(page.locator(".cp-dcol__note")).not.toContainText(/for what it holds|window above/);
-    await expect(pane).not.toHaveText(before);
+    const url = page.url();
+    await page.clock.runFor(40_000);
+    await expect(page.locator(".cp-aud__count")).not.toHaveText(/^01 \//);
+    // The frame and the address keep the collection in hand...
+    expect(await pane.innerText()).toBe(before);
+    expect(page.url()).toBe(url);
+    // ...and the line under the card describes a collection the card shows.
+    const onCard = await page.locator(".cp-aud__panel.is-on .cp-aud__col").evaluateAll((els) => els.map((el) => el.dataset.collection));
+    expect(onCard).toContain(await page.locator(".cp-aud__note").getAttribute("data-collection"));
+  });
+
+  test("the note never describes a collection the card does not show", async ({ page }) => {
+    await page.goto("/");
+    await page.locator(".cp-aud").evaluate((el) => el.scrollIntoView({ block: "center", behavior: "instant" }));
+    const note = page.locator(".cp-aud__note");
+    const tabs = page.locator(".cp-aud__tab");
+    const count = await tabs.count();
+    for (let i = 0; i < count; i += 1) {
+      await chooseAudience(page, i);
+      const onCard = await page.locator(".cp-aud__panel.is-on .cp-aud__col").evaluateAll((els) => els.map((el) => el.dataset.collection));
+      const described = await note.getAttribute("data-collection");
+      expect(onCard, `use case ${i + 1}`).toContain(described);
+      const entry = STOREFRONT_CATALOG.find((e) => e.id === described);
+      await expect(note).toContainText(entry.blurb);
+    }
+    // A collection picked in the hero frame that this card does not name is
+    // not described under it: the card's first chip is.
+    const last = page.locator(".cp-aud__panel.is-on .cp-aud__col");
+    const shown = await last.evaluateAll((els) => els.map((el) => el.dataset.collection));
+    const elsewhere = STOREFRONT_CATALOG.find((entry) => !shown.includes(entry.id));
+    await page.goto(`/?collection=${elsewhere.id}`);
+    await page.locator(".cp-aud").evaluate((el) => el.scrollIntoView({ block: "center", behavior: "instant" }));
+    await chooseAudience(page, count - 1);
+    await expect(note).toHaveAttribute("data-collection", shown[0]);
+  });
+});
+
+test.describe("the door's use cases", () => {
+  // One audience at a time, under the hero (PressAudienceExample). The rules
+  // are held in milliseconds by pressRotation.test.js; these check that the
+  // built page actually obeys them. The clock is Playwright's, so eight
+  // seconds of rotation cost nothing.
+  const band = (page) => page.locator(".cp-aud");
+  const counter = (page) => page.locator(".cp-aud__count");
+
+  async function reach(page) {
+    // Instant, not the page's smooth scroll: with Playwright's clock installed
+    // a smooth scroll never finishes, and the band never comes on screen.
+    await band(page).evaluate((el) => el.scrollIntoView({ block: "center", behavior: "instant" }));
+    await expect(band(page)).toBeVisible();
+    // Seen, by the band's own observer, before any clock is advanced; under
+    // reduced motion it is seen and still does not turn.
+    await expect.poll(() => band(page).evaluate((el) => el.dataset.rotating === "true" || matchMedia("(prefers-reduced-motion: reduce)").matches)).toBe(true);
+    // Off the band, so a fine pointer is not resting on it and pausing it.
+    if (!test.info().project.use.hasTouch) await page.mouse.move(2, 2);
+  }
+
+  test("shows one example, from the catalog, and never an unreleased collection", async ({ page }) => {
+    const errors = watchConsole(page);
+    await page.goto("/");
+    await reach(page);
+    const shown = await page.locator(".cp-aud__panel").count();
+    await expect(counter(page)).toHaveText(`01 / ${String(shown).padStart(2, "0")}`);
+    await expect(page.locator(".cp-aud__panel.is-on")).toHaveCount(1);
+    await expect(page.locator(".cp-aud__tab")).toHaveCount(shown);
+    // Every collection named in the band is one the strip below sells.
+    const cited = await page.locator(".cp-aud__col").evaluateAll((els) => [...new Set(els.map((el) => el.dataset.collection))]);
+    const sold = new Set(STOREFRONT_CATALOG.map((entry) => entry.id));
+    for (const id of cited) expect(sold.has(id), `${id} is not a live collection`).toBe(true);
+    // Every declared use case, counted from the layer rather than typed:
+    // Foundations and philanthropy and the government audience among them,
+    // and the two newest collections on the chips the owner wrote them into.
+    expect(shown).toBe(AUDIENCE_JOBS.length);
+    await expect(counter(page)).toHaveText(`01 / ${String(AUDIENCE_JOBS.length).padStart(2, "0")}`);
+    for (const id of ["foundations-philanthropy", "government-officials", "advisors"]) {
+      await expect(page.locator(`.cp-aud__panel[data-audience="${id}"]`)).toHaveCount(1);
+    }
+    for (const id of ["plot", "foundation-corporate-giving"]) expect(cited, id).toContain(id);
     expect(errors).toEqual([]);
+  });
+
+  test("it turns slowly, a choice holds it, and it turns again once the visitor is idle", async ({ page }, testInfo) => {
+    await page.clock.install();
+    await page.goto("/");
+    await reach(page);
+    await expect(counter(page)).toHaveText(/^01 \//);
+    await page.clock.runFor(8_100);
+    await expect(counter(page)).toHaveText(/^02 \//);
+
+    if (testInfo.project.name === "desktop") {
+      // Hovered, it holds; released, it carries on.
+      await band(page).hover();
+      await page.clock.runFor(20_000);
+      await expect(counter(page)).toHaveText(/^02 \//);
+      await page.mouse.move(2, 2);
+      await page.clock.runFor(8_100);
+      await expect(counter(page)).toHaveText(/^03 \//);
+    }
+
+    const tab = page.locator(".cp-aud__tab").nth(4);
+    await chooseAudience(page, 4);
+    await expect(tab).toHaveAttribute("aria-selected", "true");
+    await expect(counter(page)).toHaveText(/^05 \//);
+    await expect(band(page)).toHaveAttribute("data-stopped", "true");
+    // Playwright's click is a mouse click on the phone project too, and the
+    // pointer would stay over the band and hold it; a finger leaves nothing
+    // hovering, so the pointer is moved off in both projects.
+    await page.mouse.move(2, 2);
+    await page.evaluate(() => document.activeElement?.blur());
+    // Held while the visitor is still about (under twelve seconds)...
+    await page.clock.runFor(11_000);
+    await expect(counter(page)).toHaveText(/^05 \//);
+    // ...then it turns again, one step at a time.
+    await page.clock.runFor(1_100);
+    await expect(band(page)).toHaveAttribute("data-stopped", "false");
+    await page.clock.runFor(8_100);
+    await expect(counter(page)).toHaveText(/^06 \//);
+  });
+
+  test("under reduced motion it never cycles", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.clock.install();
+    await page.goto("/");
+    await reach(page);
+    await expect(band(page)).toHaveAttribute("data-rotating", "false");
+    await page.clock.runFor(60_000);
+    await expect(counter(page)).toHaveText(/^01 \//);
+    // The controls still work: reduced motion removes the cycling, not the choice.
+    await page.getByRole("button", { name: "Next use case" }).click();
+    await expect(counter(page)).toHaveText(/^02 \//);
+  });
+
+  test("changing the example does not move the page", async ({ page }, testInfo) => {
+    // Above 720 wide. On a phone each card takes its own height (the test
+    // below), so a shorter card does not stand over a block of empty card.
+    test.skip(testInfo.project.name === "phone", "on a phone each card is its own height");
+    await page.goto("/");
+    await reach(page);
+    // Page coordinates, not viewport ones: a click may scroll the window, and
+    // that is not the layout moving.
+    // Layout offsets, not rects: the sections below arrive with a `.cp-fade`
+    // rise, and a transform mid-reveal is not the layout moving.
+    const measure = () => page.evaluate(() => {
+      const top = (sel) => {
+        let y = 0;
+        for (let node = document.querySelector(sel); node; node = node.offsetParent) y += node.offsetTop;
+        return y;
+      };
+      return { height: document.querySelector(".cp-aud").offsetHeight, below: top(".cp-hero3__proof") };
+    });
+    const before = await measure();
+    const total = await page.locator(".cp-aud__panel").count();
+    for (let i = 0; i < total; i += 1) {
+      await page.getByRole("button", { name: "Next use case" }).click();
+      const now = await measure();
+      expect(Math.abs(now.height - before.height), "band height").toBeLessThan(0.5);
+      expect(Math.abs(now.below - before.below), "the band below it").toBeLessThan(0.5);
+    }
+  });
+
+  test("on a phone each card is its own height, with no empty block under the chips", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "phone", "a phone layout");
+    await page.goto("/");
+    await reach(page);
+    const total = await page.locator(".cp-aud__panel").count();
+    for (let i = 0; i < total; i += 1) {
+      await chooseAudience(page, i);
+      const gap = await page.locator(".cp-aud__panel.is-on").evaluate((panel) => {
+        const chips = panel.querySelector(".cp-aud__cols").getBoundingClientRect();
+        return panel.getBoundingClientRect().bottom - chips.bottom;
+      });
+      // The text's own bottom padding, and no more.
+      expect(gap, `use case ${i + 1}`).toBeLessThan(24);
+    }
+  });
+
+  test("audience names are mobile-only and scroll within the page", async ({ page }, testInfo) => {
+    const widths = testInfo.project.name === "desktop" ? [1440, 1040, 721, 720] : [null];
+    for (const width of widths) {
+      if (width) await page.setViewportSize({ width, height: 900 });
+      await page.goto("/");
+      const at = width ?? page.viewportSize().width;
+      const tabs = page.locator(".cp-aud__tabs");
+      if (at > 720) await expect(tabs).toBeHidden();
+      else {
+        await expect(tabs).toBeVisible();
+        const lines = await page.locator(".cp-aud__tab").evaluateAll((items) => new Set(items.map((tab) => Math.round(tab.getBoundingClientRect().top))).size);
+        expect(lines, `at ${at}`).toBe(1);
+        const row = await tabs.evaluate((el) => ({ scroll: el.scrollWidth, client: el.clientWidth, overflow: getComputedStyle(el).overflowX }));
+        expect(row.overflow, `the row scrolls at ${at}`).toBe("auto");
+        expect(row.scroll).toBeGreaterThan(row.client);
+      }
+      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+      expect(overflow, `the page scrolls sideways at ${at}`).toBeLessThanOrEqual(0);
+    }
+  });
+
+  // The government card carries the longest headline the band has. It must
+  // fit its card at every width: nothing clipped, nothing spilling, and on a
+  // phone the card is its own height (the test above checks the gap).
+  test("the longest headline fits its card at every width", async ({ page }, testInfo) => {
+    const widths = testInfo.project.name === "desktop" ? [1440, 1040, 720] : [null];
+    const index = visibleAudiences().findIndex((audience) => audience.id === "government-officials");
+    expect(index).toBeGreaterThanOrEqual(0);
+    for (const width of widths) {
+      if (width) await page.setViewportSize({ width, height: 900 });
+      await page.goto("/");
+      await band(page).evaluate((el) => el.scrollIntoView({ block: "center", behavior: "instant" }));
+      await chooseAudience(page, index);
+      const panel = page.locator('.cp-aud__panel.is-on[data-audience="government-officials"]');
+      await expect(panel).toHaveCount(1);
+      const fit = await panel.evaluate((el) => {
+        const box = el.getBoundingClientRect();
+        const stack = el.closest(".cp-aud__stack").getBoundingClientRect();
+        const parts = [...el.querySelectorAll(".cp-aud__outcome, .cp-aud__use, .cp-aud__cols")].map((node) => ({
+          name: node.className,
+          right: node.getBoundingClientRect().right,
+          bottom: node.getBoundingClientRect().bottom,
+          clipped: node.scrollWidth > node.clientWidth + 1 || node.scrollHeight > node.clientHeight + 1,
+        }));
+        return { right: Math.min(box.right, stack.right), bottom: Math.min(box.bottom, stack.bottom), parts };
+      });
+      for (const part of fit.parts) {
+        expect(part.clipped, `${part.name} is clipped at ${width ?? "phone"}`).toBe(false);
+        expect(part.right, `${part.name} spills right at ${width ?? "phone"}`).toBeLessThanOrEqual(fit.right + 0.5);
+        expect(part.bottom, `${part.name} spills below the card at ${width ?? "phone"}`).toBeLessThanOrEqual(fit.bottom + 0.5);
+      }
+    }
+  });
+
+  test("on a phone the facts keep one line each and the launcher waits past the first screen and the use cases", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "phone", "a phone layout");
+    await page.goto("/");
+    const heights = await page.locator(".cp-hero3__facts li").evaluateAll((items) => items.map((li) => li.getBoundingClientRect().height));
+    const one = Math.min(...heights);
+    for (const h of heights) expect(h).toBeLessThan(one * 1.5);
+    await expect(page.locator(".cp-dc__fab")).toBeHidden();
+    // Nor over the use cases, whose card and note run to the screen's edge.
+    await page.locator(".cp-aud").evaluate((el) => el.scrollIntoView({ block: "center", behavior: "instant" }));
+    await expect(page.locator(".cp-dc__fab")).toBeHidden();
+    // From the navy passage down it is back.
+    await page.locator(".cp-why").evaluate((el) => el.scrollIntoView({ block: "start", behavior: "instant" }));
+    await expect(page.locator(".cp-dc__fab")).toBeVisible();
+  });
+
+  test("the partners are named on the first screen, and each name links to its site", async ({ page }) => {
+    await page.goto("/");
+    const line = page.locator(".cp-hero3__by");
+    await expect(line).toHaveText("Built by Lumecon in partnership with Tribal Business News.");
+    await expect(line.getByRole("link", { name: "Lumecon" })).toHaveAttribute("href", LUMECON_URL);
+    await expect(line.getByRole("link", { name: "Tribal Business News" })).toHaveAttribute("href", TBN_URL);
+    // Teal text is --dteal (#0A7F74), and the door's own `a { color: inherit }`
+    // must not win over it.
+    await expect(line.getByRole("link", { name: "Lumecon" })).toHaveCSS("color", "rgb(10, 127, 116)");
+  });
+
+  // THE PREVIEW LOGIN. The named reviewer at Indian Country Media signs in to
+  // the standalone preview through this door's "Log in" tab, with an account
+  // the deploy provisions from a repository secret (pressDemoGate.test.js
+  // holds that wiring). This is the same path with the suite's own Cedar
+  // Press account, after the band was added above the strip: the door still
+  // opens the form and the form still lets the reviewer in.
+  test("the preview login still signs a Cedar Press reader in through the door", async ({ page }) => {
+    const errors = watchConsole(page);
+    await page.goto("/");
+    await expect(band(page)).toHaveCount(1);
+    await signIn(page, PRESS_ACCOUNT);
+    await expect(page.locator(".cp-aud")).toHaveCount(0);
+    expect(errors).toEqual([]);
+  });
+});
+
+test.describe("the use-case card", () => {
+  // Owner's brief, 2026-09-26, second pass: an outcome as the headline, what
+  // Cedar Press lets the audience understand, the collections as chips, and
+  // a duotone sector photograph as a panel of the card.
+  const band = (page) => page.locator(".cp-aud");
+  const on = (page) => page.locator(".cp-aud__panel.is-on");
+
+  test("leads with the outcome and the job, with no quiet line under it", async ({ page }) => {
+    const errors = watchConsole(page);
+    await page.goto("/");
+    await band(page).evaluate((el) => el.scrollIntoView({ block: "center", behavior: "instant" }));
+    const first = AUDIENCE_JOBS[0];
+    await expect(on(page).locator(".cp-aud__outcome")).toHaveText(first.outcome);
+    await expect(on(page).locator(".cp-aud__job")).toHaveText(first.job);
+    // The quiet line under the band was removed (owner, 2026-09-27).
+    await expect(page.locator(".cp-aud__quiet")).toHaveCount(0);
+    await expect(page.locator("body")).not.toContainText("not rebuilding public data");
+    expect(errors).toEqual([]);
+  });
+
+  test("the photograph is a lazy panel with a responsive source, and it lands", async ({ page }, testInfo) => {
+    await page.goto("/");
+    // Before the band is reached, only the first use case holds a photograph,
+    // and it is lazy: a visitor who never scrolls here downloads none.
+    const imgs = page.locator(".cp-aud__media img");
+    await expect(imgs).toHaveCount(1);
+    await expect(imgs.first()).toHaveAttribute("loading", "lazy");
+    await expect(imgs.first()).toHaveAttribute("srcset", /-sm\.webp 600w, .*\.webp 1200w/);
+    await expect(page.locator(".cp-aud__media source")).toHaveAttribute("srcset", /-wide\.webp \d+w/);
+    await band(page).evaluate((el) => el.scrollIntoView({ block: "center", behavior: "instant" }));
+    const img = on(page).locator(".cp-aud__media img");
+    await expect.poll(() => img.evaluate((el) => el.complete && el.naturalWidth > 0)).toBe(true);
+    // The photograph fills its panel and the panel is the card's own height.
+    // All three boxes in one read: the section's fade-in rise moves the band
+    // between separate reads, which is not the layout.
+    const boxes = () => on(page).evaluate((panel) => {
+      const box = (sel) => { const r = panel.querySelector(sel).getBoundingClientRect(); return { x: r.x, y: r.y, width: r.width, height: r.height }; };
+      return { media: box(".cp-aud__media"), shot: box(".cp-aud__media img"), text: box(".cp-aud__text") };
+    });
+    await page.waitForTimeout(600);
+    const { media, shot, text } = await boxes();
+    expect(Math.abs(media.height - shot.height)).toBeLessThan(1);
+    expect(Math.abs(media.width - shot.width)).toBeLessThan(1);
+    if (testInfo.project.name === "phone") {
+      // A banner on top, at 5:2.
+      expect(Math.abs(media.width / media.height - 2.5)).toBeLessThan(0.05);
+      expect(media.y + media.height).toBeLessThanOrEqual(text.y + 1);
+    } else {
+      // Beside the text, and the side alternates from one use case to the next.
+      expect(media.x + media.width).toBeLessThanOrEqual(text.x + 1);
+      await page.getByRole("button", { name: "Next use case" }).click();
+      await expect.poll(async () => (await boxes()).shot.width).toBeGreaterThan(0);
+      const next = await boxes();
+      expect(next.text.x + next.text.width).toBeLessThanOrEqual(next.media.x + 1);
+    }
+  });
+
+  test("a use case shows the next photograph in its pool on each visit", async ({ page }) => {
+    await page.goto("/");
+    await band(page).evaluate((el) => el.scrollIntoView({ block: "center", behavior: "instant" }));
+    const pool = AUDIENCE_JOBS[0].imagePool;
+    const shown = () => on(page).locator(".cp-aud__media img").getAttribute("data-image");
+    await expect.poll(shown).toBe(pool[0]);
+    await page.getByRole("button", { name: "Next use case" }).click();
+    await page.getByRole("button", { name: "Previous use case" }).click();
+    await expect.poll(shown).toBe(pool[1]);
+  });
+});
+
+test.describe("the product copy reads the jobs layer", () => {
+  test("the signed-in homepage, its briefing, and the entity page's actions", async ({ page }) => {
+    const errors = watchConsole(page);
+    await signIn(page);
+    await expect(page.locator(".cp-hero__deck")).toHaveText(
+      "Compare peers, follow funding and business activity, spot changes worth investigating and trace the evidence behind them.",
+    );
+    const caps = await page.locator(".cp-brief__cap").allInnerTexts();
+    expect(caps.map((c) => c.toLowerCase())).toEqual(expect.arrayContaining(["what changed", "explore the records"]));
+    expect(caps.join(" ")).not.toMatch(/worth watching|open today|insight|opportunit/i);
+
+    await page.goto("/data?c=funding");
+    await page.getByTestId("explore-record").first().locator("a").first().click();
+    await page.waitForURL(/\/record\?/);
+    await page.locator(".cp-rec__name a").first().click();
+    await page.waitForURL(/\/entity\/CE-/);
+    const head = page.getByTestId("entity-head");
+    await expect(head.locator(".cp-ent__line")).toHaveText(ENTITY_JOBS.line);
+    // Only what works today: no dead button for the two that are not built.
+    for (const action of ENTITY_JOBS.actions.filter((a) => !a.available)) {
+      await expect(page.getByRole("link", { name: action.label })).toHaveCount(0);
+      await expect(page.getByRole("button", { name: action.label })).toHaveCount(0);
+    }
+    const overTime = head.locator('[data-action="over-time"]');
+    await expect(overTime).toHaveAttribute("href", /\?e=CE-[^&]+&s=date:asc$/);
+    await overTime.click();
+    await page.waitForURL(/s=date(%3A|:)asc/);
+    await expect(page.getByTestId("explore-record").first()).toBeVisible();
+    expect(errors).toEqual([]);
+  });
+
+  test("Research access shows the owner's two examples, from the layer", async ({ page }) => {
+    await page.goto("/research-access");
+    const fit = page.locator(".cp-fit__side--yes p");
+    await expect(fit).toHaveText(researchExamples().map((example) => example.text));
+    await expect(page.locator(".cp-trh__sub")).toContainText("without rebuilding the underlying collection yourself");
   });
 });
 
@@ -1174,6 +1907,30 @@ test.describe("the record page", () => {
     expect(errors).toEqual([]);
   });
 
+  // THE SOURCE IS THE EVIDENCE, NOT CEDAR'S WORKING FILE (2026-09-27).
+  // A table whose link is built from the row's own identifiers opens the
+  // originating record; the file Cedar read it through is named for what it
+  // is; and a row with no link in a table that has links says so for the row.
+  test("a record links to its originating document and names Cedar's own files as working files", async ({ page }) => {
+    const errors = watchConsole(page);
+    await signIn(page);
+    await page.goto("/record?k=federal-register/fr_ex_parte_party_entity_links&r=2014-09591");
+    await expect(page.getByTestId("record-head")).toBeVisible();
+    await expect(page.getByRole("link", { name: /Open the source record/ })).toHaveAttribute("href", "https://www.federalregister.gov/d/2014-09591");
+    await page.getByTestId("record-more").click();
+    for (const summary of await page.locator(".cp-rec__group summary").all()) await summary.click();
+    const body = await page.locator("main").innerText();
+    expect(body).toContain("Cedar working file");
+    expect(body).not.toContain("ferc_ex_parte_parties.csv");
+    expect(errors).toEqual([]);
+  });
+
+  test("a row with no link in a table that has links says so for the row", async ({ page }) => {
+    await signIn(page);
+    await page.goto("/record?k=lobbying/lobbying_registrant_native_ownership_evidence&r=88052");
+    await expect(page.getByTestId("record-no-link")).toHaveText("No link was recorded for this row.");
+  });
+
   test("a record that is not in the preview says so rather than showing a neighbour", async ({ page }) => {
     await signIn(page);
     await page.goto("/record?k=funding/federal_funding_transactions&r=not-a-real-record");
@@ -1207,7 +1964,19 @@ test.describe("Shape the research", () => {
     const errors = watchConsole(page);
     await signIn(page);
     await page.goto("/priorities");
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("What should Cedar research and build next?");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Help set the research agenda.");
+    // Points inform the agenda and do not decide it, said in the deck itself.
+    await expect(page.locator(".cp-mh__sub")).toContainText("do not decide it");
+    // The owner's examples, visibly examples and not a roadmap, with causal
+    // research questions told apart from descriptive ones.
+    const examples = page.getByTestId("priority-examples");
+    await expect(examples).toContainText("Examples, not a roadmap");
+    await expect(examples.locator(".cp-pri__exkind")).toHaveCount(2);
+    await expect(examples.locator(".cp-pri__exkind").nth(1)).toContainText("Causal");
+    // The narrower asks are smaller than the ambitious ones.
+    const small = await examples.locator(".cp-pri__exsmall li").first().evaluate((el) => parseFloat(getComputedStyle(el).fontSize));
+    const lead = await examples.locator(".cp-pri__exlist li").first().evaluate((el) => parseFloat(getComputedStyle(el).fontSize));
+    expect(small).toBeLessThan(lead);
     await expect(page.getByTestId("priorities-research_question").getByTestId("priority").first()).toBeVisible();
     await expect(page.getByTestId("priorities-dataset").getByTestId("priority").first()).toBeVisible();
     // The influence card carries the "no service" sentence; the note under it
@@ -1458,6 +2227,13 @@ test.describe("house style", () => {
   //      asserting something the source does not say, which is the one thing
   //      the whole identity layer exists to prevent.
   //
+  //   3. "Foundation & Corporate Giving" is a COLLECTION NAME the owner keeps
+  //      with its ampersand (2026-09-27). It is exempted by exact name, not by
+  //      selector: the name is removed from the text before the check, so the
+  //      same line carrying any other ampersand still fails, and a variant
+  //      spelling ("Foundation &amp; Corporate Giving" rendered literally, or
+  //      "Foundations & Corporate Giving") is not exempt.
+  //
   // So the table and the register's name cells are excluded by selector,
   // which keeps the rule enforceable as new names arrive rather than needing
   // a string added here every time one does.
@@ -1465,6 +2241,15 @@ test.describe("house style", () => {
   // draws as a table. Missing it was the whole reason this test failed on the
   // phone project and passed on desktop, which is a useful reminder that
   // "visible copy" is per-composition, not per-page.
+  /**
+   * The one collection name allowed its ampersand (exemption 3 above). The
+   * only tolerance is whitespace after the ampersand, because the Methods
+   * ring sets a long name on two SVG lines ("Foundation &" / "Corporate
+   * Giving") and the text of two <tspan>s joins with no space between them.
+   */
+  // S&P is a company's legal name (the ratings source on the door's banner).
+  const AMPERSAND_EXEMPT = /Foundation &\s*Corporate Giving|\bS&P\b/g;
+
   const QUOTED = [
     ".cp-ex__table",
     ".cp-ex__cards",
@@ -1498,7 +2283,7 @@ test.describe("house style", () => {
       }, QUOTED);
       const offending = text
         .split("\n")
-        .map((line) => line.trim())
+        .map((line) => line.trim().replaceAll(AMPERSAND_EXEMPT, ""))
         .filter((line) => line.includes("&"));
       expect(offending, `ampersand in visible copy on ${path}`).toEqual([]);
     });
@@ -1561,6 +2346,74 @@ test.describe("the bundle", () => {
     // no account configured at all, which proves nothing about the digest.
     expect(digestSeen, "the configured digest is not in the build").toBe(true);
   });
+
+  // Foundation & Corporate Giving and PLOT are published and live (owner,
+  // 2026-09-27): no page, prerendered route, SEO text or door answer in the
+  // build calls anything "not yet published", or waits on a first release.
+  test("says nothing is not yet published", async () => {
+    const dir = fileURLToPath(new URL("../dist-site/", import.meta.url));
+    const assets = await readdir(dir, { recursive: true, withFileTypes: true });
+    const files = assets.filter((entry) => entry.isFile() && /\.(js|html|json|xml|txt)$/.test(entry.name));
+    expect(files.length, "nothing was built to check").toBeGreaterThan(0);
+    for (const entry of files) {
+      const body = await readFile(`${entry.parentPath}/${entry.name}`, "utf8");
+      expect(body, `${entry.name} says "not yet published"`).not.toMatch(/not yet published/i);
+      expect(body, `${entry.name} waits on a first release`).not.toMatch(/with (its|their) first release/i);
+    }
+  });
+
+  // BOTH NEW COLLECTIONS ARE IN THE BUILD.
+  //
+  // Foundation & Corporate Giving and PLOT were held out of the bundle while
+  // they were gated: this test used to prove every string about them was
+  // ABSENT from dist-site. The owner made them part of Cedar Press on
+  // 2026-09-27, so the proof runs the other way: their ids, names, owner
+  // descriptions, profile questions, the owner's use-case sentences that
+  // name them and the path data of both marks must all be PRESENT in what
+  // the production build emitted. A collection that renders on a developer's
+  // machine and is missing from the build fails here.
+  test("carries both new collections, their questions, sentences and marks", async () => {
+    const dir = fileURLToPath(new URL("../dist-site/", import.meta.url));
+    const assets = await readdir(dir, { recursive: true, withFileTypes: true });
+    const files = assets.filter((entry) => entry.isFile() && /\.(js|css|html|json|map|xml|txt)$/.test(entry.name));
+    expect(files.length, "nothing was built to check").toBeGreaterThan(0);
+    const bodies = await Promise.all(files.map((entry) => readFile(`${entry.parentPath}/${entry.name}`, "utf8")));
+    const build = bodies.join("\n");
+
+    const ids = ["plot", "foundation-corporate-giving"];
+    const needles = [];
+    for (const id of ids) {
+      const entry = STOREFRONT_CATALOG.find((item) => item.id === id);
+      expect(entry, `${id} is not in the catalog`).toBeTruthy();
+      needles.push(id, entry.name, entry.short, entry.blurb, entry.linkage);
+      const questions = collectionQuestions(id);
+      expect(questions.length, `${id} has no questions`).toBeGreaterThanOrEqual(2);
+      needles.push(...questions.map((item) => item.q));
+    }
+    const citing = AUDIENCE_JOBS.filter((audience) => audience.collections.some((id) => ids.includes(id)));
+    expect(citing.map((audience) => audience.id).sort()).toEqual(
+      ["ancs-nhos", "banks-lenders", "economic-development", "foundations-philanthropy", "journalists", "native-nonprofits"],
+    );
+    for (const audience of citing) needles.push(audience.explanation);
+    needles.push("Foundations and philanthropy");
+    // The marks, read from the family file so the list cannot drift from it.
+    const icons = await readFile(new URL("../src/pages/grove/pressCollectionIcons.jsx", import.meta.url), "utf8");
+    for (const name of ["GivingIcon", "PlotIcon"]) {
+      const start = icons.indexOf(`const ${name} = (`);
+      expect(start, `${name} is not in the family`).toBeGreaterThanOrEqual(0);
+      const body = icons.slice(start, icons.indexOf(");", start));
+      const paths = [...body.matchAll(/\bd="([^"]+)"/g)].map((m) => m[1]);
+      expect(paths.length, `${name}'s path data`).toBeGreaterThanOrEqual(2);
+      needles.push(...paths);
+    }
+
+    // A strict string search, whole needle, so a partial string cannot pass
+    // for the whole description. JSX-escaped ampersands are compared both
+    // ways, since the minifier may keep either spelling.
+    const missing = needles.filter((needle) => !build.includes(needle) && !build.includes(needle.replaceAll("&", "\\u0026")));
+    expect(needles.length, "nothing to search for: the proof would pass vacuously").toBeGreaterThan(20);
+    expect(missing, "new-collection material missing from the build").toEqual([]);
+  });
 });
 
 test.describe("crawlers", () => {
@@ -1611,17 +2464,18 @@ test.describe("crawlers", () => {
     });
   }
 
-  test("the door names all twelve collections in the HTML a crawler fetches", async ({ request }) => {
-    // The strip is what a visitor uses to preview what they get, and it is
-    // also the only place the door spells the twelve out at readable size.
-    // Prerendered, so it is text in the document rather than something that
-    // appears after a script runs; a crawler and a reader with JS off both
-    // get the list.
+  test("the door names all fourteen collections in the HTML a crawler fetches", async ({ request }) => {
+    // The viewer's rail and the use cases' chips (every example is in the
+    // document, one shown at a time) spell the collections out. Prerendered,
+    // so it is text in the document rather than something that appears after
+    // a script runs; a crawler and a reader with JS off both get the list.
     const body = await (await request.get("/")).text();
     const names = STOREFRONT_NAMES;
-    expect(names).toHaveLength(12);
-    for (const name of names) expect(body).toContain(name);
-    expect(body).toContain("Twelve collections");
+    expect(names).toHaveLength(14);
+    // The HTML escapes the one ampersand a collection name carries.
+    for (const name of names) expect(body.includes(name) || body.includes(name.replaceAll("&", "&amp;")), name).toBe(true);
+    // The count is the hero's own fact line, read from the catalog.
+    expect(body).toMatch(new RegExp(`<b[^>]*>${names.length}</b> collections`));
   });
 
   test("a page behind the gate is not offered to crawlers", async ({ request }) => {
@@ -1742,7 +2596,7 @@ test.describe("Methods", () => {
           })),
         };
       });
-      expect(boxes.nodes.length).toBe(12);
+      expect(boxes.nodes.length).toBe(STOREFRONT_CATALOG.length);
       const GAP = 8;
       for (const node of boxes.nodes) {
         const apart =
@@ -1827,14 +2681,14 @@ test.describe("Methods", () => {
     expect(boxes.svg.bottom).toBeLessThanOrEqual(boxes.text.top);
   });
 
-  test("the twelve marks index the collections, and one profile opens beneath", async ({ page }) => {
+  test("the fourteen marks index the collections, and one profile opens beneath", async ({ page }) => {
     const errors = watchConsole(page);
     await page.goto("/methods");
-    // The section was twelve stacked accordions; it is the twelve marks now,
-    // and the count is the catalog's, so a collection cannot go missing here
+    // The section was twelve stacked accordions; it is the marks now, and
+    // the count is the catalog's, so a collection cannot go missing here
     // without going missing from the shelf too.
     const tiles = page.locator(".cp-mbc__tile");
-    await expect(tiles).toHaveCount(12);
+    await expect(tiles).toHaveCount(STOREFRONT_CATALOG.length);
     await expect(page.locator("#mbc-panel")).toBeVisible();
     const first = await page.locator(".cp-mbc__name").innerText();
     await tiles.nth(5).click();
@@ -2055,6 +2909,77 @@ test.describe("the loop between the records and the journalism", () => {
     expect(errors).toEqual([]);
   });
 
+  // The index is a menu of square cards (owner, 2026-09-27), one per brief,
+  // each picture in its piece's own wash, and every card opens the brief.
+  test("Research Briefs lists every brief as a square card in its own tone", async ({ page }) => {
+    const errors = watchConsole(page);
+    await signIn(page);
+    await page.goto("/articles");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Research Briefs.");
+    const cards = page.locator(".cp-briefgrid .cp-art--square");
+    expect(await cards.count()).toBeGreaterThanOrEqual(4);
+    const tones = await page.locator(".cp-briefgrid img.cp-art__img").evaluateAll((imgs) =>
+      imgs.map((img) => getComputedStyle(img).filter),
+    );
+    expect(new Set(tones).size).toBeGreaterThan(1);
+    await cards.filter({ hasText: "Federal contracting to Native" }).click();
+    await expect(page).toHaveURL(/\/articles\/brief-contractors/);
+    await expect(page.getByRole("link", { name: /All Research Briefs/ })).toBeVisible();
+    expect(errors).toEqual([]);
+  });
+
+  // A research brief opens on what it is (owner, 2026-09-27): title,
+  // authors and picture first, then its key facts and the collections it
+  // used, each one open to this reader; and its figures sit in the text,
+  // two or three to a piece, rather than one lifted to lead the page.
+  test("a research brief opens on its title, authors, picture, highlights and collections", async ({ page }) => {
+    const errors = watchConsole(page);
+    await signIn(page);
+    await page.goto("/articles/brief-deals");
+    const hero = page.locator(".cp-ar__hero");
+    await expect(hero.getByRole("heading", { level: 1 })).toContainText("Announced deals");
+    await expect(hero.locator(".cp-ar__by")).toContainText("Cedar Press research desk");
+    await expect(hero.locator("img.cp-ar__heroart")).toBeVisible();
+    // Three headlines from the piece, in the band's top right.
+    await expect(hero.locator(".cp-ar__highlights li")).toHaveCount(3);
+    // The rest of the research, as cards down the rail.
+    expect(await page.locator(".cp-ar__related .cp-ar__rel").count()).toBeGreaterThanOrEqual(2);
+    const uses = page.locator(".cp-ar__uses .cp-ar__use");
+    await expect(uses.first()).toContainText("Deals");
+    expect(await page.locator(".cp-ar__body .cp-ar__fig").count()).toBeGreaterThanOrEqual(2);
+    await expect(page.locator(".cp-ar__fig--lead")).toHaveCount(0);
+    await expect(page.locator(".cp-ar__quote")).toHaveCount(1);
+    // Example sponsor units, labelled as examples, beside the one invitation.
+    expect(await page.locator(".cp-ad--example").count()).toBeGreaterThanOrEqual(2);
+    await expect(page.locator(".cp-ad--example .cp-ad__cap").first()).toHaveText("Sponsored · Example");
+    await uses.first().getByRole("link", { name: /Open the data/ }).click();
+    await expect(page).toHaveURL(/\/data\?c=deals/);
+    expect(errors).toEqual([]);
+  });
+
+  // Share (owner, 2026-09-27): the brief as a PDF, with its figures and the
+  // way to Cedar Press+, to pass around.
+  test("a research brief downloads as a PDF with its figures", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop", "one download is enough");
+    const errors = watchConsole(page);
+    await signIn(page);
+    await page.goto("/articles/brief-contractors");
+    const share = page.getByRole("group", { name: "Share this brief" });
+    await expect(share.getByRole("button", { name: "Email this brief" })).toBeVisible();
+    const [download] = await Promise.all([
+      page.waitForEvent("download"),
+      share.getByRole("button", { name: "Download PDF" }).click(),
+    ]);
+    expect(download.suggestedFilename()).toMatch(/^federal-contracting-to-native-entities.*\.pdf$/);
+    const bytes = await (await download.createReadStream()).toArray().then((c) => Buffer.concat(c));
+    expect(bytes.subarray(0, 5).toString()).toBe("%PDF-");
+    // Two charts and the lead picture: a figure that failed to rasterize
+    // would leave the file small.
+    expect(bytes.length).toBeGreaterThan(60_000);
+    expect(bytes.toString("latin1")).toContain("tribalbusinessnews.com/subscribe");
+    expect(errors).toEqual([]);
+  });
+
   // The third way in: an entity's profile reads ten sample rows per table,
   // and each collection heading on it opens the release itself — carrying
   // BOTH the collection and the entity, so it lands narrowed to what the
@@ -2160,6 +3085,39 @@ test.describe("dead ends", () => {
   });
 });
 
+test.describe("Settings: your work", () => {
+  // The offered answers are the landing audiences: same set, same order,
+  // same labels (readerWork.js reads them from pressJobs.js). A preserved
+  // stored answer is shown under the government audience with its level, to
+  // its holder only, and its stored value is never rewritten.
+  const OFFERED = visibleAudiences().map((audience) => audience.audience);
+
+  test("offers the landing audiences, in order, as the landing names them", async ({ page }) => {
+    await page.goto("/");
+    const landing = await page.locator(".cp-aud__tab").allTextContents();
+    expect(landing).toEqual(OFFERED);
+    await signIn(page);
+    await page.goto("/settings");
+    await expect(page.locator("#cp-work option")).toHaveText(["Rather not say", ...landing]);
+    await expect(page.locator("#cp-work option", { hasText: "Consultants and advisors" })).toHaveAttribute("value", "advisor");
+    await expect(page.locator("#cp-work option", { hasText: /^Government and public agency officials$/ })).toHaveAttribute("value", "government");
+  });
+
+  for (const [id, level] of [["federal", "federal"], ["state_local", "state or local"]]) {
+    test(`keeps a stored ${id} answer under the government audience, unchanged`, async ({ page }) => {
+      await signIn(page);
+      await page.evaluate((value) => localStorage.setItem("cedar-press-work", value), id);
+      await page.goto("/settings");
+      const select = page.locator("#cp-work");
+      await expect(select).toHaveValue(id);
+      const at = OFFERED.indexOf("Government and public agency officials");
+      const expected = ["Rather not say", ...OFFERED.slice(0, at + 1), `Government and public agency officials (${level})`, ...OFFERED.slice(at + 1)];
+      await expect(select.locator("option")).toHaveText(expected);
+      expect(await page.evaluate(() => localStorage.getItem("cedar-press-work"))).toBe(id);
+    });
+  }
+});
+
 /* ── Interaction: arrival, response, state ─────────────────────────────────
  * The motion contract is docs/DESIGN_SYSTEM.md, "Motion". These measure it
  * in a browser: the twelve arrive in order once they are scrolled to and
@@ -2206,124 +3164,65 @@ const settledDeep = (el) =>
 /** The one curve, as Chromium serialises it. */
 const THE_CURVE = "cubic-bezier(0.22, 1, 0.36, 1)";
 
-/**
- * A window where the twelve are a reveal. Measured on the built door: at
- * 1280x720, 1366x768, 1536x864, 1440x900 and 1920x1080 the strip's top sits
- * at 0.77 to 1.01 of the window height — inside the hook's first-screen
- * slack (1.1), so it is revealed with the page, untransitioned, and the
- * stagger does not apply. That is the hook's rule, not a defect. At 1024x768
- * the strip is at 2.0 window heights and on a phone at 3.6, and there the
- * stagger is what a reader sees. The phone project keeps its own viewport.
+/*
+ * The door's collection shelf, and its staggered arrival, were replaced by the
+ * use-case band on 2026-09-26. Its chips carry the tiles' response contract:
+ * a 2px lift on the curve for a fine pointer or keyboard focus, immediate
+ * under reduced motion, nothing for a finger.
  */
-async function whereTheTwelveAreAReveal(page, testInfo) {
-  if (testInfo.project.name === "desktop") await page.setViewportSize({ width: 1024, height: 768 });
-}
+const settledBand = async (page) => {
+  const band = page.locator(".cp-aud");
+  await band.scrollIntoViewIfNeeded();
+  await expect(band).toHaveClass(/\bis-in\b/);
+  await band.evaluate(settledDeep);
+  return page.locator(".cp-aud__panel.is-on .cp-aud__col");
+};
 
-test.describe("the door's twelve arrive and respond", () => {
-  test("the tiles arrive in order once the strip is scrolled to, and settle", async ({ page }, testInfo) => {
-    const errors = watchConsole(page);
-    await whereTheTwelveAreAReveal(page, testInfo);
-    await page.goto("/");
-    const strip = page.locator(".cp-dcol");
-    await page.locator(".cp-dcol__tile").first().waitFor();
-    await page.evaluate(() => document.fonts.ready);
-    // Below the fold on arrival, so this is a reveal and not the first
-    // screen. The hook marks anything on the first screen `cp-fade--now`
-    // and the stagger does not apply there, by design.
-    const top = await strip.evaluate((el) => el.getBoundingClientRect().top / window.innerHeight);
-    expect(top, "the strip sits below the fold on arrival").toBeGreaterThan(1.1);
-    await expect(strip).not.toHaveClass(/is-in/);
-    expect(await strip.evaluate((el) => getComputedStyle(el).opacity)).toBe("0");
-
-    await strip.scrollIntoViewIfNeeded();
-    await expect(strip).toHaveClass(/\bis-in\b/);
-    await expect(strip).not.toHaveClass(/cp-fade--now/);
-
-    // Each shelf's six run left to right on their own beats.
-    const delays = await page.locator(".cp-dcol__grid").evaluateAll((grids) =>
-      grids.map((grid) => [...grid.children].map((li) => ({
-        name: getComputedStyle(li).animationName,
-        delay: parseFloat(getComputedStyle(li).animationDelay),
-      }))));
-    expect(delays).toHaveLength(2);
-    for (const shelf of delays) {
-      expect(shelf.map((t) => t.name)).toEqual(Array(shelf.length).fill("cp-tile-in"));
-      shelf.forEach((t, i) => expect(t.delay).toBeCloseTo(i * 0.045, 3));
-    }
-
-    // And then they are simply there: opaque, untransformed, nothing running.
-    await strip.evaluate(settledDeep);
-    const rest = await page.locator(".cp-dcol__grid > li").evaluateAll((items) =>
-      items.map((li) => [getComputedStyle(li).opacity, getComputedStyle(li).transform]));
-    expect(rest).toEqual(Array(12).fill(["1", "none"]));
-    expect(errors).toEqual([]);
-  });
-
-  test("a tile lifts under a fine pointer on the site's curve, and the shelf in hand says so", async ({ page }, testInfo) => {
+test.describe("the use-case chips respond", () => {
+  test("a chip lifts under a fine pointer on the site's curve, and keyboard focus lifts it too", async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== "desktop", "a fine pointer");
     await page.goto("/");
-    const tiles = page.locator(".cp-dcol__tile");
-    await tiles.first().waitFor();
-    const strip = page.locator(".cp-dcol");
-    await strip.scrollIntoViewIfNeeded();
-    await strip.evaluate(settledDeep);
+    const chips = await settledBand(page);
+    const chip = chips.nth(1);
+    expect((await chip.evaluate(readMotion)).transform, "rests untransformed").toBe("none");
 
-    const tile = tiles.nth(7); // second shelf
-    const shelves = page.locator(".cp-dcol__shelf");
-    expect((await tile.evaluate(readMotion)).transform, "rests untransformed").toBe("none");
-    await expect(shelves.nth(1)).not.toHaveClass(/is-active/);
-
-    await tile.hover();
-    // -2px on the curve; the transition is 180ms, so any later sample has landed.
+    await chip.hover();
     await expect
-      .poll(async () => (await tile.evaluate(readMotion)).translateY, { message: "the tile lifts" })
+      .poll(async () => (await chip.evaluate(readMotion)).translateY, { message: "the chip lifts" })
       .toBeLessThanOrEqual(-1.5);
-    const lifted = await tile.evaluate(readMotion);
+    const lifted = await chip.evaluate(readMotion);
     expect(lifted.translateY).toBeGreaterThanOrEqual(-2.5);
     expect(lifted.shadow, "a soft shadow under the lift").not.toBe("none");
-    // One curve per transitioned property, and nothing else in the list.
     expect(lifted.timing.replaceAll(THE_CURVE, "").replace(/[, ]/g, ""), `on ${THE_CURVE}, got ${lifted.timing}`).toBe("");
-    // The shelf the pointed collection sits on takes the accent; the other does not.
-    await expect(shelves.nth(1)).toHaveClass(/is-active/);
-    await expect(shelves.nth(0)).not.toHaveClass(/is-active/);
 
-    // Leave: the pointer moves to a different empty spot on every sample.
     let nudge = 0;
     await expect
       .poll(async () => {
         nudge = (nudge + 1) % 4;
         await page.mouse.move(2 + nudge, 2 + nudge);
-        return (await tile.evaluate(readMotion)).transform;
+        return (await chip.evaluate(readMotion)).transform;
       }, { message: "settles back on leave", timeout: 8000 })
       .toBe("none");
 
-    // Keyboard focus lifts the same way.
-    await tiles.nth(2).focus();
+    await chips.nth(2).focus();
     await expect
-      .poll(async () => (await tiles.nth(2).evaluate(readMotion)).translateY, { message: "focus lifts" })
+      .poll(async () => (await chips.nth(2).evaluate(readMotion)).translateY, { message: "focus lifts" })
       .toBeLessThanOrEqual(-1.5);
-    await expect(shelves.nth(0)).toHaveClass(/is-active/);
   });
 
-  test("reduced motion: the twelve are simply there, and a lift is immediate", async ({ page }, testInfo) => {
-    await whereTheTwelveAreAReveal(page, testInfo);
+  test("reduced motion: the example is simply there, and a lift is immediate", async ({ page }, testInfo) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/");
-    const strip = page.locator(".cp-dcol");
-    await page.locator(".cp-dcol__tile").first().waitFor();
-    await strip.scrollIntoViewIfNeeded();
-    await expect(strip).toHaveClass(/\bis-in\b/);
-    const items = await page.locator(".cp-dcol__grid > li").evaluateAll((list) =>
-      list.map((li) => [getComputedStyle(li).animationName, getComputedStyle(li).opacity, getComputedStyle(li).transform]));
-    expect(items).toEqual(Array(12).fill(["none", "1", "none"]));
+    const chips = await settledBand(page);
+    const panel = page.locator(".cp-aud__panel.is-on");
+    for (const duration of (await panel.evaluate(readMotion)).transition.match(/[\d.e-]+(?=s)/g)) {
+      expect(Number(duration)).toBeLessThanOrEqual(0.001);
+    }
     if (testInfo.project.name !== "desktop") return;
-    const tile = page.locator(".cp-dcol__tile").nth(3);
-    await tile.hover();
-    // Response kept, travel dropped: raised on the next read, no transition.
-    const lifted = await tile.evaluate(readMotion);
+    const chip = chips.nth(0);
+    await chip.hover();
+    const lifted = await chip.evaluate(readMotion);
     expect(lifted.transform).toBe("matrix(1, 0, 0, 1, 0, -2)");
-    // The stylesheet says `transition: none`; the app's global reduced-motion
-    // rule floors durations at a microsecond, so Chromium reports 1e-06s.
     for (const duration of lifted.transition.match(/[\d.e-]+(?=s)/g)) expect(Number(duration)).toBeLessThanOrEqual(0.001);
   });
 });
@@ -2331,30 +3230,22 @@ test.describe("the door's twelve arrive and respond", () => {
 test.describe("a finger gets no hover state", () => {
   test.use({ hasTouch: true });
 
-  test("a tapped tile is chosen, never raised", async ({ page }) => {
+  test("a tapped chip is chosen, never raised", async ({ page }) => {
     await page.goto("/");
     const emulated = await page.evaluate(() => matchMedia("(hover: none)").matches);
     test.skip(!emulated, "this engine does not emulate a hoverless pointer from hasTouch");
-    const tiles = page.locator(".cp-dcol__tile");
-    await tiles.first().waitFor();
-    await page.locator(".cp-dcol").scrollIntoViewIfNeeded();
-    await page.locator(".cp-dcol").evaluate(settledDeep);
-    const tile = tiles.nth(9);
-    await tile.tap();
-    await expect(tile).toHaveAttribute("aria-pressed", "true");
-    // The tap's own state answers, and the shelf follows it.
-    await expect(tile).toHaveClass(/is-on/);
-    await expect(page.locator(".cp-dcol__shelf").nth(1)).toHaveClass(/is-active/);
-    // A pointer parked over a tile on this screen — what a touch browser
-    // does to the last thing tapped — raises nothing: the lift is written
-    // for `(hover: hover) and (pointer: fine)` and this screen is neither.
-    // `hover()` rather than a second tap, because a tap here does not leave
-    // :hover behind, and a test that cannot reach the rule cannot fail when
-    // the rule is unguarded (checked: with the guard removed, a tap-only
-    // version still passed).
-    await tiles.nth(4).hover();
+    const chips = await settledBand(page);
+    const chip = chips.nth(1);
+    await chip.tap();
+    await expect(chip).toHaveAttribute("aria-pressed", "true");
+    await expect(chip).toHaveClass(/is-on/);
+    // A pointer parked over a chip on this screen raises nothing: the lift is
+    // written for `(hover: hover) and (pointer: fine)`. `hover()` rather than
+    // a second tap, because a tap does not leave :hover behind and could not
+    // reach an unguarded rule.
+    await chips.nth(2).hover();
     await page.waitForTimeout(400);
-    expect((await tiles.nth(4).evaluate(readMotion)).transform, "no lift for a finger").toBe("none");
+    expect((await chips.nth(2).evaluate(readMotion)).transform, "no lift for a finger").toBe("none");
     // The four claims respond to nothing under a finger either.
     const claim = page.locator(".cp-why__item").first();
     await claim.scrollIntoViewIfNeeded();

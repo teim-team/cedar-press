@@ -43,10 +43,11 @@ import { useFadeIn } from "../../features/grove/useFadeIn";
 import { activatePressAccount, validatePressCode } from "../../api";
 import { LAUNCH_COLLECTION, LAUNCH_ROWS_TOTAL } from "../../features/grove/collection";
 import { coverageFrom } from "../../features/grove/pressAccess";
-import { LUMECON_URL, TBN_PLANS_URL, TBN_URL } from "../../features/grove/pressArticles";
+import { LUMECON_TEAM_URL, LUMECON_URL, TBN_PLANS_URL, TBN_URL } from "../../features/grove/pressArticles";
 import { PRESS_TIERS, STOREFRONT_CATALOG, collectionsOnShelf } from "../../features/grove/pressCatalog";
 import { formatUpdated, recentlyUpdated } from "../../features/grove/pressReleases";
-import { SOURCE_REACH_CLAIM, SOURCE_REACH_FIGURE, SOURCE_ROTATION } from "../../features/grove/sourceRotation.js";
+import { SOURCE_REACH_FIGURE, SOURCE_ROTATION_ORDER } from "../../features/grove/sourceRotation.js";
+import { MAINTENANCE } from "../../features/grove/pressMethod.js";
 import {
   PRESS_METHODS_PATH,
   PRESS_REQUEST_PATH,
@@ -78,10 +79,28 @@ import {
 import CollectionPreview from "./PressCollectionPreview";
 import PressCollectionRail from "./PressCollectionRail.jsx";
 import PressDoorCedar from "./PressDoorCedar";
-import PressDoorCollections from "./PressDoorCollections";
+import PressAudienceExample from "./PressAudienceExample";
 import { PressPreviewNotice } from "./PressChrome";
 import { TierName } from "./TierName";
 import PressReleaseSpecimen from "./PressReleaseSpecimen";
+import { useTicker } from "../../features/grove/useTicker";
+
+/** The source list dealt into rows for the navy banner, from the scrambled
+ * order, so no row reads as a list someone could copy in sequence. */
+const SOURCE_ROW_COUNT = 7;
+const SOURCE_ROWS = Array.from({ length: SOURCE_ROW_COUNT }, (_, r) =>
+  SOURCE_ROTATION_ORDER.filter((_, i) => i % SOURCE_ROW_COUNT === r),
+).filter((row) => row.length);
+
+/** A hero figure that ticks to its value once, in view (owner, 2026-09-27).
+ * The year counts back from this year to the earliest record, the others up
+ * from zero. The final value is what is prerendered and what a reader who
+ * prefers reduced motion sees. */
+const formatCount = (n) => n.toLocaleString("en-US");
+function Tick({ value, from = 0, format = String }) {
+  const ref = useTicker(value, { from, format });
+  return <b ref={ref} className="cp-tick">{format(value)}</b>;
+}
 
 /** The brand mark, served from public/. The all-teal mark is the current one. */
 const MARK = "/brand/lumecon-logo-mark-teal.png";
@@ -242,6 +261,32 @@ export default function PressGate({ user }) {
     return () => {
       observer.disconnect();
       document.body.removeAttribute("data-cp-preview-in-view");
+    };
+  }, []);
+  // THE SAME, ON A PHONE, FOR THE FIRST SCREEN AND THE USE CASES. At 390 the
+  // launcher sat on the hero's facts row and, lower down, on the use-case
+  // card's last lines. While either is on screen it stays away (the
+  // stylesheet applies this below 720 only); the door's other ways into
+  // Cedar are a scroll away, and from the navy passage down it is back.
+  const heroCopyRef = useRef(null);
+  useEffect(() => {
+    const nodes = [heroCopyRef.current, document.querySelector(".cp-aud")].filter(Boolean);
+    if (!nodes.length || typeof IntersectionObserver !== "function") return undefined;
+    const showing = new Set();
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) showing.add(entry.target);
+          else showing.delete(entry.target);
+        }
+        document.body.toggleAttribute("data-cp-launcher-away", showing.size > 0);
+      },
+      { threshold: 0 },
+    );
+    for (const node of nodes) observer.observe(node);
+    return () => {
+      observer.disconnect();
+      document.body.removeAttribute("data-cp-launcher-away");
     };
   }, []);
   useEffect(() => {
@@ -523,8 +568,7 @@ export default function PressGate({ user }) {
       {/* ── The hero: the promise, and beside it the product ─────────── */}
       <section className="cp-hero3" aria-label="Cedar Press">
         <div className="cp-hero3__in">
-          <div className="cp-hero3__copy">
-            <p className="cp-kicker cp-fade">Original intelligence collections</p>
+          <div className="cp-hero3__copy" ref={heroCopyRef}>
             {/* Two messages, on purpose: the door sells the asset, the
                 signed-in overview keeps the editorial "Know what's shaping
                 Indian Country." */}
@@ -536,7 +580,15 @@ export default function PressGate({ user }) {
               research, and maintained as Indian Country changes. Every record traces back to the
               document it came from.
             </p>
-            <p className="cp-hero3__reach cp-fade">{SOURCE_REACH_CLAIM}</p>
+            {/* Who made it, on the first screen (owner's brief, 2026-09-26):
+                one restrained line rather than logos, so the product frame
+                stays the proof object. The foot and the navy passage still
+                say what each partner contributes. */}
+            <p className="cp-hero3__by cp-fade">
+              Built by <a href={LUMECON_URL} target="_blank" rel="noreferrer">Lumecon</a> in
+              partnership with{" "}
+              <a href={TBN_URL} target="_blank" rel="noreferrer">Tribal Business News</a>.
+            </p>
             <div className="cp-hero3__cta cp-fade">
               <a className="cp-btn cp-btn--primary cp-btn--lg" href={TBN_PLANS_URL} target="_blank" rel="noreferrer">
                 View plans <span className="cp-btn__arrow" aria-hidden="true">&#8594;</span>
@@ -547,12 +599,6 @@ export default function PressGate({ user }) {
                 </button>
               )}
             </div>
-            <ul className="cp-hero3__facts cp-fade" aria-label="What Cedar Press holds">
-              <li><b>{STOREFRONT_CATALOG.length}</b> collections</li>
-              {LAUNCH_ROWS_TOTAL ? <li><b>{LAUNCH_ROWS_TOTAL.toLocaleString("en-US")}</b> records</li> : null}
-              {EARLIEST_YEAR ? <li>as far back as <b>{EARLIEST_YEAR}</b></li> : null}
-              {recentlyUpdated(1)[0] ? <li>updated <b>{formatUpdated(recentlyUpdated(1)[0].updated)}</b></li> : null}
-            </ul>
           </div>
 
           {/* The product frame. The rail is the twelve collections with
@@ -610,59 +656,36 @@ export default function PressGate({ user }) {
               A live preview: the real viewer, reading the sample records published with
               each collection&rsquo;s current release.
             </figcaption>
+            {/* The summary figures, one line under the caption (owner,
+                2026-09-27), so nothing sits below the hero's button and the
+                use cases start higher. */}
+            <ul className="cp-hero3__facts" aria-label="What Cedar Press holds">
+              <li><Tick value={STOREFRONT_CATALOG.length} /> collections</li>
+              {LAUNCH_ROWS_TOTAL ? <li><Tick value={LAUNCH_ROWS_TOTAL} format={formatCount} /> records</li> : null}
+              {EARLIEST_YEAR ? <li>as far back as <Tick value={EARLIEST_YEAR} from={new Date().getFullYear()} /></li> : null}
+              {recentlyUpdated(1)[0] ? <li>updated <b>{formatUpdated(recentlyUpdated(1)[0].updated)}</b></li> : null}
+            </ul>
           </figure>
 
         </div>
 
-        {/* THE TWELVE, AT A SIZE YOU CAN ACTUALLY POINT AT.
-            Its own band under the hero, full page width. Inside the hero's
-            split it landed in the right-hand column and every tile shrank to
-            one character wide.
-
-            The frame's rail lists all twelve and has always been clickable,
-            but the frame renders the real app at 1280px and scales it to fit,
-            so a rail row is about seventeen pixels tall in six-point type:
-            visible, not pointable. A visitor deciding whether to subscribe
-            should be able to see what the twelve are and what each holds.
-
-            Pointing at one drives the frame above and answers in the line
-            below, so it works whether or not the frame is still on screen. */}
-        <PressDoorCollections
-          selectedId={selectedId}
+        {/* THE SPACE UNDER THE HERO IS HOW THE COLLECTIONS GET USED.
+            This slot held the full-size collection shelf, which was there
+            because the frame renders the real app at 1280px and scales it to
+            fit, so a rail row is about seventeen pixels tall: visible, not
+            pointable. The owner replaced the shelf on 2026-09-26 (it repeated
+            what the viewer already shows) with the use-case band, which keeps
+            the shelf's jobs: its chips preview a collection in the frame on
+            point and commit it on click through the same `pick`, and the
+            selected collection's description sits under it. Whether every live
+            collection is named by some use case is a review report
+            (pressJobs.test.js), not a rule. */}
+        <PressAudienceExample
+          selected={selected}
           onPick={pick}
           onPoint={setSelectedId}
         />
 
-        {/* The provenance band: a rotation of the systems Lumecon sources
-            from (`sourceRotation.js`, owner copy), on a slow run so the
-            breadth reads as breadth rather than as a paragraph nobody
-            finishes. Not the collections' own source list: that is
-            `PRESS_SOURCES`, held to its evidence, which Methods reads.
-
-            The run is duplicated and the track translated by half its width,
-            which is what makes the loop seamless; the copy is aria-hidden so
-            a screen reader hears the list once. Hover or focus stops it, and
-            prefers-reduced-motion turns it into a wrapped list (CSS). */}
-        <aside className="cp-hero3__proof cp-fade" aria-label="Source systems">
-          <div className="cp-hero3__proofhead">
-            <Link className="cp-hero3__prooflabel" to={PRESS_METHODS_PATH}>
-              Sources Lumecon draws on
-            </Link>
-            <span className="cp-hero3__proofcount">
-              {SOURCE_REACH_FIGURE} source websites · {STOREFRONT_CATALOG.length} collections
-            </span>
-          </div>
-          <div className="cp-hero3__marqwrap">
-          <div className="cp-hero3__marquee" style={{ "--run-dur": `${SOURCE_ROTATION.length * 2.4}s` }}>
-            <ul className="cp-hero3__run">
-              {SOURCE_ROTATION.map((label) => <li key={label}>{label}</li>)}
-            </ul>
-            <ul className="cp-hero3__run" aria-hidden="true">
-              {SOURCE_ROTATION.map((label) => <li key={`${label}-echo`}>{label}</li>)}
-            </ul>
-          </div>
-          </div>
-        </aside>
       </section>
 
       {/* ── The passage: why, on navy, with the photograph ────────────── */}
@@ -689,28 +712,83 @@ export default function PressGate({ user }) {
                 A federal contract names the company that won it, a Form 990 names the nonprofit
                 that filed it, and a royalty statement names whoever was paid. None of them says
                 whether those names belong to one nation or three, and no public system keeps
-                track. Lumecon draws on more than 500 source websites to settle that question,
-                giving every organization it can resolve a permanent identifier and keeping it
-                current as organizations rename, merge and change hands. That is how{" "}
-                {LAUNCH_COLLECTION.length} datasets come to answer as one collection.
+                track.
               </p>
-              {/* Owner copy, 2026-09-25. The records say what happened; the
-                  reporting says what it means. No count of relationships is
-                  given because none has been measured. */}
-              <p className="cp-why__lede cp-why__lede--tbn cp-fade">
-                Tribal Business News adds what the records cannot: context from relationships across
-                Indian Country built over years of investigative journalism, so each figure arrives
-                with an understanding of the nations and enterprises behind it.
+              {/* Owner copy, 2026-09-27 (second pass), verbatim: what the
+                  researchers do with public material and what it produces,
+                  then what Tribal Business News adds. The team page stays
+                  linked from "researchers". The closing line naming the
+                  Native Entity Enterprise Dataset as the identity foundation
+                  was dropped on the owner's note: the spine is Lumecon's own
+                  dataset on Native entities. */}
+              <p className="cp-why__lede cp-fade">
+                <a href={LUMECON_URL} target="_blank" rel="noreferrer">Lumecon</a>&rsquo;s{" "}
+                <a href={LUMECON_TEAM_URL} target="_blank" rel="noreferrer">researchers</a> turn
+                material that is public but scattered, difficult to find, or structured for compliance
+                rather than analysis into original datasets. We extract evidence from agency APIs,
+                state and tribal databases, annual reports, filings, regulatory calendars, PDFs, parcel
+                and permit registers, organizational websites, public announcements, and news
+                reporting. We standardize dates and measures, reconcile duplicate events and changing
+                names, and check proposed Native entity links against source evidence with human
+                review. That work creates searchable data no single publisher provides, while
+                preserving the evidence and known limits behind each published record.
+              </p>
+              <p className="cp-why__lede cp-fade">
+                <a href={TBN_URL} target="_blank" rel="noreferrer">Tribal Business News</a> reports
+                on topics no one else covers and has become a trusted partner across Indian Country,
+                including with government agencies. Organizations that want to reach people engaged
+                in the multibillion-dollar Indian Country economy turn to it, and its reporting gives
+                each figure context about the nations and enterprises behind it.
               </p>
             </div>
-            <ul className="cp-why__shelves cp-fade" aria-label="The shelves">
-              {SHELVES.map(({ tier, entries }) => (
-                <li key={tier.id}>
-                  <b><TierName name={tier.name} /></b>
-                  <span>{tier.question} {entries.length} collections.</span>
-                </li>
-              ))}
-            </ul>
+            {/* The source banner sits here (owner, 2026-09-27): the passage
+                is already about how the records are gathered, and this column
+                was empty above the shelves. */}
+            <div className="cp-why__side">
+              <aside className="cp-hero3__proof cp-why__sources cp-fade" aria-label="Source systems">
+                <div className="cp-hero3__proofhead">
+                  <Link className="cp-hero3__prooflabel" to={PRESS_METHODS_PATH}>
+                    Sources Lumecon draws on
+                  </Link>
+                  <span className="cp-hero3__proofcount">
+                    {SOURCE_REACH_FIGURE} documented upstream sources ·{" "}
+                    <span className="cp-nowrap">{STOREFRONT_CATALOG.length} collections</span>
+                  </span>
+                </div>
+                {/* Several runs, alternating direction, so the banner fills
+                    the column rather than one line at its foot. Each run is
+                    duplicated for a seamless loop; the copy is aria-hidden so
+                    a screen reader hears every source once. It does not
+                    pause on hover or focus, and a transparent layer over the
+                    runs keeps the moving text from being selected and copied
+                    (owner, 2026-09-27). */}
+                <div className="cp-why__runs">
+                  {SOURCE_ROWS.map((row, r) => (
+                    <div className="cp-hero3__marqwrap" key={r}>
+                      <div
+                        className={`cp-hero3__marquee${r % 2 ? " cp-hero3__marquee--back" : ""}`}
+                        style={{ "--run-dur": `${row.length * 3.2}s` }}
+                      >
+                        <ul className="cp-hero3__run">
+                          {row.map((label) => <li key={label}>{label}</li>)}
+                        </ul>
+                        <ul className="cp-hero3__run" aria-hidden="true">
+                          {row.map((label) => <li key={`${label}-echo`}>{label}</li>)}
+                        </ul>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </aside>
+              <ul className="cp-why__shelves cp-fade" aria-label="The shelves">
+                {SHELVES.map(({ tier, entries }) => (
+                  <li key={tier.id}>
+                    <b><TierName name={tier.name} /></b>
+                    <span>{tier.question} {entries.length} collections.</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </header>
           <div className="cp-why__photo cp-fade" aria-hidden="true">
             <picture>
@@ -782,7 +860,7 @@ export default function PressGate({ user }) {
               <span className="cp-ways__label">Methods</span>
               <div>
                 <h3>How a collection is built, and how it is kept current.</h3>
-                <p>How records are sourced, resolved to Native entities and maintained: the reference to open before citing a number.</p>
+                <p data-testid="door-maintenance">{MAINTENANCE.sentence} Methods shows how records are sourced and resolved to Native entities: the reference to open before citing a number.</p>
                 <Link className="cp-ways__act" to={PRESS_METHODS_PATH}>How Cedar builds its collections <span aria-hidden="true">&#8594;</span></Link>
               </div>
             </li>

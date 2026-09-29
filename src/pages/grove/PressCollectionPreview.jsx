@@ -25,12 +25,15 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { LAUNCH_COLLECTION } from "../../features/grove/collection";
 import { contractFor, exploreTables, parseCsv, universalRows } from "../../features/grove/explore.js";
 import { columnPlan } from "../../features/grove/recordColumns.js";
+import { tableLabel } from "../../features/grove/readerValues.js";
 import { Cards, Rows } from "./PressRecordTable.jsx";
 import { useNarrow } from "../../features/grove/useNarrow.js";
 import { coverageLabel } from "../../features/grove/pressAccess";
 import { TBN_PLANS_URL } from "../../features/grove/pressArticles";
 import { freshnessLine } from "../../features/grove/pressReleases";
+import { recordStructure } from "../../features/grove/pressRecordStructure.js";
 import { EVENT, track } from "../../features/grove/telemetry.js";
+import { RecordStructureCap, RecordStructureTable } from "./PressRecordStructure.jsx";
 import { TierName } from "./TierName";
 
 /**
@@ -112,6 +115,11 @@ export default function CollectionPreview({ entry, tier, register }) {
   const shownColumns = defaults.length ? defaults : all;
   const rowsLabel = ROWS_LABEL[entry.id];
   const fresh = freshnessLine(entry.id);
+  // Presented by its record structure (Foundation & Corporate Giving, PLOT):
+  // the frame shows what each record holds, where another collection shows
+  // its sample records. No count, span or sample value is stated for it.
+  const structure = recordStructure(entry.id);
+  const coverage = coverageLabel(entry);
   return (
     <div className="cp-pane" data-testid="collection-stage" data-collection={entry.id}>
       <div className="cp-pane__head">
@@ -120,18 +128,25 @@ export default function CollectionPreview({ entry, tier, register }) {
           <h3 className="cp-pane__name"><TierName name={entry.name} /></h3>
         </div>
         <p className="cp-pane__facts">
-          <span>{coverageLabel(entry)}</span>
+          {coverage ? <span>{coverage}</span> : null}
           {rowsLabel ? <span>{rowsLabel}</span> : null}
           {fresh ? <span>{fresh}</span> : null}
         </p>
         <p className="cp-pane__blurb">{entry.blurb}</p>
       </div>
 
-      {status === "ok" && items.length ? (
+      {structure ? (
+        <>
+          <RecordStructureCap collectionId={entry.id} />
+          <div className="cp-pane__records">
+            <RecordStructureTable collectionId={entry.id} name={entry.name} />
+          </div>
+        </>
+      ) : status === "ok" && items.length ? (
         <>
           <p className="cp-pane__tablecap">
             <span>
-              {table.table.replace(/_/g, " ")}
+              {tableLabel(table)}
               {table.flagship ? null : <em> · supporting table</em>}
             </span>
             <span>
@@ -193,7 +208,7 @@ export default function CollectionPreview({ entry, tier, register }) {
 
       {/* No linkage sentence here: the owner took the entity-linkage claim
           off the door on 2026-09-04, and it still lives on /data. */}
-      {status === "ok" && table && !table.flagship ? (
+      {!structure && status === "ok" && table && !table.flagship ? (
         <p className="cp-pane__note">
           This collection&rsquo;s main table ships with the release; its sample is not published
           on the site yet, so the preview shows a supporting table from the same release.

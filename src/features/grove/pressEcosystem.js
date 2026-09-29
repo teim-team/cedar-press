@@ -91,6 +91,20 @@ export const ECOSYSTEM = Object.freeze({
     feeds: Object.freeze(["contractors", "deals", "owned"]),
     line: "Every subsidiary and holding company names its parent, so an award or a transaction anywhere in the family rolls up to the nation or corporation behind it.",
   }),
+  // The two collections with no release yet. Their sources are the systems
+  // the producer contract (Foundation & Corporate Giving) and the owner's
+  // source list (PLOT, `sourceRotation.js`) name; the lines are the owner's
+  // cross-collection examples (`ECOSYSTEM_EXAMPLES`), shortened for the ring.
+  "foundation-corporate-giving": Object.freeze({
+    sources: Object.freeze(["IRS Form 990-PF", "Bank and corporate announcements", "Recipient announcements"]),
+    feeds: Object.freeze(["funding", "nonprofits"]),
+    line: "Private giving read beside federal funding and the nonprofit roster shows how an organization's support combines, with the legal recipient and the Native beneficiary kept apart.",
+  }),
+  plot: Object.freeze({
+    sources: Object.freeze(["BIA Realty/Tract Viewer", "County parcel GIS", "County assessor records"]),
+    feeds: Object.freeze(["deals", "need"]),
+    line: "A site acquisition in Deals links to the parcels PLOT follows, so a transaction and the land it bought read together without being collapsed.",
+  }),
 });
 
 /** The label a collection carries on the ring: the catalog's short name. */
@@ -123,7 +137,7 @@ export const FEEDS = Object.fromEntries(
  * out as prose. Kept beside the sources it classifies.
  */
 export const PROPER_NOUN =
-  /^(Grants|Congress|USAspending|FAADS|FSRS|Federal|National|Office|Senate|House|IRS|SEC|SAM|FPDS|SBA|ONRR|OSMRE|Osage|ANCSA|ANC|FERC|NRC)\b/;
+  /^(Grants|Congress|USAspending|FAADS|FSRS|Federal|National|Office|Senate|House|IRS|SEC|SAM|FPDS|SBA|ONRR|OSMRE|Osage|ANCSA|ANC|FERC|NRC|BIA)\b/;
 
 /** a, b and c: the list style the rest of the product uses. */
 export const say = (items) =>

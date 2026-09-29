@@ -101,7 +101,7 @@ export default function PressBriefing() {
         {/* THREE SIGNALS. Releases, newest first, each one a link to exactly
             what changed rather than to the feed's top. */}
         <div className="cp-brief__block">
-          <span className="cp-brief__cap">Worth watching</span>
+          <span className="cp-brief__cap">What changed</span>
           <ul className="cp-brief__signals">
             {signals.map((release) => {
               const latest = latestRelease(release.id);
@@ -133,7 +133,7 @@ export default function PressBriefing() {
             rather than opening an empty box. */}
         {collection ? (
           <div className="cp-brief__block">
-            <span className="cp-brief__cap">Open today</span>
+            <span className="cp-brief__cap">Explore the records</span>
             <Link className="cp-brief__coll" to={`${PRESS_DATA_PATH}?c=${collection.id}`}>
               <span className="cp-brief__collmark" aria-hidden="true">
                 {COLLECTION_ICONS[collection.id] ?? null}

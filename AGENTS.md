@@ -301,6 +301,14 @@ list, all of which this project has paid for:
   subscribers already hold cite themselves. The lobbying collection's rename to
   `Native Federal Advocacy and Engagement` moved six sources together and is the
   worked example.
+- **Build and write it as the shipped product.** No surface, route or copy
+  describes Cedar Press as a prototype or a pilot. Something that is not real
+  yet is labelled plainly for what it does today and tracked as a gap, never
+  called a prototype. Pilots run as ordinary accounts or access codes, not a
+  separate code path. Payment for Cedar Press is owned by Tribal Business News
+  today (`server/cedar_press/codes.py`); Lumecon's side is codes and
+  entitlement. Lumecon's own Stripe account, with Brian Kim and Kaylyn Lee as
+  admins, carries Cedar Grove payments: teim-team/teim-app#186.
 
 ## 7. How this doc gets updated
 
@@ -9596,3 +9604,14 @@ the id carries two check characters over the uid's alphabet, and the
 individually owned entity class closes to new mints. Documentation only; no
 code changed.
 
+
+## 2026-09-28: mobile preview rails must scroll inside their frame
+
+The preview wrapper must constrain its shared rail with a zero-minimum grid
+column and restore horizontal overflow at the rail breakpoint. The desktop
+`overflow: visible` override otherwise expands the rail beyond the phone and
+the frame clips the remaining collections. Touch must commit on click without
+compatibility hover/focus changing the specimen first. `tests/mobile-navigation.spec.js`
+reproduces the old rail at 2,291px inside a 390px viewport and checks native touch
+swiping plus a one-tap selection at the far end. Audience-name tabs remain at
+720px and below; wider cards use their existing previous/next controls.

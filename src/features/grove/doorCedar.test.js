@@ -4,6 +4,7 @@
 // the failures a reader would see.
 
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 
 import {
@@ -129,7 +130,10 @@ function door() {
 test("every topic has a deeper answer for tell me more, and none of it breaks the house style", () => {
   for (const intent of DOOR_INTENTS) {
     if (intent.chip) assert.ok(intent.expanded?.length > 80, `${intent.id} has no deeper answer`);
-    for (const text of [intent.answer, intent.expanded ?? "", intent.chip ?? "", ...(intent.variants ?? [])]) {
+    for (const raw of [intent.answer, intent.expanded ?? "", intent.chip ?? "", ...(intent.variants ?? [])]) {
+      // The one named exemption: the collection's own name, which the owner
+      // keeps with its ampersand. Nothing else may carry one.
+      const text = raw.replaceAll("Foundation & Corporate Giving", "");
       assert.ok(!text.includes("—"), `em dash in ${intent.id}`);
       assert.ok(!/&amp;|[A-Za-z0-9] & [A-Za-z0-9]/.test(text), `ampersand in ${intent.id}`);
       assert.ok(!/prepared (set|material|answers)/i.test(text), `${intent.id} announces its machinery`);
@@ -222,4 +226,198 @@ test("every collection is reachable by its chip, its id and its extra words", ()
   }
   assert.equal(doorMatcher.classify("do you track royalties")?.id, "collection:natural-resources");
   assert.equal(doorMatcher.classify("form 990 filings")?.id, "collection:nonprofits");
+});
+
+// ── The door as the product now ships (owner, 2026-09-27) ─────────────────
+// Fourteen collections, seven on each plan, Foundation & Corporate Giving
+// and PLOT live like the rest; no gaming anywhere; the twelve landing
+// audiences with their outcomes; and nothing claimed that the collections
+// cannot back.
+
+import { AUDIENCE_JOBS, visibleAudiences } from "./pressJobs.js";
+import { PRESS_TIERS, spellCount } from "./pressCatalog.js";
+import { recordStructure } from "./pressRecordStructure.js";
+
+/** Every string a door answer can show a visitor. */
+const everything = () =>
+  DOOR_INTENTS.flatMap((intent) => [intent.answer, intent.expanded ?? "", intent.chip ?? "", ...(intent.variants ?? [])]);
+
+test("routing: foundations and philanthropy reach the audience, and giving questions the collection", () => {
+  assert.equal(classify("Foundations and philanthropy")?.id, "audience:foundations-philanthropy");
+  assert.equal(classify("I work at a foundation")?.id, "audience:foundations-philanthropy");
+  assert.equal(classify("which foundations fund tribes")?.id, "collection:foundation-corporate-giving");
+  assert.equal(classify("corporate giving to tribes")?.id, "collection:foundation-corporate-giving");
+  assert.equal(classify("philanthropy")?.id, "collection:foundation-corporate-giving");
+});
+
+test("routing: land, parcels and permits reach PLOT", () => {
+  for (const question of ["land ownership records", "who owns these parcels", "do you track building permits", "parcel data", "property records"]) {
+    assert.equal(classify(question)?.id, "collection:plot", question);
+  }
+});
+
+test("routing: the renamed audience answers to consultants and advisors", () => {
+  for (const question of ["Consultants and advisors", "I am a consultant", "we are an advisory firm", "research for my clients", "professional services"]) {
+    assert.equal(classify(question)?.id, "audience:advisors", question);
+  }
+});
+
+test("routing: the new audience answers to government and public agency officials", () => {
+  for (const question of ["Government and public agency officials", "I work for a federal agency", "state government", "we are a county government", "preparing a tribal consultation", "government-to-government relationships"]) {
+    assert.equal(classify(question)?.id, "audience:government-officials", question);
+  }
+});
+
+test("routing: a tribal government still reaches its own free-access answer, and Tribal Nations its audience", () => {
+  assert.equal(classify("I work for a tribal government")?.id, "tribal");
+  assert.equal(classify("can our nation review our records")?.id, "tribal");
+  assert.equal(classify("Tribal Nations")?.id, "audience:tribal-nations");
+  const tribal = DOOR_INTENTS.find((intent) => intent.id === "tribal");
+  assert.match(tribal.answer, /^Federally recognized tribal governments can request and review the Cedar records associated with their nation\. No subscription is required\./);
+});
+
+test("the audience answers are the landing's twelve, with their outcomes, counted from the layer", () => {
+  const shown = visibleAudiences();
+  assert.equal(shown.length, AUDIENCE_JOBS.length);
+  const list = DOOR_INTENTS.find((intent) => intent.id === "audiences");
+  assert.ok(list.answer.startsWith(`Cedar Press is built for ${spellCount(shown.length)} audiences`), list.answer.slice(0, 60));
+  for (const audience of shown) {
+    assert.ok(list.answer.includes(`${audience.audience}: ${audience.outcome}`), `${audience.id} is missing from "Who is it for?"`);
+    const own = DOOR_INTENTS.find((intent) => intent.id === `audience:${audience.id}`);
+    assert.ok(own, `${audience.id} has no answer of its own`);
+    assert.ok(own.answer.includes(audience.outcome), `${audience.id}: the outcome is not the owner's`);
+    assert.ok(own.answer.includes(audience.explanation), `${audience.id}: the explanation is not the owner's`);
+    for (const entry of audience.collections) assert.ok(own.answer.includes(entry.short || entry.name), `${audience.id} omits ${entry.id}`);
+  }
+  assert.doesNotMatch(list.answer, /Advisors and professional services/);
+});
+
+test("consultants are told it is research, not a contact database", () => {
+  const advisors = DOOR_INTENTS.find((intent) => intent.id === "audience:advisors");
+  assert.match(advisors.answer, /not a contact database/);
+  // No line anywhere offers contacts, leads or outreach lists.
+  for (const text of everything()) {
+    const offered = text.replace(/no contact lists, leads lists or outreach lists|no contact or outreach lists|supply contact lists|not a contact database/g, "");
+    assert.doesNotMatch(offered, /contact (list|database)|leads? lists?|outreach lists?/i, text.slice(0, 80));
+  }
+});
+
+test("government officials are told Cedar supports consultation and never replaces engaging Native nations", () => {
+  const government = DOOR_INTENTS.find((intent) => intent.id === "audience:government-officials");
+  assert.match(government.answer, /supports consultation and government-to-government relationships/);
+  assert.match(government.answer, /does not replace direct engagement with Native nations/);
+  for (const text of everything()) {
+    const claimed = text.replace(/does not replace direct engagement|stand in for engaging/g, "");
+    assert.doesNotMatch(claimed, /(replaces?|instead of|substitute for|stands? in for) (direct )?(engagement|consultation|engaging)/i, text.slice(0, 80));
+  }
+});
+
+test("no answer claims a need score or a cause", () => {
+  for (const text of everything()) {
+    const claimed = text.replace(/not a need score|no need scores|score need/g, "");
+    assert.doesNotMatch(claimed, /need score|need index|most in need/i, text.slice(0, 80));
+    const causal = text.replace(/no claim that one thing caused another/g, "");
+    assert.doesNotMatch(causal, /\b(caused|causes|led to|resulted in|because of)\b/i, text.slice(0, 80));
+  }
+});
+
+test("no gaming collection or gaming source remains in any door answer", () => {
+  for (const text of everything()) assert.doesNotMatch(text, /gaming|casino|NIGC/i, text.slice(0, 80));
+  for (const intent of DOOR_INTENTS) {
+    for (const trigger of intent.triggers ?? []) assert.doesNotMatch(trigger, /gaming|casino/i, intent.id);
+  }
+  assert.equal(answer("tell me about the gaming collection").id, DOOR_FALLBACK.id);
+});
+
+test("both new collections are described like the rest, with no figure and no 'not yet published'", () => {
+  for (const id of ["plot", "foundation-corporate-giving"]) {
+    const intent = intentForCollection(id);
+    const entry = STOREFRONT_CATALOG.find((item) => item.id === id);
+    for (const text of [intent.answer, intent.expanded]) {
+      assert.doesNotMatch(text, /not yet published|first release|pending|preparation/i, id);
+      assert.doesNotMatch(text, /\d/, `${id} states a figure`);
+    }
+    assert.ok(intent.answer.includes(entry.blurb), `${id}: what it contains`);
+    assert.ok(intent.answer.includes(recordStructure(id).summary), `${id}: what each record holds`);
+    // How it connects to the other collections, in the owner's Methods words.
+    assert.match(intent.answer, id === "plot" ? /Indian Country Deals links to the parcels PLOT follows/ : /beside federal funding and the Native Nonprofits roster/);
+  }
+  for (const text of everything()) assert.doesNotMatch(text, /not yet published|with (its|their) first release/i, text.slice(0, 80));
+});
+
+test("collections and plans are counted from the catalog: fourteen, seven on each plan", () => {
+  const collections = DOOR_INTENTS.find((intent) => intent.id === "collections");
+  assert.ok(collections.answer.startsWith(`${STOREFRONT_CATALOG.length} collections, on two shelves.`));
+  const plans = DOOR_INTENTS.find((intent) => intent.id === "plans");
+  for (const tier of PRESS_TIERS.filter((t) => t.storefront)) {
+    const count = STOREFRONT_CATALOG.filter((entry) => entry.shelf === tier.shelf).length;
+    assert.ok(plans.answer.includes(`${count}`), `${tier.name}: ${count}`);
+  }
+  for (const id of ["plot", "foundation-corporate-giving"]) {
+    assert.ok(collections.answer.includes(STOREFRONT_CATALOG.find((entry) => entry.id === id).short), id);
+  }
+});
+
+test("who made it reads the same way everywhere the door says it", () => {
+  const who = DOOR_INTENTS.find((intent) => intent.id === "who");
+  assert.match(who.answer, /^Cedar Press is built by Lumecon in partnership with Tribal Business News/);
+  for (const text of everything()) {
+    assert.doesNotMatch(text, /distributed exclusively through|built by Lumecon and/i, text.slice(0, 80));
+    if (/built by Lumecon/i.test(text)) assert.match(text, /built by Lumecon in partnership with Tribal Business News/i);
+  }
+});
+
+test("maintenance and Cedar NEED's enrichments: door Cedar says weekly, and keeps each record with its entity", () => {
+  const current = DOOR_INTENTS.find((intent) => intent.id === "current");
+  assert.match(current.answer, /maintains its datasets weekly with human review/);
+  assert.match(current.expanded, /exceptionally useful, well-documented data and tools/);
+  assert.equal(classify("do you have patents")?.id, "collection:need");
+  assert.equal(classify("credit ratings for tribal enterprises")?.id, "collection:need");
+  const need = intentForCollection("need").answer;
+  assert.match(need, /later acquired/);
+  assert.match(need, /never presented as its parent's/);
+  const sources = DOOR_INTENTS.find((intent) => intent.id === "sources").answer;
+  assert.match(sources, /patent records, supported by company, tribal, SEC and court evidence/);
+  assert.match(sources, /rating-agency announcements, supported by issuer and tribal releases, filings, regulator records and labeled secondary sources/);
+  for (const text of everything()) assert.doesNotMatch(text, /updated (monthly|quarterly|annually)|every quarter/i, text.slice(0, 60));
+});
+
+test("institutional accounts: team and organization questions reach their own answer, never plans", () => {
+  const phrasings = [
+    "can my team share an account",
+    "is there an institutional plan",
+    "we have multiple users",
+    "do you offer an organization account",
+    "how do I invite colleagues",
+    "who is the admin for our account",
+    "how much is the institutional plan",
+  ];
+  for (const question of phrasings) {
+    const id = classify(question)?.id;
+    assert.equal(id, "institutional", question);
+    assert.notEqual(id, "plans", question);
+  }
+  const intent = DOOR_INTENTS.find((item) => item.id === "institutional");
+  assert.match(intent.answer, /Cedar Press and Cedar Press\+ are individual plans, one person each/);
+  assert.match(intent.answer, /admin invites colleagues by email/);
+  assert.match(intent.answer, /share the organization's details and its Cedar context/);
+  assert.match(intent.answer, /own sign-in/);
+  assert.match(intent.answer, /teammates do not see each other's conversations/);
+  assert.match(intent.answer, /loses that access at once and keeps anything they hold individually/);
+  assert.match(intent.answer, /elijah\.moreno@lumecon\.ai/);
+  for (const text of [intent.answer, intent.expanded]) {
+    assert.doesNotMatch(text, /\bseats?\b|\$|\bprice|\bcost|per user|up to \d/i, text.slice(0, 60));
+  }
+  assert.equal(classify("can we do collaborative analysis")?.id, "collaboration");
+  assert.match(DOOR_INTENTS.find((item) => item.id === "collaboration").answer, /Cedar Grove, not Cedar Press/);
+});
+
+// Owner, 2026-09-27: every collection is built from public material, and
+// Cedar says so; it never tells a reader some of it is private.
+test("Cedar says the material is public and never that some of it is not", () => {
+  const sources = DOOR_INTENTS.find((intent) => intent.id === "sources");
+  assert.match(sources.answer, /public material, drawn from more than 600 documented upstream sources/);
+  // The whole module, so an answer defined outside DOOR_INTENTS is held too.
+  const source = readFileSync(new URL("./doorCedar.js", import.meta.url), "utf8");
+  assert.doesNotMatch(source, /not all of it is public|private record|source websites/i);
 });
