@@ -3944,3 +3944,9 @@ These changes preserve issued IDs. No new ID allocator, event registry, promoted
 relationship, or review queue is authorized by technical test success. Current
 NEED human review remains pinned; returned decisions require validated receipts.
 <!-- END CODEX-EARLY-ACCESS-TAKEOVER -->
+
+<!-- BEGIN DEALS-PUBLIC-PREVIEW-2026-10-01 -->
+## Public Deals preview keeps its ten-row boundary
+
+The Deals public sample now contains ten primary-source-reviewed events with existing CEV and CE identifiers. Its 40-column consumer schema is unchanged. Source and method descriptions identify the selected preview scope, date precision and unlike monetary measures. Four newly evidenced source categories are credited; no site-wide source total is invented. This workstream owns only its Deals sample, Deals descriptor prose, corresponding generated guide and source-category additions. No protected release, collection row count or subscriber entitlement changed. The full governed multi-party consumer remains a separate integration.
+<!-- END DEALS-PUBLIC-PREVIEW-2026-10-01 -->

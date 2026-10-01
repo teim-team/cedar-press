@@ -22,7 +22,7 @@ This pass changes columns, never rows: no aggregation, deduplication, change of 
 
 ## Sources and coverage
 
-**Sources:** Tribal newsletters and tribal press; trade and journalist coverage; ANCSA shareholder filings; and Cedar's own federal contracting record, cited as a source where a transaction is visible only there.
+**Sources:** Tribal newsletters and tribal press; tribal enterprise announcements; lender transaction announcements; transaction counsel announcements; government land-transfer releases; trade and journalist coverage; ANCSA shareholder filings; and cited federal contracting records where ownership events are independently established.
 
 **Rows in the flagship table as released (recorded 2026-09-26):** 1,073. This is the count the release recorded for `deals_classified.csv`, not the sum of the collection's 20 tables; the finished public table is re-measured at release and the count here is replaced by that measurement.
 
@@ -128,7 +128,7 @@ Target columns the specification asks for that the terminal has not yet built fr
 
 **Cite as:** Lumecon, "Indian Country Deals" (v2), Cedar Press collection, cedarpress.ai. Add the date accessed.
 
-**Method:** This is the one Cedar dataset that does not exist elsewhere, so every row carries a source link. Announced and closed are labelled separately and a transaction enters totals only when its status is confirmed. Where an ownership change is visible in federal contracting but was never publicly announced, Cedar reports it and cites the contracting record with the identifier and years so a reader can re-run the check — and a change of reporting parent within one tribal corporate family is not treated as a transaction.
+**Method:** One row describes a distinct transaction or project milestone and links to its supporting source. The public preview contains ten selected events checked against primary sources on October 1, 2026; it is not the full collection or a representative statistical sample. The Native entity is identified separately from a subsidiary, borrower or acquisition vehicle. Notes distinguish announcement, closing and opening dates and preserve incomplete date precision. Loan principal, financing commitments, equity investments and project budgets are different measures; they must not be summed together. Undisclosed amounts remain blank. Follow-up reporting, multiple participants and financing instruments do not create additional additive transactions. A change of reporting parent alone is not proof of an ownership transaction.
 
 Dataset-level version, release date and citation live here and in the manifest, never as rows appended to the CSV. The row-level `source_url` and the qualifications named above are the file's own provenance.
 
