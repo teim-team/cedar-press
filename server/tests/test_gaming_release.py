@@ -1064,7 +1064,11 @@ class PartitionedConsumerTest(_ServerCase):
                 {"name": "gaming_payments", "parts": parts, "record_count": 6}
             ],
         }
-        self.pin_value = {"collection_id": "gaming", "release_id": self.release_id}
+        self.pin_value = {
+            "collection_id": "gaming",
+            "release_id": self.release_id,
+            "manifest_sha256": "a" * 64,
+        }
         for patcher in (
             patch.object(
                 repository, "grove_release_pin", side_effect=lambda _: dict(self.pin_value)
@@ -1173,6 +1177,72 @@ class PartitionedConsumerTest(_ServerCase):
         self.manifest["partitioned_components"][0]["parts"][5]["records.jsonl"] = artifact
         response, _ = self.get("gaming_payments")
         self.assertEqual(response.status_code, 503)
+
+    def test_last_part_metadata_hold_refuses_raw_and_spreadsheet_before_fetch(self):
+        contract = self.manifest["components"]["payments_part_5"]
+        original = copy.deepcopy(contract["metadata"])
+        for changes in (
+            {"internal_only": True},
+            {"publication_hold": True},
+            {"publication_status": "held"},
+        ):
+            with self.subTest(changes=changes):
+                contract["metadata"] = {**original, **changes}
+                raw, _ = self.get("gaming_payments")
+                self.assertEqual(raw.status_code, 503)
+                response = self.client.get(
+                    "/press/collections/gaming/spreadsheet-download",
+                    params={"release_id": self.release_id},
+                )
+                self.assertEqual(response.status_code, 503)
+                self.assertEqual(self.fetched, [])
+        contract["metadata"] = original
+        response = self.client.get(
+            "/press/collections/gaming/spreadsheet-download", params={"release_id": self.release_id}
+        )
+        self.assertEqual(response.status_code, 200, response.text)
+        self.assertEqual(response.headers["x-cedar-rows"], "6")
+
+    def test_last_part_malformed_metadata_refuses_raw_and_spreadsheet_before_fetch(self):
+        contract = self.manifest["components"]["payments_part_5"]
+        for metadata in (None, [], {"publication_status": []}):
+            with self.subTest(metadata=metadata):
+                contract["metadata"] = metadata
+                raw, _ = self.get("gaming_payments")
+                self.assertEqual(raw.status_code, 503)
+                response = self.client.get(
+                    "/press/collections/gaming/spreadsheet-download",
+                    params={"release_id": self.release_id},
+                )
+                self.assertEqual(response.status_code, 503)
+                self.assertEqual(self.fetched, [])
+
+    def test_later_part_publication_fields_cannot_change_first_part_filter(self):
+        contract = self.manifest["components"]["payments_part_5"]
+        for changes in (
+            {"publication_status_field": "amount"},
+            {"status_value_fields": ["amount"]},
+        ):
+            with self.subTest(changes=changes):
+                contract.update(changes)
+                raw, _ = self.get("gaming_payments")
+                self.assertEqual(raw.status_code, 503)
+                response = self.client.get(
+                    "/press/collections/gaming/spreadsheet-download",
+                    params={"release_id": self.release_id},
+                )
+                self.assertEqual(response.status_code, 503)
+                self.assertEqual(self.fetched, [])
+                for name in changes:
+                    del contract[name]
+        for part in self.manifest["components"].values():
+            part["publication_status_field"] = "amount"
+            part["status_value_fields"] = ["amount"]
+        response = self.client.get(
+            "/press/collections/gaming/spreadsheet-download", params={"release_id": self.release_id}
+        )
+        self.assertEqual(response.status_code, 200, response.text)
+        self.assertEqual(response.headers["x-cedar-rows"], "6")
 
     def test_unpublishable_or_missing_part_refused_before_bytes(self):
         self.manifest["components"]["payments_part_5"]["download_permitted"] = False

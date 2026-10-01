@@ -1183,6 +1183,15 @@ def grove_component_contract(
     contract = manifest["components"].get(component)
     if not isinstance(contract, dict):
         raise FullReleaseUnavailable("Component is not in the pinned release")
+    metadata = contract.get("metadata", {})
+    if not isinstance(metadata, dict):
+        raise FullReleaseUnavailable("Malformed component metadata")
+    for flag in ("internal_only", "publication_hold"):
+        if flag in metadata and type(metadata[flag]) is not bool:
+            raise FullReleaseUnavailable("Malformed component publication flag")
+    publication_status = metadata.get("publication_status", "public")
+    if not isinstance(publication_status, str) or not publication_status:
+        raise FullReleaseUnavailable("Malformed component publication status")
     rights = contract.get("rights")
     if (
         isinstance(rights, dict)
@@ -1204,6 +1213,12 @@ def grove_component_contract(
         or contract.get("download_permitted") is not True
     ):
         raise FullReleaseUnavailable("Component is not eligible for customer delivery")
+    if (
+        metadata.get("internal_only")
+        or metadata.get("publication_hold")
+        or publication_status not in {"public", "publishable", "eligible"}
+    ):
+        raise ComponentPublicationHeld("Component metadata holds customer delivery")
     fields = contract.get("fields")
     if not isinstance(fields, list) or any(not isinstance(f, dict) for f in fields):
         raise FullReleaseUnavailable("Malformed component contract")
@@ -1218,7 +1233,7 @@ def grove_component_contract(
         or header not in [entry.get("order"), *entry.get("compatible_orders", [])]
     ):
         raise FullReleaseUnavailable("Full release does not match product field map")
-    declared_rights = (contract.get("metadata") or {}).get("field_rights")
+    declared_rights = metadata.get("field_rights")
     if collection_id == "gaming" or declared_rights is not None:
         if (
             not isinstance(declared_rights, dict)
@@ -1245,6 +1260,17 @@ def grove_component_contract(
             and item.get("rights_class") != declared_rights[item["column"]]
         ):
             raise FullReleaseUnavailable("Field-map rights differ from the pinned contract")
+    status_field = contract.get("publication_status_field")
+    value_fields = contract.get("status_value_fields", [])
+    if (
+        status_field is not None
+        and (not isinstance(status_field, str) or status_field not in header)
+    ) or (
+        not isinstance(value_fields, list)
+        or any(not isinstance(name, str) or name not in header for name in value_fields)
+        or len(value_fields) != len(set(value_fields))
+    ):
+        raise FullReleaseUnavailable("Malformed component publication fields")
     primary_key = contract.get("primary_key")
     if not isinstance(primary_key, list) or not primary_key or not set(primary_key) <= set(header):
         raise FullReleaseUnavailable("Missing declared row identity")
@@ -1277,9 +1303,16 @@ def _grove_partitioned_release(pin, manifest, logical, *, metadata_only=False):
         contract = grove_component_contract(
             manifest, collection_id, part["component"], presentation_component=component
         )
-        signature = (contract[0]["fields"], contract[2])
+        signature = (
+            contract[0]["fields"],
+            contract[2],
+            contract[0].get("publication_status_field"),
+            contract[0].get("status_value_fields", []),
+        )
         if reference is not None and signature != reference:
-            raise FullReleaseUnavailable("Partition schemas or primary keys disagree")
+            raise FullReleaseUnavailable(
+                "Partition schemas, primary keys or publication fields disagree"
+            )
         reference = signature
         contracts.append(contract)
     header, primary_key = contracts[0][1:3]

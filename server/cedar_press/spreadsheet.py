@@ -41,17 +41,10 @@ def _layout(collection, pin, manifest):
                     "rights",
                     "publication_status_field",
                 )
+            ) or candidate.get("status_value_fields", []) != contract.get(
+                "status_value_fields", []
             ):
                 raise r.FullReleaseUnavailable("Spreadsheet partition meanings disagree")
-        metadata = contract.get("metadata", {})
-        if metadata.get("internal_only") or metadata.get("publication_hold"):
-            continue
-        if metadata.get("publication_status", "public") not in {
-            "public",
-            "publishable",
-            "eligible",
-        }:
-            continue
         for field in contract["fields"]:
             signature = json.dumps(
                 {k: field.get(k) for k in ("type", "unit", "description")}, sort_keys=True

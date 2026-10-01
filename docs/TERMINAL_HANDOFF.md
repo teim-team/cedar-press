@@ -192,3 +192,29 @@ publication remain single-writer. Preserve the active review while independent
 work continues. Candidate success is not a release, fresh-clone success is not a
 full-data rebuild, and no collection is certified ready by this handoff.
 
+
+
+## 2026-10-01 production integration checkpoint
+
+The owner has authorized continuing implementation and pushing review branches.
+The earlier local-only restriction above is historical; no production deployment,
+identity promotion or publication hold has been changed.
+
+Press now rejects held, malformed or semantically inconsistent shared-release
+metadata before spreadsheet/download delivery. The CI producer pin is
+`c0e9c64624a982c3797a675d1436b6a2be413350` in Lumecon-data PR #17.
+All five producer jobs passed on that commit, including 2,585 Python tests with
+93.49% coverage, PostgreSQL and both pinned consumer checks.
+
+Local validation: 68 focused consumer checks passed (one optional skip), server
+lint passed. A full Windows API run reached 547 tests and 83% coverage but did
+not pass: its Git-tracked fixture check encountered paging-file exhaustion and
+a Windows path comparison. The comparison now uses POSIX Git paths and its
+focused regression passes. Hosted CI remains the authoritative full gate for
+this consumer update; do not label that incomplete local run a pass.
+
+The private, versioned AWS review-upload and worker implementation is reviewable
+in Lumecon-data; infrastructure lives in teim-app. No AWS resource has been
+provisioned and no local dataset has been transferred. Existing publication and
+identity holds remain in force. All infrastructure and code work stays out of
+the owner's identity adjudication queue.

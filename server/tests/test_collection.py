@@ -330,7 +330,7 @@ class TestCrossLanguageParity(unittest.TestCase):
                     self.assertTrue(path.exists(), f"{path} is declared and missing")
                     tracked = subprocess.run(  # noqa: S603
                         ["git", "-C", str(_REPO), "ls-files", "--error-unmatch",
-                         str(path.relative_to(_REPO))],
+                         path.relative_to(_REPO).as_posix()],
                         capture_output=True, text=True, check=False,
                     )
                     self.assertEqual(

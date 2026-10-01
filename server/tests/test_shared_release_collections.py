@@ -330,6 +330,122 @@ class SharedCollectionReleaseTest(unittest.TestCase):
             repository.grove_component_contract(manifest, "plot", "environmental_events")
         self.assertNotIsInstance(raised.exception, repository.ComponentPublicationHeld)
 
+    def test_component_metadata_holds_refuse_raw_and_csv_before_artifact_reads(self):
+        manifest, pin, _ = self.fixture()
+        contract = manifest["components"]["environmental_events"]
+        self.session("press_pro")
+        holds = (
+            {"internal_only": True},
+            {"publication_hold": True},
+            {"publication_status": "held"},
+            {"publication_status": "contested"},
+            {"publication_status": "withheld"},
+            {"publication_status": "unreviewed"},
+        )
+        with (
+            patch.object(repository, "_grove_manifest", return_value=manifest),
+            patch.object(repository, "_release_response") as rows,
+        ):
+            for metadata in holds:
+                with self.subTest(metadata=metadata):
+                    contract["metadata"] = metadata
+                    with self.assertRaises(repository.ComponentPublicationHeld):
+                        repository.grove_component_contract(
+                            manifest, "plot", "environmental_events"
+                        )
+                    for route in ("full-download", "spreadsheet-download"):
+                        params = {"release_id": pin["release_id"]}
+                        if route == "full-download":
+                            params["component"] = "environmental_events"
+                        response = self.client.get(
+                            f"/press/collections/plot/{route}", params=params
+                        )
+                        self.assertEqual(response.status_code, 503)
+                    rows.assert_not_called()
+
+    def test_malformed_component_metadata_fails_closed_in_both_download_routes(self):
+        manifest, pin, _ = self.fixture()
+        contract = manifest["components"]["environmental_events"]
+        self.session("press_pro")
+        invalid = (
+            None,
+            [],
+            "",
+            True,
+            {"internal_only": "false"},
+            {"publication_hold": 0},
+            {"publication_status": []},
+            {"publication_status": ""},
+        )
+        with (
+            patch.object(repository, "_grove_manifest", return_value=manifest),
+            patch.object(repository, "_release_response") as rows,
+        ):
+            for metadata in invalid:
+                with self.subTest(metadata=metadata):
+                    contract["metadata"] = metadata
+                    with self.assertRaises(repository.FullReleaseUnavailable) as raised:
+                        repository.grove_component_contract(
+                            manifest, "plot", "environmental_events"
+                        )
+                    self.assertNotIsInstance(raised.exception, repository.ComponentPublicationHeld)
+                    for route in ("full-download", "spreadsheet-download"):
+                        params = {"release_id": pin["release_id"]}
+                        if route == "full-download":
+                            params["component"] = "environmental_events"
+                        response = self.client.get(
+                            f"/press/collections/plot/{route}", params=params
+                        )
+                        self.assertEqual(response.status_code, 503)
+                    rows.assert_not_called()
+
+    def test_explicit_eligible_metadata_preserves_raw_bytes_and_csv_rows(self):
+        manifest, pin, content = self.fixture()
+        manifest["components"]["environmental_events"]["metadata"] = {
+            "internal_only": False,
+            "publication_hold": False,
+            "publication_status": "eligible",
+        }
+        self.session("press_pro")
+        with patch.object(repository, "_grove_manifest", return_value=manifest):
+            response = self.client.get(
+                "/press/collections/plot/full-download",
+                params={
+                    "release_id": pin["release_id"],
+                    "component": "environmental_events",
+                },
+            )
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.content, content)
+            csv_response = self.client.get(
+                "/press/collections/plot/spreadsheet-download",
+                params={"release_id": pin["release_id"]},
+            )
+        self.assertEqual(csv_response.status_code, 200)
+        self.assertEqual(csv_response.headers["x-cedar-rows"], "1")
+
+    def test_publication_fields_must_name_declared_columns(self):
+        manifest, _, _ = self.fixture()
+        contract = manifest["components"]["environmental_events"]
+        for changes in (
+            {"publication_status_field": []},
+            {"publication_status_field": "missing"},
+            {"status_value_fields": None},
+            {"status_value_fields": "environmental_event_id"},
+            {"status_value_fields": ["missing"]},
+            {"status_value_fields": ["environmental_event_id"] * 2},
+        ):
+            with self.subTest(changes=changes):
+                changed = copy.deepcopy(manifest)
+                changed["components"]["environmental_events"].update(changes)
+                with self.assertRaisesRegex(
+                    repository.FullReleaseUnavailable, "publication fields"
+                ):
+                    repository.grove_component_contract(changed, "plot", "environmental_events")
+        contract["publication_status_field"] = "environmental_event_id"
+        contract["status_value_fields"] = ["environmental_event_id"]
+        repository.grove_component_contract(manifest, "plot", "environmental_events")
+
     def test_giving_rights_hold_prevents_download_for_entitled_users(self):
         self.fixture("foundation-corporate-giving", "reviewed_disclosures", rights=False)
         self.session("press")
