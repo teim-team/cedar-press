@@ -11,6 +11,7 @@
 import { SOURCE_LINK_COLUMN, codebookColumns } from "./explore.js";
 import { isInternalProvenanceColumn } from "./readerValues.js";
 import { PRESS_CATALOG_BY_ID } from "./pressCatalog.js";
+import { isRetiredIdentifierColumn } from "./readerPresentation.js";
 
 export const money = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
 
@@ -32,13 +33,14 @@ export function short(id) {
  * program, amount, date, and source. Make other columns selectable."
  */
 export function columnPlan(tableKey, contract, tableColumns) {
-  const has = (c) => c && tableColumns.includes(c);
+  const publicColumns = tableColumns.filter((column) => !isRetiredIdentifierColumn(column));
+  const has = (c) => c && publicColumns.includes(c);
   // A table whose link is BUILT from its identifiers (a USAspending award
   // key, a bill's congress and number, a Federal Register document number)
   // has no source column to show, so the table view showed no source at all
   // while the record page, reading `item.source`, did. The plan names a
   // column for it, and the table fills it from the same `rowSource`.
-  const built = Boolean(contract?.source_builder) && !has(contract?.source);
+  const built = Boolean(contract?.source_builder || contract?.row_type_contracts) && !has(contract?.source);
   const source = built ? SOURCE_LINK_COLUMN : contract?.source;
   const shown = (c) => c === SOURCE_LINK_COLUMN ? built : has(c);
   const lead = contract ? [contract.entity_uid, contract.entity_name, contract.entity_type].filter(has) : [];
@@ -48,8 +50,17 @@ export function columnPlan(tableKey, contract, tableColumns) {
   const declared = (contract?.default_columns ?? []).filter(has);
   // The codebook's order is a fallback for a table with no declared view;
   // it is not a reason to open on a column of Cedar's own file names.
-  const listed = tableKey ? codebookColumns(tableKey, tableColumns).filter((c) => !isInternalProvenanceColumn(c)) : [];
-  const defaults = [...new Set([...roleFirst, ...(declared.length ? declared : listed)])];
-  const all = [...new Set([...lead, ...tableColumns, ...(built ? [SOURCE_LINK_COLUMN] : [])])];
+  const listed = tableKey ? codebookColumns(tableKey, publicColumns).filter((c) => !isInternalProvenanceColumn(c)) : [];
+  // Producer spreadsheets already declare the complete opening view, including
+  // role and amount qualifications. A union's sparse component source columns
+  // share the same dispatched source link that the record page uses.
+  const dispatchedSources = new Set(built
+    ? Object.values(contract?.row_type_contracts ?? {})
+      .flatMap((type) => [type.source, type.source_fallback]).filter(Boolean)
+    : []);
+  const defaults = contract?.mapping_kind === "producer_spreadsheet" && declared.length
+    ? [...new Set([...declared.filter((column) => !dispatchedSources.has(column)), ...(built ? [SOURCE_LINK_COLUMN] : [])])]
+    : [...new Set([...roleFirst, ...(declared.length ? declared : listed)])];
+  const all = [...new Set([...lead, ...publicColumns, ...(built ? [SOURCE_LINK_COLUMN] : [])])];
   return { lead, defaults, all };
 }

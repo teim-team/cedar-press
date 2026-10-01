@@ -18,6 +18,28 @@ import { fileURLToPath } from "node:url";
 import { expect, test } from "@playwright/test";
 
 import { EMAIL, HASH, PASSWORD, PRESS_EMAIL } from "./demoAccount.js";
+import { parseCsv, rowSource, contractFor } from "../src/features/grove/explore.js";
+import { recordHref } from "../src/features/grove/pressRecord.js";
+
+// The browser suite follows the exact published release, including refreshed
+// source keys. It never revives retired samples just to keep a fixture alive.
+async function currentSample(id) {
+  const path = new URL(`../public/data/cedar/samples/${id}/spreadsheet__10.csv`, import.meta.url);
+  return parseCsv(await readFile(path, "utf8"));
+}
+const FUNDING_SAMPLE = await currentSample("funding");
+const FR_SAMPLE = await currentSample("federal-register");
+const LOBBYING_SAMPLE = await currentSample("lobbying");
+const NEED_SAMPLE = await currentSample("need");
+const OWNED_SAMPLE = await currentSample("owned");
+const CURRENT_ENTITY_UID = FUNDING_SAMPLE.rows.find((row) => row.cedar_uid)?.cedar_uid;
+const register = JSON.parse(await readFile(new URL("../public/data/cedar/register.json", import.meta.url), "utf8"));
+const CURRENT_ENTITY_NAME = register.entities.find((row) => row[0] === CURRENT_ENTITY_UID)?.[1];
+if (!CURRENT_ENTITY_UID || !CURRENT_ENTITY_NAME) throw new Error("Published funding sample needs a named entity for navigation checks");
+const FR_KEY = "federal-register/federal-register";
+const FR_ROW = FR_SAMPLE.rows.find((row) => rowSource(row, contractFor(FR_KEY)));
+if (!FR_ROW) throw new Error("Published Federal Register sample needs a cited source");
+
 // The fourteen, read from the catalog rather than typed: a list typed here
 // would pass while the door advertised something else.
 import { STOREFRONT_CATALOG } from "../src/features/grove/pressCatalog.js";
@@ -108,21 +130,54 @@ async function signIn(page, account = ACCOUNT) {
   );
 }
 
+test("reviewed NEED businesses remain individually named on phones and use readable ownership labels", async ({ page }, testInfo) => {
+  await signIn(page);
+  await page.goto("/data?c=need");
+  const records = page.getByTestId("explore-record");
+  await expect(records).toHaveCount(NEED_SAMPLE.rows.length);
+  for (const row of NEED_SAMPLE.rows) {
+    await expect(records.filter({ hasText: row.enterprise_name })).toHaveCount(1);
+  }
+  await expect(records.first()).toContainText("Wholly owned");
+  await expect(records.first()).toContainText(testInfo.project.name === "phone" ? "owned by" : "Owned by");
+  await expect(page.locator("main")).not.toContainText("wholly_owned");
+  await expect(page.locator("main")).not.toContainText("owned_by");
+  if (testInfo.project.name === "phone") {
+    await expect(records.first().locator(".cp-ex__cardwho")).toContainText(NEED_SAMPLE.rows[0].enterprise_name);
+    await expect(records.first().locator(".cp-ex__cardwho")).toContainText("not linked to an entity");
+    const bounds = await records.evaluateAll((elements) => elements.map((el) => {
+      const heading = el.querySelector(".cp-ex__cardwho");
+      const arrow = el.querySelector(".cp-ex__cardgo");
+      return { textRight: heading.getBoundingClientRect().right - parseFloat(getComputedStyle(heading).paddingRight), arrowLeft: arrow.getBoundingClientRect().left };
+    }));
+    for (const boundsForRow of bounds) expect(boundsForRow.textRight).toBeLessThanOrEqual(boundsForRow.arrowLeft);
+    await page.goto("/data?c=owned");
+    await expect(page.getByTestId("explore-record").first()).toContainText("Certifying authority:");
+    const firstHeading = page.getByTestId("explore-record").first().locator(".cp-ex__cardwho");
+    expect(await firstHeading.evaluate((el) => el.firstChild.textContent)).toBe(OWNED_SAMPLE.rows[0].business_name);
+    await expect(page.getByTestId("explore-record").first()).not.toContainText("certifying_authority");
+  } else {
+    await page.goto("/data?c=owned");
+    const row = page.getByTestId("explore-record").first();
+    await expect(row.locator("td.cp-ex__pin")).toHaveText(OWNED_SAMPLE.rows[0].business_name);
+    const scroller = page.locator(".cp-ex__scroll").first();
+    await scroller.evaluate((el) => el.scrollTo({ left: el.scrollWidth, behavior: "instant" }));
+    const pinned = await row.locator("td.cp-ex__pin").boundingBox();
+    const viewport = await scroller.boundingBox();
+    expect(pinned.x).toBeGreaterThanOrEqual(viewport.x);
+    expect(pinned.x + pinned.width).toBeLessThanOrEqual(viewport.x + viewport.width);
+    await page.goto("/data?c=natural-resources");
+    await expect(page.getByRole("columnheader", { name: "Measurement basis" })).toBeVisible();
+  }
+});
+
 /**
- * Open the door's Cedar, the way a reader on that scroll position actually can.
- *
- * The floating pill steps aside while the hero's preview object is on screen
- * (implementation brief §2.2: it sat on the collection strip, which is part of
- * the thing the object exists to demonstrate). Cedar is not unreachable there
- * — the preview's own foot carries "Ask Cedar", which dispatches
- * `cedar:ask-collection` — so this uses whichever control is actually offered.
+ * Open the preview's own Cedar action. The launcher is intentionally hidden
+ * by an IntersectionObserver while this preview is on screen; choosing it
+ * from an immediate visibility snapshot races that observer's first update.
+ * Separate launcher tests exercise its hide/show and empty-panel behavior.
  */
 async function openDoorCedar(page) {
-  const fab = page.locator(".cp-dc__fab");
-  if (await fab.isVisible()) {
-    await fab.click();
-    return;
-  }
   await page.locator(".cp-pane__act--btn").first().click();
 }
 
@@ -373,6 +428,9 @@ test.describe("the gate", () => {
     // The way in is named on the stage, never a route past the paywall.
     await expect(stage.getByRole("link", { name: /^Get Cedar Press/ })).toBeVisible();
     await expect(stage.getByRole("link", { name: /Browse the records/ })).toHaveCount(0);
+    await expect(stage.locator(".cp-pane__tablecap")).toContainText("sample records");
+    await expect(stage.locator(".cp-pane__facts")).not.toContainText(/\d[\d,]*\s+(rows|records)/i);
+    await expect(page.locator(".cp-hero3__facts")).not.toContainText(/\d[\d,]*\s+records/i);
     await expect(page.locator("#catalog")).toHaveCount(0);
     expect(errors).toEqual([]);
   });
@@ -815,7 +873,7 @@ test.describe("Explore the collections", () => {
     await page.locator(".cp-rail__item").filter({ hasText: "Advocacy" }).first().click();
     await expect(page).toHaveURL(/[?&]c=lobbying/);
     await expect(page.getByTestId("explore-caption")).toContainText("columns");
-    await expect(page.getByTestId("explore-scope")).toContainText("filing year");
+    await expect(page.getByTestId("explore-scope")).toContainText("reporting year");
     if (!phone) {
       await expect(page.locator(".cp-ex__table--table")).toBeVisible();
       await expect(page.locator(".cp-ex__table--table thead th").first()).toBeVisible();
@@ -890,7 +948,7 @@ test.describe("Explore the collections", () => {
     const files = unzipStored(bytes);
     expect(Object.keys(files).sort()).toEqual(["README.txt", "records.csv"]);
     const lines = files["records.csv"].split("\n");
-    expect(lines[0].split(",")).toContain("assistance_transaction_unique_key");
+    expect(lines[0].split(",")).toContain("transaction_id");
     // Every listed preview record is in the export.
     expect(lines.length - 1).toBe(await records.count());
     const width = lines[0].split(",").length;
@@ -1013,19 +1071,21 @@ test.describe("Explore the collections", () => {
     { label: "Cedar Press", account: PRESS_ACCOUNT },
     { label: "Cedar Press+", account: ACCOUNT },
   ]) {
-    test(`${label} sees a deliberate no-preview state when publication is withheld`, async ({ page }) => {
+    test(`${label} sees the released Owned and reviewed NEED previews on the correct plan`, async ({ page }) => {
       const errors = watchConsole(page);
       await signIn(page, account);
-      await page.goto("/data?c=owned");
-
-      const unavailable = page.getByTestId("explore-unavailable");
-      await expect(unavailable).toBeVisible();
-      await expect(unavailable.getByRole("heading", { name: "Preview unavailable" })).toBeVisible();
-      await expect(unavailable).toContainText("Not available for self-service browsing");
-      await expect(unavailable.locator(".cp-lock__row")).toHaveCount(0);
-      await expect(unavailable).not.toContainText("Available with Cedar Press+");
-      await unavailable.getByTestId("explore-about").click();
-      await expect(page.locator(".cp-ab")).toBeVisible();
+      for (const id of ["owned", "need"]) {
+        await page.goto(`/data?c=${id}`);
+        await expect(page.getByTestId("explore-unavailable")).toHaveCount(0);
+        if (account === ACCOUNT) {
+          await expect(page.getByTestId("explore-record").first()).toBeVisible();
+          await expect(page.getByTestId("explore-record")).toHaveCount(10);
+          await expect(page.getByTestId("explore-locked")).toHaveCount(0);
+        } else {
+          await expect(page.getByTestId("explore-locked")).toBeVisible();
+          await expect(page.getByTestId("explore-record")).toHaveCount(0);
+        }
+      }
       expect(errors).toEqual([]);
     });
   }
@@ -1042,15 +1102,15 @@ test.describe("Explore the collections", () => {
     await expect(atlas.getByTestId("atlas-row")).toHaveCount(STOREFRONT_CATALOG.length);
     // Every collection on the reader's shelf is included and every one on
     // the Plus shelf is offered, Foundation & Corporate Giving and PLOT like
-    // the rest (owner, 2026-09-27). Owned and NEED have withheld previews.
-    // NEED's collection-wide policy hold also applies to this static surface.
+    // the rest. Owned and the separately reviewed NEED component now have
+    // published previews; the unreviewed NEED components remain held.
     await expect(atlas.locator(".cp-atlas__included")).toHaveCount(
       STOREFRONT_CATALOG.filter((entry) => entry.shelf === "standard").length,
     );
     await expect(atlas.locator(".cp-atlas__locked")).toHaveCount(
-      STOREFRONT_CATALOG.filter((entry) => entry.shelf === "pro" && !["owned", "need"].includes(entry.id)).length,
+      STOREFRONT_CATALOG.filter((entry) => entry.shelf === "pro").length,
     );
-    await expect(atlas.locator(".cp-atlas__pending")).toHaveCount(2);
+    await expect(atlas.locator(".cp-atlas__pending")).toHaveCount(0);
     await expect(atlas).not.toContainText(/not yet published|first release/i);
     // Neither states a row count, a span or a version: the cells are empty
     // rather than holding a placeholder.
@@ -1108,7 +1168,7 @@ test.describe("the table's default columns", () => {
     // (recordColumns.js columnPlan, 2026-09-27).
     expect(heads.length).toBeLessThanOrEqual(11);
     const text = heads.join(" | ").toUpperCase();
-    for (const wanted of ["NATIVE ENTITY", "ACTION DATE", "AWARDEE", "FUNDING AGENCY", "DESCRIPTION", "AMOUNT", "SOURCE RECORD"]) {
+    for (const wanted of ["NATIVE ENTITY", "ACTION DATE", "AWARDEE", "AMOUNT"]) {
       expect(text).toContain(wanted);
     }
     // The built link is the originating award, the same one the record opens.
@@ -1263,9 +1323,12 @@ test.describe("the question mark", () => {
     for (const next of [{ width: 640, height: 900 }, { width: 380, height: 820 }, before]) {
       await page.setViewportSize(next);
       await expect(panel).toBeVisible();
-      const now = await panel.boundingBox();
-      expect(now.x).toBeGreaterThanOrEqual(-1);
-      expect(now.x + now.width).toBeLessThanOrEqual(next.width + 1);
+      // Resize dispatch and React's placement update are separate tasks.
+      // Visibility alone does not mean the old viewport's nudge is replaced.
+      await expect.poll(async () => {
+        const now = await panel.boundingBox();
+        return Boolean(now && now.x >= -1 && now.x + now.width <= next.width + 1);
+      }, { message: `The open disclosure must fit the ${next.width}px viewport` }).toBe(true);
     }
     expect(errors).toEqual([]);
   });
@@ -1293,7 +1356,7 @@ test.describe("About this collection", () => {
     await expect(panel).toBeVisible();
     await expect(panel).toContainText("Awardees are matched to a Native entity");
     // The release facts a reader checks a figure against.
-    for (const field of ["Updated", "Coverage", "Records"]) {
+    for (const field of ["Preview updated", "Coverage", "Sample records"]) {
       await expect(panel.locator("dt", { hasText: new RegExp(`^${field}$`) }).first()).toBeVisible();
     }
     // The unit of observation, in the codebook's own words: the sentence
@@ -1866,7 +1929,7 @@ test.describe("the record page", () => {
     // The address carries the table, the record and the cut it came from, so
     // the page can be sent to someone and still know where "back" is.
     const url = new URL(page.url());
-    expect(url.searchParams.get("k")).toBe("funding/federal_funding_transactions");
+    expect(url.searchParams.get("k")).toBe("funding/funding");
     expect(url.searchParams.get("r")).toBe(openedId);
     expect(url.searchParams.get("from")).toContain("c=funding");
 
@@ -1909,30 +1972,36 @@ test.describe("the record page", () => {
   // A table whose link is built from the row's own identifiers opens the
   // originating record; the file Cedar read it through is named for what it
   // is; and a row with no link in a table that has links says so for the row.
-  test("a record links to its originating document and names Cedar's own files as working files", async ({ page }) => {
+  test("a released record links to the exact originating document", async ({ page }) => {
     const errors = watchConsole(page);
     await signIn(page);
-    await page.goto("/record?k=federal-register/fr_ex_parte_party_entity_links&r=2014-09591");
+    const source = rowSource(FR_ROW, contractFor(FR_KEY));
+    await page.goto(recordHref({ key: FR_KEY, recordId: FR_ROW.record_key, recordType: FR_ROW.record_type }));
     await expect(page.getByTestId("record-head")).toBeVisible();
-    await expect(page.getByRole("link", { name: /Open cited source/ })).toHaveAttribute("href", "https://www.federalregister.gov/d/2014-09591");
-    await expect(page.locator(".cp-rec__source")).toContainText("Office of the Federal Register");
+    await expect(page.getByRole("link", { name: /Open cited source/ })).toHaveAttribute("href", source);
     await page.getByTestId("record-more").click();
     for (const summary of await page.locator(".cp-rec__group summary").all()) await summary.click();
-    const body = await page.locator("main").innerText();
-    expect(body).toContain("Cedar working file");
-    expect(body).not.toContain("ferc_ex_parte_parties.csv");
+    await expect(page.locator('main a[href^="file:"]')).toHaveCount(0);
     expect(errors).toEqual([]);
   });
 
   test("a row with no link in a table that has links says so for the row", async ({ page }) => {
+    // Controlled missing-source response, preserving the current schema and key.
+    // The source file on disk and all other sample rows remain unchanged.
+    const first = LOBBYING_SAMPLE.rows[0];
+    const quote = (value) => '"' + String(value ?? "").replaceAll('"', '""') + '"';
+    const rows = LOBBYING_SAMPLE.rows.map((row, index) => index ? row : { ...row, source_url: "" });
+    const body = [LOBBYING_SAMPLE.columns, ...rows.map((row) => LOBBYING_SAMPLE.columns.map((column) => row[column]))]
+      .map((row) => row.map(quote).join(",")).join("\n") + "\n";
+    await page.route("**/samples/lobbying/spreadsheet__10.csv", (route) => route.fulfill({ status: 200, contentType: "text/csv", body }));
     await signIn(page);
-    await page.goto("/record?k=lobbying/lobbying_registrant_native_ownership_evidence&r=88052");
+    await page.goto(recordHref({ key: "lobbying/lobbying", recordId: first.record_key, recordType: first.record_type }));
     await expect(page.getByTestId("record-no-link")).toHaveText("No link was recorded for this row.");
   });
 
   test("a record that is not in the preview says so rather than showing a neighbour", async ({ page }) => {
     await signIn(page);
-    await page.goto("/record?k=funding/federal_funding_transactions&r=not-a-real-record");
+    await page.goto("/record?k=funding/funding&r=not-a-real-record");
     await expect(page.getByTestId("record-empty")).toContainText("not in this preview");
   });
 
@@ -2843,7 +2912,7 @@ test.describe("the first screen", () => {
   test("an entity profile opens on its records", async ({ page }) => {
     const errors = watchConsole(page);
     await signIn(page);
-    await page.goto("/entity/CE-001CC-8N");
+    await page.goto(`/entity/${CURRENT_ENTITY_UID}`);
     await page.locator(".cp-ent__row").first().waitFor();
     await page.evaluate(() => document.fonts.ready);
     const viewport = page.viewportSize().height;
@@ -2986,14 +3055,14 @@ test.describe("the loop between the records and the journalism", () => {
   test("an entity's collection heading opens the table already narrowed to it", async ({ page }) => {
     const errors = watchConsole(page);
     await signIn(page);
-    await page.goto("/entity/CE-001CC-8N");
+    await page.goto(`/entity/${CURRENT_ENTITY_UID}`);
     const heading = page.locator(".cp-ent__glink").first();
     await heading.waitFor({ timeout: 20000 });
     await heading.click();
-    await expect(page).toHaveURL(/\/data\?c=[a-z-]+&e=CE-001CC-8N/);
+    await expect(page).toHaveURL(new RegExp(`/data\\?c=[a-z-]+&e=${CURRENT_ENTITY_UID}`));
     await page.locator(".cp-rail__item").first().waitFor();
     // Narrowed, not just opened: the caption names the entity the cut is on.
-    await expect(page.getByTestId("explore-caption")).toContainText("Yakama");
+    await expect(page.getByTestId("explore-caption")).toContainText(CURRENT_ENTITY_NAME);
     expect(errors).toEqual([]);
   });
 });

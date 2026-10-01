@@ -21,10 +21,14 @@ os.environ["CEDAR_PRESS_ACCOUNTS"] = json.dumps(
         "pro@example.org": {"password": "correct-horse", "tier": "press_pro"},
         # Two seats of one subscription: the organization earns once.
         "one@bank.example": {
-            "password": "correct-horse", "tier": "press_pro", "account": "acct-bank"
+            "password": "correct-horse",
+            "tier": "press_pro",
+            "account": "acct-bank",
         },
         "two@bank.example": {
-            "password": "correct-horse", "tier": "press_pro", "account": "acct-bank"
+            "password": "correct-horse",
+            "tier": "press_pro",
+            "account": "acct-bank",
         },
     }
 )
@@ -219,7 +223,10 @@ class TestCatalog(unittest.TestCase):
         )
         self.assertEqual(response.status_code, 200)
         payload = response.json()
-        self.assertIn("resolved", payload["answer"])
+        self.assertIn("source-declared role", payload["answer"])
+        self.assertIn(
+            "does not establish ownership at a historical transaction date", payload["answer"]
+        )
         self.assertIn("Deals", payload["basis"])
 
     def test_cedar_flags_demonstration_statistics(self) -> None:
@@ -507,8 +514,10 @@ class TestEntitlement(unittest.TestCase):
         sign_in(email)
         return client.post(
             "/cedar/ask",
-            json={"question": question or "What does this collection cover?",
-                  "collectionId": collection_id},
+            json={
+                "question": question or "What does this collection cover?",
+                "collectionId": collection_id,
+            },
         )
 
     def test_a_standard_reader_is_not_answered_over_a_plus_collection(self) -> None:
@@ -537,8 +546,14 @@ class TestEntitlement(unittest.TestCase):
     def test_a_standard_reader_keeps_every_standard_collection(self) -> None:
         # The gate must bite on the `pro` shelf and nowhere else, or it is a
         # regression wearing a security fix's name.
-        for collection_id in ("funding", "legislation", "deals", "nagpra",
-                              "lobbying", "federal-register"):
+        for collection_id in (
+            "funding",
+            "legislation",
+            "deals",
+            "nagpra",
+            "lobbying",
+            "federal-register",
+        ):
             with self.subTest(collection=collection_id):
                 body = self._ask("reader@example.org", collection_id).json()
                 self.assertIsNone(body.get("access"), collection_id)
@@ -567,8 +582,10 @@ class TestEntitlement(unittest.TestCase):
         # ever called with a collection this plan cannot open, Cedar has been
         # handed a scope under a contract that says entitlement was already
         # checked.
-        with mock.patch.object(cedar_service, "available", return_value=True), \
-                mock.patch.object(cedar_service, "ask") as asked:
+        with (
+            mock.patch.object(cedar_service, "available", return_value=True),
+            mock.patch.object(cedar_service, "ask") as asked,
+        ):
             body = self._ask(
                 "reader@example.org", "need", "What should I conclude from this?"
             ).json()
@@ -577,8 +594,10 @@ class TestEntitlement(unittest.TestCase):
 
         # And the same question on a collection the plan does reach still gets
         # there, so the test above is not passing because the hop is dead.
-        with mock.patch.object(cedar_service, "available", return_value=True), \
-                mock.patch.object(cedar_service, "ask") as asked:
+        with (
+            mock.patch.object(cedar_service, "available", return_value=True),
+            mock.patch.object(cedar_service, "ask") as asked,
+        ):
             asked.return_value = cedar_service.CedarReply(
                 answer="composed", thread_id="t-1", unavailable=False
             )
@@ -586,9 +605,7 @@ class TestEntitlement(unittest.TestCase):
             # thing left that could answer it. "What does this collection
             # cover?" is answered off the release and never reaches Cedar,
             # which would make this control pass for the wrong reason.
-            self._ask(
-                "reader@example.org", "lobbying", "What should I conclude from this?"
-            )
+            self._ask("reader@example.org", "lobbying", "What should I conclude from this?")
         self.assertEqual(asked.call_count, 1)
         self.assertEqual(asked.call_args.kwargs["collection_id"], "lobbying")
 
@@ -612,9 +629,9 @@ class TestCedarConversation(unittest.TestCase):
         return client.post("/cedar/ask", json=body)
 
     def test_an_answer_a_reader_can_open_says_its_records_are_reachable(self) -> None:
-        basis = self._ask(
-            "reader@example.org", "What does this collection cover?", "deals"
-        ).json()["answerBasis"]
+        basis = self._ask("reader@example.org", "What does this collection cover?", "deals").json()[
+            "answerBasis"
+        ]
         self.assertEqual(basis["kind"], "release")
         self.assertIs(basis["opened"], True)
         self.assertEqual(basis["collectionId"], "deals")
@@ -628,17 +645,17 @@ class TestCedarConversation(unittest.TestCase):
         # used to offer them unconditionally: "View supporting records", one
         # sentence under an answer that had just said they open with Cedar
         # Press+.
-        basis = self._ask(
-            "reader@example.org", "What does this collection cover?", "need"
-        ).json()["answerBasis"]
+        basis = self._ask("reader@example.org", "What does this collection cover?", "need").json()[
+            "answerBasis"
+        ]
         self.assertEqual(basis["kind"], "release")
         self.assertIs(basis["opened"], False)
         self.assertEqual(basis["collectionId"], "need")
         # And the same collection on a plan that includes it, so the field is
         # tracking the entitlement and not the collection.
-        plus = self._ask(
-            "pro@example.org", "What does this collection cover?", "need"
-        ).json()["answerBasis"]
+        plus = self._ask("pro@example.org", "What does this collection cover?", "need").json()[
+            "answerBasis"
+        ]
         self.assertIs(plus["opened"], True)
 
     def test_a_question_with_no_collection_gets_one_question_back(self) -> None:
@@ -1012,8 +1029,12 @@ class TestShapeTheResearch(unittest.TestCase):
         self.assertEqual(hits[0]["id"], "ds-enterprise-ownership")
         sent = c.post(
             "/press/requests",
-            json={"text": text, "use_case": "credit analysis", "priority_id": hits[0]["id"],
-                  "support_points": 1},
+            json={
+                "text": text,
+                "use_case": "credit analysis",
+                "priority_id": hits[0]["id"],
+                "support_points": 1,
+            },
         )
         self.assertEqual(sent.status_code, 201, sent.text)
         self.assertEqual(sent.json()["status"], "associated")

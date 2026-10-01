@@ -21,7 +21,9 @@ import { fileURLToPath } from "node:url";
 const REPO = fileURLToPath(new URL("..", import.meta.url));
 const MAP = `${REPO}data/cedar/field_map.json`;
 const MANIFEST = `${REPO}data/cedar/collections.manifest.json`;
-const SAMPLES = `${REPO}public/data/cedar/samples/`;
+// This dated document describes the historical raw-field transformer.
+// Its counts must not be measured on already-projected current releases.
+const SAMPLES = `${REPO}server/tests/fixtures/legacy-preview/samples/`;
 const OUT_MAP = `${REPO}docs/FIELD_MAP_2026-09-05.md`;
 const OUT_RETIRE = `${REPO}docs/IDENTIFIER_RETIREMENT_2026-09-05.md`;
 
@@ -97,7 +99,7 @@ export function renderMap() {
   const byId = Object.fromEntries(manifest.collections.map((c) => [c.id, c]));
   const lines = [];
   const p = (s = "") => lines.push(s);
-  p("# Cedar Press datasets: the field-by-field map");
+  p("# Cedar Press datasets: historical field-by-field transform map");
   p();
   p("Generated from `data/cedar/field_map.json` by `scripts/field-map-markdown.mjs`; edit the JSON, not this file. Written 2026-09-05.");
   p();
@@ -105,7 +107,20 @@ export function renderMap() {
   p();
   p("The companion to the owner's exact public column specification (`docs/PUBLIC_DATASET_SPEC_2026-09-05.md`, addendum): for each flagship, every column its current sample header carries with one decision, the approved public header in the owner's exact order, the owner's default viewer selection, and a retirement entry for every competing entity identifier. The customer-file writer generates the export from this list (`code/1137_customer_dataset_combine.py` through `cedar_publication.apply_field_map`): it renames, drops what is internal or documented, fills the opening block from the register, builds the plural aligned arrays and the named rules, verifies every alias, orders the header exactly, and refuses a dataset that carries a column with no decision, an identifier awaiting adjudication, or a retired scheme's name in a shipped column or value. This pass changes columns, never rows, identities or publication eligibility.");
   p();
-  p("Written against the ten-row samples in `public/data/cedar/samples/`. The terminal validates each rename value for value and each combine across the full table before applying it, and proves the row count, record multiplicity, event identity, totals and eligibility are unchanged.");
+  p("This dated map describes historical raw inputs, retained as private regression fixtures in `server/tests/fixtures/legacy-preview/`. Current public previews are already-projected, verified producer spreadsheets; this map is not reapplied to them. Their field definitions, record types, grains and pinned releases are in `docs/DATASET_CODEBOOK.md` and the collection guides.");
+  p();
+  p("## Current public spreadsheet previews");
+  p();
+  p("| Collection | Public file | Permitted observations | Record types |");
+  p("|---|---|---:|---|");
+  for (const collection of manifest.collections) {
+    for (const table of collection.tables ?? []) {
+      if (!table.sample_path || !table.record_types) continue;
+      p(`| ${esc(collection.name ?? collection.id)} | \`${esc(table.table)}\` | ${table.rows_published ?? table.rows_in ?? "—"} | ${Object.entries(table.record_types).map(([kind, count]) => `${esc(kind)}: ${count}`).join("; ")} |`);
+    }
+  }
+  p();
+  p("Counts are permitted source observations, not unique Native entities or businesses. A CE association identifies the role stated on its row; owner, certifier and business are not interchangeable. NEED exposes only its evidence-pinned reviewed base; other NEED components retain their publication holds.");
   p();
   p("**Decisions:**");
   p();
@@ -181,8 +196,8 @@ export function renderMap() {
   p();
   p("- Every `combine`: the sources are tested for agreement across the full table before one column replaces them; until then the sources stay in the workspace and the target is absent.");
   p("- Every `derive` marked owed: the editorial `research_note` for Deals, the date precision for the Federal Register, the names as published for Legislation and NAGPRA from the bridge.");
-  p("- The Native-owned businesses map, written when its sample lands and the audit has run.");
-  p("- NEED remains under an independent systemic affiliation publication hold (owner ruling 2026-09-23), although `enterprise_existing_cedar_uid` is now internal-only. Nonprofits' `entity_id` and `cedar_spine_entity_id` still require adjudication; Funding's `attribution_status` vocabulary requires recoding. None is released by the NEED field ruling.");
+  p("- This historical Native-owned businesses map predates the current producer spreadsheet. The current row grain is a source certification or directory listing, not necessarily one unique business.");
+  p("- Historical NEED, Nonprofits and Funding transformation holds remain regression controls for those raw inputs. They do not describe the eligibility of a new producer release. NEED’s current exception is limited to the separately verified reviewed base and does not authorize the original held components.");
   p();
   return lines.join("\n") + "\n";
 }
@@ -191,7 +206,7 @@ export function renderRetirement() {
   const map = JSON.parse(readFileSync(MAP, "utf8"));
   const lines = [];
   const p = (s = "") => lines.push(s);
-  p("# Identifier retirement report");
+  p("# Historical identifier retirement report");
   p();
   p("Generated from `data/cedar/field_map.json` and the sample headers by `scripts/field-map-markdown.mjs`; edit the map, not this file. Written 2026-09-05 under the retirement rule in `docs/PUBLIC_DATASET_SPEC_2026-09-05.md` (addendum): migrate, reconcile, verify, retire, regression-test.");
   p();
@@ -199,7 +214,7 @@ export function renderRetirement() {
   p();
   p("`cedar_uid` is Cedar's one cross-dataset identity. Every competing entity identifier in a flagship's header has a retirement entry in the map with what it identifies and its disposition. The writer (`cedar_publication.apply_field_map`) enforces the dispositions on every build: an `alias_verified` column is compared to `cedar_uid` on every row and the dataset is refused where they differ; an `adjudicate` column stops the dataset wherever it is populated, and is neither retained nor deleted; a `retired_scheme` name in any shipped value, or a prohibited name in the header, stops the dataset. The regression tests (`server/tests/test_field_map.py` and the site's explore test suite) fail if a prohibited identifier returns to any approved header, and the writer fails at build if one returns to a value.");
   p();
-  p("`rows_affected` below is the count of rows carrying the identifier in the ten-row sample; the writer prints the full-table count on every build as `retired: dataset | old_identifier | what_it_identified | cedar_uid_or_replacement | disposition | rows_affected | unresolved_count`, and that line is the report row for the release.");
+  p("`rows_affected` below is the count in the historical raw test fixture, not the current public preview or the current release. The historical writer prints its full-table disposition count on its own build. Current release field and identity contracts are documented in `docs/DATASET_CODEBOOK.md`.");
   p();
   p("## Flagship identifiers");
   p();
@@ -219,7 +234,7 @@ export function renderRetirement() {
     }
   }
   p();
-  p("NEED remains blocked by a systemic affiliation publication hold, independently of its internal-only enterprise cross-reference. The owner ruling requires a full-route audit, negative controls and a stratified quality sample before promotion. Funding still requires recoding retired attribution vocabulary; Nonprofits still has distinct unadjudicated identity links. Preserve all evidence and issued IDs; do not erase a blocked claim to pass the gate.");
+  p("The entries above describe historical raw transform inputs and their unresolved dispositions, not current producer release eligibility. Current NEED publication is restricted to its separately evidence-pinned reviewed base; the original held components are not admitted. Preserve evidence and issued IDs, and distinguish CE associations, business identities and source record keys.");
   p();
   p("## Supporting tables");
   p();

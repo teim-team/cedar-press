@@ -8,6 +8,8 @@ publication policy remain the authority for serving bytes.
 import json
 from pathlib import Path
 
+from cedar_press import need_publication
+
 
 def component_declarations(collection_id: str) -> dict:
     """Maintained presentation metadata; never a runtime publication decision."""
@@ -38,7 +40,7 @@ SHARED_COLLECTIONS = {
     "need": {
         "name": "Native Entity Enterprise Dataset",
         "shelf": "pro",
-        "components": (),
+        "components": (need_publication.COMPONENT,),
     },
     "foundation-corporate-giving": {
         "name": "Foundation and Corporate Giving",
@@ -120,6 +122,15 @@ COMPONENT_COLUMNS = {
 
 
 def presentation(collection_id: str, component: str) -> dict | None:
+    if collection_id == "need" and component == need_publication.COMPONENT:
+        return {
+            "collection": "need",
+            "order": list(need_publication.FIELDS),
+            "fields": [
+                {"column": name, "decision": "keep", "rights_class": "PUBLIC_DERIVED"}
+                for name in need_publication.FIELDS
+            ],
+        }
     declared = component_declarations(collection_id).get(component)
     if declared is not None:
         return declared

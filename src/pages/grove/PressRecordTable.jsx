@@ -34,18 +34,20 @@ import { money, short } from "../../features/grove/recordColumns.js";
 import { scrollEdges } from "../../features/grove/scrollEdges.js";
 import SourceCitation from "./SourceCitation.jsx";
 import { safeSourceUrl } from "../../features/grove/sourcePresentation.js";
+import { readerValueLabel, unlinkedRecordSubject } from "../../features/grove/readerPresentation.js";
 
 export function Human({ column, value, contract, item = null }) {
   if (column === contract?.source && item?.sourceDetails) return <SourceCitation source={item.sourceDetails} compact />;
   if (["source_inbox", "source_files", "link_ledger_source_file", "source_dataset", "raw_path", "storage_path"].includes(column)) return "Retained in internal provenance";
-  if (value === "" || value == null || isBareScheme(value)) return "?";
+  if (value === "" || value == null || isBareScheme(value)) return "Not provided";
   const raw = String(value);
+  if (column === "record_type" && contract?.row_type_contracts?.[raw]?.label) return contract.row_type_contracts[raw].label;
   if (/^[A-Za-z]:[\\/]|^file:\/\/|^\\\\/.test(raw)) return "Retained in internal provenance";
   if (isWellFormedUrl(raw)) {
     const url = safeSourceUrl(raw.trim());
     return url ? <a href={url} target="_blank" rel="noreferrer">{url.replace(/^https?:\/\/(www\.)?/, "").slice(0, 80)}{url.length > 88 ? "?" : ""}</a> : "Source link unavailable";
   }
-  const text = readerText(raw);
+  const text = readerText(readerValueLabel(item?.collection, column, raw));
   // Money wherever the column is money: the table's amount, or any column
   // named in dollars (`_usd`, `_amt`, `obligations`, `amount`, `value_usd`).
   if (contract?.amount === column || /(_usd|_amt|obligations|_amount|amount_usd)$/i.test(column) || /^(income|expenses|spend)_/i.test(column)) {
@@ -79,11 +81,13 @@ function scopeLine(el) {
   return `${rel} ${scopeName(el.scope)}`;
 }
 
-export function EntityCell({ item }) {
+export function EntityCell({ item, subjectFirst = false }) {
   const { entities } = item.entity;
   const first = entities[0];
   const why = item.why ?? [];
+  const leadSubject = subjectFirst && !item.entity.withheld && item.linkStatus !== "withheld" ? item.subject : null;
   if (!first) {
+    const subject = unlinkedRecordSubject(item);
     // What the blank says is the table's own link status where it carries
     // one; a scope alone does not make a blank "no individual named", since
     // a notice can address a population AND name a party the register could
@@ -92,7 +96,7 @@ export function EntityCell({ item }) {
       ?? "not linked to an entity";
     return (
       <>
-        <em className="cp-ex__unkeyed">{blank}</em>
+        {subject ? <>{subject}<small className="cp-ex__uid">{blank}</small></> : <em className="cp-ex__unkeyed">{blank}</em>}
         {item.scopes?.length ? <small className="cp-ex__uid">{item.scopes.map(scopeLine).join("; ")}</small> : null}
         {why.length ? <small className="cp-ex__uid">Broad scope: {why.map(scopeLine).join("; ")}. The chosen entity is not individually named.</small> : null}
       </>
@@ -101,10 +105,13 @@ export function EntityCell({ item }) {
   return (
     <>
       {why.length ? <small className="cp-ex__uid">Broad scope: {why.map(scopeLine).join("; ")}. The chosen entity is not individually named.</small> : null}
-      {first.name ?? <em>{first.withheld ? WITHHELD_TEXT : first.uid}</em>}
+      {leadSubject ? <>{leadSubject}<small className="cp-ex__uid">{first.role ? readerValueLabel(item.collection, "cedar_entity_role", first.role) : "Associated entity"}: {first.name ?? first.uid}</small></> : <>
+        {first.name ?? <em>{first.withheld ? WITHHELD_TEXT : first.uid}</em>}
+        {first.role ? <small className="cp-ex__uid">Role: {readerValueLabel(item.collection, "cedar_entity_role", first.role)}</small> : null}
+      </>}
       {entities.length > 1 ? <small className="cp-ex__uid"> +{entities.length - 1} more</small> : null}
-      {first.uid ? <small className="cp-ex__uid">{item.entity.uids.join(" · ")}</small> : null}
-      {item.subject ? <small className="cp-ex__uid">record names: {item.subject}</small> : null}
+      {first.uid ? <small className="cp-ex__uid">{leadSubject ? "Associated entity ID: " : ""}{item.entity.uids.join(" · ")}</small> : null}
+      {item.subject && !leadSubject ? <small className="cp-ex__uid">record names: {item.subject}</small> : null}
     </>
   );
 }
@@ -177,10 +184,11 @@ export function Rows({ view, items, columns, sort, onSort, onActive, showAmount,
     ...(showAmount ? [["amount", "Amount"]] : []),
     ["source", "Source"],
   ];
-  const pinned = (c) => c === entityColumn || c === contract?.entity_uid;
+  const primaryColumn = contract?.subject && columns[0] === contract.subject ? contract.subject : entityColumn;
+  const pinned = (c) => c === primaryColumn || c === contract?.entity_uid;
   // The built source link has no column in the file, so no codebook label.
   const headLabel = (c) => (c === SOURCE_LINK_COLUMN ? "Source record" : labelFor(items[0]?.key, c));
-  const heads = view === "table" ? columns.map((c) => [c, headLabel(c), pinned(c), c === contract?.entity_uid ? " cp-ex__pin--uid" : c === entityColumn && contract?.entity_uid && columns.includes(contract.entity_uid) ? " cp-ex__pin--name" : ""]) : universal;
+  const heads = view === "table" ? columns.map((c) => [c, headLabel(c), pinned(c), c === contract?.entity_uid ? " cp-ex__pin--uid" : c === primaryColumn && contract?.entity_uid && columns.includes(contract.entity_uid) ? " cp-ex__pin--name" : ""]) : universal;
   return (
     // The wrapper exists for the edge fade: every cell paints its own
     // background, so a gradient on the scroller itself is painted over by
@@ -237,7 +245,7 @@ export function Rows({ view, items, columns, sort, onSort, onActive, showAmount,
                 )}
                 {view === "table"
                   ? columns.map((column) => (
-                    <td key={column} className={`${pinned(column) ? "cp-ex__pin" : ""}${column === contract?.entity_uid ? " cp-ex__pin--uid" : column === entityColumn && contract?.entity_uid && columns.includes(contract.entity_uid) ? " cp-ex__pin--name" : ""}${column === contract?.amount ? " cp-ex__amount" : ""}`}>
+                    <td key={column} className={`${pinned(column) ? "cp-ex__pin" : ""}${column === contract?.entity_uid ? " cp-ex__pin--uid" : column === primaryColumn && contract?.entity_uid && columns.includes(contract.entity_uid) ? " cp-ex__pin--name" : ""}${column === contract?.amount ? " cp-ex__amount" : ""}`}>
                       {column === entityColumn && item.superseded ? <span className="cp-ex__badge">Superseded</span> : null}
                       {column === entityColumn && item.entity.withheld
                         ? <em>{WITHHELD_TEXT}</em>
@@ -287,9 +295,12 @@ export function Cards({ items, onActive, openRecord, readOnly = false }) {
           <>
             <span className="cp-ex__cardwho">
               {item.superseded ? <span className="cp-ex__badge">Superseded</span> : null}
-              <EntityCell item={item} />
+              <EntityCell item={item} subjectFirst />
             </span>
-            <span className="cp-ex__cardmeta">{short(item.collection)} · {item.date ?? "undated"}{item.amount != null ? ` · ${money.format(item.amount)}` : ""}</span>
+            <span className="cp-ex__cardmeta">
+              {short(item.collection)} · {item.date ?? "undated"}{item.amount != null ? ` · ${money.format(item.amount)}` : ""}
+              {item.amount != null && item.amountBasis ? <small className="cp-ex__uid">{item.amountBasis}</small> : null}
+            </span>
             <span className="cp-ex__cardobs cp-ex__clamp">{item.observation || "—"}</span>
             {readOnly ? null : <span className="cp-ex__cardgo" aria-hidden="true">&#8594;</span>}
           </>

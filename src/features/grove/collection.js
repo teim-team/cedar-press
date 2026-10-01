@@ -59,6 +59,7 @@
 import { parseCsv, csvCell } from "./csv.js";
 import manifest from "../../../data/cedar/collections.manifest.json" with { type: "json" };
 import published from "../../../data/cedar/samples.published.json" with { type: "json" };
+import previewCodebook from "../../../data/cedar/codebook.json" with { type: "json" };
 
 import { CLAIM_CLASS } from "./claims.js";
 // The storefront's own naming. `pressCatalog.js` imports nothing, so this is
@@ -342,37 +343,59 @@ export function collectionFindings() {
     },
   ];
 
+  const availabilityNeeds = LAUNCH_COLLECTION.flatMap((dataset) => {
+    const facts = collectionCedarFacts(dataset.id);
+    const sample = collectionSample(dataset.id);
+    const missing = [];
+    if (!Number.isSafeInteger(facts?.n_rows) || facts.n_rows < 0) {
+      missing.push("The current release does not state a row count.");
+    }
+    if (!sample?.path) {
+      missing.push(sampleUnavailableReason(dataset.id) || "No preview file is published for the current release.");
+    }
+    return missing.length ? [{
+      id: `col-need-${dataset.id}-availability`,
+      text: `${dataset.name}: ${missing.join(" ")}`,
+      demonstration: false,
+    }] : [];
+  });
+  const withoutVintage = LAUNCH_COLLECTION.filter(
+    (dataset) => typeof dataset.vintage !== "string" || !dataset.vintage.trim(),
+  );
+  const vintageNeeds = withoutVintage.length ? [{
+    id: "col-need-vintage",
+    text: (withoutVintage.length === LAUNCH_COLLECTION.length
+      ? "No collection states a vintage."
+      : `A collection vintage is not stated for: ${withoutVintage.map((dataset) => dataset.name).join("; ")}.`)
+      + " An update date does not establish the periods covered by every source.",
+    demonstration: false,
+  }] : [];
+
   const needs = [
     {
       id: "col-need-closing",
-      text: "Three large announced deals await closing confirmation before they enter totals (Deals, primary source pending).",
+      text: "Demonstration: Three large announced deals await closing confirmation before they enter totals (Deals, primary source pending).",
+      demonstration: true,
     },
     {
       id: "col-need-fy26",
-      text: "FY2026 assistance figures are partial until the Q1 release lands (Funding, USAspending publication lag).",
+      text: "Demonstration: FY2026 assistance figures are partial until the Q1 release lands (Funding, USAspending publication lag).",
+      demonstration: true,
     },
     {
       id: "col-need-matches",
-      text: "Two parent-entity matches are provisional pending SAM re-registration (Contractors, entity resolution queue).",
+      text: "Demonstration: Two parent-entity matches are provisional pending SAM re-registration (Contractors, entity resolution queue).",
+      demonstration: true,
     },
-    {
-      id: "col-need-owned-terms",
-      text: "White Earth listings enter entity rows once the nation confirms publication terms; aggregates only until then (Owned, consent pending).",
-    },
-    {
-      id: "col-need-owned-membership",
-      text: "Native-Owned Businesses publishes no row count and no preview file: the table Cedar names as the collection's flagship is not one its collection contract claims, and the two memberships have not been reconciled (Owned, collection membership unresolved).",
-    },
-    {
-      id: "col-need-vintage",
-      text: "No collection states a vintage: Cedar's cadence measurement produced no newest-held period for any of them, so the field is absent rather than estimated.",
-    },
+    ...availabilityNeeds,
+    ...vintageNeeds,
   ];
 
   const narratives = [
     {
       id: "col-lead-energy",
-      name: "Energy project financing expansion",
+      name: "Demonstration: Energy project financing expansion",
+      demonstration: true,
       have: 3,
       need: 3,
       missing: [],
@@ -380,7 +403,8 @@ export function collectionFindings() {
     },
     {
       id: "col-lead-8a",
-      name: "8(a) participation and award growth",
+      name: "Demonstration: 8(a) participation and award growth",
+      demonstration: true,
       have: 3,
       need: 3,
       missing: [],
@@ -388,7 +412,8 @@ export function collectionFindings() {
     },
     {
       id: "col-lead-assist",
-      name: "Assistance shifts under new appropriations",
+      name: "Demonstration: Assistance shifts under new appropriations",
+      demonstration: true,
       have: 2,
       need: 3,
       missing: ["Q1 release"],
@@ -553,6 +578,18 @@ export function collectionCsv(datasetId, sampleText) {
   const sample = SAMPLES[datasetId];
   if (!sample?.path || sampleText == null) return null;
   const { columns, rows } = parseCsv(sampleText);
+  if (sample.path.endsWith("/spreadsheet__10.csv")) {
+    // The current release replaces historical previews. A cached response
+    // with the old schema must not acquire a citation for the new release.
+    const table = sample.table;
+    const key = typeof table === "string" && table.endsWith(".csv")
+      ? `${datasetId}/${table.slice(0, -4)}` : null;
+    const expected = previewCodebook.tables[key]?.fields?.map((field) => field.column);
+    if (!expected || columns.length !== expected.length
+        || expected.length !== sample.columns
+        || columns.some((column, index) => column !== expected[index])
+        || rows.length !== sample.rows) return null;
+  }
   const citation = collectionCitation(datasetId) ?? "";
   return [
     [...columns, "cite_as"],
@@ -574,4 +611,43 @@ export function hasSample(datasetId) {
 /** Where the browser fetches a collection's preview file, or `null`. */
 export function samplePath(datasetId) {
   return collectionPublicationHold(datasetId) ? null : SAMPLES[datasetId]?.path ?? null;
+}
+
+/**
+ * Validate the public manifest binding for NEED's reviewed finite component,
+ * then compare the fetched CSV bytes. The private proof envelope stays off
+ * the client; staging verifies it before publishing this digest.
+ */
+export async function reviewedPreviewTextMatches(sampleText, sample, proof) {
+  const sha256 = (value) => typeof value === "string" && /^[a-f0-9]{64}$/.test(value);
+  if (typeof sampleText !== "string"
+      || sample?.table !== "need.csv"
+      || sample?.path !== "/data/cedar/samples/need/spreadsheet__10.csv"
+      || proof?.component !== "reviewed_public_base"
+      || proof?.envelope !== "data/cedar/need-reviewed-preview.json"
+      || !sha256(proof?.envelope_sha256)
+      || !sha256(proof?.sample_sha256)
+      || !sha256(sample?.release_id) || sample.release_id !== proof?.release_id
+      || !sha256(sample?.manifest_sha256) || sample.manifest_sha256 !== proof?.manifest_sha256
+      || !Number.isSafeInteger(proof?.public_records) || proof.public_records <= 0
+      || proof.public_records !== sample?.of
+      || !Number.isSafeInteger(sample?.rows) || sample.rows <= 0 || sample.rows > sample.of
+      || !Number.isSafeInteger(sample?.columns) || sample.columns <= 0) return false;
+  try {
+    const subtle = globalThis.crypto?.subtle;
+    if (!subtle) return false;
+    const bytes = new TextEncoder().encode(sampleText);
+    const digest = await subtle.digest("SHA-256", bytes);
+    const actual = Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
+    return actual === proof.sample_sha256;
+  } catch {
+    return false;
+  }
+}
+
+/** Exact-byte verification is required for NEED's reviewed public component. */
+export async function sampleTextMatchesRelease(datasetId, sampleText) {
+  if (datasetId !== "need") return true;
+  const proof = manifest.collections.find((entry) => entry.id === datasetId)?.verified_preview;
+  return reviewedPreviewTextMatches(sampleText, SAMPLES[datasetId], proof);
 }

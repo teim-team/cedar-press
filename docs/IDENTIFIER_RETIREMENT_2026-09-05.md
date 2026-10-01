@@ -1,4 +1,4 @@
-# Identifier retirement report
+# Historical identifier retirement report
 
 Generated from `data/cedar/field_map.json` and the sample headers by `scripts/field-map-markdown.mjs`; edit the map, not this file. Written 2026-09-05 under the retirement rule in `docs/PUBLIC_DATASET_SPEC_2026-09-05.md` (addendum): migrate, reconcile, verify, retire, regression-test.
 
@@ -6,7 +6,7 @@ Generated from `data/cedar/field_map.json` and the sample headers by `scripts/fi
 
 `cedar_uid` is Cedar's one cross-dataset identity. Every competing entity identifier in a flagship's header has a retirement entry in the map with what it identifies and its disposition. The writer (`cedar_publication.apply_field_map`) enforces the dispositions on every build: an `alias_verified` column is compared to `cedar_uid` on every row and the dataset is refused where they differ; an `adjudicate` column stops the dataset wherever it is populated, and is neither retained nor deleted; a `retired_scheme` name in any shipped value, or a prohibited name in the header, stops the dataset. The regression tests (`server/tests/test_field_map.py` and the site's explore test suite) fail if a prohibited identifier returns to any approved header, and the writer fails at build if one returns to a value.
 
-`rows_affected` below is the count of rows carrying the identifier in the ten-row sample; the writer prints the full-table count on every build as `retired: dataset | old_identifier | what_it_identified | cedar_uid_or_replacement | disposition | rows_affected | unresolved_count`, and that line is the report row for the release.
+`rows_affected` below is the count in the historical raw test fixture, not the current public preview or the current release. The historical writer prints its full-table disposition count on its own build. Current release field and identity contracts are documented in `docs/DATASET_CODEBOOK.md`.
 
 ## Flagship identifiers
 
@@ -33,7 +33,7 @@ Generated from `data/cedar/field_map.json` and the sample headers by `scripts/fi
 | `owned` | `nation_id` | source-associated nation or authority context from source configuration or staging; not the business legal identity | Preserve internally as unvalidated source context; no automatic equivalence to certifying_authority_entity_id or cedar_uid. | internal_crosswalk | — | 0 |
 | `owned` | `business_entity_id` | the business as a register entity, where the identity system assigns one | kept as business_entity_id | object_id | — | 0 |
 
-NEED remains blocked by a systemic affiliation publication hold, independently of its internal-only enterprise cross-reference. The owner ruling requires a full-route audit, negative controls and a stratified quality sample before promotion. Funding still requires recoding retired attribution vocabulary; Nonprofits still has distinct unadjudicated identity links. Preserve all evidence and issued IDs; do not erase a blocked claim to pass the gate.
+The entries above describe historical raw transform inputs and their unresolved dispositions, not current producer release eligibility. Current NEED publication is restricted to its separately evidence-pinned reviewed base; the original held components are not admitted. Preserve evidence and issued IDs, and distinguish CE associations, business identities and source record keys.
 
 ## Supporting tables
 

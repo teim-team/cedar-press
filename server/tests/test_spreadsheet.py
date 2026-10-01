@@ -115,13 +115,26 @@ class SpreadsheetUnion(unittest.TestCase):
         with (
             patch.object(repository, "assert_collection_publishable"),
             patch.object(repository, "is_component_release", return_value=True),
-            patch.object(repository, "grove_release_pin", return_value={"release_id": "c" * 64}),
+            patch.object(
+                repository,
+                "grove_release_pin",
+                return_value={
+                    "release_id": "c" * 64,
+                    "manifest_sha256": hashlib.sha256(
+                        repository._canonical_bytes(manifest)
+                    ).hexdigest(),
+                },
+            ),
             patch.object(repository, "_grove_catalog"),
             patch.object(repository, "_grove_manifest", return_value=manifest),
             patch.object(repository, "grove_components", return_value=("awards", "payments")),
             patch.object(repository, "_grove_component_release", side_effect=component),
         ):
             result = spreadsheet.download("fixture", "c" * 64)
+            self.assertEqual(
+                result["manifest_sha256"],
+                hashlib.sha256(repository._canonical_bytes(manifest)).hexdigest(),
+            )
             with result["content_file"] as content:
                 rows = list(csv.DictReader(io.StringIO(content.read().decode())))
             self.assertEqual(len(rows), 2)

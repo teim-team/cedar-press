@@ -37,7 +37,7 @@ from typing import Any
 from urllib.parse import urlparse
 from urllib.request import HTTPRedirectHandler, Request, build_opener
 
-from cedar_press import collection_profiles, governed_collections, press_catalog
+from cedar_press import collection_profiles, governed_collections, need_publication, press_catalog
 from cedar_press import collections as launch
 
 #: Which shelf each plan reaches. Mirrors ``PLAN_REACH`` in
@@ -267,6 +267,13 @@ def collection_csv(collection_id: str) -> str | None:
     tables are not served from this repository; ``collection_tables`` carries
     what a serving layer needs to find them.
     """
+    if collection_id == "need":
+        preview = launch.collection_csv(collection_id)
+        if preview is None:
+            raise ComponentPublicationHeld(
+                "NEED preview requires its exact reviewed public-base proof"
+            )
+        return preview
     assert_collection_publishable(collection_id)
     return launch.collection_csv(collection_id)
 
@@ -1183,6 +1190,10 @@ def grove_component_contract(
     contract = manifest["components"].get(component)
     if not isinstance(contract, dict):
         raise FullReleaseUnavailable("Component is not in the pinned release")
+    if collection_id == "need" and not need_publication.reviewed_base_permitted(
+        manifest, component, contract
+    ):
+        raise ComponentPublicationHeld("Only the evidence-pinned NEED reviewed base is public")
     metadata = contract.get("metadata", {})
     if not isinstance(metadata, dict):
         raise FullReleaseUnavailable("Malformed component metadata")
@@ -1393,6 +1404,7 @@ def _grove_component_release(pin, manifest, component, *, metadata_only=False):
             "fields": header,
             "table_id": component,
             "scope": "One governed component of a pinned collection release",
+            **need_publication.descriptor_metadata(manifest, component),
             "format": "jsonl",
             "records_sha256": expected["sha256"],
             "download_path": route,
@@ -1438,7 +1450,8 @@ def grove_full_release(
         raise FullReleaseUnavailable("A Grove release names a well-formed component")
     if component not in grove_components(collection_id):
         raise FullReleaseUnavailable("Component is not offered for this collection")
-    assert_collection_publishable(collection_id)
+    if collection_id != "need" or component != need_publication.COMPONENT:
+        assert_collection_publishable(collection_id)
     try:
         pin = grove_release_pin(collection_id)
         release_id = pin["release_id"]
@@ -1446,6 +1459,7 @@ def grove_full_release(
             raise FullReleaseUnavailable("Requested release is not the approved catalog pin")
         _grove_catalog(pin)
         manifest = _grove_manifest(pin)
+        assert_collection_publishable(collection_id, manifest=manifest, component=component)
         return _grove_component_release(pin, manifest, component, metadata_only=metadata_only)
     except FullReleaseUnavailable:
         raise
@@ -1468,12 +1482,16 @@ def grove_release_metadata(collection_id):
         {"kind": "full", "table_id": name, "status": "unavailable"} for name in components
     ]
     try:
-        assert_collection_publishable(collection_id)
+        if collection_id != "need" or not os.environ.get("CEDAR_PRESS_COMPONENT_RELEASE_PIN"):
+            assert_collection_publishable(collection_id)
         pin = grove_release_pin(collection_id)
         _grove_catalog(pin)
         manifest = _grove_manifest(pin)
+        assert_collection_publishable(
+            collection_id, manifest=manifest, component=need_publication.COMPONENT
+        )
     except GroveReleaseNotPinned:
-        return None
+        return unavailable if collection_id == "need" else None
     except (
         FullReleaseUnavailable,
         OSError,
@@ -1501,7 +1519,7 @@ def grove_release_metadata(collection_id):
     return out
 
 
-def assert_collection_publishable(collection_id):
+def assert_collection_publishable(collection_id, *, manifest=None, component=None):
     """Run the maintained policy before component selection or release lookup."""
     try:
         policy = _publication_policy()
@@ -1510,6 +1528,16 @@ def assert_collection_publishable(collection_id):
     try:
         policy.assert_collection_publishable(collection_id)
     except policy.FieldMapRefusal as error:
+        if (
+            collection_id == "need"
+            and isinstance(manifest, dict)
+            and component == need_publication.COMPONENT
+        ):
+            entry = manifest.get("components", {}).get(component)
+            if isinstance(entry, dict) and need_publication.reviewed_base_permitted(
+                manifest, component, entry
+            ):
+                return
         raise FullReleaseUnavailable("Collection publication is held") from error
 
 

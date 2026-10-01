@@ -52,6 +52,7 @@ import { recordStructure } from "./pressRecordStructure.js";
 import { safeSourceUrl, sourcePresentation } from "./sourcePresentation.js";
 import { PRESS_CATALOG_BY_ID, STOREFRONT_CATALOG } from "./pressCatalog.js";
 import { firstUrl } from "./readerValues.js";
+import { readerValueLabel } from "./readerPresentation.js";
 
 export const CONTRACTS = Object.freeze(explore.tables);
 
@@ -236,15 +237,42 @@ export function rowEntities(row, contract, register = EMPTY_REGISTER) {
   const uids = rowUids(row, contract);
   const ownName = cell(row, contract?.entity_name) || null;
   const ownType = cell(row, contract?.entity_type) || null;
-  const primary = uids.length
-    ? uids.map((uid, i) => {
-      const known = register.byUid.get(uid);
-      if (known) return { uid, name: known.withheld ? null : known.name, type: known.type, withheld: known.withheld, role: null };
-      // Unknown to the register: the table's own columns describe the first
-      // uid only; the rest are uids and nothing more.
-      return { uid, name: i === 0 ? ownName : null, type: i === 0 ? ownType : null, withheld: false, role: null };
-    })
-    : ownName ? [{ uid: null, name: ownName, type: ownType, withheld: false, role: null }] : [];
+  const names = contract?.entity_name_list ? listCell(ownName) : null;
+  const types = contract?.entity_type_list ? listCell(ownType) : null;
+  const rawRoles = cell(row, contract?.entity_role_column);
+  const roles = contract?.entity_role_list ? listCell(rawRoles) : null;
+  // Keep source positions until after all aligned values have been read:
+  // filtering null ids first would attach the next party's name or role.
+  const positions = contract?.entity_uid_list
+    ? listCell(cell(row, contract?.entity_uid))
+    : uids;
+  const primary = [];
+  const seen = new Map();
+  positions.forEach((uid, index) => {
+    if (!UID.test(uid)) return;
+    const role = (roles ? roles[index] : rawRoles) || null;
+    const existing = seen.get(uid);
+    if (existing) {
+      if (role && role !== existing.role && !(existing.roles ?? []).includes(role)) {
+        existing.roles = [...(existing.roles ?? []), role];
+      }
+      return;
+    }
+    const known = register.byUid.get(uid);
+    const entry = known
+      ? { uid, name: known.withheld ? null : known.name, type: known.type, withheld: known.withheld, role }
+      : {
+        uid,
+        name: names ? names[index] || null : index === 0 ? ownName : null,
+        type: types ? types[index] || null : index === 0 ? ownType : null,
+        withheld: false, role,
+      };
+    seen.set(uid, entry);
+    primary.push(entry);
+  });
+  if (!primary.length && ownName && !contract?.entity_name_list) {
+    primary.push({ uid: null, name: ownName, type: ownType, withheld: false, role: rawRoles || null });
+  }
   // THE OTHER ROLES. A subaward names the prime's owner and the sub's; a
   // NAGPRA notice names who was consulted and who receives; a payment names
   // a beneficiary. The contract declares those columns with their roles, and
@@ -399,7 +427,19 @@ export function rowEntity(row, contract, register = EMPTY_REGISTER) {
  * are different time bases. A table with no year column answers from the
  * date's calendar year, and the contract's `year_basis` says so.
  */
+
+/** Component-qualified meanings apply only to their declared record type. */
+function contractForRow(row, contract) {
+  if (!contract?.row_type_contracts) return contract;
+  const own = contract.row_type_contracts[cell(row, contract.record_type)];
+  // Unknown record kinds must not borrow another component's source or dates.
+  return own
+    ? { ...contract, ...own, row_type_contracts: null }
+    : { ...contract, source: null, source_fallback: null, source_builder: null, date: null, year: null, row_type_contracts: null };
+}
+
 export function rowYear(row, contract) {
+  contract = contractForRow(row, contract);
   if (contract?.year) {
     const year = cell(row, contract.year);
     return /^\d{4}(\.0+)?$/.test(year) ? Number.parseInt(year, 10) : null;
@@ -411,6 +451,7 @@ export function rowYear(row, contract) {
 
 /** The row's date, to the day where the table has one, else its year. */
 export function rowDate(row, contract) {
+  contract = contractForRow(row, contract);
   const date = cell(row, contract?.date);
   const day = /^(\d{4}-\d{2}-\d{2})/.exec(date);
   if (day) return day[1];
@@ -504,12 +545,15 @@ export const SOURCE_BUILDER_KINDS = Object.freeze([
  * is the link and the rest stays in the record as data.
  */
 export function rowSource(row, contract) {
-  return safeSourceUrl(firstUrl(cell(row, contract?.source))) ?? safeSourceUrl(builtSource(row, contract));
+  contract = contractForRow(row, contract);
+  return safeSourceUrl(firstUrl(cell(row, contract?.source)))
+    ?? safeSourceUrl(firstUrl(cell(row, contract?.source_fallback)))
+    ?? safeSourceUrl(builtSource(row, contract));
 }
 
 /** Whether the table says where a record's link comes from at all. */
 export function declaresSource(contract) {
-  return Boolean(contract?.source || contract?.source_builder);
+  return Boolean(contract?.source || contract?.source_builder || Object.values(contract?.row_type_contracts ?? {}).some(declaresSource));
 }
 
 /**
@@ -552,10 +596,15 @@ const OBSERVATION_LIMIT = 180;
  * most telling first. Values, not labels; pipes are the collections' own
  * list separator. The full record is one click away, so this stops at 180.
  */
-export function observationOf(row, contract) {
+export function observationOf(row, contract, collection = null) {
   const parts = [];
+  const reviewedOwnership = collection === "need" && cell(row, "relationship_type") === "owned_by" && cell(row, "ownership_extent") === "wholly_owned" && cell(row, "owner_name");
+  if (reviewedOwnership) {
+    parts.push(`Wholly owned by ${cell(row, "owner_name")}${cell(row, "owner_scope") === "immediate" ? " (immediate owner)" : ""}`);
+  }
   for (const column of contract?.observation ?? []) {
-    const value = cell(row, column).replace(/\s*\|\s*/g, ", ").replace(/\s+/g, " ");
+    if (reviewedOwnership && ["owner_name", "ownership_extent", "relationship_type"].includes(column)) continue;
+    const value = readerValueLabel(collection, column, cell(row, column)).replace(/\s*\|\s*/g, ", ").replace(/\s+/g, " ");
     if (value && !parts.includes(value)) parts.push(value);
   }
   const line = parts.join(" · ");
@@ -568,7 +617,15 @@ export function observationOf(row, contract) {
  * and the download all read the masked row and never the raw one.
  */
 export function publicRow(row, contract, entity) {
-  if (!entity?.withheld || !contract?.entity_name) return row;
+  if (!contract?.entity_name) return row;
+  if (contract.entity_name_list) {
+    const withheld = new Set((entity?.entities ?? []).filter(e => e.withheld).map(e => e.uid));
+    if (!withheld.size) return row;
+    const ids = listCell(cell(row, contract.entity_uid));
+    const names = listCell(cell(row, contract.entity_name));
+    return { ...row, [contract.entity_name]: JSON.stringify(names.map((name, i) => withheld.has(ids[i]) ? WITHHELD_TEXT : name)) };
+  }
+  if (!entity?.withheld) return row;
   return { ...row, [contract.entity_name]: WITHHELD_TEXT };
 }
 
@@ -579,17 +636,18 @@ export const WITHHELD_TEXT = "[name withheld]";
  * record's own id, so a row can be cited and found again in the release;
  * the position is the fallback for a table with no id column.
  */
-export function universalRows(key, rows, register = EMPTY_REGISTER) {
-  const contract = contractFor(key);
+export function universalRows(key, rows, register = EMPTY_REGISTER, contract = contractFor(key)) {
   const [collection] = key.split("/");
   return rows.map((raw, i) => {
     const entity = rowEntity(raw, contract, register);
     const row = publicRow(raw, contract, entity);
     const recordId = rowRecordId(row, contract);
+    const recordType = contract?.record_type ? cell(row, contract.record_type) : null;
     const subject = cell(row, contract?.subject) || null;
     return {
-      id: recordId ? `${key}:${recordId}` : `${key}#${i}`,
+      id: recordId ? `${key}:${recordType === null ? "" : `${recordType}:`}${recordId}` : `${key}#${i}`,
       recordId,
+      recordType,
       // The row's position in this table's published sample. It is how the
       // record page addresses a row whose table declares no id column, so it
       // is the FILE's order and never a filtered or sorted one.
@@ -603,12 +661,12 @@ export function universalRows(key, rows, register = EMPTY_REGISTER) {
       year: rowYear(row, contract),
       date: rowDate(row, contract),
       amount: rowAmount(row, contract),
-      amountBasis: rowAmountBasis(row, contract),
+      amountBasis: readerValueLabel(collection, contract?.amount_basis, rowAmountBasis(row, contract)),
       source: rowSource(row, contract),
       sourceDetails: sourcePresentation(collection, row, rowSource(row, contract)),
       superseded: rowSuperseded(row, contract),
       replacement: rowReplacement(row, contract),
-      observation: observationOf(row, contract),
+      observation: observationOf(row, contract, collection),
       row,
     };
   });

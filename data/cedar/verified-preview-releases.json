@@ -1,0 +1,1235 @@
+{
+  "schema_version": 1,
+  "producer_commit": "cf29ec3100a9e7762d46280d3a7b1d6074437329",
+  "updated": "2026-10-01",
+  "collections": {
+    "contractors": {
+      "release_id": "4df9d034a1bbb9b788ba63b5106a37e2da48cecb1c5ffdb2345a03e01456c7e3",
+      "manifest_sha256": "af58f9e60ac426b7ecac4f47dcf756bf1d48fa3282875ca8774587d6345fedb9",
+      "spreadsheet_sha256": "b1c4ef30d84d357bdbfd3cf766b1d6db564ce72566e877ba66d8932e47c0d0a0",
+      "spreadsheet_bytes": 990147521,
+      "public_records": 841002,
+      "held_records_in_selected_groups": 0,
+      "record_types": {
+        "prime_contracts": 841002
+      },
+      "sample_rows": 10,
+      "sample_sha256": "8e212326aa039f50f1e82ce4012f75e82dc24f051564f938b2dc60fef3134dae",
+      "sample_path": "review-samples/contractors.csv",
+      "release_class": "rehearsal",
+      "storefront_asset": true,
+      "unharmonized_fields": []
+    },
+    "deals": {
+      "release_id": "f9f50ccadc3bfe10089e47a0c8710a3ac382651703571f38ed6a2d57ba47623b",
+      "manifest_sha256": "4b0d66e63056992c7f5fe11dbe681131f46993822eea760ab568116b7ff10d7d",
+      "spreadsheet_sha256": "78bc53e654ce7b5b32a5c73fec171e2f19368b9f24bfb852d6030adef3ea0bf7",
+      "spreadsheet_bytes": 1650731,
+      "public_records": 978,
+      "held_records_in_selected_groups": 0,
+      "record_types": {
+        "records": 978
+      },
+      "sample_rows": 10,
+      "sample_sha256": "5cbfcbdfc0e8c852c3269cae2caeeb90b95e97b7e9046cea8ab5858b6f9ad039",
+      "sample_path": "review-samples/deals.csv",
+      "release_class": "rehearsal",
+      "storefront_asset": true,
+      "unharmonized_fields": []
+    },
+    "federal-register": {
+      "release_id": "c28a84fb4e008363499eb23dbac5030ba2f279f90924ded090ddc6e251b711c2",
+      "manifest_sha256": "630ae48a8f548cd86c3ddc19935a7b1221ce6fa081e99521d2d23bcbd92ee8fa",
+      "spreadsheet_sha256": "a8d72548beaa8995761a76dc8f1953f3c1058abfcc76c15a730b728891e2450d",
+      "spreadsheet_bytes": 31750119,
+      "public_records": 21258,
+      "held_records_in_selected_groups": 0,
+      "record_types": {
+        "consultation_participants": 11402,
+        "federal_actions": 9856
+      },
+      "sample_rows": 10,
+      "sample_sha256": "7eb20b7903fae1a429cc9aed7156d8215a553c0dc35b596a49d758564717bf2d",
+      "sample_path": "review-samples/federal-register.csv",
+      "release_class": "rehearsal",
+      "storefront_asset": true,
+      "unharmonized_fields": [
+        {
+          "record_type": "consultation_participants",
+          "field": "source_system",
+          "column": "consultation_participants__source_system"
+        },
+        {
+          "record_type": "consultation_participants",
+          "field": "source_url",
+          "column": "consultation_participants__source_url"
+        },
+        {
+          "record_type": "federal_actions",
+          "field": "source_url",
+          "column": "federal_actions__source_url"
+        },
+        {
+          "record_type": "federal_actions",
+          "field": "source_system",
+          "column": "federal_actions__source_system"
+        }
+      ]
+    },
+    "foundation-corporate-giving": {
+      "release_id": "4de9e836933499c5cb083599f2623fa99c99a6d14cfa65b7256a569750a902ec",
+      "manifest_sha256": "8a5b510263dea665941119e508b1e9218513c980f936397dcdf7f2c1c3c2f1a1",
+      "spreadsheet_sha256": "8095eb019f826d4f6172dda65bfcce387209f36240127ec8079a48a1d6e7b967",
+      "spreadsheet_bytes": 158533,
+      "public_records": 193,
+      "held_records_in_selected_groups": 0,
+      "record_types": {
+        "policy_eligible_disclosures": 155,
+        "reviewed_disclosures": 38
+      },
+      "sample_rows": 10,
+      "sample_sha256": "10ac9263cabd73f0fa907e8aae27515e0942c64e6fecf455ec04a462fcf194c5",
+      "sample_path": "review-samples/foundation-corporate-giving.csv",
+      "release_class": "rehearsal",
+      "storefront_asset": false,
+      "unharmonized_fields": []
+    },
+    "funding": {
+      "release_id": "6ba2dd2144d0a7cad1a0e8b57e801f170cbd47c4c5464d38c42b97999c0a837c",
+      "manifest_sha256": "b8cb82e73c18f082967cd80a28261e5a2eb7c4ff9de69dd898dd53ee2e7dae51",
+      "spreadsheet_sha256": "cbb839792a0c195d3e9935e4c8c4b7f8aa5b6230a85d586cd1dd4dbaf77b55d2",
+      "spreadsheet_bytes": 491576202,
+      "public_records": 640942,
+      "held_records_in_selected_groups": 0,
+      "record_types": {
+        "federal_funding_transactions": 640942
+      },
+      "sample_rows": 10,
+      "sample_sha256": "81d5e08ab98b2b60a780ac2cbba1b39e75bc6f08ae15fdd5eed8127239f39f46",
+      "sample_path": "review-samples/funding.csv",
+      "release_class": "rehearsal",
+      "storefront_asset": true,
+      "unharmonized_fields": []
+    },
+    "gaming": {
+      "release_id": "e7223346489e0def0301c75dce224bcb70f6e3e54d1cd7e0b9686694b9560fc8",
+      "manifest_sha256": "cfeae9b98e10911296f1b4663911784d7de2fea4e86c5c592d728ac1403a650c",
+      "spreadsheet_sha256": "44d37101c6d65bbf983e9d4ad996bb761326ee9f279580b959802bbc2824ee60",
+      "spreadsheet_bytes": 91973719,
+      "public_records": 68340,
+      "held_records_in_selected_groups": 0,
+      "record_types": {
+        "gaming_compact_versions": 1158,
+        "gaming_compacts": 707,
+        "gaming_financial_disclosures": 1578,
+        "gaming_government_payments": 52129,
+        "gaming_land_eligibility": 240,
+        "gaming_regional_revenue": 224,
+        "gaming_regulatory_events": 3776,
+        "gaming_reported_revenue_observations": 8508,
+        "gaming_revenue_bands": 20
+      },
+      "sample_rows": 10,
+      "sample_sha256": "25a20f5c33f677115929ca464617d5f90249edde874814662797add0fad281f9",
+      "sample_path": "review-samples/gaming.csv",
+      "release_class": "rehearsal",
+      "storefront_asset": false,
+      "unharmonized_fields": [
+        {
+          "record_type": "gaming_compact_versions",
+          "field": "version_id",
+          "column": "gaming_compact_versions__version_id"
+        },
+        {
+          "record_type": "gaming_compact_versions",
+          "field": "compact_id",
+          "column": "gaming_compact_versions__compact_id"
+        },
+        {
+          "record_type": "gaming_compact_versions",
+          "field": "state",
+          "column": "gaming_compact_versions__state"
+        },
+        {
+          "record_type": "gaming_compact_versions",
+          "field": "tribe_name_as_published",
+          "column": "gaming_compact_versions__tribe_name_as_published"
+        },
+        {
+          "record_type": "gaming_compact_versions",
+          "field": "cedar_uid",
+          "column": "gaming_compact_versions__cedar_uid"
+        },
+        {
+          "record_type": "gaming_compact_versions",
+          "field": "approval_type",
+          "column": "gaming_compact_versions__approval_type"
+        },
+        {
+          "record_type": "gaming_compact_versions",
+          "field": "fr_document_number",
+          "column": "gaming_compact_versions__fr_document_number"
+        },
+        {
+          "record_type": "gaming_compact_versions",
+          "field": "regulatory_event_id",
+          "column": "gaming_compact_versions__regulatory_event_id"
+        },
+        {
+          "record_type": "gaming_compact_versions",
+          "field": "source_system",
+          "column": "gaming_compact_versions__source_system"
+        },
+        {
+          "record_type": "gaming_compact_versions",
+          "field": "source_record_id",
+          "column": "gaming_compact_versions__source_record_id"
+        },
+        {
+          "record_type": "gaming_compact_versions",
+          "field": "source_url",
+          "column": "gaming_compact_versions__source_url"
+        },
+        {
+          "record_type": "gaming_compact_versions",
+          "field": "source_date",
+          "column": "gaming_compact_versions__source_date"
+        },
+        {
+          "record_type": "gaming_compact_versions",
+          "field": "retrieved_date",
+          "column": "gaming_compact_versions__retrieved_date"
+        },
+        {
+          "record_type": "gaming_compact_versions",
+          "field": "rights_class",
+          "column": "gaming_compact_versions__rights_class"
+        },
+        {
+          "record_type": "gaming_compacts",
+          "field": "compact_id",
+          "column": "gaming_compacts__compact_id"
+        },
+        {
+          "record_type": "gaming_compacts",
+          "field": "state",
+          "column": "gaming_compacts__state"
+        },
+        {
+          "record_type": "gaming_compacts",
+          "field": "tribe_name_as_published",
+          "column": "gaming_compacts__tribe_name_as_published"
+        },
+        {
+          "record_type": "gaming_compacts",
+          "field": "cedar_uid",
+          "column": "gaming_compacts__cedar_uid"
+        },
+        {
+          "record_type": "gaming_compacts",
+          "field": "approval_type",
+          "column": "gaming_compacts__approval_type"
+        },
+        {
+          "record_type": "gaming_compacts",
+          "field": "fr_document_number",
+          "column": "gaming_compacts__fr_document_number"
+        },
+        {
+          "record_type": "gaming_compacts",
+          "field": "status",
+          "column": "gaming_compacts__status"
+        },
+        {
+          "record_type": "gaming_compacts",
+          "field": "status_basis",
+          "column": "gaming_compacts__status_basis"
+        },
+        {
+          "record_type": "gaming_compacts",
+          "field": "source_system",
+          "column": "gaming_compacts__source_system"
+        },
+        {
+          "record_type": "gaming_compacts",
+          "field": "source_record_id",
+          "column": "gaming_compacts__source_record_id"
+        },
+        {
+          "record_type": "gaming_compacts",
+          "field": "source_url",
+          "column": "gaming_compacts__source_url"
+        },
+        {
+          "record_type": "gaming_compacts",
+          "field": "source_date",
+          "column": "gaming_compacts__source_date"
+        },
+        {
+          "record_type": "gaming_compacts",
+          "field": "retrieved_date",
+          "column": "gaming_compacts__retrieved_date"
+        },
+        {
+          "record_type": "gaming_compacts",
+          "field": "rights_class",
+          "column": "gaming_compacts__rights_class"
+        },
+        {
+          "record_type": "gaming_financial_disclosures",
+          "field": "source_system",
+          "column": "gaming_financial_disclosures__source_system"
+        },
+        {
+          "record_type": "gaming_financial_disclosures",
+          "field": "source_record_id",
+          "column": "gaming_financial_disclosures__source_record_id"
+        },
+        {
+          "record_type": "gaming_financial_disclosures",
+          "field": "evidence_class",
+          "column": "gaming_financial_disclosures__evidence_class"
+        },
+        {
+          "record_type": "gaming_financial_disclosures",
+          "field": "amount_nominal_usd",
+          "column": "gaming_financial_disclosures__amount_nominal_usd"
+        },
+        {
+          "record_type": "gaming_financial_disclosures",
+          "field": "amount_as_published",
+          "column": "gaming_financial_disclosures__amount_as_published"
+        },
+        {
+          "record_type": "gaming_financial_disclosures",
+          "field": "summable_within_series",
+          "column": "gaming_financial_disclosures__summable_within_series"
+        },
+        {
+          "record_type": "gaming_financial_disclosures",
+          "field": "nonadditive_series_key",
+          "column": "gaming_financial_disclosures__nonadditive_series_key"
+        },
+        {
+          "record_type": "gaming_financial_disclosures",
+          "field": "period_end",
+          "column": "gaming_financial_disclosures__period_end"
+        },
+        {
+          "record_type": "gaming_financial_disclosures",
+          "field": "fiscal_year",
+          "column": "gaming_financial_disclosures__fiscal_year"
+        },
+        {
+          "record_type": "gaming_financial_disclosures",
+          "field": "cedar_uid",
+          "column": "gaming_financial_disclosures__cedar_uid"
+        },
+        {
+          "record_type": "gaming_financial_disclosures",
+          "field": "gaming_facility_id",
+          "column": "gaming_financial_disclosures__gaming_facility_id"
+        },
+        {
+          "record_type": "gaming_financial_disclosures",
+          "field": "derivation_note",
+          "column": "gaming_financial_disclosures__derivation_note"
+        },
+        {
+          "record_type": "gaming_financial_disclosures",
+          "field": "source_authority",
+          "column": "gaming_financial_disclosures__source_authority"
+        },
+        {
+          "record_type": "gaming_financial_disclosures",
+          "field": "source_url",
+          "column": "gaming_financial_disclosures__source_url"
+        },
+        {
+          "record_type": "gaming_financial_disclosures",
+          "field": "source_page",
+          "column": "gaming_financial_disclosures__source_page"
+        },
+        {
+          "record_type": "gaming_financial_disclosures",
+          "field": "source_quote",
+          "column": "gaming_financial_disclosures__source_quote"
+        },
+        {
+          "record_type": "gaming_financial_disclosures",
+          "field": "source_date",
+          "column": "gaming_financial_disclosures__source_date"
+        },
+        {
+          "record_type": "gaming_financial_disclosures",
+          "field": "retrieved_date",
+          "column": "gaming_financial_disclosures__retrieved_date"
+        },
+        {
+          "record_type": "gaming_financial_disclosures",
+          "field": "rights_class",
+          "column": "gaming_financial_disclosures__rights_class"
+        },
+        {
+          "record_type": "gaming_government_payments",
+          "field": "source_system",
+          "column": "gaming_government_payments__source_system"
+        },
+        {
+          "record_type": "gaming_government_payments",
+          "field": "source_record_id",
+          "column": "gaming_government_payments__source_record_id"
+        },
+        {
+          "record_type": "gaming_government_payments",
+          "field": "state",
+          "column": "gaming_government_payments__state"
+        },
+        {
+          "record_type": "gaming_government_payments",
+          "field": "amount_nominal_usd",
+          "column": "gaming_government_payments__amount_nominal_usd"
+        },
+        {
+          "record_type": "gaming_government_payments",
+          "field": "amount_as_published",
+          "column": "gaming_government_payments__amount_as_published"
+        },
+        {
+          "record_type": "gaming_government_payments",
+          "field": "period_end",
+          "column": "gaming_government_payments__period_end"
+        },
+        {
+          "record_type": "gaming_government_payments",
+          "field": "period_cadence",
+          "column": "gaming_government_payments__period_cadence"
+        },
+        {
+          "record_type": "gaming_government_payments",
+          "field": "fiscal_year_definition",
+          "column": "gaming_government_payments__fiscal_year_definition"
+        },
+        {
+          "record_type": "gaming_government_payments",
+          "field": "sum_exclusion_flag",
+          "column": "gaming_government_payments__sum_exclusion_flag"
+        },
+        {
+          "record_type": "gaming_government_payments",
+          "field": "sum_exclusion_reason",
+          "column": "gaming_government_payments__sum_exclusion_reason"
+        },
+        {
+          "record_type": "gaming_government_payments",
+          "field": "summable_within_series",
+          "column": "gaming_government_payments__summable_within_series"
+        },
+        {
+          "record_type": "gaming_government_payments",
+          "field": "nonadditive_series_key",
+          "column": "gaming_government_payments__nonadditive_series_key"
+        },
+        {
+          "record_type": "gaming_government_payments",
+          "field": "overlaps_online_sportsbook_observation_id",
+          "column": "gaming_government_payments__overlaps_online_sportsbook_observation_id"
+        },
+        {
+          "record_type": "gaming_government_payments",
+          "field": "source_authority",
+          "column": "gaming_government_payments__source_authority"
+        },
+        {
+          "record_type": "gaming_government_payments",
+          "field": "source_url",
+          "column": "gaming_government_payments__source_url"
+        },
+        {
+          "record_type": "gaming_government_payments",
+          "field": "source_page",
+          "column": "gaming_government_payments__source_page"
+        },
+        {
+          "record_type": "gaming_government_payments",
+          "field": "source_quote",
+          "column": "gaming_government_payments__source_quote"
+        },
+        {
+          "record_type": "gaming_government_payments",
+          "field": "source_date",
+          "column": "gaming_government_payments__source_date"
+        },
+        {
+          "record_type": "gaming_government_payments",
+          "field": "retrieved_date",
+          "column": "gaming_government_payments__retrieved_date"
+        },
+        {
+          "record_type": "gaming_government_payments",
+          "field": "rights_class",
+          "column": "gaming_government_payments__rights_class"
+        },
+        {
+          "record_type": "gaming_land_eligibility",
+          "field": "decision_id",
+          "column": "gaming_land_eligibility__decision_id"
+        },
+        {
+          "record_type": "gaming_land_eligibility",
+          "field": "cedar_uid",
+          "column": "gaming_land_eligibility__cedar_uid"
+        },
+        {
+          "record_type": "gaming_land_eligibility",
+          "field": "subject_name_as_published",
+          "column": "gaming_land_eligibility__subject_name_as_published"
+        },
+        {
+          "record_type": "gaming_land_eligibility",
+          "field": "state",
+          "column": "gaming_land_eligibility__state"
+        },
+        {
+          "record_type": "gaming_land_eligibility",
+          "field": "fr_document_number",
+          "column": "gaming_land_eligibility__fr_document_number"
+        },
+        {
+          "record_type": "gaming_land_eligibility",
+          "field": "source_system",
+          "column": "gaming_land_eligibility__source_system"
+        },
+        {
+          "record_type": "gaming_land_eligibility",
+          "field": "source_record_id",
+          "column": "gaming_land_eligibility__source_record_id"
+        },
+        {
+          "record_type": "gaming_land_eligibility",
+          "field": "source_url",
+          "column": "gaming_land_eligibility__source_url"
+        },
+        {
+          "record_type": "gaming_land_eligibility",
+          "field": "source_date",
+          "column": "gaming_land_eligibility__source_date"
+        },
+        {
+          "record_type": "gaming_land_eligibility",
+          "field": "retrieved_date",
+          "column": "gaming_land_eligibility__retrieved_date"
+        },
+        {
+          "record_type": "gaming_land_eligibility",
+          "field": "rights_class",
+          "column": "gaming_land_eligibility__rights_class"
+        },
+        {
+          "record_type": "gaming_regional_revenue",
+          "field": "fiscal_year",
+          "column": "gaming_regional_revenue__fiscal_year"
+        },
+        {
+          "record_type": "gaming_regional_revenue",
+          "field": "fiscal_year_definition",
+          "column": "gaming_regional_revenue__fiscal_year_definition"
+        },
+        {
+          "record_type": "gaming_regional_revenue",
+          "field": "source_system",
+          "column": "gaming_regional_revenue__source_system"
+        },
+        {
+          "record_type": "gaming_regional_revenue",
+          "field": "source_record_id",
+          "column": "gaming_regional_revenue__source_record_id"
+        },
+        {
+          "record_type": "gaming_regional_revenue",
+          "field": "source_document",
+          "column": "gaming_regional_revenue__source_document"
+        },
+        {
+          "record_type": "gaming_regional_revenue",
+          "field": "source_url",
+          "column": "gaming_regional_revenue__source_url"
+        },
+        {
+          "record_type": "gaming_regional_revenue",
+          "field": "source_date",
+          "column": "gaming_regional_revenue__source_date"
+        },
+        {
+          "record_type": "gaming_regional_revenue",
+          "field": "retrieved_date",
+          "column": "gaming_regional_revenue__retrieved_date"
+        },
+        {
+          "record_type": "gaming_regional_revenue",
+          "field": "rights_class",
+          "column": "gaming_regional_revenue__rights_class"
+        },
+        {
+          "record_type": "gaming_regulatory_events",
+          "field": "regulatory_event_id",
+          "column": "gaming_regulatory_events__regulatory_event_id"
+        },
+        {
+          "record_type": "gaming_regulatory_events",
+          "field": "status",
+          "column": "gaming_regulatory_events__status"
+        },
+        {
+          "record_type": "gaming_regulatory_events",
+          "field": "status_basis",
+          "column": "gaming_regulatory_events__status_basis"
+        },
+        {
+          "record_type": "gaming_regulatory_events",
+          "field": "cedar_uid",
+          "column": "gaming_regulatory_events__cedar_uid"
+        },
+        {
+          "record_type": "gaming_regulatory_events",
+          "field": "subject_name_as_published",
+          "column": "gaming_regulatory_events__subject_name_as_published"
+        },
+        {
+          "record_type": "gaming_regulatory_events",
+          "field": "state",
+          "column": "gaming_regulatory_events__state"
+        },
+        {
+          "record_type": "gaming_regulatory_events",
+          "field": "compact_id",
+          "column": "gaming_regulatory_events__compact_id"
+        },
+        {
+          "record_type": "gaming_regulatory_events",
+          "field": "version_id",
+          "column": "gaming_regulatory_events__version_id"
+        },
+        {
+          "record_type": "gaming_regulatory_events",
+          "field": "decision_id",
+          "column": "gaming_regulatory_events__decision_id"
+        },
+        {
+          "record_type": "gaming_regulatory_events",
+          "field": "fr_document_number",
+          "column": "gaming_regulatory_events__fr_document_number"
+        },
+        {
+          "record_type": "gaming_regulatory_events",
+          "field": "source_system",
+          "column": "gaming_regulatory_events__source_system"
+        },
+        {
+          "record_type": "gaming_regulatory_events",
+          "field": "source_record_id",
+          "column": "gaming_regulatory_events__source_record_id"
+        },
+        {
+          "record_type": "gaming_regulatory_events",
+          "field": "source_url",
+          "column": "gaming_regulatory_events__source_url"
+        },
+        {
+          "record_type": "gaming_regulatory_events",
+          "field": "source_date",
+          "column": "gaming_regulatory_events__source_date"
+        },
+        {
+          "record_type": "gaming_regulatory_events",
+          "field": "retrieved_date",
+          "column": "gaming_regulatory_events__retrieved_date"
+        },
+        {
+          "record_type": "gaming_regulatory_events",
+          "field": "rights_class",
+          "column": "gaming_regulatory_events__rights_class"
+        },
+        {
+          "record_type": "gaming_reported_revenue_observations",
+          "field": "source_system",
+          "column": "gaming_reported_revenue_observations__source_system"
+        },
+        {
+          "record_type": "gaming_reported_revenue_observations",
+          "field": "source_record_id",
+          "column": "gaming_reported_revenue_observations__source_record_id"
+        },
+        {
+          "record_type": "gaming_reported_revenue_observations",
+          "field": "state",
+          "column": "gaming_reported_revenue_observations__state"
+        },
+        {
+          "record_type": "gaming_reported_revenue_observations",
+          "field": "cedar_uid",
+          "column": "gaming_reported_revenue_observations__cedar_uid"
+        },
+        {
+          "record_type": "gaming_reported_revenue_observations",
+          "field": "gaming_facility_id",
+          "column": "gaming_reported_revenue_observations__gaming_facility_id"
+        },
+        {
+          "record_type": "gaming_reported_revenue_observations",
+          "field": "evidence_class",
+          "column": "gaming_reported_revenue_observations__evidence_class"
+        },
+        {
+          "record_type": "gaming_reported_revenue_observations",
+          "field": "period_end",
+          "column": "gaming_reported_revenue_observations__period_end"
+        },
+        {
+          "record_type": "gaming_reported_revenue_observations",
+          "field": "period_cadence",
+          "column": "gaming_reported_revenue_observations__period_cadence"
+        },
+        {
+          "record_type": "gaming_reported_revenue_observations",
+          "field": "fiscal_year_definition",
+          "column": "gaming_reported_revenue_observations__fiscal_year_definition"
+        },
+        {
+          "record_type": "gaming_reported_revenue_observations",
+          "field": "sum_exclusion_flag",
+          "column": "gaming_reported_revenue_observations__sum_exclusion_flag"
+        },
+        {
+          "record_type": "gaming_reported_revenue_observations",
+          "field": "sum_exclusion_reason",
+          "column": "gaming_reported_revenue_observations__sum_exclusion_reason"
+        },
+        {
+          "record_type": "gaming_reported_revenue_observations",
+          "field": "summable_within_series",
+          "column": "gaming_reported_revenue_observations__summable_within_series"
+        },
+        {
+          "record_type": "gaming_reported_revenue_observations",
+          "field": "nonadditive_series_key",
+          "column": "gaming_reported_revenue_observations__nonadditive_series_key"
+        },
+        {
+          "record_type": "gaming_reported_revenue_observations",
+          "field": "overlaps_online_sportsbook_observation_id",
+          "column": "gaming_reported_revenue_observations__overlaps_online_sportsbook_observation_id"
+        },
+        {
+          "record_type": "gaming_reported_revenue_observations",
+          "field": "source_authority",
+          "column": "gaming_reported_revenue_observations__source_authority"
+        },
+        {
+          "record_type": "gaming_reported_revenue_observations",
+          "field": "source_document",
+          "column": "gaming_reported_revenue_observations__source_document"
+        },
+        {
+          "record_type": "gaming_reported_revenue_observations",
+          "field": "source_url",
+          "column": "gaming_reported_revenue_observations__source_url"
+        },
+        {
+          "record_type": "gaming_reported_revenue_observations",
+          "field": "source_page",
+          "column": "gaming_reported_revenue_observations__source_page"
+        },
+        {
+          "record_type": "gaming_reported_revenue_observations",
+          "field": "source_quote",
+          "column": "gaming_reported_revenue_observations__source_quote"
+        },
+        {
+          "record_type": "gaming_reported_revenue_observations",
+          "field": "source_date",
+          "column": "gaming_reported_revenue_observations__source_date"
+        },
+        {
+          "record_type": "gaming_reported_revenue_observations",
+          "field": "retrieved_date",
+          "column": "gaming_reported_revenue_observations__retrieved_date"
+        },
+        {
+          "record_type": "gaming_reported_revenue_observations",
+          "field": "rights_class",
+          "column": "gaming_reported_revenue_observations__rights_class"
+        },
+        {
+          "record_type": "gaming_revenue_bands",
+          "field": "fiscal_year",
+          "column": "gaming_revenue_bands__fiscal_year"
+        },
+        {
+          "record_type": "gaming_revenue_bands",
+          "field": "fiscal_year_definition",
+          "column": "gaming_revenue_bands__fiscal_year_definition"
+        },
+        {
+          "record_type": "gaming_revenue_bands",
+          "field": "derivation_note",
+          "column": "gaming_revenue_bands__derivation_note"
+        },
+        {
+          "record_type": "gaming_revenue_bands",
+          "field": "source_system",
+          "column": "gaming_revenue_bands__source_system"
+        },
+        {
+          "record_type": "gaming_revenue_bands",
+          "field": "source_record_id",
+          "column": "gaming_revenue_bands__source_record_id"
+        },
+        {
+          "record_type": "gaming_revenue_bands",
+          "field": "source_document",
+          "column": "gaming_revenue_bands__source_document"
+        },
+        {
+          "record_type": "gaming_revenue_bands",
+          "field": "source_page",
+          "column": "gaming_revenue_bands__source_page"
+        },
+        {
+          "record_type": "gaming_revenue_bands",
+          "field": "source_quote",
+          "column": "gaming_revenue_bands__source_quote"
+        },
+        {
+          "record_type": "gaming_revenue_bands",
+          "field": "source_url",
+          "column": "gaming_revenue_bands__source_url"
+        },
+        {
+          "record_type": "gaming_revenue_bands",
+          "field": "source_date",
+          "column": "gaming_revenue_bands__source_date"
+        },
+        {
+          "record_type": "gaming_revenue_bands",
+          "field": "retrieved_date",
+          "column": "gaming_revenue_bands__retrieved_date"
+        },
+        {
+          "record_type": "gaming_revenue_bands",
+          "field": "rights_class",
+          "column": "gaming_revenue_bands__rights_class"
+        }
+      ]
+    },
+    "legislation": {
+      "release_id": "8b4569e17831f4a0dfc7a6df8f03e39191f79637f714fe76bd9ba0991e56f2f3",
+      "manifest_sha256": "4a9ad97b72620923cb12b53fd691b64c75ec74f4fd0a386e3d6c1780df01fb4d",
+      "spreadsheet_sha256": "e29fa702a1200ca8ac55a318f22822a2d26cdf5ed2d9f0563a22b982533beb55",
+      "spreadsheet_bytes": 2094957,
+      "public_records": 3064,
+      "held_records_in_selected_groups": 0,
+      "record_types": {
+        "records": 3064
+      },
+      "sample_rows": 10,
+      "sample_sha256": "d68aea1b6808522b595a896b1de5e67db65780715460fe968008e5db895de922",
+      "sample_path": "review-samples/legislation.csv",
+      "release_class": "rehearsal",
+      "storefront_asset": true,
+      "unharmonized_fields": []
+    },
+    "lobbying": {
+      "release_id": "c37e800572a0b108d27eca98248f51d0a1d9bb7335c1340abdf96540efc79cc5",
+      "manifest_sha256": "c0214ce61dfe1c5923f66abc4bca214aeb61f70324e95e883985c849425732ce",
+      "spreadsheet_sha256": "ee988603a0ef2be20d40f16582c93005a78fc58ca516ad09f08e09f8cfc37562",
+      "spreadsheet_bytes": 22356937,
+      "public_records": 27825,
+      "held_records_in_selected_groups": 0,
+      "record_types": {
+        "records": 27825
+      },
+      "sample_rows": 10,
+      "sample_sha256": "ea30559d61f73982ffa0a905d967bde996e09b4a74eed20314859ee19907dcb5",
+      "sample_path": "review-samples/lobbying.csv",
+      "release_class": "rehearsal",
+      "storefront_asset": true,
+      "unharmonized_fields": []
+    },
+    "nagpra": {
+      "release_id": "b45822cd045724582cee3e2be0e87008fc61569d82cf2fa53fe2e2c309eb3c0d",
+      "manifest_sha256": "0d202a7aae98efb176337654e78fd4551594347e764c98dc28632b3f9dcbca13",
+      "spreadsheet_sha256": "b501492eaa6b387757eff08239b12374d84be4d65cb60ab580ac3050f646ee7e",
+      "spreadsheet_bytes": 12684163,
+      "public_records": 6792,
+      "held_records_in_selected_groups": 0,
+      "record_types": {
+        "records": 6792
+      },
+      "sample_rows": 10,
+      "sample_sha256": "ba063f939667cf98500b0b8c9752e9ca8d7e5e0ff63156f88055c4a0f3a17d1d",
+      "sample_path": "review-samples/nagpra.csv",
+      "release_class": "rehearsal",
+      "storefront_asset": true,
+      "unharmonized_fields": []
+    },
+    "natural-resources": {
+      "release_id": "f65f92d809d91fa07c977f37ff2a4c3830ca014eccb728daaaf43ebfaa61e7e5",
+      "manifest_sha256": "aefc98bded744a63714b4ac57683b6f1c2a34bf1b4f71e2f619277a559443e47",
+      "spreadsheet_sha256": "ff371000ebb63fbf190c399ffd96b7a73254010b47b88f83cac027edbfe62c40",
+      "spreadsheet_bytes": 12695760,
+      "public_records": 11120,
+      "held_records_in_selected_groups": 0,
+      "record_types": {
+        "records": 11120
+      },
+      "sample_rows": 10,
+      "sample_sha256": "5229fd4a1eb7b59a95f805fca2a515b5260959635c62a81633bb4ad845fbca43",
+      "sample_path": "review-samples/natural-resources.csv",
+      "release_class": "rehearsal",
+      "storefront_asset": true,
+      "unharmonized_fields": []
+    },
+    "need": {
+      "release_id": "dc105294abc2ba5d0a3819afbfe32f81b3e8ef41f3ba8c1c13c8ce320010d035",
+      "manifest_sha256": "380ff64aa5af720e7337dfe20cb8d9cc73f76bcd508276a9e9f23f85689cdc9d",
+      "spreadsheet_sha256": "00490e1b37a54a7f860a7f370df0bbd3a2e653c8ff93a58ebbdb08e9950d0e57",
+      "spreadsheet_bytes": 33622,
+      "public_records": 27,
+      "held_records_in_selected_groups": 0,
+      "record_types": {
+        "reviewed_public_base": 27
+      },
+      "sample_rows": 10,
+      "sample_sha256": "c0884f41406ca2592c3668ac70841b9d0f9c6563ad4ce7090d40879f1c75df5a",
+      "sample_path": "review-samples/need.csv",
+      "release_class": "rehearsal",
+      "storefront_asset": true,
+      "unharmonized_fields": []
+    },
+    "nonprofits": {
+      "release_id": "bb679c5bb80b210fc42ab22a5241941220c1fc823e85dcda5d6a11e0045a24a6",
+      "manifest_sha256": "dd33230d147bd1b81ae0db619ef8c9bfa03cf147cec6b1a70df0b5a800e20c32",
+      "spreadsheet_sha256": "3fe4f7044d6fe9f7b7d117f5ccffddf34b30d4528c90f80d5b2e3c34214506a8",
+      "spreadsheet_bytes": 85378,
+      "public_records": 89,
+      "held_records_in_selected_groups": 0,
+      "record_types": {
+        "records": 89
+      },
+      "sample_rows": 10,
+      "sample_sha256": "ad469108eb3a73f4d19282aa908769cf480436b159f18a57a60c040e5b8673f7",
+      "sample_path": "review-samples/nonprofits.csv",
+      "release_class": "rehearsal",
+      "storefront_asset": true,
+      "unharmonized_fields": []
+    },
+    "owned": {
+      "release_id": "f298b01f29651ab652e2d8f221d061504b8de035c18ae9e10cf84a3daf777ed9",
+      "manifest_sha256": "abd0ee5d477facd6abd6d25a39a5e29d7c83c6600c0558b1f3891f72488619e9",
+      "spreadsheet_sha256": "4f824e6ea743659150cfcc36af3abd3adbbf8f304aa6cafdbe4fb1d40e3d86c7",
+      "spreadsheet_bytes": 3070806,
+      "public_records": 3725,
+      "held_records_in_selected_groups": 0,
+      "record_types": {
+        "records": 3725
+      },
+      "sample_rows": 10,
+      "sample_sha256": "28928d1eccc13a0901b9c9da6cea1e002d2291042529b76cd97f97242734c707",
+      "sample_path": "review-samples/owned.csv",
+      "release_class": "rehearsal",
+      "storefront_asset": true,
+      "unharmonized_fields": []
+    },
+    "plot": {
+      "release_id": "a450bd56cdcafd2f7ff1d8191f141b025ad384eeb5a3d676fc96a6598c4d182b",
+      "manifest_sha256": "bd9c27c687ab072204d0ac74dbc624311b989abe18ab91350b29493941244888",
+      "spreadsheet_sha256": "a60e5e2b57a16a47fa323307779d12fb5bca78dee8f298d359ee02b471cfb52b",
+      "spreadsheet_bytes": 210436698,
+      "public_records": 151715,
+      "held_records_in_selected_groups": 0,
+      "record_types": {
+        "environmental_events": 3210,
+        "environmental_permits": 1242,
+        "ownership_observations": 4991,
+        "permit_events": 599,
+        "permits": 122,
+        "tract_observations": 141551
+      },
+      "sample_rows": 10,
+      "sample_sha256": "c99cdc29b15fa8dabe9accd74c1f934af346ab51c2edfbc09f9965d29a3c5bb2",
+      "sample_path": "review-samples/plot.csv",
+      "release_class": "rehearsal",
+      "storefront_asset": false,
+      "unharmonized_fields": [
+        {
+          "record_type": "environmental_events",
+          "field": "environmental_record_id",
+          "column": "environmental_events__environmental_record_id"
+        },
+        {
+          "record_type": "environmental_events",
+          "field": "event_date",
+          "column": "environmental_events__event_date"
+        },
+        {
+          "record_type": "environmental_events",
+          "field": "event_type",
+          "column": "environmental_events__event_type"
+        },
+        {
+          "record_type": "environmental_events",
+          "field": "event_date_precision",
+          "column": "environmental_events__event_date_precision"
+        },
+        {
+          "record_type": "environmental_events",
+          "field": "source_id",
+          "column": "environmental_events__source_id"
+        },
+        {
+          "record_type": "environmental_events",
+          "field": "source_url",
+          "column": "environmental_events__source_url"
+        },
+        {
+          "record_type": "environmental_permits",
+          "field": "environmental_record_id",
+          "column": "environmental_permits__environmental_record_id"
+        },
+        {
+          "record_type": "environmental_permits",
+          "field": "source_permit_id",
+          "column": "environmental_permits__source_permit_id"
+        },
+        {
+          "record_type": "environmental_permits",
+          "field": "state",
+          "column": "environmental_permits__state"
+        },
+        {
+          "record_type": "environmental_permits",
+          "field": "program",
+          "column": "environmental_permits__program"
+        },
+        {
+          "record_type": "environmental_permits",
+          "field": "status_raw",
+          "column": "environmental_permits__status_raw"
+        },
+        {
+          "record_type": "environmental_permits",
+          "field": "issued_date",
+          "column": "environmental_permits__issued_date"
+        },
+        {
+          "record_type": "environmental_permits",
+          "field": "expiration_date",
+          "column": "environmental_permits__expiration_date"
+        },
+        {
+          "record_type": "environmental_permits",
+          "field": "source_snapshot_date",
+          "column": "environmental_permits__source_snapshot_date"
+        },
+        {
+          "record_type": "environmental_permits",
+          "field": "source_record_url",
+          "column": "environmental_permits__source_record_url"
+        },
+        {
+          "record_type": "environmental_permits",
+          "field": "source_id",
+          "column": "environmental_permits__source_id"
+        },
+        {
+          "record_type": "environmental_permits",
+          "field": "source_url",
+          "column": "environmental_permits__source_url"
+        },
+        {
+          "record_type": "ownership_observations",
+          "field": "source_id",
+          "column": "ownership_observations__source_id"
+        },
+        {
+          "record_type": "ownership_observations",
+          "field": "record_grain",
+          "column": "ownership_observations__record_grain"
+        },
+        {
+          "record_type": "ownership_observations",
+          "field": "state",
+          "column": "ownership_observations__state"
+        },
+        {
+          "record_type": "ownership_observations",
+          "field": "county_fips",
+          "column": "ownership_observations__county_fips"
+        },
+        {
+          "record_type": "ownership_observations",
+          "field": "source_snapshot_date",
+          "column": "ownership_observations__source_snapshot_date"
+        },
+        {
+          "record_type": "ownership_observations",
+          "field": "source_url",
+          "column": "ownership_observations__source_url"
+        },
+        {
+          "record_type": "ownership_observations",
+          "field": "source_record_url",
+          "column": "ownership_observations__source_record_url"
+        },
+        {
+          "record_type": "permit_events",
+          "field": "permit_id",
+          "column": "permit_events__permit_id"
+        },
+        {
+          "record_type": "permit_events",
+          "field": "source_id",
+          "column": "permit_events__source_id"
+        },
+        {
+          "record_type": "permit_events",
+          "field": "event_date",
+          "column": "permit_events__event_date"
+        },
+        {
+          "record_type": "permit_events",
+          "field": "event_date_precision",
+          "column": "permit_events__event_date_precision"
+        },
+        {
+          "record_type": "permit_events",
+          "field": "event_type",
+          "column": "permit_events__event_type"
+        },
+        {
+          "record_type": "permit_events",
+          "field": "source_url",
+          "column": "permit_events__source_url"
+        },
+        {
+          "record_type": "permit_events",
+          "field": "state",
+          "column": "permit_events__state"
+        },
+        {
+          "record_type": "permits",
+          "field": "permit_id",
+          "column": "permits__permit_id"
+        },
+        {
+          "record_type": "permits",
+          "field": "source_id",
+          "column": "permits__source_id"
+        },
+        {
+          "record_type": "permits",
+          "field": "source_permit_id",
+          "column": "permits__source_permit_id"
+        },
+        {
+          "record_type": "permits",
+          "field": "state",
+          "column": "permits__state"
+        },
+        {
+          "record_type": "permits",
+          "field": "county_fips",
+          "column": "permits__county_fips"
+        },
+        {
+          "record_type": "permits",
+          "field": "program",
+          "column": "permits__program"
+        },
+        {
+          "record_type": "permits",
+          "field": "status_raw",
+          "column": "permits__status_raw"
+        },
+        {
+          "record_type": "permits",
+          "field": "issued_date",
+          "column": "permits__issued_date"
+        },
+        {
+          "record_type": "permits",
+          "field": "expiration_date",
+          "column": "permits__expiration_date"
+        },
+        {
+          "record_type": "permits",
+          "field": "source_snapshot_date",
+          "column": "permits__source_snapshot_date"
+        },
+        {
+          "record_type": "permits",
+          "field": "source_url",
+          "column": "permits__source_url"
+        },
+        {
+          "record_type": "permits",
+          "field": "source_record_url",
+          "column": "permits__source_record_url"
+        },
+        {
+          "record_type": "tract_observations",
+          "field": "source_id",
+          "column": "tract_observations__source_id"
+        },
+        {
+          "record_type": "tract_observations",
+          "field": "record_grain",
+          "column": "tract_observations__record_grain"
+        },
+        {
+          "record_type": "tract_observations",
+          "field": "state",
+          "column": "tract_observations__state"
+        },
+        {
+          "record_type": "tract_observations",
+          "field": "county_fips",
+          "column": "tract_observations__county_fips"
+        },
+        {
+          "record_type": "tract_observations",
+          "field": "source_snapshot_date",
+          "column": "tract_observations__source_snapshot_date"
+        },
+        {
+          "record_type": "tract_observations",
+          "field": "source_url",
+          "column": "tract_observations__source_url"
+        },
+        {
+          "record_type": "tract_observations",
+          "field": "source_record_url",
+          "column": "tract_observations__source_record_url"
+        }
+      ]
+    },
+    "subcontracting": {
+      "release_id": "126230dd07419a9d1f57c1342fb5e11aae31ffea2fe846d3ea95c9b9934bfc06",
+      "manifest_sha256": "51d86a40d2187ff670e39c5ce30bc6d50c4c7fccb837481800d94cc3224b94d7",
+      "spreadsheet_sha256": "1431fdb320029ff9525056ad902f6de56985b9ad76ad180ccdcfbe11e56e578e",
+      "spreadsheet_bytes": 83693230,
+      "public_records": 70054,
+      "held_records_in_selected_groups": 0,
+      "record_types": {
+        "records": 70054
+      },
+      "sample_rows": 10,
+      "sample_sha256": "cf3ace5fa669f3c31d63091210eaf87fe7261a0498550dff5bd8d7729fea9284",
+      "sample_path": "review-samples/subcontracting.csv",
+      "release_class": "rehearsal",
+      "storefront_asset": true,
+      "unharmonized_fields": []
+    }
+  }
+}

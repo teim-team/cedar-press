@@ -14,26 +14,81 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 
-import { LAUNCH_COLLECTION, collectionSample, collectionPublicationHold, collectionCsv, hasSample, samplePath } from "./collection.js";
+import { LAUNCH_COLLECTION, collectionSample, collectionPublicationHold, collectionCsv, hasSample, samplePath, reviewedPreviewTextMatches } from "./collection.js";
 import { csvFor, hasReleaseFile } from "./pressDownload.js";
 
 const PUBLIC = fileURLToPath(new URL("../../../public", import.meta.url));
 const readSample = (path) => readFile(`${PUBLIC}${path}`, "utf8");
 
-test("held NEED sample cannot be fetched or serialized from cached rows", async () => {
+test("stale NEED cached rows cannot acquire the reviewed release citation", async () => {
+  const stale = "enterprise_id,name\nCEDAR-NEST-1,old cached row\n";
   let calls = 0;
-  const result = await csvFor({ id: "need", name: "Cedar NEED" }, async () => {
+  const result = await csvFor({ id: "need", name: "Cedar NEED" }, async (path) => {
     calls++;
-    return "enterprise_id,name\nCEDAR-NEST-1,old cached row\n";
+    assert.equal(path, samplePath("need"));
+    return stale;
   });
-  assert.ok(collectionPublicationHold("need"));
-  assert.equal(hasSample("need"), false);
-  assert.equal(samplePath("need"), null);
-  assert.equal(collectionCsv("need", "enterprise_id,name\nold,cached\n"), null);
-  assert.equal(calls, 0);
+  assert.equal(collectionPublicationHold("need"), null);
+  assert.equal(hasSample("need"), true);
+  assert.equal(collectionCsv("need", stale), null);
+  assert.equal(calls, 1);
   assert.equal(result.name, "need-collection-description.csv");
-  assert.match(result.csv, /withheld from publication/);
-  assert.doesNotMatch(result.csv, /old cached row/);
+  assert.doesNotMatch(result.csv, /old cached row|CEDAR-NEST-1/);
+});
+
+test("the reviewed finite NEED preview remains available", async () => {
+  const sample = collectionSample("need");
+  assert.equal(sample.of, 27, "the installed release is the reviewed 27-observation base");
+  assert.equal(sample.path, "/data/cedar/samples/need/spreadsheet__10.csv");
+  assert.equal(hasReleaseFile({ id: "need" }), true);
+  const source = await readSample(sample.path);
+  const { csv, name } = await csvFor({ id: "need", name: "Cedar NEED" }, readSample);
+  assert.equal(name, "need.csv");
+  const rows = parseCsv(csv);
+  assert.equal(rows.length, sample.rows + 1);
+  assert.equal(rows[0].length, sample.columns + 1);
+  assert.equal(rows[0].at(-1), "cite_as");
+  assert.ok(rows.slice(1).every((row) => row.at(-1).includes("Cedar")));
+  // A stale schema with the same width also fails: column count alone is
+  // not evidence that cached bytes belong to this release.
+  const wrongHeader = source.replace("record_type", "legacy_record_type");
+  assert.notEqual(wrongHeader, source);
+  assert.equal(collectionCsv("need", wrongHeader), null);
+  const matrix = parseCsv(source);
+  while (matrix.at(-1)?.length === 1 && matrix.at(-1)[0] === "") matrix.pop();
+  const encode = (records) => records.map((record) => record
+    .map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(",")).join("\n");
+  const reordered = matrix.map((record) => [record[1], record[0], ...record.slice(2)]);
+  assert.equal(collectionCsv("need", encode(reordered)), null);
+  assert.equal(collectionCsv("need", encode(matrix.slice(0, -1))), null);
+  assert.equal(collectionCsv("need", encode([...matrix, matrix[1]])), null);
+  const mutated = matrix.map((record) => [...record]);
+  mutated[1][mutated[1].length - 1] = "STALE_NEED_CACHE_MARKER";
+  const refused = await csvFor({ id: "need", name: "Cedar NEED" }, async () => encode(mutated));
+  assert.equal(refused.name, "need-collection-description.csv");
+  assert.doesNotMatch(refused.csv, /STALE_NEED_CACHE_MARKER/);
+});
+
+test("reviewed NEED preview refuses missing, malformed or mismatched public proof metadata", async () => {
+  const manifest = JSON.parse(await readFile(new URL("../../../data/cedar/collections.manifest.json", import.meta.url), "utf8"));
+  const entry = manifest.collections.find((item) => item.id === "need");
+  const text = await readSample(entry.sample.path);
+  const sample = entry.sample;
+  const proof = entry.verified_preview;
+  assert.equal(await reviewedPreviewTextMatches(text, sample, proof), true);
+  for (const invalid of [
+    undefined,
+    { ...proof, component: "unreviewed_graph" },
+    { ...proof, envelope: undefined },
+    { ...proof, envelope_sha256: "not-a-digest" },
+    { ...proof, sample_sha256: "not-a-digest" },
+    { ...proof, sample_sha256: "0".repeat(64) },
+    { ...proof, release_id: "0".repeat(64) },
+    { ...proof, manifest_sha256: "0".repeat(64) },
+    { ...proof, public_records: sample.of + 1 },
+  ]) assert.equal(await reviewedPreviewTextMatches(text, sample, invalid), false);
+  assert.equal(await reviewedPreviewTextMatches(text, { ...sample, release_id: undefined }, proof), false);
+  assert.equal(await reviewedPreviewTextMatches(text, { ...sample, rows: sample.of + 1 }, proof), false);
 });
 
 /**

@@ -3990,3 +3990,9 @@ frontend presentation. Giving is standard Press with inherited Grove access;
 PLOT is Press+ with inherited Grove access; Gaming remains Grove exclusive.
 Existing full-release verification and subscriber authority remain canonical.
 <!-- END CEDAR-GIVING-PLOT-CONSUMER-20260926 -->
+
+<!-- BEGIN PRESS-PRESENTATION-20261001 -->
+### Press presentation maintenance, 2026-10-01
+
+The Grove merge audit worker owns the focused Press presentation changes for this pass; the coordinator applies and verifies them. Public samples retain existing eligibility. Connected counts derive from verified release metadata. The shared reader presentation helper owns retired identifier column filtering and record labels. The producer retains canonical data and public codebook ownership. Current maintenance instructions live in `docs/PRESENTATION_DATA_FLOW.md`; historical measurements are not current product counts.
+<!-- END PRESS-PRESENTATION-20261001 -->

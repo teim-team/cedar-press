@@ -71,9 +71,7 @@ def _run(script: Path) -> dict:
         check=False,
     )
     if result.returncode != 0:
-        raise AssertionError(
-            f"{script.name} exited {result.returncode}:\n{result.stderr}"
-        )
+        raise AssertionError(f"{script.name} exited {result.returncode}:\n{result.stderr}")
     return json.loads(result.stdout)
 
 
@@ -124,8 +122,7 @@ class TestCrossLanguageParity(unittest.TestCase):
     def test_no_descriptor_field_exists_on_only_one_side(self) -> None:
         rename = {"short_name": "shortName", "rows_label": "rowsLabel"}
         expected = {
-            rename.get(f.name, f.name)
-            for f in dataclasses.fields(launch.CollectionDataset)
+            rename.get(f.name, f.name) for f in dataclasses.fields(launch.CollectionDataset)
         }
         for javascript in self.js["launchCollection"]:
             with self.subTest(dataset=javascript["id"]):
@@ -161,9 +158,7 @@ class TestCrossLanguageParity(unittest.TestCase):
         self.assertIn("newsletters", excluded)
         self.assertTrue(excluded["newsletters"]["reason"])
         self.assertNotIn("newsletters", {d.id for d in launch.LAUNCH_COLLECTION})
-        self.assertEqual(
-            [dict(e) for e in launch.EXCLUDED_COLLECTIONS], self.js["excluded"]
-        )
+        self.assertEqual([dict(e) for e in launch.EXCLUDED_COLLECTIONS], self.js["excluded"])
 
     # -- honesty about what is not measured ------------------------------
 
@@ -179,9 +174,7 @@ class TestCrossLanguageParity(unittest.TestCase):
                 self.assertIsNone(dataset.downloads)
 
     def test_every_figure_declares_whether_it_is_a_measurement(self) -> None:
-        for python, javascript in zip(
-            launch.COLLECTION_FIGURES, self.js["figures"], strict=True
-        ):
+        for python, javascript in zip(launch.COLLECTION_FIGURES, self.js["figures"], strict=True):
             with self.subTest(figure=python.id):
                 self.assertIsInstance(python.demonstration, bool)
                 self.assertEqual(python.demonstration, javascript["demonstration"])
@@ -225,9 +218,7 @@ class TestCrossLanguageParity(unittest.TestCase):
         )
 
     def test_the_figure_order_matches(self) -> None:
-        self.assertEqual(
-            [f.id for f in launch.figures_in_shelf_order()], self.js["figureOrder"]
-        )
+        self.assertEqual([f.id for f in launch.figures_in_shelf_order()], self.js["figureOrder"])
 
     def test_the_findings_match(self) -> None:
         findings = launch.collection_findings()
@@ -315,8 +306,9 @@ class TestCrossLanguageParity(unittest.TestCase):
                     # Or WITHHELD by the importer's publication rule, which
                     # says why on the table itself (sample_withheld_why).
                     with self.subTest(dataset=dataset.id, table=table["table"]):
-                        recorded = (table.get("sample_unpublished")
-                                    or table.get("sample_withheld_why"))
+                        recorded = table.get("sample_unpublished") or table.get(
+                            "sample_withheld_why"
+                        )
                         self.assertTrue(recorded, f"{table['table']} has no sample and no record")
                     continue
                 path = _REPO / "public" / table["sample_path"].lstrip("/")
@@ -329,12 +321,21 @@ class TestCrossLanguageParity(unittest.TestCase):
                 with self.subTest(dataset=dataset.id, table=table["table"]):
                     self.assertTrue(path.exists(), f"{path} is declared and missing")
                     tracked = subprocess.run(  # noqa: S603
-                        ["git", "-C", str(_REPO), "ls-files", "--error-unmatch",
-                         path.relative_to(_REPO).as_posix()],
-                        capture_output=True, text=True, check=False,
+                        [
+                            "git",
+                            "-C",
+                            str(_REPO),
+                            "ls-files",
+                            "--error-unmatch",
+                            path.relative_to(_REPO).as_posix(),
+                        ],
+                        capture_output=True,
+                        text=True,
+                        check=False,
                     )
                     self.assertEqual(
-                        tracked.returncode, 0,
+                        tracked.returncode,
+                        0,
                         f"{dataset.id}: {path.relative_to(_REPO)} is not tracked; "
                         "`git add` it from the checkout that ran the importer",
                     )
@@ -372,8 +373,9 @@ class TestCrossLanguageParity(unittest.TestCase):
             if not (launch.collection_sample(d.id) or {}).get("path")
         ]
         for cid in without:
-            self.assertTrue(launch.sample_unavailable_reason(cid),
-                            f"{cid} has no sample and no reason for it")
+            self.assertTrue(
+                launch.sample_unavailable_reason(cid), f"{cid} has no sample and no reason for it"
+            )
         # `owned` was BLOCKED with three named blockers at v0 and is READY with
         # none at v1 - the rebuild settled its membership and grain. Pinning the
         # test to BLOCKED would have made that fix look like a failure.
@@ -384,20 +386,18 @@ class TestCrossLanguageParity(unittest.TestCase):
         for dataset in launch.LAUNCH_COLLECTION:
             facts = launch.collection_cedar_facts(dataset.id)
             if facts["status"] == "BLOCKED":
-                self.assertTrue(facts["blockers"],
-                                f"{dataset.id} is BLOCKED and names no blocker")
+                self.assertTrue(facts["blockers"], f"{dataset.id} is BLOCKED and names no blocker")
             elif facts["status"] == "READY":
-                self.assertFalse(facts["blockers"],
-                                 f"{dataset.id} is READY and still lists blockers")
+                self.assertFalse(
+                    facts["blockers"], f"{dataset.id} is READY and still lists blockers"
+                )
 
     # -- the bytes a reader receives ---------------------------------------
 
     def test_the_download_bytes_match(self) -> None:
         for dataset in launch.LAUNCH_COLLECTION:
             with self.subTest(dataset=dataset.id):
-                self.assertEqual(
-                    launch.collection_csv(dataset.id), self.js["csvs"][dataset.id]
-                )
+                self.assertEqual(launch.collection_csv(dataset.id), self.js["csvs"][dataset.id])
 
     def test_every_download_keeps_a_citation_column(self) -> None:
         for dataset in launch.LAUNCH_COLLECTION:
@@ -436,9 +436,7 @@ class TestPressCatalogSnapshot(unittest.TestCase):
         # in this file are transcribed editorial copy, and a stale one is a
         # misquotation.
         snapshot = json.loads(
-            (Path(press_catalog.__file__).with_name("_press_data.json")).read_text(
-                encoding="utf-8"
-            )
+            (Path(press_catalog.__file__).with_name("_press_data.json")).read_text(encoding="utf-8")
         )
         self.assertEqual(
             snapshot,
@@ -639,7 +637,10 @@ class TestGeneratorAndManifestAgree(unittest.TestCase):
         # naming the command, on the machine where it happened.
         result = subprocess.run(  # noqa: S603
             ["node", str(_REPO / "scripts" / "measure-samples.mjs"), "--check"],
-            capture_output=True, text=True, check=False, cwd=_REPO,
+            capture_output=True,
+            text=True,
+            check=False,
+            cwd=_REPO,
         )
         self.assertEqual(result.returncode, 0, result.stderr or result.stdout)
 
@@ -654,8 +655,10 @@ class TestGeneratorAndManifestAgree(unittest.TestCase):
         # of another class carrying the same column is not; a firm's name
         # under any column is the backstop.
         import tempfile
+
         names, uids = self.script.withheld_entities(
-            _REPO / "data" / "spine" / "cedar_entity_names.csv")
+            _REPO / "data" / "spine" / "cedar_entity_names.csv"
+        )
         self.assertEqual(len(names), 45)
         self.assertEqual(len(uids), 45)
         leaked = next(iter(names)).title()
@@ -681,13 +684,19 @@ class TestGeneratorAndManifestAgree(unittest.TestCase):
         at = "/data/cedar/samples/fixture"
 
         def manifest() -> dict:
-            return {"collections": [{
-                "id": "fixture",
-                "cedar": {"cedar_id": "fixture"},
-                "sample": {"table": "owner.csv", "path": f"{at}/owner__10.csv"},
-                "tables": [{"table": f"{name}.csv", "sample_path": f"{at}/{name}__10.csv"}
-                           for name in [*samples, "absent"]],
-            }]}
+            return {
+                "collections": [
+                    {
+                        "id": "fixture",
+                        "cedar": {"cedar_id": "fixture"},
+                        "sample": {"table": "owner.csv", "path": f"{at}/owner__10.csv"},
+                        "tables": [
+                            {"table": f"{name}.csv", "sample_path": f"{at}/{name}__10.csv"}
+                            for name in [*samples, "absent"]
+                        ],
+                    }
+                ]
+            }
 
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -695,7 +704,8 @@ class TestGeneratorAndManifestAgree(unittest.TestCase):
             plant(root / "dist" / "review" / "samples" / "fixture", samples)
             imported = manifest()
             struck = self.script.withhold_samples(
-                imported, self.script.review_sample(root), names, uids)
+                imported, self.script.review_sample(root), names, uids
+            )
             self.assertEqual(sorted(s["table"] for s in struck), ["named.csv", "owner.csv"])
             by_table = {s["table"]: s for s in struck}
             self.assertEqual(by_table["owner.csv"]["columns"], ["owner_name"])
@@ -719,12 +729,14 @@ class TestGeneratorAndManifestAgree(unittest.TestCase):
             plant(served, samples)
             audited = manifest()
             struck_public = self.script.withhold_samples(
-                audited, self.script.public_sample(root), names, uids)
+                audited, self.script.public_sample(root), names, uids
+            )
             self.assertEqual(sorted(s["table"] for s in struck_public), ["named.csv", "owner.csv"])
         # The files public/ serves.
         for path in (_REPO / "public" / "data" / "cedar" / "samples").rglob("*.csv"):
             self.assertEqual(
-                self.script.sample_violations(path, names, uids), [],
+                self.script.sample_violations(path, names, uids),
+                [],
                 f"{path} publishes a withheld field; run import_cedar_manifest.py --audit",
             )
 
@@ -740,23 +752,39 @@ class TestGeneratorAndManifestAgree(unittest.TestCase):
                 self.script.public_sample_path(root, valid),
                 root.resolve() / "public" / valid[1:],
             )
-            for bad in ("/../retained.csv", "//server/file.csv", "C:/retained.csv",
-                        "/C:/retained.csv", "/data\\..\\retained.csv", "/%2e%2e/retained.csv"):
+            for bad in (
+                "/../retained.csv",
+                "//server/file.csv",
+                "C:/retained.csv",
+                "/C:/retained.csv",
+                "/data\\..\\retained.csv",
+                "/%2e%2e/retained.csv",
+            ):
                 with self.subTest(path=bad), self.assertRaises(ValueError):
                     self.script.unpublish(root, [{"path": bad}])
             self.assertEqual(outside.read_text(encoding="utf-8"), "retained\n")
 
     def test_canonical_need_policy_refuses_stale_manifest_sample_paths(self) -> None:
-        manifest = {"collections": [{
-            "id": "need", "cedar": {"cedar_id": "need"},
-            "sample": {"path": "/data/cedar/samples/need/restored.csv"},
-            "tables": [{"table": "restored.csv",
-                        "sample_path": "/data/cedar/samples/need/restored.csv"}],
-        }]}
+        manifest = {
+            "collections": [
+                {
+                    "id": "need",
+                    "cedar": {"cedar_id": "need"},
+                    "sample": {"path": "/data/cedar/samples/need/restored.csv"},
+                    "tables": [
+                        {
+                            "table": "restored.csv",
+                            "sample_path": "/data/cedar/samples/need/restored.csv",
+                        }
+                    ],
+                }
+            ]
+        }
         with self.assertRaisesRegex(ValueError, "publication-held"):
             self.script.copy_samples(_REPO, manifest)
         struck = self.script.withhold_samples(
-            manifest, lambda *_: self.fail("Held files must never be read"), frozenset())
+            manifest, lambda *_: self.fail("Held files must never be read"), frozenset()
+        )
         self.assertEqual(len(struck), 1)
         self.assertIsNone(manifest["collections"][0]["tables"][0]["sample_path"])
         self.assertEqual(manifest["collections"][0]["cedar"]["status"], "BLOCKED")
@@ -767,8 +795,20 @@ class TestGeneratorAndManifestAgree(unittest.TestCase):
             try:
                 self.script._COLLECTION_RULE.assert_collection_publishable(identifier)
             except self.script._COLLECTION_RULE.FieldMapRefusal:
-                self.assertTrue(collection.get("publication_hold"), identifier)
-                self.assertFalse(any(t.get("sample_path") for t in collection["tables"]))
+                if identifier == "need" and collection.get("sample", {}).get("path"):
+                    from cedar_press.need_preview import need_preview_permitted
+
+                    advertised = [
+                        table for table in collection["tables"] if table.get("sample_path")
+                    ]
+                    self.assertEqual(
+                        len(advertised), 1, "Only the reviewed NEED base may have a preview"
+                    )
+                    self.assertTrue(need_preview_permitted(_REPO, collection, advertised[0]))
+                    self.assertNotIn("publication_hold", collection)
+                else:
+                    self.assertTrue(collection.get("publication_hold"), identifier)
+                    self.assertFalse(any(t.get("sample_path") for t in collection["tables"]))
 
     def test_audit_persists_policy_even_without_sample_paths(self) -> None:
         import tempfile
@@ -778,10 +818,21 @@ class TestGeneratorAndManifestAgree(unittest.TestCase):
             root = Path(folder)
             path = root / "data/cedar/collections.manifest.json"
             path.parent.mkdir(parents=True)
-            path.write_text(json.dumps({"collections": [{
-                "id": "need", "cedar": {"cedar_id": "need", "status": "READY"},
-                "sample": {"path": None}, "tables": [{"sample_path": None}],
-            }]}), encoding="utf-8")
+            path.write_text(
+                json.dumps(
+                    {
+                        "collections": [
+                            {
+                                "id": "need",
+                                "cedar": {"cedar_id": "need", "status": "READY"},
+                                "sample": {"path": None},
+                                "tables": [{"sample_path": None}],
+                            }
+                        ]
+                    }
+                ),
+                encoding="utf-8",
+            )
             with patch.object(
                 self.script, "withheld_entities", return_value=(frozenset(), frozenset())
             ):
@@ -799,14 +850,17 @@ class TestGeneratorAndManifestAgree(unittest.TestCase):
         # (a clean file), it changes nothing; and every sample the site serves
         # today is clean.
         import tempfile
+
         leaked = (
-            'id,source_document,note\n'
-            '1,"native_entity_enterprise_dataset_v6_geocoded.csv (the owner\'s research '
-            'dataset, on this machine at '
-            '~/Desktop/dissertation/data/tribal_federal_spending/clean/) '
+            "id,source_document,note\n"
+            "1,\"native_entity_enterprise_dataset_v6_geocoded.csv (the owner's research "
+            "dataset, on this machine at "
+            "~/Desktop/dissertation/data/tribal_federal_spending/clean/) "
             ':: https://www.bowhead.com/about/",kept\n'
-            '2,/Users/' 'someone/work/x.csv,C:\\Users\\' 'someone\\x.csv\n'
-            '3,https://www.example.com/home/about,~20% of rows\n'
+            "2,/Users/"
+            "someone/work/x.csv,C:\\Users\\"
+            "someone\\x.csv\n"
+            "3,https://www.example.com/home/about,~20% of rows\n"
         )
         clean = self.script.scrub_local_paths(leaked)
         self.assertNotIn("Desktop", clean)
@@ -834,11 +888,13 @@ class TestGeneratorAndManifestAgree(unittest.TestCase):
             self.assertEqual([p.name for p in rewritten], ["leak__10.csv"])
             self.assertEqual((served / "leak__10.csv").read_text(encoding="utf-8"), clean)
             self.assertEqual(
-                self.script.scrub_public_samples(root), [], "a second pass finds nothing")
+                self.script.scrub_public_samples(root), [], "a second pass finds nothing"
+            )
             # The import path writes through the same scrub.
             target = root / "out" / "leak__10.csv"
             self.assertFalse(
-                self.script.publish_sample(served / "leak__10.csv", target), "already clean")
+                self.script.publish_sample(served / "leak__10.csv", target), "already clean"
+            )
             source = root / "bundle.csv"
             source.write_text(leaked, encoding="utf-8", newline="")
             self.assertTrue(self.script.publish_sample(source, target))
@@ -846,7 +902,8 @@ class TestGeneratorAndManifestAgree(unittest.TestCase):
         for path in (_REPO / "public" / "data" / "cedar" / "samples").rglob("*.csv"):
             text = path.read_text(encoding="utf-8")
             self.assertEqual(
-                self.script.scrub_local_paths(text), text,
+                self.script.scrub_local_paths(text),
+                text,
                 f"{path} carries a local filesystem path; run import_cedar_manifest.py --audit",
             )
 
@@ -857,24 +914,35 @@ class TestGeneratorAndManifestAgree(unittest.TestCase):
         # the command; so does a register export behind the spine.
         result = subprocess.run(  # noqa: S603
             ["node", str(_REPO / "scripts" / "derive-explore.mjs"), "--check"],
-            capture_output=True, text=True, check=False, cwd=_REPO,
+            capture_output=True,
+            text=True,
+            check=False,
+            cwd=_REPO,
         )
         self.assertEqual(result.returncode, 0, result.stderr or result.stdout)
 
     def test_the_release_ledger_is_tracked(self) -> None:
         # All runtime metadata must survive a fresh clone, including the
         # curated field contracts that cannot be regenerated from datasets.
-        for name in ("codebook.json", "field_map.json", "collections.manifest.json",
-                     "releases.json", "samples.published.json", "explore.json",
-                     "explore.overrides.json"):
+        for name in (
+            "codebook.json",
+            "field_map.json",
+            "collections.manifest.json",
+            "releases.json",
+            "samples.published.json",
+            "explore.json",
+            "explore.overrides.json",
+        ):
             with self.subTest(file=name):
                 result = subprocess.run(  # noqa: S603
-                    ["git", "-C", str(_REPO), "ls-files", "--error-unmatch",
-                     f"data/cedar/{name}"],
-                    capture_output=True, text=True, check=False,
+                    ["git", "-C", str(_REPO), "ls-files", "--error-unmatch", f"data/cedar/{name}"],
+                    capture_output=True,
+                    text=True,
+                    check=False,
                 )
                 self.assertEqual(
-                    result.returncode, 0,
+                    result.returncode,
+                    0,
                     f"data/cedar/{name} is not tracked; commit the authoritative runtime contract",
                 )
 

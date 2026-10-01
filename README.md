@@ -161,21 +161,22 @@ Please report vulnerabilities as described in [SECURITY.md](SECURITY.md).
 
 ## The data workspace
 
-This repository also contains the Cedar data workspace, merged on 2026-09-02.
-It has its own entry points and its own conventions:
+This repository retains the historical Cedar data workspace, merged on 2026-09-02.
+Current versioned releases and researcher spreadsheets are built in Lumecon-data;
+Press consumes explicit release pins. Use these entry points:
 
 | | |
 |---|---|
-| **What the site needs from the workspace** | [`docs/TERMINAL_HANDOFF.md`](docs/TERMINAL_HANDOFF.md) — read this after every pull. One table of open items, and the tests that fail when the workspace moves under a published claim. |
-| Start here | [`START_HERE.md`](START_HERE.md) |
+| Consumer continuation | [`docs/TERMINAL_HANDOFF.md`](docs/TERMINAL_HANDOFF.md): current workflow, maintained authorities and archived checkpoints. |
+| Historical workspace orientation | [`START_HERE.md`](START_HERE.md); its dated counts and assignments are not current release evidence. |
 | Rules for agents working in it | [`AGENTS.md`](AGENTS.md) |
-| Current state of the datasets | [`docs/DATASET_READINESS.md`](docs/DATASET_READINESS.md) (regenerate: `py -3 code/518_dataset_readiness.py`; not run 2026-09-23, since it rewrites a tracked file) and [`docs/TWELVE_DATASET_PLAN.md`](docs/TWELVE_DATASET_PLAN.md) |
+| Current release evidence | [Producer convergence checkpoint](https://github.com/teim-team/Lumecon-data/blob/codex/convergence-packet-guard-20260928/docs/cedar-convergence.md) and its linked dependency ledger. The older [`DATASET_READINESS.md`](docs/DATASET_READINESS.md) and [`TWELVE_DATASET_PLAN.md`](docs/TWELVE_DATASET_PLAN.md) describe the historical workspace. |
 | Past handoffs, kept as records | [`docs/handoffs/`](docs/handoffs/); each carries a banner saying what superseded it |
 | The dataset plans and the v2 spec | [`docs/plans/`](docs/plans/) |
 | Measured map of the collections | [`docs/DATA_ARCHITECTURE.md`](docs/DATA_ARCHITECTURE.md) |
-| The thirteen built datasets | `dist/customer/` (CSV + codebook + notes) |
-| Rebuild the deliverables | `py -3 code/1137_customer_dataset_combine.py build` (not run 2026-09-23: it rebuilds the committed deliverables) |
-| Audit | `py -3 code/846_session_audit.py` (run 2026-09-23 with Python 3.12: 18 of 32 claims pass, 14 fail, 4 of them critical, in the identity layer; it also rewrites `docs/SESSION_AUDIT.json`) |
+| Historical combined deliverables | `dist/customer/` preserves workspace CSVs, codebooks and notes; it is not the connected release authority. |
+| Build current researcher deliverables | The producer's installed `lumecon-data spreadsheet` command with explicit store, collection and release pins; see the [spreadsheet guide](https://github.com/teim-team/Lumecon-data/blob/codex/convergence-packet-guard-20260928/README.md#one-living-dataset-one-spreadsheet). The Press API consumes those verified releases. |
+| Historical workspace reproduction | `code/1137_customer_dataset_combine.py` and `code/846_session_audit.py` retain their original scopes and safety gates. Their prior results are historical evidence, not current release acceptance. |
 
 `py -3` is the Windows launcher; on Linux and macOS use `python3`, which
 must be 3.12 or later (some scripts, `code/1137_customer_dataset_combine.py`
@@ -204,3 +205,7 @@ pinned rollback; undeclared extra columns still refuse delivery.
 Public labels and citations use the collection name and its recorded Updated date. Version labels and internal file/table counts are not product descriptions or source counts. The authenticated spreadsheet-download route returns one CSV per collection through the same pinned, rights-checked download verifier. Existing component routes remain internal compatibility interfaces. Compatible columns align; conflicting definitions or units stay separate until reviewed, and record type/key/grain prevent accidental aggregation across observations. Preview extracts remain explicitly labeled as samples.
 
 Rebuild and inspect the real collection exports in the data workspace before publication. Review conflicting column definitions, duplicate keys, missing values and original-source provenance; preserve publication holds. The code change itself does not rebuild the external data store or deploy the service.
+
+## Presentation maintenance
+
+[Press and Grove presentation data flow](docs/PRESENTATION_DATA_FLOW.md) is the maintained guide to public sample counts, connected release counts, shared reader labels and the export/codebook review boundary. Historical handoffs keep their dated measurements; avoid copying those counts into the current product.

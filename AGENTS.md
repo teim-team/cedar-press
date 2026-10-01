@@ -76,10 +76,11 @@ with Tribal Business News: built by Lumecon and available exclusively through
 Tribal Business News, which handles subscriber plans (payment, renewals and
 issuance). There is no year gating: every subscriber gets full coverage.
 
-**The Cedar data workspace.** The collections themselves — the deal ledger, the
-entity universe and the outcomes panel — and the pipeline that builds them,
-under `code/`, `docs/` and `dist/customer/`. This is what `AGENTS.md` below is
-mostly about.
+**The preserved Cedar data workspace.** Historical acquisition, adjudication and
+reproduction scripts remain under `code/`, with their evidence in `docs/` and
+`dist/customer/`. Current versioned release builds and researcher spreadsheets
+are maintained in Lumecon-data. Press owns the shared consumer, publication
+filters and customer presentation. The journal below preserves earlier work.
 
 **Does not own:**
 
@@ -87,8 +88,9 @@ mostly about.
   to Tribal Business News, whose involvement is with Cedar Press only.
 - The shared data foundation. That is
   [`Lumecon-data`](https://github.com/teim-team/Lumecon-data), the separate
-  data repository decided on 2026-09-21. It exists as of 2026-09-23; the
-  pipeline in `code/` has not moved to it yet.
+  data repository decided on 2026-09-21. Its installed builders and spreadsheet
+  exporter now own current pinned releases. Historical scripts under `code/`
+  remain available for their documented reproduction and adjudication roles.
 - The economic model. That is `teim-engine`, whose reference data this workspace
   reads under ADR-044 `reference_dataset` treatment — pinned, checksummed,
   versioned, never `data_snapshot`.
@@ -104,7 +106,7 @@ mostly about.
 |---|---|---|
 | Web client | Vite + React, deployed as a static build | `npm run dev`; `src/` |
 | API | FastAPI, Python | `server/` — see [`server/README.md`](server/README.md) |
-| Data workspace | Python scripts, numbered | `code/<n>_*.py`; `dist/customer/` holds the built deliverables |
+| Preserved data workspace | Historical Python scripts, numbered | `code/<n>_*.py` and `dist/customer/`; current release entrypoints are linked from [`docs/TERMINAL_HANDOFF.md`](docs/TERMINAL_HANDOFF.md) |
 
 Pointing `VITE_API_URL` at the API is the whole switch from the standalone build
 to a connected one. [`.env.example`](.env.example) lists every configuration
@@ -333,7 +335,7 @@ editing when several agents run at once.
 
 ## 8. Cross-repo links and status
 
-*Section current as of 2026-09-23.*
+*Current release workflow is recorded in [the maintained consumer handoff](docs/TERMINAL_HANDOFF.md), which links the producer checkpoint. Dated journal entries below preserve history.*
 
 | Repo | What it is | Relationship to this one |
 |---|---|---|
@@ -341,7 +343,7 @@ editing when several agents run at once.
 | [`teim-engine`](https://github.com/teim-team/teim-engine) | The model engine behind Cedar Impact (internal) | This workspace reads its reference data as `reference_dataset` per ADR-044 |
 | [`cedar`](https://github.com/teim-team/cedar) | Cedar, the AI economic analyst, as a service | No runtime dependency in either direction |
 | [`lumecon-website`](https://github.com/teim-team/lumecon-website) | The public site, and the **North Star** for product vocabulary | Product names and their one-line definitions follow its `AGENTS.md` |
-| [`Lumecon-data`](https://github.com/teim-team/Lumecon-data) | The shared Python data foundation behind Cedar Press, Cedar Grove, Cedar and Cedar Impact | The separate data repository decided on 2026-09-21; data extraction and harmonization are to move there. The pipeline in `code/` is still here |
+| [`Lumecon-data`](https://github.com/teim-team/Lumecon-data) | The shared Python data foundation behind Cedar Press, Cedar Grove, Cedar and Cedar Impact | Owns current versioned builders, verification and researcher spreadsheet exports. Press consumes exact pins; historical workspace scripts remain here for reproduction and adjudication. |
 
 **Naming**, per the North Star: the impact product is **Cedar Impact**; "TEIM"
 survives as a repository, database and resource name only; "tribal economic
@@ -9661,3 +9663,7 @@ registered publishers and source systems; never relabel table counts as sources.
 Final delivery is one cohesive data table per collection, with compatible columns,
 explicit record grain and provenance, and blanks for inapplicable fields. Preserve
 all rights and identity holds; joins must not multiply observations or money.
+
+## 2026-10-01: sample counts and connected spreadsheet counts have different populations
+
+Public previews count their own eligible sample records and label the preview update date. Do not sum legacy collection/table counts into a customer record total. Connected spreadsheet counts come from permitted release descriptors and must match the same release's displayed record types. Reader-facing labels and retired identifier column filtering are shared in `src/features/grove/readerPresentation.js`; Cedar IDs, names and original record IDs remain. `docs/PRESENTATION_DATA_FLOW.md` owns this current maintenance boundary. Automated build, test and deployment checks remain enabled.

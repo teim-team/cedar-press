@@ -98,7 +98,8 @@ def packet(tier: str, collection: str, release_id: str, component: str | None = 
         r"[0-9a-f]{64}", release_id
     ):
         raise repository.FullReleaseUnavailable("Invalid research release identity")
-    repository.assert_collection_publishable(collection)
+    if collection != "need" or component != repository.need_publication.COMPONENT:
+        repository.assert_collection_publishable(collection)
     if repository.is_component_release(collection) and not (
         collection == "federal-register" and component is None
     ):

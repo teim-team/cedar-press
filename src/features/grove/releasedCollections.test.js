@@ -34,3 +34,31 @@ test("the spreadsheet download requires matching verified metadata", async () =>
   assert.equal(spreadsheetDownloadUrl("gaming", meta, parts), null);
   assert.equal(spreadsheetDownloadUrl("../plot", meta, parts), null);
 });
+
+test("research examples omit retired entity IDs while keeping names and source record IDs", async () => {
+  const vite = await createServer({ appType: "custom", logLevel: "silent", server: { middlewareMode: true } });
+  try {
+    const { ResearchPreview } = await vite.ssrLoadModule("/src/pages/grove/ReleasedCollections.jsx");
+    const names = ["canonical_name", "award_id", "cicd_id", "owner_hub_handle"];
+    const packet = {
+      collection: "funding", release_id: "a".repeat(64), sample_rows: 1, source_rows: 12,
+      display_order: names,
+      codebook: { row_grain: "One award", aggregation_cautions: [], fields: names.map((name) => ({
+        name, label: name, definition: "Fixture definition", display_disposition: "keep",
+      })) },
+      rows: [{ release_row_sha256: "b".repeat(64), row: {
+        canonical_name: "Example organization", award_id: "AWARD-1",
+        cicd_id: "retired-number", owner_hub_handle: "retired-handle",
+      }, source: null }],
+      limits: [],
+    };
+    const html = renderToStaticMarkup(jsx(ResearchPreview, { packet }));
+    assert.ok(html.includes("1 real examples from"));
+    assert.ok(html.includes("12"));
+    assert.ok(html.includes("Example organization"));
+    assert.ok(html.includes("AWARD-1"));
+    for (const value of ["cicd_id", "owner_hub_handle", "retired-number", "retired-handle"]) {
+      assert.equal(html.includes(value), false, value);
+    }
+  } finally { await vite.close(); }
+});

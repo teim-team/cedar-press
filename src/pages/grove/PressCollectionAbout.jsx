@@ -29,6 +29,7 @@ import {
 } from "../../features/grove/collection.js";
 import { codebookFor } from "../../features/grove/explore.js";
 import { coverageLabel } from "../../features/grove/pressAccess.js";
+import { sampleRecordCount } from "../../features/grove/readerPresentation.js";
 import { articleHref, articlesDrawingOn } from "../../features/grove/pressArticles.js";
 import { PRESS_CATALOG_BY_ID } from "../../features/grove/pressCatalog.js";
 import { collectionQuestions } from "../../features/grove/pressJobs.js";
@@ -75,6 +76,7 @@ export default function PressCollectionAbout({ entry, flagship, onClose }) {
   const releases = ledgerFor(entry.id) ?? [];
   const latest = releases.at(-1) ?? null;
   const questions = collectionQuestions(entry.id);
+  const sampleRows = sampleRecordCount(flagship?.sampleRows);
 
   return (
     <div className="cp-ab" role="dialog" aria-label={`About ${entry.name}`} ref={panelRef}>
@@ -93,9 +95,9 @@ export default function PressCollectionAbout({ entry, flagship, onClose }) {
         {/* The header's facts, as fields. A reader checking a figure wants
             the release and the coverage before they want the prose. */}
         <dl className="cp-ab__facts">
-          {launch.updated ? (<div><dt>Updated</dt><dd>{formatUpdated(launch.updated)}</dd></div>) : null}
+          {launch.updated ? (<div><dt>Preview updated</dt><dd>{formatUpdated(launch.updated)}</dd></div>) : null}
           {coverageLabel(catalog) ? (<div><dt>Coverage</dt><dd>{coverageLabel(catalog)}</dd></div>) : null}
-          {launch.rowsLabel ? (<div><dt>Records</dt><dd>{launch.rowsLabel}</dd></div>) : null}
+          {sampleRows !== null ? (<div><dt>Sample records</dt><dd>{sampleRows.toLocaleString("en-US")}</dd></div>) : null}
           <div><dt>Maintained</dt><dd>{MAINTENANCE.label}</dd></div>
         </dl>
 

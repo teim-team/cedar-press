@@ -1,12 +1,8 @@
-// docs/TERMINAL_HANDOFF.md is the one file the data workspace reads after
-// pulling this repository. A handoff that names a file which has moved is
-// worse than no handoff: it sends someone looking for instructions that are
-// not there, and it looks as authoritative as a correct one.
-//
-// So every path it names has to exist, and the two claims in it that the code
-// can check are checked.
+// The active handoff is short, links to the preserved historical checkpoint,
+// and states the current consumer status. Every local reference must resolve.
 import assert from "node:assert/strict";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, statSync } from "node:fs";
+import { isAbsolute, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
 
@@ -17,48 +13,79 @@ const read = (rel) => readFileSync(new URL(rel, root), "utf8");
 const HANDOFF = "docs/TERMINAL_HANDOFF.md";
 const handoff = read(HANDOFF);
 
+function repositoryReferences(text) {
+  const references = new Set();
+  const add = (target, base) => {
+    if (!target || target.startsWith("#") || /^(?:https?:|mailto:)/i.test(target)) return;
+    assert.ok(!/^[a-z][a-z0-9+.-]*:/i.test(target),
+      "the handoff must use repository-relative local references");
+    const url = new URL(target, base);
+    const local = fileURLToPath(url);
+    const path = relative(fileURLToPath(root), local);
+    assert.ok(!isAbsolute(path) && path !== ".." && !path.startsWith(".." + sep),
+      "the handoff references a file outside the repository: " + target);
+    references.add(path.split(sep).join("/"));
+  };
+  // Inline code paths are repository-relative; normal Markdown links are
+  // relative to the handoff document, as they are on GitHub.
+  for (const match of text.matchAll(/`([^`\s]+)`/g)) {
+    if (/^(?:Makefile|[A-Za-z0-9_./-]+\.(?:md|mjs|cjs|jsx|js|json|jsonl|py|yml|yaml|csv|toml))$/.test(match[1])) {
+      add(match[1], root);
+    }
+  }
+  for (const match of text.matchAll(/\[[^\]\n]+\]\((?:<([^>\n]+)>|([^\s)]+))(?:\s+"[^"]*")?\)/g)) {
+    add(match[1] ?? match[2], new URL(HANDOFF, root));
+  }
+  return references;
+}
+
 test("every repository path the handoff names exists", () => {
-  // Backticked paths that look like files in this repo: a slash or a known
-  // extension, and not a shell command or a column name.
-  const candidates = new Set(
-    [...handoff.matchAll(/`([^`\s]+\.(?:md|js|json|jsonl|py|yml|csv))`/g)].map((m) => m[1]),
-  );
-  assert.ok(candidates.size >= 10, `expected the handoff to name paths, found ${candidates.size}`);
-  const missing = [...candidates].filter((rel) => !existsSync(fileURLToPath(new URL(rel, root))));
-  assert.deepEqual(missing, [], `the handoff names ${missing.length} path(s) that do not exist`);
+  const candidates = repositoryReferences(handoff);
+  // These are the active workflow and archived evidence destinations, not an
+  // arbitrary minimum number of backticks in an intentionally concise page.
+  for (const path of [
+    "README.md",
+    "docs/PRESENTATION_DATA_FLOW.md",
+    "AGENTS.md",
+    "server/README.md",
+    "docs/handoffs/2026-10-01-terminal-history.md",
+    "START_HERE.md",
+    "Makefile",
+  ]) {
+    assert.ok(candidates.has(path), "the handoff dropped its reference to " + path);
+  }
+  const missing = [...candidates].filter((path) => {
+    const local = fileURLToPath(new URL(path, root));
+    return !existsSync(local) || !statSync(local).isFile();
+  });
+  assert.deepEqual(missing, [], "the handoff names missing or non-file repository paths");
 });
 
 test("the handoff's other documents exist and point back", () => {
   for (const doc of ["docs/CEDAR_IDENTITY_SYSTEM_2026-09-13.md", "docs/CEDAR_PRESS_SITE_2026-09-13.md"]) {
-    assert.ok(existsSync(fileURLToPath(new URL(doc, root))), `${doc} is gone`);
+    assert.ok(existsSync(fileURLToPath(new URL(doc, root))), doc + " is gone");
   }
-  // And the two entry points a terminal actually opens have to route to it,
-  // or the handoff is a file nobody is told to read.
   for (const entry of ["README.md", "START_HERE.md"]) {
-    assert.match(read(entry), /docs\/TERMINAL_HANDOFF\.md/, `${entry} no longer routes to the handoff`);
+    assert.match(read(entry), /docs\/TERMINAL_HANDOFF\.md/, entry + " no longer routes to the handoff");
   }
 });
 
 test("the handoff's liveness claim matches the code", () => {
-  // Item 1 says the business register is not minted and tells the reader to
-  // flip a flag. If someone flips the flag and leaves the handoff saying to,
-  // the next session does the work twice.
   const business = IDENTIFIERS.find((item) => item.id === "business");
-  const saysPending = /`live: false` → `true`/.test(handoff);
-  assert.equal(
-    saysPending,
-    business.live === false,
-    business.live
-      ? "the business register is live; item 1 of the handoff is done and should be removed"
-      : "the handoff no longer tells the terminal to flip `live` when CB- is minted",
-  );
+  assert.ok(business, "the consumer has no business identifier descriptor");
+  const declaration = handoff.match(/Business register state:\s*`live: (true|false)`/);
+  assert.ok(declaration, "the active handoff must state the consumer's business-register liveness");
+  assert.equal(declaration[1] === "true", business.live,
+    "the handoff's business-register liveness disagrees with the consumer");
+  if (!business.live) {
+    assert.match(handoff, /`live: false` → `true`/);
+    assert.match(handoff, /approved register is imported and its product integration is verified/);
+  }
 });
 
 test("the handoff stays a list, not a journal", () => {
-  // It is rewritten in place on purpose. The failure mode for every other doc
-  // in this repo is that it grows until nobody reads it, and this is the one
-  // that has to be read on every pull.
   const lines = handoff.split("\n").length;
-  assert.ok(lines < 200, `the handoff is ${lines} lines; it is meant to be a table, not a journal`);
-  assert.match(handoff, /Rewritten in place, never\s*\n?appended to/, "the handoff dropped its own rule");
+  assert.ok(lines < 200, "the handoff is " + lines + " lines; historical checkpoints belong in the archive");
+  assert.match(handoff, /Rewritten in place, never\s*\n?appended to/,
+    "the handoff dropped its own maintenance rule");
 });

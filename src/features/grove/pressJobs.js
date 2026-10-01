@@ -153,9 +153,9 @@ export const COLLECTION_JOBS = Object.freeze({
     questions: Object.freeze([
       // The owner's "organizations like this one", made exact: "like" is
       // the register's entity type, not a similarity measure Cedar lacks.
-      q(describe, "Which federal programs are supporting organizations of the same type as this one?", ["cfda_title", "entity_class", "canonical_name"]),
-      q(compare, "How has reported federal assistance changed over time?", ["fiscal_year", "obligated_usd", "fy_partial_flag"]),
-      q(compare, "Which agencies are most active among a set of peer organizations?", ["awarding_agency_name", "canonical_name"]),
+      q(describe, "Which federal programs are supporting organizations of the same type as this one?", ["program_name", "entity_class", "canonical_name"]),
+      q(compare, "How has reported federal assistance changed over time?", ["fiscal_year", "obligations_usd", "fy_partial_flag"]),
+      q(compare, "Which agencies are most active among a set of peer organizations?", ["awarding_agency", "canonical_name"]),
     ]),
     cedar: Object.freeze([
       ask(describe, "What does this collection let me compare across peer organizations?", "content"),
@@ -164,9 +164,9 @@ export const COLLECTION_JOBS = Object.freeze({
   }),
   "federal-register": Object.freeze({
     questions: Object.freeze([
-      q(describe, "Which agencies are opening consultations with tribes, and on what topics?", ["agency", "topic", "consultation_type"]),
+      q(describe, "Which agencies are opening consultations with tribes, and on what topics?", ["agency", "topic", "activity_type"]),
       q(compare, "How has consultation activity changed over time?", ["notice_date", "agency"]),
-      q(trace, "Which Federal Register document does a consultation come from?", ["fr_document_number", "federal_register_citation", "source_url"]),
+      q(trace, "Which Federal Register document does a consultation come from?", ["fr_document_number", "federal_register_citation", "consultation_participants__source_url", "federal_actions__source_url", "html_url"]),
     ]),
     cedar: Object.freeze([
       ask(describe, "What does this collection let me follow across agencies?", "content"),
@@ -177,7 +177,7 @@ export const COLLECTION_JOBS = Object.freeze({
     questions: Object.freeze([
       q(describe, "Which bills concerning a Nation have moved past introduction?", ["canonical_names", "outcome", "latest_action"]),
       q(compare, "Which policy areas draw the most legislation concerning Indian Country?", ["policy_area"]),
-      q(trace, "Who sponsors legislation affecting a set of Nations?", ["sponsor", "canonical_names"]),
+      q(trace, "Who sponsors legislation affecting a set of Nations?", ["sponsor_name", "canonical_names"]),
     ]),
     cedar: Object.freeze([
       ask(describe, "What does this collection let me follow on a bill?", "content"),
@@ -186,9 +186,9 @@ export const COLLECTION_JOBS = Object.freeze({
   }),
   deals: Object.freeze({
     questions: Object.freeze([
-      q(describe, "What kinds of major transactions are peer organizations announcing?", ["transaction_type", "Deal_Category", "entity_class"]),
-      q(trace, "Which organizations or counterparties appear repeatedly?", ["native_party_canonical_name", "Counterparty_or_Funder"]),
-      q(compare, "Where is acquisition or financing activity increasing?", ["transaction_type", "State", "Event_Year"]),
+      q(describe, "What kinds of major transactions are peer organizations announcing?", ["deal_type", "entity_class"]),
+      q(trace, "Which organizations or counterparties appear repeatedly?", ["canonical_name", "counterparty_or_funder"]),
+      q(compare, "Where is acquisition or financing activity increasing?", ["deal_type", "state", "event_year"]),
     ]),
     cedar: Object.freeze([
       ask(describe, "What does this collection track about each transaction?", "content"),
@@ -208,8 +208,8 @@ export const COLLECTION_JOBS = Object.freeze({
   }),
   lobbying: Object.freeze({
     questions: Object.freeze([
-      q(describe, "Which agencies and chambers do Native organizations engage, and on which issues?", ["government_entities", "lobbying_issues_codes"]),
-      q(compare, "How much are peer organizations reporting on federal lobbying?", ["spend_usd", "canonical_name", "filing_year"]),
+      q(describe, "Which agencies and chambers do Native organizations engage, and on which issues?", ["government_bodies", "issue_codes"]),
+      q(compare, "How much are peer organizations reporting on federal lobbying?", ["reported_amount_usd", "canonical_name", "reporting_year"]),
       q(trace, "Which registrants file on an organization's behalf?", ["registrant_name", "client_name", "canonical_name"]),
     ]),
     cedar: Object.freeze([
@@ -220,8 +220,8 @@ export const COLLECTION_JOBS = Object.freeze({
   contractors: Object.freeze({
     questions: Object.freeze([
       q(describe, "Which agencies award contracts to Native-owned firms in a given industry?", ["funding_agency", "naics_description"]),
-      q(compare, "How does an organization's use of set-asides compare with its peers?", ["setaside", "total_obligations", "canonical_name"]),
-      q(trace, "Which Nation or corporation does a contractor roll up to?", ["awardee_name", "parent_name", "canonical_name"]),
+      q(compare, "How does an organization's use of set-asides compare with its peers?", ["set_aside_classification", "obligations_usd", "canonical_name"]),
+      q(trace, "What parent and Native-entity associations are recorded for a contractor?", ["awardee_name", "parent_name", "canonical_name"]),
     ]),
     cedar: Object.freeze([
       ask(describe, "What does this collection let me examine on an award?", "content"),
@@ -230,9 +230,9 @@ export const COLLECTION_JOBS = Object.freeze({
   }),
   subcontracting: Object.freeze({
     questions: Object.freeze([
-      q(trace, "Which prime contractors subcontract to Native-owned firms?", ["prime_name", "sub_name", "direction"]),
-      q(describe, "In which industries do Native firms appear as subcontractors?", ["naics_title", "direction"]),
-      q(compare, "How large are subawards relative to their prime awards?", ["subaward_amount", "prime_award_amount", "subaward_to_prime_ratio"]),
+      q(trace, "Which prime contractors and subcontractors appear together in reported subawards?", ["prime_name", "subcontractor_name", "native_direction"]),
+      q(describe, "Which industries are recorded for subcontractors in the release?", ["naics_description", "native_direction"]),
+      q(compare, "How large are subawards relative to their prime awards?", ["subaward_amount_usd", "prime_award_amount_usd", "subaward_to_prime_ratio"]),
     ]),
     cedar: Object.freeze([
       ask(describe, "What does this collection show about the prime relationship?", "content"),
@@ -241,9 +241,9 @@ export const COLLECTION_JOBS = Object.freeze({
   }),
   "natural-resources": Object.freeze({
     questions: Object.freeze([
-      q(describe, "Which commodities generate reported revenue for a Nation?", ["commodity", "canonical_name", "amount_usd"]),
-      q(compare, "How have royalties and other revenues moved across periods?", ["revenue_type", "period_start", "amount_usd"]),
-      q(trace, "Who pays and who operates on the lands behind these revenues?", ["payer_entity_name", "operator_entity_name"]),
+      q(describe, "Which commodities and monetary measures are recorded for a Nation?", ["commodity", "canonical_name", "amount_usd", "measurement_status"]),
+      q(compare, "How do reported resource amounts vary by period and measurement status?", ["revenue_type", "period_start", "amount_usd", "measurement_status"]),
+      q(trace, "Who pays and who operates on the lands behind these revenues?", ["payer_name", "operator_name"]),
     ]),
     cedar: Object.freeze([
       ask(describe, "What does this collection let me compare across commodities?", "content"),
@@ -255,8 +255,8 @@ export const COLLECTION_JOBS = Object.freeze({
     // otherwise only in aggregates, so a question about where individual
     // businesses are would promise rows the collection withholds.
     questions: Object.freeze([
-      q(trace, "Which offices certify Native-owned businesses, and under which programs?", ["certifying_authority_name", "programme_name"]),
-      q(describe, "In which industries are a Nation's certified businesses concentrated?", ["naics", "certifying_authority_name"]),
+      q(trace, "Which offices certify Native-owned businesses, and under which programs?", ["certifying_authority_name", "program_name"]),
+      q(describe, "In which industries are a Nation's certified businesses concentrated?", ["naics_code", "certifying_authority_name"]),
     ]),
     cedar: Object.freeze([
       ask(describe, "What does this collection hold about each business?", "content"),
@@ -268,7 +268,7 @@ export const COLLECTION_JOBS = Object.freeze({
       // The owner's "operate in a similar space", made exact: the IRS
       // activity code (NTEE) in the release, not an invented similarity.
       q(compare, "Which organizations share the same IRS activity code?", ["ntee_code"]),
-      q(compare, "How do Native-led and Native-serving organizations differ across the roster?", ["cedar_native_entity_class", "ntee_code", "state"]),
+      q(compare, "How do Native-led and Native-serving organizations differ across the roster?", ["organization_entity_class", "ntee_code", "state"]),
       q(trace, "Which organizations also appear in federal funding or advocacy records?", ["cedar_uid"]),
     ]),
     cedar: Object.freeze([
@@ -278,9 +278,9 @@ export const COLLECTION_JOBS = Object.freeze({
   }),
   need: Object.freeze({
     questions: Object.freeze([
-      q(trace, "What enterprises sit under this Native entity?", ["owner_hub_name", "enterprise_name"]),
-      q(compare, "How has the enterprise structure changed over time?", ["first_observed_year", "last_observed_year", "parent_enterprise_id", "status"]),
-      q(trace, "Which subsidiaries connect this organization to other Cedar records?", ["enterprise_id", "uei", "in_federal_contracting"]),
+      q(trace, "What ownership relationships are documented for the reviewed enterprises?", ["enterprise_name", "owner_name", "relationship_type"]),
+      q(compare, "Which federal identifiers are documented for the reviewed enterprises?", ["enterprise_name", "uei", "cage_code"]),
+      q(trace, "Which evidence and source release support each reviewed enterprise?", ["evidence_pins", "source_release_id", "reviewed_on"]),
     ]),
     cedar: Object.freeze([
       ask(describe, "What does this collection hold about an enterprise's owner and parent?", "content"),

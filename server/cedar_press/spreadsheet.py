@@ -100,7 +100,8 @@ def _cell(value):
 
 def download(collection, release_id=None, *, metadata_only=False):
     """Pins and every component's byte, schema, key and rights checks stay binding."""
-    r.assert_collection_publishable(collection)
+    if collection != "need":
+        r.assert_collection_publishable(collection)
     if not r.is_component_release(collection):
         return _single_dataset(collection, release_id, metadata_only=metadata_only)
     pin = r.grove_release_pin(collection)
@@ -108,12 +109,18 @@ def download(collection, release_id=None, *, metadata_only=False):
         raise r.FullReleaseUnavailable("Requested release is not the approved catalog pin")
     r._grove_catalog(pin)
     manifest = r._grove_manifest(pin)
+    r.assert_collection_publishable(
+        collection, manifest=manifest, component=r.need_publication.COMPONENT
+    )
     groups, columns, mappings = _layout(collection, pin, manifest)
     descriptor = {
         "kind": "spreadsheet",
         "format": "csv",
         "release_id": pin["release_id"],
+        "manifest_sha256": pin["manifest_sha256"],
+        **r.need_publication.descriptor_metadata(manifest, r.need_publication.COMPONENT),
         "fields": columns,
+        "record_count": sum(descriptor["record_count"] for _, _, descriptor in groups),
         "filename": f"{collection}.csv",
         "scope": "One observation per row, with record type, grain and original source fields.",
         "download_path": (
@@ -182,6 +189,7 @@ def _single_dataset(collection, release_id, *, metadata_only):
         "format": "csv",
         "release_id": rid,
         "fields": source["fields"],
+        "record_count": source["record_count"],
         "filename": f"{collection}.csv",
         "scope": source.get("scope", "One source observation per row."),
         "download_path": f"/press/collections/{collection}/spreadsheet-download?release_id={rid}",

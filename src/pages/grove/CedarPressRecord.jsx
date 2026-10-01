@@ -209,7 +209,7 @@ function CopyButton({ text, label, done = "Copied", className = "cp-rec__copy" }
 /** Previous and next in the reader's own ordering, and where they are in it. */
 function Walk({ place, from, className }) {
   if (place.at < 0) return null;
-  const href = (item) => recordHref({ key: item.key, recordId: item.recordId, index: item.index, from });
+  const href = (item) => recordHref({ key: item.key, recordId: item.recordId, recordType: item.recordType, index: item.index, from });
   return (
     <nav className={className} aria-label="Records in this result">
       {place.previous ? (

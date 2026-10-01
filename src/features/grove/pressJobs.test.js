@@ -121,8 +121,9 @@ test("every surface the brief names reads the layer", () => {
 
 /** The codebook table a collection's questions are checked against. */
 function codebookTable(id) {
-  const keys = Object.keys(codebookJson.tables).filter((key) => key.split("/")[0] === id);
-  return keys.length === 1 ? codebookJson.tables[keys[0]] : null;
+  // The public file has one producer spreadsheet. Historical dictionaries
+  // may remain for transform documentation and are not its current schema.
+  return codebookJson.tables[`${id}/${id}`] ?? null;
 }
 
 test("every collection has two or three questions, and nothing else does", () => {

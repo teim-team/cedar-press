@@ -64,7 +64,7 @@ export function catalogDescription(catalog = STOREFRONT_CATALOG) {
   });
   const list = phrases.length > 1 ? `${phrases.slice(0, -1).join(", ")} and ${phrases.at(-1)}` : phrases.join("");
   const count = spellCount(catalog.length);
-  return `${count[0].toUpperCase()}${count.slice(1)} collections on Indian Country's economy: ${list}, each resolved to the tribal governments and Native entities behind the records.`;
+  return `${count[0].toUpperCase()}${count.slice(1)} collections on Indian Country's economy: ${list}, with source records and separately documented Native entity associations.`;
 }
 
 function latestReleaseDate() {
@@ -103,7 +103,7 @@ export function graph() {
         url: `${SITE}/`,
         name: "Cedar Press",
         description:
-          "Trusted intelligence for Indian Country: maintained collections on federal funding, contracting, deals, policy, giving, land and Native enterprise ownership, each traced to its source and resolved to the Native entities behind it.",
+          "Trusted intelligence for Indian Country: maintained collections on federal funding, contracting, deals, policy, giving, land and Native enterprise ownership, with source records, declared row grains and separately documented Native entity associations.",
         inLanguage: "en",
         keywords: KEYWORDS,
         publisher: { "@id": ORG },

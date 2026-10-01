@@ -667,18 +667,27 @@
   "releases": {
     "funding": {
       "name": "Federal Funding to Indian Country",
-      "version": "v2",
-      "updated": "2026-09-26",
+      "version": "v3",
+      "updated": "2026-10-01",
       "cadence": "Updated weekly",
       "retired": false,
       "history": [
+        {
+          "version": "v3",
+          "date": "2026-10-01",
+          "kind": "data",
+          "changed": [
+            "Dataset updated: 640,942 observations.",
+            "A 10-row preview downloads from the shelf."
+          ]
+        },
         {
           "version": "v2",
           "date": "2026-09-26",
           "kind": "data",
           "changed": [
             "Dataset updated: 3,646,750 rows.",
-            "A 10-row preview downloads from the shelf."
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         },
         {
@@ -703,18 +712,27 @@
     },
     "federal-register": {
       "name": "Federal Register — Indian Affairs",
-      "version": "v2",
-      "updated": "2026-09-26",
+      "version": "v3",
+      "updated": "2026-10-01",
       "cadence": "Updated weekly",
       "retired": false,
       "history": [
+        {
+          "version": "v3",
+          "date": "2026-10-01",
+          "kind": "data",
+          "changed": [
+            "Dataset updated: 21,258 observations.",
+            "A 10-row preview downloads from the shelf."
+          ]
+        },
         {
           "version": "v2",
           "date": "2026-09-26",
           "kind": "data",
           "changed": [
             "Dataset updated: 502,483 rows.",
-            "A 10-row preview downloads from the shelf."
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         },
         {
@@ -739,18 +757,27 @@
     },
     "legislation": {
       "name": "Native Legislation and Votes",
-      "version": "v2",
-      "updated": "2026-09-26",
+      "version": "v3",
+      "updated": "2026-10-01",
       "cadence": "Updated weekly",
       "retired": false,
       "history": [
+        {
+          "version": "v3",
+          "date": "2026-10-01",
+          "kind": "data",
+          "changed": [
+            "Dataset updated: 3,064 observations.",
+            "A 10-row preview downloads from the shelf."
+          ]
+        },
         {
           "version": "v2",
           "date": "2026-09-26",
           "kind": "data",
           "changed": [
             "Dataset updated: 206,354 rows.",
-            "A 10-row preview downloads from the shelf."
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         },
         {
@@ -775,18 +802,27 @@
     },
     "deals": {
       "name": "Indian Country Deals",
-      "version": "v2",
-      "updated": "2026-09-26",
+      "version": "v3",
+      "updated": "2026-10-01",
       "cadence": "Updated weekly",
       "retired": false,
       "history": [
+        {
+          "version": "v3",
+          "date": "2026-10-01",
+          "kind": "data",
+          "changed": [
+            "Dataset updated: 978 observations.",
+            "A 10-row preview downloads from the shelf."
+          ]
+        },
         {
           "version": "v2",
           "date": "2026-09-26",
           "kind": "data",
           "changed": [
             "Dataset updated: 2,662 rows.",
-            "A 10-row preview downloads from the shelf."
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         },
         {
@@ -811,18 +847,27 @@
     },
     "nagpra": {
       "name": "NAGPRA Notices",
-      "version": "v2",
-      "updated": "2026-09-26",
+      "version": "v3",
+      "updated": "2026-10-01",
       "cadence": "Updated weekly",
       "retired": false,
       "history": [
+        {
+          "version": "v3",
+          "date": "2026-10-01",
+          "kind": "data",
+          "changed": [
+            "Dataset updated: 6,792 observations.",
+            "A 10-row preview downloads from the shelf."
+          ]
+        },
         {
           "version": "v2",
           "date": "2026-09-26",
           "kind": "data",
           "changed": [
             "Dataset updated: 100,786 rows.",
-            "A 10-row preview downloads from the shelf."
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         },
         {
@@ -847,18 +892,27 @@
     },
     "lobbying": {
       "name": "Native Federal Advocacy and Engagement",
-      "version": "v2",
-      "updated": "2026-09-26",
+      "version": "v3",
+      "updated": "2026-10-01",
       "cadence": "Updated weekly",
       "retired": false,
       "history": [
+        {
+          "version": "v3",
+          "date": "2026-10-01",
+          "kind": "data",
+          "changed": [
+            "Dataset updated: 27,825 observations.",
+            "A 10-row preview downloads from the shelf."
+          ]
+        },
         {
           "version": "v2",
           "date": "2026-09-26",
           "kind": "data",
           "changed": [
             "Dataset updated: 264,478 rows.",
-            "A 10-row preview downloads from the shelf."
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         },
         {
@@ -883,18 +937,27 @@
     },
     "contractors": {
       "name": "Native Federal Contractors",
-      "version": "v2",
-      "updated": "2026-09-26",
+      "version": "v3",
+      "updated": "2026-10-01",
       "cadence": "Updated weekly",
       "retired": false,
       "history": [
+        {
+          "version": "v3",
+          "date": "2026-10-01",
+          "kind": "data",
+          "changed": [
+            "Dataset updated: 841,002 observations.",
+            "A 10-row preview downloads from the shelf."
+          ]
+        },
         {
           "version": "v2",
           "date": "2026-09-26",
           "kind": "data",
           "changed": [
             "Dataset updated: 3,345,971 rows.",
-            "A 10-row preview downloads from the shelf."
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         },
         {
@@ -919,18 +982,27 @@
     },
     "subcontracting": {
       "name": "Native Federal Subcontracting",
-      "version": "v2",
-      "updated": "2026-09-26",
+      "version": "v3",
+      "updated": "2026-10-01",
       "cadence": "Updated weekly",
       "retired": false,
       "history": [
+        {
+          "version": "v3",
+          "date": "2026-10-01",
+          "kind": "data",
+          "changed": [
+            "Dataset updated: 70,054 observations.",
+            "A 10-row preview downloads from the shelf."
+          ]
+        },
         {
           "version": "v2",
           "date": "2026-09-26",
           "kind": "data",
           "changed": [
             "Dataset updated: 90,479 rows.",
-            "A 10-row preview downloads from the shelf."
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         },
         {
@@ -955,18 +1027,27 @@
     },
     "owned": {
       "name": "Native-Owned Businesses",
-      "version": "v2",
-      "updated": "2026-09-26",
+      "version": "v3",
+      "updated": "2026-10-01",
       "cadence": "Updated weekly",
       "retired": false,
       "history": [
+        {
+          "version": "v3",
+          "date": "2026-10-01",
+          "kind": "data",
+          "changed": [
+            "Dataset updated: 3,725 observations.",
+            "A 10-row preview downloads from the shelf."
+          ]
+        },
         {
           "version": "v2",
           "date": "2026-09-26",
           "kind": "data",
           "changed": [
             "Dataset updated: 5,930 rows.",
-            "A 10-row preview is not published on the shelf yet."
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         },
         {
@@ -992,11 +1073,20 @@
     },
     "need": {
       "name": "Cedar Native Entity Enterprise Dataset (NEED)",
-      "version": "v3",
-      "updated": "2026-09-27",
+      "version": "v4",
+      "updated": "2026-10-01",
       "cadence": "Updated weekly",
       "retired": false,
       "history": [
+        {
+          "version": "v4",
+          "date": "2026-10-01",
+          "kind": "data",
+          "changed": [
+            "Dataset updated: 27 observations.",
+            "A 10-row preview downloads from the shelf."
+          ]
+        },
         {
           "version": "v3",
           "date": "2026-09-27",
@@ -1038,18 +1128,27 @@
     },
     "natural-resources": {
       "name": "Tribal Natural Resource Revenue",
-      "version": "v2",
-      "updated": "2026-09-26",
+      "version": "v3",
+      "updated": "2026-10-01",
       "cadence": "Updated weekly",
       "retired": false,
       "history": [
+        {
+          "version": "v3",
+          "date": "2026-10-01",
+          "kind": "data",
+          "changed": [
+            "Dataset updated: 11,120 observations.",
+            "A 10-row preview downloads from the shelf."
+          ]
+        },
         {
           "version": "v2",
           "date": "2026-09-26",
           "kind": "data",
           "changed": [
             "Dataset updated: 283,716 rows.",
-            "A 10-row preview downloads from the shelf."
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         },
         {
@@ -1074,18 +1173,27 @@
     },
     "nonprofits": {
       "name": "Native Nonprofits",
-      "version": "v2",
-      "updated": "2026-09-26",
+      "version": "v3",
+      "updated": "2026-10-01",
       "cadence": "Updated weekly",
       "retired": false,
       "history": [
+        {
+          "version": "v3",
+          "date": "2026-10-01",
+          "kind": "data",
+          "changed": [
+            "Dataset updated: 89 observations.",
+            "A 10-row preview downloads from the shelf."
+          ]
+        },
         {
           "version": "v2",
           "date": "2026-09-26",
           "kind": "data",
           "changed": [
             "Dataset updated: 131,090 rows.",
-            "A 10-row preview downloads from the shelf."
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         },
         {

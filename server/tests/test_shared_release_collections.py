@@ -200,11 +200,25 @@ class SharedCollectionReleaseTest(unittest.TestCase):
 
     def test_legacy_need_preview_obeys_collection_hold_before_reading_rows(self):
         self.session("press_pro")
-        with patch.object(repository.launch, "collection_csv") as rows:
+        # The reviewed-base proof is checked by the real preview reader.
+        # Replacing that reader would replace the very guard this test exercises.
+        with (
+            patch(
+                "cedar_press.need_preview.current_need_preview_permitted",
+                return_value=False,
+            ) as proof,
+            patch.object(
+                repository.launch,
+                "_SAMPLE",
+                {"need": {"path": "/data/cedar/samples/need/stale.csv"}},
+            ),
+            patch.object(repository.launch, "_SAMPLE_ROOT") as sample_root,
+        ):
             response = self.client.get("/press/collections/need/download")
             self.assertEqual(response.status_code, 503)
             self.assertEqual(response.json()["code"], "COLLECTION_HELD")
-            rows.assert_not_called()
+            proof.assert_called_once_with(repository.launch._REPO)
+            sample_root.__truediv__.assert_not_called()
 
     def test_fifteen_targets_preserve_tiers_and_never_invent_samples(self):
         with (
@@ -547,6 +561,18 @@ class SharedCollectionReleaseTest(unittest.TestCase):
                 {},
             ):
                 with self.subTest(collection=collection, rights=rights):
+                    # NEED refuses this unreviewed component before field presentation
+                    # can imply that it has passed its narrower publication proof.
+                    refusal = (
+                        repository.ComponentPublicationHeld
+                        if collection == "need"
+                        else repository.FullReleaseUnavailable
+                    )
+                    reason = (
+                        "^Only the evidence-pinned NEED reviewed base is public$"
+                        if collection == "need"
+                        else "incomplete|held or unknown"
+                    )
                     entry = {
                         "collection": collection,
                         "order": ["id", "secret"],
@@ -567,9 +593,7 @@ class SharedCollectionReleaseTest(unittest.TestCase):
                             "_field_map_tables",
                             return_value={f"{collection}/facts": entry},
                         ),
-                        self.assertRaisesRegex(
-                            repository.FullReleaseUnavailable, "incomplete|held or unknown"
-                        ),
+                        self.assertRaisesRegex(refusal, reason),
                     ):
                         repository.grove_component_contract(
                             {"components": {"facts": contract}}, collection, "facts"

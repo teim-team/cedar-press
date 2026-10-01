@@ -80,7 +80,10 @@ def exchange(request: dict, output_directory: Path | None = None) -> dict:
         raise ExchangeRefusal(400, "Invalid collection, component or release identity")
     if not repository.may_download_full(request["tier"], collection):
         raise ExchangeRefusal(403, "Collection is unavailable to this plan")
-    repository.assert_collection_publishable(collection)
+    if collection != "need" or (
+        operation != "spreadsheet" and component != repository.need_publication.COMPONENT
+    ):
+        repository.assert_collection_publishable(collection)
     if operation == "research":
         return release_research.packet(request["tier"], collection, rid, component)
     if output_directory is None or not output_directory.is_dir() or output_directory.is_symlink():

@@ -480,7 +480,9 @@ def step4_np_orgs(ex: pd.DataFrame, fh) -> pd.DataFrame:
         if e in s_excl:
             ctier, stage = "X", "excluded_by_prior_ruling"
         elif e in s_vstr:
-            ctier, stage = "A", "verified_strict"
+            # The upstream filename records name/place filtering, not a
+            # dated primary Native-governance decision. Retain its provenance.
+            ctier, stage = "B", "verified_strict"
         elif e in s_ver:
             ctier, stage = "B", "verified_not_strict"
         elif e in s_hc:
@@ -510,7 +512,8 @@ def step4_np_orgs(ex: pd.DataFrame, fh) -> pd.DataFrame:
                       f"(A_distinctive={coders[0]}, B_state={coders[1]}, C_ntee={coders[2]}, "
                       f"D_strong={coders[3]}, E_usaspending={coders[4]})")
         if stage == "verified_strict":
-            ev.append("survived place-name filter and v2 ambiguous-token strict filter")
+            ev.append("survived place-name filter and v2 ambiguous-token strict filter; "
+                      "candidate only, needs primary Native governance/service evidence")
         elif stage == "verified_not_strict":
             ev.append("survived place-name filter; dropped by v2 strict filter")
         if e in excl_map:

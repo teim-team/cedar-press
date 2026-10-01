@@ -321,7 +321,7 @@ export default function CedarPressEntity() {
                       {/* A ledger row, not a card: date, what, amount, in
                           the same columns down the page, so a reader can
                           read an entity's activity by scanning one edge. */}
-                      <Link className="cp-ent__row" to={recordHref({ key: item.key, recordId: item.recordId, index: item.index })}>
+                      <Link className="cp-ent__row" to={recordHref({ key: item.key, recordId: item.recordId, recordType: item.recordType, index: item.index })}>
                         <span className="cp-ent__rowdate">{item.date ?? "undated"}</span>
                         <span className="cp-ent__rowwhat">
                           {item.observation || "—"}

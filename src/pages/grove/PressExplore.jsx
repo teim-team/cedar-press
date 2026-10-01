@@ -653,7 +653,7 @@ function LockedCollection({ collection, onAbout }) {
   // the locked frame, where another names its release's default columns.
   const columns = structure
     ? structure.fields.slice(0, 6).map((field) => field.name)
-    : (contract?.default_columns ?? []).slice(0, 6);
+    : (contract?.default_columns ?? []).slice(0, contract?.mapping_kind === "producer_spreadsheet" ? 8 : 6);
   const columnLabel = (column) => (structure ? column.replace(/_/g, " ") : labelFor(flagship.key, column));
   const rows = ROWS_BY_ID[entry.id];
 
@@ -989,6 +989,7 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
   openRecord.href = (item) => recordHref({
     key: item.key,
     recordId: item.recordId,
+    recordType: item.recordType,
     index: item.index ?? null,
     from: params.toString(),
   });

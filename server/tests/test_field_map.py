@@ -3,8 +3,9 @@
 ``code/cedar_publication.apply_field_map`` generates the customer header from
 ``data/cedar/field_map.json`` (docs/PUBLIC_DATASET_SPEC_2026-09-05.md, the
 addendum's exact column lists and the identifier retirement rule). The full
-tables are not in this repository, so the ten-row samples the site serves
-are the fixtures: the same header the writer sees, ten rows deep. What is
+tables are not in this repository, so historical raw preview inputs under
+server/tests/fixtures/legacy-preview are used: ten rows deep. These fixtures
+are not the current public producer spreadsheets. What is
 asserted is the applier's contract, not the data:
 
 - the opening block leads every mapped dataset, filled from the register;
@@ -38,7 +39,7 @@ from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[2]
 CODE = ROOT / "code"
-SAMPLES = ROOT / "public" / "data" / "cedar" / "samples"
+SAMPLES = ROOT / "server" / "tests" / "fixtures" / "legacy-preview" / "samples"
 
 sys.path.insert(0, str(CODE))
 
@@ -1101,7 +1102,7 @@ class TestApplyFieldMap(unittest.TestCase):
         self.assertEqual(header, ["facility_id", "name", "built_date"])
 
     def test_the_map_and_the_codebook_name_the_same_shipped_columns(self):
-        codebook = json.loads((ROOT / "data" / "cedar" / "codebook.json").read_text("utf-8"))
+        codebook = json.loads((SAMPLES.parent / "codebook.json").read_text("utf-8"))
         for coll, entry in pub.field_map().items():
             if not entry["fields"] or entry["key"] not in codebook["tables"]:
                 continue

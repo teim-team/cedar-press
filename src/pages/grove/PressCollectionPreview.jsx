@@ -46,7 +46,6 @@ import { TierName } from "./TierName";
  */
 const PANE_ROWS = 10;
 
-const ROWS_LABEL = Object.fromEntries(LAUNCH_COLLECTION.map((entry) => [entry.id, entry.rowsLabel]));
 const SOURCES = Object.fromEntries(LAUNCH_COLLECTION.map((entry) => [entry.id, entry.sources]));
 
 /**
@@ -114,7 +113,6 @@ export default function CollectionPreview({ entry, tier, register }) {
   const entityColumn = contract ? (contract.entity_name ?? contract.entity_uid ?? null) : null;
   const { defaults, all } = columnPlan(table?.key ?? null, contract, parsed?.columns ?? []);
   const shownColumns = defaults.length ? defaults : all;
-  const rowsLabel = ROWS_LABEL[entry.id];
   const fresh = freshnessLine(entry.id);
   // Presented by its record structure (Foundation & Corporate Giving, PLOT):
   // the frame shows what each record holds, where another collection shows
@@ -130,8 +128,7 @@ export default function CollectionPreview({ entry, tier, register }) {
         </div>
         <p className="cp-pane__facts">
           {!publicationHold && coverage ? <span>{coverage}</span> : null}
-          {!publicationHold && rowsLabel ? <span>{rowsLabel}</span> : null}
-          {!publicationHold && fresh ? <span>{fresh}</span> : null}
+          {!publicationHold && fresh ? <span>Preview {fresh.charAt(0).toLowerCase() + fresh.slice(1)}</span> : null}
         </p>
         <p className="cp-pane__blurb">{entry.blurb}</p>
       </div>
@@ -157,7 +154,6 @@ export default function CollectionPreview({ entry, tier, register }) {
             </span>
             <span>
               {items.length} of {parsed.rows.length} sample records
-              {table.rows ? ` · ${table.rows.toLocaleString("en-US")} in the release` : ""}
             </span>
           </p>
           {/* THE SAME TABLE, NOT A TABLE THAT LOOKS LIKE IT.
@@ -196,12 +192,10 @@ export default function CollectionPreview({ entry, tier, register }) {
           </span>
           {status === "none" ? (
             <p>
-              The ten-row sample of this collection&rsquo;s main table was produced with the
-              current release and is not on the site yet, so there is nothing here to show you
-              that would be real. The release itself ships {rowsLabel ? <b>{rowsLabel}</b> : "in full"}.
+              A public sample is not available for this collection yet.
             </p>
           ) : (
-            <p>The sample file did not load. The release is unaffected.</p>
+            <p>The public sample could not be loaded. Please try again later.</p>
           )}
           {SOURCES[entry.id] ? (
             <p className="cp-pane__sources">
@@ -216,8 +210,8 @@ export default function CollectionPreview({ entry, tier, register }) {
           off the door on 2026-09-04, and it still lives on /data. */}
       {!structure && status === "ok" && table && !table.flagship ? (
         <p className="cp-pane__note">
-          This collection&rsquo;s main table ships with the release; its sample is not published
-          on the site yet, so the preview shows a supporting table from the same release.
+          This preview uses a supporting table. Its records may have a different grain from
+          the collection&rsquo;s main table.
         </p>
       ) : null}
       <div className="cp-pane__foot">

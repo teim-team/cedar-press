@@ -41,7 +41,6 @@ import { contactHref } from "../../features/grove/appLink.js";
 import { useAuth } from "../../context/useAuth";
 import { useFadeIn } from "../../features/grove/useFadeIn";
 import { activatePressAccount, validatePressCode } from "../../api";
-import { LAUNCH_COLLECTION, LAUNCH_ROWS_TOTAL } from "../../features/grove/collection";
 import { coverageFrom } from "../../features/grove/pressAccess";
 import { LUMECON_TEAM_URL, LUMECON_URL, TBN_PLANS_URL, TBN_URL } from "../../features/grove/pressArticles";
 import { PRESS_TIERS, STOREFRONT_CATALOG, collectionsOnShelf } from "../../features/grove/pressCatalog";
@@ -96,7 +95,6 @@ const SOURCE_ROWS = Array.from({ length: SOURCE_ROW_COUNT }, (_, r) =>
  * The year counts back from this year to the earliest record, the others up
  * from zero. The final value is what is prerendered and what a reader who
  * prefers reduced motion sees. */
-const formatCount = (n) => n.toLocaleString("en-US");
 function Tick({ value, from = 0, format = String }) {
   const ref = useTicker(value, { from, format });
   return <b ref={ref} className="cp-tick">{format(value)}</b>;
@@ -111,7 +109,6 @@ const MARK = "/brand/lumecon-logo-mark-teal.png";
 // "since": the rest start later and two of them are rosters with no start.
 const COLLECTION_STARTS = STOREFRONT_CATALOG.map((entry) => coverageFrom(entry)).filter(Boolean);
 const EARLIEST_YEAR = COLLECTION_STARTS.length ? Math.min(...COLLECTION_STARTS) : null;
-const ROWS_LABEL = Object.fromEntries(LAUNCH_COLLECTION.map((entry) => [entry.id, entry.rowsLabel]));
 
 // The shelves, each with its collections, in the storefront's order.
 const SHELVES = PRESS_TIERS.filter((tier) => tier.storefront).map((tier) => ({
@@ -661,7 +658,6 @@ export default function PressGate({ user }) {
                 use cases start higher. */}
             <ul className="cp-hero3__facts" aria-label="What Cedar Press holds">
               <li><Tick value={STOREFRONT_CATALOG.length} /> collections</li>
-              {LAUNCH_ROWS_TOTAL ? <li><Tick value={LAUNCH_ROWS_TOTAL} format={formatCount} /> records</li> : null}
               {EARLIEST_YEAR ? <li>as far back as <Tick value={EARLIEST_YEAR} from={new Date().getFullYear()} /></li> : null}
               {recentlyUpdated(1)[0] ? <li>updated <b>{formatUpdated(recentlyUpdated(1)[0].updated)}</b></li> : null}
             </ul>
