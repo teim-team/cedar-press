@@ -1,28 +1,40 @@
 # Terminal handoff ? current Codex implementation checkpoint
 
-## Current continuation: 2026-09-28 download closure
+## Current continuation: 2026-09-30 real-data recovery
 
-Cloud edits on this consumer branch consolidate governed component and multipart
-download validation into one disk-backed path. They preserve exact source bytes,
-rights, publication holds, release pins and primary-key checks. Reads are bounded
-and the response closes its private spool even on header-send failure or
-cancellation. CI pins Lumecon runtime `cc5ae36b17eb0ad1a66335b1888e630268de79c5`.
-The matching producer work is in Lumecon PR #17, stacked on #15. Its compatibility
-checks must test the consumer commit containing this entry before integration.
+The Windows convergence checkout was clean and has incorporated GitHub head
+e84d21152481130ffcdc2921fdc2edeb0b488b46. This is the active consumer branch,
+codex/cedar-convergence-consumer-20260926. Its living-dataset and dependency
+consolidation changes are preserved.
 
-The local transport suite ran 105 tests with one environment-dependent skip;
-72 component, partition, shared-collection and Grove-exchange tests passed without
-skips. Whole-file-read mutations were deliberately rejected by the new memory
-controls. Hosted CI must prove the complete repository gates. These tests do not
-replay the terminal's real Windows releases or authorize customer publication.
+Configured CI producer pin: b9ef58eaf92df4cad91f2605287772c304b3844a.
+Local real-CSV acceptance additionally tests producer
+7a462a1969c7269f81148f3c25844f76e7613bc4, whose changes fix producer-side
+explicit partition exports and Windows export installation. The consumer's
+97 focused tests passed with one disposable-PostgreSQL fixture skip.
+The full actual-HTTP rehearsal passed for all 15 collection pins: 14 CSVs,
+1,847,097 permitted review rows, every cell reconciled and NEED refused.
+Gaming uses the Grove product boundary; these are not 14 Press collections.
+The exact e84d211 hosted Checks and subscriber-storage workflows passed.
 
-Resume from the [Lumecon convergence record](https://github.com/teim-team/Lumecon-data/blob/codex/cedar-convergence-20260926/docs/cedar-convergence.md)
-and its ledger for the current 15-collection inventory. The older generated September 2 readiness scoreboard
-uses a different collection set and is not publication evidence. Preserve any
-local terminal changes before integrating this pushed commit; do not reset them.
-The sections below retain earlier NEED evidence and instructions, not a claim
-that their old delivery-status table describes this integration checkpoint.
+The [maintained convergence checkpoint](https://github.com/teim-team/Lumecon-data/blob/codex/convergence-packet-guard-20260928/docs/cedar-convergence.md)
+and its ledger now contain direct workstation/database evidence, fresh CSV
+export receipts and real HTTP acceptance results. The bounded HTTP rehearsal
+checks the actual saved release pins, every emitted source cell, duplicate keys,
+response hashes/counts and anonymous, tier, revoked-account, production and
+wrong-pin refusal. This does not relabel synthetic tests as real evidence or
+authorize publication.
 
+Producer continuation is [#17](https://github.com/teim-team/Lumecon-data/pull/17),
+stacked on #15. Grove [#181](https://github.com/teim-team/teim-app/pull/181)
+owns the migration/auth prerequisite and the remaining main-branch integration.
+Those engineering tasks stay separate from Elijah's identity rulings.
+The original review page, evidence order, canonical IDs, publication holds
+and historical data release pins remain preserved.
+
+The earlier sections below record prior review batches and decisions, not the
+current code/database state. The old September 2 readiness scoreboard uses a
+different collection set and is not publication evidence.
 
 *Rewritten in place, never appended to. Updated 2026-09-23.*
 
