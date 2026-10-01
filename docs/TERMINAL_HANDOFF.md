@@ -193,14 +193,6 @@ work continues. Candidate success is not a release, fresh-clone success is not a
 full-data rebuild, and no collection is certified ready by this handoff.
 
 
-
-## 2026-10-01 production integration checkpoint
-
-Owner now authorizes implementation and review-branch pushes; the local-only
-restriction above is historical. Delivery holds and partition contracts are
-enforced, pinned to producer `c0e9c64624a982c3797a675d1436b6a2be413350`
-(PR #17: all five CI jobs passed, 2,585 tests, 93.49% coverage). Locally 68
-focused consumer checks passed (one skip), plus lint. The full Windows API
-run did not pass due to paging exhaustion and Git path comparison; the path
-fix passes its regression. Hosted full CI is still required. AWS review
-storage/worker code is prepared; no provisioning, transfer or promotion occurred.
+## 2026-10-01 checkpoint
+Owner authorizes review-branch pushes. Producer c0e9c64 passes all five CI jobs (2,585 tests, 93.49% coverage). Delivery holds and partition contracts remain enforced.
+Consumer: 68 focused checks pass (one skip), lint passes; Windows full run failed on memory/Git paths, path regression fixed, hosted full CI required. AWS code is prepared; no provisioning, transfer, publication or identity promotion.
