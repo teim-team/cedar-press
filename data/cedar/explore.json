@@ -485,7 +485,7 @@
       "record_id": "record_key",
       "subject": "client_name",
       "superseded": "is_superseded",
-      "superseded_by": null,
+      "superseded_by": "superseded_by_record_id",
       "amount_basis": "amount_basis",
       "year_basis": "reporting year",
       "observation": [

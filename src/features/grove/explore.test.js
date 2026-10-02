@@ -16,7 +16,7 @@ import { readFileSync, readdirSync, statSync } from "node:fs";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 
-import { SOURCE_BUILDERS, contractFor as deriveContract, validateContract } from "../../../scripts/derive-explore.mjs";
+import { SOURCE_BUILDERS, contractFor as deriveContract, unknownOverrideKeys, validateContract } from "../../../scripts/derive-explore.mjs";
 import { LAUNCH_COLLECTION, collectionTables } from "./collection.js";
 import { STOREFRONT_CATALOG } from "./pressCatalog.js";
 import { isInternalProvenanceColumn, namesInternalFile } from "./readerValues.js";
@@ -470,6 +470,42 @@ test("supersession is read from the table and the replacement's link follows the
   assert.equal(filterRows(items, EMPTY_CUT).length, items.filter((i) => !i.superseded).length);
   assert.equal(filterRows(items, { ...EMPTY_CUT, history: true }).length, items.length);
   assert.equal(excludedBy(items, EMPTY_CUT).superseded, items.filter((i) => i.superseded).length);
+});
+
+test("the served lobbying contract reads the producer's replacement column, not the retired filing_uuid name", () => {
+  // The 2026-10-01 release renamed superseded_by_filing_uuid to
+  // superseded_by_record_id; until 2026-10-02 the rule knew only the old name,
+  // so the contract carried superseded_by: null and no superseded filing ever
+  // offered its replacement.
+  const key = "lobbying/lobbying";
+  const contract = currentContractFor(key);
+  const { columns } = load(key);
+  assert.ok(columns.includes("superseded_by_record_id"), "the served header carries the producer's column");
+  assert.equal(contract.superseded_by, "superseded_by_record_id");
+  assert.equal(contract.superseded, "is_superseded");
+  const replacement = rowReplacement({ superseded_by_record_id: "LDA-2", is_superseded: "1" }, contract);
+  assert.equal(replacement?.id, "LDA-2");
+  assert.equal(rowReplacement({ superseded_by_record_id: "" }, contract), null);
+  // The derived rule still reads the historical name where a legacy table carries it.
+  assert.equal(deriveContract(["superseded_by_filing_uuid", "cedar_uid"]).superseded_by, "superseded_by_filing_uuid");
+  assert.equal(deriveContract(["superseded_by_record_id", "cedar_uid"]).superseded_by, "superseded_by_record_id");
+});
+
+test("an override keyed to a table the manifest does not declare is refused, and the live file declares none", () => {
+  const manifest = JSON.parse(readFileSync(`${REPO}data/cedar/collections.manifest.json`, "utf8"));
+  const overrides = JSON.parse(readFileSync(`${REPO}data/cedar/explore.overrides.json`, "utf8"));
+  // Every 2026-09-05 key matched a 2026-09-02 table and nothing after the
+  // 2026-10-01 rename; they are retired under a `_` key, not matched.
+  assert.deepEqual(unknownOverrideKeys(overrides, manifest), []);
+  const retired = overrides["_retired_2026-10-02"].tables;
+  assert.equal(Object.keys(retired).length, 27);
+  assert.deepEqual(unknownOverrideKeys(retired, manifest), Object.keys(retired).sort());
+  assert.ok(Object.keys(retired).includes("lobbying/native_entity_lobbying_disclosures"));
+  // The guard names the stale key and leaves a current one and prose alone.
+  assert.deepEqual(
+    unknownOverrideKeys({ "lobbying/native_entity_lobbying_disclosures": {}, "lobbying/lobbying": {}, _note: "x" }, manifest),
+    ["lobbying/native_entity_lobbying_disclosures"],
+  );
 });
 
 test("the observation is values joined, pipes read as lists, and never runs past its limit", () => {

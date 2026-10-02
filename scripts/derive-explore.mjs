@@ -94,7 +94,10 @@ const RULES = {
     "participant_name_as_published",
   ],
   superseded: ["is_superseded", "supersession_status"],
-  superseded_by: ["superseded_by_filing_uuid"],
+  // The producer renamed the lobbying key from filing_uuid to record_id
+  // (2026-10-01 release); the replacement link followed the old name until
+  // 2026-10-02 and so was never offered for a superseded filing.
+  superseded_by: ["superseded_by_record_id", "superseded_by_filing_uuid"],
   amount_basis: ["spend_basis", "value_type", "amount_sign_meaning", "measurement_status"],
 };
 
@@ -447,9 +450,33 @@ export function validateContract(key, contract, columns) {
   }
 }
 
+/**
+ * Override keys that name no table the manifest declares. An override is a
+ * hand-written declaration that only takes effect when its key matches
+ * `<collection>/<table stem>`; after the 2026-10-01 release renamed every
+ * table to `<collection>.csv`, all 27 keys written against the 2026-09-02
+ * tables matched nothing and their `reviewed`, `record_id` and
+ * `default_columns` silently stopped applying (found 2026-10-02). Keys that
+ * begin with `_` are prose or retired blocks and are never matched.
+ */
+export function unknownOverrideKeys(overrides, manifest) {
+  const known = new Set();
+  for (const collection of manifest.collections) {
+    for (const table of collection.tables) known.add(`${collection.id}/${table.table.replace(/\.csv$/, "")}`);
+  }
+  return Object.keys(overrides).filter((key) => !key.startsWith("_") && !known.has(key)).sort();
+}
+
 export function derive() {
   const manifest = JSON.parse(readFileSync(MANIFEST, "utf8"));
   const overrides = existsSync(OVERRIDES) ? JSON.parse(readFileSync(OVERRIDES, "utf8")) : {};
+  const unknown = unknownOverrideKeys(overrides, manifest);
+  if (unknown.length) {
+    throw new Error(
+      `explore.overrides.json declares ${unknown.length} table(s) the manifest does not: ${unknown.join(", ")}. ` +
+      "An override that matches no table applies to nothing; retire it under a `_` key or rename it.",
+    );
+  }
   const tables = {};
   const unpublished = [];
   for (const collection of manifest.collections) {
