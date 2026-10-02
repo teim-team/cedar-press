@@ -338,6 +338,9 @@ function typeOf(column, values) {
   if (!filled.length) return T.text;
   if (filled.every((v) => /^\d{4}-\d{2}-\d{2}T/.test(v))) return T.datetime;
   if (filled.every((v) => /^\d{4}-\d{2}-\d{2}$/.test(v))) return T.date;
+  // A date column whose rows stop at the month or the year where the source
+  // does (deals: "2014-05" beside event_date_precision "month").
+  if (filled.every((v) => /^\d{4}(-\d{2}){0,2}$/.test(v)) && filled.some((v) => v.includes("-")) && /date|_on$/.test(name)) return T.date_precision ?? T.date;
   if (filled.every((v) => /^-?\d+(\.\d+)?$/.test(v)) && !/code|period|month|fips|zip/.test(name)) return T.number;
   if (filled.some((v) => v.includes("|")) && filled.every((v) => !/^https?:/.test(v)) && /entities|counties|states|codes|organizations|variants/.test(name)) return T.list;
   return T.text;
@@ -347,12 +350,72 @@ function blankMeans(column, decision, type) {
   const { GUIDES } = guideData();
   const T = GUIDES.types;
   if (decision === "withhold") return "masked where the publication policy withholds it; otherwise the source reports none";
+  if (/^(record_type|record_key|record_grain)$/.test(column)) return "never blank; the producer sets it on every row";
   if (/^n_/.test(column)) return "not stated by the source; 0 means the source states none";
   if (type === T.yesno) return "not stated; 0 is no";
   if (type === T.money) return "the source reports no amount; never zero";
-  if (type === T.date || type === T.datetime || type === T.year) return "the source states no date";
-  if (/cedar_uid|cedar_entity/.test(column)) return "unattributed or unresolved, with the reason in the attribution status where the table carries one; never non-Native";
+  if (type === T.date || type === T.date_precision || type === T.datetime || type === T.year) return "the source states no date";
+  if (/_precision$/.test(column)) return "no date is stated on this row, so no precision applies";
+  if (/cedar_uid|cedar_entity|canonical_name|entity_class/.test(column)) return "no registered Cedar entity is linked; read the link or attribution status column where the table carries one; never a finding that no Native entity is involved";
   return "the source states none, or not applicable to this row";
+}
+
+// Tokens that read as a value and are sometimes a stand-in for one. Each
+// occurrence in a preview is reported by column, so a reader can check the
+// dictionary's definition before treating it as data; the generator never
+// recodes it.
+const TOKENS = /^(null|none|unknown|nan|n\/a|na|tbd|undisclosed)$/i;
+
+/**
+ * What the preview itself shows, measured from its rows rather than typed:
+ * record types and their counts, the columns blank on every row, the literal
+ * tokens present, and the money, date and date-time columns the unit and
+ * format statements apply to. Re-measured on every render, so the guide
+ * cannot describe a sample it no longer ships.
+ */
+export function previewFacts(book, sample) {
+  const { GUIDES } = guideData();
+  const T = GUIDES.types;
+  const rows = sample.rows;
+  const cell = (row, column) => String(row[column] ?? "").trim();
+  const recordTypes = new Map();
+  for (const row of rows) {
+    const kind = cell(row, "record_type") || "(blank)";
+    recordTypes.set(kind, (recordTypes.get(kind) ?? 0) + 1);
+  }
+  const allBlank = [];
+  const tokens = [];
+  const typed = new Map();
+  for (const field of book.fields) {
+    const values = rows.map((row) => cell(row, field.column));
+    const type = field.column === "record_key" ? "JSON source key" : typeOf(field.column, values);
+    typed.set(field.column, type);
+    if (rows.length && values.every((v) => !v)) allBlank.push(field.column);
+    const found = new Map();
+    for (const v of values) if (TOKENS.test(v)) found.set(v, (found.get(v) ?? 0) + 1);
+    for (const [token, count] of found) tokens.push({ column: field.column, token, count });
+  }
+  const columnsOf = (type) => [...typed].filter(([, t]) => t === type).map(([c]) => c);
+  const money = columnsOf(T.money);
+  const dateColumns = [...columnsOf(T.date), ...columnsOf(T.date_precision)];
+  const datetimeColumns = columnsOf(T.datetime);
+  const monthPrecision = book.fields
+    .map((field) => field.column)
+    .filter((column) => rows.some((row) => /^\d{4}-\d{2}$/.test(cell(row, column))));
+  return {
+    rowCount: rows.length,
+    recordTypes: [...recordTypes],
+    allBlank,
+    tokens,
+    typed,
+    money,
+    real2025: money.filter((c) => /_real2025$/.test(c)),
+    currencyColumn: typed.has("currency"),
+    dateColumns,
+    datetimeColumns,
+    precisionColumns: book.fields.map((f) => f.column).filter((c) => /_precision$/.test(c)),
+    monthPrecision,
+  };
 }
 
 export function renderReleasedGuide(collection, book, entry, descriptor, sample) {
@@ -360,11 +423,13 @@ export function renderReleasedGuide(collection, book, entry, descriptor, sample)
   const lines = [];
   const p = (text = "") => lines.push(text);
   const name = book.dataset || descriptor.name || collection;
+  const updated = descriptor?.updated ?? entry?.descriptor?.updated ?? null;
+  const facts = previewFacts(book, sample);
   const columns = new Set(book.fields.map((field) => field.column));
   const names = (pattern) => book.fields.filter((field) => pattern.test(field.column)).map((field) => `\`${field.column}\``).join(", ");
   p(`# ${name}: a researcher's guide`);
   p();
-  p(`Collection \`${collection}\` · producer spreadsheet \`${entry.sample.table}\`. Generated by \`scripts/docs-markdown.mjs --kind guides\` from the installed release manifest and its field dictionary. The statements below describe that release.`);
+  p(`Collection \`${collection}\` · producer spreadsheet \`${entry.sample.table}\`${updated ? ` · Updated ${updated}` : ""}. Generated by \`scripts/docs-markdown.mjs --kind guides\` from the installed release manifest, its field dictionary and the served preview. The statements below describe that release.`);
   p();
   p("## Purpose"); p();
   p(`Use the ${name} spreadsheet to inspect source observations at their declared record type and grain, with the identifiers, sources and qualifications retained on each row.`);
@@ -441,10 +506,30 @@ export function renderReleasedGuide(collection, book, entry, descriptor, sample)
   p("| # | Column | Label | Definition | Type | Blank means |");
   p("|---|---|---|---|---|---|");
   book.fields.forEach((field, index) => {
-    const values = sample.rows.map((row) => row[field.column]);
-    const type = field.column === "record_key" ? "JSON source key" : typeOf(field.column, values);
-    p(`| ${index + 1} | \`${field.column}\` | ${esc(field.label)} | ${esc(field.meaning)} | ${esc(type)} | Not recorded in this export; consult the field definition and publication policy. |`);
+    const type = facts.typed.get(field.column);
+    p(`| ${index + 1} | \`${field.column}\` | ${esc(field.label)} | ${esc(field.meaning)} | ${esc(type)} | ${esc(blankMeans(field.column, undefined, type))} |`);
   });
+  p();
+  p("The \"Blank means\" column is the general rule for a column of that type; the producer's field definition beside it takes precedence where it states a narrower meaning.");
+  p();
+  p("### Units and formats"); p();
+  if (facts.money.length) {
+    const nominal = facts.money.filter((c) => !facts.real2025.includes(c)).map((c) => `\`${c}\``).join(", ");
+    p(`- Money columns are nominal US dollars as recorded, no rounding: ${nominal || "none at nominal value in this spreadsheet"}.${facts.real2025.length ? ` Columns ending \`_real2025\` (${facts.real2025.map((c) => `\`${c}\``).join(", ")}) are the same amounts adjusted to 2025 dollars, as the dictionary states; a nominal and a 2025-dollar column are never added together.` : ""}${facts.currencyColumn ? " The `currency` column states the reported currency of each row where it is filled; a blank currency is a gap, not an assumption of US dollars." : ""}`);
+  } else {
+    p("- This spreadsheet carries no money column.");
+  }
+  if (facts.dateColumns.length || facts.datetimeColumns.length || facts.monthPrecision.length) {
+    p(`- Dates are ISO 8601 calendar dates (YYYY-MM-DD).${facts.precisionColumns.length ? ` Where a precision column (${facts.precisionColumns.map((c) => `\`${c}\``).join(", ")}) states \`month\` or \`year\`, the date is written to that precision (YYYY-MM or YYYY) and no day is invented.` : ""}${facts.datetimeColumns.length ? ` Date-time columns (${facts.datetimeColumns.map((c) => `\`${c}\``).join(", ")}) carry their UTC offset.` : ""}`);
+  }
+  p("- Identifiers, codes, FIPS and EIN values are text and keep their leading zeros.");
+  p();
+  p("### Observed in the preview"); p();
+  p("Measured from the served preview rows when this guide was generated; a preview describes itself, not the full spreadsheet.");
+  p();
+  p(`- Preview rows: ${facts.rowCount.toLocaleString("en-US")}; record types present: ${facts.recordTypes.map(([kind, count]) => `\`${esc(kind)}\` (${count})`).join(", ") || "none"}.`);
+  p(`- Columns blank on every preview row (${facts.allBlank.length} of ${book.fields.length}): ${facts.allBlank.length ? facts.allBlank.map((c) => `\`${c}\``).join(", ") : "none"}. A column blank in the preview can be filled elsewhere in the spreadsheet; it is reported so a reader does not read the preview as the column's coverage.`);
+  p(`- Literal tokens present as cell values: ${facts.tokens.length ? facts.tokens.map(({ column, token, count }) => `\`${esc(token)}\` in \`${column}\` (${count})`).join("; ") : "none"}. A token is the producer's declared value where the field definition above defines it; a token the definition does not define is a finding for the producer, never a value to recode.`);
   p();
   p("## Missing values"); p();
   p("A blank is not zero, an invented date, proof of no relationship or permission to fill a value from another party. Preserve documented distinctions between unknown, not applicable and withheld values. Do not infer a redaction marker that the field contract does not declare.");
@@ -470,7 +555,9 @@ export function renderReleasedGuide(collection, book, entry, descriptor, sample)
   p("## Release, citation and method"); p();
   p(`**Release:** ${book.where}`);
   p();
-  p(`**Cite as:** Lumecon, "${name}", Cedar Press collection, cedarpress.ai, the exact release named above. Add the date accessed and the record type and key for row-specific claims.`);
+  p(`**Cite as:** Lumecon, "${name}", Cedar Press collection, cedarpress.ai.${updated ? ` Updated ${updated}.` : ""} Accessed <date>.`);
+  p();
+  p("This is the sentence every download of the collection carries. Cite the collection by its name and Updated date, never by a version label, file count or table count; add the record type and record key for a row-specific claim, and the exact release identifier above when a reviewer must reproduce the file.");
   p();
   p(`**Method:** the preview is an excerpt of the installed producer spreadsheet. ${columns.has("source_url") ? "The source_url field and the dictionary's other source fields carry row-level provenance." : "Use the source fields defined in the dictionary for row-level provenance."}`);
   p();
@@ -682,7 +769,7 @@ export function renderAll() {
     "One guide per Cedar Press collection, generated by `scripts/docs-markdown.mjs --kind guides`. Installed producer spreadsheets use their manifest-selected dictionary and exact served header, with the release's record grains and qualifications. Collections without an installed producer spreadsheet retain the authored guide and compatibility field map. Edit the input contracts and regenerate; a test fails when these files are stale.",
     "",
     ...collections.map((c) => {
-      const d = DESCRIPTORS.find((x) => x.id === c) ?? {};
+      const d = MANIFEST.collections.find((x) => x.id === c)?.descriptor ?? DESCRIPTORS.find((x) => x.id === c) ?? {};
       return `- [${d.name ?? c}](${c}.md) (\`${c}\`)`;
     }),
     "",
