@@ -19,6 +19,13 @@ import { coverageLabel } from "../src/features/grove/pressAccess.js";
 
 const ROOT = fileURLToPath(new URL("..", import.meta.url));
 const INDEX = `${ROOT}index.html`;
+// The release descriptor per collection: the name the download citation
+// carries and the Updated date, read from the manifest so the structured data
+// names the dataset the way its own files do.
+const RELEASE = Object.fromEntries(
+  JSON.parse(readFileSync(`${ROOT}data/cedar/collections.manifest.json`, "utf8")).collections
+    .map((entry) => [entry.id, entry.descriptor]),
+);
 const SITEMAP = `${ROOT}public/sitemap.xml`;
 const SITE = "https://cedarpress.ai";
 const ORG = "https://lumecon.ai/#organization";
@@ -72,13 +79,24 @@ function latestReleaseDate() {
   return dates.at(-1)?.slice(0, 10) ?? null;
 }
 
+export function alternateNames(entry) {
+  const names = [entry.short, RELEASE[entry.id]?.name]
+    .filter((name, index, all) => name && name !== entry.name && all.indexOf(name) === index);
+  if (!names.length) return undefined;
+  return names.length === 1 ? names[0] : names;
+}
+
 export function datasets() {
   return PRESS_CATALOG.filter((entry) => STOREFRONT_SHELVES.includes(entry.shelf)).map((entry) => ({
     "@type": "Dataset",
     "@id": `${SITE}/#dataset-${entry.id}`,
     name: entry.name,
-    alternateName: entry.short !== entry.name ? entry.short : undefined,
+    // The short name and, where it differs, the collection name every
+    // download's citation carries, so a reader searching for the name on a
+    // file they hold finds the dataset it came from.
+    alternateName: alternateNames(entry),
     description: `${entry.blurb} ${entry.linkage ?? ""}`.trim(),
+    dateModified: RELEASE[entry.id]?.updated ?? undefined,
     url: `${SITE}/`,
     creator: { "@id": ORG },
     publisher: { "@id": ORG },
@@ -130,6 +148,7 @@ export function graph() {
         name: "The Cedar Press collections",
         url: `${SITE}/`,
         description: catalogDescription(),
+        dateModified: latestReleaseDate() ?? undefined,
         provider: { "@id": ORG },
         dataset: datasets().map((d) => ({ "@id": d["@id"] })),
       },
