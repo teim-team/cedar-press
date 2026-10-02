@@ -63382,7 +63382,7 @@
    "mentioned_outside_history": 18,
    "oneoff_shaped": false,
    "has_run_receipt": false,
-   "last_modified": "2026-09-26",
+   "last_modified": "2026-10-02",
    "lines": 2774,
    "operational_role": "unresolved",
    "collection_output_entrypoints": [],
@@ -63427,7 +63427,7 @@
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "2c32448aa6e53ffd15b6cc1b012cd03907971a7fce4f0d0bd256fc23cdbebcef"
+     "signature": "a8e976c8e4ef9e6c18fc6cfa1cb9d335a52a500b2ac7994ea44bb8847d64a9e7"
     },
     {
      "line": 2078,
@@ -63435,7 +63435,7 @@
      "target": "<unresolved>/data/clean/native_owned_businesses.csv",
      "scope": "governed_table",
      "table": "native_owned_businesses.csv",
-     "signature": "f8f368ec902867707dc7586f3785c28c635f761f285869652e4e5dcf7bc266e9"
+     "signature": "b19905dfe882911e63c66f3389e18da7fd2c6db08e0490a4131bcfb5f940f567"
     },
     {
      "line": 2205,
@@ -63443,7 +63443,7 @@
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "ec72967ce3248bd623acd041c93d5463a79e975f61366fa62146ed21e3d67235"
+     "signature": "57aaa2e33c397a696e324ce45614ad6d0af56a4405c3e01c8efaa68244e5cb05"
     },
     {
      "line": 2624,
@@ -63451,7 +63451,7 @@
      "target": "<unresolved>/docs/datasets/native-owned-businesses.md",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "38dd73c7e5a2b37e96ee79c2018d3edc7ef42ccbb33556f34e6d3a1458788148"
+     "signature": "345f565278c3daa564141930d6ac5ab4e77f431b0e2d08fc712cfd7d73bd7380"
     }
    ],
    "writer_analysis_error": null,
@@ -63459,11 +63459,11 @@
    "undeclared_governed_tables": [
     "native_owned_businesses.csv"
    ],
-   "source_sha256": "839806a0080241dc5368949a67d8c9fae4ceb3f1c3fa1e5beb4096b1e4d58301",
+   "source_sha256": "05813cc0bf8b255398e1364811b7385e64009d170b2abc43d42e693839b96a1b",
    "maintenance_status": "REQUIRES-REVIEW",
    "maintenance_evidence": {
     "reason": "governed output is not admitted: native_owned_businesses.csv",
-    "source_sha256": "839806a0080241dc5368949a67d8c9fae4ceb3f1c3fa1e5beb4096b1e4d58301",
+    "source_sha256": "05813cc0bf8b255398e1364811b7385e64009d170b2abc43d42e693839b96a1b",
     "identical_source_peers": [],
     "ci_commands": [],
     "documented_commands": [
@@ -70194,8 +70194,8 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 22,
-   "mentioned_outside_history": 22,
+   "mentions": 23,
+   "mentioned_outside_history": 23,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-10-02",
@@ -70203,6 +70203,7 @@
    "operational_role": "unresolved",
    "collection_output_entrypoints": [],
    "static_consumers": [
+    "code/41_match_subawards_to_ledger_test.py",
     "code/45_promote_subawards.py",
     "code/94_match_raw_subawards.py",
     "code/collect_subawards_after_deadline.ps1"
@@ -72389,8 +72390,8 @@
    ],
    "in_a_contract": true,
    "in_an_ordering": true,
-   "mentions": 28,
-   "mentioned_outside_history": 28,
+   "mentions": 29,
+   "mentioned_outside_history": 29,
    "oneoff_shaped": true,
    "has_run_receipt": false,
    "last_modified": "2026-10-02",
@@ -72405,6 +72406,7 @@
    ],
    "static_consumers": [
     "code/24_generate_dataset_docs.py",
+    "code/41_match_subawards_to_ledger_test.py",
     "code/910_subaward_report_id_backfill.py",
     "code/94_match_raw_subawards.py",
     "code/collect_subawards_after_deadline.ps1",
