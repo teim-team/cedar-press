@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "recorded_on": "2026-10-02",
+  "scope": "Canonical names shared by more than one cedar_uid in data/spine/cedar_identity_register.csv, pending owner adjudication. An entry records that the pair is known and under review, so server/tests/test_public_preview_audit.py and Lumecon-data's `lumecon-data spine check --allowlist` report it as a review item instead of a failure. An entry never merges, renames, retires or re-mints an identity; only the owner's adjudication, written into the register itself, closes it, and the entry is then removed (a stale entry fails the audit). Same shape as Lumecon-data intake/spine-duplicate-name-review.json.",
+  "entries": [
+    {
+      "canonical_name": "National Center for American Indian Enterprise Development",
+      "cedar_uids": ["CE-000RA-MT", "CE-001R2-8V"],
+      "entity_classes": ["Intertribal Organization", "Native nonprofit"],
+      "reason": "pending owner adjudication, 2026-10-02",
+      "owner": "Elijah Moreno via Havala Hanson",
+      "status": "CONTESTED candidate; not merged, not renamed",
+      "evidence": [
+        "cedar_identity_register.csv row 779: CE-000RA-MT, handle I-004, class Intertribal Organization, canonical_name National Center for American Indian Enterprise Development, minted at the 2026-08-28 register build; no state.",
+        "cedar_identity_register.csv row 1795: CE-001R2-8V, class Native nonprofit, same canonical_name, minted 2026-09-04 by code/1183_native_nonprofit_entities.py (GiveNative listing + IRS registration, EIN 952627645), state AZ.",
+        "cedar_nonprofit_ein_links.csv: EIN 952627645 -> CE-001R2-8V (basis: minted 1183) and EIN 472238803 -> CE-000RA-MT (basis: existing Cedar entity matched on exact EIN), both tier A.",
+        "cedar_entity_names.csv row 779: the published name of CE-000RA-MT is Native American Development Center (source givenative, captured 2026-09-04, name_match_route blank, prior_canonical_name National Center for American Indian Enterprise Development, name_differs_from_prior 1); row 1795 publishes the NCAIED name for CE-001R2-8V.",
+        "cedar_retired_neid_crosswalk.csv row 779: retired handle ITO-CNTRFR-00 -> CE-000RA-MT, unique."
+      ],
+      "question": "The two uids carry different EINs and different published names under one register canonical name. Either CE-000RA-MT is NCAIED (the intertribal roster entry) and the EIN 472238803 link and the Native American Development Center published name are the defect, or CE-000RA-MT is the Native American Development Center and the register canonical_name is the defect. A shared name is no evidence of one subject; neither uid is merged.",
+      "next_sources": [
+        "IRS Exempt Organizations Business Master File entries for EIN 952627645 and EIN 472238803 (legal name, state, ruling year).",
+        "The intertribal-organization source behind handle I-004 (docs/NHO_INTERTRIBAL_REGISTER_LOG.md, intertribal_orgs.csv): which organization that roster listed.",
+        "GiveNative directory entries for both names, as captured 2026-09-04."
+      ],
+      "closes_when": "The owner records which uid the NCAIED name belongs to in cedar_identity_register.csv (correcting the other uid's canonical_name, or recording a relationship), then this entry is removed."
+    }
+  ]
+}

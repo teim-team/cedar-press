@@ -501,6 +501,13 @@ class PublicPreviewAuditTest(unittest.TestCase):
         self.assertEqual(s["alias_unresolved"], [])
         self.assertEqual(s["alias_kind_unknown"], [])
         self.assertEqual(s["alias_not_a_rendering_of_register_name"], [])
+        # A canonical name shared by two uids is an identity question, never a
+        # merge or a rename by name: it must be recorded with a reason in
+        # data/spine/cedar_duplicate_name_review.json (which uid the name
+        # belongs to is the owner's call), and an entry whose pair no longer
+        # exists in the register is stale and must be removed.
+        self.assertEqual(s["duplicate_canonical_names_unreviewed"], {})
+        self.assertEqual(s["duplicate_name_review_stale"], [])
         self.assertEqual(s["crosswalk_unresolved"], [])
         self.assertEqual(s["ein_bad_format"], [])
         self.assertEqual(s["ein_unresolved"], [])
