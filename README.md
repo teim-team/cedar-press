@@ -136,6 +136,12 @@ the file.
 The most recent structural fact-check of the served previews, the spine and
 the public text is [`docs/FACT_CHECK_2026-10-02.md`](docs/FACT_CHECK_2026-10-02.md);
 `python3 server/tests/test_public_preview_audit.py --report` reproduces its measurements, and `make test-python` keeps its invariants firing.
+Its section 8 records what was then fixed at source on 2026-10-02: the register spelling
+of two ANCSA names (source renderings kept as aliases in `data/spine/cedar_entity_name_aliases.csv`),
+the Native nonprofit count, the subcontracting flag rule, and two definitions. One
+reader-visible definition changed: `ownership_percent` in Native-Owned Businesses is the
+share owned by the certifying tribe's members as the certifier reports it, not the Native
+ownership share overall, so a certified Native-owned firm can read `0.0` there.
 
 ## Access
 
