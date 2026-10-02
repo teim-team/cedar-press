@@ -106,7 +106,7 @@ filters and customer presentation. The journal below preserves earlier work.
 |---|---|---|
 | Web client | Vite + React, deployed as a static build | `npm run dev`; `src/` |
 | API | FastAPI, Python | `server/` — see [`server/README.md`](server/README.md) |
-| Preserved data workspace | Historical Python scripts, numbered | `code/<n>_*.py` and `dist/customer/`; current release entrypoints are linked from [`docs/TERMINAL_HANDOFF.md`](docs/TERMINAL_HANDOFF.md) |
+| Preserved data workspace | Historical Python scripts, numbered | `code/<n>_*.py` and `dist/customer/`; current release entrypoints are linked from [`docs/TERMINAL_HANDOFF.md`](docs/TERMINAL_HANDOFF.md). Scripts with zero references and no tracked output sit in `code/archive/` (moved 2026-10-02, never deleted; `code/archive/INDEX.md` names each; the rule and measurement are `server/tests/code_reference_graph.py`) |
 
 Pointing `VITE_API_URL` at the API is the whole switch from the standalone build
 to a connected one. [`.env.example`](.env.example) lists every configuration

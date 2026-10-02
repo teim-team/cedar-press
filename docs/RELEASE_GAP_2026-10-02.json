@@ -1,0 +1,1286 @@
+{
+ "generated": "2026-10-02",
+ "generator": "python3 server/tests/release_gap_register.py --write",
+ "classifications": [
+  "CODE",
+  "EVIDENCE_IN_REPO",
+  "EVIDENCE_NEEDED",
+  "DECISION",
+  "RIGHTS"
+ ],
+ "owners": {
+  "havala": "Havala Hanson (@Havala-Hanson), Cedar Grove and Cedar Press including their data",
+  "francesca": "Francesca Agnes (@mafranagn), data methods and the Cedar service boundary",
+  "elijah": "Elijah Moreno (owner), identity, affiliation and legal-object adjudication, through Havala",
+  "kaylyn": "Kaylyn Lee (@kaylynhl), product behaviour and customer-facing copy"
+ },
+ "rows": [
+  {
+   "id": "GAP-01",
+   "collection": "gaming",
+   "gate": "manifest.excluded (shelf grove) and data/cedar/grove_release_pin.json pins = {}",
+   "exists": "Workspace facts 2026-09-02: 128,561 rows across 56 tables (collection_descriptors.cedar.json); legacy extract 10 rows of gaming_facilities (workspace 787); producer receipt: 68,340 permitted records in 9 record types (REVIEW_STATUS: 86,563 records in the reviewed release).",
+   "served": "Nothing in Cedar Press (excluded by shelf). Cedar Grove: the runtime pin is empty, so nothing is pinned for production; a local Grove rehearsal returned the 224-record gaming_regional_revenue component (REVIEW_STATUS).",
+   "gate_location": "data/cedar/collections.manifest.json excluded[gaming]; src/features/grove/pressCatalog.js shelf grove; server/cedar_press/repository.py is_sold(); data/cedar/grove_release_pin.json",
+   "closing_condition": "Owner rules Gaming ready for Grove; Cedar issues gaming object ids (code/build.py gaming-issue-ids); Lumecon-data builds a production release from the issued registry; the pin is set by a reviewed PR.",
+   "evidence": "manifest excluded reason; grove_release_pin.json status text; verified-preview-releases.json gaming receipt",
+   "classification": "DECISION",
+   "owner": "Havala Hanson (@Havala-Hanson), Cedar Grove and Cedar Press including their data",
+   "question": "Is the Gaming release built on PROPOSED object ids acceptable to pin for Cedar Grove, or does production wait for issued ids?"
+  },
+  {
+   "id": "GAP-02",
+   "collection": "newsletters",
+   "gate": "manifest.excluded: owner ruling 2026-09-02, not a Cedar Press product",
+   "exists": "Workspace facts 2026-09-02: 3,444 rows across 2 tables; legacy extract 10 rows of tribal_newsletter_corpus (workspace 1,889 rows: 1,394 publication_channel, 481 probe_absence, 14 other, per the extract README).",
+   "served": "Nowhere. No producer release, no receipt, no shelf.",
+   "gate_location": "data/cedar/collections.manifest.json excluded[newsletters]",
+   "closing_condition": "The owner's ruling stands; the collection stays in the workspace. Nothing to close unless the ruling changes.",
+   "evidence": "manifest excluded reason (owner ruling 2026-09-02); data/cedar/samples/README.md grain note",
+   "classification": "RIGHTS",
+   "owner": "Havala Hanson (@Havala-Hanson), Cedar Grove and Cedar Press including their data",
+   "question": null
+  },
+  {
+   "id": "GAP-03",
+   "collection": "_entity_layer",
+   "gate": "manifest.excluded: shelf infrastructure, not sold on its own",
+   "exists": "Workspace facts 2026-09-02: 363,220 rows across 42 tables; legacy extract of the register (workspace 1,555 entities then).",
+   "served": "Partly: public/data/cedar/register.json serves 1,916 entities (uid, name, class) from data/spine/; the 41 other tables (aliases, relationships, identifier ledger, handle history) are not served and are not in Git except the five spine files.",
+   "gate_location": "data/cedar/collections.manifest.json excluded[_entity_layer]; scripts/derive-explore.mjs buildRegister",
+   "closing_condition": "By design: the spine keys every collection and is published as the register, not as a dataset.",
+   "evidence": "manifest excluded reason; register.json entity count; .gitignore spine allowlist",
+   "classification": "EVIDENCE_IN_REPO",
+   "owner": null,
+   "question": null
+  },
+  {
+   "id": "GAP-04",
+   "collection": "all 14 (data/cedar/samples/*__sample.csv)",
+   "gate": "historical extracts, bannered superseded; nothing reads them",
+   "exists": "15 legacy extracts of 10 rows each (2026-09-02, code/770). Same table as the served preview and comparable on the key column in 9 collections: contractors (parent_contract_number: 6 of 10 legacy rows absent from the served 10); deals (Deal_ID: 10 of 10 legacy rows absent from the served 10); federal-register (consultation_event_id: 10 of 10 legacy rows absent from the served 10); lobbying (registrant_id: 9 of 10 legacy rows absent from the served 10); nagpra (document_number: 10 of 10 legacy rows absent from the served 10); natural-resources (resource_revenue_event_id: 10 of 10 legacy rows absent from the served 10); need (enterprise_id: 10 of 10 legacy rows absent from the served 10); nonprofits (EIN: 10 of 10 legacy rows absent from the served 10); owned (business_source_id: 10 of 10 legacy rows absent from the served 10). Different table from the served preview in 3: funding (federal_funding_transactions.csv vs funding.csv), legislation (bill_votes.csv vs legislation.csv), subcontracting (subawards.csv vs subcontracting.csv).",
+   "served": "The producer's pinned 10-row previews only. Whether each legacy row is in the 2026-10-01 full release is not measurable here: the full spreadsheets are not in Git, and a preview is a selection, not a population.",
+   "gate_location": "data/cedar/samples/README.md banner; scripts/stage_verified_previews.py (the only path that writes a served sample)",
+   "closing_condition": "Per collection, join the legacy key column to the producer's full spreadsheet; any legacy row absent needs a NAMED disposition in the producer.",
+   "evidence": "data/cedar/samples/*__sample.csv; public/data/cedar/samples/*/spreadsheet__10.csv; the key comparison above",
+   "classification": "EVIDENCE_NEEDED",
+   "owner": "Havala Hanson (@Havala-Hanson), Cedar Grove and Cedar Press including their data",
+   "question": null,
+   "needs": "The producer's full spreadsheets (Lumecon-data release store, release ids in data/cedar/verified-preview-releases.json). Command per collection: `python3 -c \"import csv;a={r['<key>'] for r in csv.DictReader(open('data/cedar/samples/<id>__sample.csv',encoding='utf-8-sig'))};b={r['<key>'] for r in csv.DictReader(open('<full spreadsheet>.csv',encoding='utf-8-sig'))};print(sorted(a-b))\"`"
+  },
+  {
+   "id": "GAP-05",
+   "collection": "deals / CEV-* events (PR #149)",
+   "gate": "the served sample is the producer's pinned selection; the fixture is a regression input",
+   "exists": "10 reviewed events (CEV-2025-01F262669F, CEV-2025-09E060E63E, CEV-2025-101F917A66 ... CEV-2021-357C5BC869), sources checked 2026-10-01 (docs/DEALS_PUBLIC_PREVIEW_REVIEW_2026-10-01.md), in the 40-column legacy fixture server/tests/fixtures/legacy-preview/samples/deals/deals_classified__10.csv.",
+   "served": "None of the 10 ids is in the served 36-column preview (ids ACQ2020-*/ANCSA-*); no tracked file under public/, data/cedar/, src/ or server/cedar_press/ names a CEV id (0 files). Whether the events are among the 978 released records is not measurable here.",
+   "gate_location": "scripts/stage_verified_previews.py (sample = producer selection); data/cedar/verified-preview-releases.json deals.sample_sha256",
+   "closing_condition": "The producer selects the reviewed events as the Deals sample (or confirms they are in the 978) and pins a new release; server/tests/legacy_deals_adapter.py documents the 40 -> 36 column mapping so that step is mechanical.",
+   "evidence": "docs/FACT_CHECK_2026-10-02.md section 4; the fixture; server/tests/test_legacy_deals_adapter.py",
+   "classification": "DECISION",
+   "owner": "Havala Hanson (@Havala-Hanson), Cedar Grove and Cedar Press including their data",
+   "question": "Should the ten reviewed CEV events replace the ACQ2020/ANCSA selection as the served Deals preview in the next producer pin?"
+  },
+  {
+   "id": "GAP-06",
+   "collection": "all attributed collections / verified not_native denials",
+   "gate": "code/cedar_publication.denied_ueis() from data/clean/cedar_ruling_ledger_consolidated.csv",
+   "exists": "The consolidated ruling ledger: 15,587 rows when its schema was captured (2026-08-26); outcome vocabulary ENTITY, UNRESOLVED_ENTITY, NEGATIVE, HOLD_OVER_OWNER, CLASS, HOLD, OWNER_VS_DIFFERENT_UNRESOLVED_OWNER, POSITIVE_VS_NOT_NATIVE, TWO_DIFFERENT_UNRESOLVED_OWNERS. Per-class counts are not in Git: docs/schema/tables/ holds the schema and examples, not the rows.",
+   "served": "Rows whose UEI is denied ship with the Cedar attribution blanked (attribution_status excluded_not_native, mask reason verified_not_native_denial); the row itself ships. The count of rows so masked per collection is in the producer's build log, not here.",
+   "gate_location": "code/cedar_publication.py denied_ueis(), enforce_denials(); code/174_apply_rulings_to_source_tables.py FUND_EXCLUDE_SET",
+   "closing_condition": "Nothing to close for a correct denial. The counts per class come from the ledger on the owner's machine.",
+   "evidence": "docs/schema/tables/cedar_ruling_ledger_consolidated.json; code/173, 174, cedar_publication",
+   "classification": "EVIDENCE_NEEDED",
+   "owner": null,
+   "question": null,
+   "needs": "data/clean/cedar_ruling_ledger_consolidated.csv (gitignored). Command: `python3 -c \"import csv,collections;r=list(csv.DictReader(open('data/clean/cedar_ruling_ledger_consolidated.csv',encoding='utf-8-sig')));print(collections.Counter((x['status'],x['outcome'],x['ruling'].lower()=='not_native',x['tier_source']=='stated_on_ruling_row') for x in r))\"`"
+  },
+  {
+   "id": "GAP-07",
+   "collection": "all attributed collections / the five tribal-link refusals",
+   "gate": "code/173_consolidate_rulings_ledger.py classify(): NEG_PREFIX before CLASS_PREFIX",
+   "exists": "45 prior rulings on individually Native-owned firms (docs/schema/tables/individual_native_prior_rulings.json; ruling_text values 'individually_native_owned', 'OWNER_NAMED', 'INDIVIDUAL_NATIVE', 'Not a Native entity - individually Native-owned firm'); five read 'Not a Native entity - individually Native-owned firm', which refuses the tribal link and affirms Native ownership; 5 exclusion pairs name the identifiers (TALLSALT ADVISORS / METTE ASSOCIATES, TRIBAL ENERGY ALTERNATIVES, 9DVK5, 9H8M8, LAGUNA CREEK LLC).",
+   "served": "Until this pass, classify() returned NEGATIVE for that sentence (its first clause is a NEG_PREFIX), so 173 settled each such subject as NEGATIVE/not_native and 174 applied RULED_NOT_NATIVE (excluded_not_native) to its funding and prime rows, while denied_ueis() did not fire (it needs ruling == 'not_native' exactly): two readers of one ruling, two verdicts, and the ruling class applied more broadly than its definition to firms the register classes as Native. FIXED: classify() now asks cedar_domain's predicate first and returns CLASS/individual_native.",
+   "gate_location": "code/173_consolidate_rulings_ledger.py classify(), is_tribal_link_refusal(); code/cedar_domain.py is_tribal_link_refusal_not_native_refusal()",
+   "closing_condition": "Re-run 173 on the owner's machine, then 174 and the funding candidate rebuild; confirm the five subjects settle CLASS, not NEGATIVE.",
+   "evidence": "code/173_consolidate_rulings_ledger_test.py (6 tests; HEAD classify(refusal) == NEGATIVE recorded in the register notes); AGENTS.md 'THE INVERTED RULING'; docs/ENTITY_TYPES.md",
+   "classification": "CODE",
+   "owner": null,
+   "question": null,
+   "needs": "To measure the live effect: data/clean/cedar_ruling_ledger_consolidated.csv rows whose ruling contains 'individually Native-owned' and outcome == NEGATIVE, before and after re-running 173."
+  },
+  {
+   "id": "GAP-08",
+   "collection": "funding / recipient UEI GJV4PJ8M5PC7, award ASST_NON_1896753-42-22_417",
+   "gate": "no consumer vocabulary for 'distinct recipient' until this pass; policy inputs not in Git",
+   "exists": "Two Federal Funding transactions projected to the tribal-government recipient while the recipient is the Siletz Tribal Arts and Heritage Society, a separate Native nonprofit (docs/REVIEW_STATUS.md 'Source-side fixes, 2026-10-02').",
+   "served": "Both transactions ship bound to the tribal government in the 640,942-row release (not measurable here; the projection is not in Git).",
+   "gate_location": "data/cedar/recipient_holds.json (new, zero entries); code/cedar_publication.recipient_holds()/validate_recipient_holds(); docs/RECIPIENT_HOLDS_2026-10-02.md; docs/schema/recipient_holds.schema.json",
+   "closing_condition": "Read the bound uid off the two transactions; re-read and quote the two evidence pages; record the entry with status ready; the producer's funding candidate rebuild consumes it and pins. No new Cedar id without the owner's adjudication.",
+   "evidence": "server/tests/test_recipient_holds.py (19 tests; the drafted entry validates as evidence_incomplete and is refused as ready without the bound uid)",
+   "classification": "EVIDENCE_NEEDED",
+   "owner": "Havala Hanson (@Havala-Hanson), Cedar Grove and Cedar Press including their data",
+   "question": null,
+   "needs": "The funding projection on the owner's machine (data/clean/federal_funding_transactions.csv): `python3 -c \"import csv;print({(r['cedar_uid'],r['canonical_name']) for r in csv.DictReader(open('data/clean/federal_funding_transactions.csv',encoding='utf-8-sig')) if r.get('recipient_uei')=='GJV4PJ8M5PC7'})\"`; the two URLs re-read from a network that reaches them."
+  },
+  {
+   "id": "GAP-09",
+   "collection": "register / Siletz Tribal Arts and Heritage Society",
+   "gate": "no register entity; admission is an identity adjudication",
+   "exists": "A nonprofit with its own board, named in two sources (REVIEW_STATUS), not in data/spine/cedar_identity_register.csv.",
+   "served": "Nothing can be attributed to it; a withhold leaves the two transactions unattributed.",
+   "gate_location": "data/spine/cedar_identity_register.csv; owner adjudication per AGENTS.md",
+   "closing_condition": "The owner admits the society to the register as a Native nonprofit (a new CE- id) or declines; either way the hold stands.",
+   "evidence": "docs/RECIPIENT_HOLDS_2026-10-02.md 'The Siletz entry, drafted and held'",
+   "classification": "DECISION",
+   "owner": "Elijah Moreno (owner), identity, affiliation and legal-object adjudication, through Havala",
+   "question": "Is the Siletz Tribal Arts and Heritage Society admitted to the register as its own Native nonprofit (new CE- id), or recorded only as the distinct recipient behind UEI GJV4PJ8M5PC7?"
+  },
+  {
+   "id": "GAP-10",
+   "collection": "foundation-corporate-giving, need / publication_status",
+   "gate": "server/cedar_press/spreadsheet.py drops rows whose publication_status_field is held, contested or withheld",
+   "exists": "Served previews: foundation-corporate-giving publication_rights_status = {'(blank)': 5, 'derived_facts_only': 5}, publication_status = {'observed': 5, '(blank)': 5}; need publication_status = {'observed': 10}. The codebook defines giving's publication_status; the giving reviewed_disclosures rows carry a blank there and derived_facts_only in publication_rights_status.",
+   "served": "Every served row passes (blank and observed are not held values). The NEED patent, rating and profile_links components declare publication_status 'held for all rows under NEED policy' in data/cedar/need_component_contracts.json; needEvidence.js and need_profiles.py require 'eligible', so none shows: consistent.",
+   "gate_location": "server/cedar_press/spreadsheet.py; server/cedar_press/need_profiles.py select_entity_rows; src/features/grove/needEvidence.js",
+   "closing_condition": "Producer: one convention for 'not evaluated' on giving reviewed_disclosures (blank vs observed) and currency on those rows (FACT_CHECK queue, UNRESOLVED).",
+   "evidence": "docs/FACT_CHECK_2026-10-02.md section 5 (giving FG-* rows); data/cedar/need_component_contracts.json",
+   "classification": "EVIDENCE_IN_REPO",
+   "owner": "Francesca Agnes (@mafranagn), data methods and the Cedar service boundary",
+   "question": null
+  },
+  {
+   "id": "GAP-11",
+   "collection": "register / 45 withheld names",
+   "gate": "code/cedar_domain.may_publish_individual_native_field(): withhold unless consent_status OPTED_IN",
+   "exists": "45 register entities ship with a uid, a class and a null name; by class: {'Individually Native-owned business': 45}. Reason: the class is a person-proxy and consent_status is NOT_ASKED on all 45 (AGENTS.md); a firm's website statement is evidence, never permission.",
+   "served": "uid and class only (public/data/cedar/register.json withheld_names = 45); rows keyed to them ship with the name masked ([name withheld]).",
+   "gate_location": "scripts/derive-explore.mjs buildRegister (WITHHELD_CLASS); src/features/grove/explore.js publicRow; scripts/import_cedar_manifest.py sample_violations",
+   "closing_condition": "Per firm: a recorded OPTED_IN consent with date and source releases the name; nothing else does.",
+   "evidence": "Tracked documents naming any of the 45 uids: ['docs/ENTITY_TYPES.md'] (docs/ENTITY_TYPES.md cites two as examples). No later log records a consent or a reclassification for any of the 45: the search for a resolved withholding found none.",
+   "classification": "RIGHTS",
+   "owner": null,
+   "question": null
+  },
+  {
+   "id": "GAP-12",
+   "collection": "owned / identity_scope",
+   "gate": "no consumer-side scope filter; eligibility is the producer's publishable flag",
+   "exists": "Served preview: identity_scope {'any_native': 10}, assertion_class {'OWNERSHIP': 10}; the codebook defines the scopes as not interchangeable evidence of Native ownership. Workspace extract 2026-09-02: 2,916 rows; release 3,725 (larger: the release admits sources the extract excluded).",
+   "served": "All 3,725 permitted rows. Consumer files filtering on identity_scope: none; no row is dropped by scope on this side. Rows withheld at the producer (publishable = N, TERMS_STATED_RESTRICTIVE sources) are counted in neither file.",
+   "gate_location": "code/330_build_native_owned_businesses.py (identity_scope per source); code/615_set_publishable_native_owned_businesses.py; producer press_candidates",
+   "closing_condition": "Producer: state the withheld count and reason per source in the release manifest (held_records_in_selected_groups is 0 because the held rows are outside the selected group).",
+   "evidence": "data/cedar/codebook.json owned.identity_scope; data/cedar/collections.manifest.json owned.tables[0]",
+   "classification": "EVIDENCE_IN_REPO",
+   "owner": "Francesca Agnes (@mafranagn), data methods and the Cedar service boundary",
+   "question": null
+  },
+  {
+   "id": "GAP-13",
+   "collection": "contractors, deals, funding, natural-resources, subcontracting, nonprofits, need / manifest n_rows below the workspace table",
+   "gate": "producer publication contract (publishable flags, deduplication, exclusions) applied between the workspace table and the release",
+   "exists": "Workspace table rows (2026-09-02 extract README) versus released permitted rows: contractors prime_contracts.csv 1,217,768 -> 841,002 (-376,766); deals deals_classified.csv 1,073 -> 978 (-95); funding federal_funding_transactions.csv 701,955 -> 640,942 (-61,013); nagpra nagpra_notices.csv 6,792 -> 6,792 (+0); natural-resources resource_revenue.csv 11,305 -> 11,120 (-185); need need_enterprises.csv 1,610 -> 43 (-1,567); nonprofits np_orgs.csv 12,764 -> 89 (-12,675); owned native_owned_businesses.csv 2,916 -> 3,725 (+809); subcontracting subawards.csv 89,809 -> 70,054 (-19,755).",
+   "served": "The released count. The rows between the two figures each need a NAMED disposition in the producer's build (duplicate filing, publishable = N, ruled out, excluded by rights); none is named in this repository. Nonprofits (12,764 -> 89) and NEED (1,610 -> 43) are by construction: the universe considered versus the rows ruled in / the proof-bound public base. nagpra is equal; owned grew.",
+   "gate_location": "Lumecon-data release builders (press_candidates); scripts/stage_verified_previews.py writes rows_in = permitted + held_records_in_selected_groups",
+   "closing_condition": "Producer release manifest states, per collection, rows_in from the workspace table and the count per named disposition; the consumer manifest then carries a non-zero rows_withheld with withheld_why.",
+   "evidence": "data/cedar/samples/README.md counts; data/cedar/collections.manifest.json; docs/REVIEW_STATUS.md collection inventory",
+   "classification": "EVIDENCE_NEEDED",
+   "owner": "Francesca Agnes (@mafranagn), data methods and the Cedar service boundary",
+   "question": null,
+   "needs": "The producer build logs and release manifests in Lumecon-data for the 2026-10-01 pins (release ids in data/cedar/verified-preview-releases.json); the workspace tables data/clean/<table>.csv on the owner's machine for a row-level join.",
+   "measured": {
+    "below_workspace": [
+     "contractors",
+     "deals",
+     "funding",
+     "natural-resources",
+     "need",
+     "nonprofits",
+     "subcontracting"
+    ]
+   }
+  },
+  {
+   "id": "GAP-14",
+   "collection": "foundation-corporate-giving, need, plot, gaming / components outside the permitted set",
+   "gate": "producer publication contract per component; consumer manifest counts only the selected group",
+   "exists": "Records in the reviewed release versus permitted rows (docs/REVIEW_STATUS.md): Foundation & Corporate Giving 7,801 / 193; NEED 143,369 / 43; PLOT 235,385 / 151,715; Gaming 86,563 / 68,340. Declared components not in the permitted record types: giving ['held_disclosures', 'repeat_decisions', 'source_policies']; plot 32 (held_* and internal_*); need 18; gaming 15. NEED reviewed manifest: 143,369 records across 19 logical components, reviewed_public_base 43; the manifest caveat: whole-NEED public export quarantine remains binding.",
+   "served": "Only the permitted record types; the consumer manifest's rows_in equals the permitted count because held_records_in_selected_groups is 0 for every collection, so the held and internal components are invisible in data/cedar/collections.manifest.json and visible only in REVIEW_STATUS and the component contract files.",
+   "gate_location": "data/cedar/*_component_contracts.json rights_class INTERNAL_RESEARCH_ONLY / held_*; server/cedar_press/repository.py _grove_component_release (ComponentPublicationHeld); scripts/stage_verified_previews.py rows_in",
+   "closing_condition": "Working as written. If the manifest should show what exists but is held, the producer receipt needs a per-collection total records field and the staging script a rows_in that uses it.",
+   "evidence": "docs/REVIEW_STATUS.md collection inventory; data/cedar/need-reviewed-preview.json manifest.caveats; component contract files",
+   "classification": "RIGHTS",
+   "owner": "Havala Hanson (@Havala-Hanson), Cedar Grove and Cedar Press including their data",
+   "question": "Should the consumer manifest record the release's total records beside the permitted count, so a held component is visible to a reader of the manifest?"
+  },
+  {
+   "id": "GAP-15",
+   "collection": "all 14 / Explore display contracts",
+   "gate": "scripts/derive-explore.mjs override key = <collection>/<table stem>",
+   "exists": "27 hand-written override declarations (reviewed 2026-09-05) keyed to the 2026-09-02 tables (contractors/prime_contracts, lobbying/native_entity_lobbying_disclosures, ...).",
+   "served": "None applied since the 2026-10-01 release renamed every served table to <collection>.csv: the keys matched nothing and derive() applied an empty override to each. FIXED: derive() refuses a key that names no manifest table; the 27 declarations are retired under _retired_2026-10-02 in explore.overrides.json; live override keys now: none.",
+   "gate_location": "scripts/derive-explore.mjs unknownOverrideKeys(); data/cedar/explore.overrides.json",
+   "closing_condition": "A new override for a served table is keyed <collection>/<collection>; the guard fails the generator otherwise.",
+   "evidence": "src/features/grove/explore.test.js 'an override keyed to a table the manifest does not declare is refused'",
+   "classification": "CODE",
+   "owner": null,
+   "question": null
+  },
+  {
+   "id": "GAP-16",
+   "collection": "lobbying / superseded filings",
+   "gate": "scripts/derive-explore.mjs RULES.superseded_by",
+   "exists": "The served lobbying header carries superseded_by_record_id (the producer renamed filing_uuid to record_id); the rule listed only superseded_by_filing_uuid.",
+   "served": "explore.json carried superseded_by: null, so a superseded filing never offered its replacement's id. FIXED: the rule reads the producer's name first; explore.json now carries superseded_by = superseded_by_record_id. Rows were not dropped by this: is_superseded was already read, and superseded filings are hidden by default with history on request.",
+   "gate_location": "scripts/derive-explore.mjs RULES; src/features/grove/explore.js rowReplacement",
+   "closing_condition": "Closed; regenerate explore.json after any producer rename (make check-generated).",
+   "evidence": "src/features/grove/explore.test.js 'the served lobbying contract reads the producer's replacement column'",
+   "classification": "CODE",
+   "owner": null,
+   "question": null
+  },
+  {
+   "id": "GAP-17",
+   "collection": "all / data/cedar/collection_descriptors.cedar.json",
+   "gate": "a 2026-09-02 facts file nothing reads",
+   "exists": "Workspace counts for 15 ids (contractors 3,345,971; deals 2,662; federal-register 502,483; _entity_layer 363,220; gaming 128,561; newsletters 3,444), the shape code/760 writes to dist/.",
+   "served": "Not read by server/, src/ or scripts/ (git grep). The served counts are the manifest's. FIXED: a dated _superseded note is written into the file; counts kept as evidence.",
+   "gate_location": "data/cedar/collection_descriptors.cedar.json; scripts/import_cedar_manifest.py reads dist/, not this copy",
+   "closing_condition": "Delete or keep as dated evidence; Havala's call, no behaviour depends on it.",
+   "evidence": "git grep collection_descriptors.cedar across server/, src/, scripts/: no reader",
+   "classification": "CODE",
+   "owner": "Havala Hanson (@Havala-Hanson), Cedar Grove and Cedar Press including their data",
+   "question": "Keep data/cedar/collection_descriptors.cedar.json as dated evidence, or remove it now that the manifest carries the served counts?"
+  },
+  {
+   "id": "GAP-18",
+   "collection": "deals / 1185 fact-check corrections and 1184 presentation",
+   "gate": "code/cedar_publication.deals_public_view() applies review/deals_2025_2026_corrected.csv at publish",
+   "exists": "Owner's 2025-2026 corrections as data keyed by Deal_ID with a precondition each (review/ file, gitignored) and the reviewer's Caveat derivation (1184), both applied by the workspace writer 1137.",
+   "served": "The served Deals release is built by Lumecon-data from the workspace tables; whether its build applies 1185's corrections and 1184's caveats is not stated in this repository.",
+   "gate_location": "code/cedar_publication.py deals_public_view(); Lumecon-data press_candidates (not here)",
+   "closing_condition": "Producer confirms the corrections are applied in its Deals projection (or imports review/deals_2025_2026_corrected.csv as a reviewed input).",
+   "evidence": "code/cedar_publication.py deals_public_view docstring (Codex PR #56); code/1185_deals_fact_check_2025_2026.py",
+   "classification": "EVIDENCE_NEEDED",
+   "owner": "Francesca Agnes (@mafranagn), data methods and the Cedar service boundary",
+   "question": null,
+   "needs": "review/deals_2025_2026_corrected.csv on the owner's machine and the producer's Deals build log for release f9f50cca..."
+  },
+  {
+   "id": "GAP-19",
+   "collection": "infrastructure",
+   "gate": "manifest.excluded (separate Cedar Grove dataset); grove_release_pin pins = {}",
+   "exists": "28,484 permitted Records rows (1,163 IHS, 22,380 TTPTIP, 2,467 SDWIS, 1,254 DWINSA, 1,220 NBI) and 13 restricted components; verified local release d7a93b56... (docs/REVIEW_STATUS.md); 14 component contracts in data/cedar/infrastructure_component_contracts.json.",
+   "served": "Nothing pinned for production; a local Grove process rehearsal returned all 28,484 permitted records. Press never serves it.",
+   "gate_location": "data/cedar/collections.manifest.json excluded[infrastructure]; data/cedar/grove_release_pin.json",
+   "closing_condition": "Reviewed PR sets the Grove pin to the consumer-projection hash; coordinate holds (three data-center coordinate differences) stay explicit.",
+   "evidence": "docs/REVIEW_STATUS.md 'October 2 integration checkpoint'",
+   "classification": "DECISION",
+   "owner": "Havala Hanson (@Havala-Hanson), Cedar Grove and Cedar Press including their data",
+   "question": "Is the Infrastructure consumer projection (89db65d8...) the release to pin for Cedar Grove, with the three coordinate holds carried as holds?"
+  },
+  {
+   "id": "GAP-20",
+   "collection": "foundation-corporate-giving, plot / production pins",
+   "gate": "data/cedar/press_component_release_pin.json pins = {}",
+   "exists": "Verified rehearsal releases pinned for preview (giving 193 permitted of 7,801; plot 151,715 of 235,385); release_class rehearsal in every receipt.",
+   "served": "10-row public previews and the connected research API against the rehearsal pins; no production download pin for either.",
+   "gate_location": "data/cedar/press_component_release_pin.json; data/cedar/verified-preview-releases.json release_class",
+   "closing_condition": "An isolated review environment with exact catalog and manifest digests, then a reviewed PR setting the pins (the file's own status text).",
+   "evidence": "press_component_release_pin.json status; REVIEW_STATUS 'Remaining release gates'",
+   "classification": "DECISION",
+   "owner": "Havala Hanson (@Havala-Hanson), Cedar Grove and Cedar Press including their data",
+   "question": "Which Giving and PLOT releases (by release id and manifest digest) are the production pins, and in which review environment is that approval recorded?"
+  },
+  {
+   "id": "GAP-21",
+   "collection": "code/ / 618 numbered workspace scripts",
+   "gate": "reference graph: Makefile, CI, package.json, other script, product code, document, journal, loader by stem or number",
+   "exists": "619 numbered scripts (602 numeric-prefixed, 17 letter-suffixed; the brief's 606 counted non-Python files with a numeric prefix). Referenced: 601 (598 outside AGENTS.md). Zero references: 18.",
+   "served": "18 moved to code/archive/ (zero references, no tracked artifact written, not ACTIVE, not NEVER_RUN, in no contract or ordering), indexed in code/archive/INDEX.md; census refreshed (python3.12 code/521_inventory.py scripts-only).",
+   "gate_location": "docs/CODE_REFERENCE_GRAPH_2026-10-02.json; server/tests/code_reference_graph.py; docs/schema/inventory.json script_census",
+   "closing_condition": "Closed for this pass; the test module proves every archived script still has zero references in the tree.",
+   "evidence": "server/tests/test_code_reference_graph.py (11 tests)",
+   "classification": "CODE",
+   "owner": null,
+   "question": null
+  },
+  {
+   "id": "GAP-22",
+   "collection": "owned / display name",
+   "gate": "collection name is a data contract carried into every download's citation (AGENTS.md section 6)",
+   "exists": "Owner decision 2026-10-02: the collection is 'Individual Native-Owned Businesses', never 'Native-Owned Businesses' (which makes NEED sound redundant). Served now as 'Individual Native-Owned Businesses' at version v4 (updated 2026-10-02); the pinned sample and receipt are unchanged.",
+   "served": "Manifest, descriptors, codebook, guides, SEO/JSON-LD, the press dump and the catalog carry the new name; the release ledger keeps v0-v3 under the name they shipped with and records the rename as v4 (the ledger refuses a changed fact on an existing version). The producer's descriptor still carries the old title; Lumecon-data #17 is changing it so the next pin agrees. Catalog `short` now equals the full name pending a copy decision.",
+   "gate_location": "data/cedar/collections.manifest.json owned.descriptor; scripts/stage_verified_previews.py copies name from the producer descriptor at pin; server/tests/test_collection_display_names.py",
+   "closing_condition": "Producer title changed (Lumecon-data #17) before the next pin; a short label chosen for tiles; downloads already held cite the old name, which the ledger records.",
+   "evidence": "server/tests/test_collection_display_names.py (4 tests); data/cedar/releases.json owned v4",
+   "classification": "DECISION",
+   "owner": "Kaylyn Lee (@kaylynhl), product behaviour and customer-facing copy",
+   "question": "What short label should tiles show for Individual Native-Owned Businesses, now that the catalog's short name equals the full name?"
+  }
+ ],
+ "measured": {
+  "served": {
+   "funding": {
+    "n_rows": 640942,
+    "name": "Federal Funding to Indian Country",
+    "rows_in": 640942,
+    "rows_withheld": 0,
+    "sample_rows": 10,
+    "sample_columns": 42,
+    "version": "v3",
+    "updated": "2026-10-01"
+   },
+   "federal-register": {
+    "n_rows": 21258,
+    "name": "Federal Register — Indian Affairs",
+    "rows_in": 21258,
+    "rows_withheld": 0,
+    "sample_rows": 10,
+    "sample_columns": 61,
+    "version": "v3",
+    "updated": "2026-10-01"
+   },
+   "legislation": {
+    "n_rows": 3064,
+    "name": "Native Legislation and Votes",
+    "rows_in": 3064,
+    "rows_withheld": 0,
+    "sample_rows": 10,
+    "sample_columns": 33,
+    "version": "v3",
+    "updated": "2026-10-01"
+   },
+   "deals": {
+    "n_rows": 978,
+    "name": "Indian Country Deals",
+    "rows_in": 978,
+    "rows_withheld": 0,
+    "sample_rows": 10,
+    "sample_columns": 36,
+    "version": "v3",
+    "updated": "2026-10-01"
+   },
+   "nagpra": {
+    "n_rows": 6792,
+    "name": "NAGPRA Notices",
+    "rows_in": 6792,
+    "rows_withheld": 0,
+    "sample_rows": 10,
+    "sample_columns": 55,
+    "version": "v3",
+    "updated": "2026-10-01"
+   },
+   "lobbying": {
+    "n_rows": 27825,
+    "name": "Native Federal Advocacy and Engagement",
+    "rows_in": 27825,
+    "rows_withheld": 0,
+    "sample_rows": 10,
+    "sample_columns": 41,
+    "version": "v3",
+    "updated": "2026-10-01"
+   },
+   "contractors": {
+    "n_rows": 841002,
+    "name": "Native Federal Contractors",
+    "rows_in": 841002,
+    "rows_withheld": 0,
+    "sample_rows": 10,
+    "sample_columns": 52,
+    "version": "v3",
+    "updated": "2026-10-01"
+   },
+   "subcontracting": {
+    "n_rows": 70054,
+    "name": "Native Federal Subcontracting",
+    "rows_in": 70054,
+    "rows_withheld": 0,
+    "sample_rows": 10,
+    "sample_columns": 57,
+    "version": "v3",
+    "updated": "2026-10-01"
+   },
+   "owned": {
+    "n_rows": 3725,
+    "name": "Individual Native-Owned Businesses",
+    "rows_in": 3725,
+    "rows_withheld": 0,
+    "sample_rows": 10,
+    "sample_columns": 35,
+    "version": "v4",
+    "updated": "2026-10-02"
+   },
+   "need": {
+    "n_rows": 43,
+    "name": "Cedar Native Entity Enterprise Dataset (NEED)",
+    "rows_in": 43,
+    "rows_withheld": 0,
+    "sample_rows": 10,
+    "sample_columns": 23,
+    "version": "v5",
+    "updated": "2026-10-01"
+   },
+   "natural-resources": {
+    "n_rows": 11120,
+    "name": "Tribal Natural Resource Revenue",
+    "rows_in": 11120,
+    "rows_withheld": 0,
+    "sample_rows": 10,
+    "sample_columns": 41,
+    "version": "v3",
+    "updated": "2026-10-01"
+   },
+   "nonprofits": {
+    "n_rows": 89,
+    "name": "Native Nonprofits",
+    "rows_in": 89,
+    "rows_withheld": 0,
+    "sample_rows": 10,
+    "sample_columns": 27,
+    "version": "v3",
+    "updated": "2026-10-01"
+   },
+   "foundation-corporate-giving": {
+    "n_rows": 193,
+    "name": "Foundation & Corporate Giving",
+    "rows_in": 193,
+    "rows_withheld": 0,
+    "sample_rows": 10,
+    "sample_columns": 66,
+    "version": "v3",
+    "updated": "2026-10-01"
+   },
+   "plot": {
+    "n_rows": 151715,
+    "name": "PLOT",
+    "rows_in": 151715,
+    "rows_withheld": 0,
+    "sample_rows": 10,
+    "sample_columns": 106,
+    "version": "v3",
+    "updated": "2026-10-01"
+   }
+  },
+  "receipt_types": {
+   "contractors": {
+    "prime_contracts": 841002
+   },
+   "deals": {
+    "records": 978
+   },
+   "federal-register": {
+    "consultation_participants": 11402,
+    "federal_actions": 9856
+   },
+   "foundation-corporate-giving": {
+    "policy_eligible_disclosures": 155,
+    "reviewed_disclosures": 38
+   },
+   "funding": {
+    "federal_funding_transactions": 640942
+   },
+   "gaming": {
+    "gaming_compact_versions": 1158,
+    "gaming_compacts": 707,
+    "gaming_financial_disclosures": 1578,
+    "gaming_government_payments": 52129,
+    "gaming_land_eligibility": 240,
+    "gaming_regional_revenue": 224,
+    "gaming_regulatory_events": 3776,
+    "gaming_reported_revenue_observations": 8508,
+    "gaming_revenue_bands": 20
+   },
+   "legislation": {
+    "records": 3064
+   },
+   "lobbying": {
+    "records": 27825
+   },
+   "nagpra": {
+    "records": 6792
+   },
+   "natural-resources": {
+    "records": 11120
+   },
+   "need": {
+    "reviewed_public_base": 43
+   },
+   "nonprofits": {
+    "records": 89
+   },
+   "owned": {
+    "records": 3725
+   },
+   "plot": {
+    "environmental_events": 3210,
+    "environmental_permits": 1242,
+    "ownership_observations": 4991,
+    "permit_events": 599,
+    "permits": 122,
+    "tract_observations": 141551
+   },
+   "subcontracting": {
+    "records": 70054
+   }
+  },
+  "legacy": {
+   "_entity_layer": {
+    "rows": 10,
+    "columns": 6,
+    "first_column": "cedar_uid",
+    "served": false
+   },
+   "contractors": {
+    "rows": 10,
+    "columns": 18,
+    "first_column": "parent_contract_number",
+    "served": true,
+    "key": "parent_contract_number",
+    "legacy_only": 6,
+    "shared": 1
+   },
+   "deals": {
+    "rows": 10,
+    "columns": 17,
+    "first_column": "Deal_ID",
+    "served": true,
+    "key": "Deal_ID",
+    "legacy_only": 10,
+    "shared": 0
+   },
+   "federal-register": {
+    "rows": 10,
+    "columns": 15,
+    "first_column": "consultation_event_id",
+    "served": true,
+    "key": "consultation_event_id",
+    "legacy_only": 10,
+    "shared": 0
+   },
+   "funding": {
+    "rows": 10,
+    "columns": 12,
+    "first_column": "award_id_fain",
+    "served": true,
+    "key": "award_id_fain",
+    "legacy_only": null,
+    "shared": null,
+    "note": "key column absent from the served header; different table"
+   },
+   "gaming": {
+    "rows": 10,
+    "columns": 21,
+    "first_column": "facility_id",
+    "served": false
+   },
+   "legislation": {
+    "rows": 10,
+    "columns": 15,
+    "first_column": "vote_id",
+    "served": true,
+    "key": "vote_id",
+    "legacy_only": null,
+    "shared": null,
+    "note": "key column absent from the served header; different table"
+   },
+   "lobbying": {
+    "rows": 10,
+    "columns": 15,
+    "first_column": "registrant_id",
+    "served": true,
+    "key": "registrant_id",
+    "legacy_only": 9,
+    "shared": 1
+   },
+   "nagpra": {
+    "rows": 10,
+    "columns": 16,
+    "first_column": "document_number",
+    "served": true,
+    "key": "document_number",
+    "legacy_only": 10,
+    "shared": 0
+   },
+   "natural-resources": {
+    "rows": 10,
+    "columns": 9,
+    "first_column": "resource_revenue_event_id",
+    "served": true,
+    "key": "resource_revenue_event_id",
+    "legacy_only": 10,
+    "shared": 0
+   },
+   "need": {
+    "rows": 10,
+    "columns": 21,
+    "first_column": "enterprise_id",
+    "served": true,
+    "key": "enterprise_id",
+    "legacy_only": 10,
+    "shared": 0
+   },
+   "newsletters": {
+    "rows": 10,
+    "columns": 18,
+    "first_column": "newsletter_id",
+    "served": false
+   },
+   "nonprofits": {
+    "rows": 10,
+    "columns": 15,
+    "first_column": "EIN",
+    "served": true,
+    "key": "EIN",
+    "legacy_only": 10,
+    "shared": 0
+   },
+   "owned": {
+    "rows": 10,
+    "columns": 16,
+    "first_column": "business_source_id",
+    "served": true,
+    "key": "business_source_id",
+    "legacy_only": 10,
+    "shared": 0
+   },
+   "subcontracting": {
+    "rows": 10,
+    "columns": 17,
+    "first_column": "source_dataset",
+    "served": true,
+    "key": "source_dataset",
+    "legacy_only": null,
+    "shared": null,
+    "note": "key column absent from the served header; different table"
+   }
+  },
+  "workspace_counts": {
+   "_entity_layer": {
+    "table": "cedar_identity_register.csv",
+    "rows": 1555
+   },
+   "contractors": {
+    "table": "prime_contracts.csv",
+    "rows": 1217768
+   },
+   "deals": {
+    "table": "deals_classified.csv",
+    "rows": 1073
+   },
+   "federal-register": {
+    "table": "consultation_events.csv",
+    "rows": 11402
+   },
+   "funding": {
+    "table": "federal_funding_transactions.csv",
+    "rows": 701955
+   },
+   "gaming": {
+    "table": "gaming_facilities.csv",
+    "rows": 787
+   },
+   "legislation": {
+    "table": "bill_votes.csv",
+    "rows": 423
+   },
+   "lobbying": {
+    "table": "lobbying_registrants.csv",
+    "rows": 653
+   },
+   "nagpra": {
+    "table": "nagpra_notices.csv",
+    "rows": 6792
+   },
+   "owned": {
+    "table": "native_owned_businesses.csv",
+    "rows": 2916
+   },
+   "natural-resources": {
+    "table": "resource_revenue.csv",
+    "rows": 11305
+   },
+   "need": {
+    "table": "need_enterprises.csv",
+    "rows": 1610
+   },
+   "newsletters": {
+    "table": "tribal_newsletter_corpus.csv",
+    "rows": 1889
+   },
+   "nonprofits": {
+    "table": "np_orgs.csv",
+    "rows": 12764
+   },
+   "subcontracting": {
+    "table": "subawards.csv",
+    "rows": 89809
+   }
+  },
+  "cev": {
+   "ids": [
+    "CEV-2025-01F262669F",
+    "CEV-2025-09E060E63E",
+    "CEV-2025-101F917A66",
+    "CEV-2025-1F1A049EDC",
+    "CEV-2025-249EC2AE05",
+    "CEV-2025-4D8A6B38A7",
+    "CEV-2025-6CAA2D9284",
+    "CEV-2025-77402471C6",
+    "CEV-2021-002D0E2F52",
+    "CEV-2021-357C5BC869"
+   ],
+   "in_served_sample": [],
+   "tracked_paths_naming_cev": [],
+   "fixture_columns": 40,
+   "served_columns": 36
+  },
+  "withheld": {
+   "total": 45,
+   "by_class": {
+    "Individually Native-owned business": 45
+   },
+   "tracked_docs_naming_a_withheld_uid": [
+    "docs/ENTITY_TYPES.md"
+   ]
+  },
+  "owned": {
+   "identity_scope": {
+    "any_native": 10
+   },
+   "assertion_class": {
+    "OWNERSHIP": 10
+   },
+   "consumer_files_filtering_on_identity_scope": []
+  },
+  "status_values": {
+   "need": {
+    "publication_status": {
+     "observed": 10
+    }
+   },
+   "foundation-corporate-giving": {
+    "publication_rights_status": {
+     "(blank)": 5,
+     "derived_facts_only": 5
+    },
+    "publication_status": {
+     "observed": 5,
+     "(blank)": 5
+    }
+   }
+  },
+  "components": {
+   "federal-register": {
+    "declared": [
+     "consultation_participants",
+     "federal_actions"
+    ],
+    "permitted_record_types": [
+     "consultation_participants",
+     "federal_actions"
+    ],
+    "declared_not_permitted": []
+   },
+   "foundation-corporate-giving": {
+    "declared": [
+     "held_disclosures",
+     "policy_eligible_disclosures",
+     "repeat_decisions",
+     "reviewed_disclosures",
+     "source_policies"
+    ],
+    "permitted_record_types": [
+     "policy_eligible_disclosures",
+     "reviewed_disclosures"
+    ],
+    "declared_not_permitted": [
+     "held_disclosures",
+     "repeat_decisions",
+     "source_policies"
+    ]
+   },
+   "gaming": {
+    "declared": [
+     "gaming_advocacy_links",
+     "gaming_compact_terms",
+     "gaming_compact_versions",
+     "gaming_compacts",
+     "gaming_coverage_gaps",
+     "gaming_environmental_reviews",
+     "gaming_facility_capacity",
+     "gaming_facility_history",
+     "gaming_facility_names",
+     "gaming_facility_relationships",
+     "gaming_financial_disclosures",
+     "gaming_government_payments",
+     "gaming_grove_facilities",
+     "gaming_labor_observations",
+     "gaming_land_eligibility",
+     "gaming_licenses",
+     "gaming_litigation",
+     "gaming_online_sportsbook_financials",
+     "gaming_online_sportsbook_relationships",
+     "gaming_online_sportsbook_units",
+     "gaming_regional_revenue",
+     "gaming_regulatory_events",
+     "gaming_reported_revenue_observations",
+     "gaming_revenue_bands"
+    ],
+    "permitted_record_types": [
+     "gaming_compact_versions",
+     "gaming_compacts",
+     "gaming_financial_disclosures",
+     "gaming_government_payments",
+     "gaming_land_eligibility",
+     "gaming_regional_revenue",
+     "gaming_regulatory_events",
+     "gaming_reported_revenue_observations",
+     "gaming_revenue_bands"
+    ],
+    "declared_not_permitted": [
+     "gaming_advocacy_links",
+     "gaming_compact_terms",
+     "gaming_coverage_gaps",
+     "gaming_environmental_reviews",
+     "gaming_facility_capacity",
+     "gaming_facility_history",
+     "gaming_facility_names",
+     "gaming_facility_relationships",
+     "gaming_grove_facilities",
+     "gaming_labor_observations",
+     "gaming_licenses",
+     "gaming_litigation",
+     "gaming_online_sportsbook_financials",
+     "gaming_online_sportsbook_relationships",
+     "gaming_online_sportsbook_units"
+    ]
+   },
+   "infrastructure": {
+    "declared": [
+     "annual",
+     "assets",
+     "audit",
+     "codebook",
+     "coverage",
+     "datacenters",
+     "energy",
+     "environment",
+     "housing",
+     "links",
+     "profiles",
+     "records",
+     "sources",
+     "spatial"
+    ],
+    "permitted_record_types": [],
+    "declared_not_permitted": [
+     "annual",
+     "assets",
+     "audit",
+     "codebook",
+     "coverage",
+     "datacenters",
+     "energy",
+     "environment",
+     "housing",
+     "links",
+     "profiles",
+     "records",
+     "sources",
+     "spatial"
+    ]
+   },
+   "need": {
+    "declared": [
+     "credit_rating_actions",
+     "duplicate_candidates",
+     "enrichment_bindings",
+     "enrichment_sources",
+     "enterprise_register",
+     "enterprises",
+     "evidence_conflicts",
+     "fpds_contradictions",
+     "linkage_holds",
+     "parent_crosswalk",
+     "patent_events",
+     "patent_observations",
+     "profile_links",
+     "rating_availability",
+     "reconciliation",
+     "relationship_observations",
+     "source_records",
+     "staged_observations"
+    ],
+    "permitted_record_types": [
+     "reviewed_public_base"
+    ],
+    "declared_not_permitted": [
+     "credit_rating_actions",
+     "duplicate_candidates",
+     "enrichment_bindings",
+     "enrichment_sources",
+     "enterprise_register",
+     "enterprises",
+     "evidence_conflicts",
+     "fpds_contradictions",
+     "linkage_holds",
+     "parent_crosswalk",
+     "patent_events",
+     "patent_observations",
+     "profile_links",
+     "rating_availability",
+     "reconciliation",
+     "relationship_observations",
+     "source_records",
+     "staged_observations"
+    ]
+   },
+   "plot": {
+    "declared": [
+     "environmental_events",
+     "environmental_permits",
+     "held_national_observations",
+     "held_permit_events",
+     "held_permits",
+     "internal_authority_inventory",
+     "internal_baseline_parcel_objects",
+     "internal_cross_collection_intake",
+     "internal_deal_candidates",
+     "internal_facility_associations",
+     "internal_holds",
+     "internal_native_permits",
+     "internal_native_permits_events",
+     "internal_native_permits_parcel_links",
+     "internal_native_property_assertions",
+     "internal_parcel_context",
+     "internal_parcel_links",
+     "internal_parcel_observations",
+     "internal_permit_candidates",
+     "internal_permit_context",
+     "internal_permit_context_events",
+     "internal_permit_context_parcel_links",
+     "internal_permit_diagnostics",
+     "internal_permit_diagnostics_events",
+     "internal_permit_diagnostics_parcel_links",
+     "internal_permit_parcel_references",
+     "internal_permit_relations",
+     "internal_pin_crosswalk_rules",
+     "internal_relationship_assertions",
+     "internal_source_contracts",
+     "internal_source_field_contracts",
+     "internal_source_occurrences",
+     "internal_source_outcomes",
+     "internal_state_coverage",
+     "ownership_observations",
+     "permit_events",
+     "permits",
+     "tract_observations"
+    ],
+    "permitted_record_types": [
+     "environmental_events",
+     "environmental_permits",
+     "ownership_observations",
+     "permit_events",
+     "permits",
+     "tract_observations"
+    ],
+    "declared_not_permitted": [
+     "held_national_observations",
+     "held_permit_events",
+     "held_permits",
+     "internal_authority_inventory",
+     "internal_baseline_parcel_objects",
+     "internal_cross_collection_intake",
+     "internal_deal_candidates",
+     "internal_facility_associations",
+     "internal_holds",
+     "internal_native_permits",
+     "internal_native_permits_events",
+     "internal_native_permits_parcel_links",
+     "internal_native_property_assertions",
+     "internal_parcel_context",
+     "internal_parcel_links",
+     "internal_parcel_observations",
+     "internal_permit_candidates",
+     "internal_permit_context",
+     "internal_permit_context_events",
+     "internal_permit_context_parcel_links",
+     "internal_permit_diagnostics",
+     "internal_permit_diagnostics_events",
+     "internal_permit_diagnostics_parcel_links",
+     "internal_permit_parcel_references",
+     "internal_permit_relations",
+     "internal_pin_crosswalk_rules",
+     "internal_relationship_assertions",
+     "internal_source_contracts",
+     "internal_source_field_contracts",
+     "internal_source_occurrences",
+     "internal_source_outcomes",
+     "internal_state_coverage"
+    ]
+   }
+  },
+  "need_components": {
+   "credit_rating_actions": 158,
+   "duplicate_candidates": 144,
+   "enrichment_bindings": 16,
+   "enrichment_sources": 103,
+   "enterprise_register": 6089,
+   "enterprises": 5820,
+   "evidence_conflicts": 52,
+   "fpds_contradictions": 25,
+   "linkage_holds": 88931,
+   "parent_crosswalk": 658,
+   "patent_events": 22,
+   "patent_observations": 23,
+   "profile_links": 3,
+   "rating_availability": 1,
+   "reconciliation": 5226,
+   "relationship_observations": 8690,
+   "reviewed_public_base": 43,
+   "source_records": 18110,
+   "staged_observations": 9255
+  },
+  "need_total_records": 143369,
+  "review_table": {
+   "Prime Contracting": {
+    "records_in_release": 841002,
+    "permitted": 841002
+   },
+   "Deals": {
+    "records_in_release": 978,
+    "permitted": 978
+   },
+   "Federal Register": {
+    "records_in_release": 21258,
+    "permitted": 21258
+   },
+   "Foundation & Corporate Giving": {
+    "records_in_release": 7801,
+    "permitted": 193
+   },
+   "Federal Funding": {
+    "records_in_release": 640942,
+    "permitted": 640942
+   },
+   "Gaming": {
+    "records_in_release": 86563,
+    "permitted": 68340
+   },
+   "Legislation": {
+    "records_in_release": 3064,
+    "permitted": 3064
+   },
+   "Advocacy / Lobbying": {
+    "records_in_release": 27825,
+    "permitted": 27825
+   },
+   "NAGPRA": {
+    "records_in_release": 6792,
+    "permitted": 6792
+   },
+   "Natural Resources": {
+    "records_in_release": 11120,
+    "permitted": 11120
+   },
+   "NEED": {
+    "records_in_release": 143369,
+    "permitted": 43
+   },
+   "Native Nonprofits": {
+    "records_in_release": 89,
+    "permitted": 89
+   },
+   "Individual Native-Owned Businesses": {
+    "records_in_release": 3725,
+    "permitted": 3725
+   },
+   "PLOT": {
+    "records_in_release": 235385,
+    "permitted": 151715
+   },
+   "Subcontracting": {
+    "records_in_release": 70054,
+    "permitted": 70054
+   }
+  },
+  "overrides": {
+   "live_keys": [],
+   "retired": 27,
+   "lobbying_superseded_by": "superseded_by_record_id"
+  },
+  "excluded": {
+   "newsletters": {
+    "id": "newsletters",
+    "shelf": "standard",
+    "reason": "Owner ruling, 2026-09-02: not a Cedar Press product. The collection and its data remain in the Cedar workspace; only the storefront slot is withdrawn."
+   },
+   "gaming": {
+    "id": "gaming",
+    "shelf": "grove",
+    "reason": "Shelf 'grove': Gaming Intelligence is built for Cedar Grove and is still in progress. Cedar Press neither sells nor previews it; it returns to the storefront's catalog when the workspace rules it ready."
+   },
+   "_entity_layer": {
+    "id": "_entity_layer",
+    "shelf": "infrastructure",
+    "reason": "Shelf 'infrastructure': the identity spine every other collection keys to, not a collection sold on its own."
+   },
+   "infrastructure": {
+    "id": "infrastructure",
+    "name": "Native Infrastructure",
+    "shelf": "grove",
+    "reason": "A separate Cedar Grove dataset. Records retain source-specific periods, grains and publication permissions."
+   }
+  },
+  "excluded_legacy": {
+   "gaming": {
+    "legacy_facts_rows": 128561,
+    "legacy_facts_tables": 56,
+    "legacy_sample_rows": 10
+   },
+   "newsletters": {
+    "legacy_facts_rows": 3444,
+    "legacy_facts_tables": 2,
+    "legacy_sample_rows": 10
+   },
+   "_entity_layer": {
+    "legacy_facts_rows": 363220,
+    "legacy_facts_tables": 42,
+    "legacy_sample_rows": 10
+   }
+  },
+  "gaming_receipt": {
+   "public_records": 68340,
+   "record_types": {
+    "gaming_compact_versions": 1158,
+    "gaming_compacts": 707,
+    "gaming_financial_disclosures": 1578,
+    "gaming_government_payments": 52129,
+    "gaming_land_eligibility": 240,
+    "gaming_regional_revenue": 224,
+    "gaming_regulatory_events": 3776,
+    "gaming_reported_revenue_observations": 8508,
+    "gaming_revenue_bands": 20
+   }
+  },
+  "grove_pins": {},
+  "press_component_pins": {},
+  "ledger_schema": {
+   "rows_scanned": 15587,
+   "generated": "2026-08-26",
+   "outcomes": [
+    "ENTITY",
+    "UNRESOLVED_ENTITY",
+    "NEGATIVE",
+    "HOLD_OVER_OWNER",
+    "CLASS",
+    "HOLD",
+    "OWNER_VS_DIFFERENT_UNRESOLVED_OWNER",
+    "POSITIVE_VS_NOT_NATIVE",
+    "TWO_DIFFERENT_UNRESOLVED_OWNERS"
+   ]
+  },
+  "prior_rulings": {
+   "rows": 45,
+   "ruling_text": [
+    "individually_native_owned",
+    "OWNER_NAMED",
+    "INDIVIDUAL_NATIVE",
+    "Not a Native entity - individually Native-owned firm"
+   ]
+  },
+  "exclusion_pairs": {
+   "rows": 5,
+   "identifiers": [
+    "TALLSALT ADVISORS / METTE ASSOCIATES",
+    "TRIBAL ENERGY ALTERNATIVES",
+    "9DVK5",
+    "9H8M8",
+    "LAGUNA CREEK LLC"
+   ]
+  },
+  "graph": {
+   "numbered_scripts": 619,
+   "pure_numeric_prefix": 602,
+   "letter_suffixed_prefix": 17,
+   "at_code_top_level": 601,
+   "in_code_archive": 18,
+   "referenced": 601,
+   "referenced_outside_journal": 598,
+   "zero_references": 18,
+   "archive_eligible_by_rule": [
+    "1172_codebook_block_generator.py",
+    "1175_write_id_system_doc.py",
+    "1178_sentinel_null_and_recount.py",
+    "1179_cross_table_key_consistency.py",
+    "1182_stream_official_names.py",
+    "530_shard_b_tribe_web_probe.py",
+    "536_shard_e_newsletters.py",
+    "584_register_labor_codebook.py",
+    "590_shard_f_org_slice.py",
+    "591_shard_f_ihs_uio_register.py",
+    "592_shard_f_ihs_selfgov_compacts.py",
+    "593_shard_f_candidates.py",
+    "595_shard_f_org_web_reprobe.py",
+    "597_shard_f_org_rosters_finalise.py",
+    "598_shard_f_newsletters.py",
+    "600_shard_f_service_area.py",
+    "601_shard_f_build_web_map.py",
+    "602_shard_f_verify.py"
+   ],
+   "archived": [
+    "1172_codebook_block_generator.py",
+    "1175_write_id_system_doc.py",
+    "1178_sentinel_null_and_recount.py",
+    "1179_cross_table_key_consistency.py",
+    "1182_stream_official_names.py",
+    "530_shard_b_tribe_web_probe.py",
+    "536_shard_e_newsletters.py",
+    "584_register_labor_codebook.py",
+    "590_shard_f_org_slice.py",
+    "591_shard_f_ihs_uio_register.py",
+    "592_shard_f_ihs_selfgov_compacts.py",
+    "593_shard_f_candidates.py",
+    "595_shard_f_org_web_reprobe.py",
+    "597_shard_f_org_rosters_finalise.py",
+    "598_shard_f_newsletters.py",
+    "600_shard_f_service_area.py",
+    "601_shard_f_build_web_map.py",
+    "602_shard_f_verify.py"
+   ],
+   "by_reference_kind": {
+    "makefile": 4,
+    "ci": 4,
+    "package_json": 0,
+    "script": 429,
+    "product_code": 105,
+    "documented": 579,
+    "journal": 239,
+    "data_or_config": 35,
+    "stem_only": 57,
+    "number_keyed": 243
+   },
+   "text_files_scanned": 2152
+  },
+  "census": {
+   "scripts": 687,
+   "operational_role_counts": {
+    "active producer": 76,
+    "active validator/migration/review": 11,
+    "historical": 18,
+    "product consumer/shared service": 8,
+    "test/fixture": 7,
+    "unresolved": 567
+   },
+   "maintenance_status_counts": {
+    "ACTIVE": 164,
+    "DUPLICATE": 0,
+    "SUPERSEDED": 0,
+    "HISTORICAL-RETAIN": 38,
+    "SAFE-DELETE-CANDIDATE": 0,
+    "REQUIRES-REVIEW": 485
+   }
+  }
+ }
+}
