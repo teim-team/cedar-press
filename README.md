@@ -48,16 +48,94 @@ Alongside these, `/tribal-data-request` carries the tribal data request
 policy and `/research-access` the limited research access path — each on its
 own URL, so either can be sent to a council office or a researcher directly.
 
-Fourteen collections: Federal Funding, Federal Register, Legislation, Deals,
-NAGPRA, Advocacy and Foundation & Corporate Giving on Cedar Press; Prime
-Contracting, Subcontracting, Natural Resources, Native-Owned Businesses, Native
-Nonprofits, Cedar NEED (with patents and credit ratings) and PLOT on Cedar
-Press+. The datasets are maintained weekly with human review.
+## The collections
 
-Every collection is built on publicly available sources, is extended through original
-research and entity resolution, and stays current as new information arrives.
-Every download carries its own citation, so a figure can be traced back to the
-release it came from.
+Fourteen collections, built and verified in `Lumecon-data` and served here as
+pinned releases. The counts below are the permitted observations in each
+collection's current producer spreadsheet, read from
+`data/cedar/collections.manifest.json` on 2026-10-02; they are mixed-grain
+observation counts, not counts of unique people, businesses, awards or dollars,
+and the collections must not be added together. Every collection was Updated
+2026-10-01. The datasets are maintained with human review; the cadence is a
+promise, not yet a measured interval.
+
+| Collection | Shelf | Observations | One row is |
+| --- | --- | ---: | --- |
+| Federal Funding to Indian Country | Cedar Press | 640,942 | one federal assistance transaction |
+| Federal Register — Indian Affairs | Cedar Press | 21,258 | one consultation participant row or one federal action |
+| Native Legislation and Votes | Cedar Press | 3,064 | one bill with its recorded votes |
+| Indian Country Deals | Cedar Press | 978 | one source-described deal or milestone |
+| NAGPRA Notices | Cedar Press | 6,792 | one Federal Register NAGPRA notice |
+| Native Federal Advocacy and Engagement | Cedar Press | 27,825 | one entity-linked activity or source record |
+| Foundation & Corporate Giving | Cedar Press | 193 | one disclosure or award version |
+| Native Federal Contractors | Cedar Press+ | 841,002 | one prime contract transaction |
+| Native Federal Subcontracting | Cedar Press+ | 70,054 | one subaward filing |
+| Native-Owned Businesses | Cedar Press+ | 3,725 | one directory or certification listing |
+| Cedar Native Entity Enterprise Dataset (NEED) | Cedar Press+ | 43 | one reviewed enterprise in the public base |
+| Tribal Natural Resource Revenue | Cedar Press+ | 11,120 | one revenue event as its source reports it |
+| Native Nonprofits | Cedar Press+ | 89 | one organization (EIN) |
+| PLOT | Cedar Press+ | 151,715 | one tract, parcel, permit or environmental observation |
+
+Cedar Press carries the first seven; Cedar Press+ adds the other seven at the
+same depth. Each collection's grain, keys, field dictionary, missing-value
+rules, units and citation are in its researcher guide under
+[`docs/guides/`](docs/guides/README.md), regenerated from the release manifest
+and the served preview by `node scripts/docs-markdown.mjs --kind guides`.
+The public preview of each collection is ten rows
+(`public/data/cedar/samples/<collection>/spreadsheet__10.csv`), byte-identical
+to the producer's pinned sample; a preview describes itself, not the full
+spreadsheet. Gaming and Native Infrastructure are Cedar Grove collections and
+are not sold or previewed here.
+
+### Where the data comes from
+
+Every collection is built on publicly available primary sources, extended
+through original research and entity resolution, and each row carries its
+source link. In brief: USAspending and the FAADS archives (funding, prime
+contracting, subcontracting); federalregister.gov and govinfo (Federal
+Register, NAGPRA); Congress.gov and Voteview (legislation); Senate and House
+lobbying disclosure, agency dockets and IRS Form 990 Schedule C (advocacy);
+tribal and enterprise announcements, lender and counsel releases and ANCSA
+shareholder filings (deals); tribal TERO and licensing registers published by
+each nation (Native-owned businesses); audited ANCSA filings and owners' own
+enterprise registers (NEED); ONRR, MMS, OSMRE and Osage Minerals Council
+records (natural resources); the IRS Business Master File and 990 filings
+(nonprofits); first-party donation reports and public foundation, corporate
+and bank disclosures (giving); BIA tract maps, the Wisconsin statewide parcel
+layer, local permit feeds and EPA regulatory records (PLOT). The full source
+statement per collection is the `sources` field of its manifest descriptor,
+and the row-level `source_url` is the citation for any single record.
+
+### How to cite
+
+Cite a collection by its name and Updated date, never by a version label or a
+file or table count. This is the sentence every download carries:
+
+```
+Lumecon, "<Collection name>", Cedar Press collection, cedarpress.ai. Updated <YYYY-MM-DD>. Accessed <YYYY-MM-DD>.
+```
+
+For a row-specific claim add the record type and record key, and the exact
+release identifier from the collection's guide when a reviewer must reproduce
+the file.
+
+### What is not claimed
+
+- A Cedar entity link (`cedar_uid`) is an association in the stated role. It
+  does not establish ownership, Native status or a party's share, and a blank
+  link is never a finding that no Native entity is involved.
+- Observation counts are not totals. Grains overlap, obligations and award
+  values are different measures, and a subaward is a slice of a prime award.
+- Previews are excerpts, not samples in the statistical sense, and a column
+  blank in a preview says nothing about its coverage in the spreadsheet.
+- Cadence is a commitment, not a measured interval; no vintage is stated for
+  any collection because none has been measured.
+- IMPLAN, where it is used elsewhere in the Cedar products, is a benchmark to
+  measure agreement with, not ground truth.
+
+The most recent structural fact-check of the served previews, the spine and
+the public text is [`docs/FACT_CHECK_2026-10-02.md`](docs/FACT_CHECK_2026-10-02.md);
+`python3 server/tests/test_public_preview_audit.py --report` reproduces its measurements, and `make test-python` keeps its invariants firing.
 
 ## Access
 
@@ -86,11 +164,17 @@ npm run build:site # the build, then the three public pages prerendered to HTML
 npm run seo:check  # the structured data and sitemap are current with the catalog
 ```
 
-Checked 2026-09-27: `npm run lint`, `npm run test` (473 pass, 0 fail,
-coverage floor met), `npm run test:smoke` (245 passed, 31 skipped, after
-`npx playwright install --with-deps chromium`), `make check-generated`,
-`npm run build:site` and `npm run seo:check` all succeed, and `npm run dev`
-starts on port 5173. The full list of checks CI runs, with how to run the API
+Checked 2026-10-02 on Linux, Node 22, Python 3.11: `npm run lint` clean;
+`make check-generated` current; `npm run test` 634 pass, 0 fail, 1 skipped,
+coverage 88.64 lines / 85.00 branches / 90.80 functions, floors met;
+`ruff check server` clean; `make test-python` ran 664 tests with 33 skipped
+and 85% coverage against the 77 floor, with five import errors and one
+failure that are Python 3.11 artifacts (`code/` scripts use 3.12 f-string
+syntax, and the writer census parses them), so the hosted run on Python 3.12
+is the record for that suite; `npm run build` completes (the chunk-size
+warning is pre-existing); `make audit-node` and `make audit-python` report no
+known vulnerabilities. `npm run test:smoke` was not rerun; the hosted Checks
+run covers it. The full list of checks CI runs, with how to run the API
 suite, is [`AGENTS.md`](AGENTS.md) §3.
 
 The API is a FastAPI service in [`server/`](server/README.md); it serves every

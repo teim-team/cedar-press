@@ -38,6 +38,7 @@ Review-only material does not become a public sample when a local count changes.
 | Generated codebook documentation | scripts/docs-markdown.mjs --kind codebook |
 | Cross-language duplication measurement | scripts/measure_duplication.py |
 | Generated-file validation | make check-generated |
+| Structural audit of served previews, descriptors and spine (read-only; also a firing test) | server/tests/test_public_preview_audit.py --report; findings recorded in docs/FACT_CHECK_2026-10-02.md |
 
 The sample publication check and display-contract generator serve different
 contracts; neither is a substitute for the other. JS/Python parity checks remain

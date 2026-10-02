@@ -161,17 +161,20 @@ root: its `-s server/tests -t server` is why a bare
 importable` (`tests/` at the root is the Playwright smoke directory, not a
 Python package).
 
-**Verified 2026-09-24**, in the order above: `npm run lint` exits `0` ·
-`make check-generated` reports all seven files current · `npm run test`
-reports `398 pass, 0 fail` and a coverage floor met at 84.43 lines /
-83.33 branches / 90.24 functions · `ruff check server` reports
-`All checks passed!` · `make test-python` reports `Ran 265 tests … OK
-(skipped=31)` and its floor met · `make audit-python` and `make audit-node`
-report no known vulnerabilities. The Playwright pair, re-run the same day
-(browsers already installed, then `npm run test:smoke`), reports
-`180 passed`, `26 skipped`. `npm run build`, `npm run build:site`
-and `npm run seo:check` also complete; the build's chunk-size warning is
-pre-existing.
+**Verified 2026-10-02** (Linux, Node 22, Python 3.11), in the order above:
+`npm run lint` exits `0` · `make check-generated` reports all six generators
+current · `npm run test` reports `634 pass, 0 fail, 1 skipped` and a coverage
+floor met at 88.64 lines / 85.00 branches / 90.80 functions · `ruff check
+server` reports `All checks passed!` · `make test-python` reports `Ran 664
+tests`, 33 skipped, 85% coverage against the 77 floor, with five import
+errors and one failure that are Python 3.11 artifacts (`code/` scripts use
+3.12 f-string syntax and the writer census parses them with `ast`); on
+Python 3.12, which CI uses, the same suite was recorded green on 2026-10-02
+in `docs/REVIEW_STATUS.md` · `make audit-python` and `make audit-node` report
+no known vulnerabilities · `npm run build` completes; its chunk-size warning
+is pre-existing. The Playwright pair was not rerun on 2026-10-02; the hosted
+Checks run for the pushed head is the record for it. The 2026-09-24 figures
+this block replaced were `398 pass` and `Ran 265 tests`.
 
 **`py -3` is the Windows Python launcher.** The workspace's ~1,000 documented
 commands are written with it, because that is where they were written. On Linux
