@@ -24,6 +24,7 @@ import hashlib
 import json
 import re
 import sys
+import unicodedata
 import unittest
 from collections import Counter
 from pathlib import Path
@@ -32,6 +33,49 @@ from urllib.parse import urlparse
 ROOT = Path(__file__).resolve().parents[2]
 SAMPLES = ROOT / "public" / "data" / "cedar" / "samples"
 SPINE = ROOT / "data" / "spine"
+# Source renderings of a register name (diacritics, case, spacing) live here,
+# never in the published-names file: the register's spelling is canonical and
+# the source's spelling is an alias with its source. Same contract as
+# Lumecon-data's `lumecon-data spine check` (src/lumecon_data/spine.py).
+ALIASES = SPINE / "cedar_entity_name_aliases.csv"
+ALIAS_KINDS = {"source_rendering"}
+# A canonical name shared by two uids is an identity question for the owner.
+# It is a review item only when this file names exactly those uids with a
+# reason; otherwise it is a failure. Nothing here decides which uid the name
+# belongs to, and no uid is merged, renamed or re-minted.
+DUPLICATE_NAME_REVIEW = SPINE / "cedar_duplicate_name_review.json"
+
+
+def fold_name(value: str) -> str:
+    """Rendering-insensitive form of a name: diacritics, case and spacing removed."""
+    stripped = "".join(
+        ch for ch in unicodedata.normalize("NFKD", value) if not unicodedata.combining(ch)
+    )
+    return " ".join(stripped.casefold().split())
+
+
+def duplicate_name_review() -> list[dict]:
+    """Reviewed duplicate-name entries; each needs the exact uids and a reason."""
+    if not DUPLICATE_NAME_REVIEW.exists():
+        return []
+    document = json.loads(DUPLICATE_NAME_REVIEW.read_text(encoding="utf-8"))
+    entries = document.get("entries") if isinstance(document, dict) else None
+    if not isinstance(entries, list):
+        raise ValueError("duplicate-name review must be an object with an entries list")
+    for entry in entries:
+        uids = entry.get("cedar_uids") if isinstance(entry, dict) else None
+        if (
+            not isinstance(entry, dict)
+            or not isinstance(entry.get("canonical_name"), str)
+            or not isinstance(uids, list)
+            or len(uids) < 2
+            or len(set(uids)) != len(uids)
+            or any(not isinstance(u, str) or not UID.match(u) for u in uids)
+            or not isinstance(entry.get("reason"), str)
+            or not entry["reason"].strip()
+        ):
+            raise ValueError("review entry needs canonical_name, two or more uids and a reason")
+    return entries
 
 TOKENS = re.compile(
     r"^(nan|n/a|na|null|none|tbd|unknown|undisclosed|#n/a|#ref!|lorem|ipsum|-|--|\?)$", re.I
@@ -155,8 +199,22 @@ def spine() -> dict:
     ein = list(
         csv.DictReader((SPINE / "cedar_nonprofit_ein_links.csv").open(newline="", encoding="utf-8"))
     )
+    aliases = (
+        list(csv.DictReader(ALIASES.open(newline="", encoding="utf-8")))
+        if ALIASES.exists()
+        else []
+    )
     class_counts = Counter(r["entity_class"] for r in reg.values())
     dup_names = Counter(r["canonical_name"] for r in reg.values())
+    duplicates = {
+        k: sorted(u for u, r in reg.items() if r["canonical_name"] == k)
+        for k, n in dup_names.items()
+        if n > 1
+    }
+    review = duplicate_name_review()
+    reviewed = {
+        (e["canonical_name"], tuple(sorted(e["cedar_uids"]))): e["reason"] for e in review
+    }
     return (
         {
             "register_rows": len(reg),
@@ -168,14 +226,52 @@ def spine() -> dict:
             "published_name_differs_from_register_canonical": sum(
                 1 for u in reg if u in names and reg[u]["canonical_name"] != names[u]["name"]
             ),
+            # A published name that is the register's name in another rendering
+            # is a source spelling, not a different name: it belongs in the
+            # aliases file with the register's spelling published.
+            "published_name_is_rendering_variant_of_register": [
+                (u, names[u]["name"], reg[u]["canonical_name"])
+                for u in reg
+                if u in names
+                and reg[u]["canonical_name"] != names[u]["name"]
+                and fold_name(reg[u]["canonical_name"]) == fold_name(names[u]["name"])
+            ],
             "class_differs_between_files": [
                 u for u in reg if u in names and reg[u]["entity_class"] != names[u]["entity_class"]
             ],
-            "duplicate_canonical_names": {
-                k: [u for u, r in reg.items() if r["canonical_name"] == k]
-                for k, n in dup_names.items()
-                if n > 1
+            "duplicate_canonical_names": duplicates,
+            "duplicate_canonical_names_reviewed": {
+                k: reviewed[(k, tuple(v))]
+                for k, v in duplicates.items()
+                if (k, tuple(v)) in reviewed
             },
+            "duplicate_canonical_names_unreviewed": {
+                k: v for k, v in duplicates.items() if (k, tuple(v)) not in reviewed
+            },
+            "duplicate_name_review_stale": [
+                e["canonical_name"]
+                for e in review
+                if (e["canonical_name"], tuple(sorted(e["cedar_uids"])))
+                not in {(k, tuple(v)) for k, v in duplicates.items()}
+            ],
+            "alias_rows": len(aliases),
+            "alias_unresolved": [a["cedar_uid"] for a in aliases if a["cedar_uid"] not in reg],
+            "alias_kind_unknown": [
+                a["alias"] for a in aliases if a["alias_kind"] not in ALIAS_KINDS
+            ],
+            # An alias is a rendering of the register's name for its uid; one
+            # that equals the published name is not an alias, and one that is
+            # not a rendering of the register name is a different name.
+            "alias_not_a_rendering_of_register_name": [
+                (a["cedar_uid"], a["alias"])
+                for a in aliases
+                if a["cedar_uid"] in reg
+                and (
+                    a["alias"] == names.get(a["cedar_uid"], {}).get("name")
+                    or a["register_canonical_name"] != reg[a["cedar_uid"]]["canonical_name"]
+                    or fold_name(a["alias"]) != fold_name(reg[a["cedar_uid"]]["canonical_name"])
+                )
+            ],
             "crosswalk_rows": len(cw),
             "crosswalk_unresolved": [r["retired_neid"] for r in cw if r["cedar_uid"] not in reg],
             "ein_link_rows": len(ein),
@@ -193,10 +289,12 @@ def spine() -> dict:
         },
         reg,
         names,
+        {(a["cedar_uid"], a["alias"]) for a in aliases},
     )
 
 
-def name_agreement(cols: dict, reg: dict, names: dict) -> dict:
+def name_agreement(cols: dict, reg: dict, names: dict, aliases: set | None = None) -> dict:
+    aliases = aliases or set()
     pairs = []
     n = len(next(iter(cols.values()))) if cols else 0
     for i in range(n):
@@ -226,6 +324,11 @@ def name_agreement(cols: dict, reg: dict, names: dict) -> dict:
         "pairs": len(pairs),
         "uid_not_in_register": [],
         "name_not_published_name": [],
+        # A served name that is a recorded source rendering of the register
+        # name (the producer pinned the sample before the register's spelling
+        # was published) resolves through the aliases file, not by editing
+        # the sample.
+        "name_is_recorded_alias": [],
         "class_mismatch": [],
     }
     for u, name, cls in pairs:
@@ -233,7 +336,10 @@ def name_agreement(cols: dict, reg: dict, names: dict) -> dict:
             result["uid_not_in_register"].append(u)
             continue
         if name and name != names[u]["name"]:
-            result["name_not_published_name"].append((u, name, names[u]["name"]))
+            if (u, name) in aliases:
+                result["name_is_recorded_alias"].append((u, name, names[u]["name"]))
+            else:
+                result["name_not_published_name"].append((u, name, names[u]["name"]))
         if cls and cls != reg[u]["entity_class"]:
             result["class_mismatch"].append((u, cls, reg[u]["entity_class"]))
     return result
@@ -249,13 +355,13 @@ def build_report() -> dict:
             (ROOT / "data/cedar/collections.manifest.json").read_text(encoding="utf-8")
         )["collections"]
     }
-    spine_report, reg, names = spine()
+    spine_report, reg, names, aliases = spine()
     report = {"spine": spine_report, "collections": []}
     for path in sorted(SAMPLES.glob("*/spreadsheet__10.csv")):
         entry, cols = audit_collection(
             path, pinned.get(path.parent.name, {}), manifest.get(path.parent.name)
         )
-        entry["entity_agreement"] = name_agreement(cols, reg, names)
+        entry["entity_agreement"] = name_agreement(cols, reg, names, aliases)
         report["collections"].append(entry)
     report["manifest_collections_without_served_sample"] = sorted(
         set(manifest) - {e["collection"] for e in report["collections"]}
@@ -272,7 +378,10 @@ def print_report(report: dict, as_json: bool) -> None:
         f"spine: register {s['register_rows']} rows, names {s['names_rows']}, "
         f"bad uid {len(s['bad_uid_format'])}, published name differs from canonical handle "
         f"on {s['published_name_differs_from_register_canonical']}, "
-        f"duplicate canonical names {s['duplicate_canonical_names']}, "
+        f"duplicate canonical names {s['duplicate_canonical_names']} "
+        f"(reviewed {sorted(s['duplicate_canonical_names_reviewed'])}, unreviewed "
+        f"{sorted(s['duplicate_canonical_names_unreviewed'])}), rendering variants "
+        f"{s['published_name_is_rendering_variant_of_register']}, aliases {s['alias_rows']}, "
         f"crosswalk {s['crosswalk_rows']} ({len(s['crosswalk_unresolved'])} unresolved), "
         f"EIN links {s['ein_link_rows']} ({len(s['ein_bad_format'])} bad format, "
         f"{len(s['ein_unresolved'])} unresolved), class counts differing from the types file: "
@@ -295,6 +404,7 @@ def print_report(report: dict, as_json: bool) -> None:
         print(
             f"  entity pairs {a['pairs']}: uid not in register {a['uid_not_in_register']}; "
             f"name differs {len(a['name_not_published_name'])}; "
+            f"name is a recorded alias {len(a['name_is_recorded_alias'])}; "
             f"class differs {len(a['class_mismatch'])}"
         )
         for h, k in e["keys"].items():
@@ -380,6 +490,17 @@ class PublicPreviewAuditTest(unittest.TestCase):
         self.assertEqual(s["register_without_name_row"], [])
         self.assertEqual(s["name_row_without_register"], [])
         self.assertEqual(s["class_differs_between_files"], [])
+        # The types file's row_count is the register's count per class, so
+        # it is derived from the register, never edited by hand (it read 359
+        # Native nonprofits against 361 in the register until 2026-10-02).
+        self.assertEqual(s["type_row_count_vs_register"], {})
+        # The register's spelling is canonical; a source rendering of the same
+        # name is published as an alias with its source, never over it
+        # (Ukpeagvik for Ukpeaġvik, Shee Atiká for Shee Atika, until 2026-10-02).
+        self.assertEqual(s["published_name_is_rendering_variant_of_register"], [])
+        self.assertEqual(s["alias_unresolved"], [])
+        self.assertEqual(s["alias_kind_unknown"], [])
+        self.assertEqual(s["alias_not_a_rendering_of_register_name"], [])
         self.assertEqual(s["crosswalk_unresolved"], [])
         self.assertEqual(s["ein_bad_format"], [])
         self.assertEqual(s["ein_unresolved"], [])

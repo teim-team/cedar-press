@@ -302,3 +302,58 @@ Alakaina Foundation in NEED, sourced from `beringalakaina.com` — a host naming
 both parents. Rule 11: a joint venture genuinely has two. **Refused, not
 reconciled.** `review/entity_rel_need_owner_conflicts_2026-09-02.csv`, owner
 queue **EL-2**.
+
+---
+
+## UPDATE 2026-10-02: source renderings of two register names moved to the aliases file; types count regenerated
+
+*Applied at source in cedar-press from the proposal `lumecon-data spine regenerate`
+(Lumecon-data `src/lumecon_data/spine.py`, branch `codex/convergence-packet-guard-20260928`,
+head `d780401`) wrote against this repository's live `data/spine/`. The proposal was
+diffed against the live files before it was applied and differed in exactly the three
+lines and the one new file below. `identity_changes = 0`: no uid was minted, retired,
+merged or re-bound.*
+
+**Rule.** `cedar_identity_register.csv` carries the canonical spelling. A published name
+in `cedar_entity_names.csv` that is the register's name in another rendering (diacritics,
+case, spacing; measured by a diacritic-stripping, case-folding, whitespace-collapsing fold)
+is a source spelling of the same name, not a different name. The register's spelling is
+published, and the source rendering is kept in the new `cedar_entity_name_aliases.csv`
+(`alias_kind = source_rendering`) with the source it came from. A published name that
+differs in substance (a BIA legal name against the register's short handle, 583 rows) is a
+different name by design and is untouched.
+
+| file | row | before | after |
+|---|---|---|---|
+| `cedar_entity_names.csv` | 320, `CE-0009Z-7Q` | `name` = `Ukpeagvik Iñupiat Corporation`; `name_match_route` = `canonical_name [close]`; `name_differs_from_prior` = `1` | `name` = `Ukpeaġvik Iñupiat Corporation`; route = `canonical_name [register spelling; source rendering kept as alias]`; `name_differs_from_prior` = `0` |
+| `cedar_entity_names.csv` | 382, `CE-000BX-55` | `name` = `Shee Atiká, Incorporated`; route `canonical_name [close]`; differs `1` | `name` = `Shee Atika, Incorporated` (the accent runs the other way on this one: the register has none); route as above; differs `0` |
+| `cedar_entity_types.csv` | 19, `Native nonprofit` | `row_count` = `359` | `row_count` = `361` (the register holds 361: 358 `active` plus 3 `active_unverified`; the count had not been regenerated after `code/1183` minted on 2026-09-04) |
+| `cedar_entity_name_aliases.csv` | new, 2 rows | (file absent) | `CE-0009Z-7Q` `Ukpeagvik Iñupiat Corporation` and `CE-000BX-55` `Shee Atiká, Incorporated`, both `source_rendering`, source `ancsa_lbb` (Landye Bennett Blumstein LLP, ANCSA Regional and Village Corporations, captured 2026-09-04), with `register_canonical_name` |
+
+Other columns of rows 320 and 382 (`entity_class`, `name_source*`, `name_captured`,
+`prior_canonical_name`) are unchanged. Every other row of both files is byte-identical.
+
+**Derived artifact regenerated.** `public/data/cedar/register.json` (`node scripts/derive-explore.mjs`)
+now carries the register spelling for the same two entities; nothing else in it changed
+(1,916 entities, 18 classes, 45 withheld names, `as_of` 2026-09-04).
+
+**Not edited.** `public/data/cedar/samples/subcontracting/spreadsheet__10.csv` carries
+`Ukpeagvik Iñupiat Corporation` as the `canonical_name` for `CE-0009Z-7Q`. It is the
+producer's pinned sample (`verified-preview-releases.json`) and is never edited here; the
+audit now resolves that cell through the aliases file (`name_is_recorded_alias`) and will
+read the register spelling when the producer re-pins a release built against this spine.
+
+**Checks.** `lumecon-data spine check --spine data/spine --allowlist <Lumecon-data>/intake/spine-duplicate-name-review.json`:
+`ok = true`, `rendering_variants = []`, `type_count_mismatches = []`, `identity_changes = 0`
+(before: two variants and one count mismatch). `server/tests/test_public_preview_audit.py`
+gained the same invariants (types count equals the register per class; no published name is
+a rendering variant of its register name; every alias resolves, is of a known kind and is a
+rendering of its register name); against the pre-change spine the types-count assertion
+fails on `{'Native nonprofit': {'types_file': 359, 'register': 361}}` and passes after.
+`.gitignore` now un-ignores the four register-derived spine files explicitly rather than
+relying on a force-add.
+
+**Not part of this change.** The duplicate canonical name on `CE-000RA-MT` and `CE-001R2-8V`
+is an identity question, recorded separately in `data/spine/cedar_duplicate_name_review.json`.
+The source sites (uicalaska.com, sheeatika.com) could not be reached from this environment;
+the register's spelling was taken as canonical by rule, not re-verified against the sites.
