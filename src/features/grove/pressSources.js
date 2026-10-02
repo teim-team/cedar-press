@@ -141,6 +141,10 @@ export const SOURCE_GROUPS = Object.freeze([
       // all point at the same filings made under Alaska Statute 45.55.139.
       { name: "ANCSA corporation filings", match: "Alaska Statute 45.55.139", collections: ["contractors", "need"] },
       { name: "Tribal newsletters and tribal press", collections: ["deals"] },
+      { name: "Tribal enterprise announcements", collections: ["deals"] },
+      { name: "Lender transaction announcements", collections: ["deals"] },
+      { name: "Transaction counsel announcements", collections: ["deals"] },
+      { name: "Government land-transfer releases", collections: ["deals"] },
       { name: "Trade and journalist coverage", match: "trade and journalist coverage", collections: ["deals"] },
     ]),
   }),

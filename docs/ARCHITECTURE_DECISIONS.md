@@ -3996,3 +3996,9 @@ Existing full-release verification and subscriber authority remain canonical.
 
 The Grove merge audit worker owns the focused Press presentation changes for this pass; the coordinator applies and verifies them. Public samples retain existing eligibility. Connected counts derive from verified release metadata. The shared reader presentation helper owns retired identifier column filtering and record labels. The producer retains canonical data and public codebook ownership. Current maintenance instructions live in `docs/PRESENTATION_DATA_FLOW.md`; historical measurements are not current product counts.
 <!-- END PRESS-PRESENTATION-20261001 -->
+
+<!-- BEGIN DEALS-PUBLIC-PREVIEW-2026-10-01 -->
+## Public Deals preview keeps its ten-row boundary
+
+The Deals public sample now contains ten primary-source-reviewed events with existing CEV and CE identifiers. Its 40-column consumer schema is unchanged. Source and method descriptions identify the selected preview scope, date precision and unlike monetary measures. Four newly evidenced source categories are credited; no site-wide source total is invented. This workstream owns only its Deals sample, Deals descriptor prose, corresponding generated guide and source-category additions. No protected release, collection row count or subscriber entitlement changed. The full governed multi-party consumer remains a separate integration.
+<!-- END DEALS-PUBLIC-PREVIEW-2026-10-01 -->
