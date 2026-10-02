@@ -540,6 +540,22 @@ class PublicPreviewAuditTest(unittest.TestCase):
                     r"JSON null|null when not evaluated|scope is null|always null",
                 )
 
+    def test_owned_ownership_percent_definition_states_whose_share_it_is(self) -> None:
+        # Cashwork Atm (certification 1482) reads ownership_percent 0.0 on a
+        # Native-owned registry row because Tulalip's registry prints the
+        # Tulalip-member share and certifies firms Native-owned through other
+        # tribes (identity_claim_text "Tribe: Snoqualmie; Tulalip Owned: 0%").
+        # The value is the source's; the definition must say the column is the
+        # certifying tribe's stated share, or a reader takes it as the Native
+        # ownership share and the zero as a false zero.
+        codebook = json.loads((ROOT / "data/cedar/codebook.json").read_text(encoding="utf-8"))
+        fields = codebook["tables"]["owned/owned"]["fields"]
+        field = next(f for f in fields if f["column"] == "ownership_percent")
+        meaning = field["meaning"].lower()
+        self.assertIn("certifying tribe", meaning)
+        self.assertIn("not the native ownership share overall", meaning)
+        self.assertIn("not zero", meaning)
+
     def test_deals_method_describes_the_served_rows(self) -> None:
         deals = next(c for c in self.manifest["collections"] if c["id"] == "deals")
         method = deals["descriptor"]["method"]

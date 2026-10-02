@@ -96,6 +96,12 @@
       "path": "src/lumecon_data/collections/legislation.py",
       "sha256": "1b826d0b124dcfe0513066261497f38606bab69620b3c387dbb673cf02dc7de5",
       "revision": "d780401155ef30c1bd1b9af5f7119ea6020bad06"
+    },
+    "owned-source-field-semantics-3b175bc": {
+      "repository": "press",
+      "path": "code/330_build_native_owned_businesses.py",
+      "sha256": "05813cc0bf8b255398e1364811b7385e64009d170b2abc43d42e693839b96a1b",
+      "revision": "3b175bcdc9e885923e19729d08fa06857d95eac0"
     }
   },
   "collections": {
@@ -2095,13 +2101,13 @@
         }
       },
       "ownership_percent": {
-        "meaning": "The ownership percentage explicitly stated for the particular business by the source. It is not inferred from program membership or substituted with a program's minimum eligibility threshold. A blank means no record-level percentage was supplied, not zero ownership.",
+        "meaning": "The ownership share the source prints for this business, on the certifier's own scope: the share owned by the certifying tribe's members, as the certifier reports it. It is not the Native ownership share overall, and it is not inferred from program membership or substituted with a program's minimum eligibility threshold. The Tulalip NAOB registry prints 'Tulalip Owned %' and certifies firms Native-owned through other tribes, so a row can read 0.0 beside an identity_claim_text such as 'Tribe: Snoqualmie; Tulalip Owned: 0%': that zero is the source's figure for the certifying tribe's share. identity_scope says whose Native identity the listing certifies. A blank means no record-level percentage was supplied, not zero ownership.",
         "evidence": [
           "owned-producer-projection",
           "owned-producer-field-projection",
           "owned-producer-intake-contract",
           "owned-press-field-map",
-          "owned-source-field-semantics"
+          "owned-source-field-semantics-3b175bc"
         ],
         "definition_source": {
           "kind": "reviewed_transform_contract",
@@ -2121,7 +2127,7 @@
             ]
           ],
           "semantic_basis": {
-            "evidence": "owned-source-field-semantics",
+            "evidence": "owned-source-field-semantics-3b175bc",
             "symbol": "DESCRIPTIONS",
             "line": 2667
           }

@@ -2851,7 +2851,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "contractors.cedar_entity_role"
      }
     },
@@ -2886,7 +2886,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "contractors.competition_type"
      }
     },
@@ -2945,7 +2945,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "contractors.entity_class"
      }
     },
@@ -3112,7 +3112,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "contractors.performance_geography_status"
      }
     },
@@ -3207,7 +3207,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "contractors.recipient_geography_status"
      }
     },
@@ -3290,7 +3290,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "contractors.research_note"
      }
     },
@@ -3313,7 +3313,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "contractors.sector"
      }
     },
@@ -3360,7 +3360,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "contractors.source_system"
      }
     },
@@ -3383,7 +3383,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "contractors.source_url"
      }
     },
@@ -3450,7 +3450,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "deals.additional_sources"
      }
     },
@@ -3509,7 +3509,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "deals.cedar_entity_role"
      }
     },
@@ -3568,7 +3568,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "deals.deal_status"
      }
     },
@@ -3591,7 +3591,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "deals.deal_type"
      }
     },
@@ -3626,7 +3626,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "deals.entity_class"
      }
     },
@@ -3793,7 +3793,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "deals.research_note"
      }
     },
@@ -3876,7 +3876,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "deals.transaction_structure"
      }
     },
@@ -3956,7 +3956,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "federal-register.action"
      }
     },
@@ -4004,7 +4004,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "federal-register.agency_names"
      }
     },
@@ -4028,7 +4028,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "federal-register.canonical_name"
      }
     },
@@ -4052,7 +4052,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "federal-register.cedar_entity_role"
      }
     },
@@ -4088,7 +4088,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "federal-register.cfr_references"
      }
     },
@@ -4112,7 +4112,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "federal-register.classification_rule"
      }
     },
@@ -4136,7 +4136,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "federal-register.classification_signal"
      }
     },
@@ -4160,7 +4160,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "federal-register.classification_source_field"
      }
     },
@@ -4184,7 +4184,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "federal-register.collective_scopes"
      }
     },
@@ -4232,7 +4232,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "federal-register.consultation_participants__source_system"
      }
     },
@@ -4256,7 +4256,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "federal-register.consultation_participants__source_url"
      }
     },
@@ -4280,7 +4280,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "federal-register.consultation_record_key"
      }
     },
@@ -4304,7 +4304,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "federal-register.docket_ids"
      }
     },
@@ -4328,7 +4328,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "federal-register.document_number"
      }
     },
@@ -4364,7 +4364,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "federal-register.effective_on"
      }
     },
@@ -4388,7 +4388,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "federal-register.entity_class"
      }
     },
@@ -4412,7 +4412,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "federal-register.entity_link_status"
      }
     },
@@ -4444,7 +4444,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "federal-register.event_date_precision"
      }
     },
@@ -4504,7 +4504,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "federal-register.federal_actions__source_system"
      }
     },
@@ -4528,7 +4528,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "federal-register.federal_actions__source_url"
      }
     },
@@ -4612,7 +4612,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "federal-register.html_url"
      }
     },
@@ -4648,7 +4648,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "federal-register.json_url"
      }
     },
@@ -4684,7 +4684,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "federal-register.net_caught"
      }
     },
@@ -4756,7 +4756,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "federal-register.pdf_url"
      }
     },
@@ -4780,7 +4780,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "federal-register.pre_2000_flag"
      }
     },
@@ -4816,7 +4816,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "federal-register.publication_date"
      }
     },
@@ -4840,7 +4840,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "federal-register.regulation_id_numbers"
      }
     },
@@ -4864,7 +4864,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "federal-register.research_note"
      }
     },
@@ -4888,7 +4888,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "federal-register.scope_qualification"
      }
     },
@@ -4944,7 +4944,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "federal-register.title"
      }
     },
@@ -4968,7 +4968,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "federal-register.title_abstract_term_hit"
      }
     },
@@ -4992,7 +4992,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "federal-register.title_abstract_terms"
      }
     },
@@ -5028,7 +5028,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "federal-register.type"
      }
     }
@@ -5191,7 +5191,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "funding.cedar_entity_role"
      }
     },
@@ -5226,7 +5226,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "funding.entity_class"
      }
     },
@@ -5357,7 +5357,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "funding.performance_geography_status"
      }
     },
@@ -5440,7 +5440,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "funding.recipient_geography_status"
      }
     },
@@ -5487,7 +5487,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "funding.recipient_type"
      }
     },
@@ -5522,7 +5522,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "funding.research_note"
      }
     },
@@ -5545,7 +5545,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "funding.source_system"
      }
     },
@@ -5568,7 +5568,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "funding.source_url"
      }
     },
@@ -5743,7 +5743,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "legislation.canonical_names"
      }
     },
@@ -5766,7 +5766,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "legislation.cedar_uids"
      }
     },
@@ -5801,7 +5801,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "legislation.collective_scopes"
      }
     },
@@ -5860,7 +5860,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "legislation.entity_classes"
      }
     },
@@ -5883,7 +5883,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "legislation.entity_link_statuses"
      }
     },
@@ -5906,7 +5906,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "legislation.entity_names_as_published"
      }
     },
@@ -5929,7 +5929,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "legislation.entity_roles"
      }
     },
@@ -6012,7 +6012,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "legislation.research_note"
      }
     },
@@ -6059,7 +6059,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "legislation.source_system"
      }
     },
@@ -6082,7 +6082,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "legislation.source_url"
      }
     },
@@ -6193,7 +6193,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "lobbying.activity_id"
      }
     },
@@ -6236,7 +6236,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "lobbying.activity_type"
      }
     },
@@ -6327,7 +6327,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "lobbying.cedar_entity_role"
      }
     },
@@ -6490,7 +6490,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "lobbying.participant_name"
      }
     },
@@ -6521,7 +6521,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "lobbying.participant_role"
      }
     },
@@ -6624,7 +6624,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "lobbying.research_note"
      }
     },
@@ -6679,7 +6679,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "lobbying.source_system"
      }
     },
@@ -6802,7 +6802,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "nagpra.additional_institution_names"
      }
     },
@@ -6857,7 +6857,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "nagpra.canonical_names"
      }
     },
@@ -6888,7 +6888,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "nagpra.cedar_uids"
      }
     },
@@ -6967,7 +6967,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "nagpra.entity_classes"
      }
     },
@@ -6998,7 +6998,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "nagpra.entity_names_as_published"
      }
     },
@@ -7029,7 +7029,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "nagpra.entity_roles"
      }
     },
@@ -7456,7 +7456,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "nagpra.research_note"
      }
     },
@@ -7655,7 +7655,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "natural-resources.amount_usd"
      }
     },
@@ -7714,7 +7714,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "natural-resources.beneficiary_name"
      }
     },
@@ -7737,7 +7737,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "natural-resources.canonical_name"
      }
     },
@@ -7760,7 +7760,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "natural-resources.cedar_entity_role"
      }
     },
@@ -7807,7 +7807,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "natural-resources.entity_class"
      }
     },
@@ -7854,7 +7854,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "natural-resources.measurement_status"
      }
     },
@@ -7925,7 +7925,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "natural-resources.payer_name"
      }
     },
@@ -7972,7 +7972,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "natural-resources.period_start"
      }
     },
@@ -7995,7 +7995,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "natural-resources.period_type"
      }
     },
@@ -8030,7 +8030,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "natural-resources.recipient_name"
      }
     },
@@ -8053,7 +8053,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "natural-resources.related_asset_ids"
      }
     },
@@ -8076,7 +8076,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "natural-resources.research_note"
      }
     },
@@ -8099,7 +8099,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "natural-resources.resource_revenue_event_id"
      }
     },
@@ -8170,7 +8170,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "natural-resources.source_url"
      }
     }
@@ -8477,7 +8477,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "nonprofits.cedar_entity_role"
      }
     },
@@ -8548,7 +8548,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "nonprofits.entity_link_status"
      }
     },
@@ -8571,7 +8571,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "nonprofits.inclusion_category"
      }
     },
@@ -8678,7 +8678,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "nonprofits.research_note"
      }
     },
@@ -8831,7 +8831,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "owned.assertion_class"
      }
     },
@@ -8904,7 +8904,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "owned.business_entity_id"
      }
     },
@@ -8977,7 +8977,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "owned.business_license_number"
      }
     },
@@ -9050,7 +9050,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "owned.business_name"
      }
     },
@@ -9123,7 +9123,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "owned.business_source_id"
      }
     },
@@ -9179,7 +9179,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "owned.canonical_name"
      }
     },
@@ -9239,7 +9239,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "owned.cedar_entity_role"
      }
     },
@@ -9303,7 +9303,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "owned.cedar_uid"
      }
     },
@@ -9376,7 +9376,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "owned.certification_expiration"
      }
     },
@@ -9449,7 +9449,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "owned.certification_number"
      }
     },
@@ -9522,7 +9522,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "owned.certification_start"
      }
     },
@@ -9595,7 +9595,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "owned.certification_tier"
      }
     },
@@ -9676,7 +9676,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "owned.certifying_authority_entity_id"
      }
     },
@@ -9749,7 +9749,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "owned.certifying_authority_name"
      }
     },
@@ -9822,7 +9822,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "owned.city"
      }
     },
@@ -9895,7 +9895,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "owned.directory_type"
      }
     },
@@ -9951,7 +9951,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "owned.entity_class"
      }
     },
@@ -10024,7 +10024,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "owned.first_seen"
      }
     },
@@ -10097,7 +10097,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "owned.identity_claim_text"
      }
     },
@@ -10170,7 +10170,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "owned.identity_scope"
      }
     },
@@ -10243,7 +10243,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "owned.is_current"
      }
     },
@@ -10316,7 +10316,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "owned.last_seen"
      }
     },
@@ -10389,14 +10389,14 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "owned.naics_code"
      }
     },
     {
      "column": "ownership_percent",
      "label": "ownership percent",
-     "meaning": "The ownership percentage explicitly stated for the particular business by the source. It is not inferred from program membership or substituted with a program's minimum eligibility threshold. A blank means no record-level percentage was supplied, not zero ownership.",
+     "meaning": "The ownership share the source prints for this business, on the certifier's own scope: the share owned by the certifying tribe's members, as the certifier reports it. It is not the Native ownership share overall, and it is not inferred from program membership or substituted with a program's minimum eligibility threshold. The Tulalip NAOB registry prints 'Tulalip Owned %' and certifies firms Native-owned through other tribes, so a row can read 0.0 beside an identity_claim_text such as 'Tribe: Snoqualmie; Tulalip Owned: 0%': that zero is the source's figure for the certifying tribe's share. identity_scope says whose Native identity the listing certifies. A blank means no record-level percentage was supplied, not zero ownership.",
      "definition_source": {
       "kind": "reviewed_transform_contract",
       "repository": "teim-team/Lumecon-data",
@@ -10415,7 +10415,7 @@
        ]
       ],
       "semantic_basis": {
-       "evidence": "owned-source-field-semantics",
+       "evidence": "owned-source-field-semantics-3b175bc",
        "symbol": "DESCRIPTIONS",
        "line": 2667
       },
@@ -10453,16 +10453,16 @@
         "hash_mode": "raw"
        },
        {
-        "id": "owned-source-field-semantics",
+        "id": "owned-source-field-semantics-3b175bc",
         "repository": "press",
         "path": "code/330_build_native_owned_businesses.py",
-        "sha256": "839806a0080241dc5368949a67d8c9fae4ceb3f1c3fa1e5beb4096b1e4d58301",
-        "revision": "d14e7dd71a380ea30a0310b4e200b17964d65dde",
+        "sha256": "05813cc0bf8b255398e1364811b7385e64009d170b2abc43d42e693839b96a1b",
+        "revision": "3b175bcdc9e885923e19729d08fa06857d95eac0",
         "hash_mode": "raw"
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "owned.ownership_percent"
      }
     },
@@ -10535,7 +10535,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "owned.ownership_threshold_min"
      }
     },
@@ -10608,7 +10608,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "owned.program_name"
      }
     },
@@ -10664,7 +10664,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "owned.research_note"
      }
     },
@@ -10737,7 +10737,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "owned.service_category"
      }
     },
@@ -10810,7 +10810,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "owned.source_edition"
      }
     },
@@ -10883,7 +10883,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "owned.source_last_updated"
      }
     },
@@ -10968,7 +10968,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "owned.state"
      }
     }
@@ -11071,7 +11071,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "subcontracting.canonical_name"
      }
     },
@@ -11094,7 +11094,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "subcontracting.cedar_entity_role"
      }
     },
@@ -11153,7 +11153,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "subcontracting.entity_class"
      }
     },
@@ -11404,7 +11404,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "subcontracting.research_note"
      }
     },
@@ -11631,7 +11631,7 @@
        }
       ],
       "override_file": "data/cedar/preview_definition_overrides.json",
-      "override_file_sha256": "4f735479642bf5ae687dc00fed4fcc6b48263a6cb03933212abc72d1a14f58a5",
+      "override_file_sha256": "a69001b3001785806537be332a080eeb5cfd4abb05e43c77efe2cf2ddaaec87f",
       "override_key": "subcontracting.subcontractor_geography_status"
      }
     },
