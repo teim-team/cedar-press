@@ -84,6 +84,18 @@
       "path": "code/330_build_native_owned_businesses.py",
       "sha256": "839806a0080241dc5368949a67d8c9fae4ceb3f1c3fa1e5beb4096b1e4d58301",
       "revision": "d14e7dd71a380ea30a0310b4e200b17964d65dde"
+    },
+    "producer-federal-register-d780401": {
+      "repository": "producer",
+      "path": "src/lumecon_data/collections/federal_register.py",
+      "sha256": "5a7fc2511c0e955cd782ff5dbacdcfcc6db20a172a2bef1c256615ad1ff01790",
+      "revision": "d780401155ef30c1bd1b9af5f7119ea6020bad06"
+    },
+    "producer-legislation-d780401": {
+      "repository": "producer",
+      "path": "src/lumecon_data/collections/legislation.py",
+      "sha256": "1b826d0b124dcfe0513066261497f38606bab69620b3c387dbb673cf02dc7de5",
+      "revision": "d780401155ef30c1bd1b9af5f7119ea6020bad06"
     }
   },
   "collections": {
@@ -201,14 +213,14 @@
         }
       },
       "collective_scopes": {
-        "meaning": "JSON value describing collective topical coverage. A general bill carries scope objects with relationship general_subject and unknown as-of date; a tribe-specific bill carries an empty array; an unevaluated bill scope is null. These objects do not establish legal applicability or population membership at a particular date.",
+        "meaning": "JSON value describing collective topical coverage. A general bill carries scope objects with relationship general_subject and unknown as-of date; a tribe-specific bill carries an empty array; an unevaluated bill scope is blank (producer transform legislation-projection-v3; the earlier v2 wrote the text null). These objects do not establish legal applicability or population membership at a particular date.",
         "evidence": [
-          "producer-legislation-ce736a2"
+          "producer-legislation-d780401"
         ],
         "definition_source": {
           "kind": "reviewed_transform_contract",
           "path": "src/lumecon_data/collections/legislation.py",
-          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+          "revision": "d780401155ef30c1bd1b9af5f7119ea6020bad06"
         }
       },
       "entity_classes": {
@@ -1017,14 +1029,14 @@
       },
       "collective_scopes": {
         "label": "Collective scopes",
-        "meaning": "JSON null for the consultation-participant projection because collective scope has not been evaluated. It does not mean an empty set, all tribes or an identified individual participant.",
+        "meaning": "Blank for the consultation-participant projection because collective scope has not been evaluated for it (producer transform fr-participant-observations-v2 writes the empty cell; the earlier v1 wrote the text null, which is what a pinned sample built before it still shows). Blank does not mean an empty set, all tribes or an identified individual participant; an evaluated record would carry a JSON array, [] when it names no population.",
         "evidence": [
-          "producer-federal-register-ce736a2"
+          "producer-federal-register-d780401"
         ],
         "definition_source": {
           "kind": "reviewed_transform_contract",
           "path": "src/lumecon_data/collections/federal_register.py",
-          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6",
+          "revision": "d780401155ef30c1bd1b9af5f7119ea6020bad06",
           "symbol": "build_federal_register_projection"
         }
       },

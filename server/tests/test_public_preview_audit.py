@@ -521,6 +521,25 @@ class PublicPreviewAuditTest(unittest.TestCase):
         )
         self.assertEqual(descriptors, [c["descriptor"] for c in self.manifest["collections"]])
 
+    def test_preview_definitions_state_the_blank_convention_for_unevaluated_scope(self) -> None:
+        # The spreadsheet's missing convention is a blank cell. The producer
+        # writes blank for an unevaluated collective scope since
+        # fr-participant-observations-v2 and legislation-projection-v3
+        # (Lumecon-data d780401); a definition that still calls the
+        # unevaluated value "null" describes the text token the v1/v2
+        # transforms wrote, which a pinned sample built before them may still
+        # show and the guide then reports as a producer finding, not a value.
+        codebook = json.loads((ROOT / "data/cedar/codebook.json").read_text(encoding="utf-8"))
+        for collection in ("federal-register", "legislation"):
+            table = codebook["tables"][f"{collection}/{collection}"]
+            field = next(f for f in table["fields"] if f["column"] == "collective_scopes")
+            with self.subTest(collection=collection):
+                self.assertIn("blank", field["meaning"].lower())
+                self.assertNotRegex(
+                    field["meaning"],
+                    r"JSON null|null when not evaluated|scope is null|always null",
+                )
+
     def test_deals_method_describes_the_served_rows(self) -> None:
         deals = next(c for c in self.manifest["collections"] if c["id"] == "deals")
         method = deals["descriptor"]["method"]
