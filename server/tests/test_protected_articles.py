@@ -51,7 +51,9 @@ class ProtectedArticleTests(unittest.TestCase):
             response = self.client.get("/press/articles/brief-owned")
             self.assertEqual(response.status_code, 200)
             self.assertTrue(response.json()["article"]["body"])
-            self.assertEqual(response.headers["vary"], "Cookie")
+            self.assertIn(
+                "cookie", {value.strip().lower() for value in response.headers["vary"].split(",")}
+            )
             self.assertIn("no-store", response.headers["cache-control"])
 
     def test_unknown_and_external_ids_are_not_bodies(self):
