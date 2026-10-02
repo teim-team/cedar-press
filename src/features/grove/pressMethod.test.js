@@ -151,14 +151,14 @@ test("the maintenance story says weekly, human review, wider coverage and new co
   for (const [id, cadence] of Object.entries(DECLARED_CADENCE)) assert.equal(cadence, "Updated weekly", id);
 });
 
-test("patents and credit ratings are enrichments within Cedar NEED, never collections of their own", () => {
+test("public NEED describes its reviewed cohort while restricted enrichments retain their subject and date", () => {
   assert.equal(STOREFRONT_CATALOG.length, 14);
   assert.ok(!STOREFRONT_CATALOG.some((entry) => /patent|rating/i.test(`${entry.id} ${entry.name}`)), "no standalone collection");
   const need = STOREFRONT_CATALOG.find((entry) => entry.id === "need");
-  assert.match(need.blurb, /Where records are available/);
-  assert.match(need.blurb, /patents, assigned or later acquired/);
-  assert.match(need.blurb, /dated credit ratings/);
-  assert.match(need.blurb, /each kept with the entity it concerns/);
+  assert.match(need.blurb, /limited evidence-pinned cohort/);
+  assert.match(need.blurb, /wider enterprise register/);
+  assert.match(need.blurb, /restricted enrichments remain under review/);
+  assert.doesNotMatch(need.blurb, /complete enterprise register|all enterprises verified/i);
   const all = Object.values(NEED_ENRICHMENTS).join(" ");
   assert.match(all, /where records are available/i);
   assert.match(all, /acquired patent is shown as acquired rather than as the entity's own invention/);

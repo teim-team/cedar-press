@@ -136,6 +136,8 @@ STOREFRONT: tuple[str, ...] = (
     "need",
     "natural-resources",
     "nonprofits",
+    "foundation-corporate-giving",
+    "plot",
 )
 
 #: Measured by Cedar, deliberately not on the storefront. Kept by name and

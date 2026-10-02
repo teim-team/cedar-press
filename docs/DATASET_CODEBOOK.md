@@ -1,10 +1,10 @@
 # Cedar Press dataset dictionaries
 
-Generated from `data/cedar/codebook.json` and `data/cedar/collections.manifest.json` by `scripts/codebook-markdown.mjs`. Edit the source dictionaries and regenerate this document.
+Generated from `data/cedar/codebook.json` and `data/cedar/collections.manifest.json` by `scripts/docs-markdown.mjs --kind codebook`. Edit the source dictionaries and regenerate this document.
 
 ## Scope
 
-This document contains 24 dictionary entries. 12 entries describe the installed producer spreadsheets selected by the manifest. Any other entry is labelled as a compatibility reference and does not describe a currently served spreadsheet.
+This document contains 26 dictionary entries. 14 entries describe the installed producer spreadsheets selected by the manifest. Any other entry is labelled as a compatibility reference and does not describe a currently served spreadsheet.
 
 Each exported field keeps its own meaning, source role and publication qualification. A business identifier, an owner link, a certifying-authority link and a source-record key identify different objects or relationships. A missing identity is not filled by a shared name.
 
@@ -1138,38 +1138,41 @@ The columns below describe the exported names directly. No legacy rename, combin
 
 Collection `need` · table `need` · installed producer spreadsheet
 
-**Rows in this installed spreadsheet:** 27. This is an observation count at the declared record types and grains.
+**Rows in this installed spreadsheet:** 43. This is an observation count at the declared record types and grains.
 
 **One row is:** One permitted observation at its declared record_type and record_grain.
 
-**Release or source location:** Exact release dc105294abc2ba5d0a3819afbfe32f81b3e8ef41f3ba8c1c13c8ce320010d035; one researcher spreadsheet.
+**Release or source location:** Exact release 428d11048f12cd819f7cf95dccdbbe4c1ea20a8c81c635a7e985fbc17b1b983b; one researcher spreadsheet.
 
 The columns below describe the exported names directly. No legacy rename, combine or promised identity block is applied to this spreadsheet.
 
-**Fields (20):**
+**Fields (23):**
 
 | # | Column | Label | Meaning |
 |---|---|---|---|
 | 1 | `record_type` | record type | The permitted logical record type from the pinned release. |
 | 2 | `record_key` | record key | The original source primary-key values serialized as JSON. |
 | 3 | `record_grain` | record grain | What one observation of this record type represents; never sum across overlapping grains. |
-| 4 | `cage_code` | cage code | CAGE explicitly stated in the primary evidence for the exact existing UEI; its claim scope is separate. |
+| 4 | `cage_code` | cage code | CAGE independently supported by evidence; blank is unreviewed. |
 | 5 | `cage_evidence_scope` | cage evidence scope | Whether evidence corroborates an existing CAGE or supplies a previously blank value through the exact UEI. The preserved authority is never overwritten. |
 | 6 | `decision_sha256` | decision sha256 | SHA-256 of this exact reviewed decision including its evidence pins. |
 | 7 | `enterprise_id` | enterprise id | Existing permanent enterprise ID, preserved without issuance or merging. |
 | 8 | `enterprise_name` | enterprise name | Exact name in the pinned enterprise authority; not a new canonical-name ruling. |
 | 9 | `evidence_pins` | evidence pins | JSON citations with exact stored evidence SHA-256 and supported fact types. |
-| 10 | `owner_name` | owner name | Owner explicitly supported by the cited evidence; scope is stated separately. |
+| 10 | `owner_name` | owner name | Explicitly reviewed owner only; subsidiary and affiliation counterparts are separate. |
 | 11 | `owner_scope` | owner scope | Whether owner_name is the immediate legal parent or ultimate owner. |
-| 12 | `ownership_extent` | ownership extent | Majority or wholly owned as stated by the source; no inferred percentage. |
+| 12 | `ownership_extent` | ownership extent | Source-supported majority or wholly-owned extent; blank means unspecified, never zero. |
 | 13 | `publication_status` | publication status | Publication applies only to this whitelisted reviewed base record. |
-| 14 | `relationship_type` | relationship type | Explicit ownership; affiliation and shared location do not qualify. |
-| 15 | `review_reason` | review reason | Reviewer-written factual basis; no licensed report prose. |
-| 16 | `reviewed_on` | reviewed on | Evidence review date, not the relationship's effective date or a current-status guarantee. |
-| 17 | `source_release_id` | source release id | Immutable NEED source release reviewed for this decision. |
-| 18 | `source_reported_name` | source reported name | Name shown by the reviewed primary evidence. |
-| 19 | `source_row_sha256` | source row sha256 | SHA-256 of the exact preserved enterprise source row. |
-| 20 | `uei` | uei | Exact existing UEI corroborated by the reviewed source; not an establishment merge. |
+| 14 | `related_entity_name` | related entity name | Counterpart explicitly named by the source for the reviewed relationship. Affiliation and subsidiary statements do not assert an ownership percentage. |
+| 15 | `relationship_type` | relationship type | Reviewed owned_by, subsidiary_of or affiliated_with claim; blank is unreviewed. |
+| 16 | `review_reason` | review reason | Reviewer-written factual basis; no licensed report prose. |
+| 17 | `reviewed_on` | reviewed on | Evidence review date, not the relationship's effective date or a current-status guarantee. |
+| 18 | `source_release_id` | source release id | Immutable NEED source release reviewed for this decision. |
+| 19 | `source_reported_name` | source reported name | Name shown by the reviewed primary evidence. |
+| 20 | `source_row_sha256` | source row sha256 | SHA-256 of the exact preserved enterprise source row. |
+| 21 | `subject_binding` | subject binding | Exact identifier or preserved reviewed profile-link evidence connecting the source subject to this existing enterprise ID; never a shared-name join. |
+| 22 | `uei` | uei | Exact existing UEI independently corroborated by primary evidence; blank is unreviewed. |
+| 23 | `verified_claims` | verified claims | JSON list of independently evidenced claims in this row. Missing claims are unreviewed, not negative findings; identifiers and relationships are distinct. |
 
 ### Native Nonprofits
 
@@ -1340,6 +1343,212 @@ The columns below describe the exported names directly. No legacy rename, combin
 | 55 | `subcontractor_parent_uei` | Subrecipient parent UEI | The UEI of the subrecipient's declared parent. |
 | 56 | `subcontractor_state` | Subcontractor state | Its state. |
 | 57 | `subcontractor_uei` | Subcontractor UEI | Its Unique Entity ID. |
+
+### Foundation & Corporate Giving
+
+Collection `foundation-corporate-giving` · table `foundation-corporate-giving` · installed producer spreadsheet
+
+**Rows in this installed spreadsheet:** 193. This is an observation count at the declared record types and grains.
+
+**One row is:** One permitted observation at its declared record_type and record_grain.
+
+**Release or source location:** Exact release 4de9e836933499c5cb083599f2623fa99c99a6d14cfa65b7256a569750a902ec; one researcher spreadsheet.
+
+The columns below describe the exported names directly. No legacy rename, combine or promised identity block is applied to this spreadsheet.
+
+**Fields (66):**
+
+| # | Column | Label | Meaning |
+|---|---|---|---|
+| 1 | `record_type` | record type | The permitted logical record type from the pinned release. |
+| 2 | `record_key` | record key | The original source primary-key values serialized as JSON. |
+| 3 | `record_grain` | record grain | What one observation of this record type represents; never sum across overlapping grains. |
+| 4 | `addability_status` | addability status | nonadditive_disclosure_view forbids treating rows as independent additive award totals. |
+| 5 | `aggregation_status` | aggregation status | nonadditive_disclosure_observation requires award/version and period reconciliation before totals. |
+| 6 | `amount_aggregate_usd` | amount aggregate usd | Umbrella or multi-recipient nominal USD total, not allocated to this recipient. Never add it to recipient amounts. |
+| 7 | `amount_basis` | amount basis | Source measure: commitment, commitment_increment, payment, future_payable or reported_grant. These are not interchangeable. |
+| 8 | `amount_class` | amount class | Exact, range or unstated representation; a range is not a point estimate and unstated is not zero. |
+| 9 | `amount_exact_usd` | amount exact usd | Exact reported nominal USD for this disclosure and financial status, stored as decimal text; blank is unknown, never zero. |
+| 10 | `amount_lower_usd` | amount lower usd | Lower bound of a reported nominal USD range; not an additional amount or point estimate. Blank means unstated. |
+| 11 | `amount_upper_usd` | amount upper usd | Upper bound of a reported nominal USD range; not an additional amount or point estimate. Blank means unstated. |
+| 12 | `announcement_date` | announcement date | Explicit public announcement date, distinct from approval and payment; blank means unestablished. |
+| 13 | `approval_date` | approval date | Reported approval date, distinct from announcement and payment; blank means unestablished. |
+| 14 | `award_family_source` | award family source | Explicit reviewed or preserved source family key, used with funder and recipient; blank leaves family unresolved. |
+| 15 | `award_id` | award id | Reviewed award-family key grouping versions; blank means no confirmed family. Amounts remain nonadditive. |
+| 16 | `award_period_text` | award period text | Source-supported duration or coverage text, not a payment schedule or proof of disbursement. |
+| 17 | `beneficiary_name` | beneficiary name | Separately reported ultimate beneficiary, not necessarily the legal recipient or payee. |
+| 18 | `cedar_uid` | cedar uid | Existing registered Native entity ID for the reviewed recipient only; blank means no approved binding. Do not infer an ID from its name or parent. |
+| 19 | `currency` | currency | Reported currency; verified USD here is nominal and not inflation adjusted. |
+| 20 | `disclosure_id` | disclosure id | Stable key for one source disclosure, not a recipient or distinct award count. |
+| 21 | `event_type` | event type | Reported disclosure category; does not alone establish a new award or payment. |
+| 22 | `financial_status` | financial status | Committed, pledged or authorized is not paid. Paid reports disbursement; unpaid_balance is outstanding stock; committed_increment is an increment, not a restated total; unknown establishes none. |
+| 23 | `fiscal_sponsor_name` | fiscal sponsor name | Separately reported fiscal sponsor or intermediary; distinct from recipient and ultimate beneficiary. |
+| 24 | `funder_class` | funder class | Reported funder category, separate from canonical identity. |
+| 25 | `funder_ein` | funder ein | Reported funder tax identifier as text; blank means unavailable or unverified. |
+| 26 | `funder_name` | funder name | Funder name reported by the source; no Native identity or ownership is implied. |
+| 27 | `hold_reason` | hold reason | Explicit withholding reason; blank is not unrestricted source or production permission. |
+| 28 | `observation` | observation | Generated sentence naming funder, reported recipient and source year; not copied prose or proof of payment. |
+| 29 | `overlap_status` | overlap status | Review state of repeated or aggregate disclosures; reviewed_distinct does not make rows summable. |
+| 30 | `partition` | partition | Original primary, other_recipient or held delivery partition; provenance, not current eligibility by itself. |
+| 31 | `payment_date` | payment date | Reported disbursement date; blank does not establish paid or unpaid status. |
+| 32 | `project_geography` | project geography | Explicitly supported project or service geography. Recipient address is never a fallback; blank means unestablished. |
+| 33 | `publication_rights_status` | publication rights status | Approved projection use; derived_facts_only excludes copied prose and raw-source exports. |
+| 34 | `publication_status` | publication status | observed permits the governed review view; held remains internal. Neither authorizes production by itself. |
+| 35 | `purpose` | purpose | Copied source-purpose prose is intentionally withheld; blank does not establish a missing project purpose. |
+| 36 | `recipient_affiliation` | recipient affiliation | Reviewed recipient-scope label; not a legal ownership relationship or canonical identity binding. |
+| 37 | `recipient_city` | recipient city | Source-reported recipient locality, not necessarily headquarters or project geography. |
+| 38 | `recipient_country` | recipient country | Source-reported recipient country, not project footprint. |
+| 39 | `recipient_ein` | recipient ein | Reported recipient tax identifier as text; blank means unavailable or unverified. |
+| 40 | `recipient_entity_type` | recipient entity type | Type of the approved registered recipient; blank when no approved recipient binding exists. |
+| 41 | `recipient_name` | recipient name | Recipient name as published; may identify a program or intermediary rather than a distinct legal payee. |
+| 42 | `recipient_name_reported` | recipient name reported | Recipient name as published, without asserting an approved Cedar identity. |
+| 43 | `recipient_role` | recipient role | Presence of a fiscal sponsor or beneficiary. Consult both fields; the label does not identify the legal payee. |
+| 44 | `recipient_state` | recipient state | Source-reported recipient state, not project footprint. Blank means unstated or not representable as one state. |
+| 45 | `record_kind` | record kind | grant_event is a grant-related disclosure; recipient_year_total is an annual aggregate, not a distinct award. |
+| 46 | `report_year` | report year | Source year label; fiscal, calendar, reporting or grant-cycle basis must not be inferred. |
+| 47 | `report_year_basis` | report year basis | Source-supported meaning of report_year; blank means fiscal/calendar basis is unestablished. |
+| 48 | `review_action` | review action | Recorded repeat-disclosure review action, not an affirmative canonical identity decision. |
+| 49 | `rights_classification` | rights classification | Existing source-family rights classification; does not override row, field or release holds. |
+| 50 | `source_class` | source class | Reviewed source-family category used by maintained acquisition and factual-publication policy. |
+| 51 | `source_document_sha256` | source document sha256 | SHA256 of retained source bytes; identifies evidence, not legal clearance or verification of every assertion. |
+| 52 | `source_id` | source id | Acquisition or source-registry key; not a recipient ID and not itself a readable publisher name. |
+| 53 | `source_locator` | source locator | Within-document recipient, page or section locator; used with URL and recipient to reproduce the disclosure key. |
+| 54 | `source_observation_status` | source observation status | Preserved upstream verification status, not a canonical identity determination. |
+| 55 | `source_policy_eligibility` | source policy eligibility | Existing source-policy permission for this factual projection, separate from production approval. |
+| 56 | `source_qa_flags` | source qa flags | Upstream quality flags; blank means none recorded, not that every semantic issue is resolved. |
+| 57 | `source_record_id` | source record id | Source-system record ID; may be blank and need not be unique across publishers. |
+| 58 | `source_retrieved_date` | source retrieved date | Evidence retrieval date; never substitute for announcement, approval, payment or reporting period. |
+| 59 | `source_url` | source url | Exact source citation; a public URL alone does not grant redistribution rights. |
+| 60 | `temporal_caveat` | temporal caveat | Limit on source-date or source-year interpretation, including unestablished report-year basis. |
+| 61 | `term_end` | term end | Reported award or coverage-period end; interpret with precision, not as payment date. |
+| 62 | `term_end_precision` | term end precision | Source precision of the end date; never invent a day for month-only or year-only evidence. |
+| 63 | `term_start` | term start | Reported award or coverage-period start; interpret with precision, not as payment date. |
+| 64 | `term_start_precision` | term start precision | Source precision of the start date; never invent a day for month-only or year-only evidence. |
+| 65 | `transfer_kind` | transfer kind | Reported transfer category, separate from its commitment or payment status. |
+| 66 | `version_kind` | version kind | Disclosure version: original, amended, renewed, expanded or unknown. Delivered original_unconfirmed remains unconfirmed; a version is not a new award. |
+
+### PLOT
+
+Collection `plot` · table `plot` · installed producer spreadsheet
+
+**Rows in this installed spreadsheet:** 151,715. This is an observation count at the declared record types and grains.
+
+**One row is:** One permitted observation at its declared record_type and record_grain.
+
+**Release or source location:** Exact release a450bd56cdcafd2f7ff1d8191f141b025ad384eeb5a3d676fc96a6598c4d182b; one researcher spreadsheet.
+
+The columns below describe the exported names directly. No legacy rename, combine or promised identity block is applied to this spreadsheet.
+
+**Fields (106):**
+
+| # | Column | Label | Meaning |
+|---|---|---|---|
+| 1 | `record_type` | record type | The permitted logical record type from the pinned release. |
+| 2 | `record_key` | record key | The original source primary-key values serialized as JSON. |
+| 3 | `record_grain` | record grain | What one observation of this record type represents; never sum across overlapping grains. |
+| 4 | `application_date` | application date | Reported application date, not approval |
+| 5 | `application_number` | application number | Application number, distinct from issued permit number |
+| 6 | `approved_date` | approved date | Reported approval date, not issuance |
+| 7 | `authority_name` | authority name | Issuing or reviewing public authority |
+| 8 | `completion_date` | completion date | Reported completion date under source definition |
+| 9 | `date_source_field` | date source field | Source field furnishing event date |
+| 10 | `default_map_visible` | default map visible | Preserved map display gate; false rows are not map features |
+| 11 | `effective_date` | effective date | Reported effective date |
+| 12 | `environmental_event_id` | environmental event id | Preserved lifecycle event object ID |
+| 13 | `environmental_events__environmental_record_id` | environmental events  environmental record id | Parent EPA program record object ID |
+| 14 | `environmental_events__event_date` | environmental events  event date | Source lifecycle date; scheduled dates remain flagged |
+| 15 | `environmental_events__event_date_precision` | environmental events  event date precision | Precision of source event date |
+| 16 | `environmental_events__event_type` | environmental events  event type | Distinct program lifecycle event kind |
+| 17 | `environmental_events__source_id` | environmental events  source id | Saved official EPA source family |
+| 18 | `environmental_events__source_url` | environmental events  source url | Exact source citation; saved query may no longer resolve |
+| 19 | `environmental_permits__environmental_record_id` | environmental permits  environmental record id | Preserved EPA program record object ID |
+| 20 | `environmental_permits__expiration_date` | environmental permits  expiration date | Reported or scheduled expiration date |
+| 21 | `environmental_permits__issued_date` | environmental permits  issued date | Reported issuance date |
+| 22 | `environmental_permits__program` | environmental permits  program | Environmental regulatory program |
+| 23 | `environmental_permits__source_id` | environmental permits  source id | Saved official EPA source family |
+| 24 | `environmental_permits__source_permit_id` | environmental permits  source permit id | EPA NPDES permit identifier; not a parcel identifier |
+| 25 | `environmental_permits__source_record_url` | environmental permits  source record url | EPA record citation |
+| 26 | `environmental_permits__source_snapshot_date` | environmental permits  source snapshot date | Exact ISO capture date or timestamp; not event time |
+| 27 | `environmental_permits__source_url` | environmental permits  source url | Exact source citation; saved query may no longer resolve |
+| 28 | `environmental_permits__state` | environmental permits  state | EPA reported state |
+| 29 | `environmental_permits__status_raw` | environmental permits  status raw | EPA reported permit status at snapshot |
+| 30 | `estate_type` | estate type | Reported interest or estate category; partial interests remain distinct |
+| 31 | `event_interpretation` | event interpretation | Reported program date or scheduled-date interpretation |
+| 32 | `facility_name_raw` | facility name raw | Facility name reported by EPA; not verified legal owner |
+| 33 | `facility_registry_id` | facility registry id | External EPA FRS identifier; not a Cedar business ID |
+| 34 | `future_relative_to_capture` | future relative to capture | True if event date follows source snapshot |
+| 35 | `geometry_display_scope` | geometry display scope | Preserved geometry interest scope; not exclusive title |
+| 36 | `geometry_wkb_hex` | geometry wkb hex | Original 2D WKB encoded as hex, CRS84 longitude/latitude; structural checks only |
+| 37 | `latitude` | latitude | Reported WGS84 latitude; environmental context only |
+| 38 | `longitude` | longitude | Reported WGS84 longitude; environmental context only |
+| 39 | `municipality` | municipality | Source municipality |
+| 40 | `native_ownership_supported` | native ownership supported | Always false: EPA flags do not establish Native ownership |
+| 41 | `owner_name_raw` | owner name raw | Assessor-reported owner label; not verified beneficial ownership or title |
+| 42 | `ownership_observation_date` | ownership observation date | Preserved ownership observation date and precision |
+| 43 | `ownership_observations__county_fips` | ownership observations  county fips | County FIPS context; parcel IDs are not nationally unique |
+| 44 | `ownership_observations__record_grain` | ownership observations  record grain | BIA tract feature or assessor parcel feature; a tract can contain several parcels |
+| 45 | `ownership_observations__source_id` | ownership observations  source id | Exact acquired source family |
+| 46 | `ownership_observations__source_record_url` | ownership observations  source record url | Exact source feature citation |
+| 47 | `ownership_observations__source_snapshot_date` | ownership observations  source snapshot date | Reported source snapshot date; blank remains unknown |
+| 48 | `ownership_observations__source_url` | ownership observations  source url | Source dataset citation |
+| 49 | `ownership_observations__state` | ownership observations  state | State context |
+| 50 | `ownership_time_basis` | ownership time basis | Evidence basis and limitations for owner observation time |
+| 51 | `permit_event_id` | permit event id | Preserved lifecycle event key |
+| 52 | `permit_events__event_date` | permit events  event date | Reported lifecycle date, not necessarily actual physical activity |
+| 53 | `permit_events__event_date_precision` | permit events  event date precision | Source date precision |
+| 54 | `permit_events__event_type` | permit events  event type | Application, approval, issuance, inspection or other lifecycle kind |
+| 55 | `permit_events__permit_id` | permit events  permit id | Parent permit key; many events per permit |
+| 56 | `permit_events__source_id` | permit events  source id | Exact source dataset |
+| 57 | `permit_events__source_url` | permit events  source url | Exact source event citation |
+| 58 | `permit_events__state` | permit events  state | Source state |
+| 59 | `permit_number` | permit number | Public authority permit number |
+| 60 | `permit_type_raw` | permit type raw | Source permit category |
+| 61 | `permits__county_fips` | permits  county fips | County FIPS context |
+| 62 | `permits__expiration_date` | permits  expiration date | Reported or scheduled expiration; not a realized event |
+| 63 | `permits__issued_date` | permits  issued date | Reported issuance date, not work completion |
+| 64 | `permits__permit_id` | permits  permit id | Preserved permit/application object key |
+| 65 | `permits__program` | permits  program | Permit program |
+| 66 | `permits__source_id` | permits  source id | Source jurisdiction and dataset |
+| 67 | `permits__source_permit_id` | permits  source permit id | Source permit key scoped to jurisdiction |
+| 68 | `permits__source_record_url` | permits  source record url | Additional exact source citation |
+| 69 | `permits__source_snapshot_date` | permits  source snapshot date | Source capture date, distinct from lifecycle dates |
+| 70 | `permits__source_url` | permits  source url | Source record citation |
+| 71 | `permits__state` | permits  state | Source state |
+| 72 | `permits__status_raw` | permits  status raw | Source status at capture; no completion inferred |
+| 73 | `plot_record_id` | plot record id | Preserved PLOT observation object key; not a Native entity ID |
+| 74 | `record_kind` | record kind | Source application, permit or agency action record kind |
+| 75 | `record_role` | record role | Preserved interpretation of source observation |
+| 76 | `recorded_acres` | recorded acres | Source reported land area; use recorded_acres_measure before aggregation |
+| 77 | `recorded_acres_measure` | recorded acres measure | Area measurement basis; not necessarily surveyed or exclusive area |
+| 78 | `reported_value` | reported value | Source permit valuation; repeated child permits may carry same value |
+| 79 | `research_scope` | research scope | EPA Indian Country program context; no parcel affiliation |
+| 80 | `scheduled_only` | scheduled only | Scheduled rather than completed or observed lifecycle activity |
+| 81 | `source_field` | source field | EPA field that supplied the lifecycle date |
+| 82 | `source_object_id` | source object id | Source feature key scoped to source_id |
+| 83 | `source_ownership_code` | source ownership code | Source ownership category, such as BIA T; not a canonical owner binding |
+| 84 | `source_parcel_id` | source parcel id | Source parcel or tract identifier; jurisdiction and grain required |
+| 85 | `source_tax_aggregation_eligible` | source tax aggregation eligible | Preserved source tax aggregation gate; no override |
+| 86 | `source_vintage` | source vintage | Source release vintage; not an event date |
+| 87 | `submitted_date` | submitted date | Reported submission date |
+| 88 | `tax_aggregation_status` | tax aggregation status | Preserved aggregation exclusion or eligibility explanation |
+| 89 | `tax_amount` | tax amount | Reported property tax; tax_measure and tax_year define meaning; not payment |
+| 90 | `tax_amount_observed` | tax amount observed | Observed tax monetary value, distinct from harmonized tax_amount; not a boolean |
+| 91 | `tax_comparison_group` | tax comparison group | Comparable tax series classification; aggregate only within permitted group |
+| 92 | `tax_cross_county_pooling_status` | tax cross county pooling status | Whether county definitions permit pooling; preserve restrictions |
+| 93 | `tax_measure` | tax measure | Source-specific net, gross or other tax measure; not interchangeable |
+| 94 | `tax_year` | tax year | Source tax-roll year; not owner observation or filing year |
+| 95 | `terminated_date` | terminated date | Reported termination date |
+| 96 | `tract_observations__county_fips` | tract observations  county fips | County FIPS context; parcel IDs are not nationally unique |
+| 97 | `tract_observations__record_grain` | tract observations  record grain | BIA tract feature or assessor parcel feature; a tract can contain several parcels |
+| 98 | `tract_observations__source_id` | tract observations  source id | Exact acquired source family |
+| 99 | `tract_observations__source_record_url` | tract observations  source record url | Exact source feature citation |
+| 100 | `tract_observations__source_snapshot_date` | tract observations  source snapshot date | Reported source snapshot date; blank remains unknown |
+| 101 | `tract_observations__source_url` | tract observations  source url | Source dataset citation |
+| 102 | `tract_observations__state` | tract observations  state | State context |
+| 103 | `trust_status` | trust status | Preserved reported trust classification |
+| 104 | `value_currency` | value currency | Currency reported for valuation |
+| 105 | `value_measure` | value measure | Source valuation definition; not a payment or expenditure |
+| 106 | `whole_footprint_ownership_claim` | whole footprint ownership claim | Preserved limit on whole-footprint ownership interpretation |
 
 ## Review questions
 

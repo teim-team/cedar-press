@@ -99,3 +99,162 @@ class VerifiedPreviewTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class MixedPreviewDefinitionTest(unittest.TestCase):
+    """Admission uses actual component mappings and refuses invented definitions."""
+
+    def load_admission(self):
+        spec = importlib.util.spec_from_file_location(
+            "admit_verified_previews",
+            Path(__file__).resolve().parents[2] / "scripts/stage_verified_previews.py",
+        )
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return module
+
+    def definitions_fixture(self):
+        from types import SimpleNamespace
+
+        return SimpleNamespace(
+            is_substantive=lambda text, column: (
+                isinstance(text, str)
+                and len(text.strip()) > 12
+                and not text.startswith("Reviewed Cedar field contract:")
+            )
+        )
+
+    def test_same_named_component_fields_keep_separate_definition_and_mapping(self):
+        from types import ModuleType
+        from unittest.mock import patch
+
+        stub = ModuleType("lumecon_data.collections")
+        stub.foundation_metadata = ModuleType("foundation_metadata")
+        stub.foundation_metadata.annotation = lambda *_: {"fields": {}}
+        plan = {
+            "columns": [
+                "record_type",
+                "record_key",
+                "record_grain",
+                "permits__source_url",
+                "permit_events__source_url",
+            ],
+            "mappings": {
+                "permits": {"source_url": "permits__source_url"},
+                "permit_events": {"source_url": "permit_events__source_url"},
+            },
+            "groups": [
+                {
+                    "name": "permits",
+                    "contract": {
+                        "fields": [
+                            {
+                                "name": "source_url",
+                                "description": "Citation for the source permit observation.",
+                            }
+                        ]
+                    },
+                },
+                {
+                    "name": "permit_events",
+                    "contract": {
+                        "fields": [
+                            {
+                                "name": "source_url",
+                                "description": "Citation for the reported permit lifecycle event.",
+                            }
+                        ]
+                    },
+                },
+            ],
+        }
+        with patch.dict("sys.modules", {"lumecon_data.collections": stub}):
+            fields = self.load_admission().preview_fields(
+                "plot", plan, Path("."), self.definitions_fixture()
+            )
+        by_name = {field["column"]: field for field in fields}
+        self.assertEqual(
+            by_name["permits__source_url"]["meaning"], "Citation for the source permit observation."
+        )
+        self.assertEqual(
+            by_name["permit_events__source_url"]["meaning"],
+            "Citation for the reported permit lifecycle event.",
+        )
+        self.assertEqual(
+            by_name["permit_events__source_url"]["definition_source"][0]["component"],
+            "permit_events",
+        )
+        self.assertEqual(list(by_name), plan["columns"])
+
+    def test_unreviewed_placeholders_and_conflicting_shared_meanings_fail(self):
+        from copy import deepcopy
+        from types import ModuleType
+        from unittest.mock import patch
+
+        stub = ModuleType("lumecon_data.collections")
+        stub.foundation_metadata = ModuleType("foundation_metadata")
+        stub.foundation_metadata.annotation = lambda *_: {"fields": {}}
+        plan = {
+            "columns": ["record_type", "record_key", "record_grain", "source_url"],
+            "mappings": {"permits": {"source_url": "source_url"}},
+            "groups": [
+                {
+                    "name": "permits",
+                    "contract": {
+                        "fields": [
+                            {
+                                "name": "source_url",
+                                "description": "Reviewed Cedar field contract: source_url",
+                            }
+                        ]
+                    },
+                }
+            ],
+        }
+        with patch.dict("sys.modules", {"lumecon_data.collections": stub}):
+            admission = self.load_admission()
+            with self.assertRaisesRegex(ValueError, "no substantive"):
+                admission.preview_fields("plot", plan, Path("."), self.definitions_fixture())
+            valid = deepcopy(plan)
+            valid["groups"][0]["contract"]["fields"][0]["description"] = (
+                "Citation for the source permit observation."
+            )
+            valid["mappings"]["permit_events"] = {"source_url": "source_url"}
+            valid["groups"].append(
+                {
+                    "name": "permit_events",
+                    "contract": {
+                        "fields": [
+                            {
+                                "name": "source_url",
+                                "description": "Citation for a distinct event observation.",
+                            }
+                        ]
+                    },
+                }
+            )
+            with self.assertRaisesRegex(ValueError, "conflicting definitions"):
+                admission.preview_fields("plot", valid, Path("."), self.definitions_fixture())
+
+    def test_future_staging_preserves_verified_component_field_map(self):
+        prior = {"id": "plot", "descriptor": {}, "cedar": {}}
+        metadata = {
+            "records": 2,
+            "release_id": "a" * 64,
+            "source_manifest_sha256": "b" * 64,
+            "columns": ["record_type", "record_key", "record_grain", "source_url"],
+            "held_records_in_selected_groups": 0,
+            "bytes": 100,
+        }
+        mapping = {"permits": {"source_url": "source_url"}}
+        entry = preview.proposed_entry(
+            prior,
+            metadata,
+            {"permits": 2},
+            [["permits", '["1"]', "permit", "https://example.test/"]],
+            "2026-10-01",
+            {"mappings": mapping},
+        )
+        self.assertEqual(entry["tables"][0]["record_type_fields"], mapping)
+        self.assertFalse(entry["full_files"]["served"])
+        self.assertEqual(prior, {"id": "plot", "descriptor": {}, "cedar": {}})

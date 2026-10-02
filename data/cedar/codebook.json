@@ -8180,7 +8180,7 @@
    "collection": "need",
    "dataset": "Cedar Native Entity Enterprise Dataset (NEED)",
    "row": "One permitted observation at its declared record_type and record_grain.",
-   "where": "Exact release dc105294abc2ba5d0a3819afbfe32f81b3e8ef41f3ba8c1c13c8ce320010d035; one researcher spreadsheet.",
+   "where": "Exact release 428d11048f12cd819f7cf95dccdbbe4c1ea20a8c81c635a7e985fbc17b1b983b; one researcher spreadsheet.",
    "fields": [
     {
      "column": "record_type",
@@ -8209,9 +8209,9 @@
     {
      "column": "cage_code",
      "label": "cage code",
-     "meaning": "CAGE explicitly stated in the primary evidence for the exact existing UEI; its claim scope is separate.",
+     "meaning": "CAGE independently supported by evidence; blank is unreviewed.",
      "definition_source": {
-      "kind": "existing_installed_definition"
+      "kind": "producer_description"
      }
     },
     {
@@ -8219,7 +8219,7 @@
      "label": "cage evidence scope",
      "meaning": "Whether evidence corroborates an existing CAGE or supplies a previously blank value through the exact UEI. The preserved authority is never overwritten.",
      "definition_source": {
-      "kind": "existing_installed_definition"
+      "kind": "producer_description"
      }
     },
     {
@@ -8227,7 +8227,7 @@
      "label": "decision sha256",
      "meaning": "SHA-256 of this exact reviewed decision including its evidence pins.",
      "definition_source": {
-      "kind": "existing_installed_definition"
+      "kind": "producer_description"
      }
     },
     {
@@ -8235,7 +8235,7 @@
      "label": "enterprise id",
      "meaning": "Existing permanent enterprise ID, preserved without issuance or merging.",
      "definition_source": {
-      "kind": "existing_installed_definition"
+      "kind": "producer_description"
      }
     },
     {
@@ -8243,7 +8243,7 @@
      "label": "enterprise name",
      "meaning": "Exact name in the pinned enterprise authority; not a new canonical-name ruling.",
      "definition_source": {
-      "kind": "existing_installed_definition"
+      "kind": "producer_description"
      }
     },
     {
@@ -8251,15 +8251,15 @@
      "label": "evidence pins",
      "meaning": "JSON citations with exact stored evidence SHA-256 and supported fact types.",
      "definition_source": {
-      "kind": "existing_installed_definition"
+      "kind": "producer_description"
      }
     },
     {
      "column": "owner_name",
      "label": "owner name",
-     "meaning": "Owner explicitly supported by the cited evidence; scope is stated separately.",
+     "meaning": "Explicitly reviewed owner only; subsidiary and affiliation counterparts are separate.",
      "definition_source": {
-      "kind": "existing_installed_definition"
+      "kind": "producer_description"
      }
     },
     {
@@ -8267,15 +8267,15 @@
      "label": "owner scope",
      "meaning": "Whether owner_name is the immediate legal parent or ultimate owner.",
      "definition_source": {
-      "kind": "existing_installed_definition"
+      "kind": "producer_description"
      }
     },
     {
      "column": "ownership_extent",
      "label": "ownership extent",
-     "meaning": "Majority or wholly owned as stated by the source; no inferred percentage.",
+     "meaning": "Source-supported majority or wholly-owned extent; blank means unspecified, never zero.",
      "definition_source": {
-      "kind": "existing_installed_definition"
+      "kind": "producer_description"
      }
     },
     {
@@ -8283,15 +8283,23 @@
      "label": "publication status",
      "meaning": "Publication applies only to this whitelisted reviewed base record.",
      "definition_source": {
-      "kind": "existing_installed_definition"
+      "kind": "producer_description"
+     }
+    },
+    {
+     "column": "related_entity_name",
+     "label": "related entity name",
+     "meaning": "Counterpart explicitly named by the source for the reviewed relationship. Affiliation and subsidiary statements do not assert an ownership percentage.",
+     "definition_source": {
+      "kind": "producer_description"
      }
     },
     {
      "column": "relationship_type",
      "label": "relationship type",
-     "meaning": "Explicit ownership; affiliation and shared location do not qualify.",
+     "meaning": "Reviewed owned_by, subsidiary_of or affiliated_with claim; blank is unreviewed.",
      "definition_source": {
-      "kind": "existing_installed_definition"
+      "kind": "producer_description"
      }
     },
     {
@@ -8299,7 +8307,7 @@
      "label": "review reason",
      "meaning": "Reviewer-written factual basis; no licensed report prose.",
      "definition_source": {
-      "kind": "existing_installed_definition"
+      "kind": "producer_description"
      }
     },
     {
@@ -8307,7 +8315,7 @@
      "label": "reviewed on",
      "meaning": "Evidence review date, not the relationship's effective date or a current-status guarantee.",
      "definition_source": {
-      "kind": "existing_installed_definition"
+      "kind": "producer_description"
      }
     },
     {
@@ -8315,7 +8323,7 @@
      "label": "source release id",
      "meaning": "Immutable NEED source release reviewed for this decision.",
      "definition_source": {
-      "kind": "existing_installed_definition"
+      "kind": "producer_description"
      }
     },
     {
@@ -8323,7 +8331,7 @@
      "label": "source reported name",
      "meaning": "Name shown by the reviewed primary evidence.",
      "definition_source": {
-      "kind": "existing_installed_definition"
+      "kind": "producer_description"
      }
     },
     {
@@ -8331,15 +8339,31 @@
      "label": "source row sha256",
      "meaning": "SHA-256 of the exact preserved enterprise source row.",
      "definition_source": {
-      "kind": "existing_installed_definition"
+      "kind": "producer_description"
+     }
+    },
+    {
+     "column": "subject_binding",
+     "label": "subject binding",
+     "meaning": "Exact identifier or preserved reviewed profile-link evidence connecting the source subject to this existing enterprise ID; never a shared-name join.",
+     "definition_source": {
+      "kind": "producer_description"
      }
     },
     {
      "column": "uei",
      "label": "uei",
-     "meaning": "Exact existing UEI corroborated by the reviewed source; not an establishment merge.",
+     "meaning": "Exact existing UEI independently corroborated by primary evidence; blank is unreviewed.",
      "definition_source": {
-      "kind": "existing_installed_definition"
+      "kind": "producer_description"
+     }
+    },
+    {
+     "column": "verified_claims",
+     "label": "verified claims",
+     "meaning": "JSON list of independently evidenced claims in this row. Missing claims are unreviewed, not negative findings; identifiers and relationships are distinct.",
+     "definition_source": {
+      "kind": "producer_description"
      }
     }
    ]
@@ -11681,6 +11705,1398 @@
       "source_column": "sub_uei",
       "decision": "rename",
       "target_column": "subcontractor_uei"
+     }
+    }
+   ]
+  },
+  "foundation-corporate-giving/foundation-corporate-giving": {
+   "collection": "foundation-corporate-giving",
+   "dataset": "Foundation & Corporate Giving",
+   "row": "One permitted observation at its declared record_type and record_grain.",
+   "where": "Exact release 4de9e836933499c5cb083599f2623fa99c99a6d14cfa65b7256a569750a902ec; one researcher spreadsheet.",
+   "fields": [
+    {
+     "column": "record_type",
+     "label": "record type",
+     "meaning": "The permitted logical record type from the pinned release.",
+     "definition_source": {
+      "kind": "spreadsheet_metadata_contract"
+     }
+    },
+    {
+     "column": "record_key",
+     "label": "record key",
+     "meaning": "The original source primary-key values serialized as JSON.",
+     "definition_source": {
+      "kind": "spreadsheet_metadata_contract"
+     }
+    },
+    {
+     "column": "record_grain",
+     "label": "record grain",
+     "meaning": "What one observation of this record type represents; never sum across overlapping grains.",
+     "definition_source": {
+      "kind": "spreadsheet_metadata_contract"
+     }
+    },
+    {
+     "column": "addability_status",
+     "label": "addability status",
+     "meaning": "nonadditive_disclosure_view forbids treating rows as independent additive award totals.",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "aggregation_status",
+     "label": "aggregation status",
+     "meaning": "nonadditive_disclosure_observation requires award/version and period reconciliation before totals.",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "amount_aggregate_usd",
+     "label": "amount aggregate usd",
+     "meaning": "Umbrella or multi-recipient nominal USD total, not allocated to this recipient. Never add it to recipient amounts.",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "amount_basis",
+     "label": "amount basis",
+     "meaning": "Source measure: commitment, commitment_increment, payment, future_payable or reported_grant. These are not interchangeable.",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "amount_class",
+     "label": "amount class",
+     "meaning": "Exact, range or unstated representation; a range is not a point estimate and unstated is not zero.",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "amount_exact_usd",
+     "label": "amount exact usd",
+     "meaning": "Exact reported nominal USD for this disclosure and financial status, stored as decimal text; blank is unknown, never zero.",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "amount_lower_usd",
+     "label": "amount lower usd",
+     "meaning": "Lower bound of a reported nominal USD range; not an additional amount or point estimate. Blank means unstated.",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "amount_upper_usd",
+     "label": "amount upper usd",
+     "meaning": "Upper bound of a reported nominal USD range; not an additional amount or point estimate. Blank means unstated.",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "announcement_date",
+     "label": "announcement date",
+     "meaning": "Explicit public announcement date, distinct from approval and payment; blank means unestablished.",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "approval_date",
+     "label": "approval date",
+     "meaning": "Reported approval date, distinct from announcement and payment; blank means unestablished.",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "award_family_source",
+     "label": "award family source",
+     "meaning": "Explicit reviewed or preserved source family key, used with funder and recipient; blank leaves family unresolved.",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "award_id",
+     "label": "award id",
+     "meaning": "Reviewed award-family key grouping versions; blank means no confirmed family. Amounts remain nonadditive.",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "award_period_text",
+     "label": "award period text",
+     "meaning": "Source-supported duration or coverage text, not a payment schedule or proof of disbursement.",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "beneficiary_name",
+     "label": "beneficiary name",
+     "meaning": "Separately reported ultimate beneficiary, not necessarily the legal recipient or payee.",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "cedar_uid",
+     "label": "cedar uid",
+     "meaning": "Existing registered Native entity ID for the reviewed recipient only; blank means no approved binding. Do not infer an ID from its name or parent.",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "currency",
+     "label": "currency",
+     "meaning": "Reported currency; verified USD here is nominal and not inflation adjusted.",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "disclosure_id",
+     "label": "disclosure id",
+     "meaning": "Stable key for one source disclosure, not a recipient or distinct award count.",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "event_type",
+     "label": "event type",
+     "meaning": "Reported disclosure category; does not alone establish a new award or payment.",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "financial_status",
+     "label": "financial status",
+     "meaning": "Committed, pledged or authorized is not paid. Paid reports disbursement; unpaid_balance is outstanding stock; committed_increment is an increment, not a restated total; unknown establishes none.",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "fiscal_sponsor_name",
+     "label": "fiscal sponsor name",
+     "meaning": "Separately reported fiscal sponsor or intermediary; distinct from recipient and ultimate beneficiary.",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "funder_class",
+     "label": "funder class",
+     "meaning": "Reported funder category, separate from canonical identity.",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "funder_ein",
+     "label": "funder ein",
+     "meaning": "Reported funder tax identifier as text; blank means unavailable or unverified.",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "funder_name",
+     "label": "funder name",
+     "meaning": "Funder name reported by the source; no Native identity or ownership is implied.",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "hold_reason",
+     "label": "hold reason",
+     "meaning": "Explicit withholding reason; blank is not unrestricted source or production permission.",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "observation",
+     "label": "observation",
+     "meaning": "Generated sentence naming funder, reported recipient and source year; not copied prose or proof of payment.",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "overlap_status",
+     "label": "overlap status",
+     "meaning": "Review state of repeated or aggregate disclosures; reviewed_distinct does not make rows summable.",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "partition",
+     "label": "partition",
+     "meaning": "Original primary, other_recipient or held delivery partition; provenance, not current eligibility by itself.",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "payment_date",
+     "label": "payment date",
+     "meaning": "Reported disbursement date; blank does not establish paid or unpaid status.",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "project_geography",
+     "label": "project geography",
+     "meaning": "Explicitly supported project or service geography. Recipient address is never a fallback; blank means unestablished.",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "publication_rights_status",
+     "label": "publication rights status",
+     "meaning": "Approved projection use; derived_facts_only excludes copied prose and raw-source exports.",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "publication_status",
+     "label": "publication status",
+     "meaning": "observed permits the governed review view; held remains internal. Neither authorizes production by itself.",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "purpose",
+     "label": "purpose",
+     "meaning": "Copied source-purpose prose is intentionally withheld; blank does not establish a missing project purpose.",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "recipient_affiliation",
+     "label": "recipient affiliation",
+     "meaning": "Reviewed recipient-scope label; not a legal ownership relationship or canonical identity binding.",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "recipient_city",
+     "label": "recipient city",
+     "meaning": "Source-reported recipient locality, not necessarily headquarters or project geography.",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "recipient_country",
+     "label": "recipient country",
+     "meaning": "Source-reported recipient country, not project footprint.",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "recipient_ein",
+     "label": "recipient ein",
+     "meaning": "Reported recipient tax identifier as text; blank means unavailable or unverified.",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "recipient_entity_type",
+     "label": "recipient entity type",
+     "meaning": "Type of the approved registered recipient; blank when no approved recipient binding exists.",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "recipient_name",
+     "label": "recipient name",
+     "meaning": "Recipient name as published; may identify a program or intermediary rather than a distinct legal payee.",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "recipient_name_reported",
+     "label": "recipient name reported",
+     "meaning": "Recipient name as published, without asserting an approved Cedar identity.",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "recipient_role",
+     "label": "recipient role",
+     "meaning": "Presence of a fiscal sponsor or beneficiary. Consult both fields; the label does not identify the legal payee.",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "recipient_state",
+     "label": "recipient state",
+     "meaning": "Source-reported recipient state, not project footprint. Blank means unstated or not representable as one state.",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "record_kind",
+     "label": "record kind",
+     "meaning": "grant_event is a grant-related disclosure; recipient_year_total is an annual aggregate, not a distinct award.",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "report_year",
+     "label": "report year",
+     "meaning": "Source year label; fiscal, calendar, reporting or grant-cycle basis must not be inferred.",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "report_year_basis",
+     "label": "report year basis",
+     "meaning": "Source-supported meaning of report_year; blank means fiscal/calendar basis is unestablished.",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "review_action",
+     "label": "review action",
+     "meaning": "Recorded repeat-disclosure review action, not an affirmative canonical identity decision.",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "rights_classification",
+     "label": "rights classification",
+     "meaning": "Existing source-family rights classification; does not override row, field or release holds.",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "source_class",
+     "label": "source class",
+     "meaning": "Reviewed source-family category used by maintained acquisition and factual-publication policy.",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "source_document_sha256",
+     "label": "source document sha256",
+     "meaning": "SHA256 of retained source bytes; identifies evidence, not legal clearance or verification of every assertion.",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "source_id",
+     "label": "source id",
+     "meaning": "Acquisition or source-registry key; not a recipient ID and not itself a readable publisher name.",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "source_locator",
+     "label": "source locator",
+     "meaning": "Within-document recipient, page or section locator; used with URL and recipient to reproduce the disclosure key.",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "source_observation_status",
+     "label": "source observation status",
+     "meaning": "Preserved upstream verification status, not a canonical identity determination.",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "source_policy_eligibility",
+     "label": "source policy eligibility",
+     "meaning": "Existing source-policy permission for this factual projection, separate from production approval.",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "source_qa_flags",
+     "label": "source qa flags",
+     "meaning": "Upstream quality flags; blank means none recorded, not that every semantic issue is resolved.",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "source_record_id",
+     "label": "source record id",
+     "meaning": "Source-system record ID; may be blank and need not be unique across publishers.",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "source_retrieved_date",
+     "label": "source retrieved date",
+     "meaning": "Evidence retrieval date; never substitute for announcement, approval, payment or reporting period.",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "source_url",
+     "label": "source url",
+     "meaning": "Exact source citation; a public URL alone does not grant redistribution rights.",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "temporal_caveat",
+     "label": "temporal caveat",
+     "meaning": "Limit on source-date or source-year interpretation, including unestablished report-year basis.",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "term_end",
+     "label": "term end",
+     "meaning": "Reported award or coverage-period end; interpret with precision, not as payment date.",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "term_end_precision",
+     "label": "term end precision",
+     "meaning": "Source precision of the end date; never invent a day for month-only or year-only evidence.",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "term_start",
+     "label": "term start",
+     "meaning": "Reported award or coverage-period start; interpret with precision, not as payment date.",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "term_start_precision",
+     "label": "term start precision",
+     "meaning": "Source precision of the start date; never invent a day for month-only or year-only evidence.",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "transfer_kind",
+     "label": "transfer kind",
+     "meaning": "Reported transfer category, separate from its commitment or payment status.",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "version_kind",
+     "label": "version kind",
+     "meaning": "Disclosure version: original, amended, renewed, expanded or unknown. Delivered original_unconfirmed remains unconfirmed; a version is not a new award.",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    }
+   ]
+  },
+  "plot/plot": {
+   "collection": "plot",
+   "dataset": "PLOT",
+   "row": "One permitted observation at its declared record_type and record_grain.",
+   "where": "Exact release a450bd56cdcafd2f7ff1d8191f141b025ad384eeb5a3d676fc96a6598c4d182b; one researcher spreadsheet.",
+   "fields": [
+    {
+     "column": "record_type",
+     "label": "record type",
+     "meaning": "The permitted logical record type from the pinned release.",
+     "definition_source": {
+      "kind": "spreadsheet_metadata_contract"
+     }
+    },
+    {
+     "column": "record_key",
+     "label": "record key",
+     "meaning": "The original source primary-key values serialized as JSON.",
+     "definition_source": {
+      "kind": "spreadsheet_metadata_contract"
+     }
+    },
+    {
+     "column": "record_grain",
+     "label": "record grain",
+     "meaning": "What one observation of this record type represents; never sum across overlapping grains.",
+     "definition_source": {
+      "kind": "spreadsheet_metadata_contract"
+     }
+    },
+    {
+     "column": "application_date",
+     "label": "application date",
+     "meaning": "Reported application date, not approval",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "application_number",
+     "label": "application number",
+     "meaning": "Application number, distinct from issued permit number",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "approved_date",
+     "label": "approved date",
+     "meaning": "Reported approval date, not issuance",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "authority_name",
+     "label": "authority name",
+     "meaning": "Issuing or reviewing public authority",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "completion_date",
+     "label": "completion date",
+     "meaning": "Reported completion date under source definition",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "date_source_field",
+     "label": "date source field",
+     "meaning": "Source field furnishing event date",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "default_map_visible",
+     "label": "default map visible",
+     "meaning": "Preserved map display gate; false rows are not map features",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "effective_date",
+     "label": "effective date",
+     "meaning": "Reported effective date",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "environmental_event_id",
+     "label": "environmental event id",
+     "meaning": "Preserved lifecycle event object ID",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "environmental_events__environmental_record_id",
+     "label": "environmental events  environmental record id",
+     "meaning": "Parent EPA program record object ID",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "environmental_events__event_date",
+     "label": "environmental events  event date",
+     "meaning": "Source lifecycle date; scheduled dates remain flagged",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "environmental_events__event_date_precision",
+     "label": "environmental events  event date precision",
+     "meaning": "Precision of source event date",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "environmental_events__event_type",
+     "label": "environmental events  event type",
+     "meaning": "Distinct program lifecycle event kind",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "environmental_events__source_id",
+     "label": "environmental events  source id",
+     "meaning": "Saved official EPA source family",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "environmental_events__source_url",
+     "label": "environmental events  source url",
+     "meaning": "Exact source citation; saved query may no longer resolve",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "environmental_permits__environmental_record_id",
+     "label": "environmental permits  environmental record id",
+     "meaning": "Preserved EPA program record object ID",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "environmental_permits__expiration_date",
+     "label": "environmental permits  expiration date",
+     "meaning": "Reported or scheduled expiration date",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "environmental_permits__issued_date",
+     "label": "environmental permits  issued date",
+     "meaning": "Reported issuance date",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "environmental_permits__program",
+     "label": "environmental permits  program",
+     "meaning": "Environmental regulatory program",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "environmental_permits__source_id",
+     "label": "environmental permits  source id",
+     "meaning": "Saved official EPA source family",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "environmental_permits__source_permit_id",
+     "label": "environmental permits  source permit id",
+     "meaning": "EPA NPDES permit identifier; not a parcel identifier",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "environmental_permits__source_record_url",
+     "label": "environmental permits  source record url",
+     "meaning": "EPA record citation",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "environmental_permits__source_snapshot_date",
+     "label": "environmental permits  source snapshot date",
+     "meaning": "Exact ISO capture date or timestamp; not event time",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "environmental_permits__source_url",
+     "label": "environmental permits  source url",
+     "meaning": "Exact source citation; saved query may no longer resolve",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "environmental_permits__state",
+     "label": "environmental permits  state",
+     "meaning": "EPA reported state",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "environmental_permits__status_raw",
+     "label": "environmental permits  status raw",
+     "meaning": "EPA reported permit status at snapshot",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "estate_type",
+     "label": "estate type",
+     "meaning": "Reported interest or estate category; partial interests remain distinct",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "event_interpretation",
+     "label": "event interpretation",
+     "meaning": "Reported program date or scheduled-date interpretation",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "facility_name_raw",
+     "label": "facility name raw",
+     "meaning": "Facility name reported by EPA; not verified legal owner",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "facility_registry_id",
+     "label": "facility registry id",
+     "meaning": "External EPA FRS identifier; not a Cedar business ID",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "future_relative_to_capture",
+     "label": "future relative to capture",
+     "meaning": "True if event date follows source snapshot",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "geometry_display_scope",
+     "label": "geometry display scope",
+     "meaning": "Preserved geometry interest scope; not exclusive title",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "geometry_wkb_hex",
+     "label": "geometry wkb hex",
+     "meaning": "Original 2D WKB encoded as hex, CRS84 longitude/latitude; structural checks only",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "latitude",
+     "label": "latitude",
+     "meaning": "Reported WGS84 latitude; environmental context only",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "longitude",
+     "label": "longitude",
+     "meaning": "Reported WGS84 longitude; environmental context only",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "municipality",
+     "label": "municipality",
+     "meaning": "Source municipality",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "native_ownership_supported",
+     "label": "native ownership supported",
+     "meaning": "Always false: EPA flags do not establish Native ownership",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "owner_name_raw",
+     "label": "owner name raw",
+     "meaning": "Assessor-reported owner label; not verified beneficial ownership or title",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "ownership_observation_date",
+     "label": "ownership observation date",
+     "meaning": "Preserved ownership observation date and precision",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "ownership_observations__county_fips",
+     "label": "ownership observations  county fips",
+     "meaning": "County FIPS context; parcel IDs are not nationally unique",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "ownership_observations__record_grain",
+     "label": "ownership observations  record grain",
+     "meaning": "BIA tract feature or assessor parcel feature; a tract can contain several parcels",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "ownership_observations__source_id",
+     "label": "ownership observations  source id",
+     "meaning": "Exact acquired source family",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "ownership_observations__source_record_url",
+     "label": "ownership observations  source record url",
+     "meaning": "Exact source feature citation",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "ownership_observations__source_snapshot_date",
+     "label": "ownership observations  source snapshot date",
+     "meaning": "Reported source snapshot date; blank remains unknown",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "ownership_observations__source_url",
+     "label": "ownership observations  source url",
+     "meaning": "Source dataset citation",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "ownership_observations__state",
+     "label": "ownership observations  state",
+     "meaning": "State context",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "ownership_time_basis",
+     "label": "ownership time basis",
+     "meaning": "Evidence basis and limitations for owner observation time",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "permit_event_id",
+     "label": "permit event id",
+     "meaning": "Preserved lifecycle event key",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "permit_events__event_date",
+     "label": "permit events  event date",
+     "meaning": "Reported lifecycle date, not necessarily actual physical activity",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "permit_events__event_date_precision",
+     "label": "permit events  event date precision",
+     "meaning": "Source date precision",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "permit_events__event_type",
+     "label": "permit events  event type",
+     "meaning": "Application, approval, issuance, inspection or other lifecycle kind",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "permit_events__permit_id",
+     "label": "permit events  permit id",
+     "meaning": "Parent permit key; many events per permit",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "permit_events__source_id",
+     "label": "permit events  source id",
+     "meaning": "Exact source dataset",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "permit_events__source_url",
+     "label": "permit events  source url",
+     "meaning": "Exact source event citation",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "permit_events__state",
+     "label": "permit events  state",
+     "meaning": "Source state",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "permit_number",
+     "label": "permit number",
+     "meaning": "Public authority permit number",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "permit_type_raw",
+     "label": "permit type raw",
+     "meaning": "Source permit category",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "permits__county_fips",
+     "label": "permits  county fips",
+     "meaning": "County FIPS context",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "permits__expiration_date",
+     "label": "permits  expiration date",
+     "meaning": "Reported or scheduled expiration; not a realized event",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "permits__issued_date",
+     "label": "permits  issued date",
+     "meaning": "Reported issuance date, not work completion",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "permits__permit_id",
+     "label": "permits  permit id",
+     "meaning": "Preserved permit/application object key",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "permits__program",
+     "label": "permits  program",
+     "meaning": "Permit program",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "permits__source_id",
+     "label": "permits  source id",
+     "meaning": "Source jurisdiction and dataset",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "permits__source_permit_id",
+     "label": "permits  source permit id",
+     "meaning": "Source permit key scoped to jurisdiction",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "permits__source_record_url",
+     "label": "permits  source record url",
+     "meaning": "Additional exact source citation",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "permits__source_snapshot_date",
+     "label": "permits  source snapshot date",
+     "meaning": "Source capture date, distinct from lifecycle dates",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "permits__source_url",
+     "label": "permits  source url",
+     "meaning": "Source record citation",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "permits__state",
+     "label": "permits  state",
+     "meaning": "Source state",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "permits__status_raw",
+     "label": "permits  status raw",
+     "meaning": "Source status at capture; no completion inferred",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "plot_record_id",
+     "label": "plot record id",
+     "meaning": "Preserved PLOT observation object key; not a Native entity ID",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "record_kind",
+     "label": "record kind",
+     "meaning": "Source application, permit or agency action record kind",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "record_role",
+     "label": "record role",
+     "meaning": "Preserved interpretation of source observation",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "recorded_acres",
+     "label": "recorded acres",
+     "meaning": "Source reported land area; use recorded_acres_measure before aggregation",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "recorded_acres_measure",
+     "label": "recorded acres measure",
+     "meaning": "Area measurement basis; not necessarily surveyed or exclusive area",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "reported_value",
+     "label": "reported value",
+     "meaning": "Source permit valuation; repeated child permits may carry same value",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "research_scope",
+     "label": "research scope",
+     "meaning": "EPA Indian Country program context; no parcel affiliation",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "scheduled_only",
+     "label": "scheduled only",
+     "meaning": "Scheduled rather than completed or observed lifecycle activity",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "source_field",
+     "label": "source field",
+     "meaning": "EPA field that supplied the lifecycle date",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "source_object_id",
+     "label": "source object id",
+     "meaning": "Source feature key scoped to source_id",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "source_ownership_code",
+     "label": "source ownership code",
+     "meaning": "Source ownership category, such as BIA T; not a canonical owner binding",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "source_parcel_id",
+     "label": "source parcel id",
+     "meaning": "Source parcel or tract identifier; jurisdiction and grain required",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "source_tax_aggregation_eligible",
+     "label": "source tax aggregation eligible",
+     "meaning": "Preserved source tax aggregation gate; no override",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "source_vintage",
+     "label": "source vintage",
+     "meaning": "Source release vintage; not an event date",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "submitted_date",
+     "label": "submitted date",
+     "meaning": "Reported submission date",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "tax_aggregation_status",
+     "label": "tax aggregation status",
+     "meaning": "Preserved aggregation exclusion or eligibility explanation",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "tax_amount",
+     "label": "tax amount",
+     "meaning": "Reported property tax; tax_measure and tax_year define meaning; not payment",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "tax_amount_observed",
+     "label": "tax amount observed",
+     "meaning": "Observed tax monetary value, distinct from harmonized tax_amount; not a boolean",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "tax_comparison_group",
+     "label": "tax comparison group",
+     "meaning": "Comparable tax series classification; aggregate only within permitted group",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "tax_cross_county_pooling_status",
+     "label": "tax cross county pooling status",
+     "meaning": "Whether county definitions permit pooling; preserve restrictions",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "tax_measure",
+     "label": "tax measure",
+     "meaning": "Source-specific net, gross or other tax measure; not interchangeable",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "tax_year",
+     "label": "tax year",
+     "meaning": "Source tax-roll year; not owner observation or filing year",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "terminated_date",
+     "label": "terminated date",
+     "meaning": "Reported termination date",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "tract_observations__county_fips",
+     "label": "tract observations  county fips",
+     "meaning": "County FIPS context; parcel IDs are not nationally unique",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "tract_observations__record_grain",
+     "label": "tract observations  record grain",
+     "meaning": "BIA tract feature or assessor parcel feature; a tract can contain several parcels",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "tract_observations__source_id",
+     "label": "tract observations  source id",
+     "meaning": "Exact acquired source family",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "tract_observations__source_record_url",
+     "label": "tract observations  source record url",
+     "meaning": "Exact source feature citation",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "tract_observations__source_snapshot_date",
+     "label": "tract observations  source snapshot date",
+     "meaning": "Reported source snapshot date; blank remains unknown",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "tract_observations__source_url",
+     "label": "tract observations  source url",
+     "meaning": "Source dataset citation",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "tract_observations__state",
+     "label": "tract observations  state",
+     "meaning": "State context",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "trust_status",
+     "label": "trust status",
+     "meaning": "Preserved reported trust classification",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "value_currency",
+     "label": "value currency",
+     "meaning": "Currency reported for valuation",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "value_measure",
+     "label": "value measure",
+     "meaning": "Source valuation definition; not a payment or expenditure",
+     "definition_source": {
+      "kind": "existing_installed_definition"
+     }
+    },
+    {
+     "column": "whole_footprint_ownership_claim",
+     "label": "whole footprint ownership claim",
+     "meaning": "Preserved limit on whole-footprint ownership interpretation",
+     "definition_source": {
+      "kind": "existing_installed_definition"
      }
     }
    ]

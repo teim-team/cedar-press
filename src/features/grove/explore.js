@@ -142,9 +142,8 @@ export function flagshipKey(collectionId) {
 export function explorableCollections(user) {
   return STOREFRONT_CATALOG.map((entry) => {
     const tables = exploreTables(entry.id);
-    // A collection presented by its record structure (Foundation & Corporate
-    // Giving, PLOT) has no sample rows to preview and is not missing one:
-    // its viewer shows what each record holds instead.
+    // A record-structure guide can accompany an admitted sample. A guide alone
+    // also explains the schema when there is no sample to preview.
     const structure = recordStructure(entry.id);
     const flagship = tables.find((t) => t.flagship) ?? null;
     return {
@@ -234,6 +233,7 @@ export function rowUids(row, contract) {
  * stays withheld whatever the table says.
  */
 export function rowEntities(row, contract, register = EMPTY_REGISTER) {
+  contract = contractForRow(row, contract);
   const uids = rowUids(row, contract);
   const ownName = cell(row, contract?.entity_name) || null;
   const ownType = cell(row, contract?.entity_type) || null;
@@ -250,7 +250,7 @@ export function rowEntities(row, contract, register = EMPTY_REGISTER) {
   const seen = new Map();
   positions.forEach((uid, index) => {
     if (!UID.test(uid)) return;
-    const role = (roles ? roles[index] : rawRoles) || null;
+    const role = (roles ? roles[index] : rawRoles) || contract?.entity_role || null;
     const existing = seen.get(uid);
     if (existing) {
       if (role && role !== existing.role && !(existing.roles ?? []).includes(role)) {
@@ -271,7 +271,7 @@ export function rowEntities(row, contract, register = EMPTY_REGISTER) {
     primary.push(entry);
   });
   if (!primary.length && ownName && !contract?.entity_name_list) {
-    primary.push({ uid: null, name: ownName, type: ownType, withheld: false, role: rawRoles || null });
+    primary.push({ uid: null, name: ownName, type: ownType, withheld: false, role: rawRoles || contract?.entity_role || null });
   }
   // THE OTHER ROLES. A subaward names the prime's owner and the sub's; a
   // NAGPRA notice names who was consulted and who receives; a payment names
@@ -435,7 +435,7 @@ function contractForRow(row, contract) {
   // Unknown record kinds must not borrow another component's source or dates.
   return own
     ? { ...contract, ...own, row_type_contracts: null }
-    : { ...contract, source: null, source_fallback: null, source_builder: null, date: null, year: null, row_type_contracts: null };
+    : { ...contract, source: null, source_fallback: null, source_builder: null, source_fields: {}, subject: null, entity_uid: null, entity_name: null, entity_type: null, entity_role_column: null, entity_roles: [], observation: [], amount: null, amount_basis: null, amount_lower: null, amount_upper: null, date: null, year: null, row_type_contracts: null };
 }
 
 export function rowYear(row, contract) {
@@ -460,6 +460,8 @@ export function rowDate(row, contract) {
 }
 
 export function rowAmount(row, contract) {
+  contract = contractForRow(row, contract);
+  if (cell(row, contract?.amount_class).toLowerCase() === "range") return null;
   if (!contract?.amount) return null;
   const raw = cell(row, contract.amount).replace(/[$,\s]/g, "");
   if (raw === "") return null;
@@ -468,8 +470,28 @@ export function rowAmount(row, contract) {
 }
 
 /** What the amount is: the row's own basis column, else the declared label. */
-export function rowAmountBasis(row, contract) {
-  return cell(row, contract?.amount_basis) || contract?.amount_label || null;
+export function rowAmountBasis(row, contract, collection = null) {
+  contract = contractForRow(row, contract);
+  const qualifiers = [contract?.amount_basis, ...(contract?.amount_qualifiers ?? [])].filter(Boolean).map((field) => readerValueLabel(collection, field.split("__").at(-1), cell(row, field))).filter(Boolean);
+  return [...new Set(qualifiers)].join(" · ") || contract?.amount_label || null;
+}
+
+/** Bounds remain bounds. An umbrella/program total is never a recipient amount. */
+export function rowAmountRange(row, contract) {
+  contract = contractForRow(row, contract);
+  if (cell(row, contract?.amount_class).toLowerCase() !== "range") return null;
+  const number = (field) => {
+    const value = cell(row, field).replace(/[$,\s]/g, "");
+    return value && Number.isFinite(Number(value)) ? Number(value) : null;
+  };
+  const lower = number(contract?.amount_lower), upper = number(contract?.amount_upper);
+  return lower == null && upper == null ? null : { lower, upper };
+}
+
+function sourceRow(row, contract) {
+  return contract?.source_fields
+    ? Object.fromEntries(Object.entries(contract.source_fields).map(([field, column]) => [field, row[column]]))
+    : row;
 }
 
 const ORDINAL = (n) => {
@@ -597,15 +619,29 @@ const OBSERVATION_LIMIT = 180;
  * list separator. The full record is one click away, so this stops at 180.
  */
 export function observationOf(row, contract, collection = null) {
+  contract = contractForRow(row, contract);
   const parts = [];
   const reviewedOwnership = collection === "need" && cell(row, "relationship_type") === "owned_by" && cell(row, "ownership_extent") === "wholly_owned" && cell(row, "owner_name");
   if (reviewedOwnership) {
     parts.push(`Wholly owned by ${cell(row, "owner_name")}${cell(row, "owner_scope") === "immediate" ? " (immediate owner)" : ""}`);
   }
   for (const column of contract?.observation ?? []) {
-    if (reviewedOwnership && ["owner_name", "ownership_extent", "relationship_type"].includes(column)) continue;
-    const value = readerValueLabel(collection, column, cell(row, column)).replace(/\s*\|\s*/g, ", ").replace(/\s+/g, " ");
+    if (reviewedOwnership && (["owner_name", "ownership_extent", "relationship_type"].includes(column) ||
+        (column === "related_entity_name" && cell(row, column) === cell(row, "owner_name")))) continue;
+    const sourceField = Object.entries(contract?.source_fields ?? {}).find(([, target]) => target === column)?.[0] ?? column;
+    const value = readerValueLabel(collection, sourceField, cell(row, column)).replace(/\s*\|\s*/g, ", ").replace(/\s+/g, " ");
     if (value && !parts.includes(value)) parts.push(value);
+  }
+  // A reviewed NEED row may support identity only. Preserve that distinction
+  // rather than inventing an owner or displaying an empty observation.
+  if (collection === "need" && parts.length === 0) {
+    for (const [label, column] of [["UEI", "uei"], ["CAGE", "cage_code"]]) {
+      const value = cell(row, column);
+      if (value) parts.push(`${label}: ${value}`);
+    }
+    if (parts.length === 0 && cell(row, "enterprise_name")) {
+      parts.push(`Enterprise name: ${cell(row, "enterprise_name")}`);
+    }
   }
   const line = parts.join(" · ");
   return line.length > OBSERVATION_LIMIT ? `${line.slice(0, OBSERVATION_LIMIT - 1).trimEnd()}…` : line;
@@ -639,11 +675,16 @@ export const WITHHELD_TEXT = "[name withheld]";
 export function universalRows(key, rows, register = EMPTY_REGISTER, contract = contractFor(key)) {
   const [collection] = key.split("/");
   return rows.map((raw, i) => {
-    const entity = rowEntity(raw, contract, register);
-    const row = publicRow(raw, contract, entity);
-    const recordId = rowRecordId(row, contract);
+    const own = contractForRow(raw, contract);
+    const entity = rowEntity(raw, own, register);
+    let row = publicRow(raw, own, entity);
+    const subjectColumns = own?.subject_candidates ?? (own?.subject ? [own.subject] : []);
+    if (entity.withheld && own?.subject_entity_role === "recipient") {
+      row = { ...row, ...Object.fromEntries(subjectColumns.map(column => [column, WITHHELD_TEXT])) };
+    }
+    const recordId = rowRecordId(row, own);
     const recordType = contract?.record_type ? cell(row, contract.record_type) : null;
-    const subject = cell(row, contract?.subject) || null;
+    const subject = subjectColumns.map(column => cell(row, column)).find(Boolean) || null;
     return {
       id: recordId ? `${key}:${recordType === null ? "" : `${recordType}:`}${recordId}` : `${key}#${i}`,
       recordId,
@@ -660,10 +701,12 @@ export function universalRows(key, rows, register = EMPTY_REGISTER, contract = c
       subject: subject && subject.toLowerCase() !== (entity.name ?? "").toLowerCase() ? subject : null,
       year: rowYear(row, contract),
       date: rowDate(row, contract),
-      amount: rowAmount(row, contract),
-      amountBasis: readerValueLabel(collection, contract?.amount_basis, rowAmountBasis(row, contract)),
-      source: rowSource(row, contract),
-      sourceDetails: sourcePresentation(collection, row, rowSource(row, contract)),
+      amount: rowAmount(row, own),
+      amountRange: rowAmountRange(row, own),
+      amountBasis: rowAmountBasis(row, own, collection),
+      dateBasis: own?.date && cell(row, own.date) ? own.date_basis ?? null : own?.year ? own.year_basis : null,
+      source: rowSource(row, own),
+      sourceDetails: sourcePresentation(collection, sourceRow(row, own), rowSource(row, own)),
       superseded: rowSuperseded(row, contract),
       replacement: rowReplacement(row, contract),
       observation: observationOf(row, contract, collection),
@@ -889,9 +932,13 @@ function sortKey(item, by) {
     case "entity": return item.entity.name ?? item.entity.uid;
     case "entity_type": return item.entity.type;
     case "collection": return PRESS_CATALOG_BY_ID[item.collection]?.short ?? item.collection;
+    case "__subject": return item.subject ?? item.entity.name ?? item.entity.uid;
+    case "__date":
     case "date": return item.date;
     case "year": return item.year;
+    case "__amount":
     case "amount": return item.amount;
+    case "__observation":
     case "observation": return item.observation;
     case "source":
     case SOURCE_LINK_COLUMN: return item.source;

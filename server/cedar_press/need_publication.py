@@ -9,6 +9,7 @@ POLICY_HOLD = "NEED_PUBLICATION_QUARANTINE"
 COMPONENT = "reviewed_public_base"
 SOURCE = "need-reviewed-public-base-evidence"
 VERSION = "need-reviewed-public-base-1"
+CLAIM_VERSION = "need-reviewed-public-base-2"
 FIELDS = (
     "enterprise_id",
     "enterprise_name",
@@ -27,6 +28,19 @@ FIELDS = (
     "decision_sha256",
     "evidence_pins",
     "publication_status",
+)
+CLAIM_FIELDS = FIELDS + ("related_entity_name", "verified_claims", "subject_binding")
+CLAIM_NULLABLE_FIELDS = frozenset(
+    {
+        "uei",
+        "cage_code",
+        "cage_evidence_scope",
+        "owner_name",
+        "owner_scope",
+        "relationship_type",
+        "ownership_extent",
+        "related_entity_name",
+    }
 )
 
 
@@ -58,9 +72,17 @@ def reviewed_base_permitted(manifest: dict[str, Any], name: str, entry: dict[str
     proof = metadata.get("reviewed_public_base")
     if not isinstance(proof, dict) or proof != attestations.get("reviewed_public_base"):
         return False
+    version = proof.get("version")
+    if version == VERSION:
+        expected_fields = FIELDS
+        nullable_fields: frozenset[str] = frozenset()
+    elif version == CLAIM_VERSION:
+        expected_fields = CLAIM_FIELDS
+        nullable_fields = CLAIM_NULLABLE_FIELDS
+    else:
+        return False
     if (
-        proof.get("version") != VERSION
-        or proof.get("scope") != "reviewed_public_base_only"
+        proof.get("scope") != "reviewed_public_base_only"
         or proof.get("supersedes") != POLICY_HOLD
         or metadata.get("internal_only") is not False
         or not metadata_permits_publication(metadata)
@@ -119,9 +141,11 @@ def reviewed_base_permitted(manifest: dict[str, Any], name: str, entry: dict[str
     if not isinstance(fields, list) or any(not isinstance(field, dict) for field in fields):
         return False
     if (
-        tuple(field.get("name") for field in fields) != FIELDS
-        or any(field.get("nullable") is not False for field in fields)
-        or metadata.get("field_rights") != dict.fromkeys(FIELDS, "PUBLIC_DERIVED")
+        tuple(field.get("name") for field in fields) != expected_fields
+        or any(
+            field.get("nullable") is not (field.get("name") in nullable_fields) for field in fields
+        )
+        or metadata.get("field_rights") != dict.fromkeys(expected_fields, "PUBLIC_DERIVED")
         or next(field for field in fields if field["name"] == "publication_status").get(
             "allowed_values"
         )

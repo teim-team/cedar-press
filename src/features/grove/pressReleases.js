@@ -96,7 +96,22 @@ export const RELEASE_KIND = Object.freeze({
  */
 export const DECLARED_CADENCE = Object.freeze(
   Object.fromEntries(
-    ["funding", "federal-register", "legislation", "deals", "nagpra", "lobbying", "contractors", "subcontracting", "natural-resources", "owned", "nonprofits", "need"].map((id) => [id, CADENCE.WEEKLY]),
+    [
+  "funding",
+  "federal-register",
+  "legislation",
+  "deals",
+  "nagpra",
+  "lobbying",
+  "contractors",
+  "subcontracting",
+  "natural-resources",
+  "owned",
+  "nonprofits",
+  "need",
+  "foundation-corporate-giving",
+  "plot"
+].map((id) => [id, CADENCE.WEEKLY]),
   ),
 );
 

@@ -137,6 +137,11 @@ def exchange(request: dict, output_directory: Path | None = None) -> dict:
             "bytes": size,
             "record_count": release["record_count"],
             "citation": release["citation"],
+            **{
+                key: release[key]
+                for key in ("publication_scope", "reviewed_public_base")
+                if key in release
+            },
         }
     except BaseException:
         if destination is not None:

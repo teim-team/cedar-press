@@ -29510,7 +29510,7 @@
     "code/build.py",
     "code/cedar_publication.py",
     "data/cedar/codebook.json",
-    "scripts/field-map-markdown.mjs",
+    "scripts/docs-markdown.mjs --kind field-map",
     "server/tests/test_field_map.py"
    ],
    "runtime_consumer_candidates": [
@@ -89620,7 +89620,7 @@
     "code/940_staleness_sweep.py",
     "docs/defect_class_retro_sweep.json",
     "docs/schema/declared_column_removals.json",
-    "scripts/field-map-markdown.mjs"
+    "scripts/docs-markdown.mjs --kind field-map"
    ],
    "runtime_consumer_candidates": [],
    "operational_call_evidence": {
@@ -89734,7 +89734,7 @@
     "code/846_session_audit.py",
     "docs/defect_class_retro_sweep.json",
     "docs/schema/declared_column_removals.json",
-    "scripts/field-map-markdown.mjs"
+    "scripts/docs-markdown.mjs --kind field-map"
    ],
    "runtime_consumer_candidates": [],
    "operational_call_evidence": {

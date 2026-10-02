@@ -283,7 +283,7 @@ and the Pages upload are downstream of it, so they were skipped. Two gates,
 both doing their job:
 
 - `server/cedar_press/_press_data.json` is written by
-  `scripts/dump-press.mjs` and read by the API. The NEED rename changed the
+  `scripts/dump.mjs --kind press` and read by the API. The NEED rename changed the
   catalog name and the dump was never re-run, so the API would have served the
   old one. **If you change the catalog, re-run the dump in the same commit.**
 - `docs/ARCHITECTURE.md` carries a measured table of what the pending

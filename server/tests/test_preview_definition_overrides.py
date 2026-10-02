@@ -3,15 +3,24 @@
 import hashlib
 import importlib.util
 import json
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 _PATH = Path(__file__).resolve().parents[2] / "scripts/preview_definitions.py"
 _SPEC = importlib.util.spec_from_file_location("preview_definition_override_test_subject", _PATH)
 assert _SPEC and _SPEC.loader
 defs = importlib.util.module_from_spec(_SPEC)
 _SPEC.loader.exec_module(defs)
+_OVERRIDE_SPEC = importlib.util.spec_from_file_location(
+    "preview_definition_override_git_test_subject",
+    _PATH.with_name("preview_definition_overrides.py"),
+)
+assert _OVERRIDE_SPEC and _OVERRIDE_SPEC.loader
+override_loader = importlib.util.module_from_spec(_OVERRIDE_SPEC)
+_OVERRIDE_SPEC.loader.exec_module(override_loader)
 
 
 class PreviewDefinitionOverridesTest(unittest.TestCase):
@@ -34,7 +43,7 @@ class PreviewDefinitionOverridesTest(unittest.TestCase):
                     "repository": "producer",
                     "path": "src/source.py",
                     "sha256": hashlib.sha256(self.source.read_bytes()).hexdigest(),
-                    "revision": "a" * 40,
+                    "revision": "working-tree",
                 }
             },
             "collections": {
@@ -46,7 +55,7 @@ class PreviewDefinitionOverridesTest(unittest.TestCase):
                         "definition_source": {
                             "kind": "reviewed_transform_contract",
                             "path": "src/source.py",
-                            "revision": "a" * 40,
+                            "revision": "working-tree",
                         },
                     }
                 }
@@ -203,6 +212,174 @@ class PreviewDefinitionOverridesTest(unittest.TestCase):
                 "Original Federal Register source-system label.", "documents__source_system"
             )
         )
+
+    def git(self, *args):
+        hooks = Path(self.temp.name) / "empty-hooks"
+        hooks.mkdir(exist_ok=True)
+        result = subprocess.run(
+            [
+                "git",
+                "-C",
+                str(self.producer),
+                "-c",
+                "core.autocrlf=false",
+                "-c",
+                "commit.gpgsign=false",
+                "-c",
+                "core.hooksPath=" + str(hooks),
+                "-c",
+                "user.name=Evidence Test",
+                "-c",
+                "user.email=evidence-test@example.invalid",
+                *args,
+            ],
+            capture_output=True,
+            env=override_loader._git_environment(),
+            timeout=15,
+            check=True,
+        )
+        return result.stdout.decode("utf-8").strip()
+
+    def pin_commit(self):
+        self.git("init", "--quiet", "--object-format=sha1")
+        self.git("add", "--force", "--", "src/source.py")
+        self.git("commit", "--quiet", "-m", "Pinned evidence fixture")
+        revision = self.git("rev-parse", "HEAD")
+        self.set_revision(revision)
+        self.document["evidence"]["source"]["sha256"] = hashlib.sha256(
+            self.source.read_bytes()
+        ).hexdigest()
+        self.write()
+        return revision
+
+    def set_revision(self, revision):
+        self.document["evidence"]["source"]["revision"] = revision
+        self.document["collections"]["funding"]["action_date"]["definition_source"]["revision"] = (
+            revision
+        )
+
+    def test_commit_pin_survives_working_file_edits_and_deletion(self):
+        revision = self.pin_commit()
+        expected = self.document["evidence"]["source"]["sha256"]
+        self.source.write_bytes(b"New, uncommitted field contract.\n")
+        for state in ("modified", "deleted"):
+            with self.subTest(state=state):
+                if state == "deleted":
+                    self.source.unlink()
+                result = defs.load_overrides(self.root, self.producer)
+                source = result["funding"]["action_date"]["definition_source"]
+                self.assertEqual(source["revision"], revision)
+                self.assertEqual(source["evidence"][0]["sha256"], expected)
+
+    def test_commit_pin_does_not_follow_new_head(self):
+        revision = self.pin_commit()
+        self.source.write_bytes(b"A later committed contract.\n")
+        self.git("add", "--", "src/source.py")
+        self.git("commit", "--quiet", "-m", "Later evidence")
+        self.assertNotEqual(self.git("rev-parse", "HEAD"), revision)
+        result = defs.load_overrides(self.root, self.producer)
+        self.assertEqual(
+            result["funding"]["action_date"]["definition_source"]["revision"], revision
+        )
+
+    def test_missing_commit_refuses_working_tree_fallback(self):
+        self.pin_commit()
+        self.set_revision("0" * 40)
+        self.write()
+        with self.assertRaisesRegex(ValueError, "unavailable locally.*no network fetch"):
+            defs.load_overrides(self.root, self.producer)
+
+    def test_commit_pin_requires_git_checkout(self):
+        self.set_revision("a" * 40)
+        self.write()
+        with self.assertRaisesRegex(ValueError, "unavailable locally"):
+            defs.load_overrides(self.root, self.producer)
+
+    def test_commit_pin_checks_raw_hash_and_never_normalizes_line_endings(self):
+        self.source.write_bytes(b"Source action date contract.\r\n")
+        self.pin_commit()
+        raw_digest = self.document["evidence"]["source"]["sha256"]
+        self.document["evidence"]["source"]["sha256"] = hashlib.sha256(
+            b"Source action date contract.\n"
+        ).hexdigest()
+        self.write()
+        with self.assertRaisesRegex(ValueError, "evidence changed"):
+            defs.load_overrides(self.root, self.producer)
+        self.document["evidence"]["source"]["sha256"] = raw_digest
+        self.write()
+        self.assertIn("funding", defs.load_overrides(self.root, self.producer))
+
+    def test_commit_pin_refuses_missing_path_and_non_blob(self):
+        self.pin_commit()
+        for path, message in [
+            ("src/missing.py", "unavailable locally"),
+            ("src", "not a blob"),
+        ]:
+            with self.subTest(path=path):
+                self.document["evidence"]["source"]["path"] = path
+                self.document["collections"]["funding"]["action_date"]["definition_source"][
+                    "path"
+                ] = path
+                self.write()
+                with self.assertRaisesRegex(ValueError, message):
+                    defs.load_overrides(self.root, self.producer)
+
+    def test_tree_object_is_not_accepted_as_a_commit(self):
+        self.pin_commit()
+        self.set_revision(self.git("rev-parse", "HEAD^{tree}"))
+        self.write()
+        with self.assertRaisesRegex(ValueError, "not a full local commit"):
+            defs.load_overrides(self.root, self.producer)
+
+    def test_oversized_blob_is_refused_before_content_read(self):
+        self.pin_commit()
+        with (
+            mock.patch.object(override_loader, "_EVIDENCE_LIMIT", 8),
+            mock.patch.object(
+                override_loader, "_git_command", wraps=override_loader._git_command
+            ) as commands,
+            self.assertRaisesRegex(ValueError, "blob exceeds bound"),
+        ):
+            override_loader.load(self.root, self.producer, is_substantive=defs.is_substantive)
+        self.assertEqual(len(commands.call_args_list), 2)
+        self.assertTrue(
+            all(call.args[1].startswith("--batch-check=") for call in commands.call_args_list)
+        )
+
+    def test_commit_mode_rejects_unsafe_or_unbounded_paths(self):
+        self.pin_commit()
+        for path in (
+            "../outside.py",
+            "/absolute.py",
+            "C:/outside.py",
+            "src\\source.py",
+            "src/source.py\nHEAD",
+            "src/source.py\x00",
+            "x" * 4097,
+        ):
+            with self.subTest(path=path):
+                self.document["evidence"]["source"]["path"] = path
+                self.write()
+                with self.assertRaisesRegex(ValueError, "Evidence path"):
+                    defs.load_overrides(self.root, self.producer)
+
+    def test_commit_mode_rejects_unsupported_hash_mode(self):
+        self.pin_commit()
+        self.document["evidence"]["source"]["hash_mode"] = "normalize-newlines"
+        self.write()
+        with self.assertRaisesRegex(ValueError, "Unsupported evidence hash mode"):
+            defs.load_overrides(self.root, self.producer)
+
+    def test_local_object_environment_disables_fetch_and_inherited_repository(self):
+        with mock.patch.dict(
+            override_loader.os.environ,
+            {"GIT_DIR": "elsewhere", "GIT_WORK_TREE": "elsewhere", "GIT_ALLOW_PROTOCOL": "https"},
+        ):
+            env = override_loader._git_environment()
+        self.assertNotIn("GIT_DIR", env)
+        self.assertNotIn("GIT_WORK_TREE", env)
+        self.assertEqual(env["GIT_NO_LAZY_FETCH"], "1")
+        self.assertEqual(env["GIT_ALLOW_PROTOCOL"], "")
 
 
 if __name__ == "__main__":

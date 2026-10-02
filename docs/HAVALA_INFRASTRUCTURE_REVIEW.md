@@ -1287,8 +1287,8 @@ py -3 -B -m unittest discover -s server/tests -p test_field_map.py
 py -3 -B -m unittest discover -s server/tests -t server -p test_collection.py
 node --test src/features/grove/pressDownload.test.js
 node --test src/features/grove/handoff.test.js
-node scripts/field-map-markdown.mjs --check
-node scripts/guides-markdown.mjs --check
+node scripts/docs-markdown.mjs --kind field-map --check
+node scripts/docs-markdown.mjs --kind guides --check
 git diff --check
 ```
 

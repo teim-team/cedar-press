@@ -170,7 +170,13 @@ class TestReadingTheReply(unittest.TestCase):
     def test_an_answer_comes_back_with_its_thread(self):
         reply = self.ask_returning({"answer": "  Because.  ", "threadId": "t-9"})
         self.assertEqual(reply.answer, "Because.")
-        self.assertEqual(reply.thread_id, "t-9")
+        with mock.patch.dict(os.environ, {"CEDAR_INTERNAL_API_KEY": "k"}):
+            self.assertEqual(
+                cedar_service._open_thread(
+                    reply.thread_id, email="a@b.c", tier="press", collection_id=None
+                ),
+                "t-9",
+            )
         self.assertFalse(reply.unavailable)
 
     def test_the_contracts_own_degraded_flag_is_kept(self):

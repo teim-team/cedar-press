@@ -126,9 +126,12 @@ def presentation(collection_id: str, component: str) -> dict | None:
         return {
             "collection": "need",
             "order": list(need_publication.FIELDS),
+            "compatible_orders": [list(need_publication.CLAIM_FIELDS)],
             "fields": [
                 {"column": name, "decision": "keep", "rights_class": "PUBLIC_DERIVED"}
-                for name in need_publication.FIELDS
+                for name in dict.fromkeys(
+                    (*need_publication.FIELDS, *need_publication.CLAIM_FIELDS)
+                )
             ],
         }
     declared = component_declarations(collection_id).get(component)

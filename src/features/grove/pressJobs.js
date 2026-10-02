@@ -54,13 +54,8 @@
  * an audience is hidden only when a collection it names is not in the catalog
  * it is resolved against, or when it names fewer than `MIN_COLLECTIONS`.
  *
- * TWO COLLECTIONS ARE PRESENTED BY THEIR RECORD STRUCTURE
- * Foundation & Corporate Giving and PLOT are live on their shelves with no
- * release file in this repository (`coverage: STRUCTURE`). Their profile
- * questions are held to the producer's declared fields where a producer
- * exists, and they carry no Cedar questions: Cedar's suggested questions are
- * routed through a release profile, and neither has one. See
- * `COLLECTION_JOBS` below.
+ * Every catalog collection has a verified local preview and a release profile.
+ * Mixed record types retain their exact codebook fields and source limits.
  *
  * COVERAGE IS A REVIEW CHECK, NOT A RULE (owner, 2026-09-26: "The landing
  * page should show the best reasons to use Cedar Press, not prove that each
@@ -287,45 +282,32 @@ export const COLLECTION_JOBS = Object.freeze({
       ask(trace, "How are subsidiaries and joint ventures tied to the Nation or corporation behind them?", "construct"),
     ]),
   }),
-});
-
-// ── The two collections presented by their record structure ─────────────
-//
-// The owner's questions (2026-09-26) for Foundation & Corporate Giving and
-// PLOT. Neither has a release file, so neither has a codebook table in this
-// repository, and neither carries `cedar` questions: Cedar answers from a
-// release profile and there is none to answer from. `cedarQuestions` returns
-// nothing for them, and the Python suite, which runs every Cedar question
-// through the profile router, has none to run.
-//
-// Foundation & Corporate Giving's `fields` name the producer's declared
-// columns (Lumecon-data, `foundation_release.py`, `FIELDS`), and the node
-// suite holds them to that list until a codebook table replaces it. PLOT has
-// no producer in any repository, so its questions name no field; the suite
-// pins that as the one named exception and fails the day a PLOT codebook
-// table exists and the fields are still empty.
-//
-// "Organizations like this one" is made exact the way Federal Funding's is:
-// "like" is the recipient's entity type, not a similarity measure.
-const STRUCTURE_JOBS = Object.freeze({
   "foundation-corporate-giving": Object.freeze({
     questions: Object.freeze([
-      q(describe, "Which funders support organizations of the same type as this one?", ["funder_name", "recipient_entity_type", "recipient_name"]),
-      q(describe, "What purposes and geographies are receiving disclosed private funding?", ["purpose", "project_geography", "amount_exact_usd"]),
-      q(compare, "How does private giving compare with federal support?", ["cedar_uid", "amount_exact_usd", "financial_status"]),
+      q(describe, "Which funders and reported recipients appear in these source disclosures?", ["record_type", "funder_name", "recipient_name", "recipient_name_reported", "recipient_role"]),
+      q(compare, "How do disclosed amounts differ by financial status and source-reported year?", ["amount_exact_usd", "amount_lower_usd", "amount_upper_usd", "financial_status", "amount_basis", "report_year", "report_year_basis", "addability_status"]),
+      q(trace, "Which source supports a disclosure and its reported recipient?", ["disclosure_id", "source_url", "source_locator", "source_document_sha256"]),
+    ]),
+    cedar: Object.freeze([
+      ask(describe, "What does Foundation and Corporate Giving contain?", "content"),
+      ask(trace, "How is Foundation and Corporate Giving built?", "construct"),
     ]),
   }),
   plot: Object.freeze({
     questions: Object.freeze([
-      q(trace, "Where does this entity hold or acquire property?", []),
-      q(describe, "What permits or development activity are associated with those parcels?", []),
-      q(compare, "How has recorded activity around a property changed over time?", []),
+      q(describe, "Which source observations concern tracts, parcels, permits or environmental records?", ["record_type", "record_key", "record_grain", "source_parcel_id", "permit_number", "environmental_event_id"]),
+      q(compare, "How do source snapshots and recorded permit events differ in their time basis?", ["tract_observations__source_snapshot_date", "ownership_time_basis", "permit_events__event_date", "permit_events__event_date_precision", "environmental_events__event_date", "scheduled_only"]),
+      q(trace, "Which source record supports each observation?", ["tract_observations__source_record_url", "ownership_observations__source_record_url", "permits__source_record_url", "permit_events__source_url", "environmental_permits__source_record_url", "environmental_events__source_url"]),
+    ]),
+    cedar: Object.freeze([
+      ask(describe, "What does PLOT contain?", "content"),
+      ask(trace, "How is PLOT built?", "construct"),
     ]),
   }),
 });
 
-/** Every collection's questions, released or not, by catalog id. */
-export const ALL_COLLECTION_JOBS = Object.freeze({ ...COLLECTION_JOBS, ...STRUCTURE_JOBS });
+/** Every released collection's questions, by catalog id. */
+export const ALL_COLLECTION_JOBS = COLLECTION_JOBS;
 
 /** The questions a collection's fields can answer, or none. */
 export function collectionQuestions(id) {

@@ -236,7 +236,6 @@ test("every collection is reachable by its chip, its id and its extra words", ()
 
 import { AUDIENCE_JOBS, visibleAudiences } from "./pressJobs.js";
 import { PRESS_TIERS, spellCount } from "./pressCatalog.js";
-import { recordStructure } from "./pressRecordStructure.js";
 
 /** Every string a door answer can show a visitor. */
 const everything = () =>
@@ -329,18 +328,19 @@ test("no gaming collection or gaming source remains in any door answer", () => {
   assert.equal(answer("tell me about the gaming collection").id, DOOR_FALLBACK.id);
 });
 
-test("both new collections are described like the rest, with no figure and no 'not yet published'", () => {
+test("Giving and PLOT describe their installed observations and retain source qualifications", () => {
+  const manifest = JSON.parse(readFileSync(new URL("../../../data/cedar/collections.manifest.json", import.meta.url), "utf8"));
   for (const id of ["plot", "foundation-corporate-giving"]) {
     const intent = intentForCollection(id);
     const entry = STOREFRONT_CATALOG.find((item) => item.id === id);
     for (const text of [intent.answer, intent.expanded]) {
       assert.doesNotMatch(text, /not yet published|first release|pending|preparation/i, id);
-      assert.doesNotMatch(text, /\d/, `${id} states a figure`);
     }
     assert.ok(intent.answer.includes(entry.blurb), `${id}: what it contains`);
-    assert.ok(intent.answer.includes(recordStructure(id).summary), `${id}: what each record holds`);
-    // How it connects to the other collections, in the owner's Methods words.
-    assert.match(intent.answer, id === "plot" ? /Indian Country Deals links to the parcels PLOT follows/ : /beside federal funding and the Native Nonprofits roster/);
+    const published = manifest.collections.find((collection) => collection.id === id).sample.of;
+    assert.ok(Number.isSafeInteger(published) && published > 0, id);
+    assert.ok(intent.answer.includes(published.toLocaleString("en-US") + " observations"), `${id}: count follows the installed release`);
+    assert.match(intent.answer, id === "plot" ? /does not establish Native ownership/ : /disclosures|donation/i);
   }
   for (const text of everything()) assert.doesNotMatch(text, /not yet published|with (its|their) first release/i, text.slice(0, 80));
 });

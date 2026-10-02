@@ -1,6 +1,6 @@
 # Historical identifier retirement report
 
-Generated from `data/cedar/field_map.json` and the sample headers by `scripts/field-map-markdown.mjs`; edit the map, not this file. Written 2026-09-05 under the retirement rule in `docs/PUBLIC_DATASET_SPEC_2026-09-05.md` (addendum): migrate, reconcile, verify, retire, regression-test.
+Generated from `data/cedar/field_map.json` and the sample headers by `scripts/docs-markdown.mjs --kind field-map`; edit the map, not this file. Written 2026-09-05 under the retirement rule in `docs/PUBLIC_DATASET_SPEC_2026-09-05.md` (addendum): migrate, reconcile, verify, retire, regression-test.
 
 ## The rule, as enforced
 

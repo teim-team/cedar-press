@@ -575,10 +575,10 @@
       "name": "Foundation & Corporate Giving",
       "shelf": "standard",
       "coverage": {
-        "kind": "structure"
+        "kind": "observations"
       },
-      "blurb": "Foundation, corporate and bank funding publicly disclosed for Native nations, organizations and initiatives. Follow the funder, legal recipient, purpose, geography, amount and timing while keeping commitments, payments, authorizations and other reported financial statuses distinct.",
-      "linkage": "Philanthropic, corporate and bank giving, each disclosure kept as its own record: commitments and payments are separate facts, and the legal recipient is kept distinct from the Native beneficiary."
+      "blurb": "Foundation, corporate and bank giving disclosures concerning Native nations, organizations and initiatives. Examine reported funders, recipients, dates, amounts and financial status; commitments, payments, ranges and program totals remain distinct.",
+      "linkage": "Philanthropic, corporate and bank giving, each disclosure kept as its own record. The reported recipient may be a program or intermediary; a reviewed Native recipient binding is distinct from ownership or beneficiary status."
     },
     {
       "id": "contractors",
@@ -646,11 +646,10 @@
       "name": "Cedar Native Entity Enterprise Dataset (NEED)",
       "shelf": "pro",
       "coverage": {
-        "kind": "series",
-        "from": 2016
+        "kind": "observations"
       },
-      "blurb": "Enterprises owned or controlled by Native nations, Alaska Native corporations and other Native entities, including subsidiaries, holding companies and joint ventures. Follow parent relationships and organizational changes over time. Where records are available, profiles also carry patents, assigned or later acquired, and dated credit ratings, each kept with the entity it concerns.",
-      "linkage": "This is the structure the rest of the record resolves against, published as a collection in its own right: every tie names the nation or corporation behind it."
+      "blurb": "Source-backed enterprise identities and reviewed parent relationships. The current public release contains a limited evidence-pinned cohort; the wider enterprise register and restricted enrichments remain under review.",
+      "linkage": "Business identifiers and owner relationships remain separate claims. Each public fact retains its source release and evidence; an owner association never becomes the business identity."
     },
     {
       "id": "plot",
@@ -658,10 +657,10 @@
       "name": "PLOT",
       "shelf": "pro",
       "coverage": {
-        "kind": "structure"
+        "kind": "observations"
       },
-      "blurb": "Parcel-level ownership and development records associated with Native nations, organizations and enterprises. Follow ownership, transfers, parcel characteristics, geometry, permits and other recorded property activity over time.",
-      "linkage": "Land ownership, transfers, permitting and development, followed parcel by parcel: each parcel and the recorded events attached to it, linked to the Native entity that holds it."
+      "blurb": "Source observations of tracts, assessor parcels, permits and environmental records. Examine their recorded subjects, dates and citations while keeping parcel observations and permit events at their separate grains.",
+      "linkage": "Land ownership observations and permitting records retain their source identifiers. An assessor label, mapped tract or regulatory record does not establish Native ownership, legal title or a canonical entity binding."
     }
   ],
   "releases": {
@@ -1073,18 +1072,27 @@
     },
     "need": {
       "name": "Cedar Native Entity Enterprise Dataset (NEED)",
-      "version": "v4",
+      "version": "v5",
       "updated": "2026-10-01",
       "cadence": "Updated weekly",
       "retired": false,
       "history": [
+        {
+          "version": "v5",
+          "date": "2026-10-01",
+          "kind": "data",
+          "changed": [
+            "Dataset updated: 43 observations.",
+            "A 10-row preview downloads from the shelf."
+          ]
+        },
         {
           "version": "v4",
           "date": "2026-10-01",
           "kind": "data",
           "changed": [
             "Dataset updated: 27 observations.",
-            "A 10-row preview downloads from the shelf."
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         },
         {
@@ -1212,6 +1220,42 @@
           "changed": [
             "First published on Cedar Press: 123,293 rows.",
             "A 10-row preview accompanied this update; the shelf now serves the current preview."
+          ]
+        }
+      ]
+    },
+    "foundation-corporate-giving": {
+      "name": "Foundation & Corporate Giving",
+      "version": "v3",
+      "updated": "2026-10-01",
+      "cadence": "Updated weekly",
+      "retired": false,
+      "history": [
+        {
+          "version": "v3",
+          "date": "2026-10-01",
+          "kind": "data",
+          "changed": [
+            "First published on Cedar Press: 193 observations.",
+            "A 10-row preview downloads from the shelf."
+          ]
+        }
+      ]
+    },
+    "plot": {
+      "name": "PLOT",
+      "version": "v3",
+      "updated": "2026-10-01",
+      "cadence": "Updated weekly",
+      "retired": false,
+      "history": [
+        {
+          "version": "v3",
+          "date": "2026-10-01",
+          "kind": "data",
+          "changed": [
+            "First published on Cedar Press: 151,715 observations.",
+            "A 10-row preview downloads from the shelf."
           ]
         }
       ]
@@ -1475,6 +1519,40 @@
       },
       {
         "q": "How are subsidiaries and joint ventures tied to the Nation or corporation behind them?",
+        "kind": "Trace",
+        "route": "construct"
+      },
+      {
+        "q": "What changed since I last used this collection?",
+        "kind": "Compare",
+        "route": "changes"
+      }
+    ],
+    "foundation-corporate-giving": [
+      {
+        "q": "What does Foundation and Corporate Giving contain?",
+        "kind": "Describe",
+        "route": "content"
+      },
+      {
+        "q": "How is Foundation and Corporate Giving built?",
+        "kind": "Trace",
+        "route": "construct"
+      },
+      {
+        "q": "What changed since I last used this collection?",
+        "kind": "Compare",
+        "route": "changes"
+      }
+    ],
+    "plot": [
+      {
+        "q": "What does PLOT contain?",
+        "kind": "Describe",
+        "route": "content"
+      },
+      {
+        "q": "How is PLOT built?",
         "kind": "Trace",
         "route": "construct"
       },

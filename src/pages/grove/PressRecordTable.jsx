@@ -1,3 +1,4 @@
+import { PRESENTATION_COLUMNS } from "../../features/grove/mixedSpreadsheet.js";
 // REVIEW OWNER: Havala
 //
 // The record table, and the list it becomes on a phone.
@@ -30,14 +31,21 @@ import {
   scopeName,
 } from "../../features/grove/explore.js";
 import { isBareScheme, isWellFormedUrl, readerText } from "../../features/grove/readerValues.js";
-import { money, short } from "../../features/grove/recordColumns.js";
+import { money, short, reportedAmountText } from "../../features/grove/recordColumns.js";
 import { scrollEdges } from "../../features/grove/scrollEdges.js";
 import SourceCitation from "./SourceCitation.jsx";
 import { safeSourceUrl } from "../../features/grove/sourcePresentation.js";
 import { readerValueLabel, unlinkedRecordSubject } from "../../features/grove/readerPresentation.js";
 
 export function Human({ column, value, contract, item = null }) {
-  if (column === contract?.source && item?.sourceDetails) return <SourceCitation source={item.sourceDetails} compact />;
+  if (column === "__subject") return item?.entity?.withheld || item?.linkStatus === "withheld" ? WITHHELD_TEXT : item?.subject ?? item?.entity?.name ?? "Not provided";
+  if (column === "__observation") return item?.observation || "Not provided";
+  if (column === "__date") return item?.date ? <>{item.date}{item.dateBasis ? <small className="cp-ex__uid">{item.dateBasis}</small> : null}</> : "Not provided";
+  if (column === "__amount") {
+    const shown = reportedAmountText(item);
+    return shown ? <>{shown}{item.amountBasis ? <small className="cp-ex__uid">{item.amountBasis}</small> : null}</> : "Not provided";
+  }
+  if ((column === contract?.source || column === SOURCE_LINK_COLUMN) && item?.sourceDetails) return <SourceCitation source={item.sourceDetails} compact />;
   if (["source_inbox", "source_files", "link_ledger_source_file", "source_dataset", "raw_path", "storage_path"].includes(column)) return "Retained in internal provenance";
   if (value === "" || value == null || isBareScheme(value)) return "Not provided";
   const raw = String(value);
@@ -184,10 +192,10 @@ export function Rows({ view, items, columns, sort, onSort, onActive, showAmount,
     ...(showAmount ? [["amount", "Amount"]] : []),
     ["source", "Source"],
   ];
-  const primaryColumn = contract?.subject && columns[0] === contract.subject ? contract.subject : entityColumn;
+  const primaryColumn = columns[0] === "__subject" ? "__subject" : contract?.subject && columns[0] === contract.subject ? contract.subject : entityColumn;
   const pinned = (c) => c === primaryColumn || c === contract?.entity_uid;
   // The built source link has no column in the file, so no codebook label.
-  const headLabel = (c) => (c === SOURCE_LINK_COLUMN ? "Source record" : labelFor(items[0]?.key, c));
+  const headLabel = (c) => PRESENTATION_COLUMNS[c] ?? labelFor(items[0]?.key, c);
   const heads = view === "table" ? columns.map((c) => [c, headLabel(c), pinned(c), c === contract?.entity_uid ? " cp-ex__pin--uid" : c === primaryColumn && contract?.entity_uid && columns.includes(contract.entity_uid) ? " cp-ex__pin--name" : ""]) : universal;
   return (
     // The wrapper exists for the edge fade: every cell paints its own
@@ -298,8 +306,9 @@ export function Cards({ items, onActive, openRecord, readOnly = false }) {
               <EntityCell item={item} subjectFirst />
             </span>
             <span className="cp-ex__cardmeta">
-              {short(item.collection)} · {item.date ?? "undated"}{item.amount != null ? ` · ${money.format(item.amount)}` : ""}
-              {item.amount != null && item.amountBasis ? <small className="cp-ex__uid">{item.amountBasis}</small> : null}
+              {short(item.collection)} · {item.date ?? "undated"}{reportedAmountText(item) ? ` · ${reportedAmountText(item)}` : ""}
+              {item.date && item.dateBasis ? <small className="cp-ex__uid">{item.dateBasis}</small> : null}
+              {reportedAmountText(item) && item.amountBasis ? <small className="cp-ex__uid">{item.amountBasis}</small> : null}
             </span>
             <span className="cp-ex__cardobs cp-ex__clamp">{item.observation || "—"}</span>
             {readOnly ? null : <span className="cp-ex__cardgo" aria-hidden="true">&#8594;</span>}

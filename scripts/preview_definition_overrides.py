@@ -4,11 +4,14 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import re
+import subprocess
 from pathlib import Path, PurePosixPath
 from typing import Any, Callable
 
 _LIMIT = 8 * 1024 * 1024
+_EVIDENCE_LIMIT = 32 * 1024 * 1024
 
 
 def _unique_object(pairs):
@@ -22,12 +25,113 @@ def _unique_object(pairs):
 
 def _digest(path: Path, mode: str) -> str:
     with path.open("rb") as stream:
-        data = stream.read(32 * 1024 * 1024 + 1)
-    if len(data) > 32 * 1024 * 1024:
+        data = stream.read(_EVIDENCE_LIMIT + 1)
+    if len(data) > _EVIDENCE_LIMIT:
         raise ValueError("Override evidence file exceeds bound")
     if mode != "raw":
         raise ValueError("Unsupported evidence hash mode")
     return hashlib.sha256(data).hexdigest()
+
+
+def _git_environment() -> dict[str, str]:
+    # Bind object lookup to the selected checkout, not an inherited Git directory.
+    env = os.environ.copy()
+    for key in (
+        "GIT_DIR",
+        "GIT_WORK_TREE",
+        "GIT_COMMON_DIR",
+        "GIT_OBJECT_DIRECTORY",
+        "GIT_ALTERNATE_OBJECT_DIRECTORIES",
+        "GIT_NAMESPACE",
+    ):
+        env.pop(key, None)
+    env.update(
+        GIT_NO_LAZY_FETCH="1",
+        GIT_ALLOW_PROTOCOL="",
+        GIT_TERMINAL_PROMPT="0",
+        GIT_OPTIONAL_LOCKS="0",
+    )
+    return env
+
+
+def _git_command(root: Path, *args: str) -> list[str]:
+    return ["git", "--no-replace-objects", "-C", str(root), "cat-file", *args]
+
+
+def _git_object_info(root: Path, query: str) -> tuple[str, str, int]:
+    # One newline-free query yields only an object ID, type and decimal size.
+    # In the missing-object case Git echoes the bounded query, never blob bytes.
+    try:
+        result = subprocess.run(
+            _git_command(root, "--batch-check=%(objectname) %(objecttype) %(objectsize)"),
+            input=(query + "\n").encode("utf-8"),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+            env=_git_environment(),
+            timeout=15,
+            check=False,
+        )
+    except (OSError, subprocess.SubprocessError) as exc:
+        raise ValueError(
+            "Pinned evidence requires local Git objects; ensure Git is installed "
+            "and provide a checkout containing the pinned commit and path"
+        ) from exc
+    match = re.fullmatch(
+        rb"([0-9a-f]{40}|[0-9a-f]{64}) (blob|tree|commit|tag) ([0-9]{1,20})\n",
+        result.stdout,
+    )
+    if result.returncode != 0 or match is None:
+        raise ValueError(
+            "Pinned evidence object is unavailable locally: "
+            + query
+            + "; provide a checkout containing the pinned commit and path "
+            "(no network fetch or working-tree fallback)"
+        )
+    return match[1].decode("ascii"), match[2].decode("ascii"), int(match[3])
+
+
+def _pinned_digest(root: Path, revision: str, relative: str) -> str:
+    commit, kind, _ = _git_object_info(root, revision)
+    if commit != revision or kind != "commit":
+        raise ValueError("Evidence revision is not a full local commit: " + revision)
+    blob, kind, size = _git_object_info(root, revision + ":" + relative)
+    if kind != "blob":
+        raise ValueError("Pinned evidence path is not a blob: " + relative)
+    if size > _EVIDENCE_LIMIT:
+        raise ValueError("Override evidence blob exceeds bound")
+    try:
+        process = subprocess.Popen(
+            _git_command(root, "blob", blob),
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+            env=_git_environment(),
+        )
+    except OSError as exc:
+        raise ValueError("Could not read pinned evidence from local Git objects") from exc
+    try:
+        assert process.stdout is not None
+        digest = hashlib.sha256()
+        remaining = size
+        while remaining:
+            chunk = process.stdout.read(min(64 * 1024, remaining))
+            if not chunk:
+                raise ValueError("Pinned evidence blob is truncated or unavailable locally")
+            digest.update(chunk)
+            remaining -= len(chunk)
+        if process.stdout.read(1):
+            raise ValueError("Pinned evidence blob exceeds its declared bound")
+        if process.wait(timeout=15) != 0:
+            raise ValueError("Pinned evidence blob could not be read locally")
+        return digest.hexdigest()
+    except subprocess.SubprocessError as exc:
+        raise ValueError("Local pinned evidence read did not complete") from exc
+    finally:
+        if process.stdout is not None:
+            process.stdout.close()
+        if process.poll() is None:
+            process.kill()
+            process.wait(timeout=15)
 
 
 def load(
@@ -84,7 +188,12 @@ def load(
             raise ValueError(
                 "Producer evidence requires --producer or the staging producer checkout"
             )
-        if not isinstance(relative, str) or "\\" in relative:
+        if (
+            not isinstance(relative, str)
+            or "\\" in relative
+            or len(relative) > 4096
+            or any(ord(char) < 32 or ord(char) == 127 for char in relative)
+        ):
             raise ValueError("Evidence paths must be relative POSIX paths")
         pure = PurePosixPath(relative)
         if (
@@ -107,10 +216,16 @@ def load(
             raise ValueError("Evidence revision must be a full commit or working-tree")
         root = roots[repository]
         assert root is not None
-        path = root.joinpath(*pure.parts).resolve(strict=True)
-        if not path.is_relative_to(root):
-            raise ValueError("Evidence symlink escapes its repository")
-        if _digest(path, mode) != expected:
+        if mode != "raw":
+            raise ValueError("Unsupported evidence hash mode")
+        if revision == "working-tree":
+            path = root.joinpath(*pure.parts).resolve(strict=True)
+            if not path.is_relative_to(root):
+                raise ValueError("Evidence symlink escapes its repository")
+            actual = _digest(path, mode)
+        else:
+            actual = _pinned_digest(root, revision, relative)
+        if actual != expected:
             raise ValueError("Preview definition evidence changed: " + evidence_id)
         verified[evidence_id] = {**entry, "hash_mode": mode}
     resolved = {}

@@ -1,3 +1,5 @@
+import { columnPlan as currentColumnPlan } from "./recordColumns.js";
+import { PRESENTATION_COLUMNS as currentPresentationColumns } from "./mixedSpreadsheet.js";
 // The Explore card's model, proven on the real samples and on planted rows.
 //
 // The contracts are derived, so the first thing to prove is that every table
@@ -147,7 +149,7 @@ test("every published table has a contract and every contract names real columns
         if (contract[field]) assert.ok(columns.includes(contract[field]), `${key}.${field} = ${contract[field]} is not a column`);
       }
       for (const column of [...contract.observation, ...(contract.default_columns ?? [])]) {
-        assert.ok(columns.includes(column), `${key}: ${column} is not a column`);
+        assert.ok(columns.includes(column) || (contract.mapping_kind === "producer_spreadsheet" && Object.hasOwn(currentPresentationColumns, column)), `${key}: ${column} is not a column`);
       }
     }
   }
@@ -161,7 +163,7 @@ test("every flagship the shelf serves is declared reviewed, with its record id a
     assert.equal(contract.reviewed, true, `${key} is not declared reviewed in explore.overrides.json`);
     assert.ok(contract.record_id, `${key} has no record id`);
     assert.ok(!contract.entity_uid || contract.entity_role || contract.entity_role_column, `${key} does not say how its entity relates to the record`);
-    assert.ok(contract.default_columns?.length >= 5, `${key} declares no default columns`);
+    assert.ok(currentColumnPlan(key, contract, load(key).columns).defaults.length >= 5, `${key} declares no default columns`);
     // A dated table says what its year means; a register says it has none.
     if (contract.year || contract.date) assert.ok(contract.year_basis, `${key} has a year and no year basis`);
     if (contract.amount) assert.ok(contract.amount_basis || contract.amount_label, `${key} has an amount and no basis`);
@@ -185,10 +187,15 @@ test("the flagship comes first among a collection's tables and locked shelves st
   // and is not a collection missing its preview.
   for (const id of ["plot", "foundation-corporate-giving"]) {
     const described = standard.find((c) => c.entry.id === id);
-    assert.equal(described.flagship, null, id);
-    assert.deepEqual(described.tables, [], id);
+    assert.equal(described.flagship?.key, id + "/" + id, id);
+    assert.equal(described.tables.length, 1, id);
+    assert.equal(contractFor(described.flagship.key).mapping_kind, "producer_spreadsheet", id);
     assert.equal(described.previewUnavailable, null, id);
-    assert.ok(described.structure?.fields.length >= 5, id);
+    const { columns } = load(described.flagship.key);
+    const contract = contractFor(described.flagship.key);
+    assert.deepEqual(CURRENT_CODEBOOK[described.flagship.key].fields.map((field) => field.column), columns, id);
+    assert.ok(Object.keys(contract.row_type_contracts).length > 1, id);
+    assert.ok(currentColumnPlan(described.flagship.key, contract, columns).defaults.includes(SOURCE_LINK_COLUMN), id);
   }
 });
 
@@ -702,8 +709,8 @@ test("a table with no identifier column has no record id, and its rows keep dist
 });
 
 test("the codebook names real columns in every flagship, with a label and a meaning each, and its document is current", () => {
-  const script = fileURLToPath(new URL("../../../scripts/codebook-markdown.mjs", import.meta.url));
-  const run = spawnSync(process.execPath, [script, "--check"], { encoding: "utf8" });
+  const script = fileURLToPath(new URL("../../../scripts/docs-markdown.mjs", import.meta.url));
+  const run = spawnSync(process.execPath, [script, "--kind", "codebook", "--check"], { encoding: "utf8" });
   assert.equal(run.status, 0, run.stderr || run.stdout);
   for (const dataset of LAUNCH_COLLECTION) {
     const key = flagshipKey(dataset.id);
@@ -721,7 +728,7 @@ test("the codebook names real columns in every flagship, with a label and a mean
     assert.deepEqual(book.fields.map(f => f.column), columns, `${key}: exact shipped dictionary`);
     // Every column the contract declares as a default is a column the codebook explains.
     const listed = new Set(book.fields.map((f) => f.column));
-    for (const column of contractFor(key).default_columns ?? []) assert.ok(listed.has(column), `${key}: default column ${column} is not in the codebook`);
+    for (const column of contractFor(key).default_columns ?? []) assert.ok(listed.has(column) || (contractFor(key).mapping_kind === "producer_spreadsheet" && Object.hasOwn(currentPresentationColumns, column)), `${key}: default column ${column} is not in the codebook`);
     assert.ok(codebookColumns(key, columns).length >= 10, `${key}: fewer than ten codebook columns present`);
   }
   // The identity block's class is the register's, never a scope or a source's own type (Codex, PR #64).
@@ -738,7 +745,7 @@ test("CONTRACTS is the derived file, frozen, and the withheld tables are gone fr
   const published = LAUNCH_COLLECTION.flatMap(dataset =>
     collectionTables(dataset.id).filter(t => t.sample_path).map(t => tableKey(dataset.id, t.table)));
   assert.deepEqual(Object.keys(CONTRACTS).sort(), published.sort());
-  assert.equal(Object.keys(CONTRACTS).length, 12);
+  assert.equal(Object.keys(CONTRACTS).length, 14);
   assert.equal(CONTRACTS["owned/individual_native_firm_register"], undefined);
 });
 
@@ -763,8 +770,8 @@ test("the publish-time deals columns are read from cedar_publication.py, not gue
 });
 
 test("the field map decides every column of every sampled flagship in the owner's exact order, retires every competing identifier, and the codebook lists exactly what ships", () => {
-  const script = fileURLToPath(new URL("../../../scripts/field-map-markdown.mjs", import.meta.url));
-  const run = spawnSync(process.execPath, [script, "--check"], { encoding: "utf8" });
+  const script = fileURLToPath(new URL("../../../scripts/docs-markdown.mjs", import.meta.url));
+  const run = spawnSync(process.execPath, [script, "--kind", "field-map", "--check"], { encoding: "utf8" });
   assert.equal(run.status, 0, run.stderr || run.stdout);
   assert.deepEqual(OPENING_SINGULAR, ["cedar_uid", "canonical_name", "entity_class", "cedar_entity_role"]);
   assert.deepEqual(OPENING_PLURAL, ["cedar_uids", "canonical_names", "entity_classes", "entity_roles", "entity_names_as_published"]);
@@ -772,8 +779,13 @@ test("the field map decides every column of every sampled flagship in the owner'
   // and Federal Register is 34 because the producer now builds
   // consultation_record_key at write time (field_map.json, 6f620ec).
   const EXPECTED = { funding: 39, "federal-register": 34, legislation: 30, deals: 33, nagpra: 52, lobbying: 38, contractors: 49, subcontracting: 54, "natural-resources": 38, owned: 32, need: 30, nonprofits: 24 };
+  // This map records the original twelve curated schemas. Current producer
+  // spreadsheets are checked against their exact codebooks and type maps in
+  // currentProducerPresentation.test.js, including Giving and PLOT.
+  const historical = LAUNCH_COLLECTION.filter((dataset) => Object.hasOwn(EXPECTED, dataset.id));
+  assert.equal(historical.length, Object.keys(EXPECTED).length);
   let sampled = 0;
-  for (const dataset of LAUNCH_COLLECTION) {
+  for (const dataset of historical) {
     const map = Object.values(FIELD_MAP).find((t) => t.collection === dataset.id);
     assert.ok(map, `${dataset.id} has no field map`);
     assert.equal(map.order.length, EXPECTED[dataset.id], `${dataset.id}: column count`);
@@ -1105,13 +1117,13 @@ test("the contract guard fires on each violation it names, and passes a clean ov
 // ── The researcher guides ──────────────────────────────────────────────────
 
 test("every collection has a researcher guide with the sections the specification requires, and the guides are current", async () => {
-  const script = fileURLToPath(new URL("../../../scripts/guides-markdown.mjs", import.meta.url));
-  const run = spawnSync(process.execPath, [script, "--check"], { encoding: "utf8" });
+  const script = fileURLToPath(new URL("../../../scripts/docs-markdown.mjs", import.meta.url));
+  const run = spawnSync(process.execPath, [script, "--kind", "guides", "--check"], { encoding: "utf8" });
   assert.equal(run.status, 0, run.stderr || run.stdout);
-  const { SECTIONS } = await import("../../../scripts/guides-markdown.mjs");
+  const { SECTIONS } = await import("../../../scripts/docs-markdown.mjs");
   const dir = fileURLToPath(new URL("../../../docs/guides/", import.meta.url));
   const ids = LAUNCH_COLLECTION.map((d) => d.id);
-  assert.equal(ids.length, 12);
+  assert.equal(ids.length, 14);
   for (const id of ids) {
     const text = readFileSync(`${dir}${id}.md`, "utf8");
     for (const section of SECTIONS) assert.ok(text.includes(`\n## ${section}\n`), `${id}: no "${section}" section`);

@@ -132,13 +132,10 @@ test("installed producer contracts open on their curated columns and retain raw 
   }
 });
 
-test("NEED keeps its seven reviewed enterprise and ownership columns", () => {
+test("NEED keeps its seven reviewed enterprise and relationship columns", () => {
   const contract = CONTRACTS["need/need"];
   assert.ok(contract);
-  assert.deepEqual(contract.default_columns, [
-    "enterprise_name", "owner_name", "ownership_extent", "relationship_type",
-    "uei", "cage_code", "record_grain",
-  ]);
+  assert.deepEqual(contract.default_columns, ["enterprise_name", "related_entity_name", "relationship_type", "ownership_extent", "uei", "cage_code", "record_grain"]);
   const plan = columnPlan("need/need", contract, [
     ...contract.default_columns, "record_type", "record_key", "evidence_pins",
   ]);

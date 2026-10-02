@@ -222,3 +222,158 @@ class ReviewedNeedReleaseTest(unittest.TestCase):
                         )
                     with self.assertRaises(repository.FullReleaseUnavailable):
                         spreadsheet.download("need", pin["release_id"])
+
+    def claim_scoped_fixture(self):
+        manifest, pin, _ = self.reviewed_fixture()
+        entry = manifest["components"][policy.COMPONENT]
+        proof = manifest["attestations"]["reviewed_public_base"]
+        proof["version"] = policy.CLAIM_VERSION
+        entry["metadata"]["reviewed_public_base"] = copy.deepcopy(proof)
+        entry["metadata"]["field_rights"] = dict.fromkeys(policy.CLAIM_FIELDS, "PUBLIC_DERIVED")
+        entry["fields"] = [
+            {
+                "name": name,
+                "type": "string",
+                "nullable": name in policy.CLAIM_NULLABLE_FIELDS,
+                "allowed_values": ["observed"] if name == "publication_status" else None,
+            }
+            for name in policy.CLAIM_FIELDS
+        ]
+        row = dict.fromkeys(policy.CLAIM_FIELDS, "synthetic")
+        row.update(
+            enterprise_id="NEST-SYNTHETIC-1",
+            enterprise_name="Synthetic Enterprise",
+            source_reported_name="Synthetic Enterprise",
+            publication_status="observed",
+            source_release_id="a" * 64,
+            source_row_sha256="b" * 64,
+            decision_sha256="c" * 64,
+            uei=None,
+            cage_code=None,
+            cage_evidence_scope=None,
+            owner_name=None,
+            owner_scope=None,
+            ownership_extent=None,
+            related_entity_name="Synthetic Regional Organization",
+            relationship_type="affiliated_with",
+            reviewed_on="2026-10-01",
+            review_reason="Reviewed official portfolio affiliation only.",
+            verified_claims=json.dumps(["identity", "affiliation"]),
+            subject_binding=json.dumps(
+                {
+                    "kind": "reviewed_profile_link",
+                    "profile_link_id": "f" * 64,
+                    "profile_row_sha256": "f" * 64,
+                }
+            ),
+            evidence_pins=json.dumps(
+                [
+                    {
+                        "url": "https://example.test/portfolio",
+                        "sha256": "e" * 64,
+                        "supports": ["identity", "affiliation"],
+                    }
+                ]
+            ),
+        )
+        content = repository._canonical_bytes(row)
+        entry["files"]["records.jsonl"] = {
+            "bytes": len(content),
+            "sha256": hashlib.sha256(content).hexdigest(),
+        }
+        self.repin(manifest, pin)
+        return manifest, pin, content
+
+    def test_claim_scoped_http_export_does_not_turn_affiliation_into_ownership(self):
+        manifest, pin, content = self.claim_scoped_fixture()
+        self.assertTrue(
+            policy.reviewed_base_permitted(
+                manifest, policy.COMPONENT, manifest["components"][policy.COMPONENT]
+            )
+        )
+        self.session("press_pro")
+        with patch.object(
+            repository, "_release_response", side_effect=lambda _: io.BytesIO(content)
+        ):
+            result = self.client.get(
+                "/press/collections/need/spreadsheet-download",
+                params={"release_id": pin["release_id"]},
+            )
+            self.assertEqual(result.status_code, 200, result.text)
+            rows = list(csv.DictReader(io.StringIO(result.text)))
+            self.assertEqual(len(rows), 1)
+            self.assertEqual(rows[0]["related_entity_name"], "Synthetic Regional Organization")
+            self.assertEqual(rows[0]["relationship_type"], "affiliated_with")
+            for column in ("owner_name", "owner_scope", "ownership_extent", "uei", "cage_code"):
+                self.assertEqual(rows[0][column], "")
+            self.assertEqual(json.loads(rows[0]["verified_claims"]), ["identity", "affiliation"])
+            response = grove_exchange.response(
+                {
+                    "protocol_version": 1,
+                    "tier": "grove",
+                    "operation": "spreadsheet",
+                    "collection": "need",
+                    "release_id": pin["release_id"],
+                },
+                self.root,
+            )
+            self.assertEqual(response["status"], 200, response)
+            self.assertEqual(
+                response["payload"]["reviewed_public_base"]["version"], policy.CLAIM_VERSION
+            )
+            self.assertEqual(response["payload"]["record_count"], 1)
+        with (
+            patch.object(
+                repository,
+                "_release_response",
+                side_effect=AssertionError("Private components stay held"),
+            ),
+            self.assertRaises(repository.FullReleaseUnavailable),
+        ):
+            repository.grove_full_release("need", pin["release_id"], component="enterprises")
+
+    def test_claim_scoped_proof_is_exact_and_refuses_before_component_fetch(self):
+        manifest, pin, _ = self.claim_scoped_fixture()
+        original = copy.deepcopy(manifest)
+        for failure in (
+            "unknown_version",
+            "old_version_new_fields",
+            "missing_binding",
+            "nullable_identity",
+            "required_unproved_owner",
+            "licensed_field",
+            "unpaired_proof",
+        ):
+            with self.subTest(failure=failure):
+                manifest.clear()
+                manifest.update(copy.deepcopy(original))
+                entry = manifest["components"][policy.COMPONENT]
+                if failure in {"unknown_version", "old_version_new_fields"}:
+                    version = (
+                        "need-reviewed-public-base-99"
+                        if failure == "unknown_version"
+                        else policy.VERSION
+                    )
+                    manifest["attestations"]["reviewed_public_base"]["version"] = version
+                    entry["metadata"]["reviewed_public_base"]["version"] = version
+                elif failure == "missing_binding":
+                    entry["fields"] = [f for f in entry["fields"] if f["name"] != "subject_binding"]
+                elif failure in {"nullable_identity", "required_unproved_owner"}:
+                    target = "enterprise_id" if failure == "nullable_identity" else "owner_name"
+                    next(f for f in entry["fields"] if f["name"] == target)["nullable"] = (
+                        target == "enterprise_id"
+                    )
+                elif failure == "licensed_field":
+                    entry["metadata"]["field_rights"]["related_entity_name"] = "LICENSED"
+                else:
+                    entry["metadata"]["reviewed_public_base"]["version"] = policy.VERSION
+                self.repin(manifest, pin)
+                with (
+                    patch.object(
+                        repository,
+                        "_release_response",
+                        side_effect=AssertionError("Rejected proof must not fetch"),
+                    ),
+                    self.assertRaises(repository.FullReleaseUnavailable),
+                ):
+                    spreadsheet.download("need", pin["release_id"])

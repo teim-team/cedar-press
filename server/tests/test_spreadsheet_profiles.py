@@ -65,3 +65,35 @@ class SpreadsheetProfileTest(unittest.TestCase):
                 self.assertRaisesRegex(ValueError, "record-type count"),
             ):
                 _spreadsheet_construction("funding")
+
+    def test_giving_and_plot_profiles_preserve_component_claim_limits(self):
+        for collection, kinds, phrases in (
+            (
+                "foundation-corporate-giving",
+                {"policy_eligible_disclosures": 155, "reviewed_disclosures": 38},
+                (
+                    "not necessarily a distinct award or payment",
+                    "unpaid balances",
+                    "intermediary or program",
+                ),
+            ),
+            (
+                "plot",
+                {"tract_observations": 20, "permit_events": 4},
+                (
+                    "tract can contain several parcels",
+                    "not title certification",
+                    "not unique projects",
+                ),
+            ),
+        ):
+            with (
+                self.subTest(collection=collection),
+                patch(
+                    "cedar_press.collection_profiles.collection_tables",
+                    return_value=({"record_types": kinds},),
+                ),
+            ):
+                result = _spreadsheet_construction(collection)
+            for phrase in phrases:
+                self.assertIn(phrase, result["known_limitations"])

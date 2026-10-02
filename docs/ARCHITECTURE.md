@@ -63,10 +63,10 @@ git ls-files src/<dir>/grove                                   # files to move
 
 | | |
 |---|---|
-| Files to move | 157 — `features/grove` 110, `pages/grove` 44, `components/grove` 1, `styles/grove` 2 |
-| Path references to rewrite | 433, across 102 files |
+| Files to move | 166 — `features/grove` 119, `pages/grove` 44, `components/grove` 1, `styles/grove` 2 |
+| Path references to rewrite | 433, across 100 files |
 | Referencing files inside `src/` | 52 — `pages/` 34, `features/` 14, `context/` 2, `components/` 1, `main.jsx` 1 |
-| Referencing files outside `src/` | 50 — `server/cedar_press/` 8, `scripts/` 9, `docs/` 17, `code/` 5, `server/tests/` 4, `tests/` 2, `data/` 1, `.github/` 1, `.env.example` 1, `AGENTS.md` 1, `eslint.config.js` 1 |
+| Referencing files outside `src/` | 48 — `server/cedar_press/` 8, `scripts/` 7, `docs/` 17, `code/` 5, `server/tests/` 4, `tests/` 2, `data/` 1, `.github/` 1, `.env.example` 1, `AGENTS.md` 1, `eslint.config.js` 1 |
 
 The reason this was deferred has expired. The table used to carry a fifth row
 — twelve files also touched by an open PR, which would each have become a
@@ -536,7 +536,7 @@ disposition. The column counts are the owner's exactly, except Funding at
 39: the list keeps `recipient_duns` and the retirement rule in the same
 addendum says not to publish DUNS, and the later rule wins. This pass
 changes columns, never rows, identities or eligibility.
-`scripts/field-map-markdown.mjs` renders `docs/FIELD_MAP_2026-09-05.md`
+`scripts/docs-markdown.mjs --kind field-map` renders `docs/FIELD_MAP_2026-09-05.md`
 and `docs/IDENTIFIER_RETIREMENT_2026-09-05.md` (`--check` fails a stale
 document). The unsampled flagship (`owned`) carries its 32-column order as
 owed until its sample lands.
@@ -588,7 +588,7 @@ carries, and `rowEntities` unions them into the row's entities with the
 role on each, so an entity filter finds a row through any supported role
 and never only the first displayed uid.
 
-THE GUIDES. `scripts/guides-markdown.mjs` writes one researcher guide per
+THE GUIDES. `scripts/docs-markdown.mjs --kind guides` writes one researcher guide per
 collection into `docs/guides/` from `data/cedar/guides.json` (the prose),
 the collection descriptor (purpose, sources, method), the field map (row
 unit, roles, approved header, what is owed, the retirement findings that

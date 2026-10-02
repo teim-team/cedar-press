@@ -81,7 +81,9 @@ export function formatPressCode(raw) {
  * everything else opens on activation, because someone arriving from a Tribal
  * Business News confirmation has a code in hand and no account yet.
  */
-export function initialPressStep(storage) {
+export function initialPressStep(storage, { signInRequested = false } = {}) {
+  // An explicit login link also works on a new host/browser with no local hint.
+  if (signInRequested) return PRESS_STEP.SIGN_IN;
   // With no server routes behind activation, sign-in is the only screen the
   // gate may open on; the storage hint matters again when activation ships.
   if (!PRESS_ACTIVATION_AVAILABLE) return PRESS_STEP.SIGN_IN;

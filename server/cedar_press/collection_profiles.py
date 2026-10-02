@@ -197,6 +197,22 @@ def _spreadsheet_construction(dataset_id: str) -> dict[str, Any] | None:
             " Preserve measurement_status: an appropriation or allocation "
             "is not evidence that a payment occurred."
         )
+    if dataset_id == "foundation-corporate-giving":
+        limits += (
+            " A disclosure is not necessarily a distinct award or payment. "
+            "Keep commitments, payments, unpaid balances, ranges and aggregate "
+            "program totals separate. The reported recipient may be an "
+            "intermediary or program; no ownership or donation relationship "
+            "is inferred from a shared identifier."
+        )
+    if dataset_id == "plot":
+        limits += (
+            " A mapped tract can contain several parcels. Assessor owner "
+            "labels are source observations, not title certification or "
+            "verified Native ownership. Permits are not unique projects, "
+            "and permit valuation is not expenditure. Regulatory dates and "
+            "source snapshots are not acquisition dates."
+        )
     return {
         "unit_of_observation": unit,
         "entity_resolution_method": (

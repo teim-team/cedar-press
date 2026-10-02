@@ -118,7 +118,7 @@ test("resource reporting periods do not become missing or invented payment dates
 
 test("reviewed NEED defaults display qualified owner facts without inventing an entity link", () => {
   const c = spreadsheetContract([...base, "enterprise_name", "owner_name", "ownership_extent", "relationship_type", "uei", "cage_code", "evidence_pins"]);
-  assert.deepEqual(c.default_columns, ["enterprise_name", "owner_name", "ownership_extent", "relationship_type", "uei", "cage_code", "record_grain"]);
+  assert.deepEqual(c.default_columns, ["enterprise_name", "owner_name", "relationship_type", "ownership_extent", "uei", "cage_code", "record_grain"]);
   assert.equal(c.entity_uid, null);
   assert.equal(c.entity_name, null);
   assert.ok(c.observation.includes("ownership_extent"));

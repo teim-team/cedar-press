@@ -18,7 +18,7 @@ WHY THIS PAGE
 WHAT IT DELIBERATELY DOES NOT SHOW
     The tier ladder's marketing copy -- each band's product name, price,
     question and promise -- exists only in ``pressCatalog.js``'s
-    ``PRESS_TIERS``, which ``scripts/dump-press.mjs`` does not dump. It is not
+    ``PRESS_TIERS``, which ``scripts/dump.mjs --kind press`` does not dump. It is not
     retyped here. Adding a seventh hand-maintained mirror to a page whose
     argument is that six is too many would refute the page. The template says
     so where the copy would sit, and moving that ladder into Python is a named
@@ -168,6 +168,8 @@ def _coverage(entry: dict[str, Any]) -> str:
     catalog snapshot has not caught up with states neither.
     """
     coverage = entry.get("coverage") or {}
+    if coverage.get("kind") == "observations":
+        return "Source-dated observations"
     if coverage.get("kind") == "roster" and coverage.get("captured"):
         return f"Current roster, captured {coverage['captured']}"
     year = _coverage_from(entry)

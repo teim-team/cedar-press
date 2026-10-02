@@ -38,7 +38,7 @@ test("stale NEED cached rows cannot acquire the reviewed release citation", asyn
 
 test("the reviewed finite NEED preview remains available", async () => {
   const sample = collectionSample("need");
-  assert.equal(sample.of, 27, "the installed release is the reviewed 27-observation base");
+  assert.equal(sample.of, 43, "the installed release is the reviewed 43-observation base");
   assert.equal(sample.path, "/data/cedar/samples/need/spreadsheet__10.csv");
   assert.equal(hasReleaseFile({ id: "need" }), true);
   const source = await readSample(sample.path);

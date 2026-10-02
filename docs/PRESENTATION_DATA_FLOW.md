@@ -35,7 +35,7 @@ Review-only material does not become a public sample when a local count changes.
 | Shared reader-facing field and record labels | src/features/grove/readerPresentation.js |
 | Public table column layout | src/features/grove/recordColumns.js |
 | Connected display order and count checks | src/features/grove/releaseResearch.js |
-| Generated codebook documentation | scripts/codebook-markdown.mjs |
+| Generated codebook documentation | scripts/docs-markdown.mjs --kind codebook |
 | Cross-language duplication measurement | scripts/measure_duplication.py |
 | Generated-file validation | make check-generated |
 

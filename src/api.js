@@ -69,10 +69,23 @@ async function request(path, { method = "GET", body, signal, headers } = {}) {
 
 /* ── Session ─────────────────────────────────────────────────────────── */
 
+function requireSessionPayload(payload) {
+  if (!payload || typeof payload !== "object" || Array.isArray(payload)
+      || typeof payload.email !== "string" || !payload.email.trim()
+      || typeof payload.workspace_tier !== "string" || !payload.workspace_tier.trim()) {
+    throw new ApiError(
+      "The sign-in service returned an unexpected response. Please try again or contact Cedar Press.",
+      "AUTH_RESPONSE_INVALID",
+      502,
+    );
+  }
+  return payload;
+}
+
 /** The signed-in subscriber, or null when the session is not valid. */
 export async function fetchSession({ signal } = {}) {
   try {
-    return await request("/me", { signal });
+    return requireSessionPayload(await request("/me", { signal }));
   } catch (error) {
     if (error.status === 401) return null;
     throw error;
@@ -80,7 +93,7 @@ export async function fetchSession({ signal } = {}) {
 }
 
 export async function login({ email, password }) {
-  return request("/auth/login", { method: "POST", body: { email, password } });
+  return requireSessionPayload(await request("/auth/login", { method: "POST", body: { email, password } }));
 }
 
 export async function logout() {
@@ -94,7 +107,7 @@ export async function validatePressCode({ code, email }) {
 }
 
 export async function activatePressAccount({ code, email, password }) {
-  return request("/press/activation", { method: "POST", body: { code, email, password } });
+  return requireSessionPayload(await request("/press/activation", { method: "POST", body: { code, email, password } }));
 }
 
 /* ── The subscriber ──────────────────────────────────────────────────── */

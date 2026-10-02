@@ -15,7 +15,7 @@ Python read the descriptor, so ``deals`` cited as v9.0 in the browser and v9 on
 the server. A docstring is not a check.
 
 This is the check. It executes BOTH implementations -- Python in-process,
-JavaScript through ``scripts/dump-collection.mjs`` -- and compares every value
+JavaScript through ``scripts/dump.mjs --kind collection`` -- and compares every value
 the two produce. It lives here rather than at the path the docstring named
 because ``tests/`` is Playwright's directory and CI runs the Python suite as
 ``python -m unittest discover -s tests -t .`` from ``server/``. A test at a
@@ -49,21 +49,20 @@ from cedar_press import collection_profiles, press_catalog
 from cedar_press import collections as launch
 
 _REPO = Path(__file__).resolve().parents[2]
-_DUMP = _REPO / "scripts" / "dump-collection.mjs"
-_PRESS_DUMP = _REPO / "scripts" / "dump-press.mjs"
+_DUMP = _REPO / "scripts" / "dump.mjs"
 
 #: The same fixed date the JavaScript dump uses. Neither implementation reads a
 #: clock, so this comparison cannot flap at midnight.
 ACCESSED = "1 January 2026"
 
 
-def _run(script: Path) -> dict:
+def _run(kind: str) -> dict:
     """Run one of the dump scripts and read back everything it produces."""
     node = shutil.which("node")
     if node is None:
         raise AssertionError("node is not on PATH")
     result = subprocess.run(  # noqa: S603
-        [node, str(script)],
+        [node, str(_DUMP), "--kind", kind],
         capture_output=True,
         text=True,
         encoding="utf-8",
@@ -71,18 +70,18 @@ def _run(script: Path) -> dict:
         check=False,
     )
     if result.returncode != 0:
-        raise AssertionError(f"{script.name} exited {result.returncode}:\n{result.stderr}")
+        raise AssertionError(f"dump.mjs ({kind}) exited {result.returncode}:\n{result.stderr}")
     return json.loads(result.stdout)
 
 
 def _javascript() -> dict:
     """The launch collection, as the JavaScript implementation produces it."""
-    return _run(_DUMP)
+    return _run("collection")
 
 
 def _javascript_press() -> dict:
     """The Press ladder, as ``pressCatalog.js`` and its siblings produce it."""
-    return _run(_PRESS_DUMP)
+    return _run("press")
 
 
 class TestCrossLanguageParity(unittest.TestCase):
@@ -128,10 +127,9 @@ class TestCrossLanguageParity(unittest.TestCase):
             with self.subTest(dataset=javascript["id"]):
                 self.assertEqual(set(javascript), expected)
 
-    def test_the_twelve_are_the_storefront(self) -> None:
-        # The count is a product decision (owner ruling, 2026-09-02) and is
-        # pinned so a thirteenth cannot arrive without somebody deciding to.
-        self.assertEqual(len(launch.LAUNCH_COLLECTION), 12)
+    def test_the_fourteen_are_the_storefront(self) -> None:
+        # The approved Press collection set includes Giving and PLOT.
+        self.assertEqual(len(launch.LAUNCH_COLLECTION), 14)
         self.assertEqual(
             {d.id for d in launch.LAUNCH_COLLECTION},
             {
@@ -147,6 +145,8 @@ class TestCrossLanguageParity(unittest.TestCase):
                 "need",
                 "natural-resources",
                 "nonprofits",
+                "foundation-corporate-giving",
+                "plot",
             },
         )
 
@@ -412,7 +412,7 @@ class TestPressCatalogSnapshot(unittest.TestCase):
     """The other cross-language pair: ``pressCatalog.js`` and ``CATALOG``.
 
     Python does not re-implement the Press ladder; it reads a snapshot,
-    ``server/cedar_press/_press_data.json``, that ``scripts/dump-press.mjs``
+    ``server/cedar_press/_press_data.json``, that ``scripts/dump.mjs --kind press``
     writes from the JavaScript modules. That is a weaker coupling than the
     launch collection's shared manifest and it fails in a quieter way: the
     JavaScript changes, nobody re-runs the dump, and the API serves last
@@ -442,7 +442,7 @@ class TestPressCatalogSnapshot(unittest.TestCase):
             snapshot,
             self.js,
             "server/cedar_press/_press_data.json is stale: re-run "
-            "`node scripts/dump-press.mjs > server/cedar_press/_press_data.json`",
+            "`node scripts/dump.mjs --kind press > server/cedar_press/_press_data.json`",
         )
 
     def test_the_same_collections_in_the_same_order(self) -> None:
@@ -483,11 +483,11 @@ class TestPressCatalogSnapshot(unittest.TestCase):
         for entry in press_catalog.CATALOG:
             with self.subTest(collection=entry["id"]):
                 coverage = entry["coverage"]
-                self.assertIn(coverage["kind"], {"series", "roster", "structure"})
-                if coverage["kind"] == "structure":
+                self.assertIn(coverage["kind"], {"series", "roster", "structure", "observations"})
+                if coverage["kind"] in {"structure", "observations"}:
                     # Presented by its record structure, nothing measured:
                     # neither shape's field, and no span to state.
-                    self.assertEqual(coverage, {"kind": "structure"})
+                    self.assertEqual(coverage, {"kind": coverage["kind"]})
                 elif coverage["kind"] == "series":
                     self.assertIn("from", coverage)
                     self.assertNotIn("captured", coverage)
@@ -520,7 +520,7 @@ class TestPressCatalogSnapshot(unittest.TestCase):
         for entry in press_catalog.CATALOG:
             coverage = entry["coverage"]
             with self.subTest(collection=entry["id"]):
-                if coverage["kind"] == "structure":
+                if coverage["kind"] in {"structure", "observations"}:
                     continue
                 if coverage["kind"] == "series":
                     self.assertIsInstance(coverage["from"], int)

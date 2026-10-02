@@ -246,7 +246,7 @@ test("the first release keeps its own facts, the latest matches the manifest", (
     assert.ok(first.changed.length >= 2, dataset.id);
     assert.match(first.changed[0], /^First published on Cedar Press: /);
     // it states SOME measured row count - its own, not necessarily today's
-    assert.match(first.changed[0], /[\d,]+ rows|row count unresolved/,
+    assert.match(first.changed[0], /[\d,]+ (?:rows|observations)|row count unresolved/,
                  `${dataset.id}: ${first.changed[0]}`);
     // and the ledger's NEWEST release is the version the manifest is on.
     // (latestRelease returns a release - kind, changed, version - not the raw

@@ -64,7 +64,7 @@
     </p>
     {% if view.catalog_gap %}
       {#- Said on the page rather than swallowed. press_catalog.CATALOG is a
-          snapshot a human regenerates by hand with scripts/dump-press.mjs,
+          snapshot a human regenerates by hand with scripts/dump.mjs --kind press,
           and it is behind: these collections are on the shelf and the Python
           catalog has never heard of them, so they render from their
           descriptor alone. -#}
@@ -74,7 +74,7 @@
         {{ view.catalog_gap | length }} collection{{ "" if view.catalog_gap | length == 1 else "s" }}:
         {{ view.catalog_gap | join(", ") }}. Rendered from the descriptor
         manifest instead of dropped. Regenerate with
-        <code>node scripts/dump-press.mjs &gt; server/cedar_press/_press_data.json</code>.
+        <code>node scripts/dump.mjs --kind press &gt; server/cedar_press/_press_data.json</code>.
       </p>
     {% endif %}
   </section>
@@ -93,7 +93,7 @@
               {#- The shelf's own id, not a product name. The tier ladder's
                   copy -- Cedar Press, Cedar Press+, their prices, questions
                   and promises -- lives only in pressCatalog.js's PRESS_TIERS,
-                  which dump-press.mjs does not dump, so Python does not have
+                  which dump.mjs --kind press does not dump, so Python does not have
                   it. It is named as missing rather than retyped. -#}
               <h3 class="cp-band__name">{{ band.shelf | capitalize }} shelf</h3>
               <p class="cp-read__blurb">

@@ -550,6 +550,19 @@
           "of": 27
         },
         "blockers": []
+      },
+      {
+        "version": "v5",
+        "date": "2026-10-01",
+        "name": "Cedar Native Entity Enterprise Dataset (NEED)",
+        "tables": 1,
+        "rowsLabel": "43 observations",
+        "preview": {
+          "table": "need.csv",
+          "rows": 10,
+          "of": 43
+        },
+        "blockers": []
       }
     ],
     "natural-resources": [
@@ -656,6 +669,36 @@
           "table": "nonprofits.csv",
           "rows": 10,
           "of": 89
+        },
+        "blockers": []
+      }
+    ],
+    "foundation-corporate-giving": [
+      {
+        "version": "v3",
+        "date": "2026-10-01",
+        "name": "Foundation & Corporate Giving",
+        "tables": 1,
+        "rowsLabel": "193 observations",
+        "preview": {
+          "table": "foundation-corporate-giving.csv",
+          "rows": 10,
+          "of": 193
+        },
+        "blockers": []
+      }
+    ],
+    "plot": [
+      {
+        "version": "v3",
+        "date": "2026-10-01",
+        "name": "PLOT",
+        "tables": 1,
+        "rowsLabel": "151,715 observations",
+        "preview": {
+          "table": "plot.csv",
+          "rows": 10,
+          "of": 151715
         },
         "blockers": []
       }

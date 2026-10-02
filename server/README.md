@@ -37,7 +37,7 @@ uvicorn cedar_press.app:app --reload --port 8000
 
 | Variable | Purpose |
 | --- | --- |
-| `CEDAR_PRESS_SECRET` | Signs the session cookie. Without one, a restart invalidates every session rather than accepting forgeable cookies. |
+| `CEDAR_PRESS_SECRET` | Stable server-only session signing secret; staging/production require at least 32 characters. Only development may generate a temporary key. |
 | `CEDAR_PRESS_ACCOUNTS` | Provisioned subscribers as JSON. Empty by default, so a service started without accounts authenticates nobody. |
 | `CEDAR_PRESS_CODES` | Access codes as issued, keyed by code: `{"CODE": {"email": ..., "tier": ..., "expires": "YYYY-MM-DD"}}`. `expires` is optional. Empty by default, so a service started without a register activates nobody. |
 | `CEDAR_PRESS_ORIGINS` | Comma-separated origins allowed to send credentialed requests. |
@@ -50,14 +50,26 @@ modules today. When the collections move into Postgres it answers from there
 and `app.py` does not change — routes hold HTTP concerns and no data access
 of their own, which is what keeps that swap to one module.
 
-Two other seams are marked and both are in-memory today, which means they are
-forgotten on restart: `codes.py` holds which access codes have been spent, and
-`session.py` holds accounts created by activation. In production both are rows
-written in the same transaction — the account created, the code spent — and
-neither belongs in process memory.
+`subscribers.py` already persists subscribers and access codes when `DATABASE_URL`
+is configured. Redemption spends the code and creates its subscriber in one
+PostgreSQL transaction. The environment-backed account/code fallback is for
+development; staging and production refuse it. Install the PostgreSQL extra
+with `uv sync --locked --no-dev --extra postgres --project server` from the
+repository root and run the existing migration command in `DATABASE.md`.
 
-`session.py` is the same shape: `_lookup` is the seam the subscriber table
-replaces, and the cookie, its flags and the payload the client reads all stay.
+Sessions expire after 14 days. Every authenticated request re-reads the subscriber
+and current Press tier; removed subscribers and changed credentials or account
+bindings invalidate existing cookies. Logout advances the subscriber's persistent
+revocation revision, ending that email's sessions on all devices without ending
+other seats' sessions. A stable server-only signing secret is required in staging
+and production. Existing passwords, accounts and subscription tiers are preserved;
+old cookies without lifecycle claims require a fresh sign-in.
+
+The static browser preview gate is a separate login authority. Enabling
+`VITE_API_URL` does not migrate its accounts. Before switching an existing site,
+verify every existing subscriber's credential compatibility and entitlement in
+the persistent API. Do not
+reset credentials or treat a public preview digest as a PostgreSQL password hash.
 
 ## Checks
 

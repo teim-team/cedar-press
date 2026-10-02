@@ -29,12 +29,12 @@ measured cost are set out in ``docs/ARCHITECTURE.md`` under "Where the
 ``grove/`` paths came from".
 
 **The article and citation data is transcribed, not retyped.**
-``_press_data.json`` is written by ``scripts/dump-press.mjs`` from the
+``_press_data.json`` is written by ``scripts/dump.mjs --kind press`` from the
 JavaScript modules. Headlines and deks are editorial copy, so a retyped
 character is a misquotation rather than a crash, which is the failure that
 would survive review::
 
-    node scripts/dump-press.mjs > server/cedar_press/_press_data.json
+    node scripts/dump.mjs --kind press > server/cedar_press/_press_data.json
 
 The script and the destination are both named here because the docstring
 named neither correctly: it pointed at ``python/tools/dump_press.mjs``

@@ -79,9 +79,9 @@ from cedar_press.session import (
     account_exists,
     account_id_for,
     current_session,
-    issue,
     sign_in,
     sign_out,
+    validate_auth_configuration,
 )
 
 app = FastAPI(
@@ -94,15 +94,17 @@ app = FastAPI(
 # and the session rides in a cookie, so credentials must be allowed and the
 # origin list must be explicit — "*" is not permitted with credentials, and
 # should not be wanted.
+_AUTH_ORIGINS = [
+    origin.strip()
+    for origin in os.environ.get(
+        "CEDAR_PRESS_ORIGINS",
+        "http://localhost:5173,https://cedarpress.ai,https://app.cedarpress.ai",
+    ).split(",")
+    if origin.strip()
+]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        origin.strip()
-        for origin in os.environ.get(
-            "CEDAR_PRESS_ORIGINS", "http://localhost:5173,https://cedarpress.ai"
-        ).split(",")
-        if origin.strip()
-    ],
+    allow_origins=_AUTH_ORIGINS,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["Content-Type"],
@@ -348,18 +350,21 @@ def login(credentials: Credentials, request: Request, response: Response) -> dic
                 ),
             },
         )
-    # The subscription and the platform account can appear in either order --
-    # a Tribal Business News reader may activate months before they open the
-    # platform, or never. Binding here means whichever came second finds the
-    # first, without a migration or a back-fill. A no-op where there is no
-    # database, no `users` table, or no account at that address.
-    subscribers.link_platform_account(session.email)
     return session.as_payload()
 
 
 @app.post("/auth/logout", status_code=204)
-def logout(response: Response) -> None:
-    sign_out(response)
+def logout(
+    request: Request,
+    response: Response,
+    session: Session | None = Depends(current_session),
+) -> None:
+    # CORS governs response access, not whether a simple cross-site POST runs.
+    # Reject an unrelated browser origin before account-wide revocation.
+    origin = request.headers.get("origin")
+    if origin is not None and origin not in _AUTH_ORIGINS:
+        raise HTTPException(status_code=403, detail="Untrusted sign-out origin.")
+    sign_out(response, session)
 
 
 class CodeCheck(BaseModel):
@@ -381,6 +386,7 @@ def _guard(request: Request, bucket: str, attempts: int) -> None:
     tasks and a subscriber may legitimately be doing the second after failing
     the first.
     """
+    validate_auth_configuration()
     key = f"{bucket}:{ratelimit.client_key(request)}"
     if not ratelimit.allow(key, attempts=attempts):
         raise HTTPException(
@@ -474,10 +480,17 @@ def activate(activation: Activation, request: Request, response: Response) -> di
     if made is None:
         # Somebody redeemed it between `check` above and this write.
         raise _refuse(codes.CODE_USED)
-    session = Session(email=made.email, tier=made.tier)
     codes.spend(issued.code)
-    subscribers.link_platform_account(made.email)
-    return issue(session, response).as_payload()
+    session = sign_in(made.email, activation.password, response)
+    if session is None:
+        raise HTTPException(
+            status_code=409,
+            detail={
+                "code": "ACCOUNT_CHANGED",
+                "message": "Your account changed during activation. Please sign in again.",
+            },
+        )
+    return session.as_payload()
 
 
 @app.get("/press/collections")
@@ -1067,6 +1080,10 @@ def ask_cedar(question: Question, session: Session = Depends(require_session)) -
                 collection_name=collection_name,
                 pathname=question.pathname,
             )
+            if reply.unavailable:
+                raise cedar_service.CedarUnavailable(
+                    "Cedar reported that it is unavailable."
+                )
         except cedar_service.CedarUnavailable:
             raise HTTPException(
                 status_code=503,

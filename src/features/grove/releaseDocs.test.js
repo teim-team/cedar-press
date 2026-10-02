@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { assertReleasedDictionary, releasedBook, releasedTableKey } from "../../../scripts/release-docs.mjs";
-import { renderReleasedGuide, SECTIONS } from "../../../scripts/guides-markdown.mjs";
+import { renderReleasedGuide, SECTIONS } from "../../../scripts/docs-markdown.mjs";
 
 function fixture(collection = "funding") {
   const fields = [

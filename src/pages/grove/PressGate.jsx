@@ -38,6 +38,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router";
 
 import { contactHref } from "../../features/grove/appLink.js";
+import { requestedSignIn, workspaceSignInHref } from "../../features/grove/pressSessionNavigation.js";
 import { useAuth } from "../../context/useAuth";
 import { useFadeIn } from "../../features/grove/useFadeIn";
 import { activatePressAccount, validatePressCode } from "../../api";
@@ -175,7 +176,9 @@ export default function PressGate({ user }) {
   // The page reads as one long scroll on a phone, so its sections arrive as
   // they enter the viewport instead of standing there already.
   const fadeRoot = useFadeIn();
-  const [step, setStep] = useState(() => initialPressStep(browserStorage()));
+  const [step, setStep] = useState(() => initialPressStep(browserStorage(), {
+    signInRequested: requestedSignIn(typeof window === "undefined" ? "" : window.location.search),
+  }));
   // Plans or sign-in, one at a time, or NEITHER ON ARRIVAL.
   //
   // This opened on "signin" for any browser that had signed in before, on the
@@ -185,7 +188,8 @@ export default function PressGate({ user }) {
   // form has decided for them what they came for, and the two tabs are
   // already sitting in the bar where a visitor looks for them. Nothing opens
   // until it is asked for.
-  const [panel, setPanel] = useState(null);
+  const [panel, setPanel] = useState(() => requestedSignIn(typeof window === "undefined" ? "" : window.location.search) ? "signin" : null);
+  const workspaceSignIn = workspaceSignInHref(typeof window === "undefined" ? null : window.location);
   const [code, setCode] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -360,6 +364,10 @@ export default function PressGate({ user }) {
 
   const toggle = (which) => setPanel((current) => (current === which ? null : which));
   const openSignIn = () => {
+    if (workspaceSignIn) {
+      window.location.assign(workspaceSignIn);
+      return;
+    }
     setPanel("signin");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -402,7 +410,9 @@ export default function PressGate({ user }) {
               >
                 View plans
               </button>
-              <button
+              {workspaceSignIn ? (
+                <a className="cp-btn cp-btn--primary" href={workspaceSignIn}>Log in</a>
+              ) : <button
                 type="button"
                 id="cp-tab-signin"
                 role="tab"
@@ -412,7 +422,7 @@ export default function PressGate({ user }) {
                 onClick={() => toggle("signin")}
               >
                 Log in
-              </button>
+              </button>}
             </div>
           )}
         </div>

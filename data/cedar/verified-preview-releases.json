@@ -91,7 +91,7 @@
       "sample_sha256": "10ac9263cabd73f0fa907e8aae27515e0942c64e6fecf455ec04a462fcf194c5",
       "sample_path": "review-samples/foundation-corporate-giving.csv",
       "release_class": "rehearsal",
-      "storefront_asset": false,
+      "storefront_asset": true,
       "unharmonized_fields": []
     },
     "funding": {
@@ -891,21 +891,28 @@
       "unharmonized_fields": []
     },
     "need": {
-      "release_id": "dc105294abc2ba5d0a3819afbfe32f81b3e8ef41f3ba8c1c13c8ce320010d035",
-      "manifest_sha256": "380ff64aa5af720e7337dfe20cb8d9cc73f76bcd508276a9e9f23f85689cdc9d",
-      "spreadsheet_sha256": "00490e1b37a54a7f860a7f370df0bbd3a2e653c8ff93a58ebbdb08e9950d0e57",
-      "spreadsheet_bytes": 33622,
-      "public_records": 27,
+      "release_id": "428d11048f12cd819f7cf95dccdbbe4c1ea20a8c81c635a7e985fbc17b1b983b",
+      "manifest_sha256": "038be840a58f812192ffc72eaedc7512ddcd5f1a8c2a66a033c64e202d702c17",
+      "spreadsheet_sha256": "f3f86711a0bf629c064826fca54e95d00bb13833425ead4680414720f64b8f91",
+      "spreadsheet_bytes": 59691,
+      "public_records": 43,
       "held_records_in_selected_groups": 0,
       "record_types": {
-        "reviewed_public_base": 27
+        "reviewed_public_base": 43
       },
       "sample_rows": 10,
-      "sample_sha256": "c0884f41406ca2592c3668ac70841b9d0f9c6563ad4ce7090d40879f1c75df5a",
+      "sample_sha256": "0a14877e682bd79edfb9221db1fd1c98e4c1d7068983e59e799446efe7b14320",
       "sample_path": "review-samples/need.csv",
       "release_class": "rehearsal",
       "storefront_asset": true,
-      "unharmonized_fields": []
+      "unharmonized_fields": [],
+      "producer_commit": "9f61569378a615e1142df69dd19665015506a48c",
+      "updated": "2026-10-01",
+      "source_queue_sha256": "c127735aa74fabfde986249f633e3d8c136ec36c87a1b8e164bf9f7cfdd85c02",
+      "replaces": {
+        "release_id": "dc105294abc2ba5d0a3819afbfe32f81b3e8ef41f3ba8c1c13c8ce320010d035",
+        "manifest_sha256": "380ff64aa5af720e7337dfe20cb8d9cc73f76bcd508276a9e9f23f85689cdc9d"
+      }
     },
     "nonprofits": {
       "release_id": "bb679c5bb80b210fc42ab22a5241941220c1fc823e85dcda5d6a11e0045a24a6",
@@ -960,7 +967,7 @@
       "sample_sha256": "c99cdc29b15fa8dabe9accd74c1f934af346ab51c2edfbc09f9965d29a3c5bb2",
       "sample_path": "review-samples/plot.csv",
       "release_class": "rehearsal",
-      "storefront_asset": false,
+      "storefront_asset": true,
       "unharmonized_fields": [
         {
           "record_type": "environmental_events",

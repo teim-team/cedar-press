@@ -1,3 +1,4 @@
+import { PRESENTATION_COLUMNS } from "./mixedSpreadsheet.js";
 /**
  * PURPOSE
  * How a record table is laid out: the money format, a collection's short
@@ -47,7 +48,7 @@ export function columnPlan(tableKey, contract, tableColumns) {
   const roleFirst = contract
     ? [contract.entity_name, ...(contract.observation ?? []), contract.amount, contract.date, source].filter(shown)
     : [];
-  const declared = (contract?.default_columns ?? []).filter(has);
+  const declared = (contract?.default_columns ?? []).filter((column) => has(column) || (contract?.mapping_kind === "producer_spreadsheet" && Object.hasOwn(PRESENTATION_COLUMNS, column)));
   // The codebook's order is a fallback for a table with no declared view;
   // it is not a reason to open on a column of Cedar's own file names.
   const listed = tableKey ? codebookColumns(tableKey, publicColumns).filter((c) => !isInternalProvenanceColumn(c)) : [];
@@ -61,6 +62,16 @@ export function columnPlan(tableKey, contract, tableColumns) {
   const defaults = contract?.mapping_kind === "producer_spreadsheet" && declared.length
     ? [...new Set([...declared.filter((column) => !dispatchedSources.has(column)), ...(built ? [SOURCE_LINK_COLUMN] : [])])]
     : [...new Set([...roleFirst, ...(declared.length ? declared : listed)])];
-  const all = [...new Set([...lead, ...publicColumns, ...(built ? [SOURCE_LINK_COLUMN] : [])])];
+  const all = [...new Set([...lead, ...publicColumns, ...declared.filter((column) => Object.hasOwn(PRESENTATION_COLUMNS, column)), ...(built ? [SOURCE_LINK_COLUMN] : [])])];
   return { lead, defaults, all };
+}
+
+/** Display a reported point or bounds; never substitute an aggregate for either. */
+export function reportedAmountText(item) {
+  if (item?.amount != null) return money.format(item.amount);
+  const range = item?.amountRange;
+  if (!range || (range.lower == null && range.upper == null)) return null;
+  if (range.lower == null) return "Up to " + money.format(range.upper);
+  if (range.upper == null) return "At least " + money.format(range.lower);
+  return money.format(range.lower) + " to " + money.format(range.upper);
 }

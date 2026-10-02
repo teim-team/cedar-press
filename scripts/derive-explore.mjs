@@ -1,3 +1,5 @@
+import { reviewedNeedColumns } from "../src/features/grove/readerPresentation.js";
+import { mixedSpreadsheetContract, PRESENTATION_COLUMNS } from "../src/features/grove/mixedSpreadsheet.js";
 // Derive each table's EXPLORE CONTRACT from its published sample, and record
 // it in data/cedar/explore.json.
 //
@@ -251,7 +253,9 @@ export function spreadsheetDefaultColumns(contract, columns) {
   return unique([...identity, ...kind, ...money, ...dates, ...observations, ...sources]);
 }
 
-export function spreadsheetContract(columns, sampleRows = []) {
+export function spreadsheetContract(columns, sampleRows = [], presentation = {}) {
+  const mixed = mixedSpreadsheetContract(presentation.collection, columns, presentation.record_type_fields);
+  if (mixed) return mixed;
   for (const required of ["record_type", "record_key", "record_grain"]) {
     if (!columns.includes(required)) throw new Error("producer spreadsheet lacks " + required);
   }
@@ -299,9 +303,10 @@ export function spreadsheetContract(columns, sampleRows = []) {
     c.observation = ["commodity", "resource_type", "revenue_type"];
   }
   c.default_columns = spreadsheetDefaultColumns(c, columns);
-  if (["enterprise_name", "owner_name", "ownership_extent", "evidence_pins"].every(column => columns.includes(column))) {
-    c.observation = ["owner_name", "ownership_extent", "relationship_type"].filter(column => columns.includes(column));
-    c.default_columns = ["enterprise_name", "owner_name", "ownership_extent", "relationship_type", "uei", "cage_code", "record_grain"].filter(column => columns.includes(column));
+  const reviewedNeed = reviewedNeedColumns(columns);
+  if (reviewedNeed) {
+    c.observation = reviewedNeed.observation;
+    c.default_columns = reviewedNeed.defaults;
   }
   // A union spreadsheet retains component-qualified columns when meanings
   // differ. Select them by record_type; an action date is not a notice date.
@@ -414,12 +419,12 @@ export const SOURCE_BUILDERS = Object.freeze({
 export function validateContract(key, contract, columns) {
   for (const [kind, child] of Object.entries(contract.row_type_contracts ?? {})) {
     validateContract(key + ":" + kind, child, columns);
-    for (const field of ["source_fallback", "date"]) {
+    for (const field of ["source_fallback", "date", "year", "subject", "entity_uid", "entity_name", "entity_type", "entity_role_column", "amount", "amount_basis", "amount_lower", "amount_upper", "amount_class"]) {
       if (child[field] && !columns.includes(child[field])) throw new Error(key + ": missing component " + field);
     }
   }
   for (const column of contract.default_columns ?? []) {
-    if (!columns.includes(column)) throw new Error(`${key}: default column ${column} is not in the sample`);
+    if (!columns.includes(column) && !(contract.mapping_kind === "producer_spreadsheet" && Object.hasOwn(PRESENTATION_COLUMNS, column))) throw new Error(`${key}: default column ${column} is not in the sample`);
   }
   if (contract.source && !columns.includes(contract.source)) {
     throw new Error(`${key}: source column ${contract.source} is not in the sample`);
@@ -459,7 +464,7 @@ export function derive() {
       const override = overrides[key] ?? {};
       const spreadsheet = table.record_types && typeof table.record_types === "object";
       const contract = {
-        ...(spreadsheet ? spreadsheetContract(columns, rows(path)) : contractFor(columns, rows(path))),
+        ...(spreadsheet ? spreadsheetContract(columns, rows(path), { collection: collection.id, record_type_fields: table.record_type_fields }) : contractFor(columns, rows(path))),
         ...override,
       };
       // The year's meaning follows the year and date the override settled on,
