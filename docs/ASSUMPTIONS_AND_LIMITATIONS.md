@@ -1492,6 +1492,11 @@ management fees — `[74 FR 36932, July 27, 2009]`.)*
 
 ### H5 · Licensing, which is a limitation on what we may publish
 
+**Rights basis, owner decision 2026-10-02.** Cedar publishes facts about Native entities compiled from publicly available sources, cited to their source, as a publication would. Third-party terms are recorded per source; the owner has decided publication proceeds under citation. The two restrictions below
+are third-party terms recorded per source; they are the record, not a consent
+gate, and no clause in this document conditions publication on a subject's
+consent.
+
 **Casino City may be read for QA and never published.** The vendor share of the property
 universe is **610 of 774**. **D&B Open Data** (legal name, street, city, state, ZIP) may not
 be disseminated in bulk and attaches to every base award dated before **2022-04-04** — 100%
