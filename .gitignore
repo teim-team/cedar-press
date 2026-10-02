@@ -213,6 +213,9 @@ data/restricted/
 !/data/cedar/grove_release_pin.json
 !/data/cedar/releases.json
 !/data/cedar/samples.published.json
+# Per-UEI recipient holds and rebinds (not not_native denials): the policy
+# input code/cedar_publication.recipient_holds() reads. Added 2026-10-02.
+!/data/cedar/recipient_holds.json
 
 # Requirements / lockfiles, wherever they turn up.
 !requirements*.txt
