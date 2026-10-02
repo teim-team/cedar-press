@@ -29193,8 +29193,8 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 14,
-   "mentioned_outside_history": 14,
+   "mentions": 16,
+   "mentioned_outside_history": 16,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-27",
@@ -29205,6 +29205,8 @@
     "code/521_inventory.py",
     "code/cedar_publication.py",
     "data/cedar/codebook.json",
+    "server/tests/fixtures/legacy-preview/codebook.json",
+    "server/tests/fixtures/legacy-preview/collections.manifest.json",
     "src/features/grove/collection.js",
     "src/features/grove/pressDownload.js"
    ],
@@ -29496,8 +29498,8 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 44,
-   "mentioned_outside_history": 43,
+   "mentions": 46,
+   "mentioned_outside_history": 45,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-26",
@@ -29510,7 +29512,8 @@
     "code/build.py",
     "code/cedar_publication.py",
     "data/cedar/codebook.json",
-    "scripts/docs-markdown.mjs --kind field-map",
+    "scripts/docs-markdown.mjs",
+    "server/tests/fixtures/legacy-preview/codebook.json",
     "server/tests/test_field_map.py"
    ],
    "runtime_consumer_candidates": [
@@ -37652,8 +37655,8 @@
    "reads": [],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 1,
-   "mentioned_outside_history": 1,
+   "mentions": 2,
+   "mentioned_outside_history": 2,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-26",
@@ -37661,7 +37664,8 @@
    "operational_role": "unresolved",
    "collection_output_entrypoints": [],
    "static_consumers": [
-    "code/521_inventory.py"
+    "code/521_inventory.py",
+    "data/spine/cedar_duplicate_name_review.json"
    ],
    "runtime_consumer_candidates": [],
    "operational_call_evidence": {
@@ -38065,8 +38069,8 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 2,
-   "mentioned_outside_history": 2,
+   "mentions": 3,
+   "mentioned_outside_history": 3,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-26",
@@ -38075,7 +38079,8 @@
    "collection_output_entrypoints": [],
    "static_consumers": [
     "code/521_inventory.py",
-    "data/cedar/explore.overrides.json"
+    "data/cedar/explore.overrides.json",
+    "server/tests/fixtures/legacy-preview/explore.json"
    ],
    "runtime_consumer_candidates": [],
    "operational_call_evidence": {
@@ -40491,8 +40496,8 @@
    ],
    "in_a_contract": true,
    "in_an_ordering": true,
-   "mentions": 26,
-   "mentioned_outside_history": 26,
+   "mentions": 27,
+   "mentioned_outside_history": 27,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-26",
@@ -40517,7 +40522,8 @@
     "docs/VINTAGE_MIXING_AUDIT.json",
     "docs/defect_class_retro_sweep.json",
     "docs/schema/tables/section_106_consultation_events.json",
-    "docs/schema/tables/section_106_project_parties.json"
+    "docs/schema/tables/section_106_project_parties.json",
+    "server/tests/fixtures/legacy-preview/explore.json"
    ],
    "runtime_consumer_candidates": [],
    "operational_call_evidence": {
@@ -63372,8 +63378,8 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 18,
-   "mentioned_outside_history": 17,
+   "mentions": 19,
+   "mentioned_outside_history": 18,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-26",
@@ -63388,6 +63394,7 @@
     "code/771_normalize_nboa_certification_dates.py",
     "data/cedar/codebook.json",
     "data/cedar/field_map.json",
+    "data/cedar/preview_definition_overrides.json",
     "docs/defect_class_retro_sweep.json"
    ],
    "runtime_consumer_candidates": [
@@ -64144,8 +64151,8 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 10,
-   "mentioned_outside_history": 10,
+   "mentions": 11,
+   "mentioned_outside_history": 11,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-26",
@@ -64155,7 +64162,8 @@
    "static_consumers": [
     "data/cedar/explore.overrides.json",
     "docs/CONSOLIDATION_DOC_INVENTORY.json",
-    "docs/defect_class_retro_sweep.json"
+    "docs/defect_class_retro_sweep.json",
+    "server/tests/fixtures/legacy-preview/explore.json"
    ],
    "runtime_consumer_candidates": [],
    "operational_call_evidence": {
@@ -70190,8 +70198,8 @@
    "mentioned_outside_history": 22,
    "oneoff_shaped": false,
    "has_run_receipt": false,
-   "last_modified": "2026-09-26",
-   "lines": 566,
+   "last_modified": "2026-10-02",
+   "lines": 635,
    "operational_role": "unresolved",
    "collection_output_entrypoints": [],
    "static_consumers": [
@@ -70220,78 +70228,78 @@
    },
    "writer_evidence": [
     {
-     "line": 68,
+     "line": 69,
      "operation": "open",
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "62255ee65efa291ebcf620a49ce44eb3c4bbbac4f894bcf4bb53edb3c792355a"
+     "signature": "6fa9d5e4b425240ee80b2b47b67076a29f4db15c9c0c2df4249a3e0a338ad63f"
     },
     {
-     "line": 175,
+     "line": 176,
      "operation": "z.open",
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "ae0c61bcd340b2ec1b5427ecc2ebc8beb7efc5b2099bb34563ff05534812c3be"
+     "signature": "27c00eff527279de294d6b4d5175320fa15d9e8fee2046663f1843c4ed535fc4"
     },
     {
-     "line": 266,
+     "line": 338,
      "operation": "open",
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "08a4a9976c90f2a7b115874c8c16046d7aa7ac36a562960c8e6b72bc2c9adbf6"
+     "signature": "926f60e61d17e2134f3b9761401ce9cfa127816d4b5c9c993fa8cc62177765cf"
     },
     {
-     "line": 456,
+     "line": 525,
      "operation": "open",
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "6196e9d66b302c557e3511617c23bd85c4074747ef0d48f3123499f9e4db692a"
+     "signature": "a23a9adac43e7cd768458a28d5a11baebf054f31fcc904b472dd7c5c084371f2"
     },
     {
-     "line": 470,
+     "line": 539,
      "operation": "open",
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "2bc940e7a348a21a77e3d3fcd400fa66aa00e205b5602b310c9a4ee1c9632fc0"
+     "signature": "8f8aada329c0c56ef82caa4583e1e7ae202b667ac65a33eacd794b2e10a80ecd"
     },
     {
-     "line": 482,
+     "line": 551,
      "operation": "open",
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "3ee20e1802a0d25de82821941dc18443074c2052b422eeb07b2309525b086084"
+     "signature": "b3c81f032b936463923323bb16bbe6991672a97965666f25e44989ffeab82c8b"
     },
     {
-     "line": 500,
+     "line": 569,
      "operation": "open",
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "9c84be6bcaade65c7b17681844e1a6004d9848777bc30856c96ed89954b7139d"
+     "signature": "c8824bff17b9d1fe1eb9e4f1f90788874a4872f3b08f0025040307f6f2528df2"
     },
     {
-     "line": 560,
+     "line": 629,
      "operation": "open",
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "3da4294c63dd36a79c85fc94cdd46bcbf2aeafedf16050d12f906c927c7d620e"
+     "signature": "595fc4d4e2ce3a3352f4da1c20defae9d27d444d9144beb9df6275ef4c3503fe"
     }
    ],
    "writer_analysis_error": null,
    "writer_risk": "P2_unresolved_write_target",
    "undeclared_governed_tables": [],
-   "source_sha256": "e3eaacc774c250829afd563b3a0d596f27688aa343b7706903d23655d1d334ac",
+   "source_sha256": "676d5d5dcb116843ba4fe05ffcf9f73341da9401e7882d82ad43e4188681d424",
    "maintenance_status": "ACTIVE",
    "maintenance_evidence": {
     "reason": "declared operational role, CI invocation or reachable Python dependency",
-    "source_sha256": "e3eaacc774c250829afd563b3a0d596f27688aa343b7706903d23655d1d334ac",
+    "source_sha256": "676d5d5dcb116843ba4fe05ffcf9f73341da9401e7882d82ad43e4188681d424",
     "identical_source_peers": [],
     "ci_commands": [],
     "documented_commands": [
@@ -70302,6 +70310,71 @@
     "active_runtime_callers": [
      "code/45_promote_subawards.py"
     ],
+    "superseded_output_edges": [],
+    "historical_replay_evidence": [],
+    "output_authority_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "output_artifact_hashes": "NOT_MEASURED_BY_SCRIPT_CENSUS",
+    "retirement_authorized": false,
+    "review_owner": null,
+    "review_priority": null,
+    "review_write_sites": [],
+    "safe_delete_proof": "NOT_ESTABLISHED: external callers, unique output and recovery value are not exhausted by static scans",
+    "bounded_source_review": null,
+    "source_review_stale": false
+   },
+   "registration_status": "unresolved_not_authorized"
+  },
+  {
+   "script": "41_match_subawards_to_ledger_test.py",
+   "dir": "",
+   "number": "41",
+   "duplicate_number": true,
+   "kind": "unknown",
+   "evidence": [],
+   "never_run": false,
+   "never_run_reason": "",
+   "writes": [],
+   "reads": [],
+   "in_a_contract": false,
+   "in_an_ordering": false,
+   "mentions": 0,
+   "mentioned_outside_history": 0,
+   "oneoff_shaped": false,
+   "has_run_receipt": false,
+   "last_modified": "2026-10-02",
+   "lines": 84,
+   "operational_role": "test/fixture",
+   "collection_output_entrypoints": [],
+   "static_consumers": [],
+   "runtime_consumer_candidates": [],
+   "operational_call_evidence": {
+    "publication_calls": [],
+    "validation_calls": []
+   },
+   "unknown_io_literals": [],
+   "embedded_test_functions": 7,
+   "standalone_test_evidence": {
+    "unittest_classes": [
+     "SubawardMoneyFenceTests"
+    ],
+    "pytest_import": false,
+    "filename_convention": true,
+    "assertion_nodes": 0,
+    "local_check_harness_calls": []
+   },
+   "writer_evidence": [],
+   "writer_analysis_error": null,
+   "writer_risk": "P3_no_detected_write_not_readonly_certified",
+   "undeclared_governed_tables": [],
+   "source_sha256": "8e3bbda7613b95765d339aa954ebd61a88a7f5e07be3f5f8d078a9633d737eab",
+   "maintenance_status": "ACTIVE",
+   "maintenance_evidence": {
+    "reason": "declared operational role, CI invocation or reachable Python dependency",
+    "source_sha256": "8e3bbda7613b95765d339aa954ebd61a88a7f5e07be3f5f8d078a9633d737eab",
+    "identical_source_peers": [],
+    "ci_commands": [],
+    "documented_commands": [],
+    "active_runtime_callers": [],
     "superseded_output_edges": [],
     "historical_replay_evidence": [],
     "output_authority_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
@@ -72320,8 +72393,8 @@
    "mentioned_outside_history": 28,
    "oneoff_shaped": true,
    "has_run_receipt": false,
-   "last_modified": "2026-09-26",
-   "lines": 504,
+   "last_modified": "2026-10-02",
+   "lines": 509,
    "operational_role": "active producer",
    "collection_output_entrypoints": [
     {
@@ -72358,41 +72431,41 @@
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "59ec38dd426f5e197d22d74a7a9e8470eec5f24d75e96a42be108453eedfbd7b"
+     "signature": "55b67f0826cdca31ab35e90cbd4d0090aae91c3b1f00278ba6d5fdebe7b25d7b"
     },
     {
-     "line": 458,
+     "line": 463,
      "operation": "open",
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "48aabab9b3553b74d946f060a1d742644ff8c28ef8dfc85271efdf53f882e1f5"
+     "signature": "f8adebbff30efc14c440bd502e0e1b841873da00f39a8d6105ff86bc17d0e2f1"
     },
     {
-     "line": 487,
+     "line": 492,
      "operation": "open",
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "70b5c43cc07a00fc4788f00c4f1fbfcdf16b1881e06fe77bd09075a70e11f18a"
+     "signature": "8b884e06b71eb1c8fcce43ab60977e8d61cc2a3f37f73b44314bb8fb8ed23750"
     },
     {
-     "line": 498,
+     "line": 503,
      "operation": "open",
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "acc143cb4d0995f851049b61895427204737e216c7446848a76db419ae777710"
+     "signature": "c3fa1d67a143c4faedc044a8062f1edf8607ed84d41061606bbaad4bbd571d75"
     }
    ],
    "writer_analysis_error": null,
    "writer_risk": "P2_unresolved_write_target",
    "undeclared_governed_tables": [],
-   "source_sha256": "54060d3cfd7917ab807420aed6e211d738273765028ea6319b63905a28edf6f5",
+   "source_sha256": "9ca9661faa437a1ff49a1f37331695cfaf7ca503838b563d83c3a80f9df9000d",
    "maintenance_status": "ACTIVE",
    "maintenance_evidence": {
     "reason": "declared operational role, CI invocation or reachable Python dependency",
-    "source_sha256": "54060d3cfd7917ab807420aed6e211d738273765028ea6319b63905a28edf6f5",
+    "source_sha256": "9ca9661faa437a1ff49a1f37331695cfaf7ca503838b563d83c3a80f9df9000d",
     "identical_source_peers": [],
     "ci_commands": [],
     "documented_commands": [
@@ -87023,8 +87096,8 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 9,
-   "mentioned_outside_history": 9,
+   "mentions": 10,
+   "mentioned_outside_history": 10,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-26",
@@ -87036,6 +87109,7 @@
     "code/cedar_publication.py",
     "docs/datasets/_descriptors.json",
     "scripts/import_cedar_manifest.py",
+    "server/tests/fixtures/legacy-preview/collections.manifest.json",
     "src/features/grove/collection.js"
    ],
    "runtime_consumer_candidates": [],
@@ -87404,8 +87478,8 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 16,
-   "mentioned_outside_history": 15,
+   "mentions": 17,
+   "mentioned_outside_history": 16,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-26",
@@ -87416,7 +87490,8 @@
     "code/521_inventory.py",
     "code/cedar_publication.py",
     "docs/defect_class_retro_sweep.json",
-    "scripts/import_cedar_manifest.py"
+    "scripts/import_cedar_manifest.py",
+    "server/tests/fixtures/legacy-preview/collections.manifest.json"
    ],
    "runtime_consumer_candidates": [],
    "operational_call_evidence": {
@@ -89620,7 +89695,7 @@
     "code/940_staleness_sweep.py",
     "docs/defect_class_retro_sweep.json",
     "docs/schema/declared_column_removals.json",
-    "scripts/docs-markdown.mjs --kind field-map"
+    "scripts/docs-markdown.mjs"
    ],
    "runtime_consumer_candidates": [],
    "operational_call_evidence": {
@@ -89734,7 +89809,7 @@
     "code/846_session_audit.py",
     "docs/defect_class_retro_sweep.json",
     "docs/schema/declared_column_removals.json",
-    "scripts/docs-markdown.mjs --kind field-map"
+    "scripts/docs-markdown.mjs"
    ],
    "runtime_consumer_candidates": [],
    "operational_call_evidence": {
@@ -95202,8 +95277,8 @@
    "mentioned_outside_history": 11,
    "oneoff_shaped": false,
    "has_run_receipt": false,
-   "last_modified": "2026-09-26",
-   "lines": 864,
+   "last_modified": "2026-10-02",
+   "lines": 863,
    "operational_role": "unresolved",
    "collection_output_entrypoints": [],
    "static_consumers": [
@@ -95230,49 +95305,49 @@
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "6c361b83d68b22c7aee89ff5d1cbcdc8dab8f7cc079cc66bda03dfcb221a98d3"
+     "signature": "158eeee7d1b1ef0c59e714ffc375292bfb981c57d5ee430cd62a713ce97bec60"
     },
     {
-     "line": 530,
+     "line": 529,
      "operation": "open",
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "7752ce423f26fa7bbf4447052238d092d4ab5f2e507c47c83f61b81d97bbe481"
+     "signature": "da88d69bad48107fa89c73d39c857a65c59093280b548a3e5a19151a72277e8c"
     },
     {
-     "line": 761,
+     "line": 760,
      "operation": "open",
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "09ef1e2a780ec456e70fe109ccd1cc38ecdd785361e0ae9a68d73f51949464ea"
+     "signature": "4207b9ec16feaf340cdd3835067c42018bb5d8f020ba13110ada9aa927730f76"
     },
     {
-     "line": 832,
+     "line": 831,
      "operation": "open",
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "3a93bb0aec80f16c396b01d9909107261e33d9e63a25c3002e1bc0a54f7f08c4"
+     "signature": "f29e0ebc55fe23f90df82c40151ba1c435b25accb8ef1c740ec95a3b5a192d07"
     },
     {
-     "line": 853,
+     "line": 852,
      "operation": "open",
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "a9fdf60a7790139ba3ce4772cb3a40f42f6dcf76f0854f2633c5e3a041a85eca"
+     "signature": "de49fe2095f890a102b855f01e3bbe25bd2a7db240dcb9cadf96de1df2680537"
     }
    ],
    "writer_analysis_error": null,
    "writer_risk": "P2_unresolved_write_target",
    "undeclared_governed_tables": [],
-   "source_sha256": "735e0b60094c35bfda51508eb8cc99ab81a94c6a0c974b68f9fc7e9c67a40412",
+   "source_sha256": "44de5c72ac8bcd1c3ca258e1b68dfcdc8caab682fbd03bec4a135c2c01ad9e10",
    "maintenance_status": "REQUIRES-REVIEW",
    "maintenance_evidence": {
     "reason": "writer targets/callers need runtime confirmation before ownership or retirement: <unresolved>",
-    "source_sha256": "735e0b60094c35bfda51508eb8cc99ab81a94c6a0c974b68f9fc7e9c67a40412",
+    "source_sha256": "44de5c72ac8bcd1c3ca258e1b68dfcdc8caab682fbd03bec4a135c2c01ad9e10",
     "identical_source_peers": [],
     "ci_commands": [],
     "documented_commands": [],
@@ -95293,28 +95368,28 @@
       "table": null
      },
      {
-      "line": 530,
+      "line": 529,
       "operation": "open",
       "target": "<unresolved>",
       "scope": "unresolved_target",
       "table": null
      },
      {
-      "line": 761,
+      "line": 760,
       "operation": "open",
       "target": "<unresolved>",
       "scope": "unresolved_target",
       "table": null
      },
      {
-      "line": 832,
+      "line": 831,
       "operation": "open",
       "target": "<unresolved>",
       "scope": "unresolved_target",
       "table": null
      },
      {
-      "line": 853,
+      "line": 852,
       "operation": "open",
       "target": "<unresolved>",
       "scope": "unresolved_target",
@@ -106449,7 +106524,8 @@
   ],
   "code:41": [
    "41_build_codebooks.py",
-   "41_match_subawards_to_ledger.py"
+   "41_match_subawards_to_ledger.py",
+   "41_match_subawards_to_ledger_test.py"
   ],
   "code:45": [
    "45_contract_spiderweb_2026-08-06.py",
@@ -106566,19 +106642,19 @@
   }
  },
  "script_census": {
-  "generated": "2026-10-01",
+  "generated": "2026-10-02",
   "generator": "code/521_inventory.py scripts-only",
   "scope": "code/**/*.py; caller mentions restricted to Git-tracked project text",
-  "scripts": 685,
+  "scripts": 686,
   "operational_role_counts": {
    "active producer": 76,
    "active validator/migration/review": 11,
    "product consumer/shared service": 8,
-   "test/fixture": 5,
+   "test/fixture": 6,
    "unresolved": 585
   },
   "maintenance_status_counts": {
-   "ACTIVE": 162,
+   "ACTIVE": 163,
    "DUPLICATE": 0,
    "SUPERSEDED": 0,
    "HISTORICAL-RETAIN": 20,
@@ -106598,8 +106674,8 @@
   "writer_risk_scope": "Potential AST write sites with conservative binding expansion, not executed writes. Existing unregistered edges remain pending; inventory receipt is not authorization. Imported custom writers, shell dispatch and dynamic output resolution require runtime review.",
   "operational_precedence": "Standalone test evidence; explicit historical directory; launch producer declaration; Python runtime-reference candidate plus operational call evidence; existing unreferenced archive candidate; unresolved",
   "reference_scope": "Static references retain tests, path literals and tracked configuration. Runtime candidates require Python imports or literal dispatch paths from non-test files; these are not verified reachability, external scheduler or runtime invocations. Dynamic targets and non-Python dispatch remain unresolved.",
-  "embedded_selftest_files": 124,
-  "unresolved_not_authorized": 571,
+  "embedded_selftest_files": 125,
+  "unresolved_not_authorized": 572,
   "table_snapshot_preserved_sha256": "c46a1097785af2a92ee0d50d35858f75f7c4f3cf1c40a0c31f3c96fcdb9e49ee",
   "data_generated_unchanged": "2026-09-02",
   "limitation": "Static census is not runtime write proof or authorization to run a producer."
