@@ -146,8 +146,8 @@
     },
     {
       "id": "owned",
-      "short": "Native-Owned Businesses",
-      "name": "Individually Owned Native Businesses",
+      "short": "Individual Native-Owned",
+      "name": "Individual Native-Owned Businesses",
       "shelf": "pro",
       "coverage": {
         "kind": "roster",
@@ -553,19 +553,28 @@
       ]
     },
     "owned": {
-      "name": "Native-Owned Businesses",
-      "version": "v3",
-      "updated": "2026-10-01",
+      "name": "Individual Native-Owned Businesses",
+      "version": "v4",
+      "updated": "2026-10-02",
       "cadence": "Updated weekly",
       "retired": false,
       "history": [
+        {
+          "version": "v4",
+          "date": "2026-10-02",
+          "kind": "data",
+          "changed": [
+            "Dataset updated: 3,725 observations.",
+            "A 10-row preview downloads from the shelf."
+          ]
+        },
         {
           "version": "v3",
           "date": "2026-10-01",
           "kind": "data",
           "changed": [
             "Dataset updated: 3,725 observations.",
-            "A 10-row preview downloads from the shelf."
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         },
         {

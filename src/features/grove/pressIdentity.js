@@ -246,7 +246,7 @@ export const WHY_BOTH = Object.freeze({
  * is narrower than the earlier copy on this page implied, and the distinction
  * is the whole judgement:
  *
- * - The storefront's Individually Owned Native Businesses collection publishes
+ * - The storefront's Individual Native-Owned Businesses collection publishes
  *   these firms BY NAME, because a nation's own TERO or commerce office
  *   published them and shared them under stated terms. The name is the
  *   nation's to give and it gave it.

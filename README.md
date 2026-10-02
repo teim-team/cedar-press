@@ -70,7 +70,7 @@ promise, not yet a measured interval.
 | Foundation & Corporate Giving | Cedar Press | 193 | one disclosure or award version |
 | Native Federal Contractors | Cedar Press+ | 841,002 | one prime contract transaction |
 | Native Federal Subcontracting | Cedar Press+ | 70,054 | one subaward filing |
-| Native-Owned Businesses | Cedar Press+ | 3,725 | one directory or certification listing |
+| Individual Native-Owned Businesses | Cedar Press+ | 3,725 | one directory or certification listing |
 | Cedar Native Entity Enterprise Dataset (NEED) | Cedar Press+ | 43 | one reviewed enterprise in the public base |
 | Tribal Natural Resource Revenue | Cedar Press+ | 11,120 | one revenue event as its source reports it |
 | Native Nonprofits | Cedar Press+ | 89 | one organization (EIN) |
@@ -139,7 +139,7 @@ the public text is [`docs/FACT_CHECK_2026-10-02.md`](docs/FACT_CHECK_2026-10-02.
 Its section 8 records what was then fixed at source on 2026-10-02: the register spelling
 of two ANCSA names (source renderings kept as aliases in `data/spine/cedar_entity_name_aliases.csv`),
 the Native nonprofit count, the subcontracting flag rule, and two definitions. One
-reader-visible definition changed: `ownership_percent` in Native-Owned Businesses is the
+reader-visible definition changed: `ownership_percent` in Individual Native-Owned Businesses is the
 share owned by the certifying tribe's members as the certifier reports it, not the Native
 ownership share overall, so a certified Native-owned firm can read `0.0` there.
 

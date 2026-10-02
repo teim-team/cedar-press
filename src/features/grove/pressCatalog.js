@@ -397,8 +397,11 @@ export const PRESS_CATALOG = Object.freeze([
   }),
   Object.freeze({
     id: "owned",
-    short: "Native-Owned Businesses",
-    name: "Individually Owned Native Businesses",
+    // Ring and tile label, provisional (Kaylyn Lee owns the copy): the full
+    // name breaks into a 23-character line that shrinks the ecosystem ring
+    // below half the canvas; this keeps the owner's distinguishing words.
+    short: "Individual Native-Owned",
+    name: "Individual Native-Owned Businesses",
     shelf: "pro",
     // Roster, not a series, so it states no year to be covered from. Every
     // certifying office publishes who is certified NOW and none of them

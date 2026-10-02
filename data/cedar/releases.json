@@ -485,6 +485,19 @@
           "of": 3725
         },
         "blockers": []
+      },
+      {
+        "version": "v4",
+        "date": "2026-10-02",
+        "name": "Individual Native-Owned Businesses",
+        "tables": 1,
+        "rowsLabel": "3,725 observations",
+        "preview": {
+          "table": "owned.csv",
+          "rows": 10,
+          "of": 3725
+        },
+        "blockers": []
       }
     ],
     "need": [

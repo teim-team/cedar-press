@@ -72,7 +72,7 @@ export const PRIORITY_EXAMPLES = Object.freeze({
   }),
   expansions: Object.freeze([
     "Add annual filing history to Native Nonprofits.",
-    "Add more tribal TERO and commerce offices to Native-Owned Businesses.",
+    "Add more tribal TERO and commerce offices to Individual Native-Owned Businesses.",
     "Carry Natural Resource Revenues to more Nations and commodities.",
   ]),
 });

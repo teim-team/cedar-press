@@ -36,7 +36,7 @@
     "method": "Attribution routes through a party table rather than a single owner column, because one payment can involve the tribal government, allottees, an enterprise, an operator and a trust account at once. Where Interior suppresses the entity by law the row is published as an aggregate and labelled as one — {{NR_AGG_PCT}} ({{NR_NATIONAL_AGG}} national plus {{NR_STATE_AGG}} state of {{NR_ROWS}} rows) of rows are aggregate for that reason, and none are unattributed for want of effort. Individual allottee detail is never published: Osage rows carry a class recipient at a per-headright rate, and the headright divisor is used as a check, never as a multiplier."
   },
   "native-owned-businesses": {
-    "name": "Native-Owned Businesses",
+    "name": "Individual Native-Owned Businesses",
     "short_name": "Businesses",
     "tracks": "Firms certified or listed as Native-owned by a tribal certifying authority — TERO vendor lists, Indian preference registers, tribal business licences and tribal enterprise registers — harmonised across nations into one schema.",
     "sources": "Tribal TERO offices, business licensing departments and enterprise registers, harvested from each nation's own publication. Contributing authorities are acknowledged in every release.",

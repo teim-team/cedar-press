@@ -456,7 +456,7 @@ Collection `subcontracting` · table `subawards` · compatibility reference; not
 | 53 | `source_url` | Source | The prime award's page on USAspending. |
 | 54 | `research_note` (to add in the compatibility transform) | Research note | A concise factual qualification that changes how the row should be read (an uncertain closing date, an amount covering a whole joint venture, a geography that cannot be assigned precisely). Blank when nothing needs saying. |
 
-### Native-Owned Businesses
+### Individual Native-Owned Businesses
 
 Collection `owned` · table `native_owned_businesses` · compatibility reference; not the manifest's installed spreadsheet
 
@@ -1218,7 +1218,7 @@ The columns below describe the exported names directly. No legacy rename, combin
 | 26 | `state` | State | The organization's state. |
 | 27 | `tax_period` | Latest tax period | The most recent tax period in the file. |
 
-### Native-Owned Businesses
+### Individual Native-Owned Businesses
 
 Collection `owned` · table `owned` · installed producer spreadsheet
 
