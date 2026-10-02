@@ -60,9 +60,9 @@ The 41 columns below follow the served spreadsheet header exactly. Types describ
 | 6 | `allocation_formula_effective_end` | Allocation rule effective to | When the allocation rule ceased to apply. | text | the source states none, or not applicable to this row |
 | 7 | `allocation_formula_effective_start` | Allocation rule effective from | When the allocation rule took effect. | text | the source states none, or not applicable to this row |
 | 8 | `allocation_formula_source_url` | Formula source | Where that rule is published. | web address | the source states none, or not applicable to this row |
-| 9 | `amount_sign_meaning` | What the sign means | How to read a negative amount (a correction, a recoupment). | amount in US dollars, as recorded (no rounding; negative where the source records a reduction) | the source reports no amount; never zero |
+| 9 | `amount_sign_meaning` | What the sign means | How to read a negative amount (a correction, a recoupment). | text | the source states none, or not applicable to this row |
 | 10 | `amount_usd` | Amount | The source-reported amount in US dollars. Read measurement_status and amount_sign_meaning with it: a revenue amount, appropriation, allocation, estimate or payment does not imply another of those measures. | amount in US dollars, as recorded (no rounding; negative where the source records a reduction) | the source reports no amount; never zero |
-| 11 | `amount_usd_real2025` | Amount in 2025 dollars | The same amount adjusted to 2025 dollars. | amount in US dollars, as recorded (no rounding; negative where the source records a reduction) | the source reports no amount; never zero |
+| 11 | `amount_usd_real2025` | Amount in 2025 dollars | The same amount adjusted to 2025 dollars. | text | the source states none, or not applicable to this row |
 | 12 | `attribution_status` | Attribution status | Whether the row is keyed to a Native entity, to an aggregate, or unresolved. A blank Cedar ID has a stated reason here. | text | the source states none, or not applicable to this row |
 | 13 | `beneficiary_entity_id` | Beneficiary ID | The identifier of the beneficiary where it differs from the recipient. | identifier, as text | the source states none, or not applicable to this row |
 | 14 | `beneficiary_name` | Source beneficiary | The source-reported beneficiary, where one is given separately from the recipient. This field does not resolve or promote a canonical entity identity. | text | the source states none, or not applicable to this row |
@@ -98,7 +98,7 @@ The "Blank means" column is the general rule for a column of that type; the prod
 
 ### Units and formats
 
-- Money columns are nominal US dollars as recorded, no rounding: `amount_sign_meaning`, `amount_usd`. Columns ending `_real2025` (`amount_usd_real2025`) are the same amounts adjusted to 2025 dollars, as the dictionary states; a nominal and a 2025-dollar column are never added together.
+- Money columns are nominal US dollars as recorded, no rounding: `amount_usd`.
 - Dates are ISO 8601 calendar dates (YYYY-MM-DD).
 - Identifiers, codes, FIPS and EIN values are text and keep their leading zeros.
 

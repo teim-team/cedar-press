@@ -331,7 +331,11 @@ function typeOf(column, values) {
     return filled.some((v) => v.includes("|")) || /_ids$/.test(name) ? T.list : T.id;
   }
   if (/_names$|_tiers$|_classes$|_uids$/.test(name)) return T.list;
-  if (/(_usd|_amt|obligations|_amount|_value_usd|_cost|face_value_of_loan)$/.test(name) || /^(income|expenses|amount)_/.test(name)) return T.money;
+  // A column named amount_* or income_* is money only when its values are
+  // numbers: amount_basis and amount_class are text that says what an amount
+  // measures, and were read as money until 2026-10-02.
+  const numeric = filled.length > 0 && filled.every((v) => /^-?\d+(\.\d+)?$/.test(v));
+  if (/(_usd|_amt|obligations|_amount|_value_usd|_cost|face_value_of_loan)$/.test(name) || (/^(income|expenses|amount)_/.test(name) && numeric)) return T.money;
   if (/(^|_)url(_\d)?$/.test(name)) return T.url;
   if (/^(is_|has_|self_|reported_|credit_instrument)|_flag$|^attributed_flag$|^attribution_withdrawn$|^is_correction$|^in_federal_contracting$|^parent_is_hub$|^evidence_human_reviewed$|^culturally_unidentifiable$|^lineal_descendant_determination$/.test(name)) return T.yesno;
   if (/_year$|^year$|^congress$/.test(name)) return T.year;

@@ -60,7 +60,7 @@ The 41 columns below follow the served spreadsheet header exactly. Types describ
 | 6 | `activity_title` | Filing type | Registration, quarterly or year-end report, amendment, termination. | text | the source states none, or not applicable to this row |
 | 7 | `activity_type` | activity type | Source-family label for the activity row. The current projection writes lda_filing; it does not imply that consultation, testimony, meeting, or other activity families are already included. | text | the source states none, or not applicable to this row |
 | 8 | `affiliated_organizations` | Affiliated organizations | Organizations the filing lists as affiliated with the client. | text | the source states none, or not applicable to this row |
-| 9 | `amount_basis` | Basis of spend | Income, expenses, or none reported. | amount in US dollars, as recorded (no rounding; negative where the source records a reduction) | the source reports no amount; never zero |
+| 9 | `amount_basis` | Basis of spend | Income, expenses, or none reported. | text | the source states none, or not applicable to this row |
 | 10 | `attribution_withdrawn` | Attribution withdrawn | Whether Cedar withdrew its link between this filing and the entity after review (yes or no). A withdrawn filing stays in the file; its spend is not counted as the entity's. | yes or no (1 or 0) | not stated; 0 is no |
 | 11 | `attribution_withdrawn_reason` | Why withdrawn | The reason recorded for the withdrawal. | text | the source states none, or not applicable to this row |
 | 12 | `canonical_name` | Native entity | That entity's name as Cedar's register spells it, so one entity reads the same in every collection. The record's own names (recipient, contractor, organization) stay in their own columns. | text | no registered Cedar entity is linked; read the link or attribution status column where the table carries one; never a finding that no Native entity is involved |
@@ -98,7 +98,7 @@ The "Blank means" column is the general rule for a column of that type; the prod
 
 ### Units and formats
 
-- Money columns are nominal US dollars as recorded, no rounding: `amount_basis`, `expenses_usd`, `income_usd`, `reported_amount_usd`.
+- Money columns are nominal US dollars as recorded, no rounding: `expenses_usd`, `income_usd`, `reported_amount_usd`.
 - Dates are ISO 8601 calendar dates (YYYY-MM-DD). Date-time columns (`activity_date`) carry their UTC offset.
 - Identifiers, codes, FIPS and EIN values are text and keep their leading zeros.
 

@@ -95,13 +95,14 @@ function richFixture() {
     { column: "event_date", label: "Date", meaning: "When it happened." },
     { column: "event_date_precision", label: "Date precision", meaning: "Day, month or year." },
     { column: "filed_at", label: "Filed", meaning: "When the filing was received." },
+    { column: "amount_basis", label: "What the value is", meaning: "What the amount measures; text, not money." },
     { column: "status", label: "Status", meaning: "Controlled status; unknown establishes none." },
     { column: "n_named", label: "Named", meaning: "How many parties the source names." },
   ];
   const rows = [
-    { record_type: "records", record_key: '["a"]', record_grain: "one event", cedar_uid: "CE-00001-6S", canonical_name: "Asa'carsarmiut Tribe", amount_usd: "5000", amount_usd_real2025: "6100.5", currency: "USD", event_date: "2020-02-05", event_date_precision: "day", filed_at: "2020-02-05T10:00:00-05:00", status: "paid", n_named: "2" },
-    { record_type: "records", record_key: '["b"]', record_grain: "one event", cedar_uid: "", canonical_name: "", amount_usd: "", amount_usd_real2025: "", currency: "", event_date: "2014-05", event_date_precision: "month", filed_at: "2014-05-01T00:00:00-04:00", status: "unknown", n_named: "0" },
-    { record_type: "corrections", record_key: '["c"]', record_grain: "one correction", cedar_uid: "", canonical_name: "", amount_usd: "", amount_usd_real2025: "", currency: "", event_date: "", event_date_precision: "unstated", filed_at: "2015-01-05T00:00:00-05:00", status: "null", n_named: "1" },
+    { record_type: "records", record_key: '["a"]', record_grain: "one event", cedar_uid: "CE-00001-6S", canonical_name: "Asa'carsarmiut Tribe", amount_usd: "5000", amount_usd_real2025: "6100.5", currency: "USD", event_date: "2020-02-05", event_date_precision: "day", filed_at: "2020-02-05T10:00:00-05:00", amount_basis: "purchase price", status: "paid", n_named: "2" },
+    { record_type: "records", record_key: '["b"]', record_grain: "one event", cedar_uid: "", canonical_name: "", amount_usd: "", amount_usd_real2025: "", currency: "", event_date: "2014-05", event_date_precision: "month", filed_at: "2014-05-01T00:00:00-04:00", amount_basis: "", status: "unknown", n_named: "0" },
+    { record_type: "corrections", record_key: '["c"]', record_grain: "one correction", cedar_uid: "", canonical_name: "", amount_usd: "", amount_usd_real2025: "", currency: "", event_date: "", event_date_precision: "unstated", filed_at: "2015-01-05T00:00:00-05:00", amount_basis: "Undisclosed", status: "null", n_named: "1" },
   ];
   return {
     entry: { id: "deals", descriptor: { updated: "2026-10-01" }, sample: { table: "deals.csv", path: "/data/cedar/samples/deals/spreadsheet__10.csv", rows: 3, of: 978 }, tables: [] },
@@ -116,8 +117,12 @@ test("the preview facts are measured from the rows, never typed", () => {
   assert.equal(facts.rowCount, 3);
   assert.deepEqual(facts.recordTypes, [["records", 2], ["corrections", 1]]);
   assert.deepEqual(facts.allBlank, []);
-  assert.deepEqual(facts.tokens, [{ column: "status", token: "unknown", count: 1 }, { column: "status", token: "null", count: 1 }]);
-  assert.deepEqual(facts.money, ["amount_usd", "amount_usd_real2025"]);
+  assert.deepEqual(facts.tokens, [
+    { column: "amount_basis", token: "Undisclosed", count: 1 },
+    { column: "status", token: "unknown", count: 1 },
+    { column: "status", token: "null", count: 1 },
+  ]);
+  assert.deepEqual(facts.money, ["amount_usd", "amount_usd_real2025"], "a text amount_* column is not money");
   assert.deepEqual(facts.real2025, ["amount_usd_real2025"]);
   assert.equal(facts.currencyColumn, true);
   assert.deepEqual(facts.monthPrecision, ["event_date"]);
@@ -165,8 +170,9 @@ test("units, formats and the observed preview are stated from the measured facts
   assert.match(text, /Date-time columns \(`filed_at`\) carry their UTC offset/);
   assert.match(text, /### Observed in the preview/);
   assert.match(text, /Preview rows: 3; record types present: `records` \(2\), `corrections` \(1\)\./);
-  assert.match(text, /Columns blank on every preview row \(0 of 13\): none\./);
-  assert.match(text, /Literal tokens present as cell values: `unknown` in `status` \(1\); `null` in `status` \(1\)\./);
+  assert.match(text, /Columns blank on every preview row \(0 of 14\): none\./);
+  assert.match(text, /Literal tokens present as cell values: `Undisclosed` in `amount_basis` \(1\); `unknown` in `status` \(1\); `null` in `status` \(1\)\./);
+  assert.match(text, /\| `amount_basis` \|[^\n]*\| text \| the source states none, or not applicable to this row \|/);
   // A spreadsheet with no money column says so rather than inventing a unit.
   const { entry: e2, book: b2, sample: s2 } = fixture("need");
   const plain = renderReleasedGuide("need", b2, e2, {}, s2);

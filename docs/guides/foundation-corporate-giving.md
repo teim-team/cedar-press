@@ -59,8 +59,8 @@ The 66 columns below follow the served spreadsheet header exactly. Types describ
 | 4 | `addability_status` | addability status | nonadditive_disclosure_view forbids treating rows as independent additive award totals. | text | the source states none, or not applicable to this row |
 | 5 | `aggregation_status` | aggregation status | nonadditive_disclosure_observation requires award/version and period reconciliation before totals. | text | the source states none, or not applicable to this row |
 | 6 | `amount_aggregate_usd` | amount aggregate usd | Umbrella or multi-recipient nominal USD total, not allocated to this recipient. Never add it to recipient amounts. | amount in US dollars, as recorded (no rounding; negative where the source records a reduction) | the source reports no amount; never zero |
-| 7 | `amount_basis` | amount basis | Source measure: commitment, commitment_increment, payment, future_payable or reported_grant. These are not interchangeable. | amount in US dollars, as recorded (no rounding; negative where the source records a reduction) | the source reports no amount; never zero |
-| 8 | `amount_class` | amount class | Exact, range or unstated representation; a range is not a point estimate and unstated is not zero. | amount in US dollars, as recorded (no rounding; negative where the source records a reduction) | the source reports no amount; never zero |
+| 7 | `amount_basis` | amount basis | Source measure: commitment, commitment_increment, payment, future_payable or reported_grant. These are not interchangeable. | text | the source states none, or not applicable to this row |
+| 8 | `amount_class` | amount class | Exact, range or unstated representation; a range is not a point estimate and unstated is not zero. | text | the source states none, or not applicable to this row |
 | 9 | `amount_exact_usd` | amount exact usd | Exact reported nominal USD for this disclosure and financial status, stored as decimal text; blank is unknown, never zero. | amount in US dollars, as recorded (no rounding; negative where the source records a reduction) | the source reports no amount; never zero |
 | 10 | `amount_lower_usd` | amount lower usd | Lower bound of a reported nominal USD range; not an additional amount or point estimate. Blank means unstated. | amount in US dollars, as recorded (no rounding; negative where the source records a reduction) | the source reports no amount; never zero |
 | 11 | `amount_upper_usd` | amount upper usd | Upper bound of a reported nominal USD range; not an additional amount or point estimate. Blank means unstated. | amount in US dollars, as recorded (no rounding; negative where the source records a reduction) | the source reports no amount; never zero |
@@ -124,7 +124,7 @@ The "Blank means" column is the general rule for a column of that type; the prod
 
 ### Units and formats
 
-- Money columns are nominal US dollars as recorded, no rounding: `amount_aggregate_usd`, `amount_basis`, `amount_class`, `amount_exact_usd`, `amount_lower_usd`, `amount_upper_usd`. The `currency` column states the reported currency of each row where it is filled; a blank currency is a gap, not an assumption of US dollars.
+- Money columns are nominal US dollars as recorded, no rounding: `amount_aggregate_usd`, `amount_exact_usd`, `amount_lower_usd`, `amount_upper_usd`. The `currency` column states the reported currency of each row where it is filled; a blank currency is a gap, not an assumption of US dollars.
 - Dates are ISO 8601 calendar dates (YYYY-MM-DD). Where a precision column (`term_end_precision`, `term_start_precision`) states `month` or `year`, the date is written to that precision (YYYY-MM or YYYY) and no day is invented.
 - Identifiers, codes, FIPS and EIN values are text and keep their leading zeros.
 
