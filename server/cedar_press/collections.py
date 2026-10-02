@@ -128,7 +128,7 @@ EXCLUDED_COLLECTIONS: tuple[dict[str, str], ...] = tuple(
 #: each validated against that release's embedded component contract. Access
 #: reuses the existing tier model: a tier whose shelf reaches ``grove``
 #: (``grove``, ``tree``). No tier or route is added.
-GROVE_RELEASE_IDS: tuple[str, ...] = ("gaming",)
+GROVE_RELEASE_IDS: tuple[str, ...] = ("gaming", "infrastructure")
 GROVE_RELEASE_COLLECTIONS: tuple[dict[str, str], ...] = tuple(
     entry
     for entry in EXCLUDED_COLLECTIONS

@@ -15,6 +15,7 @@ def component_declarations(collection_id: str) -> dict:
     """Maintained presentation metadata; never a runtime publication decision."""
     if collection_id not in {
         "gaming",
+        "infrastructure",
         "need",
         "plot",
         "foundation-corporate-giving",

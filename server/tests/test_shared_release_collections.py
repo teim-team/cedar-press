@@ -220,14 +220,14 @@ class SharedCollectionReleaseTest(unittest.TestCase):
             proof.assert_called_once_with(repository.launch._REPO)
             sample_root.__truediv__.assert_not_called()
 
-    def test_fifteen_targets_preserve_tiers_and_never_invent_samples(self):
+    def test_sixteen_targets_preserve_tiers_and_never_invent_samples(self):
         with (
             patch.object(repository, "grove_release_metadata", return_value=None),
             patch.object(repository, "full_release_metadata", return_value=None),
         ):
             for tier in ("press", "press_pro", "grove", "tree"):
                 target = repository.release_targets_for(tier)
-                self.assertEqual((target["target_count"], target["press_target_count"]), (15, 14))
+                self.assertEqual((target["target_count"], target["press_target_count"]), (16, 14))
                 ids = {entry["id"] for entry in target["collections"]}
                 self.assertIn("foundation-corporate-giving", ids)
                 self.assertEqual("need" in ids, tier != "press")
@@ -238,6 +238,7 @@ class SharedCollectionReleaseTest(unittest.TestCase):
                 self.assertNotIn("entity-register", ids)
                 self.assertEqual("plot" in ids, tier != "press")
                 self.assertEqual("gaming" in ids, tier in {"grove", "tree"})
+                self.assertEqual("infrastructure" in ids, tier in {"grove", "tree"})
                 self.assertTrue(
                     all(
                         entry["sample"] is None and entry["release"] is None

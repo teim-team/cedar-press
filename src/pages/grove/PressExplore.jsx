@@ -78,6 +78,7 @@ import { columnPlan, short } from "../../features/grove/recordColumns.js";
 import { coverageLabel, upgradeFor } from "../../features/grove/pressAccess.js";
 import { RecordStructureCap, RecordStructureTable } from "./PressRecordStructure.jsx";
 import { TBN_PLANS_URL, articleHref, articlesDrawingOn } from "../../features/grove/pressArticles.js";
+import { useProtectedArticles } from "../../features/grove/useProtectedArticles.js";
 import { EVENT, track } from "../../features/grove/telemetry.js";
 import { useNarrow } from "../../features/grove/useNarrow.js";
 import PressCollectionRail from "./PressCollectionRail.jsx";
@@ -471,8 +472,8 @@ function YearRange({ cut, bounds, basis, onChange }) {
  * piece that runs on Tribal Business News opens there and says so; one
  * hosted here opens here.
  */
-function WrittenFrom({ collectionId, onMore }) {
-  const pieces = articlesDrawingOn(collectionId);
+function WrittenFrom({ collectionId, onMore, articles }) {
+  const pieces = articlesDrawingOn(collectionId, articles);
   if (!pieces.length) return null;
   // ONE, NOT ALL OF THEM. Two headlines in this row pushed it onto a second
   // line, which on a page whose whole point is the records is a row of
@@ -807,6 +808,8 @@ function SampleDownload({ entry }) {
 }
 
 export default function PressExplore({ user, pick = null, onActive = () => {}, onSelected = () => {} }) {
+  const articleState = useProtectedArticles(user);
+  const articles = articleState.data?.articles ?? [];
   const [params, setParams] = useSearchParams();
   const navigate = useNavigate();
   const cut = useMemo(() => decodeCut(params.toString()), [params]);
@@ -1106,6 +1109,7 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
           the whole screen on a phone. */}
       {cut.about && (single || lockedSingle) ? (
         <PressCollectionAbout
+          articles={articles}
           entry={(single ?? lockedSingle).entry}
           flagship={(single ?? lockedSingle).flagship}
           onClose={() => write({ about: false })}
@@ -1352,7 +1356,7 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
             >
               Ask Cedar <span aria-hidden="true">&#8594;</span>
             </button>
-            {single ? <WrittenFrom collectionId={single.entry.id} onMore={() => write({ about: true })} /> : null}
+            {single ? <WrittenFrom collectionId={single.entry.id} onMore={() => write({ about: true })} articles={articles} /> : null}
             {!atlas ? <span className="cp-ex__pages" title={`${PAGE_SIZE} records a page`}>
               <button type="button" className="cp-ex__clear" disabled={paged.page <= 1} onClick={() => write({ page: paged.page - 1 })} aria-label="Previous page">&#8249;</button>
               {/* Short, because this sits in a status bar that has to hold

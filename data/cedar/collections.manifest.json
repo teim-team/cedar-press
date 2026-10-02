@@ -38,6 +38,12 @@
       "id": "_entity_layer",
       "shelf": "infrastructure",
       "reason": "Shelf 'infrastructure': the identity spine every other collection keys to, not a collection sold on its own."
+    },
+    {
+      "id": "infrastructure",
+      "name": "Native Infrastructure",
+      "shelf": "grove",
+      "reason": "A separate Cedar Grove dataset. Records retain source-specific periods, grains and publication permissions."
     }
   ],
   "collections": [

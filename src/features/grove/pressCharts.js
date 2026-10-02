@@ -124,7 +124,67 @@ export const FIGURE_REQUIREMENTS = Object.freeze([
  * not been finished. Used by the test rather than at render time: the page
  * should not be deciding at runtime whether an editor did their job.
  */
+
+const EVIDENCE_CHARTS = new Set(["relationships", "timeline", "evidenceTable"]);
+const EVIDENCE_COLUMNS = new Set(["entity", "role", "asOf", "detail"]);
+const evidenceText = (value, limit = 4000) =>
+  typeof value === "string" && value.trim().length > 0 && value.length <= limit;
+const evidenceDate = (value) => {
+  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value) || value.startsWith("0000")) return false;
+  const parsed = new Date(value);
+  return Number.isFinite(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value;
+};
+const evidenceSources = (sources) =>
+  Array.isArray(sources) && sources.length > 0 && sources.length <= 20 && sources.every((source) => {
+    try {
+      const url = new URL(source?.url);
+      return ["http:", "https:"].includes(url.protocol) && url.hostname.includes(".") &&
+        !url.username && !url.password && !/(^localhost$|\.local$|\.internal$|\.localhost$)/i.test(url.hostname);
+    } catch {
+      return false;
+    }
+  });
+
+function evidenceFigureProblems(figure) {
+  const problems = [];
+  if (!evidenceText(figure.id, 100) || !/^[a-z0-9][a-z0-9-]{0,99}$/.test(figure.id)) problems.push("invalid evidence id");
+  if (!evidenceText(figure.caption, 1200)) problems.push("no evidence caption");
+  if (!evidenceText(figure.source, 1200)) problems.push("no evidence source");
+  if (!evidenceSources(figure.sources)) problems.push("no public evidence sources");
+  if (!Array.isArray(figure.notes) || figure.notes.length < 2 || figure.notes.length > 12 ||
+      figure.notes.some((note) => !evidenceText(note, 2000))) problems.push("invalid evidence scope notes");
+  if (["points", "flows", "series", "value", "weight"].some((key) => Object.hasOwn(figure, key))) {
+    problems.push("evidence views cannot imply numeric magnitudes");
+  }
+  if (figure.asOf !== undefined && !evidenceDate(figure.asOf)) problems.push("invalid evidence as-of date");
+  const collection = { relationships: "relationships", timeline: "events", evidenceTable: "rows" }[figure.kind];
+  const rows = figure[collection];
+  const fields = {
+    relationships: ["from", "relationship", "to", "asOf", "detail"],
+    timeline: ["date", "title", "detail"],
+    evidenceTable: ["entity", "role", "asOf", "detail"],
+  }[figure.kind];
+  if (!Array.isArray(rows) || rows.length === 0 || rows.length > 100) {
+    problems.push("evidence requires one to one hundred observations");
+  } else if (rows.some((row) => !row || fields.some((key) =>
+    ["date", "asOf"].includes(key) ? !evidenceDate(row[key]) : !evidenceText(row[key])
+  ) || !evidenceSources(row.sources))) {
+    problems.push("invalid or unsourced evidence observation");
+  }
+  if (figure.kind === "evidenceTable") {
+    const columns = figure.columns;
+    if (!Array.isArray(columns) || columns.length === 0 || columns.length > 4 ||
+        columns.some((column) => !EVIDENCE_COLUMNS.has(column?.key) || !evidenceText(column?.label, 100)) ||
+        new Set(columns.map((column) => column?.key)).size !== columns.length) {
+      problems.push("invalid or repeated evidence columns");
+    }
+  }
+  return problems;
+}
+
+
 export function figureProblems(figure) {
+  if (EVIDENCE_CHARTS.has(figure.kind)) return evidenceFigureProblems(figure);
   const problems = [];
   if (!chartRule(figure.kind)) problems.push(`unknown mark: ${figure.kind}`);
   if (!figure.caption) problems.push("no caption");

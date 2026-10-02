@@ -383,7 +383,7 @@ class TestGroveDivergence(unittest.TestCase):
             for entry in launch.EXCLUDED_COLLECTIONS
             if entry["shelf"] == "grove"
         }
-        self.assertEqual(workspace_grove, {"gaming"})
+        self.assertEqual(workspace_grove, {"gaming", "infrastructure"})
         for entry in launch.EXCLUDED_COLLECTIONS:
             with self.subTest(excluded=entry["id"]):
                 self.assertNotIn(entry["id"], in_catalog)
@@ -402,7 +402,9 @@ class TestGroveDivergence(unittest.TestCase):
         # collection and collapsing them would make the Press/Grove boundary
         # unreadable.
         excluded = {entry["id"]: entry for entry in launch.EXCLUDED_COLLECTIONS}
-        self.assertEqual(set(excluded), {"newsletters", "gaming", "_entity_layer"})
+        self.assertEqual(
+            set(excluded), {"newsletters", "gaming", "_entity_layer", "infrastructure"}
+        )
         self.assertEqual(
             {entry["shelf"] for entry in excluded.values()},
             {"standard", "grove", "infrastructure"},
@@ -410,11 +412,11 @@ class TestGroveDivergence(unittest.TestCase):
         for entry in excluded.values():
             with self.subTest(collection=entry["id"]):
                 self.assertTrue(entry["reason"].strip())
-        # Only one of the three is a Grove divergence. The other two are not
+        # Gaming and Native Infrastructure belong to Grove. The other two are not
         # in Cedar Grove's favour and must not be counted as though they were.
         self.assertEqual(
             [e["id"] for e in excluded.values() if e["shelf"] == "grove"],
-            ["gaming"],
+            ["gaming", "infrastructure"],
         )
 
     def test_the_two_implementations_agree_on_what_is_excluded(self) -> None:

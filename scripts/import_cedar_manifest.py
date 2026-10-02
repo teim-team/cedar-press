@@ -158,6 +158,10 @@ EXCLUDED: dict[str, str] = {
         "Shelf 'infrastructure': the identity spine every other collection "
         "keys to, not a collection sold on its own."
     ),
+    "infrastructure": (
+        "A separate Cedar Grove dataset. Records retain source-specific periods, "
+        "grains and publication permissions."
+    ),
 }
 
 #: The fourteen fields ``CollectionDataset`` declares. 760 emits exactly these

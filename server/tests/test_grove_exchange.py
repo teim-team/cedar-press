@@ -29,14 +29,14 @@ class GroveExchange(unittest.TestCase):
             ]:
                 self.assertEqual(exchange.response(request)["status"], status)
 
-    def test_discovery_uses_fifteen_existing_targets_and_existing_tiers(self):
+    def test_discovery_uses_sixteen_existing_targets_and_existing_tiers(self):
         with (
             patch.object(repository, "grove_release_metadata", return_value=None),
             patch.object(repository, "full_release_metadata", return_value=None),
         ):
             result = exchange.response(self.request())["payload"]
-        self.assertEqual((result["target_count"], result["press_target_count"]), (15, 14))
-        self.assertEqual(len(result["collections"]), 15)
+        self.assertEqual((result["target_count"], result["press_target_count"]), (16, 14))
+        self.assertEqual(len(result["collections"]), 16)
         self.assertNotIn("entity-register", [item["id"] for item in result["collections"]])
 
     def test_held_need_download_and_enterprise_profile_never_escape(self):

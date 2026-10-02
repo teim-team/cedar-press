@@ -166,6 +166,10 @@ export async function fetchArticles({ signal } = {}) {
   return request("/press/articles", { signal });
 }
 
+export async function fetchArticle(slug, { signal } = {}) {
+  return request("/press/articles/" + encodeURIComponent(slug), { signal });
+}
+
 /**
  * A collection's release file. Returns a Blob rather than parsed rows: the
  * file is what the subscriber is taking, and re-serializing it here would

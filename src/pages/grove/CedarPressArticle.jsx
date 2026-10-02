@@ -41,7 +41,6 @@ import {
   ARTICLE_IMAGE,
   BLOCK,
   LUMECON_URL,
-  PRESS_ARTICLES,
   TBN_PLANS_URL,
   TBN_URL,
 } from "../../features/grove/pressArticles";
@@ -65,7 +64,7 @@ import PressAd from "./PressAd";
 import { PressCedarFab } from "./PressCedarFab";
 import { TierName } from "./TierName";
 
-const BY_ID = Object.fromEntries(PRESS_ARTICLES.map((article) => [article.id, article]));
+import { useProtectedArticle, useProtectedArticles } from "../../features/grove/useProtectedArticles.js";
 
 /**
  * A figure: the chart, what it shows, what it came from, where it was made,
@@ -84,7 +83,85 @@ const BY_ID = Object.fromEntries(PRESS_ARTICLES.map((article) => [article.id, ar
  * Every chart here is built in Cedar Grove, and saying so beside an
  * invitation to build one is the strongest case Grove has.
  */
+
+function EvidenceSources({ sources }) {
+  return (
+    <ul className="cp-ar__fignotes">
+      {sources.map((source, index) => (
+        <li key={source.url + ":" + index}>
+          <a href={source.url} target="_blank" rel="noreferrer">
+            {source.title || source.publisher || "Source"}
+          </a>
+          {source.date ? " (" + source.date + ")" : null}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function EvidenceFigure({ block, lead = false }) {
+  const table = block.chart === "evidenceTable";
+  return (
+    <figure className={"cp-ar__fig" + (lead ? " cp-ar__fig--lead" : "")}>
+      <figcaption className="cp-ar__figcap">{block.caption}</figcaption>
+      {table ? (
+        <div role="region" aria-label={block.caption} tabIndex={0} style={{ overflowX: "auto" }}>
+          <table>
+            <thead>
+              <tr>
+                {block.columns.map((column) => <th scope="col" key={column.key}>{column.label}</th>)}
+                <th scope="col">Evidence</th>
+              </tr>
+            </thead>
+            <tbody>
+              {block.rows.map((row, index) => (
+                <tr key={row.entity + ":" + index}>
+                  {block.columns.map((column) => <td key={column.key}>{row[column.key]}</td>)}
+                  <td>
+                    <details>
+                      <summary>{"Evidence for " + row.entity}</summary>
+                      {!block.columns.some((column) => column.key === "detail") ? <p>{row.detail}</p> : null}
+                      <EvidenceSources sources={row.sources} />
+                    </details>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <ol className="cp-ar__fignotes">
+          {(block.chart === "relationships" ? block.relationships : block.events).map((row, index) => (
+            <li key={index}>
+              <details>
+                <summary>
+                  {block.chart === "relationships"
+                    ? <><b>{row.from}</b>{" " + row.relationship + " "}<b>{row.to}</b>{" (as of " + row.asOf + ")"}</>
+                    : <><time dateTime={row.date}>{row.date}</time>{" · "}<b>{row.title}</b></>}
+                </summary>
+                <p>{row.detail}</p>
+                <EvidenceSources sources={row.sources} />
+              </details>
+            </li>
+          ))}
+        </ol>
+      )}
+      <ul className="cp-ar__fignotes">{block.notes.map((note) => <li key={note}>{note}</li>)}</ul>
+      <p className="cp-ar__figsrc">
+        <b>{block.source}</b>
+        {block.asOf ? ", as of " + block.asOf : null}
+        {block.releaseId ? " · Source release " + block.releaseId : null}
+      </p>
+      <EvidenceSources sources={block.sources} />
+    </figure>
+  );
+}
+
+
 function Figure({ block, lead = false }) {
+  if (["relationships", "timeline", "evidenceTable"].includes(block.chart)) {
+    return <EvidenceFigure block={block} lead={lead} />;
+  }
   const entry = PRESS_CATALOG_BY_ID[block.source];
   const release = releaseFor(block.source);
   const Chart = PRESS_FIGURES[block.chart];
@@ -101,16 +178,24 @@ function Figure({ block, lead = false }) {
           {block.notes.map((note) => <li key={note}>{note}</li>)}
         </ul>
       ) : null}
+      {block.sources?.length ? (
+        <ul className="cp-ar__fignotes">
+          {block.sources.map((source) => (
+            <li key={source.url}><a href={source.url} target="_blank" rel="noreferrer">{source.title || source.publisher || "Source"}</a></li>
+          ))}
+        </ul>
+      ) : null}
       <p className="cp-ar__figsrc">
         {/* A date, never a version: the collections update continuously and
             the date is what makes the figure reproducible. */}
         <b>{entry?.name ?? block.source}</b>
-        {release ? `, as of ${formatUpdated(release.updated)}` : null}
-        . Built in Cedar Grove.{" "}
+        {block.asOf ? ", as of " + block.asOf : !block.releaseId && release ? ", as of " + formatUpdated(release.updated) : null}
+        {block.releaseId ? <span> · Source release {block.releaseId}</span> : null}
+        .{" "}
         {/* To the Cedar Grove page on lumecon.ai, not /app/grove: a Press
             reader clicking this has no Grove entitlement, and the app route
             answers with a sign-in wall instead of the argument. */}
-        <a href={GROVE_MARKETING_URL} target="_blank" rel="noreferrer">Make your own &#8594;</a>
+        <a href={GROVE_MARKETING_URL} target="_blank" rel="noreferrer">Explore Cedar Grove &#8594;</a>
       </p>
     </figure>
   );
@@ -123,6 +208,28 @@ function Figure({ block, lead = false }) {
  * that breaks out past the column collides with whatever is in the rail at
  * that moment. The lead picture is the one that gets the page.
  */
+
+function Paragraph({ block }) {
+  return (
+    <Fragment>
+      <p>{block.text}</p>
+      {block.citations?.length ? (
+        <p className="cp-ar__figsrc">
+          {block.citations.map((source, index) => (
+            <Fragment key={source.url}>
+              {index ? " · " : null}
+              <a href={source.url} target="_blank" rel="noreferrer">
+                {source.title || source.publisher || "Source"}
+              </a>
+            </Fragment>
+          ))}
+        </p>
+      ) : null}
+    </Fragment>
+  );
+}
+
+
 function BodyImage({ src, alt, caption, credit, tone }) {
   return (
     <figure className="cp-ar__inline">
@@ -309,7 +416,9 @@ export default function CedarPressArticle() {
   const { user, loading } = useAuth();
   // Sitewide arrival language: the head fades in; the prose stays put.
   const fadeRoot = useFadeIn();
-  const article = BY_ID[articleId];
+  const articleState = useProtectedArticle(loading ? null : user, articleId);
+  const relatedState = useProtectedArticles(loading ? null : user);
+  const article = articleState.data?.article;
   useDocumentTitle(article?.title ?? "Article not found");
   useEffect(() => {
     if (article?.id) track(EVENT.articleOpened, { article: article.id, dataset: article.datasetId });
@@ -332,6 +441,23 @@ export default function CedarPressArticle() {
     return (
       <div className="teim-rd teim-rd--paper">
         <PressGate user={user} />
+      </div>
+    );
+  }
+
+  if (articleState.status === "loading" || articleState.status === "unavailable") {
+    return (
+      <div className="teim-rd teim-rd--paper">
+        <main id="cp-main" className="cp cp-page">
+          <PressMast section="articles" />
+          <PressBack label="All Research Briefs" to={PRESS_ARTICLES_PATH} />
+          <p role="status">
+            {articleState.status === "loading"
+              ? "Loading this article…"
+              : "Articles are unavailable on this connection. Your sign-in is unchanged. Please try again when the article service is available."}
+          </p>
+          <PressFoot />
+        </main>
       </div>
     );
   }
@@ -381,7 +507,8 @@ export default function CedarPressArticle() {
   const headings = body.flatMap((b, i) => (b.kind === BLOCK.H2 ? [i] : []));
   const inlineAdAt = headings[1] ?? -1;
   // The rest of the research, beside the piece: newest first, three at most.
-  const related = PRESS_ARTICLES.filter((other) => other.id !== article.id && other.image).slice(0, 3);
+  const related = (relatedState.data?.articles ?? [])
+    .filter((other) => other.id !== article.id && other.image).slice(0, 3);
 
   return (
     <div className="teim-rd teim-rd--paper">
@@ -467,6 +594,16 @@ export default function CedarPressArticle() {
             </ul>
           </div>
 
+          {article.demonstration ? (
+            <p className="cp-ar__herocap" role="note">
+              Demonstration article. Its findings and chart values are invented layout examples.
+            </p>
+          ) : article.earlyAccess ? (
+            <p className="cp-ar__herocap" role="note">
+              Early access draft. Findings are preliminary and subject to change.
+            </p>
+          ) : null}
+
           <div className="cp-ar__grid">
             <div className="cp-ar__body">
               {body.map((block, index) => {
@@ -496,7 +633,7 @@ export default function CedarPressArticle() {
                 if (block.kind === BLOCK.PAIR) {
                   return <BodyPair key={index} images={block.images} />;
                 }
-                return <p key={index}>{block.text}</p>;
+                return <Paragraph key={index} block={block} />;
               })}
             </div>
 
@@ -571,6 +708,20 @@ export default function CedarPressArticle() {
 
         <PressAd slot={AD_SLOT.ARTICLE_END} example />
 
+        {article.sources?.length ? (
+          <section className="cp-ar__data" aria-label="Article sources">
+            <h2>Sources</h2>
+            <ul>
+              {article.sources.map((source) => (
+                <li key={source.url}>
+                  <a href={source.url} target="_blank" rel="noreferrer">{source.title || source.publisher || "Source"}</a>
+                  {source.date ? " · " + source.date : null}
+                  {source.locator ? " · " + source.locator : null}
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
         {/* The end of every hosted piece: the data it came from, resolved
             against what this reader can open. */}
         <section className="cp-ar__data cp-fade" aria-label="The data behind this article">

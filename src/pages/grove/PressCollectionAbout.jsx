@@ -49,8 +49,8 @@ function Block({ title, children }) {
   );
 }
 
-export default function PressCollectionAbout({ entry, flagship, onClose }) {
-  const written = articlesDrawingOn(entry.id);
+export default function PressCollectionAbout({ entry, flagship, onClose, articles = [] }) {
+  const written = articlesDrawingOn(entry?.id, articles);
   const panelRef = useRef(null);
   const closeRef = useRef(null);
 

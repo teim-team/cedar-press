@@ -21,7 +21,9 @@
 import { Link } from "react-router";
 
 import { LAUNCH_COLLECTION } from "../../features/grove/collection";
-import { ARTICLE_IMAGE, PRESS_ARTICLES, articleHref } from "../../features/grove/pressArticles";
+import { ARTICLE_IMAGE, articleHref } from "../../features/grove/pressArticles";
+import { useAuth } from "../../context/useAuth";
+import { useProtectedArticles } from "../../features/grove/useProtectedArticles.js";
 import { PRESS_CATALOG_BY_ID } from "../../features/grove/pressCatalog";
 import { anchorOf, formatUpdated, latestRelease, recentlyUpdated } from "../../features/grove/pressReleases";
 import { PRESS_DATA_PATH, PRESS_WHATS_NEW_PATH } from "../../features/grove/pressRoutes";
@@ -38,7 +40,9 @@ function leadCollection() {
 }
 
 export default function PressBriefing() {
-  const [lead] = PRESS_ARTICLES;
+  const { user, loading } = useAuth();
+  const articleState = useProtectedArticles(loading ? null : user);
+  const [lead] = articleState.data?.articles ?? [];
   const signals = recentlyUpdated(3);
   const collection = leadCollection();
   const away = lead && !lead.hosted;
@@ -49,7 +53,7 @@ export default function PressBriefing() {
           size of a lead — not a card in a grid of six. */}
       {lead ? (
         <article className="cp-brief__lead">
-          <span className="cp-brief__cap">The latest research</span>
+          <span className="cp-brief__cap">{lead.demonstration ? "Demonstration" : lead.earlyAccess ? "Early access" : "The latest research"}</span>
           {/* THE LEAD HAS A PICTURE ON /articles AND HAD NONE HERE.
               The briefing brief is "one lead development", which is about how
               MANY things the page carries, not about stripping the one it
@@ -95,7 +99,15 @@ export default function PressBriefing() {
             {away ? " · on Tribal Business News" : null}
           </p>
         </article>
-      ) : null}
+      ) : (
+        <div className="cp-brief__lead" data-testid="brief-article-unavailable">
+          <p role="status">
+            {articleState.status === "loading"
+              ? "Loading research articles…"
+              : "Research articles are unavailable on this connection. Your collections and account are still available."}
+          </p>
+        </div>
+      )}
 
       <div className="cp-brief__side">
         {/* THREE SIGNALS. Releases, newest first, each one a link to exactly

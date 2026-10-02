@@ -18,7 +18,10 @@ import { fileURLToPath } from "node:url";
 import { expect, test } from "@playwright/test";
 
 import { EMAIL, HASH, PASSWORD, PRESS_EMAIL } from "./demoAccount.js";
-import { parseCsv, rowSource, contractFor } from "../src/features/grove/explore.js";
+import { parseCsv, rowSource, contractFor, exploreTables, labelFor, universalRows } from "../src/features/grove/explore.js";
+import { LAUNCH_COLLECTION } from "../src/features/grove/collection.js";
+import { coverageLabel } from "../src/features/grove/pressAccess.js";
+import { formatUpdated } from "../src/features/grove/pressReleases.js";
 import { recordHref } from "../src/features/grove/pressRecord.js";
 
 // The browser suite follows the exact published release, including refreshed
@@ -32,6 +35,8 @@ const FR_SAMPLE = await currentSample("federal-register");
 const LOBBYING_SAMPLE = await currentSample("lobbying");
 const NEED_SAMPLE = await currentSample("need");
 const OWNED_SAMPLE = await currentSample("owned");
+const GIVING_SAMPLE = await currentSample("foundation-corporate-giving");
+const PLOT_SAMPLE = await currentSample("plot");
 const CURRENT_ENTITY_UID = FUNDING_SAMPLE.rows.find((row) => row.cedar_uid)?.cedar_uid;
 const register = JSON.parse(await readFile(new URL("../public/data/cedar/register.json", import.meta.url), "utf8"));
 const CURRENT_ENTITY_NAME = register.entities.find((row) => row[0] === CURRENT_ENTITY_UID)?.[1];
@@ -664,27 +669,13 @@ test.describe("the subscriber's path", () => {
     const errors = watchConsole(page);
     await signIn(page);
 
-    // THE OVERVIEW IS A BRIEFING NOW, NOT SIX DOORS.
-    // It asserted six hub tiles — Collections, Research Briefs, Priorities,
-    // What's new, Methods, Plans — which is the masthead's own nav bar
-    // restated underneath itself. Owner, 2026-09-20: "Make it feel more like
-    // a briefing: one lead development, three signals worth watching, one
-    // collection or research brief to explore, one Cedar question worth
-    // asking." Those four are what is asserted, because those four are what
-    // the page is for; every one of them is read from the release record or
-    // the article list, so none of it can go stale in place.
+    // The offline briefing keeps release navigation and account controls,
+    // while its research slot truthfully reports the absent protected API.
     await expect(page.locator(".cp-brief__lead")).toBeVisible();
-    // The lead's PICTURE, in the DOM and decoded -- not its JSX. The unit
-    // test beside this one reads the source, and source can be commented out
-    // or put behind a condition that never fires while every regex over it
-    // still matches. `naturalWidth` is the only assertion that distinguishes
-    // "the element rendered" from "the file actually arrived", and the page
-    // was measurably the thinnest in the product for want of exactly this.
-    const leadImage = page.locator(".cp-brief__img");
-    await expect(leadImage).toBeVisible();
-    await expect
-      .poll(() => leadImage.evaluate((el) => el.naturalWidth), { timeout: 5000 })
-      .toBeGreaterThan(0);
+    await expect(page.getByTestId("brief-article-unavailable")).toContainText(
+      "Research articles are unavailable on this connection.",
+    );
+    await expect(page.locator(".cp-brief__img")).toHaveCount(0);
     await expect(page.locator(".cp-brief__signals a")).toHaveCount(3);
     await expect(page.locator(".cp-brief__coll")).toBeVisible();
     await expect(page.getByRole("button", { name: /Ask Cedar what changed/ })).toBeVisible();
@@ -1015,54 +1006,71 @@ test.describe("Explore the collections", () => {
     expect(errors).toEqual([]);
   });
 
-  // FOUNDATION & CORPORATE GIVING AND PLOT ARE LIVE ON THEIR PLANS (owner,
-  // 2026-09-27). Each opens for the plan that includes it like any other
-  // collection on its shelf, and where another collection shows sample
-  // records it shows what each record holds. No row count, span or version
-  // is stated for either, anywhere a reader can see.
-  const NUMERIC_COUNT = /\d[\d,.]*\s*(k|m|million|thousand)?\s*(rows?|records?)\b/i;
-  for (const { id, fields, cases } of [
-    { id: "foundation-corporate-giving", fields: 27, cases: [{ account: PRESS_ACCOUNT, open: true }, { account: ACCOUNT, open: true }] },
-    { id: "plot", fields: 9, cases: [{ account: PRESS_ACCOUNT, open: false }, { account: ACCOUNT, open: true }] },
+  // Giving and PLOT now carry reviewed observation-level releases. The public
+  // sample identities and release descriptor are the test's source of truth.
+  for (const { id, cases } of [
+    { id: "foundation-corporate-giving", cases: [{ account: PRESS_ACCOUNT, open: true }, { account: ACCOUNT, open: true }] },
+    { id: "plot", cases: [{ account: PRESS_ACCOUNT, open: false }, { account: ACCOUNT, open: true }] },
   ]) {
+    const sample = id === "plot" ? PLOT_SAMPLE : GIVING_SAMPLE;
+    const table = exploreTables(id).find((entry) => entry.flagship);
+    const release = LAUNCH_COLLECTION.find((entry) => entry.id === id);
+    const entry = STOREFRONT_CATALOG.find((item) => item.id === id);
+    if (!table || !release?.rowsLabel || !release.updated || !sample.rows.length) {
+      throw new Error(id + " needs a published sample and a dated release descriptor");
+    }
+    const expectedIds = universalRows(table.key, sample.rows).map((row) => row.recordId).sort();
+    if (expectedIds.some((value) => !value)) throw new Error(id + " has an unnamed sample observation");
     for (const { account, open } of cases) {
-      test(`${id} ${open ? "opens on what each record holds" : "is offered on Cedar Press+"} for ${account === ACCOUNT ? "Cedar Press+" : "Cedar Press"}`, async ({ page }) => {
+      test(id + (open ? " opens its reviewed sample" : " is offered on Cedar Press+") + " for " + (account === ACCOUNT ? "Cedar Press+" : "Cedar Press"), async ({ page }) => {
         const errors = watchConsole(page);
         await signIn(page, account);
-        await page.goto(`/data?c=${id}`);
+        const requested = [];
+        page.on("request", (request) => {
+          if (new URL(request.url()).pathname.startsWith("/data/cedar/samples/" + id + "/")) requested.push(request.url());
+        });
+        await page.goto("/data?c=" + id);
         const explore = page.getByTestId("explore");
         await expect(explore).not.toContainText(/not yet published|first release/i);
         await expect(page.getByTestId("explore-unavailable")).toHaveCount(0);
+        await expect(page.getByTestId("explore-structure")).toHaveCount(0);
         if (open) {
-          const view = page.getByTestId("explore-structure");
-          await expect(view).toBeVisible();
+          const records = page.getByTestId("explore-record");
+          await expect(records).toHaveCount(sample.rows.length);
+          const seen = await records.evaluateAll((nodes) => nodes.map((node) => node.dataset.recordId).sort());
+          expect(seen).toEqual(expectedIds);
           await expect(page.getByTestId("explore-locked")).toHaveCount(0);
-          await expect(view).toContainText("What each record holds");
-          await expect(view.getByTestId("record-structure").locator("tbody tr")).toHaveCount(fields);
-          expect(await view.innerText()).not.toMatch(NUMERIC_COUNT);
         } else {
           const locked = page.getByTestId("explore-locked");
           await expect(locked).toBeVisible();
           await expect(locked.locator(".cp-lock__say")).toContainText("Available with Cedar Press+");
-          expect((await locked.locator("thead th").allInnerTexts()).join(" | ").toUpperCase()).toContain("OWNER OR ENTITY");
-          expect(await locked.innerText()).not.toMatch(NUMERIC_COUNT);
+          const contract = contractFor(table.key);
+          const columns = contract.default_columns.slice(0, contract.mapping_kind === "producer_spreadsheet" ? 8 : 6);
+          await expect(locked.locator("thead th")).toHaveText(columns.map((column) => labelFor(table.key, column)));
+          await expect(locked.locator(".cp-ex__caption")).toContainText(release.rowsLabel);
+          await expect(page.getByTestId("explore-record")).toHaveCount(0);
+          expect(requested).toEqual([]);
         }
-        const rail = page.locator(".cp-rail__item").filter({ has: page.locator(`text=${id === "plot" ? "PLOT" : "Foundation & Corporate Giving"}`) }).first();
+        const rail = page.locator(".cp-rail__item").filter({ has: page.locator("text=" + (entry.short || entry.name)) }).first();
         await expect(rail.locator(".cp-rail__lock")).toHaveText(open ? [] : ["Plus"]);
         expect(errors).toEqual([]);
       });
     }
 
-    test(`the door shows ${id} by what each record holds, with no count`, async ({ page }) => {
+    test("the door shows " + id + " as individually identified reviewed sample records", async ({ page }) => {
       const errors = watchConsole(page);
-      await page.goto(`/?collection=${id}`);
-      const stage = page.locator(`[data-testid="collection-stage"][data-collection="${id}"]`);
+      await page.goto("/?collection=" + id);
+      const stage = page.locator('[data-testid="collection-stage"][data-collection="' + id + '"]');
       await expect(stage).toBeVisible();
-      await expect(stage.getByTestId("record-structure").locator("tbody tr")).toHaveCount(fields);
-      await expect(stage).toContainText("What each record holds");
-      await expect(stage).not.toContainText(/not yet published|first release/i);
-      await expect(stage.locator(".cp-pane__facts")).not.toContainText(/\d/);
-      expect(await stage.innerText()).not.toMatch(NUMERIC_COUNT);
+      await expect(stage.getByTestId("record-structure")).toHaveCount(0);
+      const records = stage.getByTestId("stage-record");
+      await expect(records).toHaveCount(Math.min(10, sample.rows.length));
+      expect(await records.evaluateAll((nodes) => nodes.map((node) => node.dataset.recordId).sort()))
+        .toEqual(expectedIds.slice(0, 10));
+      await expect(stage.locator(".cp-pane__tablecap")).toContainText(sample.rows.length + " of " + sample.rows.length + " sample records");
+      await expect(stage.locator(".cp-pane__facts")).toContainText(formatUpdated(release.updated).replace(/, \d{4}$/, ""));
+      if (coverageLabel(entry)) await expect(stage.locator(".cp-pane__facts")).toContainText(coverageLabel(entry));
+      await expect(stage).not.toContainText(/not yet published|first release|preview pending/i);
       expect(errors).toEqual([]);
     });
   }
@@ -1112,13 +1120,14 @@ test.describe("Explore the collections", () => {
     );
     await expect(atlas.locator(".cp-atlas__pending")).toHaveCount(0);
     await expect(atlas).not.toContainText(/not yet published|first release/i);
-    // Neither states a row count, a span or a version: the cells are empty
-    // rather than holding a placeholder.
-    for (const name of ["PLOT", "Foundation & Corporate Giving"]) {
-      const row = atlas.getByTestId("atlas-row").filter({ has: page.getByRole("button", { name, exact: true }) });
-      await expect(row.getByTestId("atlas-rows")).toHaveText("");
-      await expect(row.locator("td").nth(1)).toHaveText("");
-      await expect(row.locator("td").nth(3)).toHaveText("");
+    // Counts, coverage and freshness now follow the actual released metadata.
+    for (const id of ["plot", "foundation-corporate-giving"]) {
+      const entry = STOREFRONT_CATALOG.find((item) => item.id === id);
+      const release = LAUNCH_COLLECTION.find((item) => item.id === id);
+      const row = atlas.getByTestId("atlas-row").filter({ has: page.getByRole("button", { name: entry.name, exact: true }) });
+      await expect(row.getByTestId("atlas-rows")).toHaveText(release.rowsLabel);
+      await expect(row.locator("td").nth(1)).toHaveText(coverageLabel(entry));
+      await expect(row.locator("td").nth(3)).toHaveText(formatUpdated(release.updated));
     }
     await expect(page.locator(".cp-ex__pages")).toHaveCount(0);
 
@@ -2365,7 +2374,7 @@ test.describe("sponsorship", () => {
   for (const { name, path, expected } of [
     { name: "the overview", path: "/", expected: 1 },
     { name: "Articles", path: "/articles", expected: 1 },
-    { name: "an article", path: "/articles/brief-deals", expected: 1 },
+    { name: "an unavailable article", path: "/articles/brief-owned", expected: 0 },
     { name: "What's new", path: "/whats-new", expected: 1 },
     { name: "Methods", path: "/methods", expected: 0 },
   ]) {
@@ -2941,110 +2950,55 @@ test.describe("the first screen", () => {
 });
 
 test.describe("the loop between the records and the journalism", () => {
-  // THE LOOP BETWEEN THE RECORDS AND THE JOURNALISM.
-  //
-  // Owner, 2026-09-20: "maybe articles that have used those data sets get
-  // populated... because we have links to the data sets on the article page.
-  // But that feedback loop seems helpful."
-  //
-  // One relationship, `draws`, read both ways. The risk a test is worth here
-  // is not that the link renders — it is that the two ends drift apart, so
-  // both directions are asserted against the same collection.
-  test("a collection names what was written from it, and the writing links back", async ({ page }) => {
+  // This suite deliberately builds without an API. Subscriber bodies and
+  // protected research links must stay unavailable in that mode. Successful
+  // delivery, authorization, figure shapes and PDF content are covered by
+  // server/tests/test_protected_articles.py and the article module tests.
+  test("offline collection profiles do not revive static demonstration articles", async ({ page }) => {
     const errors = watchConsole(page);
     await signIn(page);
-    await page.goto("/data?c=funding");
-    await page.locator(".cp-rail__item").first().waitFor();
-    // Out: the collection's records to a piece built on them.
-    const read = page.locator(".cp-ex__wrote").first();
-    await expect(read).toBeVisible();
-    await expect(read).toContainText("Read:");
-    // Federal Funding has two, and the second is not crammed into the row:
-    // it opens the collection's profile, where every one is listed.
-    await page.locator(".cp-ex__wrotemore").click();
-    await expect(page.getByRole("heading", { name: "Research built from this collection" })).toBeVisible();
-    expect(await page.locator(".cp-ab__read").count()).toBeGreaterThan(1);
-
-    // Back: a piece to the collection, open in the table rather than only as
-    // a ten-row file.
-    await page.goto("/articles/brief-deals");
-    const open = page.getByRole("link", { name: /Open it in the table/ }).first();
-    await expect(open).toBeVisible();
-    await open.click();
-    await expect(page).toHaveURL(/\/data\?c=deals/);
-    await page.locator(".cp-rail__item").first().waitFor();
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("Deals");
+    await page.goto("/data?c=deals&about=1");
+    await expect(page.locator(".cp-ab")).toBeVisible();
+    await expect(page.locator(".cp-ex__wrote")).toHaveCount(0);
+    await expect(page.locator(".cp-ab__read")).toHaveCount(0);
+    await expect(page.getByRole("heading", { name: "Research built from this collection" })).toHaveCount(0);
     expect(errors).toEqual([]);
   });
 
-  // The index is a menu of square cards (owner, 2026-09-27), one per brief,
-  // each picture in its piece's own wash, and every card opens the brief.
-  test("Research Briefs lists every brief as a square card in its own tone", async ({ page }) => {
+  test("Research Briefs preserves sign-in and explains that the article service is unavailable", async ({ page }) => {
     const errors = watchConsole(page);
     await signIn(page);
     await page.goto("/articles");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Research Briefs.");
-    const cards = page.locator(".cp-briefgrid .cp-art--square");
-    expect(await cards.count()).toBeGreaterThanOrEqual(4);
-    const tones = await page.locator(".cp-briefgrid img.cp-art__img").evaluateAll((imgs) =>
-      imgs.map((img) => getComputedStyle(img).filter),
-    );
-    expect(new Set(tones).size).toBeGreaterThan(1);
-    await cards.filter({ hasText: "Federal contracting to Native" }).click();
-    await expect(page).toHaveURL(/\/articles\/brief-contractors/);
-    await expect(page.getByRole("link", { name: /All Research Briefs/ })).toBeVisible();
+    await expect(page.getByRole("status")).toContainText("Articles are unavailable on this connection.");
+    await expect(page.locator(".cp-briefgrid .cp-art--square")).toHaveCount(0);
+    await expect(page.locator(".cp-acct")).toBeVisible();
     expect(errors).toEqual([]);
   });
 
-  // A research brief opens on what it is (owner, 2026-09-27): title,
-  // authors and picture first, then its key facts and the collections it
-  // used, each one open to this reader; and its figures sit in the text,
-  // two or three to a piece, rather than one lifted to lead the page.
-  test("a research brief opens on its title, authors, picture, highlights and collections", async ({ page }) => {
+  test("an offline article never falls back to bundled bodies, highlights or figures", async ({ page }) => {
     const errors = watchConsole(page);
     await signIn(page);
-    await page.goto("/articles/brief-deals");
-    const hero = page.locator(".cp-ar__hero");
-    await expect(hero.getByRole("heading", { level: 1 })).toContainText("Announced deals");
-    await expect(hero.locator(".cp-ar__by")).toContainText("Cedar Press research desk");
-    await expect(hero.locator("img.cp-ar__heroart")).toBeVisible();
-    // Three headlines from the piece, in the band's top right.
-    await expect(hero.locator(".cp-ar__highlights li")).toHaveCount(3);
-    // The rest of the research, as cards down the rail.
-    expect(await page.locator(".cp-ar__related .cp-ar__rel").count()).toBeGreaterThanOrEqual(2);
-    const uses = page.locator(".cp-ar__uses .cp-ar__use");
-    await expect(uses.first()).toContainText("Deals");
-    expect(await page.locator(".cp-ar__body .cp-ar__fig").count()).toBeGreaterThanOrEqual(2);
-    await expect(page.locator(".cp-ar__fig--lead")).toHaveCount(0);
-    await expect(page.locator(".cp-ar__quote")).toHaveCount(1);
-    // Example sponsor units, labelled as examples, beside the one invitation.
-    expect(await page.locator(".cp-ad--example").count()).toBeGreaterThanOrEqual(2);
-    await expect(page.locator(".cp-ad--example .cp-ad__cap").first()).toHaveText("Sponsored · Example");
-    await uses.first().getByRole("link", { name: /Open the data/ }).click();
-    await expect(page).toHaveURL(/\/data\?c=deals/);
+    for (const id of ["brief-owned", "two-tribes-one-building", "brief-deals"]) {
+      await page.goto("/articles/" + id);
+      await expect(page.getByRole("status")).toContainText("Articles are unavailable on this connection.");
+      await expect(page.locator(".cp-ar__body, .cp-ar__hero, .cp-ar__highlights, .cp-ar__fig")).toHaveCount(0);
+      await expect(page.getByRole("link", { name: /All Research Briefs/ })).toBeVisible();
+    }
     expect(errors).toEqual([]);
   });
 
-  // Share (owner, 2026-09-27): the brief as a PDF, with its figures and the
-  // way to Cedar Press+, to pass around.
-  test("a research brief downloads as a PDF with its figures", async ({ page }, testInfo) => {
-    test.skip(testInfo.project.name !== "desktop", "one download is enough");
+  test("an unavailable article cannot download a PDF and still lets the reader sign out", async ({ page }) => {
     const errors = watchConsole(page);
     await signIn(page);
-    await page.goto("/articles/brief-contractors");
-    const share = page.getByRole("group", { name: "Share this brief" });
-    await expect(share.getByRole("button", { name: "Email this brief" })).toBeVisible();
-    const [download] = await Promise.all([
-      page.waitForEvent("download"),
-      share.getByRole("button", { name: "Download PDF" }).click(),
-    ]);
-    expect(download.suggestedFilename()).toMatch(/^federal-contracting-to-native-entities.*\.pdf$/);
-    const bytes = await (await download.createReadStream()).toArray().then((c) => Buffer.concat(c));
-    expect(bytes.subarray(0, 5).toString()).toBe("%PDF-");
-    // Two charts and the lead picture: a figure that failed to rasterize
-    // would leave the file small.
-    expect(bytes.length).toBeGreaterThan(60_000);
-    expect(bytes.toString("latin1")).toContain("tribalbusinessnews.com/subscribe");
+    await page.goto("/articles/brief-owned");
+    await expect(page.getByRole("status")).toContainText("Articles are unavailable on this connection.");
+    await expect(page.getByRole("group", { name: "Share this brief" })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "Download PDF" })).toHaveCount(0);
+    await page.locator(".cp-acct > summary").click();
+    await page.getByRole("button", { name: "Sign out" }).click();
+    await expect(page.locator(".cp-split")).toBeVisible();
+    await expect(page.locator(".cp-ar__body")).toHaveCount(0);
     expect(errors).toEqual([]);
   });
 
@@ -3347,4 +3301,23 @@ test.describe("Methods' seven stages arrive as a sequence", () => {
     expect(rest).toEqual(Array(stages.length).fill(["1", "none"]));
     expect(errors).toEqual([]);
   });
+});
+
+test("built public assets contain no subscriber article paragraphs or review files", async () => {
+  const catalog = JSON.parse(await readFile(new URL("../server/cedar_press/articles.json", import.meta.url), "utf8"));
+  const privateParagraphs = catalog.flatMap((article) =>
+    (article.body ?? []).filter((block) => block.kind === "p" && block.text?.length > 80).map((block) => block.text));
+  expect(privateParagraphs.length, "private article assertions must cover real prose").toBeGreaterThan(20);
+  const dir = fileURLToPath(new URL("../dist-site/", import.meta.url));
+  const assets = await readdir(dir, { recursive: true, withFileTypes: true });
+  const files = assets.filter((entry) => entry.isFile() && /\.(js|html|json|map)$/.test(entry.name));
+  expect(files.length).toBeGreaterThan(0);
+  for (const entry of files) {
+    const body = await readFile(entry.parentPath + "/" + entry.name, "utf8");
+    expect(body, entry.name + " exposes the private article catalog").not.toContain("server/cedar_press/articles.json");
+    for (const text of privateParagraphs) {
+      expect(body, entry.name + " contains subscriber prose").not.toContain(text);
+      expect(body, entry.name + " contains escaped subscriber prose").not.toContain(JSON.stringify(text).slice(1, -1));
+    }
+  }
 });

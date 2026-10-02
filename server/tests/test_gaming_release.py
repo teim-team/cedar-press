@@ -421,7 +421,9 @@ class GamingConsumerBoundaryTest(_ServerCase):
         self.assertEqual(self.fetched, [])
 
     def test_declaration_is_the_existing_grove_shelf_and_storefront_is_unchanged(self):
-        self.assertEqual([e["id"] for e in launch.GROVE_RELEASE_COLLECTIONS], ["gaming"])
+        self.assertEqual(
+            [e["id"] for e in launch.GROVE_RELEASE_COLLECTIONS], ["gaming", "infrastructure"]
+        )
         self.assertEqual({e["shelf"] for e in launch.GROVE_RELEASE_COLLECTIONS}, {"grove"})
         self.assertEqual(
             repository.grove_components("gaming")[:2],

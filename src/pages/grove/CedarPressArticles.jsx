@@ -15,7 +15,6 @@ import { AD_SLOT } from "../../features/grove/pressAds";
 import {
   ARTICLE_IMAGE,
   LUMECON_URL,
-  PRESS_ARTICLES,
   TBN_URL,
 } from "../../features/grove/pressArticles";
 import { pressArticlePath } from "../../features/grove/pressRoutes";
@@ -26,6 +25,7 @@ import PressAd from "./PressAd";
 import { PressCedarFab } from "./PressCedarFab";
 import { PressFoot, PressMast } from "./PressChrome";
 import PressGate from "./PressGate";
+import { useProtectedArticles } from "../../features/grove/useProtectedArticles.js";
 
 function ArticleCard({ article }) {
   const dataset = LAUNCH_COLLECTION.find((item) => item.id === article.datasetId);
@@ -59,7 +59,7 @@ function ArticleCard({ article }) {
             figures are invented, and "Original research" would be a claim the
             piece cannot carry until sourced work replaces it. */}
         <span className="cp-art__tag">
-          {article.kind || "Original research"}
+          {article.demonstration ? "Demonstration" : article.earlyAccess ? "Early access" : article.kind || "Original research"}
           <b>{dataset?.name || article.tag}</b>
         </span>
         <h2 className="cp-art__title">{article.title}</h2>
@@ -87,6 +87,7 @@ function ArticleCard({ article }) {
 export default function CedarPressArticles() {
   useDocumentTitle("Research Briefs");
   const { user, loading } = useAuth();
+  const articleState = useProtectedArticles(loading ? null : user);
   // Sitewide arrival language.
   const fadeRoot = useFadeIn();
   const entitled = canReadCedarPress(user);
@@ -120,8 +121,12 @@ export default function CedarPressArticles() {
         <section className="cp-surf cp-surf--paper cp-fade" id="briefs" aria-label="Latest research">
           <Contours strength={1} />
           <div className="cp-surf__in">
+            {articleState.status === "loading" ? <p role="status">Loading articles…</p> : null}
+            {articleState.status === "unavailable" ? (
+              <p role="status">Articles are unavailable on this connection. Your sign-in is unchanged. Please try again when the article service is available.</p>
+            ) : null}
             <ul className="cp-briefgrid">
-              {PRESS_ARTICLES.map((article) => (
+              {(articleState.data?.articles ?? []).map((article) => (
                 <li key={article.id}>
                   <ArticleCard article={article} />
                 </li>
