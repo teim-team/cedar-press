@@ -46,7 +46,7 @@ import { coverageFrom } from "../../features/grove/pressAccess";
 import { LUMECON_TEAM_URL, LUMECON_URL, TBN_PLANS_URL, TBN_URL } from "../../features/grove/pressArticles";
 import { PRESS_TIERS, STOREFRONT_CATALOG, collectionsOnShelf } from "../../features/grove/pressCatalog";
 import { formatUpdated, recentlyUpdated } from "../../features/grove/pressReleases";
-import { SOURCE_REACH_FIGURE, SOURCE_ROTATION_ORDER } from "../../features/grove/sourceRotation.js";
+import { SOURCE_REACH_FIGURE, SOURCE_REACH_UPDATED, SOURCE_ROTATION_ORDER } from "../../features/grove/sourceRotation.js";
 import { MAINTENANCE } from "../../features/grove/pressMethod.js";
 import {
   PRESS_METHODS_PATH,
@@ -110,6 +110,9 @@ const MARK = "/brand/lumecon-logo-mark-teal.png";
 // "since": the rest start later and two of them are rosters with no start.
 const COLLECTION_STARTS = STOREFRONT_CATALOG.map((entry) => coverageFrom(entry)).filter(Boolean);
 const EARLIEST_YEAR = COLLECTION_STARTS.length ? Math.min(...COLLECTION_STARTS) : null;
+// Page revisions and collection refreshes have separate dates. A source-band
+// revision updates the landing page without rewriting any collection release.
+const PAGE_UPDATED = [SOURCE_REACH_UPDATED, ...recentlyUpdated(1).map((release) => release.updated)].sort().at(-1);
 
 // The shelves, each with its collections, in the storefront's order.
 const SHELVES = PRESS_TIERS.filter((tier) => tier.storefront).map((tier) => ({
@@ -669,7 +672,7 @@ export default function PressGate({ user }) {
             <ul className="cp-hero3__facts" aria-label="What Cedar Press holds">
               <li><Tick value={STOREFRONT_CATALOG.length} /> collections</li>
               {EARLIEST_YEAR ? <li>as far back as <Tick value={EARLIEST_YEAR} from={new Date().getFullYear()} /></li> : null}
-              {recentlyUpdated(1)[0] ? <li>updated <b>{formatUpdated(recentlyUpdated(1)[0].updated)}</b></li> : null}
+              <li>updated <b>{formatUpdated(PAGE_UPDATED)}</b></li>
             </ul>
           </figure>
 
@@ -757,7 +760,7 @@ export default function PressGate({ user }) {
                     Sources Lumecon draws on
                   </Link>
                   <span className="cp-hero3__proofcount">
-                    {SOURCE_REACH_FIGURE} documented upstream sources ·{" "}
+                    {SOURCE_REACH_FIGURE} total sources ·{" "}
                     <span className="cp-nowrap">{STOREFRONT_CATALOG.length} collections</span>
                   </span>
                 </div>

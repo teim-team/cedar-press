@@ -416,7 +416,7 @@ test("institutional accounts: team and organization questions reach their own an
 // Cedar says so; it never tells a reader some of it is private.
 test("Cedar says the material is public and never that some of it is not", () => {
   const sources = DOOR_INTENTS.find((intent) => intent.id === "sources");
-  assert.match(sources.answer, /public material, drawn from more than 600 documented upstream sources/);
+  assert.match(sources.answer, /public material, drawn from more than 700 documented upstream sources/);
   // The whole module, so an answer defined outside DOOR_INTENTS is held too.
   const source = readFileSync(new URL("./doorCedar.js", import.meta.url), "utf8");
   assert.doesNotMatch(source, /not all of it is public|private record|source websites/i);

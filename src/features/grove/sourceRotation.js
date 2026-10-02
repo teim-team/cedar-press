@@ -14,7 +14,7 @@
  * payment records and gaming litigation) were removed on the owner's note of
  * 2026-09-27: gaming is not a Cedar Press collection, so a panel on the Cedar
  * Press door should not name its sources. Nothing counts this list: the
- * marquee's run time is its length, and the 600+ figure never depended on it.
+ * marquee's run time is its length, and the reach figure never depended on it.
  *
  * The parcel, assessor, deed, permit and environmental-review labels name
  * the systems PLOT is built from; the foundation, 990-PF, bank, corporate,
@@ -33,17 +33,19 @@
  * EPA line. `sourceRotation.test.js` refuses a repeated label.
  *
  * THE FIGURE IS NOT THIS LIST. SOURCE_REACH_FIGURE counts distinct upstream
- * sources, stated by the owner (2026-09-27: 600+, up from the audited 560
- * behind 500+, with the Giving, PLOT, patent and ratings sources added and
- * deduplicated). It is worded "documented upstream sources", never
- * "websites" (owner, 2026-09-27). The labels below name kinds of
- * source, not a count, and add nothing to it.
+ * sources, stated by the owner (2026-10-02: 700+). This remains an
+ * owner-supplied total, not an independently recomputed registry count.
+ * The labels below name kinds of source and add nothing to that total.
+ * The business-directory additions are evidenced by the source registry
+ * categories checked in pressSources.test.js. Grove-only Infrastructure
+ * sources remain in Grove's own catalog.
  */
 
 export const SOURCE_REACH_CLAIM =
-  "Lumecon builds its datasets and research from public material drawn from 600+ documented upstream sources.";
+  "Lumecon builds its datasets and research from public material drawn from 700+ documented upstream sources.";
 
-export const SOURCE_REACH_FIGURE = "600+";
+export const SOURCE_REACH_FIGURE = "700+";
+export const SOURCE_REACH_UPDATED = "2026-10-02";
 
 export const SOURCE_ROTATION = Object.freeze([
   "USAspending contract awards",
@@ -100,6 +102,13 @@ export const SOURCE_ROTATION = Object.freeze([
   "IRS Form 990-N e-Postcard data",
   "Tribal government and enterprise directories",
   "SBA Dynamic Small Business Search",
+  "Member-owned business directories",
+  "Cross-tribal business directories",
+  "Alaska Native corporation shareholder directories",
+  "Regional chamber directories",
+  "Native artist directories",
+  "State certified-vendor directories",
+  "Tribe-linked CDFI directories",
   "FSRS subaward reporting",
   "BIA Realty/Tract Viewer",
   "Statewide parcel and cadastral GIS",

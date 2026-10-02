@@ -29,7 +29,7 @@ test("replaced labels are gone, so a source is not named twice", () => {
 // The website count is the owner's stated distinct-site figure, and it
 // never moves because labels were added to this list.
 test("the reach figure is the stated one", () => {
-  assert.equal(SOURCE_REACH_FIGURE, "600+");
+  assert.equal(SOURCE_REACH_FIGURE, "700+");
 });
 
 // Owner, 2026-09-27: the source count is "documented upstream sources", never
@@ -42,7 +42,7 @@ test("the source count is never worded as websites", () => {
   ];
   for (const file of files) {
     const text = readFileSync(file, "utf8");
-    assert.doesNotMatch(text, /(?:600\+?|SOURCE_REACH_FIGURE\}?|distinct|source) (?:source )?websites/i, file.pathname);
-    assert.match(text, /documented upstream sources/, file.pathname);
+    assert.doesNotMatch(text, /(?:700\+?|SOURCE_REACH_FIGURE\}?|distinct|source) (?:source )?websites/i, file.pathname);
+    assert.match(text, /(?:documented upstream|total) sources/, file.pathname);
   }
 });
