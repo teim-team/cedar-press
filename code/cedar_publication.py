@@ -2390,6 +2390,224 @@ def reset_denials() -> None:
     _DENIED_UEIS = None
 
 
+# ---------------------------------------------------------------------------
+# RECIPIENT HOLDS - a per-UEI hold or rebind that is NOT a not_native denial.
+#
+# Added 2026-10-02 for the Siletz repair (docs/REVIEW_STATUS.md, "Source-side
+# fixes, 2026-10-02"): two Federal Funding transactions under recipient UEI
+# GJV4PJ8M5PC7 project to the tribal government while the recipient is the
+# Siletz Tribal Arts and Heritage Society, a separate Native nonprofit. The
+# only withholding mechanism this module honoured was `denied_ueis()`, whose
+# vocabulary is `not_native`; recording a Native nonprofit there would be a
+# false statement made to make the withholding fire. This is the policy input
+# the consumer reads instead: the fact it states is "distinct legal entity
+# from the bound uid", with the exact UEI, the exact award keys, the uid the
+# projection currently carries, and the evidence quoted.
+#
+# NOTHING APPLIES AN ENTRY YET. `recipient_holds()` validates and returns the
+# entries; the step that blanks or rebinds an attribution (the funding
+# candidate rebuild in Lumecon-data, then a new pin) consumes `ready` entries
+# and is not written here. The committed file carries zero entries until the
+# bound uid is read off the two transactions, which are not in Git.
+#
+# The validator FAILS CLOSED, the way `denied_ueis()` does: a malformed file
+# raises `RecipientHoldInvalid` rather than reading as "no holds".
+# ---------------------------------------------------------------------------
+
+RECIPIENT_HOLDS = ROOT / "data" / "cedar" / "recipient_holds.json"
+RECIPIENT_HOLDS_SCHEMA_VERSION = 1
+
+#: What a hold states about the recipient. None of these is `not_native`, by
+#: construction: a hold never says the recipient is not Native.
+RECIPIENT_HOLD_KINDS = {
+    "distinct_recipient": (
+        "The recipient behind this UEI is a legal entity distinct from the "
+        "Cedar entity the projection binds it to; the binding is withdrawn."
+    ),
+    "rebind_to_entity": (
+        "The recipient behind this UEI is a different registered Cedar entity, "
+        "named in correct_recipient.cedar_uid; the binding moves, no id is minted."
+    ),
+}
+RECIPIENT_HOLD_ACTIONS = {
+    "withhold": "blank the Cedar attribution on the scoped transactions and write the hold status",
+    "rebind": "replace the bound uid with correct_recipient.cedar_uid on the scoped transactions",
+}
+RECIPIENT_HOLD_STATUSES = ("evidence_incomplete", "ready", "applied")
+#: The controlled `attribution_status` an applied `withhold` writes; distinct
+#: from DENIED_STATUS so a consumer never reads a hold as a denial.
+RECIPIENT_HOLD_STATUS = "withheld_distinct_recipient"
+
+_UEI = re.compile(r"^[A-HJ-NP-Z0-9]{12}$")   # SAM UEI: 12 characters, no I or O
+_HOLD_ID = re.compile(r"^RH-\d{4}-\d{4}$")
+_DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+_FORBIDDEN_RULING = re.compile(r"not[ _-]?(a[ _-])?native", re.I)   # not_native, not native, not a Native entity
+
+
+class RecipientHoldInvalid(RuntimeError):
+    """The recipient-hold file cannot be read as policy. Callers stop."""
+
+
+def _hold_problem(entry: dict, index: int, register_uids: set, seen: dict) -> list:
+    where = f"entries[{index}]"
+    problems: list = []
+
+    def need(key, kind=None):
+        if key not in entry:
+            problems.append(f"{where}: missing {key}")
+            return None
+        value = entry[key]
+        if kind is not None and not isinstance(value, kind):
+            problems.append(f"{where}: {key} must be {kind.__name__}")
+            return None
+        return value
+
+    hold_id = need("hold_id", str)
+    if hold_id is not None and not _HOLD_ID.match(hold_id):
+        problems.append(f"{where}: hold_id {hold_id!r} is not RH-YYYY-NNNN (a hold is a record, never a CE-/CB- id)")
+    collection = need("collection", str)
+    uei = need("recipient_uei", str)
+    if uei is not None and not _UEI.match(uei):
+        problems.append(f"{where}: recipient_uei {uei!r} is not a 12-character SAM UEI")
+    awards = need("award_ids", list)
+    if awards is not None:
+        if not awards or any(not isinstance(a, str) or not a.strip() for a in awards):
+            problems.append(f"{where}: award_ids must name at least one exact award key")
+        elif len(set(awards)) != len(awards):
+            problems.append(f"{where}: award_ids repeats a key")
+        elif uei is not None:
+            for award in awards:
+                prior = seen.setdefault((uei, award), hold_id)
+                if prior != hold_id:
+                    problems.append(f"{where}: ({uei}, {award}) is already scoped by {prior}")
+    kind = need("hold_kind", str)
+    if kind is not None and kind not in RECIPIENT_HOLD_KINDS:
+        problems.append(f"{where}: hold_kind {kind!r} not in {sorted(RECIPIENT_HOLD_KINDS)}")
+    action = need("action", str)
+    if action is not None and action not in RECIPIENT_HOLD_ACTIONS:
+        problems.append(f"{where}: action {action!r} not in {sorted(RECIPIENT_HOLD_ACTIONS)}")
+    if kind == "distinct_recipient" and action == "rebind":
+        problems.append(f"{where}: a distinct_recipient hold withholds; rebind needs hold_kind rebind_to_entity")
+    if kind == "rebind_to_entity" and action == "withhold":
+        problems.append(f"{where}: rebind_to_entity rebinds; withhold needs hold_kind distinct_recipient")
+    status = need("status", str)
+    if status is not None and status not in RECIPIENT_HOLD_STATUSES:
+        problems.append(f"{where}: status {status!r} not in {RECIPIENT_HOLD_STATUSES}")
+    bound = need("bound_cedar_uid")
+    if bound is not None:
+        if not _UID.match(bound):
+            problems.append(f"{where}: bound_cedar_uid {bound!r} is not a CE-XXXXX-XX uid")
+        elif register_uids and bound not in register_uids:
+            problems.append(f"{where}: bound_cedar_uid {bound} is not in the register")
+    elif "bound_cedar_uid" in entry and status in ("ready", "applied"):
+        problems.append(f"{where}: status {status} requires the uid the projection currently carries")
+    correct = need("correct_recipient", dict)
+    if correct is not None:
+        name = correct.get("name")
+        if not isinstance(name, str) or not name.strip():
+            problems.append(f"{where}: correct_recipient.name is required")
+        cuid = correct.get("cedar_uid")
+        if action == "rebind":
+            if not isinstance(cuid, str) or not _UID.match(cuid):
+                problems.append(f"{where}: rebind requires correct_recipient.cedar_uid as a CE-XXXXX-XX uid")
+            elif register_uids and cuid not in register_uids:
+                problems.append(f"{where}: correct_recipient.cedar_uid {cuid} is not in the register; a hold never mints")
+            elif cuid == bound:
+                problems.append(f"{where}: correct_recipient.cedar_uid equals bound_cedar_uid; nothing to rebind")
+        elif cuid is not None:
+            problems.append(f"{where}: a withhold carries correct_recipient.cedar_uid null (not in the register, or not asserted)")
+        if correct.get("register_status") not in ("not_in_register", "in_register"):
+            problems.append(f"{where}: correct_recipient.register_status must be not_in_register or in_register")
+        if correct.get("register_status") == "in_register" and (not isinstance(cuid, str) or not cuid):
+            problems.append(f"{where}: register_status in_register requires correct_recipient.cedar_uid")
+        if correct.get("register_status") == "not_in_register" and cuid is not None:
+            problems.append(f"{where}: register_status not_in_register contradicts a cedar_uid")
+    ruling = need("ruling", str)
+    if ruling is not None:
+        if not ruling.strip():
+            problems.append(f"{where}: ruling must state the fact")
+        if _FORBIDDEN_RULING.search(ruling):
+            problems.append(f"{where}: ruling may not say not_native; a hold is not a denial (use the ruling ledger for that)")
+    evidence = need("evidence", list)
+    if evidence is not None:
+        if not evidence:
+            problems.append(f"{where}: evidence must quote at least one source")
+        for j, item in enumerate(evidence):
+            if not isinstance(item, dict):
+                problems.append(f"{where}.evidence[{j}]: must be an object")
+                continue
+            url = item.get("url")
+            if not isinstance(url, str) or not url.startswith("https://"):
+                problems.append(f"{where}.evidence[{j}]: url must be https")
+            if not isinstance(item.get("quoted"), str) or not item["quoted"].strip():
+                problems.append(f"{where}.evidence[{j}]: quoted text is required (a URL alone is not evidence)")
+            if not isinstance(item.get("checked_on"), str) or not _DATE.match(item["checked_on"]):
+                problems.append(f"{where}.evidence[{j}]: checked_on must be YYYY-MM-DD")
+    for key in ("recorded_on",):
+        value = need(key, str)
+        if value is not None and not _DATE.match(value):
+            problems.append(f"{where}: {key} must be YYYY-MM-DD")
+    need("recorded_by", str)
+    need("owner_review", str)
+    if collection is not None and not collection.strip():
+        problems.append(f"{where}: collection is required")
+    return problems
+
+
+def validate_recipient_holds(doc, register_uids=None) -> list:
+    """Every problem with a recipient-hold document, as sentences; [] when valid.
+
+    `register_uids` is the set of uids the register holds; when given, every
+    uid an entry names must be in it (a hold never mints or guesses a uid).
+    """
+    if not isinstance(doc, dict):
+        return ["document must be an object"]
+    problems: list = []
+    if doc.get("schema_version") != RECIPIENT_HOLDS_SCHEMA_VERSION:
+        problems.append(f"schema_version must be {RECIPIENT_HOLDS_SCHEMA_VERSION}")
+    if doc.get("policy") != "recipient_hold":
+        problems.append("policy must be 'recipient_hold'")
+    entries = doc.get("entries")
+    if not isinstance(entries, list):
+        return problems + ["entries must be a list (empty until an entry lands)"]
+    register_uids = set(register_uids or ())
+    seen: dict = {}
+    ids: set = set()
+    for index, entry in enumerate(entries):
+        if not isinstance(entry, dict):
+            problems.append(f"entries[{index}]: must be an object")
+            continue
+        hold_id = entry.get("hold_id")
+        if hold_id in ids:
+            problems.append(f"entries[{index}]: duplicate hold_id {hold_id}")
+        ids.add(hold_id)
+        problems.extend(_hold_problem(entry, index, register_uids, seen))
+    return problems
+
+
+def recipient_holds(path=None, register_uids=None) -> list:
+    """The validated recipient-hold entries, or raise `RecipientHoldInvalid`.
+
+    An absent file is absent policy and raises too: the consumer that reads
+    this must know whether the policy was read, the same reason
+    `denied_ueis()` refuses an absent ledger. Nothing applies the entries
+    yet (see the section comment).
+    """
+    path = Path(path) if path is not None else RECIPIENT_HOLDS
+    if not path.exists():
+        raise RecipientHoldInvalid(f"recipient holds cannot be read: {path} is absent")
+    try:
+        doc = json.loads(path.read_text(encoding="utf-8-sig"))
+    except (OSError, ValueError) as exc:
+        raise RecipientHoldInvalid(f"{path.name} is not readable JSON: {exc}") from exc
+    if register_uids is None:
+        register_uids = set(register().keys())
+    problems = validate_recipient_holds(doc, register_uids)
+    if problems:
+        raise RecipientHoldInvalid(f"{path.name}: " + "; ".join(problems))
+    return list(doc["entries"])
+
+
 #: The column that names EACH PARTY'S OWN identifier, per side of a row, and
 #: nothing else. Codex, PR #50: matching any column with "uei" in its name
 #: treated `parent_uei`, `ultimate_parent_uei` and `fpds_declared_parent_uei`

@@ -36166,71 +36166,6 @@
    "registration_status": "unresolved_not_authorized"
   },
   {
-   "script": "1172_codebook_block_generator.py",
-   "dir": "",
-   "number": "1172",
-   "duplicate_number": false,
-   "kind": "unknown",
-   "evidence": [],
-   "never_run": false,
-   "never_run_reason": "",
-   "writes": [],
-   "reads": [],
-   "in_a_contract": false,
-   "in_an_ordering": false,
-   "mentions": 0,
-   "mentioned_outside_history": 0,
-   "oneoff_shaped": false,
-   "has_run_receipt": false,
-   "last_modified": "2026-09-26",
-   "lines": 238,
-   "operational_role": "unresolved",
-   "collection_output_entrypoints": [],
-   "static_consumers": [],
-   "runtime_consumer_candidates": [],
-   "operational_call_evidence": {
-    "publication_calls": [],
-    "validation_calls": []
-   },
-   "unknown_io_literals": [
-    "SHIPPING_RUNBOOK.md"
-   ],
-   "embedded_test_functions": 0,
-   "standalone_test_evidence": {
-    "unittest_classes": [],
-    "pytest_import": false,
-    "filename_convention": false,
-    "assertion_nodes": 0,
-    "local_check_harness_calls": []
-   },
-   "writer_evidence": [],
-   "writer_analysis_error": null,
-   "writer_risk": "P3_no_detected_write_not_readonly_certified",
-   "undeclared_governed_tables": [],
-   "source_sha256": "fe2f122de2c48a51485732cf5122ed20d0119bee972382618d48935d30cb6b81",
-   "maintenance_status": "REQUIRES-REVIEW",
-   "maintenance_evidence": {
-    "reason": "no detected writer is not proof of read-only behavior; external callers, unique outputs and restoration value remain unverified",
-    "source_sha256": "fe2f122de2c48a51485732cf5122ed20d0119bee972382618d48935d30cb6b81",
-    "identical_source_peers": [],
-    "ci_commands": [],
-    "documented_commands": [],
-    "active_runtime_callers": [],
-    "superseded_output_edges": [],
-    "historical_replay_evidence": [],
-    "output_authority_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-    "output_artifact_hashes": "NOT_MEASURED_BY_SCRIPT_CENSUS",
-    "retirement_authorized": false,
-    "review_owner": "Codex",
-    "review_priority": "P3_no_detected_write_not_readonly_certified",
-    "review_write_sites": [],
-    "safe_delete_proof": "NOT_ESTABLISHED: external callers, unique output and recovery value are not exhausted by static scans",
-    "bounded_source_review": null,
-    "source_review_stale": false
-   },
-   "registration_status": "unresolved_not_authorized"
-  },
-  {
    "script": "1173_funding_identity_diagnosis.py",
    "dir": "",
    "number": "1173",
@@ -36470,74 +36405,6 @@
      "retirement_condition": "Preserve historical review provenance; not the current qualified adjudication menu",
      "grants_execution_permission": false
     },
-    "source_review_stale": false
-   },
-   "registration_status": "unresolved_not_authorized"
-  },
-  {
-   "script": "1175_write_id_system_doc.py",
-   "dir": "",
-   "number": "1175",
-   "duplicate_number": false,
-   "kind": "unknown",
-   "evidence": [],
-   "never_run": false,
-   "never_run_reason": "",
-   "writes": [],
-   "reads": [
-    "cedar_entity_names.csv",
-    "cedar_identifier_ledger_final.csv",
-    "cedar_identity_register.csv",
-    "entity_aliases.csv"
-   ],
-   "in_a_contract": false,
-   "in_an_ordering": false,
-   "mentions": 0,
-   "mentioned_outside_history": 0,
-   "oneoff_shaped": false,
-   "has_run_receipt": false,
-   "last_modified": "2026-09-26",
-   "lines": 276,
-   "operational_role": "unresolved",
-   "collection_output_entrypoints": [],
-   "static_consumers": [],
-   "runtime_consumer_candidates": [],
-   "operational_call_evidence": {
-    "publication_calls": [],
-    "validation_calls": []
-   },
-   "unknown_io_literals": [],
-   "embedded_test_functions": 0,
-   "standalone_test_evidence": {
-    "unittest_classes": [],
-    "pytest_import": false,
-    "filename_convention": false,
-    "assertion_nodes": 0,
-    "local_check_harness_calls": []
-   },
-   "writer_evidence": [],
-   "writer_analysis_error": null,
-   "writer_risk": "P3_no_detected_write_not_readonly_certified",
-   "undeclared_governed_tables": [],
-   "source_sha256": "636308baf1335b5ef517d86e31978a86047a115ec7957843d33f7cd3a7ff5bf3",
-   "maintenance_status": "REQUIRES-REVIEW",
-   "maintenance_evidence": {
-    "reason": "no detected writer is not proof of read-only behavior; external callers, unique outputs and restoration value remain unverified",
-    "source_sha256": "636308baf1335b5ef517d86e31978a86047a115ec7957843d33f7cd3a7ff5bf3",
-    "identical_source_peers": [],
-    "ci_commands": [],
-    "documented_commands": [],
-    "active_runtime_callers": [],
-    "superseded_output_edges": [],
-    "historical_replay_evidence": [],
-    "output_authority_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-    "output_artifact_hashes": "NOT_MEASURED_BY_SCRIPT_CENSUS",
-    "retirement_authorized": false,
-    "review_owner": "Codex",
-    "review_priority": "P3_no_detected_write_not_readonly_certified",
-    "review_write_sites": [],
-    "safe_delete_proof": "NOT_ESTABLISHED: external callers, unique output and recovery value are not exhausted by static scans",
-    "bounded_source_review": null,
     "source_review_stale": false
    },
    "registration_status": "unresolved_not_authorized"
@@ -36832,262 +36699,6 @@
       "target": "<unresolved>/<unresolved>",
       "scope": "unresolved_target",
       "table": null
-     }
-    ],
-    "safe_delete_proof": "NOT_ESTABLISHED: external callers, unique output and recovery value are not exhausted by static scans",
-    "bounded_source_review": null,
-    "source_review_stale": false
-   },
-   "registration_status": "unresolved_not_authorized"
-  },
-  {
-   "script": "1178_sentinel_null_and_recount.py",
-   "dir": "",
-   "number": "1178",
-   "duplicate_number": false,
-   "kind": "unknown",
-   "evidence": [],
-   "never_run": false,
-   "never_run_reason": "",
-   "writes": [],
-   "reads": [],
-   "in_a_contract": false,
-   "in_an_ordering": false,
-   "mentions": 0,
-   "mentioned_outside_history": 0,
-   "oneoff_shaped": false,
-   "has_run_receipt": false,
-   "last_modified": "2026-09-26",
-   "lines": 15,
-   "operational_role": "unresolved",
-   "collection_output_entrypoints": [],
-   "static_consumers": [],
-   "runtime_consumer_candidates": [],
-   "operational_call_evidence": {
-    "publication_calls": [],
-    "validation_calls": []
-   },
-   "unknown_io_literals": [],
-   "embedded_test_functions": 0,
-   "standalone_test_evidence": {
-    "unittest_classes": [],
-    "pytest_import": false,
-    "filename_convention": false,
-    "assertion_nodes": 0,
-    "local_check_harness_calls": []
-   },
-   "writer_evidence": [],
-   "writer_analysis_error": null,
-   "writer_risk": "P3_no_detected_write_not_readonly_certified",
-   "undeclared_governed_tables": [],
-   "source_sha256": "d98aa61b21bff3ff3eee0403d9b4b7ee87953a06013a90122c8fdc28e7bb3361",
-   "maintenance_status": "REQUIRES-REVIEW",
-   "maintenance_evidence": {
-    "reason": "no detected writer is not proof of read-only behavior; external callers, unique outputs and restoration value remain unverified",
-    "source_sha256": "d98aa61b21bff3ff3eee0403d9b4b7ee87953a06013a90122c8fdc28e7bb3361",
-    "identical_source_peers": [],
-    "ci_commands": [],
-    "documented_commands": [],
-    "active_runtime_callers": [],
-    "superseded_output_edges": [],
-    "historical_replay_evidence": [],
-    "output_authority_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-    "output_artifact_hashes": "NOT_MEASURED_BY_SCRIPT_CENSUS",
-    "retirement_authorized": false,
-    "review_owner": "Codex",
-    "review_priority": "P3_no_detected_write_not_readonly_certified",
-    "review_write_sites": [],
-    "safe_delete_proof": "NOT_ESTABLISHED: external callers, unique output and recovery value are not exhausted by static scans",
-    "bounded_source_review": null,
-    "source_review_stale": false
-   },
-   "registration_status": "unresolved_not_authorized"
-  },
-  {
-   "script": "1179_cross_table_key_consistency.py",
-   "dir": "",
-   "number": "1179",
-   "duplicate_number": false,
-   "kind": "rebuild",
-   "evidence": [
-    "writes in 'w' mode or builds from data/raw"
-   ],
-   "never_run": false,
-   "never_run_reason": "",
-   "writes": [
-    "1179_cross_table_key_gap_%s.csv",
-    "cedar_identifier_ledger_final.csv",
-    "federal_funding_transactions.csv"
-   ],
-   "reads": [],
-   "in_a_contract": false,
-   "in_an_ordering": false,
-   "mentions": 0,
-   "mentioned_outside_history": 0,
-   "oneoff_shaped": false,
-   "has_run_receipt": false,
-   "last_modified": "2026-09-26",
-   "lines": 789,
-   "operational_role": "unresolved",
-   "collection_output_entrypoints": [],
-   "static_consumers": [],
-   "runtime_consumer_candidates": [],
-   "operational_call_evidence": {
-    "publication_calls": [],
-    "validation_calls": [
-     "review_dir",
-     "verify"
-    ]
-   },
-   "unknown_io_literals": [
-    "_1179_cross_table_key_baseline.json",
-    "cedar_ledger_key_rulings_%s.csv",
-    "faads_transactions.csv",
-    "faads_transactions_all_agencies.csv",
-    "fac_tribal_single_audits.csv",
-    "gaming_employment_observations.csv",
-    "nonprofit_schedule_c_lobbying.csv",
-    "np_orgs.csv",
-    "prime_contracts.csv",
-    "subawards.csv"
-   ],
-   "embedded_test_functions": 1,
-   "standalone_test_evidence": {
-    "unittest_classes": [],
-    "pytest_import": false,
-    "filename_convention": false,
-    "assertion_nodes": 0,
-    "local_check_harness_calls": []
-   },
-   "writer_evidence": [
-    {
-     "line": 398,
-     "operation": "open",
-     "target": "<unresolved>",
-     "scope": "unresolved_target",
-     "table": null,
-     "signature": "d09fb14227adda1b5e554c0cd2a266cf5430089ae0f3a4b54c645bff90a54271"
-    },
-    {
-     "line": 402,
-     "operation": "os.replace",
-     "target": "<unresolved>",
-     "scope": "unresolved_target",
-     "table": null,
-     "signature": "82692b9aa204a7aa48c4df2cc4ed58d1a359abbc663a02b0fea7e9686fe45b43"
-    },
-    {
-     "line": 464,
-     "operation": "open",
-     "target": "<unresolved>",
-     "scope": "unresolved_target",
-     "table": null,
-     "signature": "d09fb14227adda1b5e554c0cd2a266cf5430089ae0f3a4b54c645bff90a54271"
-    },
-    {
-     "line": 468,
-     "operation": "os.replace",
-     "target": "<unresolved>",
-     "scope": "unresolved_target",
-     "table": null,
-     "signature": "82692b9aa204a7aa48c4df2cc4ed58d1a359abbc663a02b0fea7e9686fe45b43"
-    },
-    {
-     "line": 558,
-     "operation": "bl_path.write_text",
-     "target": "<unresolved>/_1179_cross_table_key_baseline.json",
-     "scope": "unresolved_target",
-     "table": null,
-     "signature": "7cd9e6adcc887ee959014a9ef59a97deb997609f2020ef4bbcad8ee392d867a7"
-    },
-    {
-     "line": 594,
-     "operation": "open",
-     "target": "<unresolved>/cedar_identifier_ledger_final.csv",
-     "scope": "governed_table",
-     "table": "cedar_identifier_ledger_final.csv",
-     "signature": "f19daff441ea44ebfcc98a9455fe3a842d30f96b8b3d0dff86561d678ee7fd5c"
-    },
-    {
-     "line": 662,
-     "operation": "open",
-     "target": "<unresolved>/federal_funding_transactions.csv",
-     "scope": "governed_table",
-     "table": "federal_funding_transactions.csv",
-     "signature": "6ca94746c0b5debfe59abb19051047d95500969b2256736d1c284aedb8235660"
-    }
-   ],
-   "writer_analysis_error": null,
-   "writer_risk": "P1_undeclared_governed_write_candidate",
-   "undeclared_governed_tables": [
-    "cedar_identifier_ledger_final.csv",
-    "federal_funding_transactions.csv"
-   ],
-   "source_sha256": "d68a8e4ebb766b391aa93e4e242b9c620846907686f454a1f504c8c2fbba0d29",
-   "maintenance_status": "REQUIRES-REVIEW",
-   "maintenance_evidence": {
-    "reason": "governed output is not admitted: cedar_identifier_ledger_final.csv, federal_funding_transactions.csv",
-    "source_sha256": "d68a8e4ebb766b391aa93e4e242b9c620846907686f454a1f504c8c2fbba0d29",
-    "identical_source_peers": [],
-    "ci_commands": [],
-    "documented_commands": [],
-    "active_runtime_callers": [],
-    "superseded_output_edges": [],
-    "historical_replay_evidence": [],
-    "output_authority_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-    "output_artifact_hashes": "NOT_MEASURED_BY_SCRIPT_CENSUS",
-    "retirement_authorized": false,
-    "review_owner": "Codex",
-    "review_priority": "P1_undeclared_governed_write_candidate",
-    "review_write_sites": [
-     {
-      "line": 398,
-      "operation": "open",
-      "target": "<unresolved>",
-      "scope": "unresolved_target",
-      "table": null
-     },
-     {
-      "line": 402,
-      "operation": "os.replace",
-      "target": "<unresolved>",
-      "scope": "unresolved_target",
-      "table": null
-     },
-     {
-      "line": 464,
-      "operation": "open",
-      "target": "<unresolved>",
-      "scope": "unresolved_target",
-      "table": null
-     },
-     {
-      "line": 468,
-      "operation": "os.replace",
-      "target": "<unresolved>",
-      "scope": "unresolved_target",
-      "table": null
-     },
-     {
-      "line": 558,
-      "operation": "bl_path.write_text",
-      "target": "<unresolved>/_1179_cross_table_key_baseline.json",
-      "scope": "unresolved_target",
-      "table": null
-     },
-     {
-      "line": 594,
-      "operation": "open",
-      "target": "<unresolved>/cedar_identifier_ledger_final.csv",
-      "scope": "governed_table",
-      "table": "cedar_identifier_ledger_final.csv"
-     },
-     {
-      "line": 662,
-      "operation": "open",
-      "target": "<unresolved>/federal_funding_transactions.csv",
-      "scope": "governed_table",
-      "table": "federal_funding_transactions.csv"
      }
     ],
     "safe_delete_proof": "NOT_ESTABLISHED: external callers, unique output and recovery value are not exhausted by static scans",
@@ -37514,123 +37125,6 @@
      "retirement_condition": "Replace entity-reference product and 1174 consumer together",
      "grants_execution_permission": false
     },
-    "source_review_stale": false
-   },
-   "registration_status": "unresolved_not_authorized"
-  },
-  {
-   "script": "1182_stream_official_names.py",
-   "dir": "",
-   "number": "1182",
-   "duplicate_number": false,
-   "kind": "rebuild",
-   "evidence": [
-    "writes in 'w' mode or builds from data/raw"
-   ],
-   "never_run": false,
-   "never_run_reason": "",
-   "writes": [
-    "probe.csv"
-   ],
-   "reads": [],
-   "in_a_contract": false,
-   "in_an_ordering": false,
-   "mentions": 0,
-   "mentioned_outside_history": 0,
-   "oneoff_shaped": false,
-   "has_run_receipt": false,
-   "last_modified": "2026-09-26",
-   "lines": 187,
-   "operational_role": "unresolved",
-   "collection_output_entrypoints": [],
-   "static_consumers": [],
-   "runtime_consumer_candidates": [],
-   "operational_call_evidence": {
-    "publication_calls": [
-     "apply_official_names",
-     "official_names"
-    ],
-    "validation_calls": []
-   },
-   "unknown_io_literals": [],
-   "embedded_test_functions": 0,
-   "standalone_test_evidence": {
-    "unittest_classes": [],
-    "pytest_import": false,
-    "filename_convention": false,
-    "assertion_nodes": 0,
-    "local_check_harness_calls": []
-   },
-   "writer_evidence": [
-    {
-     "line": 80,
-     "operation": "tmp.open",
-     "target": "<unresolved>",
-     "scope": "unresolved_target",
-     "table": null,
-     "signature": "a88b919e1aa02ac1b89facf0876d48d9f76b6c79f64a05bee78398fceceed402"
-    },
-    {
-     "line": 111,
-     "operation": "os.replace",
-     "target": "<unresolved>",
-     "scope": "unresolved_target",
-     "table": null,
-     "signature": "198a5a79a7c2235ad4fa8a417cb92c1c956412a0b9faee83306373d23582f782"
-    },
-    {
-     "line": 132,
-     "operation": "probe.write_text",
-     "target": "<unresolved>/probe.csv",
-     "scope": "unresolved_target",
-     "table": null,
-     "signature": "aab88b21a5b2d11c49786f66a3790726d8536638951fb995bd2141ded1aa8985"
-    }
-   ],
-   "writer_analysis_error": null,
-   "writer_risk": "P2_unresolved_write_target",
-   "undeclared_governed_tables": [],
-   "source_sha256": "bf4fb356decce401c8136579f459472cef4c90eea92b397c74f60d97b1a1a150",
-   "maintenance_status": "REQUIRES-REVIEW",
-   "maintenance_evidence": {
-    "reason": "writer targets/callers need runtime confirmation before ownership or retirement: <unresolved>, <unresolved>/probe.csv",
-    "source_sha256": "bf4fb356decce401c8136579f459472cef4c90eea92b397c74f60d97b1a1a150",
-    "identical_source_peers": [],
-    "ci_commands": [],
-    "documented_commands": [],
-    "active_runtime_callers": [],
-    "superseded_output_edges": [],
-    "historical_replay_evidence": [],
-    "output_authority_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-    "output_artifact_hashes": "NOT_MEASURED_BY_SCRIPT_CENSUS",
-    "retirement_authorized": false,
-    "review_owner": "Codex",
-    "review_priority": "P2_unresolved_write_target",
-    "review_write_sites": [
-     {
-      "line": 80,
-      "operation": "tmp.open",
-      "target": "<unresolved>",
-      "scope": "unresolved_target",
-      "table": null
-     },
-     {
-      "line": 111,
-      "operation": "os.replace",
-      "target": "<unresolved>",
-      "scope": "unresolved_target",
-      "table": null
-     },
-     {
-      "line": 132,
-      "operation": "probe.write_text",
-      "target": "<unresolved>/probe.csv",
-      "scope": "unresolved_target",
-      "table": null
-     }
-    ],
-    "safe_delete_proof": "NOT_ESTABLISHED: external callers, unique output and recovery value are not exhausted by static scans",
-    "bounded_source_review": null,
     "source_review_stale": false
    },
    "registration_status": "unresolved_not_authorized"
@@ -49752,12 +49246,12 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 22,
-   "mentioned_outside_history": 21,
+   "mentions": 23,
+   "mentioned_outside_history": 22,
    "oneoff_shaped": false,
    "has_run_receipt": false,
-   "last_modified": "2026-09-26",
-   "lines": 855,
+   "last_modified": "2026-10-02",
+   "lines": 888,
    "operational_role": "unresolved",
    "collection_output_entrypoints": [],
    "static_consumers": [
@@ -49813,30 +49307,30 @@
    },
    "writer_evidence": [
     {
-     "line": 847,
+     "line": 880,
      "operation": "open",
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "b3f563df4a803af68c72b662dc4c48809addeed0ff178297fb28cbc358b5dc58"
+     "signature": "e9a60979dbafec6348b1bef81ec7bcc173637ecfccdebb030c175f808a39713a"
     },
     {
-     "line": 851,
+     "line": 884,
      "operation": "os.replace",
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "9f27b7a421ddfef2ab1b21e3c79961322f27694aab8c2f0aed1c444b2e57cf5f"
+     "signature": "2f57f3e45074b5394c11acb3d5fc71c4c9a8c284c87f57ce108849b99219dbb0"
     }
    ],
    "writer_analysis_error": null,
    "writer_risk": "P2_unresolved_write_target",
    "undeclared_governed_tables": [],
-   "source_sha256": "cef5325463df4a47fd11fdec56fe99e59abf7fb0d8cb319c6c5d31d5c1ce60f7",
+   "source_sha256": "9e663a9d17de96c7b58845b1af047586923b46c707a75efe46e090f8f6cc1864",
    "maintenance_status": "REQUIRES-REVIEW",
    "maintenance_evidence": {
     "reason": "writer targets/callers need runtime confirmation before ownership or retirement: <unresolved>",
-    "source_sha256": "cef5325463df4a47fd11fdec56fe99e59abf7fb0d8cb319c6c5d31d5c1ce60f7",
+    "source_sha256": "9e663a9d17de96c7b58845b1af047586923b46c707a75efe46e090f8f6cc1864",
     "identical_source_peers": [],
     "ci_commands": [],
     "documented_commands": [
@@ -49852,20 +49346,87 @@
     "review_priority": "P2_unresolved_write_target",
     "review_write_sites": [
      {
-      "line": 847,
+      "line": 880,
       "operation": "open",
       "target": "<unresolved>",
       "scope": "unresolved_target",
       "table": null
      },
      {
-      "line": 851,
+      "line": 884,
       "operation": "os.replace",
       "target": "<unresolved>",
       "scope": "unresolved_target",
       "table": null
      }
     ],
+    "safe_delete_proof": "NOT_ESTABLISHED: external callers, unique output and recovery value are not exhausted by static scans",
+    "bounded_source_review": null,
+    "source_review_stale": false
+   },
+   "registration_status": "unresolved_not_authorized"
+  },
+  {
+   "script": "173_consolidate_rulings_ledger_test.py",
+   "dir": "",
+   "number": "173",
+   "duplicate_number": true,
+   "kind": "enricher",
+   "evidence": [
+    "names itself an in-place enricher"
+   ],
+   "never_run": false,
+   "never_run_reason": "",
+   "writes": [],
+   "reads": [],
+   "in_a_contract": false,
+   "in_an_ordering": false,
+   "mentions": 1,
+   "mentioned_outside_history": 1,
+   "oneoff_shaped": false,
+   "has_run_receipt": false,
+   "last_modified": "2026-10-02",
+   "lines": 87,
+   "operational_role": "test/fixture",
+   "collection_output_entrypoints": [],
+   "static_consumers": [],
+   "runtime_consumer_candidates": [],
+   "operational_call_evidence": {
+    "publication_calls": [],
+    "validation_calls": []
+   },
+   "unknown_io_literals": [],
+   "embedded_test_functions": 6,
+   "standalone_test_evidence": {
+    "unittest_classes": [
+     "VerdictGrammarTests"
+    ],
+    "pytest_import": false,
+    "filename_convention": true,
+    "assertion_nodes": 0,
+    "local_check_harness_calls": []
+   },
+   "writer_evidence": [],
+   "writer_analysis_error": null,
+   "writer_risk": "P3_no_detected_write_not_readonly_certified",
+   "undeclared_governed_tables": [],
+   "source_sha256": "c3ff0ce557ceeed90a0bf91ecbd97758bda50bb27a5694aeafcdf71123a371bf",
+   "maintenance_status": "ACTIVE",
+   "maintenance_evidence": {
+    "reason": "declared operational role, CI invocation or reachable Python dependency",
+    "source_sha256": "c3ff0ce557ceeed90a0bf91ecbd97758bda50bb27a5694aeafcdf71123a371bf",
+    "identical_source_peers": [],
+    "ci_commands": [],
+    "documented_commands": [],
+    "active_runtime_callers": [],
+    "superseded_output_edges": [],
+    "historical_replay_evidence": [],
+    "output_authority_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "output_artifact_hashes": "NOT_MEASURED_BY_SCRIPT_CENSUS",
+    "retirement_authorized": false,
+    "review_owner": null,
+    "review_priority": null,
+    "review_write_sites": [],
     "safe_delete_proof": "NOT_ESTABLISHED: external callers, unique output and recovery value are not exhausted by static scans",
     "bounded_source_review": null,
     "source_review_stale": false
@@ -70194,8 +69755,8 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 23,
-   "mentioned_outside_history": 23,
+   "mentions": 25,
+   "mentioned_outside_history": 25,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-10-02",
@@ -70338,8 +69899,8 @@
    "reads": [],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 0,
-   "mentioned_outside_history": 0,
+   "mentions": 2,
+   "mentioned_outside_history": 2,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-10-02",
@@ -72390,8 +71951,8 @@
    ],
    "in_a_contract": true,
    "in_an_ordering": true,
-   "mentions": 29,
-   "mentioned_outside_history": 29,
+   "mentions": 30,
+   "mentioned_outside_history": 30,
    "oneoff_shaped": true,
    "has_run_receipt": false,
    "last_modified": "2026-10-02",
@@ -75445,8 +75006,9 @@
     "*.notes.json",
     ".notes.json",
     "ARCHIVE_CANDIDATES.md",
-    "CODE_HEALTH_AUDIT.md",
     "INVENTORY.md",
+    "RELEASE_GAP_2026-10-02.json",
+    "RELEASE_GAP_2026-10-02.md",
     "_ship_rate.csv",
     "cedar_export_safety.csv",
     "cedar_press.db",
@@ -75461,8 +75023,8 @@
    "mentioned_outside_history": 11,
    "oneoff_shaped": false,
    "has_run_receipt": false,
-   "last_modified": "2026-10-01",
-   "lines": 1822,
+   "last_modified": "2026-10-02",
+   "lines": 1827,
    "operational_role": "unresolved",
    "collection_output_entrypoints": [],
    "static_consumers": [
@@ -75476,9 +75038,12 @@
    "unknown_io_literals": [
     "AGENTS.md",
     "ARCHITECTURE.md",
+    "CODE_HEALTH_AUDIT.md",
+    "CODE_REFERENCE_GRAPH_2026-10-02.json",
     "CONSOLIDATION_SCRIPT_INVENTORY.json",
     "DEPENDENCY_MANIFEST.md",
     "GRAVEYARD_INDEX.md",
+    "INDEX.md",
     "dependency_manifest.json",
     "lint_bug_classes.json",
     "lint_bug_classes_baseline.json"
@@ -75498,41 +75063,41 @@
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "cea8d6d4301d46088ca242f4a729af170a3fdce01a8e84c2449b7987e1808bcf"
+     "signature": "a243d8bfce59bf3e3c0249aaa743ea39f05973196c6221be365b567b4b0caeb1"
     },
     {
-     "line": 642,
+     "line": 647,
      "operation": "OUT_JSON.write_text",
      "target": "<unresolved>/docs/schema/inventory.json",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "f317d02e57a1d0397b79b4cd82a55c6141bbf10753da4799a15e50256a57fc10"
+     "signature": "347a3ec00fd157a2634cfc29d9a25e5ff465a8a6fa1b4a81f50faaffcc3fc7e0"
     },
     {
-     "line": 1810,
+     "line": 1815,
      "operation": "OUT_MD.write_text",
      "target": "<unresolved>/docs/INVENTORY.md",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "96d63c99431d5c23b613ca36ea93c27736dd607e671678ccbadfd7997e05d872"
+     "signature": "df4a52ff186060a01a9f5499985a86c9ec7b0bb8f6d22ac549a7e0f0f9f15420"
     },
     {
-     "line": 1811,
+     "line": 1816,
      "operation": "OUT_JSON.write_text",
      "target": "<unresolved>/docs/schema/inventory.json",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "f317d02e57a1d0397b79b4cd82a55c6141bbf10753da4799a15e50256a57fc10"
+     "signature": "347a3ec00fd157a2634cfc29d9a25e5ff465a8a6fa1b4a81f50faaffcc3fc7e0"
     }
    ],
    "writer_analysis_error": null,
    "writer_risk": "P2_unresolved_write_target",
    "undeclared_governed_tables": [],
-   "source_sha256": "b3646d3c94091b8c68a475681332627a02dcd2ee683d68ac18426b99ea6695e9",
+   "source_sha256": "185f283d9fe1fcf44d3a2bc3a1ac1f3c9d568de4e5fd2bd52356510868dd88c9",
    "maintenance_status": "REQUIRES-REVIEW",
    "maintenance_evidence": {
     "reason": "writer targets/callers need runtime confirmation before ownership or retirement: <unresolved>, <unresolved>/docs/INVENTORY.md, <unresolved>/docs/schema/inventory.json",
-    "source_sha256": "b3646d3c94091b8c68a475681332627a02dcd2ee683d68ac18426b99ea6695e9",
+    "source_sha256": "185f283d9fe1fcf44d3a2bc3a1ac1f3c9d568de4e5fd2bd52356510868dd88c9",
     "identical_source_peers": [],
     "ci_commands": [],
     "documented_commands": [
@@ -75560,21 +75125,21 @@
       "table": null
      },
      {
-      "line": 642,
+      "line": 647,
       "operation": "OUT_JSON.write_text",
       "target": "<unresolved>/docs/schema/inventory.json",
       "scope": "unresolved_target",
       "table": null
      },
      {
-      "line": 1810,
+      "line": 1815,
       "operation": "OUT_MD.write_text",
       "target": "<unresolved>/docs/INVENTORY.md",
       "scope": "unresolved_target",
       "table": null
      },
      {
-      "line": 1811,
+      "line": 1816,
       "operation": "OUT_JSON.write_text",
       "target": "<unresolved>/docs/schema/inventory.json",
       "scope": "unresolved_target",
@@ -76638,118 +76203,6 @@
    "registration_status": "unresolved_not_authorized"
   },
   {
-   "script": "530_shard_b_tribe_web_probe.py",
-   "dir": "",
-   "number": "530",
-   "duplicate_number": false,
-   "kind": "unknown",
-   "evidence": [],
-   "never_run": false,
-   "never_run_reason": "",
-   "writes": [],
-   "reads": [
-    "_candidates.json"
-   ],
-   "in_a_contract": false,
-   "in_an_ordering": false,
-   "mentions": 0,
-   "mentioned_outside_history": 0,
-   "oneoff_shaped": false,
-   "has_run_receipt": false,
-   "last_modified": "2026-09-26",
-   "lines": 202,
-   "operational_role": "unresolved",
-   "collection_output_entrypoints": [],
-   "static_consumers": [],
-   "runtime_consumer_candidates": [],
-   "operational_call_evidence": {
-    "publication_calls": [],
-    "validation_calls": []
-   },
-   "unknown_io_literals": [],
-   "embedded_test_functions": 0,
-   "standalone_test_evidence": {
-    "unittest_classes": [],
-    "pytest_import": false,
-    "filename_convention": false,
-    "assertion_nodes": 0,
-    "local_check_harness_calls": []
-   },
-   "writer_evidence": [
-    {
-     "line": 162,
-     "operation": ".write_bytes",
-     "target": "<unresolved>/data/staging/tribe_harvest/shard_b/raw/<unresolved>",
-     "scope": "unresolved_target",
-     "table": null,
-     "signature": "21e04db6df0f451beff35ec6f0d83fc1722205338acb5bc6be172d6f47510b56"
-    },
-    {
-     "line": 165,
-     "operation": ".write_text",
-     "target": "<unresolved>/data/staging/tribe_harvest/shard_b/raw/<unresolved>",
-     "scope": "unresolved_target",
-     "table": null,
-     "signature": "71c6f1683b3c842af98ed6fbf6c2832ee5ec461c3e6bb184407bfc3d5fc8136f"
-    },
-    {
-     "line": 182,
-     "operation": "outp.open",
-     "target": "<unresolved>/data/staging/tribe_harvest/shard_b/_probe_results.jsonl",
-     "scope": "unresolved_target",
-     "table": null,
-     "signature": "7e9070cfbe20961caec243a480094de04f4a638fcb5eed2b5ff2ab917fcc4d49"
-    }
-   ],
-   "writer_analysis_error": null,
-   "writer_risk": "P2_unresolved_write_target",
-   "undeclared_governed_tables": [],
-   "source_sha256": "a789e7cdd9542e143be3c792519292939bd5da1188a36651c7b7bc89d12c6ff9",
-   "maintenance_status": "REQUIRES-REVIEW",
-   "maintenance_evidence": {
-    "reason": "writer targets/callers need runtime confirmation before ownership or retirement: <unresolved>/data/staging/tribe_harvest/shard_b/_probe_results.jsonl, <unresolved>/data/staging/tribe_harvest/shard_b/raw/<unresolved>",
-    "source_sha256": "a789e7cdd9542e143be3c792519292939bd5da1188a36651c7b7bc89d12c6ff9",
-    "identical_source_peers": [],
-    "ci_commands": [],
-    "documented_commands": [],
-    "active_runtime_callers": [],
-    "superseded_output_edges": [],
-    "historical_replay_evidence": [],
-    "output_authority_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-    "output_artifact_hashes": "NOT_MEASURED_BY_SCRIPT_CENSUS",
-    "retirement_authorized": false,
-    "review_owner": "Codex",
-    "review_priority": "P2_unresolved_write_target",
-    "review_write_sites": [
-     {
-      "line": 162,
-      "operation": ".write_bytes",
-      "target": "<unresolved>/data/staging/tribe_harvest/shard_b/raw/<unresolved>",
-      "scope": "unresolved_target",
-      "table": null
-     },
-     {
-      "line": 165,
-      "operation": ".write_text",
-      "target": "<unresolved>/data/staging/tribe_harvest/shard_b/raw/<unresolved>",
-      "scope": "unresolved_target",
-      "table": null
-     },
-     {
-      "line": 182,
-      "operation": "outp.open",
-      "target": "<unresolved>/data/staging/tribe_harvest/shard_b/_probe_results.jsonl",
-      "scope": "unresolved_target",
-      "table": null
-     }
-    ],
-    "safe_delete_proof": "NOT_ESTABLISHED: external callers, unique output and recovery value are not exhausted by static scans",
-    "bounded_source_review": null,
-    "source_review_stale": false
-   },
-   "registration_status": "unresolved_not_authorized"
-  },
-  {
    "script": "531_shard_e_anc_report_mine.py",
    "dir": "",
    "number": "531",
@@ -77298,89 +76751,6 @@
       "line": 148,
       "operation": "OUT.open",
       "target": "<unresolved>/data/staging/anc_subsidiaries/shard_e_match_candidates.csv",
-      "scope": "unresolved_target",
-      "table": null
-     }
-    ],
-    "safe_delete_proof": "NOT_ESTABLISHED: external callers, unique output and recovery value are not exhausted by static scans",
-    "bounded_source_review": null,
-    "source_review_stale": false
-   },
-   "registration_status": "unresolved_not_authorized"
-  },
-  {
-   "script": "536_shard_e_newsletters.py",
-   "dir": "",
-   "number": "536",
-   "duplicate_number": false,
-   "kind": "unknown",
-   "evidence": [],
-   "never_run": false,
-   "never_run_reason": "",
-   "writes": [],
-   "reads": [
-    "_slice.json",
-    "ancsa_filings_index.csv"
-   ],
-   "in_a_contract": false,
-   "in_an_ordering": false,
-   "mentions": 0,
-   "mentioned_outside_history": 0,
-   "oneoff_shaped": false,
-   "has_run_receipt": false,
-   "last_modified": "2026-09-26",
-   "lines": 248,
-   "operational_role": "unresolved",
-   "collection_output_entrypoints": [],
-   "static_consumers": [],
-   "runtime_consumer_candidates": [],
-   "operational_call_evidence": {
-    "publication_calls": [],
-    "validation_calls": []
-   },
-   "unknown_io_literals": [],
-   "embedded_test_functions": 0,
-   "standalone_test_evidence": {
-    "unittest_classes": [],
-    "pytest_import": false,
-    "filename_convention": false,
-    "assertion_nodes": 0,
-    "local_check_harness_calls": []
-   },
-   "writer_evidence": [
-    {
-     "line": 235,
-     "operation": "OUT.open",
-     "target": "<unresolved>/data/staging/tribe_harvest/shard_e/newsletters.jsonl",
-     "scope": "unresolved_target",
-     "table": null,
-     "signature": "de1af27ce60bbf50183d46be9c64d3ca114667f001e822aebcd9eff31f54c407"
-    }
-   ],
-   "writer_analysis_error": null,
-   "writer_risk": "P2_unresolved_write_target",
-   "undeclared_governed_tables": [],
-   "source_sha256": "c5a7fe5d5d1331592baa85026851f0f2ba812ac1988175045a43547f3fdf76d1",
-   "maintenance_status": "REQUIRES-REVIEW",
-   "maintenance_evidence": {
-    "reason": "writer targets/callers need runtime confirmation before ownership or retirement: <unresolved>/data/staging/tribe_harvest/shard_e/newsletters.jsonl",
-    "source_sha256": "c5a7fe5d5d1331592baa85026851f0f2ba812ac1988175045a43547f3fdf76d1",
-    "identical_source_peers": [],
-    "ci_commands": [],
-    "documented_commands": [],
-    "active_runtime_callers": [],
-    "superseded_output_edges": [],
-    "historical_replay_evidence": [],
-    "output_authority_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-    "output_artifact_hashes": "NOT_MEASURED_BY_SCRIPT_CENSUS",
-    "retirement_authorized": false,
-    "review_owner": "Codex",
-    "review_priority": "P2_unresolved_write_target",
-    "review_write_sites": [
-     {
-      "line": 235,
-      "operation": "OUT.open",
-      "target": "<unresolved>/data/staging/tribe_harvest/shard_e/newsletters.jsonl",
       "scope": "unresolved_target",
       "table": null
      }
@@ -80437,73 +79807,6 @@
    "registration_status": "unresolved_not_authorized"
   },
   {
-   "script": "584_register_labor_codebook.py",
-   "dir": "",
-   "number": "584",
-   "duplicate_number": false,
-   "kind": "enricher",
-   "evidence": [
-    "names itself an in-place enricher"
-   ],
-   "never_run": false,
-   "never_run_reason": "",
-   "writes": [],
-   "reads": [],
-   "in_a_contract": false,
-   "in_an_ordering": false,
-   "mentions": 0,
-   "mentioned_outside_history": 0,
-   "oneoff_shaped": false,
-   "has_run_receipt": false,
-   "last_modified": "2026-09-26",
-   "lines": 278,
-   "operational_role": "unresolved",
-   "collection_output_entrypoints": [],
-   "static_consumers": [],
-   "runtime_consumer_candidates": [],
-   "operational_call_evidence": {
-    "publication_calls": [],
-    "validation_calls": []
-   },
-   "unknown_io_literals": [
-    "gaming_employment_observations.csv"
-   ],
-   "embedded_test_functions": 0,
-   "standalone_test_evidence": {
-    "unittest_classes": [],
-    "pytest_import": false,
-    "filename_convention": false,
-    "assertion_nodes": 0,
-    "local_check_harness_calls": []
-   },
-   "writer_evidence": [],
-   "writer_analysis_error": null,
-   "writer_risk": "P3_no_detected_write_not_readonly_certified",
-   "undeclared_governed_tables": [],
-   "source_sha256": "0a763e98ab0217be5e8efbe9575b1dbee3027599dd687e86f1c5ba0f8e8dd759",
-   "maintenance_status": "REQUIRES-REVIEW",
-   "maintenance_evidence": {
-    "reason": "no detected writer is not proof of read-only behavior; external callers, unique outputs and restoration value remain unverified",
-    "source_sha256": "0a763e98ab0217be5e8efbe9575b1dbee3027599dd687e86f1c5ba0f8e8dd759",
-    "identical_source_peers": [],
-    "ci_commands": [],
-    "documented_commands": [],
-    "active_runtime_callers": [],
-    "superseded_output_edges": [],
-    "historical_replay_evidence": [],
-    "output_authority_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-    "output_artifact_hashes": "NOT_MEASURED_BY_SCRIPT_CENSUS",
-    "retirement_authorized": false,
-    "review_owner": "Codex",
-    "review_priority": "P3_no_detected_write_not_readonly_certified",
-    "review_write_sites": [],
-    "safe_delete_proof": "NOT_ESTABLISHED: external callers, unique output and recovery value are not exhausted by static scans",
-    "bounded_source_review": null,
-    "source_review_stale": false
-   },
-   "registration_status": "unresolved_not_authorized"
-  },
-  {
    "script": "585_factcheck_nigc_keys.py",
    "dir": "",
    "number": "585",
@@ -81208,350 +80511,6 @@
    "registration_status": "unresolved_not_authorized"
   },
   {
-   "script": "590_shard_f_org_slice.py",
-   "dir": "",
-   "number": "590",
-   "duplicate_number": false,
-   "kind": "both",
-   "evidence": [
-    "writes in 'w' mode or builds from data/raw",
-    "names itself an in-place enricher"
-   ],
-   "never_run": false,
-   "never_run_reason": "",
-   "writes": [
-    "_slice.json"
-   ],
-   "reads": [
-    "cedar_identity_register.csv",
-    "intertribal_memberships.csv",
-    "intertribal_orgs.csv",
-    "np_ein_entity_hub.csv",
-    "np_financials.csv",
-    "np_orgs.csv"
-   ],
-   "in_a_contract": false,
-   "in_an_ordering": false,
-   "mentions": 0,
-   "mentioned_outside_history": 0,
-   "oneoff_shaped": false,
-   "has_run_receipt": false,
-   "last_modified": "2026-09-26",
-   "lines": 189,
-   "operational_role": "unresolved",
-   "collection_output_entrypoints": [],
-   "static_consumers": [],
-   "runtime_consumer_candidates": [],
-   "operational_call_evidence": {
-    "publication_calls": [],
-    "validation_calls": []
-   },
-   "unknown_io_literals": [],
-   "embedded_test_functions": 0,
-   "standalone_test_evidence": {
-    "unittest_classes": [],
-    "pytest_import": false,
-    "filename_convention": false,
-    "assertion_nodes": 1,
-    "local_check_harness_calls": []
-   },
-   "writer_evidence": [
-    {
-     "line": 169,
-     "operation": "open",
-     "target": "<unresolved>",
-     "scope": "unresolved_target",
-     "table": null,
-     "signature": "6c8bc8d7a85f1d0173175e8f0817e0fa3489e7bd63e17a3d1e0dd25058a3a4e2"
-    }
-   ],
-   "writer_analysis_error": null,
-   "writer_risk": "P2_unresolved_write_target",
-   "undeclared_governed_tables": [],
-   "source_sha256": "391cf37d9874ded55fb496939ef227a05308d2eda107a0c690c944bfc6437f40",
-   "maintenance_status": "REQUIRES-REVIEW",
-   "maintenance_evidence": {
-    "reason": "writer targets/callers need runtime confirmation before ownership or retirement: <unresolved>",
-    "source_sha256": "391cf37d9874ded55fb496939ef227a05308d2eda107a0c690c944bfc6437f40",
-    "identical_source_peers": [],
-    "ci_commands": [],
-    "documented_commands": [],
-    "active_runtime_callers": [],
-    "superseded_output_edges": [],
-    "historical_replay_evidence": [],
-    "output_authority_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-    "output_artifact_hashes": "NOT_MEASURED_BY_SCRIPT_CENSUS",
-    "retirement_authorized": false,
-    "review_owner": "Codex",
-    "review_priority": "P2_unresolved_write_target",
-    "review_write_sites": [
-     {
-      "line": 169,
-      "operation": "open",
-      "target": "<unresolved>",
-      "scope": "unresolved_target",
-      "table": null
-     }
-    ],
-    "safe_delete_proof": "NOT_ESTABLISHED: external callers, unique output and recovery value are not exhausted by static scans",
-    "bounded_source_review": null,
-    "source_review_stale": false
-   },
-   "registration_status": "unresolved_not_authorized"
-  },
-  {
-   "script": "591_shard_f_ihs_uio_register.py",
-   "dir": "",
-   "number": "591",
-   "duplicate_number": false,
-   "kind": "rebuild",
-   "evidence": [
-    "writes in 'w' mode or builds from data/raw"
-   ],
-   "never_run": false,
-   "never_run_reason": "",
-   "writes": [],
-   "reads": [],
-   "in_a_contract": false,
-   "in_an_ordering": false,
-   "mentions": 0,
-   "mentioned_outside_history": 0,
-   "oneoff_shaped": false,
-   "has_run_receipt": false,
-   "last_modified": "2026-09-26",
-   "lines": 145,
-   "operational_role": "unresolved",
-   "collection_output_entrypoints": [],
-   "static_consumers": [],
-   "runtime_consumer_candidates": [],
-   "operational_call_evidence": {
-    "publication_calls": [],
-    "validation_calls": []
-   },
-   "unknown_io_literals": [],
-   "embedded_test_functions": 0,
-   "standalone_test_evidence": {
-    "unittest_classes": [],
-    "pytest_import": false,
-    "filename_convention": false,
-    "assertion_nodes": 0,
-    "local_check_harness_calls": []
-   },
-   "writer_evidence": [
-    {
-     "line": 134,
-     "operation": "open",
-     "target": "<unresolved>",
-     "scope": "unresolved_target",
-     "table": null,
-     "signature": "112f7b4dd1c29ed898ed6ba12347f523febc068191c0d36f713a2ef14c932fc4"
-    }
-   ],
-   "writer_analysis_error": null,
-   "writer_risk": "P2_unresolved_write_target",
-   "undeclared_governed_tables": [],
-   "source_sha256": "d802abe06241b545310a6e56e9186a3737eb51c374c4362711c90afc87582fc6",
-   "maintenance_status": "REQUIRES-REVIEW",
-   "maintenance_evidence": {
-    "reason": "writer targets/callers need runtime confirmation before ownership or retirement: <unresolved>",
-    "source_sha256": "d802abe06241b545310a6e56e9186a3737eb51c374c4362711c90afc87582fc6",
-    "identical_source_peers": [],
-    "ci_commands": [],
-    "documented_commands": [],
-    "active_runtime_callers": [],
-    "superseded_output_edges": [],
-    "historical_replay_evidence": [],
-    "output_authority_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-    "output_artifact_hashes": "NOT_MEASURED_BY_SCRIPT_CENSUS",
-    "retirement_authorized": false,
-    "review_owner": "Codex",
-    "review_priority": "P2_unresolved_write_target",
-    "review_write_sites": [
-     {
-      "line": 134,
-      "operation": "open",
-      "target": "<unresolved>",
-      "scope": "unresolved_target",
-      "table": null
-     }
-    ],
-    "safe_delete_proof": "NOT_ESTABLISHED: external callers, unique output and recovery value are not exhausted by static scans",
-    "bounded_source_review": null,
-    "source_review_stale": false
-   },
-   "registration_status": "unresolved_not_authorized"
-  },
-  {
-   "script": "592_shard_f_ihs_selfgov_compacts.py",
-   "dir": "",
-   "number": "592",
-   "duplicate_number": false,
-   "kind": "rebuild",
-   "evidence": [
-    "writes in 'w' mode or builds from data/raw"
-   ],
-   "never_run": false,
-   "never_run_reason": "",
-   "writes": [],
-   "reads": [],
-   "in_a_contract": false,
-   "in_an_ordering": false,
-   "mentions": 0,
-   "mentioned_outside_history": 0,
-   "oneoff_shaped": false,
-   "has_run_receipt": false,
-   "last_modified": "2026-09-26",
-   "lines": 115,
-   "operational_role": "unresolved",
-   "collection_output_entrypoints": [],
-   "static_consumers": [],
-   "runtime_consumer_candidates": [],
-   "operational_call_evidence": {
-    "publication_calls": [],
-    "validation_calls": []
-   },
-   "unknown_io_literals": [],
-   "embedded_test_functions": 0,
-   "standalone_test_evidence": {
-    "unittest_classes": [],
-    "pytest_import": false,
-    "filename_convention": false,
-    "assertion_nodes": 0,
-    "local_check_harness_calls": []
-   },
-   "writer_evidence": [
-    {
-     "line": 98,
-     "operation": "open",
-     "target": "<unresolved>",
-     "scope": "unresolved_target",
-     "table": null,
-     "signature": "80aeeb46563fe6364f6405b3fec84673fc5a6e5f23a366f60bb68bc1ae98eb3e"
-    }
-   ],
-   "writer_analysis_error": null,
-   "writer_risk": "P2_unresolved_write_target",
-   "undeclared_governed_tables": [],
-   "source_sha256": "8ac46ff7a8023d46fb4dda7764bdd7919701c00048f1aed6b98f5594884be2ef",
-   "maintenance_status": "REQUIRES-REVIEW",
-   "maintenance_evidence": {
-    "reason": "writer targets/callers need runtime confirmation before ownership or retirement: <unresolved>",
-    "source_sha256": "8ac46ff7a8023d46fb4dda7764bdd7919701c00048f1aed6b98f5594884be2ef",
-    "identical_source_peers": [],
-    "ci_commands": [],
-    "documented_commands": [],
-    "active_runtime_callers": [],
-    "superseded_output_edges": [],
-    "historical_replay_evidence": [],
-    "output_authority_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-    "output_artifact_hashes": "NOT_MEASURED_BY_SCRIPT_CENSUS",
-    "retirement_authorized": false,
-    "review_owner": "Codex",
-    "review_priority": "P2_unresolved_write_target",
-    "review_write_sites": [
-     {
-      "line": 98,
-      "operation": "open",
-      "target": "<unresolved>",
-      "scope": "unresolved_target",
-      "table": null
-     }
-    ],
-    "safe_delete_proof": "NOT_ESTABLISHED: external callers, unique output and recovery value are not exhausted by static scans",
-    "bounded_source_review": null,
-    "source_review_stale": false
-   },
-   "registration_status": "unresolved_not_authorized"
-  },
-  {
-   "script": "593_shard_f_candidates.py",
-   "dir": "",
-   "number": "593",
-   "duplicate_number": false,
-   "kind": "rebuild",
-   "evidence": [
-    "writes in 'w' mode or builds from data/raw"
-   ],
-   "never_run": false,
-   "never_run_reason": "",
-   "writes": [
-    "_candidates.json"
-   ],
-   "reads": [
-    "_slice.json"
-   ],
-   "in_a_contract": false,
-   "in_an_ordering": false,
-   "mentions": 0,
-   "mentioned_outside_history": 0,
-   "oneoff_shaped": false,
-   "has_run_receipt": false,
-   "last_modified": "2026-09-26",
-   "lines": 222,
-   "operational_role": "unresolved",
-   "collection_output_entrypoints": [],
-   "static_consumers": [],
-   "runtime_consumer_candidates": [],
-   "operational_call_evidence": {
-    "publication_calls": [],
-    "validation_calls": []
-   },
-   "unknown_io_literals": [
-    "intertribal_orgs.csv"
-   ],
-   "embedded_test_functions": 0,
-   "standalone_test_evidence": {
-    "unittest_classes": [],
-    "pytest_import": false,
-    "filename_convention": false,
-    "assertion_nodes": 0,
-    "local_check_harness_calls": []
-   },
-   "writer_evidence": [
-    {
-     "line": 204,
-     "operation": "open",
-     "target": "<unresolved>",
-     "scope": "unresolved_target",
-     "table": null,
-     "signature": "ebfbcdf884d1a126da6678a1c5c9cc28851fc18c489cd95f0ced029a9a87f404"
-    }
-   ],
-   "writer_analysis_error": null,
-   "writer_risk": "P2_unresolved_write_target",
-   "undeclared_governed_tables": [],
-   "source_sha256": "0313c90ea29f30940f56d03831e2637e55d5dcf0b9b54ce2cfcd5d02acadc33d",
-   "maintenance_status": "REQUIRES-REVIEW",
-   "maintenance_evidence": {
-    "reason": "writer targets/callers need runtime confirmation before ownership or retirement: <unresolved>",
-    "source_sha256": "0313c90ea29f30940f56d03831e2637e55d5dcf0b9b54ce2cfcd5d02acadc33d",
-    "identical_source_peers": [],
-    "ci_commands": [],
-    "documented_commands": [],
-    "active_runtime_callers": [],
-    "superseded_output_edges": [],
-    "historical_replay_evidence": [],
-    "output_authority_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-    "output_artifact_hashes": "NOT_MEASURED_BY_SCRIPT_CENSUS",
-    "retirement_authorized": false,
-    "review_owner": "Codex",
-    "review_priority": "P2_unresolved_write_target",
-    "review_write_sites": [
-     {
-      "line": 204,
-      "operation": "open",
-      "target": "<unresolved>",
-      "scope": "unresolved_target",
-      "table": null
-     }
-    ],
-    "safe_delete_proof": "NOT_ESTABLISHED: external callers, unique output and recovery value are not exhausted by static scans",
-    "bounded_source_review": null,
-    "source_review_stale": false
-   },
-   "registration_status": "unresolved_not_authorized"
-  },
-  {
    "script": "594_shard_f_org_web_probe.py",
    "dir": "",
    "number": "594",
@@ -81655,88 +80614,6 @@
    "registration_status": "unresolved_not_authorized"
   },
   {
-   "script": "595_shard_f_org_web_reprobe.py",
-   "dir": "",
-   "number": "595",
-   "duplicate_number": false,
-   "kind": "unknown",
-   "evidence": [],
-   "never_run": false,
-   "never_run_reason": "",
-   "writes": [],
-   "reads": [
-    "_candidates.json"
-   ],
-   "in_a_contract": false,
-   "in_an_ordering": false,
-   "mentions": 0,
-   "mentioned_outside_history": 0,
-   "oneoff_shaped": false,
-   "has_run_receipt": false,
-   "last_modified": "2026-09-26",
-   "lines": 228,
-   "operational_role": "unresolved",
-   "collection_output_entrypoints": [],
-   "static_consumers": [],
-   "runtime_consumer_candidates": [],
-   "operational_call_evidence": {
-    "publication_calls": [],
-    "validation_calls": []
-   },
-   "unknown_io_literals": [],
-   "embedded_test_functions": 0,
-   "standalone_test_evidence": {
-    "unittest_classes": [],
-    "pytest_import": false,
-    "filename_convention": false,
-    "assertion_nodes": 0,
-    "local_check_harness_calls": []
-   },
-   "writer_evidence": [
-    {
-     "line": 120,
-     "operation": "open",
-     "target": "<unresolved>",
-     "scope": "unresolved_target",
-     "table": null,
-     "signature": "d22a2cb4003def72c340cbc580a66f66230da3ab170d605141f6395e6a69000e"
-    }
-   ],
-   "writer_analysis_error": null,
-   "writer_risk": "P2_unresolved_write_target",
-   "undeclared_governed_tables": [],
-   "source_sha256": "525de43590daa678c5e49ad085eba5dfa7b90967c03278c551db2faad9f1a3db",
-   "maintenance_status": "REQUIRES-REVIEW",
-   "maintenance_evidence": {
-    "reason": "writer targets/callers need runtime confirmation before ownership or retirement: <unresolved>",
-    "source_sha256": "525de43590daa678c5e49ad085eba5dfa7b90967c03278c551db2faad9f1a3db",
-    "identical_source_peers": [],
-    "ci_commands": [],
-    "documented_commands": [],
-    "active_runtime_callers": [],
-    "superseded_output_edges": [],
-    "historical_replay_evidence": [],
-    "output_authority_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-    "output_artifact_hashes": "NOT_MEASURED_BY_SCRIPT_CENSUS",
-    "retirement_authorized": false,
-    "review_owner": "Codex",
-    "review_priority": "P2_unresolved_write_target",
-    "review_write_sites": [
-     {
-      "line": 120,
-      "operation": "open",
-      "target": "<unresolved>",
-      "scope": "unresolved_target",
-      "table": null
-     }
-    ],
-    "safe_delete_proof": "NOT_ESTABLISHED: external callers, unique output and recovery value are not exhausted by static scans",
-    "bounded_source_review": null,
-    "source_review_stale": false
-   },
-   "registration_status": "unresolved_not_authorized"
-  },
-  {
    "script": "596_shard_f_org_rosters.py",
    "dir": "",
    "number": "596",
@@ -81825,185 +80702,6 @@
      },
      {
       "line": 377,
-      "operation": "open",
-      "target": "<unresolved>",
-      "scope": "unresolved_target",
-      "table": null
-     }
-    ],
-    "safe_delete_proof": "NOT_ESTABLISHED: external callers, unique output and recovery value are not exhausted by static scans",
-    "bounded_source_review": null,
-    "source_review_stale": false
-   },
-   "registration_status": "unresolved_not_authorized"
-  },
-  {
-   "script": "597_shard_f_org_rosters_finalise.py",
-   "dir": "",
-   "number": "597",
-   "duplicate_number": false,
-   "kind": "rebuild",
-   "evidence": [
-    "writes in 'w' mode or builds from data/raw"
-   ],
-   "never_run": false,
-   "never_run_reason": "",
-   "writes": [],
-   "reads": [
-    "_slice.json"
-   ],
-   "in_a_contract": false,
-   "in_an_ordering": false,
-   "mentions": 0,
-   "mentioned_outside_history": 0,
-   "oneoff_shaped": false,
-   "has_run_receipt": false,
-   "last_modified": "2026-09-26",
-   "lines": 144,
-   "operational_role": "unresolved",
-   "collection_output_entrypoints": [],
-   "static_consumers": [],
-   "runtime_consumer_candidates": [],
-   "operational_call_evidence": {
-    "publication_calls": [],
-    "validation_calls": []
-   },
-   "unknown_io_literals": [],
-   "embedded_test_functions": 0,
-   "standalone_test_evidence": {
-    "unittest_classes": [],
-    "pytest_import": false,
-    "filename_convention": false,
-    "assertion_nodes": 0,
-    "local_check_harness_calls": []
-   },
-   "writer_evidence": [
-    {
-     "line": 120,
-     "operation": "open",
-     "target": "<unresolved>",
-     "scope": "unresolved_target",
-     "table": null,
-     "signature": "6f59d937cd2761dd6699c00d9f22d0368bc49098227fc50fac764598cbcc35a9"
-    },
-    {
-     "line": 123,
-     "operation": "open",
-     "target": "<unresolved>",
-     "scope": "unresolved_target",
-     "table": null,
-     "signature": "8e78dabe95fbc8ddfbee171a347f7c230d603aa15afe00477c50ac977ddb1f0e"
-    }
-   ],
-   "writer_analysis_error": null,
-   "writer_risk": "P2_unresolved_write_target",
-   "undeclared_governed_tables": [],
-   "source_sha256": "63b7bf1e88ac8bb2fc03b757e9368510e0e1a856ac0d4dc216328da903ad5af8",
-   "maintenance_status": "REQUIRES-REVIEW",
-   "maintenance_evidence": {
-    "reason": "writer targets/callers need runtime confirmation before ownership or retirement: <unresolved>",
-    "source_sha256": "63b7bf1e88ac8bb2fc03b757e9368510e0e1a856ac0d4dc216328da903ad5af8",
-    "identical_source_peers": [],
-    "ci_commands": [],
-    "documented_commands": [],
-    "active_runtime_callers": [],
-    "superseded_output_edges": [],
-    "historical_replay_evidence": [],
-    "output_authority_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-    "output_artifact_hashes": "NOT_MEASURED_BY_SCRIPT_CENSUS",
-    "retirement_authorized": false,
-    "review_owner": "Codex",
-    "review_priority": "P2_unresolved_write_target",
-    "review_write_sites": [
-     {
-      "line": 120,
-      "operation": "open",
-      "target": "<unresolved>",
-      "scope": "unresolved_target",
-      "table": null
-     },
-     {
-      "line": 123,
-      "operation": "open",
-      "target": "<unresolved>",
-      "scope": "unresolved_target",
-      "table": null
-     }
-    ],
-    "safe_delete_proof": "NOT_ESTABLISHED: external callers, unique output and recovery value are not exhausted by static scans",
-    "bounded_source_review": null,
-    "source_review_stale": false
-   },
-   "registration_status": "unresolved_not_authorized"
-  },
-  {
-   "script": "598_shard_f_newsletters.py",
-   "dir": "",
-   "number": "598",
-   "duplicate_number": false,
-   "kind": "unknown",
-   "evidence": [],
-   "never_run": false,
-   "never_run_reason": "",
-   "writes": [],
-   "reads": [],
-   "in_a_contract": false,
-   "in_an_ordering": false,
-   "mentions": 0,
-   "mentioned_outside_history": 0,
-   "oneoff_shaped": false,
-   "has_run_receipt": false,
-   "last_modified": "2026-09-26",
-   "lines": 243,
-   "operational_role": "unresolved",
-   "collection_output_entrypoints": [],
-   "static_consumers": [],
-   "runtime_consumer_candidates": [],
-   "operational_call_evidence": {
-    "publication_calls": [],
-    "validation_calls": []
-   },
-   "unknown_io_literals": [],
-   "embedded_test_functions": 0,
-   "standalone_test_evidence": {
-    "unittest_classes": [],
-    "pytest_import": false,
-    "filename_convention": false,
-    "assertion_nodes": 0,
-    "local_check_harness_calls": []
-   },
-   "writer_evidence": [
-    {
-     "line": 128,
-     "operation": "open",
-     "target": "<unresolved>",
-     "scope": "unresolved_target",
-     "table": null,
-     "signature": "10a383c4bfd0a487a39ef9a66f74262b8598131b0510a01444dec26e6430efd0"
-    }
-   ],
-   "writer_analysis_error": null,
-   "writer_risk": "P2_unresolved_write_target",
-   "undeclared_governed_tables": [],
-   "source_sha256": "925f435767b6835dc62eac78933d04a19317e19a950d1eab837e39117dd41b78",
-   "maintenance_status": "REQUIRES-REVIEW",
-   "maintenance_evidence": {
-    "reason": "writer targets/callers need runtime confirmation before ownership or retirement: <unresolved>",
-    "source_sha256": "925f435767b6835dc62eac78933d04a19317e19a950d1eab837e39117dd41b78",
-    "identical_source_peers": [],
-    "ci_commands": [],
-    "documented_commands": [],
-    "active_runtime_callers": [],
-    "superseded_output_edges": [],
-    "historical_replay_evidence": [],
-    "output_authority_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-    "output_artifact_hashes": "NOT_MEASURED_BY_SCRIPT_CENSUS",
-    "retirement_authorized": false,
-    "review_owner": "Codex",
-    "review_priority": "P2_unresolved_write_target",
-    "review_write_sites": [
-     {
-      "line": 128,
       "operation": "open",
       "target": "<unresolved>",
       "scope": "unresolved_target",
@@ -82188,246 +80886,6 @@
       "table": "deals_source_index.csv"
      }
     ],
-    "safe_delete_proof": "NOT_ESTABLISHED: external callers, unique output and recovery value are not exhausted by static scans",
-    "bounded_source_review": null,
-    "source_review_stale": false
-   },
-   "registration_status": "unresolved_not_authorized"
-  },
-  {
-   "script": "600_shard_f_service_area.py",
-   "dir": "",
-   "number": "600",
-   "duplicate_number": false,
-   "kind": "rebuild",
-   "evidence": [
-    "writes in 'w' mode or builds from data/raw"
-   ],
-   "never_run": false,
-   "never_run_reason": "",
-   "writes": [],
-   "reads": [
-    "_slice.json"
-   ],
-   "in_a_contract": false,
-   "in_an_ordering": false,
-   "mentions": 0,
-   "mentioned_outside_history": 0,
-   "oneoff_shaped": false,
-   "has_run_receipt": false,
-   "last_modified": "2026-09-26",
-   "lines": 292,
-   "operational_role": "unresolved",
-   "collection_output_entrypoints": [],
-   "static_consumers": [],
-   "runtime_consumer_candidates": [],
-   "operational_call_evidence": {
-    "publication_calls": [],
-    "validation_calls": []
-   },
-   "unknown_io_literals": [],
-   "embedded_test_functions": 0,
-   "standalone_test_evidence": {
-    "unittest_classes": [],
-    "pytest_import": false,
-    "filename_convention": false,
-    "assertion_nodes": 0,
-    "local_check_harness_calls": []
-   },
-   "writer_evidence": [
-    {
-     "line": 148,
-     "operation": "open",
-     "target": "<unresolved>",
-     "scope": "unresolved_target",
-     "table": null,
-     "signature": "6c7454ef9d34e25992b7e340243ab52396148e7a08c4171036082165ff66511f"
-    }
-   ],
-   "writer_analysis_error": null,
-   "writer_risk": "P2_unresolved_write_target",
-   "undeclared_governed_tables": [],
-   "source_sha256": "cca886aa940ef55af706d1b7545e848b62dbfeabc4df961fc31ead19b856b0cd",
-   "maintenance_status": "REQUIRES-REVIEW",
-   "maintenance_evidence": {
-    "reason": "writer targets/callers need runtime confirmation before ownership or retirement: <unresolved>",
-    "source_sha256": "cca886aa940ef55af706d1b7545e848b62dbfeabc4df961fc31ead19b856b0cd",
-    "identical_source_peers": [],
-    "ci_commands": [],
-    "documented_commands": [],
-    "active_runtime_callers": [],
-    "superseded_output_edges": [],
-    "historical_replay_evidence": [],
-    "output_authority_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-    "output_artifact_hashes": "NOT_MEASURED_BY_SCRIPT_CENSUS",
-    "retirement_authorized": false,
-    "review_owner": "Codex",
-    "review_priority": "P2_unresolved_write_target",
-    "review_write_sites": [
-     {
-      "line": 148,
-      "operation": "open",
-      "target": "<unresolved>",
-      "scope": "unresolved_target",
-      "table": null
-     }
-    ],
-    "safe_delete_proof": "NOT_ESTABLISHED: external callers, unique output and recovery value are not exhausted by static scans",
-    "bounded_source_review": null,
-    "source_review_stale": false
-   },
-   "registration_status": "unresolved_not_authorized"
-  },
-  {
-   "script": "601_shard_f_build_web_map.py",
-   "dir": "",
-   "number": "601",
-   "duplicate_number": false,
-   "kind": "rebuild",
-   "evidence": [
-    "writes in 'w' mode or builds from data/raw"
-   ],
-   "never_run": false,
-   "never_run_reason": "",
-   "writes": [
-    "shard_f.csv"
-   ],
-   "reads": [
-    "_slice.json"
-   ],
-   "in_a_contract": false,
-   "in_an_ordering": false,
-   "mentions": 0,
-   "mentioned_outside_history": 0,
-   "oneoff_shaped": false,
-   "has_run_receipt": false,
-   "last_modified": "2026-09-26",
-   "lines": 201,
-   "operational_role": "unresolved",
-   "collection_output_entrypoints": [],
-   "static_consumers": [],
-   "runtime_consumer_candidates": [],
-   "operational_call_evidence": {
-    "publication_calls": [],
-    "validation_calls": []
-   },
-   "unknown_io_literals": [],
-   "embedded_test_functions": 0,
-   "standalone_test_evidence": {
-    "unittest_classes": [],
-    "pytest_import": false,
-    "filename_convention": false,
-    "assertion_nodes": 0,
-    "local_check_harness_calls": []
-   },
-   "writer_evidence": [
-    {
-     "line": 185,
-     "operation": "open",
-     "target": "<unresolved>",
-     "scope": "unresolved_target",
-     "table": null,
-     "signature": "7ecd16b05ed2de344df3e83aa90a16fc5f238c9ab10a1320e6268254011e42ee"
-    }
-   ],
-   "writer_analysis_error": null,
-   "writer_risk": "P2_unresolved_write_target",
-   "undeclared_governed_tables": [],
-   "source_sha256": "8a3288727e35b7d398ff738e7c5b6d79799efb9ef9b1de2686e9e3130f2d22c9",
-   "maintenance_status": "REQUIRES-REVIEW",
-   "maintenance_evidence": {
-    "reason": "writer targets/callers need runtime confirmation before ownership or retirement: <unresolved>",
-    "source_sha256": "8a3288727e35b7d398ff738e7c5b6d79799efb9ef9b1de2686e9e3130f2d22c9",
-    "identical_source_peers": [],
-    "ci_commands": [],
-    "documented_commands": [],
-    "active_runtime_callers": [],
-    "superseded_output_edges": [],
-    "historical_replay_evidence": [],
-    "output_authority_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-    "output_artifact_hashes": "NOT_MEASURED_BY_SCRIPT_CENSUS",
-    "retirement_authorized": false,
-    "review_owner": "Codex",
-    "review_priority": "P2_unresolved_write_target",
-    "review_write_sites": [
-     {
-      "line": 185,
-      "operation": "open",
-      "target": "<unresolved>",
-      "scope": "unresolved_target",
-      "table": null
-     }
-    ],
-    "safe_delete_proof": "NOT_ESTABLISHED: external callers, unique output and recovery value are not exhausted by static scans",
-    "bounded_source_review": null,
-    "source_review_stale": false
-   },
-   "registration_status": "unresolved_not_authorized"
-  },
-  {
-   "script": "602_shard_f_verify.py",
-   "dir": "",
-   "number": "602",
-   "duplicate_number": false,
-   "kind": "unknown",
-   "evidence": [],
-   "never_run": false,
-   "never_run_reason": "",
-   "writes": [],
-   "reads": [
-    "cedar_identity_register.csv",
-    "shard_f.csv"
-   ],
-   "in_a_contract": false,
-   "in_an_ordering": false,
-   "mentions": 0,
-   "mentioned_outside_history": 0,
-   "oneoff_shaped": false,
-   "has_run_receipt": false,
-   "last_modified": "2026-09-26",
-   "lines": 170,
-   "operational_role": "unresolved",
-   "collection_output_entrypoints": [],
-   "static_consumers": [],
-   "runtime_consumer_candidates": [],
-   "operational_call_evidence": {
-    "publication_calls": [],
-    "validation_calls": [
-     "check"
-    ]
-   },
-   "unknown_io_literals": [],
-   "embedded_test_functions": 0,
-   "standalone_test_evidence": {
-    "unittest_classes": [],
-    "pytest_import": false,
-    "filename_convention": false,
-    "assertion_nodes": 0,
-    "local_check_harness_calls": [
-     "check"
-    ]
-   },
-   "writer_evidence": [],
-   "writer_analysis_error": null,
-   "writer_risk": "P3_no_detected_write_not_readonly_certified",
-   "undeclared_governed_tables": [],
-   "source_sha256": "5fb3c647c455b74604a6a435f21444dce8daaff93d2f5cce188e8d19d6198d87",
-   "maintenance_status": "REQUIRES-REVIEW",
-   "maintenance_evidence": {
-    "reason": "no detected writer is not proof of read-only behavior; external callers, unique outputs and restoration value remain unverified",
-    "source_sha256": "5fb3c647c455b74604a6a435f21444dce8daaff93d2f5cce188e8d19d6198d87",
-    "identical_source_peers": [],
-    "ci_commands": [],
-    "documented_commands": [],
-    "active_runtime_callers": [],
-    "superseded_output_edges": [],
-    "historical_replay_evidence": [],
-    "output_authority_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-    "output_artifact_hashes": "NOT_MEASURED_BY_SCRIPT_CENSUS",
-    "retirement_authorized": false,
-    "review_owner": "Codex",
-    "review_priority": "P3_no_detected_write_not_readonly_certified",
-    "review_write_sites": [],
     "safe_delete_proof": "NOT_ESTABLISHED: external callers, unique output and recovery value are not exhausted by static scans",
     "bounded_source_review": null,
     "source_review_stale": false
@@ -95275,8 +93733,8 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 11,
-   "mentioned_outside_history": 11,
+   "mentions": 12,
+   "mentioned_outside_history": 12,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-10-02",
@@ -101568,6 +100026,1438 @@
    "registration_status": "declared_dependency"
   },
   {
+   "script": "1172_codebook_block_generator.py",
+   "dir": "archive",
+   "number": "1172",
+   "duplicate_number": false,
+   "kind": "unknown",
+   "evidence": [],
+   "never_run": false,
+   "never_run_reason": "",
+   "writes": [],
+   "reads": [],
+   "in_a_contract": false,
+   "in_an_ordering": false,
+   "mentions": 0,
+   "mentioned_outside_history": 0,
+   "oneoff_shaped": false,
+   "has_run_receipt": false,
+   "last_modified": "2026-09-26",
+   "lines": 238,
+   "operational_role": "historical",
+   "collection_output_entrypoints": [],
+   "static_consumers": [],
+   "runtime_consumer_candidates": [],
+   "operational_call_evidence": {
+    "publication_calls": [],
+    "validation_calls": []
+   },
+   "unknown_io_literals": [
+    "SHIPPING_RUNBOOK.md"
+   ],
+   "embedded_test_functions": 0,
+   "standalone_test_evidence": {
+    "unittest_classes": [],
+    "pytest_import": false,
+    "filename_convention": false,
+    "assertion_nodes": 0,
+    "local_check_harness_calls": []
+   },
+   "writer_evidence": [],
+   "writer_analysis_error": null,
+   "writer_risk": "P3_no_detected_write_not_readonly_certified",
+   "undeclared_governed_tables": [],
+   "source_sha256": "fe2f122de2c48a51485732cf5122ed20d0119bee972382618d48935d30cb6b81",
+   "maintenance_status": "HISTORICAL-RETAIN",
+   "maintenance_evidence": {
+    "reason": "explicit existing historical directory; retain provenance",
+    "source_sha256": "fe2f122de2c48a51485732cf5122ed20d0119bee972382618d48935d30cb6b81",
+    "identical_source_peers": [],
+    "ci_commands": [],
+    "documented_commands": [],
+    "active_runtime_callers": [],
+    "superseded_output_edges": [],
+    "historical_replay_evidence": [],
+    "output_authority_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "output_artifact_hashes": "NOT_MEASURED_BY_SCRIPT_CENSUS",
+    "retirement_authorized": false,
+    "review_owner": null,
+    "review_priority": null,
+    "review_write_sites": [],
+    "safe_delete_proof": "NOT_ESTABLISHED: external callers, unique output and recovery value are not exhausted by static scans",
+    "bounded_source_review": null,
+    "source_review_stale": false
+   },
+   "registration_status": "unresolved_not_authorized"
+  },
+  {
+   "script": "1175_write_id_system_doc.py",
+   "dir": "archive",
+   "number": "1175",
+   "duplicate_number": false,
+   "kind": "unknown",
+   "evidence": [],
+   "never_run": false,
+   "never_run_reason": "",
+   "writes": [],
+   "reads": [
+    "cedar_entity_names.csv",
+    "cedar_identifier_ledger_final.csv",
+    "cedar_identity_register.csv",
+    "entity_aliases.csv"
+   ],
+   "in_a_contract": false,
+   "in_an_ordering": false,
+   "mentions": 0,
+   "mentioned_outside_history": 0,
+   "oneoff_shaped": false,
+   "has_run_receipt": false,
+   "last_modified": "2026-09-26",
+   "lines": 276,
+   "operational_role": "historical",
+   "collection_output_entrypoints": [],
+   "static_consumers": [],
+   "runtime_consumer_candidates": [],
+   "operational_call_evidence": {
+    "publication_calls": [],
+    "validation_calls": []
+   },
+   "unknown_io_literals": [],
+   "embedded_test_functions": 0,
+   "standalone_test_evidence": {
+    "unittest_classes": [],
+    "pytest_import": false,
+    "filename_convention": false,
+    "assertion_nodes": 0,
+    "local_check_harness_calls": []
+   },
+   "writer_evidence": [],
+   "writer_analysis_error": null,
+   "writer_risk": "P3_no_detected_write_not_readonly_certified",
+   "undeclared_governed_tables": [],
+   "source_sha256": "636308baf1335b5ef517d86e31978a86047a115ec7957843d33f7cd3a7ff5bf3",
+   "maintenance_status": "HISTORICAL-RETAIN",
+   "maintenance_evidence": {
+    "reason": "explicit existing historical directory; retain provenance",
+    "source_sha256": "636308baf1335b5ef517d86e31978a86047a115ec7957843d33f7cd3a7ff5bf3",
+    "identical_source_peers": [],
+    "ci_commands": [],
+    "documented_commands": [],
+    "active_runtime_callers": [],
+    "superseded_output_edges": [],
+    "historical_replay_evidence": [],
+    "output_authority_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "output_artifact_hashes": "NOT_MEASURED_BY_SCRIPT_CENSUS",
+    "retirement_authorized": false,
+    "review_owner": null,
+    "review_priority": null,
+    "review_write_sites": [],
+    "safe_delete_proof": "NOT_ESTABLISHED: external callers, unique output and recovery value are not exhausted by static scans",
+    "bounded_source_review": null,
+    "source_review_stale": false
+   },
+   "registration_status": "unresolved_not_authorized"
+  },
+  {
+   "script": "1178_sentinel_null_and_recount.py",
+   "dir": "archive",
+   "number": "1178",
+   "duplicate_number": false,
+   "kind": "unknown",
+   "evidence": [],
+   "never_run": false,
+   "never_run_reason": "",
+   "writes": [],
+   "reads": [],
+   "in_a_contract": false,
+   "in_an_ordering": false,
+   "mentions": 0,
+   "mentioned_outside_history": 0,
+   "oneoff_shaped": false,
+   "has_run_receipt": false,
+   "last_modified": "2026-09-26",
+   "lines": 15,
+   "operational_role": "historical",
+   "collection_output_entrypoints": [],
+   "static_consumers": [],
+   "runtime_consumer_candidates": [],
+   "operational_call_evidence": {
+    "publication_calls": [],
+    "validation_calls": []
+   },
+   "unknown_io_literals": [],
+   "embedded_test_functions": 0,
+   "standalone_test_evidence": {
+    "unittest_classes": [],
+    "pytest_import": false,
+    "filename_convention": false,
+    "assertion_nodes": 0,
+    "local_check_harness_calls": []
+   },
+   "writer_evidence": [],
+   "writer_analysis_error": null,
+   "writer_risk": "P3_no_detected_write_not_readonly_certified",
+   "undeclared_governed_tables": [],
+   "source_sha256": "d98aa61b21bff3ff3eee0403d9b4b7ee87953a06013a90122c8fdc28e7bb3361",
+   "maintenance_status": "HISTORICAL-RETAIN",
+   "maintenance_evidence": {
+    "reason": "explicit existing historical directory; retain provenance",
+    "source_sha256": "d98aa61b21bff3ff3eee0403d9b4b7ee87953a06013a90122c8fdc28e7bb3361",
+    "identical_source_peers": [],
+    "ci_commands": [],
+    "documented_commands": [],
+    "active_runtime_callers": [],
+    "superseded_output_edges": [],
+    "historical_replay_evidence": [],
+    "output_authority_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "output_artifact_hashes": "NOT_MEASURED_BY_SCRIPT_CENSUS",
+    "retirement_authorized": false,
+    "review_owner": null,
+    "review_priority": null,
+    "review_write_sites": [],
+    "safe_delete_proof": "NOT_ESTABLISHED: external callers, unique output and recovery value are not exhausted by static scans",
+    "bounded_source_review": null,
+    "source_review_stale": false
+   },
+   "registration_status": "unresolved_not_authorized"
+  },
+  {
+   "script": "1179_cross_table_key_consistency.py",
+   "dir": "archive",
+   "number": "1179",
+   "duplicate_number": false,
+   "kind": "rebuild",
+   "evidence": [
+    "writes in 'w' mode or builds from data/raw"
+   ],
+   "never_run": false,
+   "never_run_reason": "",
+   "writes": [
+    "1179_cross_table_key_gap_%s.csv",
+    "cedar_identifier_ledger_final.csv",
+    "federal_funding_transactions.csv"
+   ],
+   "reads": [],
+   "in_a_contract": false,
+   "in_an_ordering": false,
+   "mentions": 0,
+   "mentioned_outside_history": 0,
+   "oneoff_shaped": false,
+   "has_run_receipt": false,
+   "last_modified": "2026-09-26",
+   "lines": 789,
+   "operational_role": "historical",
+   "collection_output_entrypoints": [],
+   "static_consumers": [],
+   "runtime_consumer_candidates": [],
+   "operational_call_evidence": {
+    "publication_calls": [],
+    "validation_calls": [
+     "review_dir",
+     "verify"
+    ]
+   },
+   "unknown_io_literals": [
+    "_1179_cross_table_key_baseline.json",
+    "cedar_ledger_key_rulings_%s.csv",
+    "faads_transactions.csv",
+    "faads_transactions_all_agencies.csv",
+    "fac_tribal_single_audits.csv",
+    "gaming_employment_observations.csv",
+    "nonprofit_schedule_c_lobbying.csv",
+    "np_orgs.csv",
+    "prime_contracts.csv",
+    "subawards.csv"
+   ],
+   "embedded_test_functions": 1,
+   "standalone_test_evidence": {
+    "unittest_classes": [],
+    "pytest_import": false,
+    "filename_convention": false,
+    "assertion_nodes": 0,
+    "local_check_harness_calls": []
+   },
+   "writer_evidence": [
+    {
+     "line": 398,
+     "operation": "open",
+     "target": "<unresolved>",
+     "scope": "unresolved_target",
+     "table": null,
+     "signature": "d09fb14227adda1b5e554c0cd2a266cf5430089ae0f3a4b54c645bff90a54271"
+    },
+    {
+     "line": 402,
+     "operation": "os.replace",
+     "target": "<unresolved>",
+     "scope": "unresolved_target",
+     "table": null,
+     "signature": "82692b9aa204a7aa48c4df2cc4ed58d1a359abbc663a02b0fea7e9686fe45b43"
+    },
+    {
+     "line": 464,
+     "operation": "open",
+     "target": "<unresolved>",
+     "scope": "unresolved_target",
+     "table": null,
+     "signature": "d09fb14227adda1b5e554c0cd2a266cf5430089ae0f3a4b54c645bff90a54271"
+    },
+    {
+     "line": 468,
+     "operation": "os.replace",
+     "target": "<unresolved>",
+     "scope": "unresolved_target",
+     "table": null,
+     "signature": "82692b9aa204a7aa48c4df2cc4ed58d1a359abbc663a02b0fea7e9686fe45b43"
+    },
+    {
+     "line": 558,
+     "operation": "bl_path.write_text",
+     "target": "<unresolved>/_1179_cross_table_key_baseline.json",
+     "scope": "unresolved_target",
+     "table": null,
+     "signature": "7cd9e6adcc887ee959014a9ef59a97deb997609f2020ef4bbcad8ee392d867a7"
+    },
+    {
+     "line": 594,
+     "operation": "open",
+     "target": "<unresolved>/cedar_identifier_ledger_final.csv",
+     "scope": "governed_table",
+     "table": "cedar_identifier_ledger_final.csv",
+     "signature": "f19daff441ea44ebfcc98a9455fe3a842d30f96b8b3d0dff86561d678ee7fd5c"
+    },
+    {
+     "line": 662,
+     "operation": "open",
+     "target": "<unresolved>/federal_funding_transactions.csv",
+     "scope": "governed_table",
+     "table": "federal_funding_transactions.csv",
+     "signature": "6ca94746c0b5debfe59abb19051047d95500969b2256736d1c284aedb8235660"
+    }
+   ],
+   "writer_analysis_error": null,
+   "writer_risk": "P1_undeclared_governed_write_candidate",
+   "undeclared_governed_tables": [
+    "cedar_identifier_ledger_final.csv",
+    "federal_funding_transactions.csv"
+   ],
+   "source_sha256": "d68a8e4ebb766b391aa93e4e242b9c620846907686f454a1f504c8c2fbba0d29",
+   "maintenance_status": "HISTORICAL-RETAIN",
+   "maintenance_evidence": {
+    "reason": "explicit existing historical directory; retain provenance",
+    "source_sha256": "d68a8e4ebb766b391aa93e4e242b9c620846907686f454a1f504c8c2fbba0d29",
+    "identical_source_peers": [],
+    "ci_commands": [],
+    "documented_commands": [],
+    "active_runtime_callers": [],
+    "superseded_output_edges": [],
+    "historical_replay_evidence": [],
+    "output_authority_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "output_artifact_hashes": "NOT_MEASURED_BY_SCRIPT_CENSUS",
+    "retirement_authorized": false,
+    "review_owner": null,
+    "review_priority": null,
+    "review_write_sites": [],
+    "safe_delete_proof": "NOT_ESTABLISHED: external callers, unique output and recovery value are not exhausted by static scans",
+    "bounded_source_review": null,
+    "source_review_stale": false
+   },
+   "registration_status": "unresolved_not_authorized"
+  },
+  {
+   "script": "1182_stream_official_names.py",
+   "dir": "archive",
+   "number": "1182",
+   "duplicate_number": false,
+   "kind": "rebuild",
+   "evidence": [
+    "writes in 'w' mode or builds from data/raw"
+   ],
+   "never_run": false,
+   "never_run_reason": "",
+   "writes": [
+    "probe.csv"
+   ],
+   "reads": [],
+   "in_a_contract": false,
+   "in_an_ordering": false,
+   "mentions": 0,
+   "mentioned_outside_history": 0,
+   "oneoff_shaped": false,
+   "has_run_receipt": false,
+   "last_modified": "2026-09-26",
+   "lines": 187,
+   "operational_role": "historical",
+   "collection_output_entrypoints": [],
+   "static_consumers": [],
+   "runtime_consumer_candidates": [],
+   "operational_call_evidence": {
+    "publication_calls": [
+     "apply_official_names",
+     "official_names"
+    ],
+    "validation_calls": []
+   },
+   "unknown_io_literals": [],
+   "embedded_test_functions": 0,
+   "standalone_test_evidence": {
+    "unittest_classes": [],
+    "pytest_import": false,
+    "filename_convention": false,
+    "assertion_nodes": 0,
+    "local_check_harness_calls": []
+   },
+   "writer_evidence": [
+    {
+     "line": 80,
+     "operation": "tmp.open",
+     "target": "<unresolved>",
+     "scope": "unresolved_target",
+     "table": null,
+     "signature": "a88b919e1aa02ac1b89facf0876d48d9f76b6c79f64a05bee78398fceceed402"
+    },
+    {
+     "line": 111,
+     "operation": "os.replace",
+     "target": "<unresolved>",
+     "scope": "unresolved_target",
+     "table": null,
+     "signature": "198a5a79a7c2235ad4fa8a417cb92c1c956412a0b9faee83306373d23582f782"
+    },
+    {
+     "line": 132,
+     "operation": "probe.write_text",
+     "target": "<unresolved>/probe.csv",
+     "scope": "unresolved_target",
+     "table": null,
+     "signature": "aab88b21a5b2d11c49786f66a3790726d8536638951fb995bd2141ded1aa8985"
+    }
+   ],
+   "writer_analysis_error": null,
+   "writer_risk": "P2_unresolved_write_target",
+   "undeclared_governed_tables": [],
+   "source_sha256": "bf4fb356decce401c8136579f459472cef4c90eea92b397c74f60d97b1a1a150",
+   "maintenance_status": "HISTORICAL-RETAIN",
+   "maintenance_evidence": {
+    "reason": "explicit existing historical directory; retain provenance",
+    "source_sha256": "bf4fb356decce401c8136579f459472cef4c90eea92b397c74f60d97b1a1a150",
+    "identical_source_peers": [],
+    "ci_commands": [],
+    "documented_commands": [],
+    "active_runtime_callers": [],
+    "superseded_output_edges": [],
+    "historical_replay_evidence": [],
+    "output_authority_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "output_artifact_hashes": "NOT_MEASURED_BY_SCRIPT_CENSUS",
+    "retirement_authorized": false,
+    "review_owner": null,
+    "review_priority": null,
+    "review_write_sites": [],
+    "safe_delete_proof": "NOT_ESTABLISHED: external callers, unique output and recovery value are not exhausted by static scans",
+    "bounded_source_review": null,
+    "source_review_stale": false
+   },
+   "registration_status": "unresolved_not_authorized"
+  },
+  {
+   "script": "530_shard_b_tribe_web_probe.py",
+   "dir": "archive",
+   "number": "530",
+   "duplicate_number": false,
+   "kind": "unknown",
+   "evidence": [],
+   "never_run": false,
+   "never_run_reason": "",
+   "writes": [],
+   "reads": [
+    "_candidates.json"
+   ],
+   "in_a_contract": false,
+   "in_an_ordering": false,
+   "mentions": 0,
+   "mentioned_outside_history": 0,
+   "oneoff_shaped": false,
+   "has_run_receipt": false,
+   "last_modified": "2026-09-26",
+   "lines": 202,
+   "operational_role": "historical",
+   "collection_output_entrypoints": [],
+   "static_consumers": [],
+   "runtime_consumer_candidates": [],
+   "operational_call_evidence": {
+    "publication_calls": [],
+    "validation_calls": []
+   },
+   "unknown_io_literals": [],
+   "embedded_test_functions": 0,
+   "standalone_test_evidence": {
+    "unittest_classes": [],
+    "pytest_import": false,
+    "filename_convention": false,
+    "assertion_nodes": 0,
+    "local_check_harness_calls": []
+   },
+   "writer_evidence": [
+    {
+     "line": 162,
+     "operation": ".write_bytes",
+     "target": "<unresolved>/data/staging/tribe_harvest/shard_b/raw/<unresolved>",
+     "scope": "unresolved_target",
+     "table": null,
+     "signature": "21e04db6df0f451beff35ec6f0d83fc1722205338acb5bc6be172d6f47510b56"
+    },
+    {
+     "line": 165,
+     "operation": ".write_text",
+     "target": "<unresolved>/data/staging/tribe_harvest/shard_b/raw/<unresolved>",
+     "scope": "unresolved_target",
+     "table": null,
+     "signature": "71c6f1683b3c842af98ed6fbf6c2832ee5ec461c3e6bb184407bfc3d5fc8136f"
+    },
+    {
+     "line": 182,
+     "operation": "outp.open",
+     "target": "<unresolved>/data/staging/tribe_harvest/shard_b/_probe_results.jsonl",
+     "scope": "unresolved_target",
+     "table": null,
+     "signature": "7e9070cfbe20961caec243a480094de04f4a638fcb5eed2b5ff2ab917fcc4d49"
+    }
+   ],
+   "writer_analysis_error": null,
+   "writer_risk": "P2_unresolved_write_target",
+   "undeclared_governed_tables": [],
+   "source_sha256": "a789e7cdd9542e143be3c792519292939bd5da1188a36651c7b7bc89d12c6ff9",
+   "maintenance_status": "HISTORICAL-RETAIN",
+   "maintenance_evidence": {
+    "reason": "explicit existing historical directory; retain provenance",
+    "source_sha256": "a789e7cdd9542e143be3c792519292939bd5da1188a36651c7b7bc89d12c6ff9",
+    "identical_source_peers": [],
+    "ci_commands": [],
+    "documented_commands": [],
+    "active_runtime_callers": [],
+    "superseded_output_edges": [],
+    "historical_replay_evidence": [],
+    "output_authority_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "output_artifact_hashes": "NOT_MEASURED_BY_SCRIPT_CENSUS",
+    "retirement_authorized": false,
+    "review_owner": null,
+    "review_priority": null,
+    "review_write_sites": [],
+    "safe_delete_proof": "NOT_ESTABLISHED: external callers, unique output and recovery value are not exhausted by static scans",
+    "bounded_source_review": null,
+    "source_review_stale": false
+   },
+   "registration_status": "unresolved_not_authorized"
+  },
+  {
+   "script": "536_shard_e_newsletters.py",
+   "dir": "archive",
+   "number": "536",
+   "duplicate_number": false,
+   "kind": "unknown",
+   "evidence": [],
+   "never_run": false,
+   "never_run_reason": "",
+   "writes": [],
+   "reads": [
+    "_slice.json",
+    "ancsa_filings_index.csv"
+   ],
+   "in_a_contract": false,
+   "in_an_ordering": false,
+   "mentions": 0,
+   "mentioned_outside_history": 0,
+   "oneoff_shaped": false,
+   "has_run_receipt": false,
+   "last_modified": "2026-09-26",
+   "lines": 248,
+   "operational_role": "historical",
+   "collection_output_entrypoints": [],
+   "static_consumers": [],
+   "runtime_consumer_candidates": [],
+   "operational_call_evidence": {
+    "publication_calls": [],
+    "validation_calls": []
+   },
+   "unknown_io_literals": [],
+   "embedded_test_functions": 0,
+   "standalone_test_evidence": {
+    "unittest_classes": [],
+    "pytest_import": false,
+    "filename_convention": false,
+    "assertion_nodes": 0,
+    "local_check_harness_calls": []
+   },
+   "writer_evidence": [
+    {
+     "line": 235,
+     "operation": "OUT.open",
+     "target": "<unresolved>/data/staging/tribe_harvest/shard_e/newsletters.jsonl",
+     "scope": "unresolved_target",
+     "table": null,
+     "signature": "de1af27ce60bbf50183d46be9c64d3ca114667f001e822aebcd9eff31f54c407"
+    }
+   ],
+   "writer_analysis_error": null,
+   "writer_risk": "P2_unresolved_write_target",
+   "undeclared_governed_tables": [],
+   "source_sha256": "c5a7fe5d5d1331592baa85026851f0f2ba812ac1988175045a43547f3fdf76d1",
+   "maintenance_status": "HISTORICAL-RETAIN",
+   "maintenance_evidence": {
+    "reason": "explicit existing historical directory; retain provenance",
+    "source_sha256": "c5a7fe5d5d1331592baa85026851f0f2ba812ac1988175045a43547f3fdf76d1",
+    "identical_source_peers": [],
+    "ci_commands": [],
+    "documented_commands": [],
+    "active_runtime_callers": [],
+    "superseded_output_edges": [],
+    "historical_replay_evidence": [],
+    "output_authority_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "output_artifact_hashes": "NOT_MEASURED_BY_SCRIPT_CENSUS",
+    "retirement_authorized": false,
+    "review_owner": null,
+    "review_priority": null,
+    "review_write_sites": [],
+    "safe_delete_proof": "NOT_ESTABLISHED: external callers, unique output and recovery value are not exhausted by static scans",
+    "bounded_source_review": null,
+    "source_review_stale": false
+   },
+   "registration_status": "unresolved_not_authorized"
+  },
+  {
+   "script": "584_register_labor_codebook.py",
+   "dir": "archive",
+   "number": "584",
+   "duplicate_number": false,
+   "kind": "enricher",
+   "evidence": [
+    "names itself an in-place enricher"
+   ],
+   "never_run": false,
+   "never_run_reason": "",
+   "writes": [],
+   "reads": [],
+   "in_a_contract": false,
+   "in_an_ordering": false,
+   "mentions": 0,
+   "mentioned_outside_history": 0,
+   "oneoff_shaped": false,
+   "has_run_receipt": false,
+   "last_modified": "2026-09-26",
+   "lines": 278,
+   "operational_role": "historical",
+   "collection_output_entrypoints": [],
+   "static_consumers": [],
+   "runtime_consumer_candidates": [],
+   "operational_call_evidence": {
+    "publication_calls": [],
+    "validation_calls": []
+   },
+   "unknown_io_literals": [
+    "gaming_employment_observations.csv"
+   ],
+   "embedded_test_functions": 0,
+   "standalone_test_evidence": {
+    "unittest_classes": [],
+    "pytest_import": false,
+    "filename_convention": false,
+    "assertion_nodes": 0,
+    "local_check_harness_calls": []
+   },
+   "writer_evidence": [],
+   "writer_analysis_error": null,
+   "writer_risk": "P3_no_detected_write_not_readonly_certified",
+   "undeclared_governed_tables": [],
+   "source_sha256": "0a763e98ab0217be5e8efbe9575b1dbee3027599dd687e86f1c5ba0f8e8dd759",
+   "maintenance_status": "HISTORICAL-RETAIN",
+   "maintenance_evidence": {
+    "reason": "explicit existing historical directory; retain provenance",
+    "source_sha256": "0a763e98ab0217be5e8efbe9575b1dbee3027599dd687e86f1c5ba0f8e8dd759",
+    "identical_source_peers": [],
+    "ci_commands": [],
+    "documented_commands": [],
+    "active_runtime_callers": [],
+    "superseded_output_edges": [],
+    "historical_replay_evidence": [],
+    "output_authority_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "output_artifact_hashes": "NOT_MEASURED_BY_SCRIPT_CENSUS",
+    "retirement_authorized": false,
+    "review_owner": null,
+    "review_priority": null,
+    "review_write_sites": [],
+    "safe_delete_proof": "NOT_ESTABLISHED: external callers, unique output and recovery value are not exhausted by static scans",
+    "bounded_source_review": null,
+    "source_review_stale": false
+   },
+   "registration_status": "unresolved_not_authorized"
+  },
+  {
+   "script": "590_shard_f_org_slice.py",
+   "dir": "archive",
+   "number": "590",
+   "duplicate_number": false,
+   "kind": "both",
+   "evidence": [
+    "writes in 'w' mode or builds from data/raw",
+    "names itself an in-place enricher"
+   ],
+   "never_run": false,
+   "never_run_reason": "",
+   "writes": [
+    "_slice.json"
+   ],
+   "reads": [
+    "cedar_identity_register.csv",
+    "intertribal_memberships.csv",
+    "intertribal_orgs.csv",
+    "np_ein_entity_hub.csv",
+    "np_financials.csv",
+    "np_orgs.csv"
+   ],
+   "in_a_contract": false,
+   "in_an_ordering": false,
+   "mentions": 0,
+   "mentioned_outside_history": 0,
+   "oneoff_shaped": false,
+   "has_run_receipt": false,
+   "last_modified": "2026-09-26",
+   "lines": 189,
+   "operational_role": "historical",
+   "collection_output_entrypoints": [],
+   "static_consumers": [],
+   "runtime_consumer_candidates": [],
+   "operational_call_evidence": {
+    "publication_calls": [],
+    "validation_calls": []
+   },
+   "unknown_io_literals": [],
+   "embedded_test_functions": 0,
+   "standalone_test_evidence": {
+    "unittest_classes": [],
+    "pytest_import": false,
+    "filename_convention": false,
+    "assertion_nodes": 1,
+    "local_check_harness_calls": []
+   },
+   "writer_evidence": [
+    {
+     "line": 169,
+     "operation": "open",
+     "target": "<unresolved>",
+     "scope": "unresolved_target",
+     "table": null,
+     "signature": "6c8bc8d7a85f1d0173175e8f0817e0fa3489e7bd63e17a3d1e0dd25058a3a4e2"
+    }
+   ],
+   "writer_analysis_error": null,
+   "writer_risk": "P2_unresolved_write_target",
+   "undeclared_governed_tables": [],
+   "source_sha256": "391cf37d9874ded55fb496939ef227a05308d2eda107a0c690c944bfc6437f40",
+   "maintenance_status": "HISTORICAL-RETAIN",
+   "maintenance_evidence": {
+    "reason": "explicit existing historical directory; retain provenance",
+    "source_sha256": "391cf37d9874ded55fb496939ef227a05308d2eda107a0c690c944bfc6437f40",
+    "identical_source_peers": [],
+    "ci_commands": [],
+    "documented_commands": [],
+    "active_runtime_callers": [],
+    "superseded_output_edges": [],
+    "historical_replay_evidence": [],
+    "output_authority_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "output_artifact_hashes": "NOT_MEASURED_BY_SCRIPT_CENSUS",
+    "retirement_authorized": false,
+    "review_owner": null,
+    "review_priority": null,
+    "review_write_sites": [],
+    "safe_delete_proof": "NOT_ESTABLISHED: external callers, unique output and recovery value are not exhausted by static scans",
+    "bounded_source_review": null,
+    "source_review_stale": false
+   },
+   "registration_status": "unresolved_not_authorized"
+  },
+  {
+   "script": "591_shard_f_ihs_uio_register.py",
+   "dir": "archive",
+   "number": "591",
+   "duplicate_number": false,
+   "kind": "rebuild",
+   "evidence": [
+    "writes in 'w' mode or builds from data/raw"
+   ],
+   "never_run": false,
+   "never_run_reason": "",
+   "writes": [],
+   "reads": [],
+   "in_a_contract": false,
+   "in_an_ordering": false,
+   "mentions": 0,
+   "mentioned_outside_history": 0,
+   "oneoff_shaped": false,
+   "has_run_receipt": false,
+   "last_modified": "2026-09-26",
+   "lines": 145,
+   "operational_role": "historical",
+   "collection_output_entrypoints": [],
+   "static_consumers": [],
+   "runtime_consumer_candidates": [],
+   "operational_call_evidence": {
+    "publication_calls": [],
+    "validation_calls": []
+   },
+   "unknown_io_literals": [],
+   "embedded_test_functions": 0,
+   "standalone_test_evidence": {
+    "unittest_classes": [],
+    "pytest_import": false,
+    "filename_convention": false,
+    "assertion_nodes": 0,
+    "local_check_harness_calls": []
+   },
+   "writer_evidence": [
+    {
+     "line": 134,
+     "operation": "open",
+     "target": "<unresolved>",
+     "scope": "unresolved_target",
+     "table": null,
+     "signature": "112f7b4dd1c29ed898ed6ba12347f523febc068191c0d36f713a2ef14c932fc4"
+    }
+   ],
+   "writer_analysis_error": null,
+   "writer_risk": "P2_unresolved_write_target",
+   "undeclared_governed_tables": [],
+   "source_sha256": "d802abe06241b545310a6e56e9186a3737eb51c374c4362711c90afc87582fc6",
+   "maintenance_status": "HISTORICAL-RETAIN",
+   "maintenance_evidence": {
+    "reason": "explicit existing historical directory; retain provenance",
+    "source_sha256": "d802abe06241b545310a6e56e9186a3737eb51c374c4362711c90afc87582fc6",
+    "identical_source_peers": [],
+    "ci_commands": [],
+    "documented_commands": [],
+    "active_runtime_callers": [],
+    "superseded_output_edges": [],
+    "historical_replay_evidence": [],
+    "output_authority_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "output_artifact_hashes": "NOT_MEASURED_BY_SCRIPT_CENSUS",
+    "retirement_authorized": false,
+    "review_owner": null,
+    "review_priority": null,
+    "review_write_sites": [],
+    "safe_delete_proof": "NOT_ESTABLISHED: external callers, unique output and recovery value are not exhausted by static scans",
+    "bounded_source_review": null,
+    "source_review_stale": false
+   },
+   "registration_status": "unresolved_not_authorized"
+  },
+  {
+   "script": "592_shard_f_ihs_selfgov_compacts.py",
+   "dir": "archive",
+   "number": "592",
+   "duplicate_number": false,
+   "kind": "rebuild",
+   "evidence": [
+    "writes in 'w' mode or builds from data/raw"
+   ],
+   "never_run": false,
+   "never_run_reason": "",
+   "writes": [],
+   "reads": [],
+   "in_a_contract": false,
+   "in_an_ordering": false,
+   "mentions": 0,
+   "mentioned_outside_history": 0,
+   "oneoff_shaped": false,
+   "has_run_receipt": false,
+   "last_modified": "2026-09-26",
+   "lines": 115,
+   "operational_role": "historical",
+   "collection_output_entrypoints": [],
+   "static_consumers": [],
+   "runtime_consumer_candidates": [],
+   "operational_call_evidence": {
+    "publication_calls": [],
+    "validation_calls": []
+   },
+   "unknown_io_literals": [],
+   "embedded_test_functions": 0,
+   "standalone_test_evidence": {
+    "unittest_classes": [],
+    "pytest_import": false,
+    "filename_convention": false,
+    "assertion_nodes": 0,
+    "local_check_harness_calls": []
+   },
+   "writer_evidence": [
+    {
+     "line": 98,
+     "operation": "open",
+     "target": "<unresolved>",
+     "scope": "unresolved_target",
+     "table": null,
+     "signature": "80aeeb46563fe6364f6405b3fec84673fc5a6e5f23a366f60bb68bc1ae98eb3e"
+    }
+   ],
+   "writer_analysis_error": null,
+   "writer_risk": "P2_unresolved_write_target",
+   "undeclared_governed_tables": [],
+   "source_sha256": "8ac46ff7a8023d46fb4dda7764bdd7919701c00048f1aed6b98f5594884be2ef",
+   "maintenance_status": "HISTORICAL-RETAIN",
+   "maintenance_evidence": {
+    "reason": "explicit existing historical directory; retain provenance",
+    "source_sha256": "8ac46ff7a8023d46fb4dda7764bdd7919701c00048f1aed6b98f5594884be2ef",
+    "identical_source_peers": [],
+    "ci_commands": [],
+    "documented_commands": [],
+    "active_runtime_callers": [],
+    "superseded_output_edges": [],
+    "historical_replay_evidence": [],
+    "output_authority_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "output_artifact_hashes": "NOT_MEASURED_BY_SCRIPT_CENSUS",
+    "retirement_authorized": false,
+    "review_owner": null,
+    "review_priority": null,
+    "review_write_sites": [],
+    "safe_delete_proof": "NOT_ESTABLISHED: external callers, unique output and recovery value are not exhausted by static scans",
+    "bounded_source_review": null,
+    "source_review_stale": false
+   },
+   "registration_status": "unresolved_not_authorized"
+  },
+  {
+   "script": "593_shard_f_candidates.py",
+   "dir": "archive",
+   "number": "593",
+   "duplicate_number": false,
+   "kind": "rebuild",
+   "evidence": [
+    "writes in 'w' mode or builds from data/raw"
+   ],
+   "never_run": false,
+   "never_run_reason": "",
+   "writes": [
+    "_candidates.json"
+   ],
+   "reads": [
+    "_slice.json"
+   ],
+   "in_a_contract": false,
+   "in_an_ordering": false,
+   "mentions": 0,
+   "mentioned_outside_history": 0,
+   "oneoff_shaped": false,
+   "has_run_receipt": false,
+   "last_modified": "2026-09-26",
+   "lines": 222,
+   "operational_role": "historical",
+   "collection_output_entrypoints": [],
+   "static_consumers": [],
+   "runtime_consumer_candidates": [],
+   "operational_call_evidence": {
+    "publication_calls": [],
+    "validation_calls": []
+   },
+   "unknown_io_literals": [
+    "intertribal_orgs.csv"
+   ],
+   "embedded_test_functions": 0,
+   "standalone_test_evidence": {
+    "unittest_classes": [],
+    "pytest_import": false,
+    "filename_convention": false,
+    "assertion_nodes": 0,
+    "local_check_harness_calls": []
+   },
+   "writer_evidence": [
+    {
+     "line": 204,
+     "operation": "open",
+     "target": "<unresolved>",
+     "scope": "unresolved_target",
+     "table": null,
+     "signature": "ebfbcdf884d1a126da6678a1c5c9cc28851fc18c489cd95f0ced029a9a87f404"
+    }
+   ],
+   "writer_analysis_error": null,
+   "writer_risk": "P2_unresolved_write_target",
+   "undeclared_governed_tables": [],
+   "source_sha256": "0313c90ea29f30940f56d03831e2637e55d5dcf0b9b54ce2cfcd5d02acadc33d",
+   "maintenance_status": "HISTORICAL-RETAIN",
+   "maintenance_evidence": {
+    "reason": "explicit existing historical directory; retain provenance",
+    "source_sha256": "0313c90ea29f30940f56d03831e2637e55d5dcf0b9b54ce2cfcd5d02acadc33d",
+    "identical_source_peers": [],
+    "ci_commands": [],
+    "documented_commands": [],
+    "active_runtime_callers": [],
+    "superseded_output_edges": [],
+    "historical_replay_evidence": [],
+    "output_authority_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "output_artifact_hashes": "NOT_MEASURED_BY_SCRIPT_CENSUS",
+    "retirement_authorized": false,
+    "review_owner": null,
+    "review_priority": null,
+    "review_write_sites": [],
+    "safe_delete_proof": "NOT_ESTABLISHED: external callers, unique output and recovery value are not exhausted by static scans",
+    "bounded_source_review": null,
+    "source_review_stale": false
+   },
+   "registration_status": "unresolved_not_authorized"
+  },
+  {
+   "script": "595_shard_f_org_web_reprobe.py",
+   "dir": "archive",
+   "number": "595",
+   "duplicate_number": false,
+   "kind": "unknown",
+   "evidence": [],
+   "never_run": false,
+   "never_run_reason": "",
+   "writes": [],
+   "reads": [
+    "_candidates.json"
+   ],
+   "in_a_contract": false,
+   "in_an_ordering": false,
+   "mentions": 0,
+   "mentioned_outside_history": 0,
+   "oneoff_shaped": false,
+   "has_run_receipt": false,
+   "last_modified": "2026-09-26",
+   "lines": 228,
+   "operational_role": "historical",
+   "collection_output_entrypoints": [],
+   "static_consumers": [],
+   "runtime_consumer_candidates": [],
+   "operational_call_evidence": {
+    "publication_calls": [],
+    "validation_calls": []
+   },
+   "unknown_io_literals": [],
+   "embedded_test_functions": 0,
+   "standalone_test_evidence": {
+    "unittest_classes": [],
+    "pytest_import": false,
+    "filename_convention": false,
+    "assertion_nodes": 0,
+    "local_check_harness_calls": []
+   },
+   "writer_evidence": [
+    {
+     "line": 120,
+     "operation": "open",
+     "target": "<unresolved>",
+     "scope": "unresolved_target",
+     "table": null,
+     "signature": "d22a2cb4003def72c340cbc580a66f66230da3ab170d605141f6395e6a69000e"
+    }
+   ],
+   "writer_analysis_error": null,
+   "writer_risk": "P2_unresolved_write_target",
+   "undeclared_governed_tables": [],
+   "source_sha256": "525de43590daa678c5e49ad085eba5dfa7b90967c03278c551db2faad9f1a3db",
+   "maintenance_status": "HISTORICAL-RETAIN",
+   "maintenance_evidence": {
+    "reason": "explicit existing historical directory; retain provenance",
+    "source_sha256": "525de43590daa678c5e49ad085eba5dfa7b90967c03278c551db2faad9f1a3db",
+    "identical_source_peers": [],
+    "ci_commands": [],
+    "documented_commands": [],
+    "active_runtime_callers": [],
+    "superseded_output_edges": [],
+    "historical_replay_evidence": [],
+    "output_authority_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "output_artifact_hashes": "NOT_MEASURED_BY_SCRIPT_CENSUS",
+    "retirement_authorized": false,
+    "review_owner": null,
+    "review_priority": null,
+    "review_write_sites": [],
+    "safe_delete_proof": "NOT_ESTABLISHED: external callers, unique output and recovery value are not exhausted by static scans",
+    "bounded_source_review": null,
+    "source_review_stale": false
+   },
+   "registration_status": "unresolved_not_authorized"
+  },
+  {
+   "script": "597_shard_f_org_rosters_finalise.py",
+   "dir": "archive",
+   "number": "597",
+   "duplicate_number": false,
+   "kind": "rebuild",
+   "evidence": [
+    "writes in 'w' mode or builds from data/raw"
+   ],
+   "never_run": false,
+   "never_run_reason": "",
+   "writes": [],
+   "reads": [
+    "_slice.json"
+   ],
+   "in_a_contract": false,
+   "in_an_ordering": false,
+   "mentions": 0,
+   "mentioned_outside_history": 0,
+   "oneoff_shaped": false,
+   "has_run_receipt": false,
+   "last_modified": "2026-09-26",
+   "lines": 144,
+   "operational_role": "historical",
+   "collection_output_entrypoints": [],
+   "static_consumers": [],
+   "runtime_consumer_candidates": [],
+   "operational_call_evidence": {
+    "publication_calls": [],
+    "validation_calls": []
+   },
+   "unknown_io_literals": [],
+   "embedded_test_functions": 0,
+   "standalone_test_evidence": {
+    "unittest_classes": [],
+    "pytest_import": false,
+    "filename_convention": false,
+    "assertion_nodes": 0,
+    "local_check_harness_calls": []
+   },
+   "writer_evidence": [
+    {
+     "line": 120,
+     "operation": "open",
+     "target": "<unresolved>",
+     "scope": "unresolved_target",
+     "table": null,
+     "signature": "6f59d937cd2761dd6699c00d9f22d0368bc49098227fc50fac764598cbcc35a9"
+    },
+    {
+     "line": 123,
+     "operation": "open",
+     "target": "<unresolved>",
+     "scope": "unresolved_target",
+     "table": null,
+     "signature": "8e78dabe95fbc8ddfbee171a347f7c230d603aa15afe00477c50ac977ddb1f0e"
+    }
+   ],
+   "writer_analysis_error": null,
+   "writer_risk": "P2_unresolved_write_target",
+   "undeclared_governed_tables": [],
+   "source_sha256": "63b7bf1e88ac8bb2fc03b757e9368510e0e1a856ac0d4dc216328da903ad5af8",
+   "maintenance_status": "HISTORICAL-RETAIN",
+   "maintenance_evidence": {
+    "reason": "explicit existing historical directory; retain provenance",
+    "source_sha256": "63b7bf1e88ac8bb2fc03b757e9368510e0e1a856ac0d4dc216328da903ad5af8",
+    "identical_source_peers": [],
+    "ci_commands": [],
+    "documented_commands": [],
+    "active_runtime_callers": [],
+    "superseded_output_edges": [],
+    "historical_replay_evidence": [],
+    "output_authority_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "output_artifact_hashes": "NOT_MEASURED_BY_SCRIPT_CENSUS",
+    "retirement_authorized": false,
+    "review_owner": null,
+    "review_priority": null,
+    "review_write_sites": [],
+    "safe_delete_proof": "NOT_ESTABLISHED: external callers, unique output and recovery value are not exhausted by static scans",
+    "bounded_source_review": null,
+    "source_review_stale": false
+   },
+   "registration_status": "unresolved_not_authorized"
+  },
+  {
+   "script": "598_shard_f_newsletters.py",
+   "dir": "archive",
+   "number": "598",
+   "duplicate_number": false,
+   "kind": "unknown",
+   "evidence": [],
+   "never_run": false,
+   "never_run_reason": "",
+   "writes": [],
+   "reads": [],
+   "in_a_contract": false,
+   "in_an_ordering": false,
+   "mentions": 0,
+   "mentioned_outside_history": 0,
+   "oneoff_shaped": false,
+   "has_run_receipt": false,
+   "last_modified": "2026-09-26",
+   "lines": 243,
+   "operational_role": "historical",
+   "collection_output_entrypoints": [],
+   "static_consumers": [],
+   "runtime_consumer_candidates": [],
+   "operational_call_evidence": {
+    "publication_calls": [],
+    "validation_calls": []
+   },
+   "unknown_io_literals": [],
+   "embedded_test_functions": 0,
+   "standalone_test_evidence": {
+    "unittest_classes": [],
+    "pytest_import": false,
+    "filename_convention": false,
+    "assertion_nodes": 0,
+    "local_check_harness_calls": []
+   },
+   "writer_evidence": [
+    {
+     "line": 128,
+     "operation": "open",
+     "target": "<unresolved>",
+     "scope": "unresolved_target",
+     "table": null,
+     "signature": "10a383c4bfd0a487a39ef9a66f74262b8598131b0510a01444dec26e6430efd0"
+    }
+   ],
+   "writer_analysis_error": null,
+   "writer_risk": "P2_unresolved_write_target",
+   "undeclared_governed_tables": [],
+   "source_sha256": "925f435767b6835dc62eac78933d04a19317e19a950d1eab837e39117dd41b78",
+   "maintenance_status": "HISTORICAL-RETAIN",
+   "maintenance_evidence": {
+    "reason": "explicit existing historical directory; retain provenance",
+    "source_sha256": "925f435767b6835dc62eac78933d04a19317e19a950d1eab837e39117dd41b78",
+    "identical_source_peers": [],
+    "ci_commands": [],
+    "documented_commands": [],
+    "active_runtime_callers": [],
+    "superseded_output_edges": [],
+    "historical_replay_evidence": [],
+    "output_authority_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "output_artifact_hashes": "NOT_MEASURED_BY_SCRIPT_CENSUS",
+    "retirement_authorized": false,
+    "review_owner": null,
+    "review_priority": null,
+    "review_write_sites": [],
+    "safe_delete_proof": "NOT_ESTABLISHED: external callers, unique output and recovery value are not exhausted by static scans",
+    "bounded_source_review": null,
+    "source_review_stale": false
+   },
+   "registration_status": "unresolved_not_authorized"
+  },
+  {
+   "script": "600_shard_f_service_area.py",
+   "dir": "archive",
+   "number": "600",
+   "duplicate_number": false,
+   "kind": "rebuild",
+   "evidence": [
+    "writes in 'w' mode or builds from data/raw"
+   ],
+   "never_run": false,
+   "never_run_reason": "",
+   "writes": [],
+   "reads": [
+    "_slice.json"
+   ],
+   "in_a_contract": false,
+   "in_an_ordering": false,
+   "mentions": 0,
+   "mentioned_outside_history": 0,
+   "oneoff_shaped": false,
+   "has_run_receipt": false,
+   "last_modified": "2026-09-26",
+   "lines": 292,
+   "operational_role": "historical",
+   "collection_output_entrypoints": [],
+   "static_consumers": [],
+   "runtime_consumer_candidates": [],
+   "operational_call_evidence": {
+    "publication_calls": [],
+    "validation_calls": []
+   },
+   "unknown_io_literals": [],
+   "embedded_test_functions": 0,
+   "standalone_test_evidence": {
+    "unittest_classes": [],
+    "pytest_import": false,
+    "filename_convention": false,
+    "assertion_nodes": 0,
+    "local_check_harness_calls": []
+   },
+   "writer_evidence": [
+    {
+     "line": 148,
+     "operation": "open",
+     "target": "<unresolved>",
+     "scope": "unresolved_target",
+     "table": null,
+     "signature": "6c7454ef9d34e25992b7e340243ab52396148e7a08c4171036082165ff66511f"
+    }
+   ],
+   "writer_analysis_error": null,
+   "writer_risk": "P2_unresolved_write_target",
+   "undeclared_governed_tables": [],
+   "source_sha256": "cca886aa940ef55af706d1b7545e848b62dbfeabc4df961fc31ead19b856b0cd",
+   "maintenance_status": "HISTORICAL-RETAIN",
+   "maintenance_evidence": {
+    "reason": "explicit existing historical directory; retain provenance",
+    "source_sha256": "cca886aa940ef55af706d1b7545e848b62dbfeabc4df961fc31ead19b856b0cd",
+    "identical_source_peers": [],
+    "ci_commands": [],
+    "documented_commands": [],
+    "active_runtime_callers": [],
+    "superseded_output_edges": [],
+    "historical_replay_evidence": [],
+    "output_authority_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "output_artifact_hashes": "NOT_MEASURED_BY_SCRIPT_CENSUS",
+    "retirement_authorized": false,
+    "review_owner": null,
+    "review_priority": null,
+    "review_write_sites": [],
+    "safe_delete_proof": "NOT_ESTABLISHED: external callers, unique output and recovery value are not exhausted by static scans",
+    "bounded_source_review": null,
+    "source_review_stale": false
+   },
+   "registration_status": "unresolved_not_authorized"
+  },
+  {
+   "script": "601_shard_f_build_web_map.py",
+   "dir": "archive",
+   "number": "601",
+   "duplicate_number": false,
+   "kind": "rebuild",
+   "evidence": [
+    "writes in 'w' mode or builds from data/raw"
+   ],
+   "never_run": false,
+   "never_run_reason": "",
+   "writes": [
+    "shard_f.csv"
+   ],
+   "reads": [
+    "_slice.json"
+   ],
+   "in_a_contract": false,
+   "in_an_ordering": false,
+   "mentions": 0,
+   "mentioned_outside_history": 0,
+   "oneoff_shaped": false,
+   "has_run_receipt": false,
+   "last_modified": "2026-09-26",
+   "lines": 201,
+   "operational_role": "historical",
+   "collection_output_entrypoints": [],
+   "static_consumers": [],
+   "runtime_consumer_candidates": [],
+   "operational_call_evidence": {
+    "publication_calls": [],
+    "validation_calls": []
+   },
+   "unknown_io_literals": [],
+   "embedded_test_functions": 0,
+   "standalone_test_evidence": {
+    "unittest_classes": [],
+    "pytest_import": false,
+    "filename_convention": false,
+    "assertion_nodes": 0,
+    "local_check_harness_calls": []
+   },
+   "writer_evidence": [
+    {
+     "line": 185,
+     "operation": "open",
+     "target": "<unresolved>",
+     "scope": "unresolved_target",
+     "table": null,
+     "signature": "7ecd16b05ed2de344df3e83aa90a16fc5f238c9ab10a1320e6268254011e42ee"
+    }
+   ],
+   "writer_analysis_error": null,
+   "writer_risk": "P2_unresolved_write_target",
+   "undeclared_governed_tables": [],
+   "source_sha256": "8a3288727e35b7d398ff738e7c5b6d79799efb9ef9b1de2686e9e3130f2d22c9",
+   "maintenance_status": "HISTORICAL-RETAIN",
+   "maintenance_evidence": {
+    "reason": "explicit existing historical directory; retain provenance",
+    "source_sha256": "8a3288727e35b7d398ff738e7c5b6d79799efb9ef9b1de2686e9e3130f2d22c9",
+    "identical_source_peers": [],
+    "ci_commands": [],
+    "documented_commands": [],
+    "active_runtime_callers": [],
+    "superseded_output_edges": [],
+    "historical_replay_evidence": [],
+    "output_authority_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "output_artifact_hashes": "NOT_MEASURED_BY_SCRIPT_CENSUS",
+    "retirement_authorized": false,
+    "review_owner": null,
+    "review_priority": null,
+    "review_write_sites": [],
+    "safe_delete_proof": "NOT_ESTABLISHED: external callers, unique output and recovery value are not exhausted by static scans",
+    "bounded_source_review": null,
+    "source_review_stale": false
+   },
+   "registration_status": "unresolved_not_authorized"
+  },
+  {
+   "script": "602_shard_f_verify.py",
+   "dir": "archive",
+   "number": "602",
+   "duplicate_number": false,
+   "kind": "unknown",
+   "evidence": [],
+   "never_run": false,
+   "never_run_reason": "",
+   "writes": [],
+   "reads": [
+    "cedar_identity_register.csv",
+    "shard_f.csv"
+   ],
+   "in_a_contract": false,
+   "in_an_ordering": false,
+   "mentions": 0,
+   "mentioned_outside_history": 0,
+   "oneoff_shaped": false,
+   "has_run_receipt": false,
+   "last_modified": "2026-09-26",
+   "lines": 170,
+   "operational_role": "historical",
+   "collection_output_entrypoints": [],
+   "static_consumers": [],
+   "runtime_consumer_candidates": [],
+   "operational_call_evidence": {
+    "publication_calls": [],
+    "validation_calls": [
+     "check"
+    ]
+   },
+   "unknown_io_literals": [],
+   "embedded_test_functions": 0,
+   "standalone_test_evidence": {
+    "unittest_classes": [],
+    "pytest_import": false,
+    "filename_convention": false,
+    "assertion_nodes": 0,
+    "local_check_harness_calls": [
+     "check"
+    ]
+   },
+   "writer_evidence": [],
+   "writer_analysis_error": null,
+   "writer_risk": "P3_no_detected_write_not_readonly_certified",
+   "undeclared_governed_tables": [],
+   "source_sha256": "5fb3c647c455b74604a6a435f21444dce8daaff93d2f5cce188e8d19d6198d87",
+   "maintenance_status": "HISTORICAL-RETAIN",
+   "maintenance_evidence": {
+    "reason": "explicit existing historical directory; retain provenance",
+    "source_sha256": "5fb3c647c455b74604a6a435f21444dce8daaff93d2f5cce188e8d19d6198d87",
+    "identical_source_peers": [],
+    "ci_commands": [],
+    "documented_commands": [],
+    "active_runtime_callers": [],
+    "superseded_output_edges": [],
+    "historical_replay_evidence": [],
+    "output_authority_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "output_artifact_hashes": "NOT_MEASURED_BY_SCRIPT_CENSUS",
+    "retirement_authorized": false,
+    "review_owner": null,
+    "review_priority": null,
+    "review_write_sites": [],
+    "safe_delete_proof": "NOT_ESTABLISHED: external callers, unique output and recovery value are not exhausted by static scans",
+    "bounded_source_review": null,
+    "source_review_stale": false
+   },
+   "registration_status": "unresolved_not_authorized"
+  },
+  {
    "script": "audit_retired_ids.py",
    "dir": "",
    "number": "",
@@ -102623,7 +102513,6 @@
     "code/1129_place_ids.py",
     "code/1149_codebook_money_fed.py",
     "code/115_pull_assistance_archive.py",
-    "code/1172_codebook_block_generator.py",
     "code/117_build_gaming_devices.py",
     "code/118_build_gaming_ordinances.py",
     "code/121_pull_subawards_api.py",
@@ -102647,7 +102536,6 @@
     "code/512_build_dataset_contracts.py",
     "code/521_inventory.py",
     "code/582_promote_review_backlog.py",
-    "code/584_register_labor_codebook.py",
     "code/586_promote_nigc_gaming.py",
     "code/588_promote_self_published_claims.py",
     "code/791_faads_transaction_key_and_repoint.py",
@@ -102671,7 +102559,6 @@
     "code/1124_register_acquire_codebooks.py",
     "code/1149_codebook_money_fed.py",
     "code/115_pull_assistance_archive.py",
-    "code/1172_codebook_block_generator.py",
     "code/117_build_gaming_devices.py",
     "code/118_build_gaming_ordinances.py",
     "code/121_pull_subawards_api.py",
@@ -102695,7 +102582,6 @@
     "code/512_build_dataset_contracts.py",
     "code/521_inventory.py",
     "code/582_promote_review_backlog.py",
-    "code/584_register_labor_codebook.py",
     "code/586_promote_nigc_gaming.py",
     "code/588_promote_self_published_claims.py",
     "code/791_faads_transaction_key_and_repoint.py",
@@ -102905,8 +102791,8 @@
    "reads": [],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 60,
-   "mentioned_outside_history": 59,
+   "mentions": 61,
+   "mentioned_outside_history": 60,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-26",
@@ -102959,6 +102845,7 @@
     "code/168_link_adjudication_hubs.py",
     "code/169_build_identifier_graph.py",
     "code/170_build_individual_native_candidates.py",
+    "code/173_consolidate_rulings_ledger.py",
     "code/175_sync_published_property_view_entities.py",
     "code/180_build_lobbying_registrant_hub.py",
     "code/181_enrich_lobbying_registrant_identifiers.py",
@@ -103058,6 +102945,7 @@
     "code/168_link_adjudication_hubs.py",
     "code/169_build_identifier_graph.py",
     "code/170_build_individual_native_candidates.py",
+    "code/173_consolidate_rulings_ledger.py",
     "code/175_sync_published_property_view_entities.py",
     "code/180_build_lobbying_registrant_hub.py",
     "code/181_enrich_lobbying_registrant_identifiers.py",
@@ -104337,8 +104225,8 @@
    "mentioned_outside_history": 30,
    "oneoff_shaped": false,
    "has_run_receipt": false,
-   "last_modified": "2026-09-26",
-   "lines": 3266,
+   "last_modified": "2026-10-02",
+   "lines": 3484,
    "operational_role": "product consumer/shared service",
    "collection_output_entrypoints": [],
    "static_consumers": [
@@ -104353,7 +104241,6 @@
     "code/1165_delivered_publication_audit.py",
     "code/1169_release_verify.py",
     "code/1174_qc_review_bundle.py",
-    "code/1182_stream_official_names.py",
     "code/1187_native_federal_advocacy.py",
     "code/24_generate_dataset_docs.py",
     "code/25_build_publication_layer.py",
@@ -104381,7 +104268,6 @@
     "code/1165_delivered_publication_audit.py",
     "code/1169_release_verify.py",
     "code/1174_qc_review_bundle.py",
-    "code/1182_stream_official_names.py",
     "code/1187_native_federal_advocacy.py",
     "code/24_generate_dataset_docs.py",
     "code/25_build_publication_layer.py",
@@ -104396,6 +104282,7 @@
     "publication_calls": [],
     "validation_calls": [
      "assert_collection_publishable",
+     "validate_recipient_holds",
      "verify"
     ]
    },
@@ -104418,6 +104305,7 @@
     "need_enterprises.csv",
     "np_orgs.csv",
     "prime_contracts.csv",
+    "recipient_holds.json",
     "resource_revenue.csv",
     "subawards.csv",
     "subcontracting.csv",
@@ -104435,30 +104323,30 @@
    },
    "writer_evidence": [
     {
-     "line": 2885,
+     "line": 3103,
      "operation": "COMPAT_FILE.write_text",
      "target": "<unresolved>/code/770_sample_extracts.py",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "1a34627668a021c2a0faf789639bc37eb61295b64a8c84757438e197296b5f01"
+     "signature": "e27925d18b90f9d569f7216065b09f1afb196f34df2867b6a44e21811fecdc48"
     },
     {
-     "line": 3134,
+     "line": 3352,
      "operation": "path.open",
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "eb7d5d4626e41d025560345ca37eab4fb419be9593a883c66ff6b8e7c65cc5e0"
+     "signature": "72d1ba6ce80b4552578d9e813a6a6c0b699554570e67726349ecc5a17a872dc0"
     }
    ],
    "writer_analysis_error": null,
    "writer_risk": "P2_unresolved_write_target",
    "undeclared_governed_tables": [],
-   "source_sha256": "44831404075abe51990ac2ab0e39c3a24db27c44d37194c37476ba4c4c382ffa",
+   "source_sha256": "96f45e4ef2a651bff6292acbd5f023f1fd1212f4b21dd6399108af387352ee7e",
    "maintenance_status": "ACTIVE",
    "maintenance_evidence": {
     "reason": "declared operational role, CI invocation or reachable Python dependency",
-    "source_sha256": "44831404075abe51990ac2ab0e39c3a24db27c44d37194c37476ba4c4c382ffa",
+    "source_sha256": "96f45e4ef2a651bff6292acbd5f023f1fd1212f4b21dd6399108af387352ee7e",
     "identical_source_peers": [],
     "ci_commands": [],
     "documented_commands": [
@@ -105614,26 +105502,14 @@
    "operational_role": "unresolved",
    "collection_output_entrypoints": [],
    "static_consumers": [
-    "code/591_shard_f_ihs_uio_register.py",
-    "code/592_shard_f_ihs_selfgov_compacts.py",
     "code/594_shard_f_org_web_probe.py",
-    "code/595_shard_f_org_web_reprobe.py",
     "code/596_shard_f_org_rosters.py",
-    "code/597_shard_f_org_rosters_finalise.py",
-    "code/598_shard_f_newsletters.py",
-    "code/599_shard_f_ein_990.py",
-    "code/600_shard_f_service_area.py"
+    "code/599_shard_f_ein_990.py"
    ],
    "runtime_consumer_candidates": [
-    "code/591_shard_f_ihs_uio_register.py",
-    "code/592_shard_f_ihs_selfgov_compacts.py",
     "code/594_shard_f_org_web_probe.py",
-    "code/595_shard_f_org_web_reprobe.py",
     "code/596_shard_f_org_rosters.py",
-    "code/597_shard_f_org_rosters_finalise.py",
-    "code/598_shard_f_newsletters.py",
-    "code/599_shard_f_ein_990.py",
-    "code/600_shard_f_service_area.py"
+    "code/599_shard_f_ein_990.py"
    ],
    "operational_call_evidence": {
     "publication_calls": [],
@@ -106478,6 +106354,7 @@
   ],
   "code:173": [
    "173_consolidate_rulings_ledger.py",
+   "173_consolidate_rulings_ledger_test.py",
    "173_fill_gaming_metrics_entity_for_newly_keyed_hubs.py",
    "173_refresh_individual_native_results_section.py"
   ],
@@ -106647,37 +106524,38 @@
   "generated": "2026-10-02",
   "generator": "code/521_inventory.py scripts-only",
   "scope": "code/**/*.py; caller mentions restricted to Git-tracked project text",
-  "scripts": 686,
+  "scripts": 687,
   "operational_role_counts": {
    "active producer": 76,
    "active validator/migration/review": 11,
+   "historical": 18,
    "product consumer/shared service": 8,
-   "test/fixture": 6,
-   "unresolved": 585
+   "test/fixture": 7,
+   "unresolved": 567
   },
   "maintenance_status_counts": {
-   "ACTIVE": 163,
+   "ACTIVE": 164,
    "DUPLICATE": 0,
    "SUPERSEDED": 0,
-   "HISTORICAL-RETAIN": 20,
+   "HISTORICAL-RETAIN": 38,
    "SAFE-DELETE-CANDIDATE": 0,
-   "REQUIRES-REVIEW": 503
+   "REQUIRES-REVIEW": 485
   },
   "maintenance_scope": "Existing inventory evidence only; duplication does not authorize deletion and table retirement does not retire unrelated outputs.",
   "unresolved_writer_risk_counts": {
    "P0_forbidden_entrypoint": 6,
    "P1_protected_surface_write_candidate": 68,
-   "P1_undeclared_governed_write_candidate": 39,
+   "P1_undeclared_governed_write_candidate": 38,
    "P2_declared_governed_write_candidate": 4,
-   "P2_unresolved_write_target": 427,
-   "P3_no_detected_write_not_readonly_certified": 34,
+   "P2_unresolved_write_target": 415,
+   "P3_no_detected_write_not_readonly_certified": 29,
    "P3_other_literal_write_candidate": 7
   },
   "writer_risk_scope": "Potential AST write sites with conservative binding expansion, not executed writes. Existing unregistered edges remain pending; inventory receipt is not authorization. Imported custom writers, shell dispatch and dynamic output resolution require runtime review.",
   "operational_precedence": "Standalone test evidence; explicit historical directory; launch producer declaration; Python runtime-reference candidate plus operational call evidence; existing unreferenced archive candidate; unresolved",
   "reference_scope": "Static references retain tests, path literals and tracked configuration. Runtime candidates require Python imports or literal dispatch paths from non-test files; these are not verified reachability, external scheduler or runtime invocations. Dynamic targets and non-Python dispatch remain unresolved.",
-  "embedded_selftest_files": 125,
-  "unresolved_not_authorized": 572,
+  "embedded_selftest_files": 126,
+  "unresolved_not_authorized": 573,
   "table_snapshot_preserved_sha256": "c46a1097785af2a92ee0d50d35858f75f7c4f3cf1c40a0c31f3c96fcdb9e49ee",
   "data_generated_unchanged": "2026-09-02",
   "limitation": "Static census is not runtime write proof or authorization to run a producer."

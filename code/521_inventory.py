@@ -462,7 +462,12 @@ _CATALOGUE = ("CONSOLIDATION_SCRIPT_INVENTORY.json", "ARCHIVE_CANDIDATES.md",
               "dependency_manifest.json", "ARCHITECTURE.md",
               "DEPENDENCY_MANIFEST.md", "lint_bug_classes.json",
               "lint_bug_classes_baseline.json", "inventory.json",
-              "INVENTORY.md", "CODE_HEALTH_AUDIT.md")
+              "INVENTORY.md", "CODE_HEALTH_AUDIT.md",
+              # 2026-10-02: the consumer-side reference graph, the archive
+              # index it produced and the release-gap register name scripts
+              # by construction (server/tests/code_reference_graph.py).
+              "CODE_REFERENCE_GRAPH_2026-10-02.json", "INDEX.md",
+              "RELEASE_GAP_2026-10-02.md", "RELEASE_GAP_2026-10-02.json")
 
 
 def read_archive_candidates():
