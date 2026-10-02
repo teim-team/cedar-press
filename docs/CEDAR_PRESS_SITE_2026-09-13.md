@@ -138,11 +138,15 @@ narrower, and the site now says so:
   publishes these firms **by name**, because a nation's own TERO or commerce
   office published them and shared them under stated terms.
 - Where the only evidence is a **federal award file**, the activity publishes
-  and the owner's name, address and UEI do not
-  (`INDIVIDUAL_NATIVE_WITHHELD_FIELDS`, `code/cedar_domain.py`). Per field,
-  defaulting to withholding; any published cell resolving to fewer than three
-  firms is suppressed; a firm's own website saying it is Native is evidence,
-  never permission.
+  and, as of 2026-09-13, the owner's name, address and UEI did not
+  (`INDIVIDUAL_NATIVE_WITHHELD_FIELDS`, `code/cedar_domain.py`). *Superseded
+  2026-10-02 by owner ruling:* a firm is a business entity regardless of what
+  it is named after, and its name, identifiers and business address are
+  public business records, so every field in that set now publishes without
+  consent (`docs/REVIEW_STATUS.md`, "Owner ruling: individually owned firm
+  records publish"). Still per field, still failing closed on an unknown
+  field; any published cell resolving to fewer than three firms is still
+  suppressed.
 - **`register.json`**, the entity lookup the whole site can read, withholds
   the name for the class outright, because it is a lookup and not a release.
 

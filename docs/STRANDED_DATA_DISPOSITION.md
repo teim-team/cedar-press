@@ -127,9 +127,13 @@ that is also a bank. **`DC)` and `DC:` are fragments of a postal address.**
 The last row is different and is **NEEDS-A-RULING, not a refusal**:
 `Tribal Energy Alternatives` is an exact canonical match to `CEDAR-ENT-000089`,
 whose `entity_class` is **`Individually Native-owned business`**.
-`cedar_domain.may_publish_individual_native_field` **fails closed** on that class
-without an explicit consent ruling — *"a firm's own website statement is our
-EVIDENCE, never their PERMISSION"* — so 400 does not make one.
+`cedar_domain.may_publish_individual_native_field` **failed closed** on that class
+without an explicit consent ruling when this was written — *"a firm's own website
+statement is our EVIDENCE, never their PERMISSION"* — so 400 did not make one.
+*Dated note, 2026-10-02:* the owner has since ruled that the firm's own name and
+identifiers publish as business records; that ruling says nothing about attaching
+a named natural person (a hearing witness) to the firm, which is the question this
+row asks, so the row stays NEEDS-A-RULING.
 
 ### 2. ALREADY-LANDED — 19 files, 71,394 rows. Proved, not assumed.
 

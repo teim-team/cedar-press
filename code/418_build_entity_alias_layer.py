@@ -237,11 +237,15 @@ def main():
         # REFUSED, AND THE REFUSAL IS THE POINT.
         #
         # 45 of the 224 uncovered entities are the class
-        # `Individually Native-owned business`, and
-        # `cedar_domain.INDIVIDUAL_NATIVE_WITHHELD_FIELDS` withholds
+        # `Individually Native-owned business`. When this refusal was written
+        # `cedar_domain.INDIVIDUAL_NATIVE_WITHHELD_FIELDS` withheld
         # `canonical_name`, `legal_business_name`, `dba_name` and `owner_name`
-        # for every one of them absent recorded OPTED_IN consent -
-        # `consent_status` is `NOT_ASKED` on all 45.
+        # for every one of them absent recorded OPTED_IN consent. The owner
+        # ruling of 2026-10-02 publishes those fields (a firm is a business
+        # entity whatever it is named after), so this refusal's privacy basis
+        # is gone; it is RETAINED here unchanged because minting 45 firm names
+        # into the alias index is a rebuild decision for the owner, not a
+        # side effect of a publication ruling.
         #
         # `entity_aliases.csv` is a NAME INDEX in `data/clean`. Minting a sole
         # proprietor's legal name into it would take a name the publication

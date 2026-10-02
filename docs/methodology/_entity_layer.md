@@ -298,12 +298,17 @@ further into an organization's affairs than a procurement id does."*
 **Publish from that table. Do not re-derive a publishable set by filtering the
 full ledger** — the filter *is* the policy, and a second copy of it will drift.
 
-A further **42 crosswalk rows are hard-withheld** under
-`cedar_domain.may_publish_individual_native_field`: for a firm whose legal name
-IS a person's name, publishing the identifier publishes the person **by one
-hop**, through SAM's public entity search. **And a digest is not a fix** —
-SAM's entity space is enumerable, so a hashed UEI is reversible by hashing
-every UEI and comparing. 1,009 `ENTITY_MASTER` and 344 legacy-integer crosswalk
+A further **42 crosswalk rows were hard-withheld** under
+`cedar_domain.may_publish_individual_native_field` as measured here: for a firm
+whose legal name IS a person's name, publishing the identifier published the
+person **by one hop**, through SAM's public entity search. **And a digest is
+not a fix** — SAM's entity space is enumerable, so a hashed UEI is reversible
+by hashing every UEI and comparing. *Dated note, 2026-10-02:* the owner ruled
+that a firm is a business entity regardless of what it is named after and its
+UEI/CAGE a public business registration, so the rule now publishes those
+rows; `code/417` reads the live answer on the next build
+(`docs/REVIEW_STATUS.md`, "Owner ruling: individually owned firm records
+publish"). 1,009 `ENTITY_MASTER` and 344 legacy-integer crosswalk
 rows are marked non-publishing as internal keys.
 
 ### The other identity artefacts, measured

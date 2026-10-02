@@ -13877,8 +13877,8 @@
    "mentioned_outside_history": 7,
    "oneoff_shaped": false,
    "has_run_receipt": false,
-   "last_modified": "2026-09-26",
-   "lines": 1350,
+   "last_modified": "2026-10-02",
+   "lines": 1365,
    "operational_role": "unresolved",
    "collection_output_entrypoints": [],
    "static_consumers": [
@@ -13905,54 +13905,54 @@
    },
    "writer_evidence": [
     {
-     "line": 630,
+     "line": 640,
      "operation": "open",
      "target": "<unresolved>/data/clean/native_business_identifier_crosswalk.csv",
      "scope": "protected_surface",
      "table": null,
-     "signature": "8515c12046af83701df4baffa4a7a584244fcf32a1ace9aa5db72eb2a74d4d3f"
+     "signature": "597e94e1ab231553eb8e0ff0052d43fab4247820e63d55c6ad90cec1969f1643"
     },
     {
-     "line": 704,
+     "line": 719,
      "operation": "open",
      "target": "<unresolved>/data/clean/native_business_contract_links.csv",
      "scope": "protected_surface",
      "table": null,
-     "signature": "3df93bdfaf29c19ec6e7fa9e5677be3efebe37e42bffa6d2c83c85b5be143b9f"
+     "signature": "2aa5dad4830ee9ed1c90b933b47ecac77cdfe09078e6ac8c64c55eee38c837e0"
     },
     {
-     "line": 708,
+     "line": 723,
      "operation": "open",
      "target": "<unresolved>/review/native_business_link_holds_2026-09-02.csv",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "57a503a792bc3c288adad58e95f85bf00fe87cf0eec6c7c2b2e21971b6682454"
+     "signature": "2452741cdd55cb7022a8e6f90eb2b048e37e9c415828c219c5ce19b9c3c3d7a1"
     },
     {
-     "line": 1129,
+     "line": 1144,
      "operation": "open",
      "target": "<unresolved>/data/clean/native_business_contracting_by_nation.csv",
      "scope": "protected_surface",
      "table": null,
-     "signature": "9d39f07b0dfc2fad8bc71b4111e65e55b351b935e56989f2cbcbb1ca1a126fe9"
+     "signature": "59de88554987deaf2624fc612de3fcc8d36f79905b059d4c881af898d2f77adb"
     },
     {
-     "line": 1203,
+     "line": 1218,
      "operation": "SUMMARY.write_text",
      "target": "<unresolved>/data/clean/_1001_summary.json",
      "scope": "protected_surface",
      "table": null,
-     "signature": "626b69726d8e86c8a1fdd8495ada975ca7bb299da816c569012ba3440533311e"
+     "signature": "b6fb7e714b90b3e11eaf5a4d696f1a315ea84e63ccfffa3a1eb3a9497ec82837"
     }
    ],
    "writer_analysis_error": null,
    "writer_risk": "P1_protected_surface_write_candidate",
    "undeclared_governed_tables": [],
-   "source_sha256": "24651371f0288768454cc5e5325ad7a2819e9dabdfbdadc8185f471c50a13cd8",
+   "source_sha256": "8da651868c962846efc9927cd202a992f146cbed53e9f32d64a68883c3bf39d7",
    "maintenance_status": "ACTIVE",
    "maintenance_evidence": {
-    "reason": "Directory/federal identifier linkage; open_crosswalk duplicates 1000 mutation",
-    "source_sha256": "24651371f0288768454cc5e5325ad7a2819e9dabdfbdadc8185f471c50a13cd8",
+    "reason": "Directory/federal identifier linkage; open_crosswalk duplicates 1000 mutation; gate_for reads the live publication rule since 2026-10-02",
+    "source_sha256": "8da651868c962846efc9927cd202a992f146cbed53e9f32d64a68883c3bf39d7",
     "identical_source_peers": [],
     "ci_commands": [],
     "documented_commands": [],
@@ -13967,7 +13967,7 @@
     "review_write_sites": [],
     "safe_delete_proof": "NOT_ESTABLISHED: external callers, unique output and recovery value are not exhausted by static scans",
     "bounded_source_review": {
-     "source_sha256": "24651371f0288768454cc5e5325ad7a2819e9dabdfbdadc8185f471c50a13cd8",
+     "source_sha256": "8da651868c962846efc9927cd202a992f146cbed53e9f32d64a68883c3bf39d7",
      "role": "transitional reconciliation",
      "retirement_condition": "One atomic crosswalk writer after both callers cut over; retain linkage/hold outputs",
      "grants_execution_permission": false
@@ -37357,15 +37357,18 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 0,
-   "mentioned_outside_history": 0,
+   "mentions": 2,
+   "mentioned_outside_history": 2,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-26",
    "lines": 656,
    "operational_role": "unresolved",
    "collection_output_entrypoints": [],
-   "static_consumers": [],
+   "static_consumers": [
+    "server/tests/release_gap_register.py",
+    "server/tests/test_code_reference_graph.py"
+   ],
    "runtime_consumer_candidates": [],
    "operational_call_evidence": {
     "publication_calls": [],
@@ -49246,8 +49249,8 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 23,
-   "mentioned_outside_history": 22,
+   "mentions": 25,
+   "mentioned_outside_history": 24,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-10-02",
@@ -49256,6 +49259,7 @@
    "collection_output_entrypoints": [],
    "static_consumers": [
     "code/160_ship_gap_report.py",
+    "code/173_consolidate_rulings_ledger_test.py",
     "code/293_lint_bug_classes.py",
     "code/309_apply_already_ruled_filter_to_review_queues.py"
    ],
@@ -49381,8 +49385,8 @@
    "reads": [],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 1,
-   "mentioned_outside_history": 1,
+   "mentions": 2,
+   "mentioned_outside_history": 2,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-10-02",
@@ -49668,8 +49672,8 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": true,
-   "mentions": 16,
-   "mentioned_outside_history": 16,
+   "mentions": 17,
+   "mentioned_outside_history": 17,
    "oneoff_shaped": true,
    "has_run_receipt": false,
    "last_modified": "2026-09-26",
@@ -57021,12 +57025,12 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": true,
-   "mentions": 22,
-   "mentioned_outside_history": 21,
+   "mentions": 24,
+   "mentioned_outside_history": 23,
    "oneoff_shaped": true,
    "has_run_receipt": false,
-   "last_modified": "2026-09-26",
-   "lines": 1351,
+   "last_modified": "2026-10-02",
+   "lines": 1345,
    "operational_role": "unresolved",
    "collection_output_entrypoints": [],
    "static_consumers": [
@@ -57057,49 +57061,51 @@
    },
    "writer_evidence": [
     {
-     "line": 345,
+     "line": 351,
      "operation": "shutil.copy2",
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "856b0a461886fc636c904b0bdfa5af702f54fbbcc4e842d6ccd8e624df7a4f4b"
+     "signature": "0eeb5cac1cc8b31c711401368f400a1d04a3726d6d77bd47342e8f2ebfb7e4de"
     },
     {
-     "line": 349,
+     "line": 355,
      "operation": "open",
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "bf9db75e5bf509271210ec05fbbcfd527df5f308883d55d5a48f05299d9e5156"
+     "signature": "0e2bf7b637062273082d5f9e2720f742839c6da3eb2ea98930173fedee337f10"
     },
     {
-     "line": 1267,
+     "line": 1261,
      "operation": ".write_text",
      "target": "<unresolved>/logs/241_promote_individual_native_firms.check.log",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "6bbb4670d63b03d89c9a1747574abcd0aa077e46c6019d1a4d689e2504a6f290"
+     "signature": "3452ed9ae46d26fd38ec329925f138263a2f5d2fe9963f1d87147d0cf6a4741c"
     },
     {
-     "line": 1344,
+     "line": 1338,
      "operation": ".write_text",
      "target": "<unresolved>/logs/241_promote_individual_native_firms.log",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "b401109fe8554626cc9793ba7b2ebda9dc97453a40edafcace4c128de1073c3c"
+     "signature": "9cf9975f261cb5566660f2d1f8cbe8f7ef2114a8b12fd831876d1419fce33531"
     }
    ],
    "writer_analysis_error": null,
    "writer_risk": "P2_unresolved_write_target",
    "undeclared_governed_tables": [],
-   "source_sha256": "9f448a3eada3fafae022aea5fcd4b37d14df33eff9c9b29a941a74a9c3ddcdcc",
+   "source_sha256": "a45d540dc58fa45109a7ba797f5efc50916848278e8ada995f6a1e7707978bf7",
    "maintenance_status": "HISTORICAL-RETAIN",
    "maintenance_evidence": {
     "reason": "explicit authoritative replay dependency; retention is not permission to execute",
-    "source_sha256": "9f448a3eada3fafae022aea5fcd4b37d14df33eff9c9b29a941a74a9c3ddcdcc",
+    "source_sha256": "a45d540dc58fa45109a7ba797f5efc50916848278e8ada995f6a1e7707978bf7",
     "identical_source_peers": [],
     "ci_commands": [],
-    "documented_commands": [],
+    "documented_commands": [
+     "docs/REVIEW_STATUS.md"
+    ],
     "active_runtime_callers": [],
     "superseded_output_edges": [],
     "historical_replay_evidence": [
@@ -57149,8 +57155,8 @@
    "mentioned_outside_history": 9,
    "oneoff_shaped": false,
    "has_run_receipt": false,
-   "last_modified": "2026-09-26",
-   "lines": 500,
+   "last_modified": "2026-10-02",
+   "lines": 504,
    "operational_role": "unresolved",
    "collection_output_entrypoints": [],
    "static_consumers": [
@@ -57175,38 +57181,38 @@
    },
    "writer_evidence": [
     {
-     "line": 141,
+     "line": 144,
      "operation": "shutil.copy2",
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "6ad4e23b4203290ea028a0c2b4e5fdc470ace4fb1db04ca23619ae920288ae59"
+     "signature": "31de8b3868f0efb201519c195be43d0a3c94c4a54f460bd30c0f1574f73aa136"
     },
     {
-     "line": 144,
+     "line": 147,
      "operation": "open",
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "dfbd5e80853dd12a00a621286033266e21fd486483290890dcda0d71a6cdd481"
+     "signature": "2f02cd4e835475d57342825c758612b22941190436098f1e38dd0e38d41ba822"
     },
     {
-     "line": 494,
+     "line": 498,
      "operation": ".write_text",
      "target": "<unresolved>/logs/242_build_individual_native_firm_contracts.log",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "9e37886af87a9e7fd8ea2727e9a2e8176801f560ba3ef1f10660c879643da897"
+     "signature": "e0b941bda4733cc6b21c6bf7eb6a0165d2c219b401599caec82d27afc3844c17"
     }
    ],
    "writer_analysis_error": null,
    "writer_risk": "P2_unresolved_write_target",
    "undeclared_governed_tables": [],
-   "source_sha256": "194f8eb0792d3e7c7765784f3e0bdb3c495b6aef287ddc21007a6ddbf6d89e39",
+   "source_sha256": "19c440b66a7f47c1fcbb9df4bc029288e04691c54867204cb1e6dfc319336edc",
    "maintenance_status": "REQUIRES-REVIEW",
    "maintenance_evidence": {
     "reason": "writer targets/callers need runtime confirmation before ownership or retirement: <unresolved>, <unresolved>/logs/242_build_individual_native_firm_contracts.log",
-    "source_sha256": "194f8eb0792d3e7c7765784f3e0bdb3c495b6aef287ddc21007a6ddbf6d89e39",
+    "source_sha256": "19c440b66a7f47c1fcbb9df4bc029288e04691c54867204cb1e6dfc319336edc",
     "identical_source_peers": [],
     "ci_commands": [],
     "documented_commands": [],
@@ -57220,21 +57226,21 @@
     "review_priority": "P2_unresolved_write_target",
     "review_write_sites": [
      {
-      "line": 141,
+      "line": 144,
       "operation": "shutil.copy2",
       "target": "<unresolved>",
       "scope": "unresolved_target",
       "table": null
      },
      {
-      "line": 144,
+      "line": 147,
       "operation": "open",
       "target": "<unresolved>",
       "scope": "unresolved_target",
       "table": null
      },
      {
-      "line": 494,
+      "line": 498,
       "operation": ".write_text",
       "target": "<unresolved>/logs/242_build_individual_native_firm_contracts.log",
       "scope": "unresolved_target",
@@ -57267,8 +57273,8 @@
    "mentioned_outside_history": 10,
    "oneoff_shaped": false,
    "has_run_receipt": false,
-   "last_modified": "2026-09-26",
-   "lines": 631,
+   "last_modified": "2026-10-02",
+   "lines": 647,
    "operational_role": "unresolved",
    "collection_output_entrypoints": [],
    "static_consumers": [
@@ -57296,38 +57302,38 @@
    },
    "writer_evidence": [
     {
-     "line": 533,
+     "line": 538,
      "operation": "shutil.copy2",
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "98587271069996120b9680e408d9e50531f31807e959d2262e184e6c8734dbcb"
+     "signature": "3ad669c771e531426712a5e44763fc8c968ab4e43cfdd147216157f86f731935"
     },
     {
-     "line": 535,
+     "line": 540,
      "operation": "open",
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "9c03ee47d716dec7ea1919e11dd3d47cbc2dd82f327802bd368bc33764097f12"
+     "signature": "7b030ca30a85aef00cf774e5401d16320b6110d23a8fdaf2851c6ec8c27c1f67"
     },
     {
-     "line": 616,
+     "line": 632,
      "operation": ".write_text",
      "target": "<unresolved>/docs/codebooks/<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "109d1fb409c1acd7d74ba7e560f68d1caab1119212262a595f9cb78858335c4b"
+     "signature": "0410e6b264618eec9339eb8d58f6d4dcc7d7059173b36a176faa0d107d0aabf4"
     }
    ],
    "writer_analysis_error": null,
    "writer_risk": "P2_unresolved_write_target",
    "undeclared_governed_tables": [],
-   "source_sha256": "3f36135c9565c0f5ec89bf2f709ff3cc16e133e37059c0c1661b4ef3ae9ebe1a",
+   "source_sha256": "cae3726e06fdf79e674928ef340fca1c5a847941e890cd8d96b61be7fc0d7180",
    "maintenance_status": "REQUIRES-REVIEW",
    "maintenance_evidence": {
     "reason": "writer targets/callers need runtime confirmation before ownership or retirement: <unresolved>, <unresolved>/docs/codebooks/<unresolved>",
-    "source_sha256": "3f36135c9565c0f5ec89bf2f709ff3cc16e133e37059c0c1661b4ef3ae9ebe1a",
+    "source_sha256": "cae3726e06fdf79e674928ef340fca1c5a847941e890cd8d96b61be7fc0d7180",
     "identical_source_peers": [],
     "ci_commands": [],
     "documented_commands": [],
@@ -57341,21 +57347,21 @@
     "review_priority": "P2_unresolved_write_target",
     "review_write_sites": [
      {
-      "line": 533,
+      "line": 538,
       "operation": "shutil.copy2",
       "target": "<unresolved>",
       "scope": "unresolved_target",
       "table": null
      },
      {
-      "line": 535,
+      "line": 540,
       "operation": "open",
       "target": "<unresolved>",
       "scope": "unresolved_target",
       "table": null
      },
      {
-      "line": 616,
+      "line": 632,
       "operation": ".write_text",
       "target": "<unresolved>/docs/codebooks/<unresolved>",
       "scope": "unresolved_target",
@@ -59400,8 +59406,8 @@
    "mentioned_outside_history": 20,
    "oneoff_shaped": false,
    "has_run_receipt": false,
-   "last_modified": "2026-09-26",
-   "lines": 1635,
+   "last_modified": "2026-10-02",
+   "lines": 1637,
    "operational_role": "product consumer/shared service",
    "collection_output_entrypoints": [],
    "static_consumers": [
@@ -59469,30 +59475,30 @@
    },
    "writer_evidence": [
     {
-     "line": 1543,
+     "line": 1545,
      "operation": ".write_text",
      "target": "<unresolved>/dist/manifests/<unresolved>",
      "scope": "protected_surface",
      "table": null,
-     "signature": "13bf5a33a0547486327bc5f71a23f5005e27222e1f377493735efae879f0a071"
+     "signature": "4c0720c917bdd3bdeff2bff841668c6713daec326de4946879a81146250ca09d"
     },
     {
-     "line": 1625,
+     "line": 1627,
      "operation": ".write_text",
      "target": "<unresolved>/dist/manifests/VALIDATION.md",
      "scope": "protected_surface",
      "table": null,
-     "signature": "6df169530fbdb90c1e7d2dcd84289eb9aec1acbe8656bea0fc685e4da43174c8"
+     "signature": "fb49125560815f35b1c66e7acaf7fe0d6ca408a56293b169220fdbc6ea453891"
     }
    ],
    "writer_analysis_error": null,
    "writer_risk": "P1_protected_surface_write_candidate",
    "undeclared_governed_tables": [],
-   "source_sha256": "2f54ecb82c74b07b87ec869e3096098f08d5fb6f30f52e0a65641ed0558d6835",
+   "source_sha256": "d0b352949d30d4419d1ef1fba8a47296b0470964ab1915ab47cf0c0ece80abc9",
    "maintenance_status": "ACTIVE",
    "maintenance_evidence": {
     "reason": "declared operational role, CI invocation or reachable Python dependency",
-    "source_sha256": "2f54ecb82c74b07b87ec869e3096098f08d5fb6f30f52e0a65641ed0558d6835",
+    "source_sha256": "d0b352949d30d4419d1ef1fba8a47296b0470964ab1915ab47cf0c0ece80abc9",
     "identical_source_peers": [],
     "ci_commands": [],
     "documented_commands": [
@@ -62939,12 +62945,12 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 19,
-   "mentioned_outside_history": 18,
+   "mentions": 20,
+   "mentioned_outside_history": 19,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-10-02",
-   "lines": 2774,
+   "lines": 2778,
    "operational_role": "unresolved",
    "collection_output_entrypoints": [],
    "static_consumers": [
@@ -62983,36 +62989,36 @@
    },
    "writer_evidence": [
     {
-     "line": 1754,
+     "line": 1758,
      "operation": "out.open",
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "a8e976c8e4ef9e6c18fc6cfa1cb9d335a52a500b2ac7994ea44bb8847d64a9e7"
+     "signature": "43c447372b6d27ecfd7f2f7a7c43438a033fa0627338139e46c8db2eeb5207ba"
     },
     {
-     "line": 2078,
+     "line": 2082,
      "operation": "CLEAN.open",
      "target": "<unresolved>/data/clean/native_owned_businesses.csv",
      "scope": "governed_table",
      "table": "native_owned_businesses.csv",
-     "signature": "b19905dfe882911e63c66f3389e18da7fd2c6db08e0490a4131bcfb5f940f567"
+     "signature": "1c859b4424a172bab9abff1d1e214bbf95ffb5096e1ee3f03a77949c2cca9909"
     },
     {
-     "line": 2205,
+     "line": 2209,
      "operation": "tmp.open",
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "57aaa2e33c397a696e324ce45614ad6d0af56a4405c3e01c8efaa68244e5cb05"
+     "signature": "9e94d975feead41201a71e0e0ff7d6147db94f22409bdcf9b174c535c789a097"
     },
     {
-     "line": 2624,
+     "line": 2628,
      "operation": "DOC.write_text",
      "target": "<unresolved>/docs/datasets/native-owned-businesses.md",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "345f565278c3daa564141930d6ac5ab4e77f431b0e2d08fc712cfd7d73bd7380"
+     "signature": "f47e10f1da782a9f8c0bca2064776c2e6c3d715079fe2884aa61726773068555"
     }
    ],
    "writer_analysis_error": null,
@@ -63020,11 +63026,11 @@
    "undeclared_governed_tables": [
     "native_owned_businesses.csv"
    ],
-   "source_sha256": "05813cc0bf8b255398e1364811b7385e64009d170b2abc43d42e693839b96a1b",
+   "source_sha256": "1b5a0ca9085ac77bf388291e02a02279d75058bed00e7b8ce202e00833f29555",
    "maintenance_status": "REQUIRES-REVIEW",
    "maintenance_evidence": {
     "reason": "governed output is not admitted: native_owned_businesses.csv",
-    "source_sha256": "05813cc0bf8b255398e1364811b7385e64009d170b2abc43d42e693839b96a1b",
+    "source_sha256": "1b5a0ca9085ac77bf388291e02a02279d75058bed00e7b8ce202e00833f29555",
     "identical_source_peers": [],
     "ci_commands": [],
     "documented_commands": [
@@ -63041,28 +63047,28 @@
     "review_priority": "P1_undeclared_governed_write_candidate",
     "review_write_sites": [
      {
-      "line": 1754,
+      "line": 1758,
       "operation": "out.open",
       "target": "<unresolved>",
       "scope": "unresolved_target",
       "table": null
      },
      {
-      "line": 2078,
+      "line": 2082,
       "operation": "CLEAN.open",
       "target": "<unresolved>/data/clean/native_owned_businesses.csv",
       "scope": "governed_table",
       "table": "native_owned_businesses.csv"
      },
      {
-      "line": 2205,
+      "line": 2209,
       "operation": "tmp.open",
       "target": "<unresolved>",
       "scope": "unresolved_target",
       "table": null
      },
      {
-      "line": 2624,
+      "line": 2628,
       "operation": "DOC.write_text",
       "target": "<unresolved>/docs/datasets/native-owned-businesses.md",
       "scope": "unresolved_target",
@@ -65573,8 +65579,8 @@
    "mentioned_outside_history": 8,
    "oneoff_shaped": false,
    "has_run_receipt": false,
-   "last_modified": "2026-09-26",
-   "lines": 785,
+   "last_modified": "2026-10-02",
+   "lines": 808,
    "operational_role": "unresolved",
    "collection_output_entrypoints": [],
    "static_consumers": [
@@ -65596,30 +65602,30 @@
    },
    "writer_evidence": [
     {
-     "line": 154,
+     "line": 167,
      "operation": "open",
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "f121c927717e2deb90f6b326976fd82dc9a968845d6c66c45368f462c0fc4289"
+     "signature": "295e6e2156ec68d608eda02da4ef88f4a6f181669c8fca03b4c8022874901463"
     },
     {
-     "line": 726,
+     "line": 749,
      "operation": "tmp.write_text",
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "afb8dbfb644de42258ec4994154e0fb60e115fc49ba3164f1d5c87d4653c0929"
+     "signature": "2fd68ed268eb8b264a4392b824ae50a28471d7d3532608107c5562c2cd04e5c0"
     }
    ],
    "writer_analysis_error": null,
    "writer_risk": "P2_unresolved_write_target",
    "undeclared_governed_tables": [],
-   "source_sha256": "a830c71915cffc61ac31bdfbef7bf9b5d1b489c9f37f1f298d8e0a3b0c901f2c",
+   "source_sha256": "c54cd6e4b41d84e3a168dc6ec61009d1ec5bbb95f4cd3f186cd4ed5d0d6176b7",
    "maintenance_status": "REQUIRES-REVIEW",
    "maintenance_evidence": {
     "reason": "writer targets/callers need runtime confirmation before ownership or retirement: <unresolved>",
-    "source_sha256": "a830c71915cffc61ac31bdfbef7bf9b5d1b489c9f37f1f298d8e0a3b0c901f2c",
+    "source_sha256": "c54cd6e4b41d84e3a168dc6ec61009d1ec5bbb95f4cd3f186cd4ed5d0d6176b7",
     "identical_source_peers": [],
     "ci_commands": [],
     "documented_commands": [
@@ -65635,14 +65641,14 @@
     "review_priority": "P2_unresolved_write_target",
     "review_write_sites": [
      {
-      "line": 154,
+      "line": 167,
       "operation": "open",
       "target": "<unresolved>",
       "scope": "unresolved_target",
       "table": null
      },
      {
-      "line": 726,
+      "line": 749,
       "operation": "tmp.write_text",
       "target": "<unresolved>",
       "scope": "unresolved_target",
@@ -66829,8 +66835,8 @@
    "mentioned_outside_history": 10,
    "oneoff_shaped": false,
    "has_run_receipt": false,
-   "last_modified": "2026-09-26",
-   "lines": 1030,
+   "last_modified": "2026-10-02",
+   "lines": 1032,
    "operational_role": "unresolved",
    "collection_output_entrypoints": [],
    "static_consumers": [
@@ -66854,22 +66860,22 @@
    },
    "writer_evidence": [
     {
-     "line": 1018,
+     "line": 1020,
      "operation": "tmp.write_text",
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "fadcd094aef91dd780728b37d8040b0508f148ff41d7c99f341cf53abe6a9517"
+     "signature": "cfaa1a9eaf8aff40faf068fae627c20de0595288e973a5fa74d6d7121407af9c"
     }
    ],
    "writer_analysis_error": null,
    "writer_risk": "P2_unresolved_write_target",
    "undeclared_governed_tables": [],
-   "source_sha256": "d7bf423a85e5b60f4d4e2c8b18c649e336e7df09c56fb69d6227570e3508bcc9",
+   "source_sha256": "7643791fa328628cd39cb1c0a6e35af06c455315cdaa985dc69736fc435e3a83",
    "maintenance_status": "ACTIVE",
    "maintenance_evidence": {
     "reason": "declared operational role, CI invocation or reachable Python dependency",
-    "source_sha256": "d7bf423a85e5b60f4d4e2c8b18c649e336e7df09c56fb69d6227570e3508bcc9",
+    "source_sha256": "7643791fa328628cd39cb1c0a6e35af06c455315cdaa985dc69736fc435e3a83",
     "identical_source_peers": [],
     "ci_commands": [
      ".github/workflows/ci.yml"
@@ -68373,8 +68379,8 @@
    "mentioned_outside_history": 8,
    "oneoff_shaped": true,
    "has_run_receipt": false,
-   "last_modified": "2026-09-26",
-   "lines": 411,
+   "last_modified": "2026-10-02",
+   "lines": 413,
    "operational_role": "active producer",
    "collection_output_entrypoints": [
     {
@@ -68400,7 +68406,7 @@
    },
    "writer_evidence": [
     {
-     "line": 362,
+     "line": 364,
      "operation": "shutil.copy2",
      "target": "<unresolved>",
      "scope": "unresolved_target",
@@ -68408,7 +68414,7 @@
      "signature": "81d881ce525573a1f8a12ce4163ba846438497242291d5bf40a9b2ef0e8a260d"
     },
     {
-     "line": 366,
+     "line": 368,
      "operation": "open",
      "target": "<unresolved>",
      "scope": "unresolved_target",
@@ -68416,7 +68422,7 @@
      "signature": "9b2c2e99767815f2aec490fd5e3e9b617eae05ddc95f2b4c56c48edff97e3540"
     },
     {
-     "line": 370,
+     "line": 372,
      "operation": "os.replace",
      "target": "<unresolved>/data/clean/hearing_appearances.csv",
      "scope": "governed_table",
@@ -68424,7 +68430,7 @@
      "signature": "6cfde0da0d267d32ba32c47beed818f30633246ec4876b66019ec65884b6ffbb"
     },
     {
-     "line": 380,
+     "line": 382,
      "operation": "open",
      "target": "<unresolved>",
      "scope": "unresolved_target",
@@ -68432,7 +68438,7 @@
      "signature": "a73d27876717430b4c78d9e5f41e7c40a8d064db62ab41fa0a3da5da381ee418"
     },
     {
-     "line": 393,
+     "line": 395,
      "operation": "os.replace",
      "target": "<unresolved>/review/<unresolved>",
      "scope": "unresolved_target",
@@ -68443,11 +68449,11 @@
    "writer_analysis_error": null,
    "writer_risk": "P2_declared_governed_write_candidate",
    "undeclared_governed_tables": [],
-   "source_sha256": "a805348d196c2283bc0fb97ac15b83ae0811d4d3533bc77db4050f5c899b6109",
+   "source_sha256": "9151045c946f9ed75de1e49c11486fcff51bfa44c76edd6d9d0c5fd09eb31c33",
    "maintenance_status": "ACTIVE",
    "maintenance_evidence": {
     "reason": "declared operational role, CI invocation or reachable Python dependency",
-    "source_sha256": "a805348d196c2283bc0fb97ac15b83ae0811d4d3533bc77db4050f5c899b6109",
+    "source_sha256": "9151045c946f9ed75de1e49c11486fcff51bfa44c76edd6d9d0c5fd09eb31c33",
     "identical_source_peers": [],
     "ci_commands": [],
     "documented_commands": [
@@ -69249,8 +69255,8 @@
    "mentioned_outside_history": 7,
    "oneoff_shaped": false,
    "has_run_receipt": false,
-   "last_modified": "2026-09-26",
-   "lines": 445,
+   "last_modified": "2026-10-02",
+   "lines": 449,
    "operational_role": "unresolved",
    "collection_output_entrypoints": [],
    "static_consumers": [
@@ -69273,30 +69279,30 @@
    },
    "writer_evidence": [
     {
-     "line": 414,
+     "line": 418,
      "operation": "open",
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "9dfd74770578e73fe7505168756a15c5da45e77f4802bc6e74513f595588de23"
+     "signature": "e0ee4fe2ae0a306ce7a55da4366e3b84e6ba054872f83d9c07d8b853e1ad4e4c"
     },
     {
-     "line": 423,
+     "line": 427,
      "operation": "open",
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "44e8cc2c0b9e7a2edd2a3494e0521de1f882da9575f85c275ea5b946e80511f6"
+     "signature": "1a393fcedeede52b2c80b3a1b56202cd59a8e689ee2f6f8c590bf4e023bb3cf7"
     }
    ],
    "writer_analysis_error": null,
    "writer_risk": "P2_unresolved_write_target",
    "undeclared_governed_tables": [],
-   "source_sha256": "630acda599e83e3421521b06e57d313df6c9700d111c37848043bbf0d10740c6",
+   "source_sha256": "99b9e01a16fe33db25849f21e0cb71b42f1ec4eb2c6828259a1fc7b7b99cc50b",
    "maintenance_status": "REQUIRES-REVIEW",
    "maintenance_evidence": {
     "reason": "writer targets/callers need runtime confirmation before ownership or retirement: <unresolved>",
-    "source_sha256": "630acda599e83e3421521b06e57d313df6c9700d111c37848043bbf0d10740c6",
+    "source_sha256": "99b9e01a16fe33db25849f21e0cb71b42f1ec4eb2c6828259a1fc7b7b99cc50b",
     "identical_source_peers": [],
     "ci_commands": [],
     "documented_commands": [
@@ -69312,14 +69318,14 @@
     "review_priority": "P2_unresolved_write_target",
     "review_write_sites": [
      {
-      "line": 414,
+      "line": 418,
       "operation": "open",
       "target": "<unresolved>",
       "scope": "unresolved_target",
       "table": null
      },
      {
-      "line": 423,
+      "line": 427,
       "operation": "open",
       "target": "<unresolved>",
       "scope": "unresolved_target",
@@ -69358,8 +69364,8 @@
    "mentioned_outside_history": 5,
    "oneoff_shaped": false,
    "has_run_receipt": false,
-   "last_modified": "2026-09-26",
-   "lines": 403,
+   "last_modified": "2026-10-02",
+   "lines": 407,
    "operational_role": "unresolved",
    "collection_output_entrypoints": [],
    "static_consumers": [
@@ -69381,7 +69387,7 @@
    },
    "writer_evidence": [
     {
-     "line": 370,
+     "line": 374,
      "operation": "BAK.write_bytes",
      "target": "<unresolved>",
      "scope": "unresolved_target",
@@ -69389,7 +69395,7 @@
      "signature": "d91d939eb063b4ddd117aef455e16889ac3a22f0fde10d43ef03f7d0850e4280"
     },
     {
-     "line": 376,
+     "line": 380,
      "operation": "open",
      "target": "<unresolved>",
      "scope": "unresolved_target",
@@ -69400,11 +69406,11 @@
    "writer_analysis_error": null,
    "writer_risk": "P2_unresolved_write_target",
    "undeclared_governed_tables": [],
-   "source_sha256": "69a634cb00b5a30374489e75ad9ddb8fb80f9e4de3d62facda53cb27b84592b1",
+   "source_sha256": "6e5dad082fdfb5257128151bace8c6cf9379d96be26ea14314517411fd8026e5",
    "maintenance_status": "REQUIRES-REVIEW",
    "maintenance_evidence": {
     "reason": "writer targets/callers need runtime confirmation before ownership or retirement: <unresolved>",
-    "source_sha256": "69a634cb00b5a30374489e75ad9ddb8fb80f9e4de3d62facda53cb27b84592b1",
+    "source_sha256": "6e5dad082fdfb5257128151bace8c6cf9379d96be26ea14314517411fd8026e5",
     "identical_source_peers": [],
     "ci_commands": [],
     "documented_commands": [],
@@ -69418,14 +69424,14 @@
     "review_priority": "P2_unresolved_write_target",
     "review_write_sites": [
      {
-      "line": 370,
+      "line": 374,
       "operation": "BAK.write_bytes",
       "target": "<unresolved>",
       "scope": "unresolved_target",
       "table": null
      },
      {
-      "line": 376,
+      "line": 380,
       "operation": "open",
       "target": "<unresolved>",
       "scope": "unresolved_target",
@@ -75019,12 +75025,12 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 11,
-   "mentioned_outside_history": 11,
+   "mentions": 12,
+   "mentioned_outside_history": 12,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-10-02",
-   "lines": 1827,
+   "lines": 1829,
    "operational_role": "unresolved",
    "collection_output_entrypoints": [],
    "static_consumers": [
@@ -75063,7 +75069,7 @@
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "a243d8bfce59bf3e3c0249aaa743ea39f05973196c6221be365b567b4b0caeb1"
+     "signature": "6e59b2f56b84d724c51f814f5f52f4c3e58e987f31b1747af4b80dc9cf10a3a2"
     },
     {
      "line": 647,
@@ -75071,33 +75077,33 @@
      "target": "<unresolved>/docs/schema/inventory.json",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "347a3ec00fd157a2634cfc29d9a25e5ff465a8a6fa1b4a81f50faaffcc3fc7e0"
+     "signature": "f61d656d924db84d788f8cac0e7fb4200cca27c5cb03eb80516b6d18c43175dd"
     },
     {
-     "line": 1815,
+     "line": 1817,
      "operation": "OUT_MD.write_text",
      "target": "<unresolved>/docs/INVENTORY.md",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "df4a52ff186060a01a9f5499985a86c9ec7b0bb8f6d22ac549a7e0f0f9f15420"
+     "signature": "f001b0593146d57a2cca63a34b30e2f897a9236813270bb8d23273a8350425f0"
     },
     {
-     "line": 1816,
+     "line": 1818,
      "operation": "OUT_JSON.write_text",
      "target": "<unresolved>/docs/schema/inventory.json",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "347a3ec00fd157a2634cfc29d9a25e5ff465a8a6fa1b4a81f50faaffcc3fc7e0"
+     "signature": "f61d656d924db84d788f8cac0e7fb4200cca27c5cb03eb80516b6d18c43175dd"
     }
    ],
    "writer_analysis_error": null,
    "writer_risk": "P2_unresolved_write_target",
    "undeclared_governed_tables": [],
-   "source_sha256": "185f283d9fe1fcf44d3a2bc3a1ac1f3c9d568de4e5fd2bd52356510868dd88c9",
+   "source_sha256": "bc9845b4885feccc170d405de1540f44c9b30b0b26279628a08db0d569de4023",
    "maintenance_status": "REQUIRES-REVIEW",
    "maintenance_evidence": {
     "reason": "writer targets/callers need runtime confirmation before ownership or retirement: <unresolved>, <unresolved>/docs/INVENTORY.md, <unresolved>/docs/schema/inventory.json",
-    "source_sha256": "185f283d9fe1fcf44d3a2bc3a1ac1f3c9d568de4e5fd2bd52356510868dd88c9",
+    "source_sha256": "bc9845b4885feccc170d405de1540f44c9b30b0b26279628a08db0d569de4023",
     "identical_source_peers": [],
     "ci_commands": [],
     "documented_commands": [
@@ -75132,14 +75138,14 @@
       "table": null
      },
      {
-      "line": 1815,
+      "line": 1817,
       "operation": "OUT_MD.write_text",
       "target": "<unresolved>/docs/INVENTORY.md",
       "scope": "unresolved_target",
       "table": null
      },
      {
-      "line": 1816,
+      "line": 1818,
       "operation": "OUT_JSON.write_text",
       "target": "<unresolved>/docs/schema/inventory.json",
       "scope": "unresolved_target",
@@ -81342,8 +81348,8 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 5,
-   "mentioned_outside_history": 5,
+   "mentions": 6,
+   "mentioned_outside_history": 6,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-26",
@@ -99683,15 +99689,17 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 2,
-   "mentioned_outside_history": 2,
+   "mentions": 3,
+   "mentioned_outside_history": 3,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-26",
    "lines": 56,
    "operational_role": "unresolved",
    "collection_output_entrypoints": [],
-   "static_consumers": [],
+   "static_consumers": [
+    "server/tests/test_code_reference_graph.py"
+   ],
    "runtime_consumer_candidates": [],
    "operational_call_evidence": {
     "publication_calls": [],
@@ -101549,8 +101557,8 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 97,
-   "mentioned_outside_history": 96,
+   "mentions": 98,
+   "mentioned_outside_history": 97,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-26",
@@ -102791,15 +102799,16 @@
    "reads": [],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 61,
-   "mentioned_outside_history": 60,
+   "mentions": 69,
+   "mentioned_outside_history": 68,
    "oneoff_shaped": false,
    "has_run_receipt": false,
-   "last_modified": "2026-09-26",
-   "lines": 2200,
+   "last_modified": "2026-10-02",
+   "lines": 2227,
    "operational_role": "unresolved",
    "collection_output_entrypoints": [],
    "static_consumers": [
+    "code/1001_link_businesses_to_contracting.py",
     "code/100_finish_declinations_and_employment.py",
     "code/1010_ownership_change_from_contracting.py",
     "code/1011_cross_dataset_reconciliation.py",
@@ -102846,6 +102855,7 @@
     "code/169_build_identifier_graph.py",
     "code/170_build_individual_native_candidates.py",
     "code/173_consolidate_rulings_ledger.py",
+    "code/173_consolidate_rulings_ledger_test.py",
     "code/175_sync_published_property_view_entities.py",
     "code/180_build_lobbying_registrant_hub.py",
     "code/181_enrich_lobbying_registrant_identifiers.py",
@@ -102866,6 +102876,7 @@
     "code/32_build_deals_party_queue.py",
     "code/33_apply_party_rulings.py",
     "code/353_propagate_lobbying_corrections_to_consumers.py",
+    "code/358_measure_sam_individual_native_class_delta.py",
     "code/35_coverage_audit.py",
     "code/35_entity_harvest.py",
     "code/374_build_cedar_taxonomy_export.py",
@@ -102900,10 +102911,14 @@
     "docs/imports/r7_audit/bundles/e6708a8f8e608cd16df9c09c/manifest.json",
     "public/data/cedar/register.json",
     "scripts/derive-explore.mjs",
+    "server/tests/test_code_reference_graph.py",
     "server/tests/test_field_map.py",
+    "src/features/grove/explore.js",
+    "src/features/grove/explore.test.js",
     "src/features/grove/pressIdentity.js"
    ],
    "runtime_consumer_candidates": [
+    "code/1001_link_businesses_to_contracting.py",
     "code/100_finish_declinations_and_employment.py",
     "code/1010_ownership_change_from_contracting.py",
     "code/1011_cross_dataset_reconciliation.py",
@@ -102962,6 +102977,7 @@
     "code/32_build_deals_party_queue.py",
     "code/33_apply_party_rulings.py",
     "code/353_propagate_lobbying_corrections_to_consumers.py",
+    "code/358_measure_sam_individual_native_class_delta.py",
     "code/35_coverage_audit.py",
     "code/35_entity_harvest.py",
     "code/374_build_cedar_taxonomy_export.py",
@@ -103023,15 +103039,18 @@
    "writer_analysis_error": null,
    "writer_risk": "P3_no_detected_write_not_readonly_certified",
    "undeclared_governed_tables": [],
-   "source_sha256": "5bb20038f2144a56e9f30cc5d1ca578e8c3ce3bcd169e0d0f4d9d6f4b3477dbc",
+   "source_sha256": "ebb0b2130ab720ac2da9f66c7d87ccc95eb00b478851a8bdceae870662a1bb46",
    "maintenance_status": "ACTIVE",
    "maintenance_evidence": {
     "reason": "declared operational role, CI invocation or reachable Python dependency",
-    "source_sha256": "5bb20038f2144a56e9f30cc5d1ca578e8c3ce3bcd169e0d0f4d9d6f4b3477dbc",
+    "source_sha256": "ebb0b2130ab720ac2da9f66c7d87ccc95eb00b478851a8bdceae870662a1bb46",
     "identical_source_peers": [],
     "ci_commands": [],
-    "documented_commands": [],
+    "documented_commands": [
+     "docs/REVIEW_STATUS.md"
+    ],
     "active_runtime_callers": [
+     "code/1001_link_businesses_to_contracting.py",
      "code/1079_quarantine_method_exposure.py",
      "code/108_build_tribal_tax_bases.py",
      "code/110_build_harmonized_views.py",
@@ -103060,6 +103079,73 @@
      "code/cedar_match_guard.py",
      "code/cedar_publication.py"
     ],
+    "superseded_output_edges": [],
+    "historical_replay_evidence": [],
+    "output_authority_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "output_artifact_hashes": "NOT_MEASURED_BY_SCRIPT_CENSUS",
+    "retirement_authorized": false,
+    "review_owner": null,
+    "review_priority": null,
+    "review_write_sites": [],
+    "safe_delete_proof": "NOT_ESTABLISHED: external callers, unique output and recovery value are not exhausted by static scans",
+    "bounded_source_review": null,
+    "source_review_stale": false
+   },
+   "registration_status": "unresolved_not_authorized"
+  },
+  {
+   "script": "cedar_domain_publication_test.py",
+   "dir": "",
+   "number": "",
+   "duplicate_number": false,
+   "kind": "unknown",
+   "evidence": [],
+   "never_run": false,
+   "never_run_reason": "",
+   "writes": [],
+   "reads": [],
+   "in_a_contract": false,
+   "in_an_ordering": false,
+   "mentions": 1,
+   "mentioned_outside_history": 1,
+   "oneoff_shaped": false,
+   "has_run_receipt": false,
+   "last_modified": "2026-10-02",
+   "lines": 132,
+   "operational_role": "test/fixture",
+   "collection_output_entrypoints": [],
+   "static_consumers": [],
+   "runtime_consumer_candidates": [],
+   "operational_call_evidence": {
+    "publication_calls": [],
+    "validation_calls": []
+   },
+   "unknown_io_literals": [],
+   "embedded_test_functions": 14,
+   "standalone_test_evidence": {
+    "unittest_classes": [
+     "EveryBusinessRecordFieldPublishes",
+     "WhatStillFailsClosed",
+     "SmallCellSuppressionIsUnchanged"
+    ],
+    "pytest_import": false,
+    "filename_convention": true,
+    "assertion_nodes": 0,
+    "local_check_harness_calls": []
+   },
+   "writer_evidence": [],
+   "writer_analysis_error": null,
+   "writer_risk": "P3_no_detected_write_not_readonly_certified",
+   "undeclared_governed_tables": [],
+   "source_sha256": "eac46fbb99c4d77b7831ff071d76f2ca179caa0f5a424dc000cc8491b3e96956",
+   "maintenance_status": "ACTIVE",
+   "maintenance_evidence": {
+    "reason": "declared operational role, CI invocation or reachable Python dependency",
+    "source_sha256": "eac46fbb99c4d77b7831ff071d76f2ca179caa0f5a424dc000cc8491b3e96956",
+    "identical_source_peers": [],
+    "ci_commands": [],
+    "documented_commands": [],
+    "active_runtime_callers": [],
     "superseded_output_edges": [],
     "historical_replay_evidence": [],
     "output_authority_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
@@ -103877,8 +103963,8 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 31,
-   "mentioned_outside_history": 30,
+   "mentions": 32,
+   "mentioned_outside_history": 31,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-26",
@@ -103923,6 +104009,7 @@
     "code/build.py",
     "docs/CONSOLIDATION_DOC_INVENTORY.json",
     "docs/defect_class_retro_sweep.json",
+    "server/tests/test_code_reference_graph.py",
     "server/tests/test_gaming_release.py",
     "server/tests/test_gaming_writer_fence.py",
     "server/tests/test_pipeline_registration.py"
@@ -104221,12 +104308,12 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 31,
-   "mentioned_outside_history": 30,
+   "mentions": 35,
+   "mentioned_outside_history": 34,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-10-02",
-   "lines": 3484,
+   "lines": 3500,
    "operational_role": "product consumer/shared service",
    "collection_output_entrypoints": [],
    "static_consumers": [
@@ -104251,7 +104338,9 @@
     "code/846_session_audit.py",
     "code/build.py",
     "server/cedar_press/repository.py",
+    "server/tests/test_code_reference_graph.py",
     "server/tests/test_field_map.py",
+    "server/tests/test_recipient_holds.py",
     "src/features/grove/explore.test.js",
     "src/features/grove/pressAccess.js",
     "src/features/grove/pressAccess.test.js",
@@ -104323,30 +104412,30 @@
    },
    "writer_evidence": [
     {
-     "line": 3103,
+     "line": 3119,
      "operation": "COMPAT_FILE.write_text",
      "target": "<unresolved>/code/770_sample_extracts.py",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "e27925d18b90f9d569f7216065b09f1afb196f34df2867b6a44e21811fecdc48"
+     "signature": "abcd6eab6727207b1ecb8963ed860218d490981403324d10dcec9829edb26867"
     },
     {
-     "line": 3352,
+     "line": 3368,
      "operation": "path.open",
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "72d1ba6ce80b4552578d9e813a6a6c0b699554570e67726349ecc5a17a872dc0"
+     "signature": "fe6568e8a883c5a6dd8eb84f6cd173c1e6dd3a6660568154f89f77435eae21b8"
     }
    ],
    "writer_analysis_error": null,
    "writer_risk": "P2_unresolved_write_target",
    "undeclared_governed_tables": [],
-   "source_sha256": "96f45e4ef2a651bff6292acbd5f023f1fd1212f4b21dd6399108af387352ee7e",
+   "source_sha256": "b567cb2da4b397d9205c640e3d3b15d97d8b232a1d26ffe7340e2713e45150ff",
    "maintenance_status": "ACTIVE",
    "maintenance_evidence": {
     "reason": "declared operational role, CI invocation or reachable Python dependency",
-    "source_sha256": "96f45e4ef2a651bff6292acbd5f023f1fd1212f4b21dd6399108af387352ee7e",
+    "source_sha256": "b567cb2da4b397d9205c640e3d3b15d97d8b232a1d26ffe7340e2713e45150ff",
     "identical_source_peers": [],
     "ci_commands": [],
     "documented_commands": [
@@ -106524,17 +106613,17 @@
   "generated": "2026-10-02",
   "generator": "code/521_inventory.py scripts-only",
   "scope": "code/**/*.py; caller mentions restricted to Git-tracked project text",
-  "scripts": 687,
+  "scripts": 688,
   "operational_role_counts": {
    "active producer": 76,
    "active validator/migration/review": 11,
    "historical": 18,
    "product consumer/shared service": 8,
-   "test/fixture": 7,
+   "test/fixture": 8,
    "unresolved": 567
   },
   "maintenance_status_counts": {
-   "ACTIVE": 164,
+   "ACTIVE": 165,
    "DUPLICATE": 0,
    "SUPERSEDED": 0,
    "HISTORICAL-RETAIN": 38,
@@ -106554,8 +106643,8 @@
   "writer_risk_scope": "Potential AST write sites with conservative binding expansion, not executed writes. Existing unregistered edges remain pending; inventory receipt is not authorization. Imported custom writers, shell dispatch and dynamic output resolution require runtime review.",
   "operational_precedence": "Standalone test evidence; explicit historical directory; launch producer declaration; Python runtime-reference candidate plus operational call evidence; existing unreferenced archive candidate; unresolved",
   "reference_scope": "Static references retain tests, path literals and tracked configuration. Runtime candidates require Python imports or literal dispatch paths from non-test files; these are not verified reachability, external scheduler or runtime invocations. Dynamic targets and non-Python dispatch remain unresolved.",
-  "embedded_selftest_files": 126,
-  "unresolved_not_authorized": 573,
+  "embedded_selftest_files": 127,
+  "unresolved_not_authorized": 574,
   "table_snapshot_preserved_sha256": "c46a1097785af2a92ee0d50d35858f75f7c4f3cf1c40a0c31f3c96fcdb9e49ee",
   "data_generated_unchanged": "2026-09-02",
   "limitation": "Static census is not runtime write proof or authorization to run a producer."

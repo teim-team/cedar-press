@@ -522,9 +522,10 @@ export default function CedarPressMethods() {
                 ))}
               </ul>
               {/* The owner's challenge, 2026-09-13: is it wrong that Cedar does
-                  not publish what it resolves? It would be. What is actually
-                  withheld is much narrower, and WITHHELD_NOTE holds the wording
-                  with the rule it comes from cited beside it. */}
+                  not publish what it resolves? It would be. The owner ruling of
+                  2026-10-02 then published the individually owned firms' names
+                  and identifiers as business records; WITHHELD_NOTE holds the
+                  wording with the rule it comes from cited beside it. */}
               <p className="cp-msec__aside">{WITHHELD_NOTE}</p>
             </Chapter>
 

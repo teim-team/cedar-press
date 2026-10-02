@@ -322,6 +322,17 @@ Both can be true. Every row therefore carries its identifier plus
 so this is a finding the owner can rule on rather than a deletion nobody can
 see. **29 crosswalk rows** are gated this way today, on **16 linked directory rows**.
 
+**Ruled, 2026-10-02.** The owner resolved the tension in favour of the first
+reading and extended it to the identifier: a firm is a business entity
+regardless of what it is named after, and its UEI/CAGE is a public business
+registration (SAM and USAspending publish it for every awardee), not a pointer
+to a private individual. `cedar_domain.may_publish_individual_native_field`
+now publishes every field it withheld, and `code/1001 gate_for` reads that
+answer, so the 29 `WITHHOLD_PENDING_RULING` rows become `PUBLISH` with the
+basis `owner_ruling_2026-10-02_...` on the next build. Record:
+`docs/REVIEW_STATUS.md`, "Owner ruling: individually owned firm records
+publish, 2026-10-02".
+
 ## Licensing and consent, as applied
 
 * **DUNS** is harvested where a site prints it (it is evidence) and written with

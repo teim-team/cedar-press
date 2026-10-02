@@ -76,20 +76,25 @@ test("the renaming targets are the ones the specification names", () => {
   assert.match(doc, /cedar_uid/, "the identifier standard no longer documents cedar_uid");
 });
 
-test("the withheld class is really withheld in the published register", () => {
+test("the individually owned class publishes by name in the published register (owner ruling 2026-10-02)", () => {
+  // Until 2026-10-02 every row of this class carried a null name and
+  // withheld_names counted them. The owner ruled that a firm is a business
+  // entity whatever it is named after, so the register now carries the name
+  // and the count reads 0; the count must still agree with the rows.
   const index = register.classes.findIndex((entry) => entry.code === WITHHELD_CLASS);
   assert.ok(index >= 0, `the register no longer holds the class "${WITHHELD_CLASS}"`);
   const rows = register.entities.filter((entity) => entity[2] === index);
   assert.ok(rows.length > 0, `the register holds no ${WITHHELD_CLASS} rows`);
   for (const [uid, name] of rows) {
-    assert.equal(name, null, `${uid} publishes a name the withholding rule says it should not`);
+    assert.ok(typeof name === "string" && name.trim(), `${uid} has no published name; the rule publishes this class`);
     assert.match(uid, /^CE-[0-9A-Z]{5}-[0-9A-Z]{2}$/, `${uid} is not a well-formed cedar_uid`);
   }
   assert.equal(
-    rows.length,
+    register.entities.filter((entity) => entity[1] === null).length,
     register.withheld_names,
-    "the register's withheld_names count disagrees with its own withheld rows",
+    "the register's withheld_names count disagrees with its own null-name rows",
   );
+  assert.equal(register.withheld_names, 0);
 });
 
 test("the shapes are the standard's, and the entity sample is a real uid", () => {

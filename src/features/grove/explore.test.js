@@ -12,7 +12,7 @@ import { PRESENTATION_COLUMNS as currentPresentationColumns } from "./mixedSprea
 
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { readFileSync, readdirSync, statSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 
@@ -120,14 +120,6 @@ const load = (key) => {
   return parseCsv(readFileSync(`${LEGACY}samples/${relative}`, "utf8"));
 };
 
-function* walk(dir) {
-  for (const name of readdirSync(dir)) {
-    const path = `${dir}/${name}`;
-    if (statSync(path).isDirectory()) yield* walk(path);
-    else if (name.endsWith(".csv")) yield path;
-  }
-}
-
 // ── The contracts ──────────────────────────────────────────────────────────
 
 test("the contract file and the register are current", () => {
@@ -201,45 +193,59 @@ test("the flagship comes first among a collection's tables and locked shelves st
 
 // ── The publication rule ───────────────────────────────────────────────────
 
-const WITHHELD_UID = REGISTER.entities.find((e) => e.withheld).uid;
+const INDIVIDUAL_CLASS = "Individually Native-owned business";
 const NAMED = [...REGISTER.byUid.entries()].find(([, e]) => e.name);
 
-test("the register withholds exactly the names the publication rule withholds", () => {
+// The published register withholds no name since the owner ruling of
+// 2026-10-02 (an individually Native-owned firm is a business entity whatever
+// it is named after; code/cedar_domain.py may_publish_individual_native_field).
+// The viewer's masking path is kept for any future withholding, so it is
+// exercised on a copy of the register with one real uid's name set to null,
+// never on the published file, which has none.
+const MASKED = (() => {
+  const json = JSON.parse(readFileSync(`${PUBLIC}/data/cedar/register.json`, "utf8"));
+  const index = json.classes.findIndex((c) => c.code === INDIVIDUAL_CLASS);
+  const first = json.entities.find((e) => e[2] === index);
+  first[1] = null;
+  return { register: buildRegister(json), uid: first[0] };
+})();
+const WITHHELD_UID = MASKED.uid;
+
+test("the register publishes every individually owned firm's name (owner ruling 2026-10-02)", () => {
+  const json = JSON.parse(readFileSync(`${PUBLIC}/data/cedar/register.json`, "utf8"));
   const withheld = REGISTER.entities.filter((e) => e.withheld);
-  assert.equal(withheld.length, 45);
-  assert.ok(withheld.every((e) => e.type === "Individually Native-owned business" && e.name === null));
+  assert.equal(withheld.length, 0);
+  assert.equal(json.withheld_names, 0);
+  const firms = REGISTER.entities.filter((e) => e.type === INDIVIDUAL_CLASS);
+  assert.equal(firms.length, 45);
+  assert.ok(firms.every((e) => typeof e.name === "string" && e.name.trim()), "a firm of the class has no name");
   assert.equal(REGISTER.classes.length, 18);
   assert.equal(REGISTER.byUid.get("CE-00134-BX")?.name, "Cherokee Nation");
 });
 
-test("no served sample carries a withheld name in any cell", () => {
-  // The importer strikes such a sample before it is copied; this is the
-  // proof on the files public/ actually holds. On 2026-09-05 six did.
-  const names = new Set(
-    readFileSync(`${REPO}data/spine/cedar_entity_names.csv`, "utf8").split("\n").slice(1)
-      .map((line) => parseCsv(`a,b,c\n${line}`).rows[0]).filter(Boolean)
-      .filter((r) => r.c === "Individually Native-owned business").map((r) => r.b.trim().toLowerCase()),
-  );
-  assert.equal(names.size, 45);
-  for (const path of walk(`${PUBLIC}/data/cedar/samples`)) {
-    const { rows } = parseCsv(readFileSync(path, "utf8"));
-    for (const row of rows) {
-      for (const [column, value] of Object.entries(row)) {
-        assert.ok(!names.has(String(value).trim().toLowerCase()), `${path.slice(PUBLIC.length)} column ${column} carries a withheld name; run python scripts/import_cedar_manifest.py --audit`);
-      }
-    }
+test("the register's firm names are the spine's, name for name", () => {
+  // Until 2026-10-02 this test proved no served sample carried one of these
+  // names; the rule now publishes them, so the proof is that the register
+  // carries each spine name for the class unchanged.
+  const spine = readFileSync(`${REPO}data/spine/cedar_entity_names.csv`, "utf8").split("\n").slice(1)
+    .map((line) => parseCsv(`a,b,c\n${line}`).rows[0]).filter(Boolean)
+    .filter((r) => r.c === INDIVIDUAL_CLASS);
+  assert.equal(spine.length, 45);
+  for (const r of spine) {
+    assert.equal(REGISTER.byUid.get(r.a)?.name, r.b, `${r.a} is not published under its spine name`);
+    assert.equal(REGISTER.byUid.get(r.a)?.withheld, false);
   }
 });
 
 test("a withheld register name never falls back to the table's own name column", () => {
   const contract = { entity_uid: "cedar_uid", entity_name: "n", entity_type: "t" };
-  const entity = rowEntity({ cedar_uid: WITHHELD_UID, n: "Leaked Name LLC", t: "whatever" }, contract, REGISTER);
+  const entity = rowEntity({ cedar_uid: WITHHELD_UID, n: "Leaked Name LLC", t: "whatever" }, contract, MASKED.register);
   assert.equal(entity.name, null);
   assert.equal(entity.withheld, true);
-  assert.equal(entity.type, "Individually Native-owned business");
+  assert.equal(entity.type, INDIVIDUAL_CLASS);
   // And the masked row is what every other path reads: the table view, the
   // record, the search and the export.
-  const [item] = universalRows("lobbying/native_entity_lobbying_disclosures", [{ cedar_uid: WITHHELD_UID, canonical_name: "Leaked Name LLC", filing_year: "2020" }], REGISTER);
+  const [item] = universalRows("lobbying/native_entity_lobbying_disclosures", [{ cedar_uid: WITHHELD_UID, canonical_name: "Leaked Name LLC", filing_year: "2020" }], MASKED.register);
   assert.equal(item.row.canonical_name, WITHHELD_TEXT);
   assert.equal(filterRows([item], { ...EMPTY_CUT, q: "leaked" }).length, 0);
   assert.ok(!cutCsv([item], { view: "table", columns: ["cedar_uid", "canonical_name"] }).includes("Leaked"));
@@ -660,7 +666,7 @@ test("the caption says the cut in words and never invents a filter", () => {
     { register: REGISTER, shown: 3, total: 10 },
   );
   assert.equal(said, "Advocacy · Cherokee Nation · 2015–2024 · “water” · including superseded versions · 3 of 10 sample records");
-  assert.equal(describeCut({ ...EMPTY_CUT, entities: [WITHHELD_UID] }, { register: REGISTER }), `all collections · ${WITHHELD_UID} (name withheld)`);
+  assert.equal(describeCut({ ...EMPTY_CUT, entities: [WITHHELD_UID] }, { register: MASKED.register }), `all collections · ${WITHHELD_UID} (name withheld)`);
   // The question to Cedar asks about the collection, not about rows it has not seen.
   assert.match(questionFor({ ...EMPTY_CUT, collections: ["lobbying"] }, REGISTER), /What does this collection cover/);
 });
@@ -917,7 +923,7 @@ test("the field map decides every column of every sampled flagship in the owner'
 
 test("a JSON-array cell reads as a list in the viewer, before and after the export changes shape", () => {
   const contract = contractFor("legislation/native_bills");
-  const register = REGISTER;
+  const register = MASKED.register;
   const pipe = { entity_cedar_uids: `${NAMED[0]}|${WITHHELD_UID}`, entity_names: "A|B" };
   const json = { entity_cedar_uids: JSON.stringify([NAMED[0], null, WITHHELD_UID]), entity_names: JSON.stringify(["A", null, "B"]) };
   assert.deepEqual(rowUids(pipe, contract), [NAMED[0], WITHHELD_UID]);

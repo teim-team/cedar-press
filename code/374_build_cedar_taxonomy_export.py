@@ -255,10 +255,12 @@ ENTITY_CLASS_DEFS = {
         "45 - CAGE registry lookup, company website, or an owner note with a "
         "URL.",
         "`elijah_ruling` is in `RULED_METHODS`, so these are tier A as "
-        "ATTRIBUTIONS. That does NOT make them publishable as NAMES: "
-        "`may_publish_individual_native_field()` withholds every name, "
-        "address, and - for a firm whose legal name is a person's - the UEI "
-        "and CAGE, absent recorded `OPTED_IN` consent."),
+        "ATTRIBUTIONS. Publication is a separate question answered by "
+        "`may_publish_individual_native_field()`: since the owner ruling of "
+        "2026-10-02 the firm's name, address, UEI and CAGE publish without "
+        "consent (a firm is a business entity whatever it is named after); "
+        "until that date they were withheld absent recorded `OPTED_IN` "
+        "consent."),
     "Urban Indian Organization": (
         "An organisation in the IHS Urban Indian Organization programme, "
         "serving Native people in an urban area.",

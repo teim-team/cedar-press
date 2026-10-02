@@ -1207,12 +1207,20 @@ def register() -> dict:
     path = ROOT / "data" / "spine" / "cedar_entity_names.csv"
     if not path.exists():
         return _REGISTER
-    # A canonical name the publication rule withholds (an individually
-    # Native-owned firm without recorded consent) is blank here, so nothing
-    # downstream can fall back to it: the class still ships, the name does
-    # not. The rule is code/cedar_domain.py's, imported rather than copied.
+    # A canonical name the publication rule withholds is blank here, so
+    # nothing downstream can fall back to it: the class still ships, the
+    # name does not. The rule is code/cedar_domain.py's, imported rather
+    # than copied and asked live. Until 2026-10-02 it withheld every
+    # individually Native-owned firm's name absent recorded consent; the
+    # owner ruling of that date publishes the name (a firm is a business
+    # entity whatever it is named after), so this blanks nothing today and
+    # would blank again if the rule ever withheld the name.
     import cedar_domain  # noqa: PLC0415
-    withheld_class = cedar_domain.INDIVIDUAL_NATIVE_CLASS
+    withheld_class = (
+        cedar_domain.INDIVIDUAL_NATIVE_CLASS
+        if not cedar_domain.may_publish_individual_native_field("canonical_name")
+        else None
+    )
     out: dict = {}
     with path.open(encoding="utf-8-sig", errors="replace", newline="") as fh:
         for row in csv.DictReader(fh):
@@ -1575,14 +1583,22 @@ def apply_field_map(collection: str, header: list, rows: list,
         role_src = None            # owed: absent until supplied, never a placeholder
     withdrawn = entry.get("withdrawn_flag")
     # The per-field publication rule for an individually Native-owned firm
-    # (cedar_domain.may_publish_individual_native_field): the columns the map
-    # marks `withhold` are masked upstream, where the consent evidence lives
-    # (241, 242), and the register blanks the canonical name. This is the
-    # last check before emission, and it fails closed: a row whose entity the
-    # register classes as individually Native-owned carries no consent here,
-    # so its withheld fields leave blank (Codex, PR #66).
-    withhold_cols = [f["column"] for f in entry["fields"] if f["decision"] == "withhold"]
+    # (cedar_domain.may_publish_individual_native_field): a column the map
+    # marks `withhold` is "masked where the carve-out applies", and the
+    # carve-out is that function's answer for the column. Until 2026-10-02 it
+    # withheld the name and identifiers absent consent, so this last check
+    # before emission blanked them on every row of the class (Codex, PR #66).
+    # Owner ruling 2026-10-02: a firm is a business entity whatever it is
+    # named after, and its name, UEI and CAGE are public business records, so
+    # the rule now publishes them and this check blanks nothing for them. The
+    # map's decision is kept and read live; a column the rule withholds (an
+    # unknown or internal field) is still blanked on the class's rows.
     import cedar_domain  # noqa: PLC0415
+    withhold_cols = [
+        f["column"] for f in entry["fields"]
+        if f["decision"] == "withhold"
+        and not cedar_domain.may_publish_individual_native_field(f["column"])
+    ]
     withheld_class = cedar_domain.INDIVIDUAL_NATIVE_CLASS if withhold_cols else None
     for row, b in zip(rows, per_row, strict=True):
         if "cedar_uid" in b:

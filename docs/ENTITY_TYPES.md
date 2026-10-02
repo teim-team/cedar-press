@@ -233,10 +233,16 @@ individually Native-owned firm"*, which refuses the **tribal link** and
 **affirms** Native ownership; read literally as "not Native" it inverts the
 owner's meaning, and it already has once.
 
-**Publication rule:** `may_publish_individual_native_field()` withholds every
-name and address, and — for a firm whose legal name is a person's — the UEI and
-CAGE, absent recorded `OPTED_IN` consent. Example uids `CE-000NV-BK` and
-`CE-000NW-HC`; names are withheld here under that rule.
+**Publication rule (owner ruling 2026-10-02):** `may_publish_individual_native_field()`
+publishes the firm's name, DBA, UEI, CAGE, city and business address without
+consent — a firm is a business entity regardless of what it is named after, and
+these are the public business records SAM and USAspending publish for every
+federal awardee. Until that date the rule withheld them absent recorded
+`OPTED_IN` consent, and this page withheld the names of its two example uids,
+`CE-000NV-BK` and `CE-000NW-HC`; they publish in `public/data/cedar/register.json`
+now. `researcher_note` stays internal; small-cell suppression is unchanged.
+Record: `docs/REVIEW_STATUS.md`, "Owner ruling: individually owned firm records
+publish, 2026-10-02".
 
 ## Urban Indian Organization — 43 rows
 

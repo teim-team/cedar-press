@@ -649,11 +649,18 @@ class TestGeneratorAndManifestAgree(unittest.TestCase):
         # reads (dist/review/samples/<cedar_id>/) and the layout the AUDIT
         # reads (public/<manifest path>): Codex, PR #63, found the first
         # joined a URL to the bundle and struck nothing. Field-level, the way
-        # the rule is written: a row of the withheld class with an owner's
-        # name and no consent is struck even when no cell is the firm's
-        # canonical name; the same row with consent recorded is not; a row
-        # of another class carrying the same column is not; a firm's name
-        # under any column is the backstop.
+        # the rule is written. Two passes:
+        #   1. the LIVE rule. Owner ruling 2026-10-02: a firm is a business
+        #      entity whatever it is named after, so every business-record
+        #      field of the class publishes without consent and nothing is
+        #      struck - not the owner's-name row, not the firm's name under
+        #      another header.
+        #   2. the rule patched back to the pre-ruling consent gate, so the
+        #      striking machinery itself is still proven: a row of the class
+        #      with an owner's name and no consent is struck even when no
+        #      cell is the firm's canonical name; the same row with consent
+        #      recorded is not; a row of another class carrying the same
+        #      column is not; a firm's name under any column is the backstop.
         import tempfile
 
         names, uids = self.script.withheld_entities(
@@ -664,6 +671,14 @@ class TestGeneratorAndManifestAgree(unittest.TestCase):
         leaked = next(iter(names)).title()
         uid = next(iter(uids))
         cls = self.script.WITHHELD_CLASS
+
+        from unittest.mock import patch
+
+        def consent_gate(field, name_is_person=None, consent_status="NOT_ASKED"):
+            # The rule as written before 2026-10-02, for pass 2 only.
+            if field not in self.script.WITHHELD_FIELDS:
+                return False
+            return (consent_status or "").strip().upper() == "OPTED_IN"
 
         def plant(folder: Path, rows_by_name: dict[str, list[list[str]]]) -> None:
             folder.mkdir(parents=True, exist_ok=True)
@@ -698,7 +713,34 @@ class TestGeneratorAndManifestAgree(unittest.TestCase):
                 ]
             }
 
+        # Pass 1: the live rule strikes nothing, in both layouts.
         with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            plant(root / "dist" / "review" / "samples" / "fixture", samples)
+            live = manifest()
+            self.assertEqual(
+                self.script.withhold_samples(live, self.script.review_sample(root), names, uids),
+                [],
+            )
+            for table in live["collections"][0]["tables"]:
+                if table["table"] != "absent.csv":
+                    self.assertTrue(table["sample_path"], table["table"])
+                self.assertNotIn("sample_withheld_why", table)
+            self.assertTrue(live["collections"][0]["sample"]["path"])
+            plant(root / "public" / "data" / "cedar" / "samples" / "fixture", samples)
+            audited_live = manifest()
+            self.assertEqual(
+                self.script.withhold_samples(
+                    audited_live, self.script.public_sample(root), names, uids
+                ),
+                [],
+            )
+
+        # Pass 2: the pre-ruling gate, so the machinery is still proven.
+        with (
+            tempfile.TemporaryDirectory() as tmp,
+            patch.object(self.script, "may_publish_individual_native_field", consent_gate),
+        ):
             root = Path(tmp)
             # The import layout.
             plant(root / "dist" / "review" / "samples" / "fixture", samples)
@@ -712,12 +754,14 @@ class TestGeneratorAndManifestAgree(unittest.TestCase):
             self.assertEqual(by_table["named.csv"]["columns"], ["firm"])
             tables = {t["table"]: t for t in imported["collections"][0]["tables"]}
             self.assertIsNone(tables["owner.csv"]["sample_path"])
-            self.assertIn("without recorded consent", tables["owner.csv"]["sample_withheld_why"])
+            self.assertIn(
+                "the publication rule withholds", tables["owner.csv"]["sample_withheld_why"]
+            )
             for kept in ("consented.csv", "tribal.csv", "clean.csv", "absent.csv"):
                 self.assertTrue(tables[kept]["sample_path"], kept)
             flagship = imported["collections"][0]["sample"]
             self.assertIsNone(flagship["path"])
-            self.assertIn("without recorded consent", flagship["unavailable_because"])
+            self.assertIn("the publication rule withholds", flagship["unavailable_because"])
             # The served copy of a struck sample from an earlier import goes.
             plant(root / "public" / "data" / "cedar" / "samples" / "fixture", samples)
             self.script.unpublish(root, struck)

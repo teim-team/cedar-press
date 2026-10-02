@@ -449,9 +449,16 @@ may_publish_individual_native_field = _RULE.may_publish_individual_native_field
 
 WITHHELD_WHY = (
     "The sample carries a field the publication rule withholds for an individually "
-    "Native-owned firm without recorded consent (may_publish_individual_native_field), "
+    "Native-owned firm (may_publish_individual_native_field), "
     "so the file is not published. The table is still in the release."
 )
+# Owner ruling 2026-10-02: a firm is a business entity regardless of what it
+# is named after, and its name, identifiers and business address are public
+# business records, so may_publish_individual_native_field now publishes every
+# field it used to withhold absent consent. The gate below is unchanged in
+# shape and asks the rule for every cell, so it strikes nothing for those
+# fields now and would strike again if the rule ever withheld one. The name
+# backstop asks the rule for `canonical_name` rather than reading consent.
 
 
 def withheld_entities(spine_names: Path) -> tuple[frozenset[str], frozenset[str]]:
@@ -480,12 +487,14 @@ def sample_violations(
     Field-level, the way the rule is written (Codex, PR #63): a row is an
     individual-business row when any cell is one of the class's uids or
     names or its ``entity_class`` is the class; on such a row every non-empty
-    column in the withheld-field list is a violation unless
+    column in the rule's field list is a violation unless
     ``may_publish_individual_native_field`` releases it for that row's
     ``consent_status`` and ``firm_legal_name_is_person``. A cell equal to a
-    withheld name under ANY column is a violation as well (the backstop for a
-    name carried under a header the list does not know), again unless the
-    row records consent.
+    class name under ANY column is a violation as well (the backstop for a
+    name carried under a header the list does not know) unless the rule
+    releases ``canonical_name`` for that row. Since the owner ruling of
+    2026-10-02 the rule releases every such field, so nothing is struck; the
+    machinery stays so a future withholding is enforced here again.
     """
     hit: list[str] = []
     with sample.open(encoding="utf-8", newline="") as handle:
@@ -511,7 +520,9 @@ def sample_violations(
                         column, name_is_person=person, consent_status=consent
                     )
                 )
-                named = value.lower() in names and consent.upper() != "OPTED_IN"
+                named = value.lower() in names and not may_publish_individual_native_field(
+                    "canonical_name", name_is_person=person, consent_status=consent
+                )
                 if (withheld_field or named) and column not in hit:
                     hit.append(column)
     return hit

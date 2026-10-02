@@ -35,7 +35,11 @@
 // null there must never be read as "try the table's own name column": the
 // row is marked withheld, the name column is masked in the table, the
 // record, the search and the export, and the sample that carried it is
-// struck by the importer before it becomes a public file.
+// struck by the importer before it becomes a public file. Since the owner
+// ruling of 2026-10-02 (code/cedar_domain.py: an individually Native-owned
+// firm is a business entity whatever it is named after, and its name is a
+// public business record) the register withholds no name, so this path
+// carries nothing today; it stays so a future withholding reads the same.
 //
 // A SAMPLE, SAID SO
 // Phase one runs over the ten-row samples the site already serves. Every

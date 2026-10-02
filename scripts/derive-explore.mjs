@@ -42,12 +42,19 @@ const TYPES = `${REPO}data/spine/cedar_entity_types.csv`;
 const IDENTITY = TYPES.replace(/cedar_entity_types\.csv$/, "cedar_identity_register.csv");
 const REGISTER = `${PUBLIC}/data/cedar/register.json`;
 
-// The one class whose names the publication rule withholds unless the owner
-// opted in (code/cedar_domain.py may_publish_individual_native_field: a
-// firm's website is evidence, never permission). The register carries the
-// uid and the class so a row keyed to one still filters by type; the name
-// is null and the picker says so.
+// Until 2026-10-02 the register withheld the name of every entity in this
+// class (null name, uid and class only), mirroring
+// code/cedar_domain.py may_publish_individual_native_field, which released a
+// name only on recorded OPTED_IN consent. Owner ruling 2026-10-02: a firm is
+// a business entity regardless of what it is named after, and its name,
+// identifiers and business address are public business records (SAM and
+// USAspending publish them for every federal awardee), so the rule now
+// publishes every such field and the register carries every name. The class
+// is still named so the count the register reports is measured against it,
+// and so the viewer's null-name masking (explore.js) keeps a defined meaning:
+// a null name is one the rule withholds, and today the rule withholds none.
 const WITHHELD_CLASS = "Individually Native-owned business";
+const WITHHELD_FIELD_PUBLISHES = true; // owner ruling 2026-10-02
 
 // Column names are matched lowercased, in this order; the first present wins.
 const RULES = {
@@ -384,7 +391,7 @@ export function deriveRegister() {
   let withheld = 0;
   for (const r of rows(NAMES)) {
     if (!index.has(r.entity_class)) throw new Error(`register: unknown class ${r.entity_class} on ${r.cedar_uid}`);
-    const withhold = r.entity_class === WITHHELD_CLASS;
+    const withhold = r.entity_class === WITHHELD_CLASS && !WITHHELD_FIELD_PUBLISHES;
     if (withhold) withheld += 1;
     entities.push([r.cedar_uid, withhold ? null : r.name, index.get(r.entity_class)]);
   }
@@ -394,7 +401,8 @@ export function deriveRegister() {
     source: "data/spine/cedar_entity_names.csv, cedar_entity_types.csv, and cedar_identity_register.csv (as_of: its latest mint date)",
     note:
       "Each entity is [cedar_uid, name, class index into `classes`]. A null name is " +
-      `withheld by the publication rule for ${WITHHELD_CLASS} (code/cedar_domain.py).`,
+      `one the publication rule withholds (code/cedar_domain.py may_publish_individual_native_field); ` +
+      `since the owner ruling of 2026-10-02 every ${WITHHELD_CLASS} name publishes, so withheld_names is 0.`,
     withheld_names: withheld,
     as_of: asOf,
     classes,

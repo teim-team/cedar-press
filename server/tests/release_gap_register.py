@@ -16,6 +16,8 @@ Classification vocabulary (one per row):
 - EVIDENCE_NEEDED: closing it needs a file or source this clone does not hold; the row names it and the command.
 - DECISION: an owner call per AGENTS.md section 5; the row names the owner and asks one question.
 - RIGHTS: withheld by a publication or rights rule that is working as written.
+- RULED_REBUILD_PENDING: an owner ruling has changed the gate in code; the workstation
+  rebuild that applies it to the producer's files has not run yet.
 
 Run from the repository root::
 
@@ -38,7 +40,14 @@ OUT_JSON = ROOT / "docs" / "RELEASE_GAP_2026-10-02.json"
 OUT_MD = ROOT / "docs" / "RELEASE_GAP_2026-10-02.md"
 DATE = "2026-10-02"
 
-CLASSES = ("CODE", "EVIDENCE_IN_REPO", "EVIDENCE_NEEDED", "DECISION", "RIGHTS")
+CLASSES = (
+    "CODE",
+    "EVIDENCE_IN_REPO",
+    "EVIDENCE_NEEDED",
+    "DECISION",
+    "RIGHTS",
+    "RULED_REBUILD_PENDING",
+)
 OWNERS = {
     "havala": "Havala Hanson (@Havala-Hanson), Cedar Grove and Cedar Press including their data",
     "francesca": "Francesca Agnes (@mafranagn), data methods and the Cedar service boundary",
@@ -160,27 +169,39 @@ def measure() -> dict:
         text=True,
     ).stdout.split()
 
-    # Withheld register names, by class.
+    # Register names with a null name (the publication rule's withholding),
+    # by class, and the tracked documents naming a uid of the individually
+    # Native-owned class. The mention grep runs over the CLASS's uids, not
+    # the null-name uids: since the owner ruling of 2026-10-02 there are no
+    # null names, and an empty pattern would match every file.
     classes = register["classes"]
     withheld_by_class = Counter(classes[e[2]]["code"] for e in register["entities"] if e[1] is None)
-    withheld_uids = sorted(e[0] for e in register["entities"] if e[1] is None)
-    withheld_mentions = subprocess.run(
-        [
-            "git",
-            "grep",
-            "-l",
-            "-E",
-            "|".join(withheld_uids),
-            "--",
-            "docs",
-            "review",
-            "AGENTS.md",
-            "README.md",
-        ],
-        cwd=ROOT,
-        capture_output=True,
-        text=True,
-    ).stdout.split()
+    individual_index = next(
+        (i for i, c in enumerate(classes) if c["code"] == "Individually Native-owned business"),
+        None,
+    )
+    class_uids = sorted(e[0] for e in register["entities"] if e[2] == individual_index)
+    withheld_mentions = (
+        subprocess.run(
+            [
+                "git",
+                "grep",
+                "-l",
+                "-E",
+                "|".join(class_uids),
+                "--",
+                "docs",
+                "review",
+                "AGENTS.md",
+                "README.md",
+            ],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+        ).stdout.split()
+        if class_uids
+        else []
+    )
 
     # Owned preview scope values.
     owned_rows = read_csv(ROOT / "public/data/cedar/samples/owned/spreadsheet__10.csv")
@@ -542,21 +563,29 @@ def rows(m: dict) -> list[dict]:
             question=None,
         )
     )
-    # --- 7. The 45 withheld register entries
+    # --- 7. The individually Native-owned firm register: ruled 2026-10-02
     wh = m["withheld"]
     out.append(
         row(
             id="GAP-11",
-            collection="register / 45 withheld names",
-            gate="code/cedar_domain.may_publish_individual_native_field(): withhold unless consent_status OPTED_IN",
-            exists=f"{wh['total']} register entities ship with a uid, a class and a null name; by class: {wh['by_class']}. Reason: the class is a person-proxy and "
-            "consent_status is NOT_ASKED on all 45 (AGENTS.md); a firm's website statement is evidence, never permission.",
-            served="uid and class only (public/data/cedar/register.json withheld_names = 45); rows keyed to them ship with the name masked ([name withheld]).",
-            gate_location="scripts/derive-explore.mjs buildRegister (WITHHELD_CLASS); src/features/grove/explore.js publicRow; scripts/import_cedar_manifest.py sample_violations",
-            closing_condition="Per firm: a recorded OPTED_IN consent with date and source releases the name; nothing else does.",
-            evidence=f"Tracked documents naming any of the 45 uids: {wh['tracked_docs_naming_a_withheld_uid'] or 'none'} (docs/ENTITY_TYPES.md cites two as examples). "
-            "No later log records a consent or a reclassification for any of the 45: the search for a resolved withholding found none.",
-            classification="RIGHTS",
+            collection="register / individually Native-owned firm names",
+            gate="code/cedar_domain.may_publish_individual_native_field(): publishes every business-record field of the class (owner ruling 2026-10-02); "
+            "until that date it withheld them unless consent_status was OPTED_IN",
+            exists=f"Register entities with a null name now: {wh['total']} (by class: {wh['by_class'] or 'none'}). Until 2026-10-02, 45 entities of the class "
+            "shipped with a uid, a class and a null name because the class was read as a person-proxy and consent_status was NOT_ASKED on all 45. "
+            "Owner ruling 2026-10-02: a firm is a business entity regardless of what it is named after; its name, identifiers and business address "
+            "are public business records (SAM and USAspending publish them for every federal awardee), not personal identifying information, so "
+            "consent is not required.",
+            served=f"public/data/cedar/register.json carries every name (withheld_names = {wh['total']}); the viewer's null-name masking has nothing to mask. "
+            "The producer's register CSV (data/clean/individual_native_firm_register.csv, workspace) still carries publish_name = 0 and the six "
+            "native-owned-businesses samples struck on 2026-09-05 are still absent until the rebuild.",
+            gate_location="code/cedar_domain.py may_publish_individual_native_field; code/241 publish_name / publish_federal_identifier; "
+            "scripts/derive-explore.mjs deriveRegister; scripts/import_cedar_manifest.py sample_violations (reads the rule)",
+            closing_condition="Workstation rebuild: python3 code/241_promote_individual_native_firms_in_place.py, the spine export, "
+            "node scripts/derive-explore.mjs, then the importer re-admits the struck samples; the register CSV then reads publish_name = 1 on every row.",
+            evidence=f"Tracked documents naming any uid of the class: {wh['tracked_docs_naming_a_withheld_uid'] or 'none'}. "
+            "The ruling and the reversed text are recorded in docs/REVIEW_STATUS.md, 'Owner ruling: individually owned firm records publish', 2026-10-02.",
+            classification="RULED_REBUILD_PENDING",
             owner=None,
             question=None,
         )
@@ -809,7 +838,8 @@ def render_markdown(reg: dict) -> str:
         "",
         "Classifications: **CODE** (fixed or fixable here, with a test), **EVIDENCE_IN_REPO** (explained by what Git holds), "
         "**EVIDENCE_NEEDED** (names the file and command), **DECISION** (owner per AGENTS.md section 5, one question), "
-        "**RIGHTS** (a publication or rights rule working as written).",
+        "**RIGHTS** (a publication or rights rule working as written), **RULED_REBUILD_PENDING** (an owner ruling changed "
+        "the gate in code; the producer rebuild that applies it has not run).",
         "",
         "## Summary",
         "",
@@ -878,9 +908,9 @@ def render_markdown(reg: dict) -> str:
         f"Scripts: {m['graph']['numbered_scripts']} numbered, {m['graph']['referenced']} referenced, {m['graph']['in_code_archive']} archived; "
         f"census {m['census']['scripts']} scripts, maintenance {m['census']['maintenance_status_counts']}.",
         "",
-        "Not found, recorded so it is not re-investigated: no later log records a consent or reclassification for any of the 45 withheld register "
-        "entries (GAP-11); no consumer file filters rows on `identity_scope` (GAP-12); no tracked file under `public/`, `data/cedar/`, `src/` or "
-        "`server/cedar_press/` names a `CEV-*` id (GAP-05).",
+        "Not found, recorded so it is not re-investigated: no consumer file filters rows on `identity_scope` (GAP-12); no tracked file under "
+        "`public/`, `data/cedar/`, `src/` or `server/cedar_press/` names a `CEV-*` id (GAP-05). GAP-11's 45 register names are no longer withheld: "
+        "the owner ruled on 2026-10-02 that they are business records, and the producer rebuild that applies it is pending.",
         "",
     ]
     return "\n".join(lines)

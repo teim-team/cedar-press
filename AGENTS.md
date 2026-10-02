@@ -9470,6 +9470,16 @@ sample for a withheld name. Run `--audit` again after adding the nineteen
 absent samples: `native_owned_businesses.csv` is the flagship of that
 collection and has not been checked, because it is not here.
 
+*Dated note, 2026-10-02.* The owner ruled that an individually Native-owned
+firm is a business entity regardless of what it is named after, and that its
+name, identifiers and business address are public business records that
+publish without consent. `may_publish_individual_native_field` now answers
+True for every field it withheld; the importer's strike reads that answer and
+so re-admits those six samples on the next run, and `register.json` carries
+every name (`withheld_names: 0`). The paragraph above records the rule as it
+stood. Record: `docs/REVIEW_STATUS.md`, "Owner ruling: individually owned
+firm records publish, 2026-10-02".
+
 The filters, the URL, the saved view, the download and the question to Cedar
 are one object, the cut (`features/grove/explore.js`). Change what a cut is
 there and every use follows; add a control to the card that is not in the cut

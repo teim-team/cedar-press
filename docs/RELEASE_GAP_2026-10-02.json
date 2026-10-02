@@ -6,7 +6,8 @@
   "EVIDENCE_IN_REPO",
   "EVIDENCE_NEEDED",
   "DECISION",
-  "RIGHTS"
+  "RIGHTS",
+  "RULED_REBUILD_PENDING"
  ],
  "owners": {
   "havala": "Havala Hanson (@Havala-Hanson), Cedar Grove and Cedar Press including their data",
@@ -151,14 +152,14 @@
   },
   {
    "id": "GAP-11",
-   "collection": "register / 45 withheld names",
-   "gate": "code/cedar_domain.may_publish_individual_native_field(): withhold unless consent_status OPTED_IN",
-   "exists": "45 register entities ship with a uid, a class and a null name; by class: {'Individually Native-owned business': 45}. Reason: the class is a person-proxy and consent_status is NOT_ASKED on all 45 (AGENTS.md); a firm's website statement is evidence, never permission.",
-   "served": "uid and class only (public/data/cedar/register.json withheld_names = 45); rows keyed to them ship with the name masked ([name withheld]).",
-   "gate_location": "scripts/derive-explore.mjs buildRegister (WITHHELD_CLASS); src/features/grove/explore.js publicRow; scripts/import_cedar_manifest.py sample_violations",
-   "closing_condition": "Per firm: a recorded OPTED_IN consent with date and source releases the name; nothing else does.",
-   "evidence": "Tracked documents naming any of the 45 uids: ['docs/ENTITY_TYPES.md'] (docs/ENTITY_TYPES.md cites two as examples). No later log records a consent or a reclassification for any of the 45: the search for a resolved withholding found none.",
-   "classification": "RIGHTS",
+   "collection": "register / individually Native-owned firm names",
+   "gate": "code/cedar_domain.may_publish_individual_native_field(): publishes every business-record field of the class (owner ruling 2026-10-02); until that date it withheld them unless consent_status was OPTED_IN",
+   "exists": "Register entities with a null name now: 0 (by class: none). Until 2026-10-02, 45 entities of the class shipped with a uid, a class and a null name because the class was read as a person-proxy and consent_status was NOT_ASKED on all 45. Owner ruling 2026-10-02: a firm is a business entity regardless of what it is named after; its name, identifiers and business address are public business records (SAM and USAspending publish them for every federal awardee), not personal identifying information, so consent is not required.",
+   "served": "public/data/cedar/register.json carries every name (withheld_names = 0); the viewer's null-name masking has nothing to mask. The producer's register CSV (data/clean/individual_native_firm_register.csv, workspace) still carries publish_name = 0 and the six native-owned-businesses samples struck on 2026-09-05 are still absent until the rebuild.",
+   "gate_location": "code/cedar_domain.py may_publish_individual_native_field; code/241 publish_name / publish_federal_identifier; scripts/derive-explore.mjs deriveRegister; scripts/import_cedar_manifest.py sample_violations (reads the rule)",
+   "closing_condition": "Workstation rebuild: python3 code/241_promote_individual_native_firms_in_place.py, the spine export, node scripts/derive-explore.mjs, then the importer re-admits the struck samples; the register CSV then reads publish_name = 1 on every row.",
+   "evidence": "Tracked documents naming any uid of the class: ['docs/ENTITY_TYPES.md']. The ruling and the reversed text are recorded in docs/REVIEW_STATUS.md, 'Owner ruling: individually owned firm records publish', 2026-10-02.",
+   "classification": "RULED_REBUILD_PENDING",
    "owner": null,
    "question": null
   },
@@ -736,10 +737,8 @@
    "served_columns": 36
   },
   "withheld": {
-   "total": 45,
-   "by_class": {
-    "Individually Native-owned business": 45
-   },
+   "total": 0,
+   "by_class": {},
    "tracked_docs_naming_a_withheld_uid": [
     "docs/ENTITY_TYPES.md"
    ]
@@ -1264,17 +1263,17 @@
    "text_files_scanned": 2152
   },
   "census": {
-   "scripts": 687,
+   "scripts": 688,
    "operational_role_counts": {
     "active producer": 76,
     "active validator/migration/review": 11,
     "historical": 18,
     "product consumer/shared service": 8,
-    "test/fixture": 7,
+    "test/fixture": 8,
     "unresolved": 567
    },
    "maintenance_status_counts": {
-    "ACTIVE": 164,
+    "ACTIVE": 165,
     "DUPLICATE": 0,
     "SUPERSEDED": 0,
     "HISTORICAL-RETAIN": 38,

@@ -775,30 +775,72 @@ class TestApplyFieldMap(unittest.TestCase):
         self.assertEqual(field["retire"], declared)
 
     def test_a_withheld_register_name_never_falls_back_to_a_raw_name(self):
+        from unittest.mock import patch
+
         import cedar_domain
 
+        # Owner ruling 2026-10-02: an individually Native-owned firm is a
+        # business entity whatever it is named after, so the rule publishes
+        # its name, UEI and CAGE. The register therefore carries the class's
+        # names, the opening block reads them (never the row's raw name), and
+        # the field map's `withhold` columns are left standing because the
+        # rule they defer to publishes them.
         reg = pub.register()
-        withheld_class = cedar_domain.INDIVIDUAL_NATIVE_CLASS
-        withheld = [uid for uid, (name, cls) in reg.items() if cls == withheld_class]
-        self.assertTrue(withheld, "the register carries the withheld class")
-        self.assertTrue(all(reg[uid][0] == "" for uid in withheld))
+        firm_class = cedar_domain.INDIVIDUAL_NATIVE_CLASS
+        firms = [uid for uid, (name, cls) in reg.items() if cls == firm_class]
+        self.assertTrue(firms, "the register carries the class")
+        self.assertTrue(all(reg[uid][0] for uid in firms), "a firm of the class has no name")
         header, rows = sample("contractors", "prime_contracts")
         neutralised("contractors", header, rows)
-        rows[0]["cedar_uid"] = withheld[0]
+        rows[0]["cedar_uid"] = firms[0]
         rows[0]["canonical_name"] = "A Raw Name That Must Not Ship"
         rows[0]["awardee_name"] = "A Person's Firm"
         rows[0]["awardee_uei"] = "UEI000000001"
         rows[0]["cage_code"] = "1ABC2"
         pub.apply_field_map("contractors", header, rows, set(header))
-        self.assertEqual(rows[0]["canonical_name"], "")
-        self.assertEqual(rows[0]["entity_class"], cedar_domain.INDIVIDUAL_NATIVE_CLASS)
-        # The fields the map marks `withhold` leave blank for that class with
-        # no consent on the row: the per-field rule, applied last and failing
-        # closed (Codex, PR #66). A tribal owner's row keeps them.
+        self.assertEqual(rows[0]["canonical_name"], reg[firms[0]][0])
+        self.assertNotEqual(rows[0]["canonical_name"], "A Raw Name That Must Not Ship")
+        self.assertEqual(rows[0]["entity_class"], firm_class)
         for col in ("awardee_name", "awardee_uei", "cage_code"):
             self.assertIn(col, header)
-            self.assertEqual(rows[0][col], "", col)
+        self.assertEqual(rows[0]["awardee_name"], "A Person's Firm")
+        self.assertEqual(rows[0]["awardee_uei"], "UEI000000001")
+        self.assertEqual(rows[0]["cage_code"], "1ABC2")
         self.assertTrue(rows[1]["awardee_name"])
+
+        # The machinery is still proven with the rule patched back to the
+        # pre-ruling consent gate: the register blanks the class's name, the
+        # opening block never falls back to the raw name, and the `withhold`
+        # columns leave blank for that class (Codex, PR #66). A tribal
+        # owner's row keeps them.
+        def consent_gate(field, name_is_person=None, consent_status="NOT_ASKED"):
+            if field in cedar_domain.INDIVIDUAL_NATIVE_PUBLISHABLE_FIELDS:
+                return True
+            if field not in cedar_domain.INDIVIDUAL_NATIVE_WITHHELD_FIELDS:
+                return False
+            return (consent_status or "").strip().upper() == "OPTED_IN"
+
+        saved = pub._REGISTER
+        try:
+            pub._REGISTER = {}
+            with patch.object(cedar_domain, "may_publish_individual_native_field", consent_gate):
+                gated = pub.register()
+                self.assertTrue(all(gated[uid][0] == "" for uid in firms))
+                header, rows = sample("contractors", "prime_contracts")
+                neutralised("contractors", header, rows)
+                rows[0]["cedar_uid"] = firms[0]
+                rows[0]["canonical_name"] = "A Raw Name That Must Not Ship"
+                rows[0]["awardee_name"] = "A Person's Firm"
+                rows[0]["awardee_uei"] = "UEI000000001"
+                rows[0]["cage_code"] = "1ABC2"
+                pub.apply_field_map("contractors", header, rows, set(header))
+                self.assertEqual(rows[0]["canonical_name"], "")
+                self.assertEqual(rows[0]["entity_class"], firm_class)
+                for col in ("awardee_name", "awardee_uei", "cage_code"):
+                    self.assertEqual(rows[0][col], "", col)
+                self.assertTrue(rows[1]["awardee_name"])
+        finally:
+            pub._REGISTER = saved
 
     def test_an_undecided_flagship_column_stops_the_build_by_name(self):
         header, rows = sample("contractors", "prime_contracts")

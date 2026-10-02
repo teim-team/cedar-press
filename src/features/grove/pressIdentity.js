@@ -250,24 +250,28 @@ export const WHY_BOTH = Object.freeze({
  *   these firms BY NAME, because a nation's own TERO or commerce office
  *   published them and shared them under stated terms. The name is the
  *   nation's to give and it gave it.
- * - Where the only evidence is a federal award file, the firm's activity
- *   publishes and the owner's name, address and UEI do not
- *   (`INDIVIDUAL_NATIVE_WITHHELD_FIELDS` in `code/cedar_domain.py`). A person
- *   who won a contract did not consent to being enumerated and ranked by
- *   obligations, and their own website saying they are Native is evidence,
- *   never permission. The rule is per field, defaults to withholding, and
- *   suppresses any published cell resolving to fewer than three firms.
- * - `register.json`, the entity lookup this whole site can read, withholds the
- *   name for this class outright, because it is a lookup and not a release.
+ * - Where the only evidence is a federal award file, the firm publishes by
+ *   name too, since the owner ruling of 2026-10-02: a firm is a business
+ *   entity regardless of what it is named after, and its name, identifiers
+ *   and business address are public business records (SAM and USAspending
+ *   publish exactly these for every federal awardee), not personal
+ *   identifying information. Until that date `INDIVIDUAL_NATIVE_WITHHELD_FIELDS`
+ *   in `code/cedar_domain.py` withheld them absent recorded consent, on the
+ *   reasoning that a firm named after its owner is a private individual; the
+ *   ruling rejects that reasoning for this class. The rule is still per
+ *   field and still fails closed on a field it does not know, and the
+ *   aggregate small-cell rule (fewer than three firms) is unchanged.
+ * - `register.json`, the entity lookup this whole site can read, therefore
+ *   carries the name for this class; its `withheld_names` reads 0.
  *
- * `pressIdentity.test.js` pins the last of those three against the published
- * file. The identifier is on the firm in all three cases, which is the point.
+ * `pressIdentity.test.js` pins the last of those against the published file.
+ * The identifier is on the firm in every case, which is the point.
  */
 export const WITHHELD_CLASS = "Individually Native-owned business";
 
-/** What Cedar publishes about a firm it will not name, said plainly. */
+/** What Cedar publishes about an individually owned firm, said plainly. */
 export const WITHHELD_NOTE =
-  "A firm carries its business id whether or not its name is ever published. Where a nation's own commerce office published its certified businesses and shared them under stated terms, they are in the collection by name. Where the only evidence is a federal award file, the activity publishes and the owner's name and address do not, because a person who won a contract did not consent to being ranked by obligations. The identifier holds both cases in one series.";
+  "A firm carries its business id and its name whatever it is named after. Where a nation's own commerce office published its certified businesses and shared them under stated terms, they are in the collection by name. Where the only evidence is a federal award file, the firm's name, identifiers and business address publish as the public business records they are, the same fields SAM and USAspending publish for every federal awardee; what Cedar does not publish is internal working text, and any aggregate cell that resolves to fewer than three firms is suppressed. The identifier holds both cases in one series.";
 
 /**
  * MEASURED LINKAGE COVERAGE, and why it is on the page.
