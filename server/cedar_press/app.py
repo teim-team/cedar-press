@@ -295,10 +295,9 @@ def submit_request(
     account = _account(session)
     _priorities.accrue(account)
     try:
-        result = _priorities.submit_request(account, body.text, body.use_case, body.priority_id)
-        if body.priority_id and body.support_points > 0:
-            result["support"] = _priorities.allocate(account, body.priority_id, body.support_points)
-        return result
+        return _priorities.submit_request(
+            account, body.text, body.use_case, body.priority_id, body.support_points
+        )
     except priorities.PointsError as exc:
         raise _points_error(exc) from exc
 

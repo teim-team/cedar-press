@@ -242,10 +242,11 @@ export async function fetchInfluence({ signal } = {}) {
 }
 
 /** Put points on a priority (positive) or take them back (negative). */
-export async function movePoints({ priorityId, points }) {
+export async function movePoints({ priorityId, points, signal }) {
   return request(`/press/priorities/${encodeURIComponent(priorityId)}/points`, {
     method: "POST",
     body: { points },
+    signal,
   });
 }
 
@@ -255,10 +256,11 @@ export async function fetchRelatedPriorities({ text, signal } = {}) {
 }
 
 /** A subscriber's own words, beside the priority they are about, with a point on it if asked. */
-export async function submitResearchRequest({ text, useCase, priorityId, supportPoints = 0 }) {
+export async function submitResearchRequest({ text, useCase, priorityId, supportPoints = 0, signal }) {
   return request("/press/requests", {
     method: "POST",
     body: { text, use_case: useCase || null, priority_id: priorityId || null, support_points: supportPoints },
+    signal,
   });
 }
 

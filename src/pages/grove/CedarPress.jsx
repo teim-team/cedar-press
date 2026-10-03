@@ -116,7 +116,7 @@ export default function CedarPress() {
               know is what moved. Every line of the briefing is read from the
               release record and the article list, so it cannot go stale. */}
           <PressBriefing />
-          <PressPrioritiesBlock signedIn={entitled} />
+          <PressPrioritiesBlock user={user} />
         </div>
 
         {/* Screen two: the close and the footer, as one ending. The ending is

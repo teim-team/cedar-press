@@ -4002,3 +4002,27 @@ The Grove merge audit worker owns the focused Press presentation changes for thi
 
 The Deals public sample now contains ten primary-source-reviewed events with existing CEV and CE identifiers. Its 40-column consumer schema is unchanged. Source and method descriptions identify the selected preview scope, date precision and unlike monetary measures. Four newly evidenced source categories are credited; no site-wide source total is invented. This workstream owns only its Deals sample, Deals descriptor prose, corresponding generated guide and source-category additions. No protected release, collection row count or subscriber entitlement changed. The full governed multi-party consumer remains a separate integration.
 <!-- END DEALS-PUBLIC-PREVIEW-2026-10-01 -->
+
+<!-- BEGIN PRESS-LIVE-WIRING-20261003 -->
+## Press live services, 2026-10-03
+
+The root coordinator owns the points request lifecycle, its hook/callers and
+API cancellation, preserving the existing server ledger and earning rules.
+The Press live-wiring agent supplies reviewed release-feed patches; the root
+applies and validates them without overwriting other publication work.
+Points, voting and research briefs belong to Press. Selected future datasets
+can enter Grove by explicit publication decision; voting does not grant access.
+Press earns one point per active month and Press Plus earns two, once per
+subscription. Grove has no earning rule. Three institutional points remain a
+proposal, not an implemented rate. Existing twelve-month expiry is unchanged.
+
+Account changes immediately hide private balances and dispose outstanding reads
+and writes. The request form is scoped to its account and plan. Request creation
+and optional support now share one store transaction, so an insufficient balance
+cannot leave a request the API reported as failed. Mutations are never retried
+automatically. Local verification passed 30 ledger tests across SQLite and an
+isolated PostgreSQL schema, including concurrent spending, 16 client/session
+tests, 78 API tests, lint and the Vite build. Intentional old-owner and split-
+transaction mutations each failed their regression test before restoration.
+This does not establish that the running deployment is configured with Postgres.
+<!-- END PRESS-LIVE-WIRING-20261003 -->
