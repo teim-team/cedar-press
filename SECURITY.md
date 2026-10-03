@@ -76,21 +76,19 @@ Out of scope:
 - Third-party destinations we link to, including Tribal Business News, the
   partner that handles Cedar Press subscriber plans.
 - The sibling Lumecon repositories, each separate scope with its own policy
-  (*as of 2026-09-23*):
+  (*as of 2026-10-03*):
   - `teim-app`, the Lumecon platform (Cedar Impact, Cedar Commons and Cedar
     Grove): <https://github.com/teim-team/teim-app/blob/main/SECURITY.md>.
   - `cedar`, Cedar, Lumecon's AI economic analyst:
     <https://github.com/teim-team/cedar/blob/develop/SECURITY.md> (`develop`
     is that repository's default branch).
   - `teim-engine`, the internal model engine:
-    <https://github.com/teim-team/teim-engine/blob/main/SECURITY.md>. That
-    file is not on `main` yet; it lands with
-    [teim-engine #20](https://github.com/teim-team/teim-engine/pull/20).
+    <https://github.com/teim-team/teim-engine/blob/main/SECURITY.md>.
   - `lumecon-website`, the public site `lumecon.ai`, which holds Lumecon's
     canonical policy:
     <https://github.com/teim-team/lumecon-website/blob/main/SECURITY.md>.
-  - [`Lumecon-data`](https://github.com/teim-team/Lumecon-data), the shared
-    data foundation. It has no root `SECURITY.md` on `main` yet.
+  - `Lumecon-data`, the shared data foundation:
+    <https://github.com/teim-team/Lumecon-data/blob/main/SECURITY.md>.
 
   Reports for any of them still reach contact@lumecon.ai; naming the
   repository in the subject line routes it faster.
