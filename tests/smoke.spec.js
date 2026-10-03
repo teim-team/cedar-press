@@ -1890,7 +1890,7 @@ test.describe("the product copy reads the jobs layer", () => {
       "Compare peers, follow funding and business activity, spot changes worth investigating and trace the evidence behind them.",
     );
     const caps = await page.locator(".cp-brief__cap").allInnerTexts();
-    expect(caps.map((c) => c.toLowerCase())).toEqual(expect.arrayContaining(["what changed", "explore the records"]));
+    expect(caps.map((c) => c.toLowerCase())).toEqual(expect.arrayContaining(["preview updates", "explore the records"]));
     expect(caps.join(" ")).not.toMatch(/worth watching|open today|insight|opportunit/i);
 
     await page.goto("/data?c=funding");
