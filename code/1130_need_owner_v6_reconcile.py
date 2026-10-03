@@ -32,8 +32,8 @@ a second row, which is the defect the "merged, not appended" design of
 `1072` exists to stop, and which already cost 25 duplicate rows and 25 lost
 corroborations (NEED_BUILD_LOG, UPDATE 2026-09-02 §3).
 
-`norm()` below is COPIED VERBATIM from `code/1072_tribally_owned_enterprises.py`
-and the copy is checked at run time: `verify` re-derives
+`norm()` below delegates to `code/1072_tribally_owned_enterprises.py`
+and the result is checked at run time: `verify` re-derives
 `enterprise_name_normalized` for all 1,610 live NEED rows and exits 1 if a
 single one disagrees.  Two normalisers that drift are two clusterings, and
 the whole comparison would be measuring the drift instead of the data.
@@ -65,6 +65,7 @@ WRITES
     data/clean/need_entity_dual_role.csv
 """
 import csv, os, re, sys, json, datetime, collections, unicodedata
+import importlib.util
 
 csv.field_size_limit(10 ** 8)
 
@@ -116,25 +117,15 @@ ALIAS_DEAD = {"DENIED", "CONTESTED", "EXPIRED", "SUPERSEDED", "RETIRED", "WITHDR
 
 
 # ---------------------------------------------------------------------------
-# NAME NORMALISATION - VERBATIM from 1072.  verify re-derives NEED's own
-# enterprise_name_normalized with it and exits 1 on a single disagreement.
+# NAME NORMALISATION - one implementation owned by the enterprise builder.
+# Keep the public norm callable for existing reconciliation consumers. Importing
+# 1072 defines helpers/constants only; its mutating CLI is main-guarded.
 # ---------------------------------------------------------------------------
-_SUFFIX = re.compile(
-    r"[ ,]+(?:l\.?l\.?c\.?|l\.?l\.?p\.?|pllc|inc\.?|incorporated|corp\.?|"
-    r"corporation|co\.?|company|ltd\.?|limited|lp|l\.p\.|plc)\.?$", re.I)
-
-
-def norm(s: str) -> str:
-    s = (s or "").strip().lower()
-    s = s.replace("\u2019", "'").replace("\u2018", "'")
-    s = re.sub(r"[^a-z0-9' ]+", " ", s)
-    s = re.sub(r"\s+", " ", s).strip()
-    for _ in range(3):
-        n = _SUFFIX.sub("", s).strip()
-        if n == s:
-            break
-        s = n
-    return re.sub(r"\s+", " ", s).strip()
+_norm_spec = importlib.util.spec_from_file_location(
+    "need1072_normalization", P("code", "1072_tribally_owned_enterprises.py"))
+_norm_builder = importlib.util.module_from_spec(_norm_spec)
+_norm_spec.loader.exec_module(_norm_builder)
+norm = _norm_builder.norm
 
 
 # Distinctive-token set for ENTITY_MATCH_RULES rule 1.  A name whose whole

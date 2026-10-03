@@ -43,6 +43,8 @@ USAGE
     py -3 code/521_inventory.py --no-scan    # cache only; uncached -> UNKNOWN
     py -3 code/521_inventory.py check        # exit 1 if INVENTORY.md is stale
     py -3 code/521_inventory.py selftest     # the fixtures; exit 1 if a derivation broke
+    py -3 code/521_inventory.py scripts-only # refresh script roles/evidence, preserving table snapshot
+    py -3 code/521_inventory.py check-scripts # data-less admission check; no writes
 
 WHAT `check` MEANS. It regenerates into memory and compares the HEADLINE
 counts against the committed document. It does not diff prose. A stale headline
@@ -54,10 +56,13 @@ docs/INVENTORY.md, docs/KNOWN_ISSUES.md. Touches no pipeline.
 """
 
 import argparse
+import ast
 import csv
+import hashlib
 import json
 import re
 import sqlite3
+import subprocess
 import sys
 from collections import Counter, defaultdict
 from datetime import date, datetime
@@ -457,7 +462,12 @@ _CATALOGUE = ("CONSOLIDATION_SCRIPT_INVENTORY.json", "ARCHIVE_CANDIDATES.md",
               "dependency_manifest.json", "ARCHITECTURE.md",
               "DEPENDENCY_MANIFEST.md", "lint_bug_classes.json",
               "lint_bug_classes_baseline.json", "inventory.json",
-              "INVENTORY.md", "CODE_HEALTH_AUDIT.md")
+              "INVENTORY.md", "CODE_HEALTH_AUDIT.md",
+              # 2026-10-02: the consumer-side reference graph, the archive
+              # index it produced and the release-gap register name scripts
+              # by construction (server/tests/code_reference_graph.py).
+              "CODE_REFERENCE_GRAPH_2026-10-02.json", "INDEX.md",
+              "RELEASE_GAP_2026-10-02.md", "RELEASE_GAP_2026-10-02.json")
 
 
 def read_archive_candidates():
@@ -497,7 +507,7 @@ def _all_text_files():
             yield p
 
 
-def inventory_scripts():
+def inventory_scripts(text_files=None):
     contracts, _ = read_contracts()
     planned = set()
     for c in contracts.values():
@@ -515,7 +525,7 @@ def inventory_scripts():
     names = {p.name: p for p in scripts}
     mentions = Counter()
     mention_where = defaultdict(set)
-    for f in _all_text_files():
+    for f in (_all_text_files() if text_files is None else text_files):
         try:
             txt = f.read_text(encoding="utf-8", errors="replace")
         except OSError:
@@ -583,6 +593,643 @@ def inventory_scripts():
                          .splitlines()),
         })
     return out, dupes
+
+
+def refresh_script_census():
+    """Update the existing script section without recertifying data tables.
+
+    References are bounded to Git-tracked project text. Installed libraries,
+    ignored candidate outputs and browser artifacts do not establish a caller.
+    This census does not authorize a producer: the supported runner separately
+    checks its output declarations against dataset_contracts and KNOWN_ORDERINGS.
+    """
+    original = json.loads(OUT_JSON.read_text(encoding="utf-8"))
+    table_bytes = json.dumps(original["tables"], sort_keys=True, separators=(",", ":")).encode()
+    tracked = subprocess.check_output(["git", "ls-files", "-z"], cwd=ROOT).decode("utf-8").split("\0")
+    suffixes = {".py", ".md", ".json", ".ps1", ".txt", ".yml", ".yaml", ".js", ".mjs"}
+    references = [ROOT / name for name in tracked if name
+                  and Path(name).suffix.lower() in suffixes and (ROOT / name).is_file()]
+    scripts, dupes = inventory_scripts(references)
+    add_operational_roles(scripts, references)
+    declared_names = {name for table in read_contracts()[0].values()
+                      for name in table.get("rebuilt_by", []) + table.get("enriched_by", [])}
+    declared_names.update(name for ordering in cp.KNOWN_ORDERINGS
+                          for name in (ordering["rebuild"], ordering["enricher"]))
+    for script in scripts:
+        script["registration_status"] = (
+            "declared_dependency" if script["script"] in declared_names
+            else "unresolved_not_authorized"
+        )
+    original["scripts"] = scripts
+    original["duplicate_numbers"] = {f"{d}:{n}": names for (d, n), names in dupes.items()}
+    original["script_census"] = {
+        "generated": TODAY,
+        "generator": "code/521_inventory.py scripts-only",
+        "scope": "code/**/*.py; caller mentions restricted to Git-tracked project text",
+        "scripts": len(scripts),
+        "operational_role_counts": dict(sorted(Counter(s["operational_role"] for s in scripts).items())),
+        "maintenance_status_counts": {status: sum(s.get("maintenance_status") == status for s in scripts)
+                                      for status in ("ACTIVE", "DUPLICATE", "SUPERSEDED", "HISTORICAL-RETAIN", "SAFE-DELETE-CANDIDATE", "REQUIRES-REVIEW")},
+        "maintenance_scope": "Existing inventory evidence only; duplication does not authorize deletion and table retirement does not retire unrelated outputs.",
+        "unresolved_writer_risk_counts": dict(sorted(Counter(s["writer_risk"] for s in scripts
+                                                             if s["operational_role"] == "unresolved").items())),
+        "writer_risk_scope": "Potential AST write sites with conservative binding expansion, not executed writes. Existing unregistered edges remain pending; inventory receipt is not authorization. Imported custom writers, shell dispatch and dynamic output resolution require runtime review.",
+        "operational_precedence": "Standalone test evidence; explicit historical directory; launch producer declaration; Python runtime-reference candidate plus operational call evidence; existing unreferenced archive candidate; unresolved",
+        "reference_scope": "Static references retain tests, path literals and tracked configuration. Runtime candidates require Python imports or literal dispatch paths from non-test files; these are not verified reachability, external scheduler or runtime invocations. Dynamic targets and non-Python dispatch remain unresolved.",
+        "embedded_selftest_files": sum(s["embedded_test_functions"] > 0 for s in scripts),
+        "unresolved_not_authorized": sum(s["registration_status"] == "unresolved_not_authorized"
+                                         for s in scripts),
+        "table_snapshot_preserved_sha256": hashlib.sha256(table_bytes).hexdigest(),
+        "data_generated_unchanged": original.get("generated"),
+        "limitation": "Static census is not runtime write proof or authorization to run a producer.",
+    }
+    assert json.dumps(original["tables"], sort_keys=True, separators=(",", ":")).encode() == table_bytes
+    OUT_JSON.write_text(json.dumps(original, indent=1) + "\n", encoding="utf-8")
+    print(json.dumps(original["script_census"], indent=2))
+    return 0
+
+
+def _call_name(node):
+    if isinstance(node, ast.Name):
+        return node.id
+    if isinstance(node, ast.Attribute):
+        return _call_name(node.value) + "." + node.attr
+    return ""
+
+
+def _runtime_script_references(tree, *, authoritative_runner=False):
+    """Conservative literal imports/dispatch, not arbitrary string mentions.
+
+    Dynamic variable targets and transitive execution require separate review.
+    A reference is evidence of a potential runtime edge, not reachability proof.
+    """
+    targets = set()
+    # A local loader is evidence only if its body really creates and executes
+    # an import spec. A function merely named load_module is not sufficient.
+    local_loaders = set()
+    for function in tree.body:
+        if not isinstance(function, ast.FunctionDef):
+            continue
+        calls = {_call_name(node.func) for node in ast.walk(function) if isinstance(node, ast.Call)}
+        if ("importlib.util.spec_from_file_location" in calls
+                and any(call.endswith(".exec_module") for call in calls)):
+            local_loaders.add(function.name)
+    if authoritative_runner:
+        for assignment in tree.body:
+            if not isinstance(assignment, ast.Assign):
+                continue
+            names = {target.id for target in assignment.targets if isinstance(target, ast.Name)}
+            if not names & {"SHIP_CHAIN", "POST_CHAIN"}:
+                continue
+            try:
+                declared = ast.literal_eval(assignment.value)
+            except (ValueError, TypeError):
+                continue
+            rows = declared if "SHIP_CHAIN" in names else [declared]
+            for row in rows:
+                if isinstance(row, (list, tuple)) and row and isinstance(row[0], str) and row[0].endswith(".py"):
+                    targets.add(Path(row[0]).name)
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            targets.update(alias.name.split(".")[-1] + ".py" for alias in node.names)
+        elif isinstance(node, ast.ImportFrom) and node.module:
+            targets.add(node.module.split(".")[-1] + ".py")
+        elif isinstance(node, ast.Call):
+            call = _call_name(node.func)
+            if call in {"importlib.import_module", "import_module"}:
+                if node.args and isinstance(node.args[0], ast.Constant) and isinstance(node.args[0].value, str):
+                    targets.add(node.args[0].value.split(".")[-1] + ".py")
+            elif call in {"subprocess.run", "subprocess.call", "subprocess.check_call",
+                          "subprocess.check_output", "subprocess.Popen", "runpy.run_path",
+                          "importlib.util.spec_from_file_location", "spec_from_file_location"} or call in local_loaders:
+                # Only the actual command/path argument. Ignore output/log/error text.
+                index = 1 if call.endswith("spec_from_file_location") else 0
+                if len(node.args) > index:
+                    targets.update(Path(value.value).name for value in ast.walk(node.args[index])
+                                   if isinstance(value, ast.Constant) and isinstance(value.value, str)
+                                   and value.value.endswith(".py"))
+    return targets
+
+
+def _test_reference(path, tree):
+    if any(part in {"tests", "test", "fixtures", "review"} or part.startswith("fixtures_")
+           for part in path.parts):
+        return True
+    if re.search(r"(^test_|_test\.py$|\.spec\.)", path.name):
+        return True
+    pytest_import = any(isinstance(node, ast.Import) and any(alias.name == "pytest" for alias in node.names)
+                        or isinstance(node, ast.ImportFrom) and node.module == "pytest"
+                        for node in ast.walk(tree))
+    return (pytest_import and any(isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+                                  and node.name.startswith("test_") for node in ast.walk(tree))
+            or any(isinstance(node, ast.ClassDef)
+                   and any(_call_name(base).endswith("TestCase") for base in node.bases)
+                   for node in ast.walk(tree)))
+
+
+def _stable_dump(node):
+    """`ast.dump` in one format on every Python the pipeline runs on.
+
+    Writer signatures hash this text, and the committed baseline in
+    docs/schema/inventory.json was measured on Python 3.12. Python 3.13 made
+    `ast.dump` omit empty lists and None fields by default, so the same tree
+    dumped differently and every signature read as a new, unregistered write
+    (2,683 of them). `show_empty=True` restores the 3.12 text on 3.13+.
+    """
+    if sys.version_info >= (3, 13):
+        return ast.dump(node, include_attributes=False, show_empty=True)
+    return ast.dump(node, include_attributes=False)
+
+
+def writer_evidence(path, table_contracts):
+    """Potential write sites from AST operations, never inferred from comments.
+
+    Binding expansion is deliberately conservative: ambiguous bindings remain
+    unresolved. This is a review priority and change ratchet, not write tracing.
+    """
+    tree = ast.parse(Path(path).read_text(encoding="utf-8-sig"))
+    bindings = defaultdict(list)
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Assign):
+            for target in node.targets:
+                if isinstance(target, ast.Name):
+                    bindings[target.id].append(node.value)
+        elif isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name) and node.value:
+            bindings[node.target.id].append(node.value)
+
+    def expand(node, seen=frozenset()):
+        if isinstance(node, ast.Name) and node.id not in seen and len(bindings[node.id]) == 1:
+            return expand(bindings[node.id][0], seen | {node.id})
+        if isinstance(node, ast.Constant) and isinstance(node.value, str):
+            return node.value
+        if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Div):
+            return expand(node.left, seen).rstrip("/") + "/" + expand(node.right, seen)
+        if isinstance(node, ast.Call) and _call_name(node.func) in {"Path", "pathlib.Path"} and node.args:
+            return expand(node.args[0], seen)
+        return "<unresolved>"
+
+    context_digest = hashlib.sha256(_stable_dump(tree).encode()).hexdigest()
+    sites = []
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call):
+            continue
+        name = _call_name(node.func)
+        method = name.rsplit(".", 1)[-1]
+        target = None
+        if method in {"write_text", "write_bytes"} and isinstance(node.func, ast.Attribute):
+            target = node.func.value
+        elif name in {"open", "io.open", "builtins.open"} or method == "open":
+            module_open = {"io.open", "builtins.open", "gzip.open", "bz2.open", "lzma.open"}
+            positional = 0 if isinstance(node.func, ast.Attribute) and name not in module_open else 1
+            mode = next((keyword.value for keyword in node.keywords if keyword.arg == "mode"),
+                        node.args[positional] if len(node.args) > positional else ast.Constant("r"))
+            value = expand(mode)
+            if value == "<unresolved>" or (re.fullmatch(r"[rwax][bt+]{0,2}", value)
+                                           and any(flag in value for flag in "wax+")):
+                target = node.func.value if positional == 0 else (node.args[0] if node.args else None)
+        elif method in {"to_csv", "to_json", "to_parquet", "to_pickle"}:
+            target = node.args[0] if node.args else next((k.value for k in node.keywords if k.arg in {"path", "path_or_buf"}), None)
+        elif name in {"os.replace", "os.rename", "shutil.copy", "shutil.copy2", "shutil.copyfile", "shutil.move"}:
+            target = node.args[1] if len(node.args) > 1 else None
+        if target is None:
+            continue
+        destination = expand(target).replace("\\", "/")
+        basename = destination.rsplit("/", 1)[-1]
+        normalized = "/" + destination.lstrip("/")
+        protected = any(part in normalized for part in (
+            "/data/spine/", "/data/cedar/", "/data/clean/", "/public/", "/dist/",
+            "/releases/", "/snapshots/", "/catalogs/",
+        ))
+        governed = basename if basename in table_contracts else None
+        declared_clean = governed and "/data/clean/" in normalized
+        scope = "governed_table" if declared_clean else "protected_surface" if protected else "governed_table" if governed else "unresolved_target" if "<unresolved>" in destination else "other_literal_target"
+        # Include bindings, so retargeting OUT without changing OUT.open fires.
+        dependencies = sorted({_stable_dump(value)
+                               for item in ast.walk(target) if isinstance(item, ast.Name)
+                               for value in bindings[item.id]})
+        unresolved_context = context_digest if "<unresolved>" in destination else None
+        signature = hashlib.sha256(json.dumps([_stable_dump(target), destination,
+                                              dependencies, method, unresolved_context], sort_keys=True).encode()).hexdigest()
+        sites.append({"line": node.lineno, "operation": name, "target": destination,
+                      "scope": scope, "table": governed, "signature": signature})
+    return sorted(sites, key=lambda site: (site["line"], site["signature"]))
+
+
+def writer_admission_problems(root=ROOT, inventory=None, table_contracts=None):
+    """Refuse newly observed unregistered write edges; expose legacy debt separately.
+
+    The committed inventory is an explicit measured baseline, not approval.
+    Refreshing it requires review of its changed edges. This cannot detect
+    arbitrary dynamic dispatch, imported write helpers or external commands.
+    """
+    root = Path(root)
+    if inventory is None:
+        inventory = json.loads((root / "docs/schema/inventory.json").read_text(encoding="utf-8"))
+    if table_contracts is None:
+        table_contracts = read_contracts()[0]
+    authority = {table: set(value.get("rebuilt_by", []) + value.get("enriched_by", []))
+                 for table, value in table_contracts.items()}
+    for ordering in cp.KNOWN_ORDERINGS:
+        if ordering["file"] in authority:
+            authority[ordering["file"]].update((ordering["rebuild"], ordering["enricher"]))
+    baseline = {(Path(row.get("dir", "").replace(".", "/")) / row["script"]).as_posix(): row
+                for row in inventory["scripts"]}
+    problems = []
+    for path in sorted((root / "code").rglob("*.py")):
+        if "__pycache__" in path.parts:
+            continue
+        relative = path.relative_to(root / "code").as_posix()
+        previous = baseline.get(relative, {})
+        if "writer_evidence" not in previous:
+            problems.append("WRITER_BASELINE_MISSING: code/" + relative)
+            continue
+        signatures = {site["signature"] for site in previous["writer_evidence"]}
+        try:
+            current = writer_evidence(path, table_contracts)
+        except (SyntaxError, UnicodeError, OSError):
+            problems.append("WRITER_ANALYSIS_UNAVAILABLE: code/" + relative)
+            continue
+        for site in current:
+            if site["signature"] in signatures or site["scope"] == "other_literal_target":
+                continue
+            if site["scope"] == "governed_table" and path.name in authority.get(site["table"], set()):
+                continue
+            problems.append(f"NEW_UNREGISTERED_WRITE: code/{relative}:{site['line']} -> {site['target']}")
+    return problems
+
+
+def add_operational_roles(scripts, references, table_contracts=None, launch_collections=None):
+    """Attach measured operational evidence to THE existing inventory records.
+
+    No role confers execution authority. Uncertain records remain unresolved.
+    In particular, an old script or a producer containing a selftest is not an
+    archive candidate or a standalone test just because its name suggests one.
+    """
+    if table_contracts is None:
+        table_contracts = read_contracts()[0]
+    if launch_collections is None:
+        import cedar_publication as publication
+        launch_collections = {name for name, shelf in publication.shelves().items()
+                              if shelf in publication.STOREFRONT_SHELVES}
+    producers = defaultdict(list)
+    for table, contract in table_contracts.items():
+        if contract["collection"] not in launch_collections:
+            continue
+        names = set(contract.get("rebuilt_by", []) + contract.get("enriched_by", []))
+        names.update(name for ordering in cp.KNOWN_ORDERINGS if ordering["file"] == table
+                     for name in (ordering["rebuild"], ordering["enricher"]))
+        for name in cp.active_table_writers(table, sorted(names)):
+            producers[name].append({"collection": contract["collection"], "output": table,
+                                    "entrypoint": contract.get("rebuild_command", "")})
+    consumers = defaultdict(set)
+    runtime_consumers = defaultdict(set)
+    for path in references:
+        if any(part in {"graveyard", "archive", "node_modules"} for part in path.parts):
+            continue
+        relative = path.relative_to(ROOT).as_posix()
+        text = path.read_text(encoding="utf-8", errors="replace")
+        if path.suffix == ".py":
+            try:
+                tree = ast.parse(text)
+            except SyntaxError:
+                continue
+            if not _test_reference(path.relative_to(ROOT), tree):
+                for target in _runtime_script_references(tree, authoritative_runner=relative == "code/build.py"):
+                    runtime_consumers[target].add(relative)
+            for node in ast.walk(tree):
+                if isinstance(node, ast.Import):
+                    for alias in node.names:
+                        consumers[alias.name.split(".")[0] + ".py"].add(relative)
+                elif isinstance(node, ast.ImportFrom) and node.module:
+                    consumers[node.module.split(".")[0] + ".py"].add(relative)
+                elif isinstance(node, ast.Constant) and isinstance(node.value, str) and node.value.endswith(".py"):
+                    consumers[Path(node.value).name].add(relative)
+        elif path.suffix in {".yml", ".yaml", ".json", ".ps1", ".mjs", ".js"}:
+            if path.name in _CATALOGUE:
+                continue
+            for token in re.findall(r"(?:code/|scripts/)([a-zA-Z0-9_./-]+\.py)", text):
+                consumers[Path(token).name].add(relative)
+    archive = {Path(name).name for name, _ in read_archive_candidates()["candidates"]}
+    for script in scripts:
+        name = script["script"]
+        path = CODE / script["dir"].replace(".", "/") / name
+        relative = path.relative_to(ROOT).as_posix()
+        text = path.read_text(encoding="utf-8", errors="replace")
+        try:
+            tree = ast.parse(text)
+        except SyntaxError:
+            tree = ast.Module(body=[], type_ignores=[])
+        aliases, case_names, pytest = {"unittest"}, {"TestCase"}, False
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import):
+                for alias in node.names:
+                    if alias.name == "unittest":
+                        aliases.add(alias.asname or alias.name)
+                    pytest |= alias.name == "pytest"
+            elif isinstance(node, ast.ImportFrom):
+                pytest |= node.module == "pytest"
+                if node.module == "unittest":
+                    case_names.update(alias.asname or alias.name for alias in node.names
+                                      if alias.name == "TestCase")
+        functions = [node.name for node in ast.walk(tree)
+                     if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))]
+        cases = [node.name for node in ast.walk(tree) if isinstance(node, ast.ClassDef)
+                 and any(isinstance(base, ast.Name) and base.id in case_names
+                         or isinstance(base, ast.Attribute) and base.attr == "TestCase"
+                         and isinstance(base.value, ast.Name) and base.value.id in aliases
+                         for base in node.bases)]
+        callers = sorted(consumers[name] - {relative})
+        runtime_callers = sorted(runtime_consumers[name] - {relative})
+        publication_aliases = {alias.asname or alias.name for node in ast.walk(tree)
+                               if isinstance(node, ast.Import) for alias in node.names
+                               if alias.name == "cedar_publication"}
+        publication_functions = {alias.asname or alias.name for node in ast.walk(tree)
+                                 if isinstance(node, ast.ImportFrom) and node.module == "cedar_publication"
+                                 for alias in node.names if alias.name != "shelves"}
+        publication_calls = sorted({_call_name(node.func) for node in ast.walk(tree)
+                                    if isinstance(node, ast.Call)
+                                    and (_call_name(node.func) in publication_functions
+                                         or isinstance(node.func, ast.Attribute)
+                                         and _call_name(node.func.value) in publication_aliases
+                                         and node.func.attr != "shelves")})
+        validation_calls = sorted({_call_name(node.func) for node in ast.walk(tree)
+                                   if isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
+                                   and node.func.id in functions
+                                   and re.match(r"^(check|verify|validate|audit|review|assert|reconcile)(_|$)", node.func.id)})
+        filename_test = bool(re.search(r"(^test_|_test\.py$|^tests?\.)", name))
+        assertion_nodes = sum(isinstance(node, ast.Assert) for node in ast.walk(tree))
+        check_calls = sorted({node.func.id for node in ast.walk(tree)
+                              if isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
+                              and node.func.id in functions
+                              and (node.func.id in {"check", "expect"}
+                                   or node.func.id.startswith("assert_"))})
+        standalone = bool(cases or pytest and any(n.startswith("test_") for n in functions)
+                          or filename_test and (assertion_nodes or check_calls))
+        if standalone:
+            role = "test/fixture"
+        elif any(part in {"graveyard", "archive"} for part in path.relative_to(CODE).parts):
+            role = "historical"
+        elif name in producers:
+            role = "active producer"
+        elif runtime_callers and (publication_calls or name in {"build.py", "cedar_pipeline.py", "cedar_ids.py", "cedar_publication.py"}):
+            role = "product consumer/shared service"
+        elif runtime_callers and validation_calls:
+            role = "active validator/migration/review"
+        elif name in archive and not callers and script["mentions"] == 0:
+            role = "unreferenced retirement candidate"
+        else:
+            role = "unresolved"
+        script.update({"operational_role": role,
+                       "collection_output_entrypoints": producers.get(name, []),
+                       "static_consumers": callers,
+                       "runtime_consumer_candidates": runtime_callers,
+                       "operational_call_evidence": {"publication_calls": publication_calls,
+                                                     "validation_calls": validation_calls},
+                       "unknown_io_literals": cp.declared_io(path)["unknown"],
+                       "embedded_test_functions": sum("selftest" in n or n.startswith("test_") for n in functions),
+                       "standalone_test_evidence": {"unittest_classes": cases, "pytest_import": pytest,
+                                                    "filename_convention": filename_test,
+                                                    "assertion_nodes": assertion_nodes,
+                                                    "local_check_harness_calls": check_calls}})
+        try:
+            writes = writer_evidence(path, table_contracts)
+            analysis_error = None
+        except (SyntaxError, UnicodeError, OSError) as error:
+            writes, analysis_error = [], type(error).__name__
+        undeclared = []
+        for site in writes:
+            if not site["table"]:
+                continue
+            contract = table_contracts[site["table"]]
+            owners = set(contract.get("rebuilt_by", []) + contract.get("enriched_by", []))
+            owners.update(value for ordering in cp.KNOWN_ORDERINGS if ordering["file"] == site["table"]
+                          for value in (ordering["rebuild"], ordering["enricher"]))
+            if name not in owners:
+                undeclared.append(site["table"])
+        scopes = {site["scope"] for site in writes}
+        if name in cp.NEVER_RUN:
+            risk = "P0_forbidden_entrypoint"
+        elif "protected_surface" in scopes:
+            risk = "P1_protected_surface_write_candidate"
+        elif undeclared:
+            risk = "P1_undeclared_governed_write_candidate"
+        elif "governed_table" in scopes:
+            risk = "P2_declared_governed_write_candidate"
+        elif analysis_error or "unresolved_target" in scopes:
+            risk = "P2_unresolved_write_target"
+        elif writes:
+            risk = "P3_other_literal_write_candidate"
+        else:
+            risk = "P3_no_detected_write_not_readonly_certified"
+        script.update({"writer_evidence": writes, "writer_analysis_error": analysis_error,
+                       "writer_risk": risk, "undeclared_governed_tables": sorted(set(undeclared))})
+
+
+    add_maintenance_classification(scripts, references)
+
+
+# Bounded human-read source evidence for the existing census, not dispatch or
+# producer admission. Tuple: source SHA256, retained status, role, evidence and
+# remaining cutover condition. A source change invalidates this evidence.
+def source_digest(path):
+    """SHA-256 of a script with CRLF read as LF.
+
+    A review hash names the source a person inspected, not the checkout's line
+    endings: the same commit hashed on Windows (CRLF) and on Linux CI (LF)
+    must agree, or a review recorded on one machine reads as stale on the
+    other. Three hashes recorded on a Windows checkout failed CI this way.
+    """
+    return hashlib.sha256(path.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
+
+
+_REVIEWED_MAINTENANCE = {
+    '35_coverage_audit.py': ('db0c73e811552b0de64361a0db3a2be73d76ef2bd23ab90081ff59a1f129dc56', 'ACTIVE', 'technical coverage measurement', 'Measures interior/edge year gaps; documented acquisition runbooks and collect_subawards_after_deadline.ps1 invoke it', 'Preserve source-lag versus missing-partition distinctions before replacing coverage measurement'),
+    '730_ws4_grain_money_conservation.py': ('2ab8b4244d4112949e4d63e147fac948df809c73649488d80d3c3c27d843df7a', 'ACTIVE', 'grain/conservation validation utility', 'Writes reviewed funding money rules and merges conservation on source_table/disposition; 518 consumes conservation ledger', 'Centralize shared conservation mutation before retirement; current merge preserves unrelated keys but is not concurrent-write proof'),
+    '751_fr_refresh_promote.py': ('7860fe9508502b9fe24f49e946a34a29268875d02ee793b728459436dedd2e45', 'ACTIVE', 'bounded transitional FR refresh', 'Calls 78 FR builders with its ONLY write filter and measures row/column changes; avoids unrelated lobbying outputs', 'Cut over FR supporting-table refresh and restamping before retiring this bounded path'),
+    '760_collection_descriptors.py': ('66f2b83005d1bf66e66a416d8b40ca4f52c8bae366a47ae28c6360f9fd3d0d7d', 'ACTIVE', 'product metadata generator', 'import_cedar_manifest consumes collection_descriptors output; exact CollectionDataset fields validated before write', 'Replace descriptor importer input with pinned release metadata before retirement; technical READY is not release certification'),
+    '770_sample_extracts.py': ('fafbedad97265d0aa6417319f43d7f092a24b62df77542171466dc24de7de5d7', 'ACTIVE', 'product sample/flagship compatibility component', 'cedar_publication reads and maintains FLAGSHIP literal; importer and 760 consume flagship/measured-facts contracts', 'Prove pinned sample consumer cutover before retiring writes; helper/FLAGSHIP dependencies remain separately retained'),
+    '953_nob_federal_identifier_candidates.py': ('2720010104b1003bf3f11217c5c70a3b7e2f7c57e58fa1c61d4da4fed0b86dcc', 'ACTIVE', 'candidate identifier enrichment utility', '954 registers its candidate fields; verify rederives candidates and checks crosswalk agreement without claiming canonical equivalence', 'Preserve candidate-versus-identity distinction; selftest uses synthetic TEMP inputs and restores all source paths on success or interruption'),
+    '97_build_aliases_and_relationships.py': ('67fa09cc9be6951ce3a8b5ad4eefcc1aad42def11b51ba6f3ca6e6c3d2d9fd2c', 'ACTIVE', 'transitional alias/relationship producer', 'entity_aliases and typed entity_relationships feed 1010/1011/1030/1079/1098; hierarchy fields are not interchangeable edges', 'Preserve source/relationship semantics and negative rulings; migrate consumers before replacing shared outputs'),
+    '05_parse_doi_nho_list.py': ('07eb6ece9ff9c38d952abce6233fc07bdec285b433381e42f65e334e8f587093', 'ACTIVE', 'source roster parser', 'DOI notification roster consumed by 35_entity_harvest, 36_build_nho_intertribal and 163; consultation listing is not 8(a) verification', 'Preserve source roster and classification boundary; parser retention does not authorize identity promotion'),
+    '10_pull_federal_register.py': ('7a2fbee98722ed54fcc37503f1c035d0deacfbcccbea4da58294333c9aedf9d5', 'ACTIVE', 'transitional historical acquisition', 'Writes federal_actions_raw and per-shard manifest; 11_classify_federal_actions reads that raw table', 'Keep full historical acquisition distinct from incremental 342; prove raw/classifier cutover before retirement'),
+    '108_build_tribal_tax_bases.py': ('35b67d5fcb8d677bd1154ceb3781fe55534616123233ecefb05ea5155becaada', 'ACTIVE', 'transitional tax-source producer', 'State tax evidence produces tribal_tax_bases.csv, referenced by 113/116/117 and grain contracts; taxable base is not revenue', 'Preserve units and source manifests when migrating this distinct supporting table'),
+    '1107_punchlist_claim_verify.py': ('418e61e3355d45095e8cb8b20b31484020efcf4582149722f3a21916efe5de7e', 'ACTIVE', 'technical validation utility', 'Verifies 526 punchlist claims against complete inputs; _fixture writes are redirected via _point into temporary roots', 'Retain full-population and UNMEASURED negative controls through replacement'),
+    '1132_fac_nontribal_native_audits.py': ('f02a7813281c1a1315f78b87a83ea2da3f02eba80afdb649a4130f384324934a', 'ACTIVE', 'transitional FAC component producer', 'Declared FAC census/report and SEFA/report-line grains; isolated selftest checks nine real negative controls', 'Migrate unique FAC source/coverage and both grains before retiring writer'),
+    '1155_np_placename_precision.py': ('e167b1dc16e28ebcca545c876972b3436ef6122c35a5ebf7956de856d6ab703e', 'ACTIVE', 'controlled negative-attribution utility', 'Named placename refusal remains a cedar_publication MASK state; selftest now modifies synthetic NP and publication fixtures only', 'Preserve evidence-dated negative rulings and masking semantics through replacement'),
+    '1187_native_federal_advocacy.py': ('a5a6a17eeff9db542bf1edaa6530b31dffba7217b4805fbe0aac4457a7304e8d', 'ACTIVE', 'transitional advocacy component projection', 'Activity-per-entity output consumed by 1174; collect distinguishes sources and refuses absent required sources', 'Replace broader activity contract, not only lobbying disclosures; cut over 1174'),
+    '14_pull_cosponsors.py': ('cb516653555cc18d38e14d21c2e9467b9b002a5f1cf170c8c11bae07eb489456', 'HISTORICAL-RETAIN', 'historical acquisition provenance', '1145_cosponsor_harvest explicitly consumes _cosponsors.csv as legacy__cosponsors_csv evidence', 'Preserve legacy rows and fetch log; do not discard because newer acquisition exists'),
+    '183_register_lobbying_registrant_layer.py': ('26672204813d8ae8ed795d95e9f2503dc388762a498815f81c4703fd306df761', 'ACTIVE', 'component metadata registration utility', 'Registers five registrant-layer fragments and 87-compatible notes; 25/27 table registrations are distinct consumers', 'Centralize fragment/notes writes after preserving all five component definitions'),
+    '208_register_extent_competed_codebook_fragment.py': ('6e0457de75fa3cf4a74e68ecc57ddb16d4294e3c0081490e2d84ce07e4b85f88', 'ACTIVE', 'bounded metadata registration utility', 'Adds normalized extent-competed definitions to prime fragment only; backup/part/rename/readback, no master write', 'Retain two precise definitions in canonical codebook generator before retirement'),
+    '20_fix_nonprofit_authority.py': ('07e1b21cce76fdb231c6949c7948b7d6755b4ab33e2dcd325eb5311777cd19d4', 'HISTORICAL-RETAIN', 'historical authority correction', 'Separates regex exclusions from human rulings and records Navajo Technical College reinstatement with retained prior evidence', 'Preserve ruled correction history; broad restamping is not current execution authority'),
+    '21_flag_corrupt_cage_codes.py': ('6925c95b6620ac1755e891d56050c002a852ea8a86b9a0f6bf588e808bdcceb7', 'ACTIVE', 'identifier-quality utility', 'Flags malformed CAGE in fpds_uei_cage_map and cedar_cage_backfill without repairing or inferring identifiers', 'Cut negative-evidence consumers over before replacing the two enrichment routes'),
+    '356_register_correction_register.py': ('6c48a5806f952bcd2e19bee1d8fdc869c40e5056be4a450b23c71800e2ed9f18', 'ACTIVE', 'correction metadata utility', 'Registers 354 correction-register fragment and uses 87 notes schema for 25/27 consumers', 'Preserve withdrawn-attribution audit contract and notes through central registration'),
+    '517_export_safety.py': ('891dbcbfa38431e3cc22fe1815494423d208e3df82ec3a81777c9f67efa58c38', 'ACTIVE', 'export validation/metadata utility', 'cedar_export_safety.csv is consumed by 518, 521, 526 and 62; verify does not write', 'Preserve aggregation/grain qualification consumers before replacing technical gate'),
+    '518_dataset_readiness.py': ('a2a3bd06573341e20f4e17cbc0c923c91a1f31bd21931ccb722f605fe16b1545', 'ACTIVE', 'technical readiness generator', 'Existing descriptors and documentation consume technical readiness; documented verify is read-only', 'Do not equate technical READY with launch certification; migrate descriptor consumers before retirement'),
+    '952_nonprofit_disposition.py': ('617523dbb49432347d1d7badbe9add836a6c8a41ec19cf9546d24d161f9646cf', 'ACTIVE', 'controlled nonprofit disposition utility', 'ADR-016 defines derived disposition separately from hand ruling; conservation selftest now uses synthetic table/manifest; 2026-10-01 bounded review: legacy verified_strict is candidate-only, with explicit positive rulings, prior exclusions and conflict precedence preserved; no write destinations or execution authority added', 'Preserve original rulings and generic-token refusal evidence in canonical transform'),
+    '954_register_promoted_columns_codebook.py': ('4dbd61ed3af99d1294dca27cf08371f43c8e0f2646a8cd3874bcd814a8d2a882', 'ACTIVE', 'codebook registration/validation', 'Registers measured 950/952/953 column definitions through cedar_codebook; selftest now isolates shared writer paths', 'Preserve all promoted-column definitions and measurement checks before consolidating'),
+    '1174_qc_review_bundle.py': ('56d628b1ae26b6e85017c58c1051620461963c9854fd92ed1f6f4e01ea31a00f', 'HISTORICAL-RETAIN', 'historical owner-review export', 'September-4 requested QC bundle consumes 1181/1186/1187 outputs; 1176 embeds its files; blank notes mean unreviewed', 'Preserve historical review provenance; not the current qualified adjudication menu'),
+    '1176_build_review_artifact.py': ('f022c2aaea09335be517f9fc2174be16c9c694508db3b20bfeec28e115109eb7', 'HISTORICAL-RETAIN', 'historical review-bundle renderer', 'Embeds 1174 QC sheets and measured coverage in requested September-4 downloadable artifact', 'Preserve artifact reproduction and prior review evidence; no current queue ownership inferred'),
+    "41_build_codebooks.py": ("6dcc4b00ac676cb3db30c89b9be1ab094df5cbaa2dd279b281190b3b49d30517", "ACTIVE", "shared helper; forbidden writer", "166/263/392/941/cedar_register_codebook import helpers; main guard precedes writes", "Move helper consumers before removing file; never re-enable whole-master writer"),
+    "1072_tribally_owned_enterprises.py": ("93ce32e6cef2110c0ccd672d881403a95e9e8388c2e07a36aa70da734e534bca", "ACTIVE", "controlled migration/producer", "build.py NEED candidate stages invoke migrate-legacy/build/verify; 1130/1133 consume helpers", "Preserve issued IDs and migration replay; publication hold remains"),
+    "1129_place_ids.py": ("d034f6948893e331a59cc2edae567cd0e65db712981758aa0bf2466fbeb16811", "ACTIVE", "controlled migration/validation", "mint/migrate --apply mutate place register; protected literals also occur in fixtures", "Retain issued-place identity and replay authority until explicit cutover"),
+    "1180_entity_official_names.py": ("6d3a5179f9586adb70fd3ba799f89dd3cd3fe9f25b1f14623921c1c900d0d140", "ACTIVE", "canonical-name utility", "build --apply writes cedar_entity_names.csv consumed by cedar_publication and build.py pins", "Replace canonical-name generation and consumers together"),
+    "1183_native_nonprofit_entities.py": ("22f922f846747f68411b2086909bdd634a14f9434b9f877518219d579ddc0bfc", "ACTIVE", "controlled identity migration", "build writes identity register, EIN links and entity types; projection does not replace minting", "Preserve issued identities and ruled object mappings; no automatic promotion"),
+    "525_event_ids.py": ("e7d924c034ef49d2f2807ac3a212a26e44877b0f8a557c976445c833876da162", "ACTIVE", "record-grain registry utility", "Produces cedar_event_id_registry.csv and EVENT_IDS.md; subcontracting contract cites this authority", "Move event grain declarations into surviving contract before retirement"),
+    "843_retire_cicd_scheme.py": ("52840f6fe8dea16f6bb72ba6dbbfaa7bc5e9799dda865a343b1a903bb15cc90e", "HISTORICAL-RETAIN", "historical migration", "One-time CICD retirement preserves crosswalk, backups and identity/funding replay", "Retain recovery provenance; not admitted to ordinary dispatch"),
+    "02_extract_exclusion_rulings.py": ("7b5dd843cec17b1d304da137d5bddaf4bb2c8033bcb6e642b79f428110933718", "HISTORICAL-RETAIN", "historical evidence extraction", "Extracts hci_analysis.do human exclusions; output consumed by 03 and 1163 negative decisions", "Preserve original rulings and reproducible extraction"),
+    "1000_harvest_business_identifiers.py": ("2d503b47ede4645a231c633e0e119860e1867f0a0f102d98e6e7f16239633996", "ACTIVE", "transitional identifier acquisition", "sweep/web/promote; open_crosswalk duplicates 1001 non-atomic rewrite preserving other built_by rows", "Centralize crosswalk mutation with 1001; preserve distinct acquisition evidence"),
+    # Re-hashed 2026-10-02: gate_for now reads cedar_domain's live publication
+    # rule (owner ruling 2026-10-02); the review's scope and plan are unchanged.
+    "1001_link_businesses_to_contracting.py": ("8da651868c962846efc9927cd202a992f146cbed53e9f32d64a68883c3bf39d7", "ACTIVE", "transitional reconciliation", "Directory/federal identifier linkage; open_crosswalk duplicates 1000 mutation; gate_for reads the live publication rule since 2026-10-02", "One atomic crosswalk writer after both callers cut over; retain linkage/hold outputs"),
+    "109_build_variable_registry.py": ("ec588dc4f3ad47de39f69423f8cb858e181615c3e87ffc5bf2b019624742d779", "ACTIVE", "metadata utility", "variable_registry.csv is consumed by 374_build_cedar_taxonomy_export.py", "Prove semantic metadata parity and cut over 374 before retirement"),
+    "1090_dtll_agency_harvest.py": ("ffe8ba11c0f75cbcc387acdc6e58e3b82eca086b8e2c1e8e9c3d7eb6e40aace1", "ACTIVE", "transitional acquisition", "Agency Dear Tribal Leader letters/coverage are distinct Advocacy components, not Federal Register", "Migrate acquisition and codebook fragment registration without losing component coverage"),
+    "1105_newsletter_corpus_ship.py": ("a924f5bc24761ee339aee603524d61f1e057730a497cc7f8094c1ee6095adcda", "ACTIVE", "conservation/registration utility", "Validates 990/991 newsletter outputs and writes conservation/codebook metadata", "Keep unique conservation checks; cut metadata writes over to canonical fragment writer"),
+    "1135_full_dataset_review_bundle.py": ("1a2b196ef937457ea2a184e022dc8744b2f8aed9a088e2c66dfe73e01c6a0bab", "ACTIVE", "review utility; transitional ancillary export", "Candidate review retained; build calls refuse_migrated_producers; ancillary full-table route distinct", "Retire only proven replaced output routes, not whole review utility"),
+    "1149_codebook_money_fed.py": ("40817ad385ba14109247e4a3afb23c7e6b4b850ab3bf1fcfc0e8a123dd2c7ef9", "ACTIVE", "codebook registration/validation", "Eleven table fragments; selftest now redirects script and shared writer to synthetic temporary tree", "Preserve fragment definitions and negative controls through codebook owner cutover"),
+    "1151_customer_preview_ten.py": ("c052a96df89691688021c118ae1e0b249e483326d9272a9eedfc58f35247ceeb", "ACTIVE", "transitional preview producer", "1162 calls verify; DATASET_NORTH_STAR documents dist/preview producer", "Replace 1162 validation and documentation with pinned release samples before retirement"),
+    "1169_release_verify.py": ("31c6915eb5d64b19d0154d8f678f416a5af826d0671c4d43e32e7cf8f647c461", "ACTIVE", "release validator", "Default verify read-only; _fixture_fails redirects protected-looking writes into TemporaryDirectory", "Retain negative release tests; fixture literals are not canonical writes"),
+    "1181_native_entities_spreadsheet.py": ("c6adbed6e7643134208775138a616ed70b3d7588d69f4736753dfa041baa031e", "ACTIVE", "entity-reference export", "dist/customer/native_entities.csv consumed by 1174 QC bundle", "Replace entity-reference product and 1174 consumer together"),
+    "1184_deals_public_presentation.py": ("2e33f4e4373d74d6fda64087de2c2e6c1b41e1853ceac6277040ef56d7b413e9", "ACTIVE", "presentation helper; legacy standalone writer", "cedar_publication.deals_public_view dynamically imports helper; standalone deals_presentation unused there", "Cut helper consumers over before file retirement; standalone writer can be separately fenced"),
+    "1186_federal_awards_rebuild.py": ("337d701f28233a5573c51dbf8792774920c468e04c352badd2a30c14897438d7", "ACTIVE", "transitional award-grain producer", "federal_awards_2025_2026.csv consumed by 1174/1176; award grain differs from transaction release", "Declare award-grain replacement and cut consumers over; transaction release alone is insufficient"),
+}
+
+
+def add_maintenance_classification(scripts, references):
+    """Classify maintenance evidence without granting write or deletion authority.
+
+    Exact duplicate bytes are evidence of duplication, not proof that an entry
+    point can be removed: relative paths and external callers still matter.
+    A table-scoped retirement never retires all of a multi-output script.
+    """
+    by_path = {}
+    by_name = defaultdict(list)
+    hashes = defaultdict(list)
+    for record in scripts:
+        relative = (Path("code") / record["dir"].replace(".", "/") / record["script"]).as_posix()
+        path = ROOT / relative
+        digest = source_digest(path)
+        by_path[relative] = record
+        by_name[record["script"]].append(relative)
+        hashes[digest].append(relative)
+        record["source_sha256"] = digest
+    reviewed = {
+        path: _REVIEWED_MAINTENANCE[record["script"]]
+        for path, record in by_path.items()
+        if path == "code/" + record["script"]
+        and record["script"] in _REVIEWED_MAINTENANCE
+        and record["source_sha256"] == _REVIEWED_MAINTENANCE[record["script"]][0]
+    }
+    workflow_calls = defaultdict(set)
+    documented_calls = defaultdict(set)
+    for path in references:
+        relative = path.relative_to(ROOT).as_posix()
+        if path.name in _CATALOGUE or any(part in {"archive", "graveyard"} for part in path.parts):
+            continue
+        if path.suffix not in {".md", ".yml", ".yaml", ".ps1"}:
+            continue
+        text = path.read_text(encoding="utf-8", errors="replace")
+        # Literal command evidence only. Mentions and historical prose do not
+        # become execution edges. Workflow roots remain reviewable evidence.
+        for line in text.splitlines():
+            if not re.search(r"(?:python(?:3(?:\.\d+)?)?|py(?: -3)?|uv run python)\s", line):
+                continue
+            for name in re.findall(r"(?:code/|code\\)([A-Za-z0-9_./\\-]+\.py)", line):
+                target = (Path("code") / name.replace("\\", "/")).as_posix()
+                if target not in by_path:
+                    continue
+                documented_calls[target].add(relative)
+                if relative.startswith(".github/workflows/"):
+                    workflow_calls[target].add(relative)
+    active_roles = {"active producer", "active validator/migration/review",
+                    "product consumer/shared service", "test/fixture"}
+    active = {path for path, record in by_path.items()
+              if record.get("operational_role") in active_roles or workflow_calls[path]}
+    active.update(path for path, review in reviewed.items() if review[1] == "ACTIVE")
+    # Follow actual Python import/dispatch candidates only from maintained
+    # roots, not from every unreferenced script that mentions another module.
+    changed = True
+    while changed:
+        changed = False
+        for path, record in by_path.items():
+            if path in active or len(by_name[record["script"]]) != 1:
+                continue
+            if set(record.get("runtime_consumer_candidates", [])) & active:
+                active.add(path)
+                changed = True
+    for path, record in by_path.items():
+        peers = sorted(other for other in hashes[record["source_sha256"]] if other != path)
+        retired = [{"output": rule["file"], "replacement": rule["rebuild"],
+                    "required_component": rule["enricher"]}
+                   for rule in cp.KNOWN_ORDERINGS
+                   if record["script"] in rule.get("retired_writers", [])]
+        replay = [{"output": output, "evidence": item.get("evidence", ""),
+                   "mints_issued_ids": record["script"] in item.get("mints", [])}
+                  for output, item in cp.REPLAY_ORDERS.items()
+                  if record["script"] in item.get("order", [])]
+        if path in reviewed:
+            status, reason = reviewed[path][1], reviewed[path][3]
+        elif path in active:
+            status, reason = "ACTIVE", "declared operational role, CI invocation or reachable Python dependency"
+        elif replay:
+            status, reason = "HISTORICAL-RETAIN", "explicit authoritative replay dependency; retention is not permission to execute"
+        elif record.get("operational_role") == "historical":
+            status, reason = "HISTORICAL-RETAIN", "explicit existing historical directory; retain provenance"
+        elif peers:
+            status, reason = "DUPLICATE", "byte-identical source peer; removal safety not established"
+        else:
+            status = "REQUIRES-REVIEW"
+            if record.get("never_run"):
+                reason = "existing forbidden-entrypoint authority; preserve evidence and verify all direct-call guards"
+            elif record.get("writer_analysis_error"):
+                reason = "write analysis failed: " + str(record["writer_analysis_error"])
+            elif any(site.get("scope") == "protected_surface" for site in record.get("writer_evidence", [])):
+                reason = "protected output writer lacks proved current ownership/cutover: " + ", ".join(sorted({site["target"] for site in record["writer_evidence"] if site.get("scope") == "protected_surface"}))
+            elif record.get("undeclared_governed_tables"):
+                reason = "governed output is not admitted: " + ", ".join(record["undeclared_governed_tables"])
+            elif record.get("writer_evidence"):
+                reason = "writer targets/callers need runtime confirmation before ownership or retirement: " + ", ".join(sorted({str(site.get("target", "<unresolved>")) for site in record["writer_evidence"]}))
+            elif documented_calls[path]:
+                reason = "documented invocation has not been established as current: " + ", ".join(sorted(documented_calls[path]))
+            else:
+                reason = "no detected writer is not proof of read-only behavior; external callers, unique outputs and restoration value remain unverified"
+        # Existing retirement evidence is output-scoped. Only classify a whole
+        # script superseded when every observed writer is explicitly retired,
+        # with no dynamic targets, runtime callers, documentation or CI entry.
+        writes = record.get("writer_evidence", [])
+        retired_tables = {item["output"] for item in retired}
+        fully_retired = (retired_tables and writes and not record.get("writer_analysis_error")
+                         and all(site.get("table") in retired_tables for site in writes)
+                         and not record.get("runtime_consumer_candidates")
+                         and not documented_calls[path] and not workflow_calls[path]
+                         and not record.get("unknown_io_literals"))
+        if fully_retired and path not in active and path not in reviewed:
+            status, reason = "SUPERSEDED", "all observed output writers retired by existing authority; no known caller"
+        provenance = record.get("collection_output_entrypoints", [])
+        record["maintenance_status"] = status
+        record["maintenance_evidence"] = {
+            "reason": reason, "source_sha256": record["source_sha256"],
+            "identical_source_peers": peers,
+            "ci_commands": sorted(workflow_calls[path]),
+            "documented_commands": sorted(documented_calls[path]),
+            "active_runtime_callers": sorted(set(record.get("runtime_consumer_candidates", [])) & active),
+            "superseded_output_edges": retired,
+            "historical_replay_evidence": replay,
+            "output_authority_sha256": hashlib.sha256(json.dumps(provenance, sort_keys=True).encode()).hexdigest(),
+            "output_artifact_hashes": "NOT_MEASURED_BY_SCRIPT_CENSUS",
+            "retirement_authorized": False,
+            "review_owner": "Codex" if status == "REQUIRES-REVIEW" else None,
+            "review_priority": record.get("writer_risk", "P3_unmeasured") if status == "REQUIRES-REVIEW" else None,
+            "review_write_sites": [{key: site.get(key) for key in ("line", "operation", "target", "scope", "table")}
+                                   for site in record.get("writer_evidence", [])] if status == "REQUIRES-REVIEW" else [],
+            "safe_delete_proof": "NOT_ESTABLISHED: external callers, unique output and recovery value are not exhausted by static scans",
+            "bounded_source_review": ({"source_sha256": reviewed[path][0],
+                                       "role": reviewed[path][2],
+                                       "retirement_condition": reviewed[path][4],
+                                       "grants_execution_permission": False}
+                                      if path in reviewed else None),
+            "source_review_stale": (record["script"] in _REVIEWED_MAINTENANCE
+                                    and path == "code/" + record["script"] and path not in reviewed),
+        }
 
 
 def classify_script(s):
@@ -1128,10 +1775,18 @@ HEADLINE_RE = re.compile(
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("cmd", nargs="?", default="build",
-                    choices=["build", "check", "selftest"])
+                    choices=["build", "check", "selftest", "scripts-only", "check-scripts"])
     ap.add_argument("--no-scan", action="store_true",
                     help="use the cache only; anything uncached prints UNKNOWN")
     a = ap.parse_args()
+
+    if a.cmd == "scripts-only":
+        return refresh_script_census()
+    if a.cmd == "check-scripts":
+        issues = cp.script_inventory_problems(ROOT)
+        issues.extend(writer_admission_problems(ROOT))
+        print("\n".join(issues) if issues else "No new script/write admission violations; existing inventoried writer risks remain pending review")
+        return int(bool(issues))
 
     if a.cmd == "selftest":
         print("=== 521_inventory selftest ===\n")

@@ -1047,17 +1047,64 @@ def _inject_orphan(text: str) -> str:
 
 
 def cmd_selftest() -> int:
+    """Isolate negative controls, including publication-source edits, in TEMP."""
+    import tempfile
+    global ROOT, NP, SPINE
+    original = ROOT, NP, SPINE
+    try:
+        with tempfile.TemporaryDirectory(prefix="cedar1155-") as tmp:
+            ROOT = Path(tmp)
+            NP = ROOT / "data" / "clean" / "np_orgs.csv"
+            SPINE = ROOT / "data" / "spine" / "cedar_entity_spine.csv"
+            NP.parent.mkdir(parents=True)
+            SPINE.parent.mkdir(parents=True)
+            (ROOT / "code").mkdir()
+            (ROOT / "code" / "cedar_publication.py").write_text(
+                f'"{DISPOSITION_VALUE}": MASK,\n', encoding="utf-8")
+            with SPINE.open("w", encoding="utf-8", newline="") as fh:
+                writer = csv.DictWriter(fh, fieldnames=["tribe_id", "canonical_name", "entity_class"])
+                writer.writeheader()
+                writer.writerow({"tribe_id": "fixture-entity", "canonical_name": "Coquille Tribe",
+                                 "entity_class": "Federally recognized tribe"})
+            columns = ["EIN", "org_name", "city", "state", "tribe_id", "cedar_uid",
+                       "tribe_canonical_name", "placename_refusal_rung",
+                       "placename_refusal_basis", "key_review_disposition", "fixture_note"]
+            with NP.open("w", encoding="utf-8", newline="") as fh:
+                writer = csv.DictWriter(fh, fieldnames=columns)
+                writer.writeheader()
+                for index in range(12764):
+                    row = {"EIN": str(index), "org_name": "Fixture organization"}
+                    if index < 400:
+                        row.update(org_name="Coquille Chess Club", city="Coquille", state="OR",
+                                   tribe_id="fixture-entity", cedar_uid="fixture-uid",
+                                   tribe_canonical_name="Coquille Tribe",
+                                   placename_refusal_rung="P1_TOKEN_IS_THE_FILERS_OWN_CITY",
+                                   placename_refusal_basis=DISPOSITION_VALUE + ": fixture",
+                                   key_review_disposition=DISPOSITION_VALUE)
+                    elif index == 400:
+                        row.update(org_name="Coquille Tribal Organization", tribe_id="fixture-entity",
+                                   cedar_uid="fixture-uid", tribe_canonical_name="Coquille Tribe")
+                    writer.writerow(row)
+            return _selftest_cases()
+    finally:
+        ROOT, NP, SPINE = original
+
+
+def _selftest_cases() -> int:
     """Inject each violation into a COPY, assert verify goes red, restore, assert green.
 
     A check that has never failed on purpose is not known to work
     (`docs/AGENT_FIELD_GUIDE.md` rule 1).
     """
-    import subprocess
-    me = [sys.executable, str(Path(__file__).resolve()), "verify"]
+    import io
+    from contextlib import redirect_stdout
 
     def run():
-        p = subprocess.run(me, capture_output=True, text=True, cwd=str(ROOT))
-        return p.returncode, p.stdout + p.stderr
+        # The real verifier must use the redirected fixture paths; a new
+        # interpreter would reinitialize them to the canonical repository.
+        with redirect_stdout(io.StringIO()) as output:
+            result = cmd_verify()
+        return result, output.getvalue()
 
     rc, out = run()
     if rc != 0:

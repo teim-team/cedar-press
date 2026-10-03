@@ -1,5 +1,11 @@
 # START HERE — Cedar Press
 
+> **Historical workspace guide.** For current continuation, start with
+> [the maintained consumer handoff](docs/TERMINAL_HANDOFF.md) and the producer
+> checkpoint it links. This file preserves the older workspace's methods,
+> source notes and dated measurements. Its assignments, counts and build
+> sequence are not current release or publication evidence.
+
 *Rewritten at the close of 2026-08-12. Dataset table re-verified 2026-08-26.*
 
 > ## BEFORE YOU WRITE ANYTHING

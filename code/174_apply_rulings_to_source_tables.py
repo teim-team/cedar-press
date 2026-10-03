@@ -333,8 +333,8 @@ def usable_name_key(n):
     return len(n) >= 8 and len(n.split()) >= 2
 
 
-def build_decisions():
-    rows = load(CONSOLIDATED)
+def build_decisions(rows=None):
+    rows = load(CONSOLIDATED) if rows is None else rows
     if not rows:
         print("  consolidated ledger missing - run 173 first")
         sys.exit(1)
@@ -401,6 +401,44 @@ def build_decisions():
             "date": max((r["ruling_date"] or "") for r in rs),
         }
     return dec
+
+
+
+def nonprofit_identity_hold(ein, decisions, target=None):
+    """Apply consolidated ruling precedence to automatic nonprofit identity.
+
+    This is an identity hold, never an exclusion from Native inclusion. The
+    consolidated ledger owns supersession; consumers must not choose newer
+    timestamps or turn an agent suggestion into an affirmative ruling.
+    """
+    raw = str(ein or "").strip()
+    if not raw:
+        return ""  # No EIN ruling; callers may use their existing name fallback.
+    if not re.fullmatch(r"(?:[0-9]{9}|[0-9]{2}-[0-9]{7})", raw):
+        return "INVALID_EIN"
+    key = "EIN:" + raw.replace("-", "")
+    decision = decisions.get(key)
+    if not decision:
+        return ""
+    action = decision["action"]
+    if action == "RULED_ATTRIBUTED":
+        if target is None or target == decision["tribe_id"]:
+            return ""
+        return "RULING_TARGET_CONFLICT"
+    return action
+
+
+def clear_nonprofit_identity(row, prefix="cedar_", *, org_identity=False):
+    """Withdraw only this role's linkage; organization columns are explicit."""
+    keys = [prefix + suffix for suffix in (
+        "spine_entity_id", "spine_canonical_name", "spine_entity_class",
+        "native_entity_class", "link_tier", "link_key", "link_sources", "link_basis")]
+    if org_identity:
+        keys += ["entity_id", "tribe_id", "tribe_canonical_name", "cedar_uid",
+                 "entity_tier", "entity_match_method", "entity_match_basis", "entity_keyed_date"]
+    for key in keys:
+        if key in row:
+            row[key] = ""
 
 
 def apply_prime(dec, check):

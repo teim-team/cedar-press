@@ -91,9 +91,9 @@
    "units": "fiscal year"
   },
   {
-   "access_tier": "internal",
+   "access_tier": "public",
    "codebook_declared_type": "text",
-   "description": "WITHHELD from publication. Present so this table can be joined by hand; released only where the register's publish_name = 1.",
+   "description": "PUBLISHED since the owner ruling of 2026-10-02: a firm is a business entity regardless of what it is named after, and its name, identifiers and business address are public business records (SAM and USAspending publish them for every federal awardee), not personal identifying information. Consent is not required. The register's publish_name = 1 on every row.",
    "examples": [
     "Bank Of Cherokee County",
     "Cherokee Unlimited, Inc",
@@ -118,7 +118,7 @@
    "pct_filled": 100.0,
    "postgres_type": "text",
    "primary_key": false,
-   "published": "0",
+   "published": "1",
    "sqlite_type": "TEXT",
    "type": "text",
    "units": "name"
@@ -146,9 +146,9 @@
    "units": "category"
   },
   {
-   "access_tier": "internal",
+   "access_tier": "public",
    "codebook_declared_type": "text",
-   "description": "WITHHELD from publication. SAM's public entity search resolves a UEI to a legal name and a street address, so where the legal name is a private person's name this identifier publishes the name by ONE HOP. Released only where firm_legal_name_is_person = 0, or on recorded consent. Independent of the D&B question and survives any answer to it.",
+   "description": "PUBLISHED since the owner ruling of 2026-10-02: a firm is a business entity regardless of what it is named after, and its name, identifiers and business address are public business records (SAM and USAspending publish them for every federal awardee), not personal identifying information. Consent is not required. Until 2026-10-02 this was withheld where the legal name read as a private person's, because SAM's public entity search resolves a UEI to a name and an address; the ruling holds that hop resolves to a business registration. Independent of the D&B question and survives any answer to it.",
    "examples": [
     "CSAJDZ3BPJ23",
     "CYLNAHG3XEF5",
@@ -173,7 +173,7 @@
    "pct_filled": 100.0,
    "postgres_type": "text",
    "primary_key": false,
-   "published": "0",
+   "published": "1",
    "sqlite_type": "TEXT",
    "type": "text",
    "units": "code"
@@ -597,7 +597,7 @@
   {
    "access_tier": "public",
    "codebook_declared_type": "text",
-   "description": "Drives every name and identifier release decision on this row. UNKNOWN counts as a person.",
+   "description": "A measured fact about the name. Since the owner ruling of 2026-10-02 it drives no release decision.",
    "examples": [
     "UNKNOWN",
     "0"
@@ -620,7 +620,7 @@
   {
    "access_tier": "public",
    "codebook_declared_type": "integer",
-   "description": "See the register.",
+   "description": "See the register: 1 on every row.",
    "examples": [
     "0",
     "1"
@@ -643,7 +643,7 @@
   {
    "access_tier": "public",
    "codebook_declared_type": "integer",
-   "description": "See the one-hop rule on `identifier`.",
+   "description": "See the register: 1 on every row.",
    "examples": [
     "0",
     "1"
@@ -796,7 +796,7 @@
    "piid",
    "modification_number"
   ],
-  "evidence": "same one-hop exposure; the contract facts publish, the identifier that resolves to a person does not",
+  "evidence": "same deterministic surrogate as the register; the identifier publishes beside it since the owner ruling of 2026-10-02 (a firm is a business entity whatever it is named after)",
   "kind": "privacy_surrogate",
   "prefix": "INF",
   "published_as": "surrogate_entity_id"

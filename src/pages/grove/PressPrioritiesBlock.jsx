@@ -10,8 +10,8 @@ import { pointsWord, published, sortPriorities } from "../../features/grove/pres
 import { usePriorities } from "../../features/grove/usePriorities.js";
 import { PRESS_PRIORITIES_PATH } from "../../features/grove/pressRoutes";
 
-export default function PressPrioritiesBlock({ signedIn }) {
-  const { priorities, status } = usePriorities({ signedIn });
+export default function PressPrioritiesBlock({ user }) {
+  const { priorities, status } = usePriorities({ user });
   const top = sortPriorities(priorities).slice(0, 3);
   const shipped = published(priorities)[0] ?? null;
   return (
@@ -19,6 +19,9 @@ export default function PressPrioritiesBlock({ signedIn }) {
       <div className={`cp-prib__in${shipped ? " is-two" : ""}`}>
         <div>
           <span className="cp-sec__band">Subscriber research priorities</span>
+          {status === "loading" ? <p role="status">Loading subscriber priorities…</p> : null}
+          {status === "failed" ? <p role="status">Subscriber priorities are temporarily unavailable.</p> : null}
+          {status === "signed-out" ? <p>Sign in to see subscriber priorities and your points.</p> : null}
           <ol className="cp-prib__list">
             {top.map((p) => (
               <li key={p.id}>

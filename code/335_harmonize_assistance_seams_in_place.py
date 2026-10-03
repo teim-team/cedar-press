@@ -149,6 +149,8 @@ from collections import Counter, defaultdict
 from datetime import date, datetime, timezone
 from pathlib import Path
 
+from cedar_pipeline import retired_table_writer
+
 CEDAR = Path(__file__).resolve().parent.parent
 CLEAN = CEDAR / "data" / "clean"
 GRAVEYARD_CICD = CEDAR / "graveyard" / "cicd"
@@ -265,6 +267,11 @@ def normalize_business_types(v):
 
 
 def main():
+    # Preserve this historical implementation without allowing a direct CLI
+    # call (including legacy force flags) to bypass the shared retirement.
+    if retired_table_writer(Path(__file__).name, "federal_funding_transactions.csv"):
+        raise SystemExit("RETIRED_TABLE_WRITER: use code/build.py for the supported "
+                         "Funding path; this historical writer cannot mutate canonical data.")
     print("=== Cedar Press 335: assistance seam harmonisation (in place) ===\n")
     if not TARGET.exists():
         raise SystemExit(f"FATAL: {TARGET} absent")

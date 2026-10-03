@@ -4,11 +4,15 @@
 
 import assert from "node:assert/strict";
 import test from "node:test";
+import { readFileSync } from "node:fs";
 
 import { COLLECTION_FIGURES, LAUNCH_COLLECTION } from "./collection.js";
-import { BLOCK, PRESS_ARTICLES } from "./pressArticles.js";
+import { BLOCK, PRESS_ARTICLES as PUBLIC_ARTICLES } from "./pressArticles.js";
 import { CHART_RULES, figureProblems } from "./pressCharts.js";
 import { PRESS_CATALOG_BY_ID } from "./pressCatalog.js";
+
+const SERVER_ARTICLES = JSON.parse(readFileSync(new URL("../../../server/cedar_press/articles.json", import.meta.url), "utf8"));
+const PRESS_ARTICLES = SERVER_ARTICLES.filter((article) => article.id.startsWith("brief-"));
 
 test("every article draws from a real dataset with a real figure", () => {
   for (const article of PRESS_ARTICLES) {
@@ -156,4 +160,74 @@ test("every mark used has a rule, and every rule says when not to use it", () =>
     assert.ok(rule.avoid.length > 30, `${rule.kind}: no guidance on when not to`);
     assert.ok(rule.axis.length > 20, `${rule.kind}: nothing about its axis`);
   }
+});
+
+test("public cards never carry subscriber bodies or highlights", () => {
+  const publicSource = readFileSync(new URL("./pressArticles.js", import.meta.url), "utf8");
+  for (const article of PUBLIC_ARTICLES) {
+    assert.equal(article.body, undefined);
+    assert.equal(article.highlights, undefined);
+  }
+  for (const article of SERVER_ARTICLES.filter((a) => a.hosted)) {
+    for (const block of article.body.filter((b) => b.kind === BLOCK.P)) {
+      assert.ok(!publicSource.includes(block.text), article.id);
+    }
+  }
+});
+
+test("new server drafts have renderable bodies and an explicit preliminary status", () => {
+  const ids = new Set();
+  for (const article of SERVER_ARTICLES) {
+    assert.ok(!ids.has(article.id), article.id);
+    ids.add(article.id);
+    if (article.id.startsWith("brief-")) continue;
+    assert.equal(article.earlyAccess, true);
+    assert.equal(article.draft, true);
+    assert.ok(article.title && article.byline && article.body.length);
+    assert.equal(article.highlights.length, 3);
+    for (const block of article.body) {
+      assert.ok(Object.values(BLOCK).includes(block.kind));
+      if (block.kind === BLOCK.FIGURE) {
+        assert.deepEqual(figureProblems({ ...block, kind: block.chart }), []);
+      }
+    }
+  }
+});
+
+
+function evidenceFixture(kind) {
+  const sources = [{ url: "https://example.org/announcement", title: "Owner announcement" }];
+  const base = { kind, id: "test-evidence", caption: "Documented roles", source: "Owner announcement",
+    notes: ["Roles are dated.", "Ownership shares are not inferred."], sources };
+  if (kind === "relationships") return { ...base, relationships: [
+    { from: "Government", relationship: "owns", to: "Enterprise", asOf: "2020-01-15", detail: "An explicit relationship.", sources },
+  ] };
+  if (kind === "timeline") return { ...base, events: [
+    { date: "2022-03-14", title: "Branding update", detail: "Not another purchase.", sources },
+  ] };
+  return { ...base, columns: [{ key: "entity", label: "Organization" }, { key: "role", label: "Reported role" }],
+    rows: [{ entity: "Manager", role: "Property manager", asOf: "2022-03-14", detail: "Management does not establish ownership.", sources }] };
+}
+
+test("sourced nonnumeric figures preserve relationships, event dates and reported roles", () => {
+  for (const kind of ["relationships", "timeline", "evidenceTable"]) {
+    assert.deepEqual(figureProblems(evidenceFixture(kind)), []);
+  }
+});
+
+test("evidence figures reject missing observations, fabricated magnitudes and invalid dates", () => {
+  for (const kind of ["relationships", "timeline", "evidenceTable"]) {
+    const fixture = evidenceFixture(kind);
+    const key = { relationships: "relationships", timeline: "events", evidenceTable: "rows" }[kind];
+    assert.ok(figureProblems({ ...fixture, [key]: [] }).length);
+    assert.ok(figureProblems({ ...fixture, points: [{ label: "Invented", value: 1 }] }).length);
+    assert.ok(figureProblems({ ...fixture, [key]: [{ ...fixture[key][0], sources: [] }] }).length);
+    assert.ok(figureProblems({ ...fixture, [key]: [{ ...fixture[key][0], detail: {} }] }).length);
+    const dateKey = kind === "timeline" ? "date" : "asOf";
+    assert.ok(figureProblems({ ...fixture, [key]: [{ ...fixture[key][0], [dateKey]: "2022-02-30" }] }).length);
+  }
+  const table = evidenceFixture("evidenceTable");
+  assert.ok(figureProblems({ ...table, columns: [{ key: "__proto__", label: "Private" }] }).length);
+  assert.ok(figureProblems({ ...table, columns: [table.columns[0], table.columns[0]] }).length);
+  assert.ok(figureProblems({ ...table, sources: [{ url: "file:///private" }] }).length);
 });

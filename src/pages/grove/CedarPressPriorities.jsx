@@ -25,7 +25,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
 
-import { fetchRelatedPriorities, submitResearchRequest } from "../../api.js";
+import { fetchRelatedPriorities } from "../../api.js";
 import { useAuth } from "../../context/useAuth";
 import { canReadCedarPress } from "../../features/grove/pressAccess";
 import {
@@ -121,7 +121,7 @@ function Priority({ priority, mine, canMove, onMove, busy, evolvedFrom, counted 
  * text (locally at once, by the service when connected); a match offers a
  * point on that priority and keeps the request beside it.
  */
-function RequestForm({ priorities, connected, canMove, available, onDone }) {
+function RequestForm({ priorities, connected, canMove, available, onSubmitRequest }) {
   const [text, setText] = useState("");
   const [useCase, setUseCase] = useState("");
   // Read locally at once; the service's reading replaces it when it
@@ -153,13 +153,12 @@ function RequestForm({ priorities, connected, canMove, available, onDone }) {
     setError(null);
     try {
       const supportPoints = best && support && canMove && available > 0 ? 1 : 0;
-      const result = await submitResearchRequest({ text, useCase, priorityId: best?.id ?? null, supportPoints });
+      const result = await onSubmitRequest({ text, useCase, priorityId: best?.id ?? null, supportPoints });
       track(EVENT.researchRequested, { associated: Boolean(best), supported: supportPoints > 0 });
       setSent(result);
       setText("");
-      onDone();
     } catch (e) {
-      setError(e?.message ?? "The request was not sent.");
+      if (e?.name !== "AbortError") setError(e?.message ?? "The request was not sent.");
     } finally {
       setBusy(false);
     }
@@ -220,20 +219,18 @@ export default function CedarPressPriorities() {
   useDocumentTitle("Shape the research");
   const { user, loading } = useAuth();
   const entitled = canReadCedarPress(user);
+  if (loading) return <p role="status">Loading your account…</p>;
+  if (!entitled) return <div className="teim-rd teim-rd--paper"><PressGate user={user} /></div>;
+  return <PrioritiesWorkspace key={`${user.id ?? user.email}:${resolveTier(user)}`} user={user} />;
+}
+
+function PrioritiesWorkspace({ user }) {
   const fadeRoot = useFadeIn();
   useScrollToTop("priorities");
   const tier = resolveTier(user);
-  const { priorities, influence, status, error, connected, reload, move } = usePriorities({ signedIn: entitled });
+  const { priorities, influence, status, error, connected, reload, move, submit } = usePriorities({ user });
   const [busy, setBusy] = useState(false);
   const [moveError, setMoveError] = useState(null);
-
-  if (!loading && !entitled) {
-    return (
-      <div className="teim-rd teim-rd--paper">
-        <PressGate user={user} />
-      </div>
-    );
-  }
 
   const mine = Object.fromEntries((influence?.allocations ?? []).map((a) => [a.priority_id, a.points]));
   const canMove = status === "ok";
@@ -247,7 +244,7 @@ export default function CedarPressPriorities() {
       await move(id, points);
       track(EVENT.priorityAllocated, { points });
     } catch (e) {
-      setMoveError(e?.message ?? "The points did not move.");
+      if (e?.name !== "AbortError") setMoveError(e?.message ?? "The points did not move.");
     } finally {
       setBusy(false);
     }
@@ -330,7 +327,7 @@ export default function CedarPressPriorities() {
                 part that says what you actually need.
               </p>
               <div className="cp-pri__askgrid">
-                <RequestForm priorities={priorities} connected={connected && entitled} canMove={canMove} available={available} onDone={() => reload()} />
+                <RequestForm priorities={priorities} connected={connected} canMove={canMove} available={available} onSubmitRequest={submit} />
                 <aside className="cp-pri__what" aria-label="What happens to a request">
                   <span className="cp-set__cap">What happens to it</span>
                   <ol className="cp-pri__steps">

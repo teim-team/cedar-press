@@ -1,55 +1,37 @@
-// The priorities and this subscription's influence, from the service when
-// it is connected and from the seed when it is not, with the difference
-// stated rather than hidden: a build without the service shows the list
-// with no counts and says that counting begins with the service.
+// Private balances belong to the current authenticated account and plan.
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { apiAvailable, fetchInfluence, fetchPriorities, movePoints, submitResearchRequest } from "../../api.js";
+import { resolveTier } from "../../workspaceTier.js";
+import { canReadCedarPress } from "./pressAccess.js";
+import { createPrioritySession, visiblePriorityState } from "./pressPriorities.js";
 
-import { useCallback, useEffect, useState } from "react";
-
-import { apiAvailable, fetchInfluence, fetchPriorities, movePoints } from "../../api.js";
-import { SEED_PRIORITIES } from "./pressPriorities.js";
-
-export function usePriorities({ signedIn }) {
+export function usePriorities({ user }) {
   const connected = apiAvailable();
-  const [priorities, setPriorities] = useState(SEED_PRIORITIES);
-  const [influence, setInfluence] = useState(null);
-  // "static": no service in this build. "signed-out": a service, nobody
-  // signed in. "loading" until the first answer, then "ok" or "failed".
-  const [answered, setAnswered] = useState(null);
-  const status = !connected ? "static" : !signedIn ? "signed-out" : (answered ?? "loading");
-  const [error, setError] = useState(null);
-
-  const reload = useCallback(async (signal) => {
-    if (!connected || !signedIn) return;
-    try {
-      const [list, card] = await Promise.all([fetchPriorities({ signal }), fetchInfluence({ signal })]);
-      if (signal?.aborted) return;
-      setPriorities(list.priorities);
-      setInfluence(card);
-      setAnswered("ok");
-      setError(null);
-    } catch (e) {
-      if (signal?.aborted) return;
-      setAnswered("failed");
-      setError(e?.message ?? "The service did not answer.");
-    }
-  }, [connected, signedIn]);
-
+  const enabled = Boolean(user) && canReadCedarPress(user);
+  const tier = resolveTier(user);
+  // Re-login with the same email is a new owner; a plan change is too.
+  const owner = useMemo(() => ({ user, tier }), [user, tier]);
+  const [state, setState] = useState(null);
+  const active = useRef(null);
   useEffect(() => {
-    const controller = new AbortController();
-    // After the commit, not during it: every state the read sets is set
-    // once the service has answered.
-    Promise.resolve().then(() => reload(controller.signal));
-    return () => controller.abort();
-  }, [reload]);
-
-  const move = useCallback(async (priorityId, points) => {
-    const result = await movePoints({ priorityId, points });
-    // The service answers with the priority's new totals and this
-    // subscription's balance; the rest of the card is re-read.
-    setPriorities((prev) => prev.map((p) => (p.id === priorityId ? { ...p, ...result.priority } : p)));
-    await reload();
-    return result;
-  }, [reload]);
-
-  return { priorities, influence, status, error, connected, reload, move };
+    if (!connected || !enabled) return undefined;
+    const session = createPrioritySession({ fetchPriorities, fetchInfluence, movePoints, submitResearchRequest,
+      publish: (next) => setState({ ...next, owner }) });
+    active.current = { owner, session };
+    void session.reload();
+    return () => {
+      session.dispose();
+      if (active.current?.session === session) active.current = null;
+    };
+  }, [connected, enabled, owner]);
+  const currentSession = useCallback(() => {
+    if (!connected || !enabled || active.current?.owner !== owner) {
+      throw Object.assign(new Error("The account session changed."), { name: "AbortError" });
+    }
+    return active.current.session;
+  }, [connected, enabled, owner]);
+  const reload = useCallback(() => currentSession().reload(), [currentSession]);
+  const move = useCallback((id, points) => currentSession().move(id, points), [currentSession]);
+  const submit = useCallback((args) => currentSession().submit(args), [currentSession]);
+  return { ...visiblePriorityState(state, owner, { connected, enabled }), connected, reload, move, submit };
 }

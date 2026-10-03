@@ -46,6 +46,11 @@ export default defineConfig([
     },
   },
   {
+    // CloudFront invokes the global handler; this deployable source is not an ES module.
+    files: ["infrastructure/cedarpress-router.js"],
+    languageOptions: { sourceType: "script", parserOptions: { sourceType: "script" } },
+  },
+  {
     // The feature tests run on node, not in a browser.
     files: ["**/*.test.js"],
     languageOptions: { globals: globals.node },

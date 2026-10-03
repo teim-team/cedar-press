@@ -56,6 +56,24 @@ import { LAUNCH_COLLECTION } from "./collection.js";
  */
 export const SOURCE_GROUPS = Object.freeze([
   Object.freeze({
+    id: "giving-disclosures",
+    label: "Giving disclosures",
+    sources: Object.freeze([
+      { name: "First-party donation reports", match: "first-party donation reports", collections: ["foundation-corporate-giving"] },
+      { name: "Public foundation, corporate and bank disclosures", match: "public foundation, corporate and bank disclosures", collections: ["foundation-corporate-giving"] },
+    ]),
+  }),
+  Object.freeze({
+    id: "land-and-regulatory-records",
+    label: "Land and regulatory records",
+    sources: Object.freeze([
+      { name: "BIA mapped tracts", match: "BIA mapped tract", collections: ["plot"] },
+      { name: "Wisconsin V12 assessor parcels", match: "Wisconsin V12 assessor parcel", collections: ["plot"] },
+      { name: "Local permits", match: "local permit", collections: ["plot"] },
+      { name: "EPA regulatory sources", match: "EPA regulatory sources", collections: ["plot"] },
+    ]),
+  }),
+  Object.freeze({
     id: "spending",
     label: "Federal spending and awards",
     sources: Object.freeze([
@@ -123,6 +141,10 @@ export const SOURCE_GROUPS = Object.freeze([
       // all point at the same filings made under Alaska Statute 45.55.139.
       { name: "ANCSA corporation filings", match: "Alaska Statute 45.55.139", collections: ["contractors", "need"] },
       { name: "Tribal newsletters and tribal press", collections: ["deals"] },
+      { name: "Tribal enterprise announcements", collections: ["deals"] },
+      { name: "Lender transaction announcements", collections: ["deals"] },
+      { name: "Transaction counsel announcements", collections: ["deals"] },
+      { name: "Government land-transfer releases", collections: ["deals"] },
       { name: "Trade and journalist coverage", match: "trade and journalist coverage", collections: ["deals"] },
     ]),
   }),

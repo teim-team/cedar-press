@@ -148,6 +148,15 @@ data/restricted/
 !/data/spine/
 /data/spine/*
 !/data/spine/cedar_identity_register.csv
+# The two files that are functions of the register (published names and the
+# per-class row counts), the source renderings of register names kept as
+# aliases, and the owner's duplicate-name review record. Tracked for the same
+# reason as the register: `lumecon-data spine check` (Lumecon-data) and
+# server/tests/test_public_preview_audit.py hold them to it.
+!/data/spine/cedar_entity_names.csv
+!/data/spine/cedar_entity_types.csv
+!/data/spine/cedar_entity_name_aliases.csv
+!/data/spine/cedar_duplicate_name_review.json
 # cedar_handle_history.csv is tracked for the SAME reason as the register and
 # is not regenerable: once a handle is retired, its valid_to and its
 # change_reason exist nowhere else. An untracked append-only history is a
@@ -196,11 +205,17 @@ data/restricted/
 # this directory, then allow exactly these files; bulk and private data stay ignored.
 !/data/cedar/
 /data/cedar/*
+!/data/cedar/federal_register_component_contracts.json
 !/data/cedar/codebook.json
 !/data/cedar/collections.manifest.json
 !/data/cedar/field_map.json
+# The one Cedar Grove release pin (immutable Lumecon release IDs and hashes only).
+!/data/cedar/grove_release_pin.json
 !/data/cedar/releases.json
 !/data/cedar/samples.published.json
+# Per-UEI recipient holds and rebinds (not not_native denials): the policy
+# input code/cedar_publication.recipient_holds() reads. Added 2026-10-02.
+!/data/cedar/recipient_holds.json
 
 # Requirements / lockfiles, wherever they turn up.
 !requirements*.txt
@@ -213,6 +228,8 @@ _profile_cache.json
 # The consolidated owner-decision queue is a curated document, not scratch -
 # its history shows what was asked and when it was answered.
 !review/OWNER_DECISION_QUEUE.md
+# Curated launch-control input to the existing review builder; HTML and receipts stay local.
+!review/launch_control.json
 
 # Agent worktrees are private scratch, never part of the tree. Committed as a
 # gitlink with no .gitmodules entry they become an unusable pseudo-submodule
@@ -223,3 +240,4 @@ server/var/
 
 # `make audit-python` resolves the server dependencies here before auditing.
 .audit-requirements.txt
+!/data/cedar/infrastructure_component_contracts.json

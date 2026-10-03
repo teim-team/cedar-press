@@ -69,10 +69,23 @@ async function request(path, { method = "GET", body, signal, headers } = {}) {
 
 /* ── Session ─────────────────────────────────────────────────────────── */
 
+function requireSessionPayload(payload) {
+  if (!payload || typeof payload !== "object" || Array.isArray(payload)
+      || typeof payload.email !== "string" || !payload.email.trim()
+      || typeof payload.workspace_tier !== "string" || !payload.workspace_tier.trim()) {
+    throw new ApiError(
+      "The sign-in service returned an unexpected response. Please try again or contact Cedar Press.",
+      "AUTH_RESPONSE_INVALID",
+      502,
+    );
+  }
+  return payload;
+}
+
 /** The signed-in subscriber, or null when the session is not valid. */
 export async function fetchSession({ signal } = {}) {
   try {
-    return await request("/me", { signal });
+    return requireSessionPayload(await request("/me", { signal }));
   } catch (error) {
     if (error.status === 401) return null;
     throw error;
@@ -80,7 +93,7 @@ export async function fetchSession({ signal } = {}) {
 }
 
 export async function login({ email, password }) {
-  return request("/auth/login", { method: "POST", body: { email, password } });
+  return requireSessionPayload(await request("/auth/login", { method: "POST", body: { email, password } }));
 }
 
 export async function logout() {
@@ -94,7 +107,7 @@ export async function validatePressCode({ code, email }) {
 }
 
 export async function activatePressAccount({ code, email, password }) {
-  return request("/press/activation", { method: "POST", body: { code, email, password } });
+  return requireSessionPayload(await request("/press/activation", { method: "POST", body: { code, email, password } }));
 }
 
 /* ── The subscriber ──────────────────────────────────────────────────── */
@@ -116,6 +129,33 @@ export async function fetchCollections({ signal } = {}) {
   return request("/press/collections", { signal });
 }
 
+export function fetchReleaseCollections({ signal } = {}) {
+  return request("/press/release-collections", { signal });
+}
+
+export function releaseDownloadUrl(collection, releaseId, component = null) {
+  if (!/^[a-z][a-z0-9-]{0,63}$/.test(collection || "") || collection === "gaming"
+      || !/^[a-f0-9]{64}$/.test(releaseId || "")
+      || (component !== null && !/^[a-z0-9][a-z0-9_]{0,59}$/.test(component))) return null;
+  const query = new URLSearchParams({ release_id: releaseId });
+  if (component) query.set("component", component);
+  return `${API_URL}/press/collections/${collection}/full-download?${query}`;
+}
+
+export function spreadsheetDownloadUrl(collection, metadata, parts) {
+  if (metadata?.kind !== "spreadsheet" || metadata.format !== "csv"
+      || !parts.some((part) => part.available && part.releaseId === metadata.release_id)
+      || !releaseDownloadUrl(collection, metadata.release_id)) return null;
+  return `${API_URL}/press/collections/${collection}/spreadsheet-download?${new URLSearchParams({ release_id: metadata.release_id })}`;
+}
+
+export function fetchReleaseResearch(collection, releaseId, component = null, { signal } = {}) {
+  if (!releaseDownloadUrl(collection, releaseId, component)) return Promise.reject(new Error("Invalid release"));
+  const query = new URLSearchParams({ release_id: releaseId });
+  if (component) query.set("component", component);
+  return request(`/press/collections/${collection}/research?${query}`, { signal });
+}
+
 /** Release history: what changed in each collection, newest first. */
 export async function fetchReleases({ signal } = {}) {
   return request("/press/releases", { signal });
@@ -124,6 +164,10 @@ export async function fetchReleases({ signal } = {}) {
 /** Published briefs. */
 export async function fetchArticles({ signal } = {}) {
   return request("/press/articles", { signal });
+}
+
+export async function fetchArticle(slug, { signal } = {}) {
+  return request("/press/articles/" + encodeURIComponent(slug), { signal });
 }
 
 /**
@@ -198,10 +242,11 @@ export async function fetchInfluence({ signal } = {}) {
 }
 
 /** Put points on a priority (positive) or take them back (negative). */
-export async function movePoints({ priorityId, points }) {
+export async function movePoints({ priorityId, points, signal }) {
   return request(`/press/priorities/${encodeURIComponent(priorityId)}/points`, {
     method: "POST",
     body: { points },
+    signal,
   });
 }
 
@@ -211,11 +256,16 @@ export async function fetchRelatedPriorities({ text, signal } = {}) {
 }
 
 /** A subscriber's own words, beside the priority they are about, with a point on it if asked. */
-export async function submitResearchRequest({ text, useCase, priorityId, supportPoints = 0 }) {
+export async function submitResearchRequest({ text, useCase, priorityId, supportPoints = 0, signal }) {
   return request("/press/requests", {
     method: "POST",
     body: { text, use_case: useCase || null, priority_id: priorityId || null, support_points: supportPoints },
+    signal,
   });
 }
 
 export { ApiError };
+
+export function getNeedEntityEvidence(cedarUid, { signal } = {}) {
+  return request(`/press/entities/${encodeURIComponent(cedarUid)}/need-evidence`, { signal });
+}

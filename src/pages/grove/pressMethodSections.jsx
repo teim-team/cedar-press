@@ -468,7 +468,7 @@ export function MethodsByCollection() {
                   line is left out rather than left empty. */}
               {release || coverageLabel(entry) ? (
                 <p className="cp-mbc__meta">
-                  {[release?.version, coverageLabel(entry), release?.cadence].filter(Boolean).join(" · ")}
+                  {[release?.updated ? `Updated ${release.updated}` : "", coverageLabel(entry), release?.cadence].filter(Boolean).join(" · ")}
                 </p>
               ) : null}
             </div>

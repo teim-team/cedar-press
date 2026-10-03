@@ -383,6 +383,7 @@ def token(name, taken):
 
 # ===========================================================================
 def main():
+    raise SystemExit("Retired NHO- issuance is disabled; mint CE- through 503_identity after review")
     check = "--check" in sys.argv
     log("=== Cedar Press 163: promote the NHO universe IN PLACE ===")
     log(f"    mode: {'--check (writes nothing)' if check else 'APPLY'}\n")

@@ -137,6 +137,6 @@ test("the service accepts exactly the ids this module knows", () => {
   const dumped = JSON.parse(
     readFileSync(new URL("../../../server/cedar_press/_press_data.json", import.meta.url), "utf8"),
   ).workKinds;
-  assert.deepEqual(dumped, JSON.parse(JSON.stringify(WORK_KINDS)), "regenerate with scripts/dump-press.mjs");
+  assert.deepEqual(dumped, JSON.parse(JSON.stringify(WORK_KINDS)), "regenerate with scripts/dump.mjs --kind press");
   for (const id of Object.keys(LEGACY)) assert.ok(dumped.some((kind) => kind.id === id), `the service would refuse ${id}`);
 });

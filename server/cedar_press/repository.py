@@ -2,8 +2,8 @@
 
 Every route reads through here, so the move from the ported modules to
 Postgres is one module's worth of change rather than a rewrite of the API.
-The shapes returned are the shapes the client already reads — see
-``src/features/grove/`` — because a repository that returns its own idea of a
+The shapes returned are the shapes the client already reads â€” see
+``src/features/grove/`` â€” because a repository that returns its own idea of a
 collection just moves the translation somewhere less visible.
 
 The catalog, the citation register and the CSV shaping live in
@@ -20,10 +20,24 @@ from the Cedar data workspace in ``code/``.
 
 from __future__ import annotations
 
+import hashlib
+import importlib.util
+import json
+import math
+import os
+import re
+import sqlite3
+import tempfile
 from collections.abc import Mapping
+from contextlib import closing
+from functools import lru_cache
+from http.client import HTTPException
+from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
+from urllib.request import HTTPRedirectHandler, Request, build_opener
 
-from cedar_press import collection_profiles, press_catalog
+from cedar_press import collection_profiles, governed_collections, need_publication, press_catalog
 from cedar_press import collections as launch
 
 #: Which shelf each plan reaches. Mirrors ``PLAN_REACH`` in
@@ -89,6 +103,7 @@ def _dataset_payload(dataset: Any) -> dict[str, Any]:
         "method": dataset.method,
         "cedar": launch.collection_cedar_facts(dataset.id),
         "sample": launch.collection_sample(dataset.id),
+        "fullRelease": full_release_metadata(dataset.id),
         "tables": list(launch.collection_tables(dataset.id)),
         "unmeasured": {
             field: reason
@@ -162,6 +177,70 @@ def _structure_shelf(collection_id: str) -> str | None:
     return None
 
 
+def is_grove_release(collection_id: str) -> bool:
+    """Whether ``collections.GROVE_RELEASE_COLLECTIONS`` declares this collection."""
+    return any(entry["id"] == collection_id for entry in launch.GROVE_RELEASE_COLLECTIONS)
+
+
+def is_component_release(collection_id: str) -> bool:
+    return (
+        is_grove_release(collection_id) or collection_id in governed_collections.SHARED_COLLECTIONS
+    )
+
+
+def may_download_full(tier: str, collection_id: str) -> bool:
+    """Whether this plan may take a pinned full release of this collection.
+
+    The storefront rule (``may_open``) for every Press collection, unchanged.
+    For a collection the reviewed Grove declaration names, the same shelf rule
+    with the ``grove`` shelf: ``grove`` and ``tree`` reach it, ``press`` and
+    ``press_pro`` do not. ``may_open`` itself still refuses Grove collections
+    to every tier, so the shelf, the sample and Ask are unaffected.
+    """
+    if may_open(tier, collection_id):
+        return True
+    shared = governed_collections.SHARED_COLLECTIONS.get(collection_id)
+    if shared is not None:
+        return _reaches(tier, shared["shelf"])
+    return is_grove_release(collection_id) and _reaches(tier, "grove")
+
+
+#: A component id is the field-map key's part after the slash (a table stem);
+#: the same shape ``code/build.py release_dataset_id`` accepts.
+_COMPONENT_ID = re.compile(r"[a-z0-9][a-z0-9_]{0,59}")
+_PHYSICAL_COMPONENT_ID = re.compile(r"[a-z0-9][a-z0-9_-]{0,59}")
+GROVE_COMPONENT_SEPARATOR = "--"
+
+
+def _field_map_tables() -> dict[str, Any]:
+    path = Path(__file__).resolve().parents[2] / "data/cedar/field_map.json"
+    return json.loads(path.read_text(encoding="utf-8"))["tables"]
+
+
+def grove_components(collection_id: str) -> tuple[str, ...]:
+    """A declared Grove collection's governed components, in field-map order.
+
+    Empty for anything the Grove declaration does not name. A component the
+    catalog does not pin is still listed here and is refused at download.
+    """
+    if collection_id in governed_collections.SHARED_COLLECTIONS:
+        existing = governed_collections.SHARED_COLLECTIONS[collection_id]["components"]
+        additional = governed_collections.component_declarations(collection_id)
+        return tuple(dict.fromkeys((*existing, *additional)))
+    if not is_grove_release(collection_id):
+        return ()
+    prefix = collection_id + "/"
+    existing = tuple(
+        key[len(prefix) :]
+        for key, entry in _field_map_tables().items()
+        if key.startswith(prefix)
+        and entry.get("collection") == collection_id
+        and _COMPONENT_ID.fullmatch(key[len(prefix) :])
+    )
+    additional = governed_collections.component_declarations(collection_id)
+    return tuple(dict.fromkeys((*existing, *additional)))
+
+
 def is_sold(collection_id: str) -> bool:
     """Whether the storefront sells this collection to anybody at all.
 
@@ -188,6 +267,14 @@ def collection_csv(collection_id: str) -> str | None:
     tables are not served from this repository; ``collection_tables`` carries
     what a serving layer needs to find them.
     """
+    if collection_id == "need":
+        preview = launch.collection_csv(collection_id)
+        if preview is None:
+            raise ComponentPublicationHeld(
+                "NEED preview requires its exact reviewed public-base proof"
+            )
+        return preview
+    assert_collection_publishable(collection_id)
     return launch.collection_csv(collection_id)
 
 
@@ -210,28 +297,85 @@ def sample_unavailable_reason(collection_id: str) -> str | None:
 
 
 def download_name(collection_id: str) -> str:
-    dataset = next(
-        (item for item in launch.LAUNCH_COLLECTION if item.id == collection_id), None
-    )
-    version = dataset.version if dataset else "v0"
+    dataset = next((item for item in launch.LAUNCH_COLLECTION if item.id == collection_id), None)
+    updated = dataset.updated if dataset else "undated"
     # The filename says it is a sample. A file called `deals-v0.csv` sitting in
     # somebody's downloads folder a month later cannot be told apart from the
     # release, and ten rows of a 2,662-row collection is not the release.
-    return f"{collection_id}-{version}-sample.csv"
+    return f"{collection_id}-{updated}-sample.csv"
 
 
-def releases() -> list[dict[str, Any]]:
-    """Release history per collection, most recently updated first.
-
-    Served from the dumped snapshot of ``pressReleases.js`` — the same
-    change notes the What's New feed renders — so the service and the page
-    describe one history rather than two.
-    """
-    rows = [
-        {"id": collection_id, **_thaw(release)}
-        for collection_id, release in press_catalog.RELEASES.items()
-    ]
-    return sorted(rows, key=lambda row: row.get("updated", ""), reverse=True)
+def releases(tier: str) -> dict[str, Any]:
+    """Current permitted releases; preview dates are never publication dates."""
+    press_ids = {item.id for item in launch.LAUNCH_COLLECTION}
+    press_ids.update(governed_collections.SHARED_COLLECTIONS)
+    previews = {item.id: item for item in launch.LAUNCH_COLLECTION}
+    rows = []
+    for target in release_targets_for(tier)["collections"]:
+        collection_id = target["id"]
+        if collection_id not in press_ids or target.get("shelf") == "grove":
+            continue
+        supplied = target.get("release")
+        parts = supplied if isinstance(supplied, list) else [supplied]
+        available = [
+            part
+            for part in parts
+            if isinstance(part, dict)
+            and part.get("kind") == "full"
+            and part.get("status") != "unavailable"
+            and isinstance(part.get("release_id"), str)
+            and _SHA256.fullmatch(part["release_id"])
+            and isinstance(part.get("manifest_sha256"), str)
+            and _SHA256.fullmatch(part["manifest_sha256"])
+            and type(part.get("record_count")) is int
+            and part["record_count"] >= 0
+        ]
+        identities = {(part["release_id"], part["manifest_sha256"]) for part in available}
+        if len(identities) != 1:
+            continue
+        release_id, manifest_sha256 = next(iter(identities))
+        sheet = target.get("spreadsheet")
+        changed = ["Verified observations are available for this account."]
+        row = {
+            "id": collection_id,
+            "name": target["name"],
+            "version": release_id,
+            "updated": None,
+            "cadence": None,
+            "retired": False,
+        }
+        if (
+            isinstance(sheet, dict)
+            and sheet.get("kind") == "spreadsheet"
+            and sheet.get("format") == "csv"
+            and sheet.get("release_id") == release_id
+            and sheet.get("manifest_sha256", manifest_sha256) == manifest_sha256
+            and type(sheet.get("record_count")) is int
+            and sheet["record_count"] >= 0
+        ):
+            row["record_count"] = sheet["record_count"]
+            changed = [f"Available spreadsheet: {sheet['record_count']:,} observations."]
+        if len(available) < len(parts):
+            changed.append("Some collection components are unavailable.")
+        row["history"] = [
+            {
+                "version": release_id,
+                "date": None,
+                "date_basis": "not_recorded",
+                "kind": "data",
+                "changed": changed,
+            }
+        ]
+        facts = launch.collection_cedar_facts(collection_id) or {}
+        preview = previews.get(collection_id)
+        if (
+            preview is not None
+            and facts.get("release_id") == release_id
+            and facts.get("manifest_sha256") == manifest_sha256
+        ):
+            row["preview_updated"] = preview.updated
+        rows.append(row)
+    return {"source": "verified_current", "history_complete": False, "releases": rows}
 
 
 def _thaw(value: Any) -> Any:
@@ -239,7 +383,7 @@ def _thaw(value: Any) -> Any:
 
     ``press_catalog`` deep-freezes its snapshot so no caller can edit the
     catalogue every later caller sees, which leaves nested values as
-    ``mappingproxy`` — a type the JSON serializer refuses. Copying at the top
+    ``mappingproxy`` â€” a type the JSON serializer refuses. Copying at the top
     level only was not enough: an article's body and figures are nested, and
     the failure surfaced as a 500 on a route whose data was fine.
     """
@@ -275,3 +419,1237 @@ def articles() -> list[dict[str, Any]]:
 def citations() -> list[dict[str, Any]]:
     """Every recorded public use of a collection. Empty until one lands."""
     return [_thaw(entry) for entry in press_catalog.CITATIONS]
+
+
+class FullReleaseUnavailable(ValueError):
+    """The pinned full file cannot be verified; never substitute a sample."""
+
+
+class ComponentPublicationHeld(FullReleaseUnavailable):
+    """An explicit component rights decision; never a transport or integrity failure."""
+
+
+def _canonical_bytes(value):
+    return (
+        json.dumps(
+            value, sort_keys=True, separators=(",", ":"), ensure_ascii=False, allow_nan=False
+        )
+        + "\n"
+    ).encode("utf-8")
+
+
+MAX_RELEASE_BYTES = 256 * 1024 * 1024
+
+
+def _release_response(path):
+    """Open one authenticated, bounded-wait request; the caller must close it."""
+    base = os.environ.get("CEDAR_PRESS_DATA_API", "").rstrip("/")
+    token = os.environ.get("CEDAR_PRESS_DATA_TOKEN", "")
+    environment = os.environ.get("CEDAR_PRESS_ENVIRONMENT", "development")
+    try:
+        timeout = float(os.environ.get("CEDAR_PRESS_DATA_TIMEOUT_SECONDS", "30"))
+    except ValueError:
+        raise FullReleaseUnavailable("Invalid data service timeout") from None
+    if not math.isfinite(timeout) or not 1 <= timeout <= 300:
+        raise FullReleaseUnavailable("Data service timeout must be between 1 and 300 seconds")
+    parsed = urlparse(base)
+    if environment not in {"development", "staging", "production"}:
+        raise FullReleaseUnavailable("Unknown service environment")
+    if (
+        not token
+        or not parsed.hostname
+        or parsed.username
+        or parsed.password
+        or parsed.query
+        or parsed.fragment
+        or parsed.path not in {"", "/"}
+        or any(character.isspace() for character in token)
+    ):
+        raise FullReleaseUnavailable("Missing or invalid data service configuration")
+    local = parsed.hostname in {"127.0.0.1", "localhost", "::1"}
+    if parsed.scheme != "https" and not (
+        environment == "development" and parsed.scheme == "http" and local
+    ):
+        raise FullReleaseUnavailable("Data service requires HTTPS outside local development")
+    if environment != "development" and (
+        local or os.environ.get("CEDAR_PRESS_INSECURE_COOKIE") == "1"
+    ):
+        raise FullReleaseUnavailable(
+            "Production/staging cannot use local or insecure configuration"
+        )
+
+    if environment != "development":
+        secret = os.environ.get("CEDAR_PRESS_SECRET", "")
+        database = os.environ.get("DATABASE_URL", "")
+        if (
+            len(secret) < 32
+            or len(token) < 32
+            or not database.startswith(("postgresql://", "postgres://"))
+            or os.environ.get("CEDAR_PRESS_ACCOUNTS", "").strip()
+        ):
+            raise FullReleaseUnavailable("Persistent protected service configuration required")
+
+    class NoRedirect(HTTPRedirectHandler):
+        def redirect_request(self, req, fp, code, msg, headers, newurl):
+            raise FullReleaseUnavailable("Data service redirects are refused")
+
+    request = Request(base + path, headers={"Authorization": "Bearer " + token})
+    return build_opener(NoRedirect()).open(request, timeout=timeout)
+
+
+def _release_bytes(path, *, limit=MAX_RELEASE_BYTES):
+    with _release_response(path) as response:
+        content = response.read(limit + 1)
+    if len(content) > limit:
+        raise FullReleaseUnavailable("Data response exceeds configured safety limit")
+    return content
+
+
+MAX_COLLECTION_MANIFEST_BYTES = 32 * 1024 * 1024
+
+
+def _release_json(path, *, limit=4 * 1024 * 1024):
+    return json.loads(_release_bytes(path, limit=limit))
+
+
+@lru_cache(maxsize=1)
+def _publication_policy():
+    # The existing governed producer owns the hold. Do not recreate it in the API.
+    path = Path(__file__).resolve().parents[2] / "code/cedar_publication.py"
+    spec = importlib.util.spec_from_file_location("cedar_release_publication", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def _partitioned_release(catalog, collection_id, requested_release_id, metadata_only):
+    """Development-only assembly of one manifest-pinned logical table.
+
+    Every part is verified before returning any bytes. The full artifact and key
+    index live on disk; copy buffers are bounded; validation retains one JSON record at a time.
+    """
+    if (
+        os.environ.get("CEDAR_PRESS_ENVIRONMENT", "development") != "development"
+        or os.environ.get("CEDAR_PRESS_PARTITIONED_REHEARSAL") != "1"
+    ):
+        raise FullReleaseUnavailable("Partitioned delivery requires explicit development rehearsal")
+    pins = catalog.get("collection_releases")
+    if not isinstance(pins, list) or any(not isinstance(p, dict) for p in pins):
+        raise FullReleaseUnavailable("Malformed collection catalog")
+    matches = [p for p in pins if p.get("collection_id") == collection_id]
+    if len(matches) != 1:
+        raise FullReleaseUnavailable("Exactly one collection pin required")
+    pin = matches[0]
+    rid = pin["release_id"]
+    if not isinstance(rid, str) or not re.fullmatch(r"[0-9a-f]{64}", rid):
+        raise FullReleaseUnavailable("Malformed collection release ID")
+    if not metadata_only and rid != requested_release_id:
+        raise FullReleaseUnavailable("Requested release is not the approved pin")
+    prefix = f"/v1/collections/{collection_id}/releases/{rid}"
+    if pin.get("manifest_path") != prefix + "/manifest":
+        raise FullReleaseUnavailable("Untrusted manifest route")
+    manifest = _release_json(prefix + "/manifest", limit=MAX_COLLECTION_MANIFEST_BYTES)
+    if not isinstance(manifest, dict):
+        raise FullReleaseUnavailable("Malformed collection manifest")
+    if hashlib.sha256(_canonical_bytes(manifest)).hexdigest() != pin.get("manifest_sha256"):
+        raise FullReleaseUnavailable("Collection manifest differs from catalog pin")
+    for key in ("collection_id", "release_id", "release_class", "synthetic", "omitted_components"):
+        if manifest.get(key) != pin.get(key):
+            raise FullReleaseUnavailable("Collection catalog metadata mismatch")
+    if (
+        manifest.get("product") != "cedar_press"
+        or manifest.get("schema_version") != 1
+        or manifest.get("release_class") != "rehearsal"
+        or manifest.get("synthetic") is not False
+        or manifest.get("omitted_components") != []
+    ):
+        raise FullReleaseUnavailable("Not a complete real rehearsal table")
+    components = manifest.get("components")
+    catalog_parts = pin.get("components")
+    if (
+        not isinstance(components, dict)
+        or not components
+        or not isinstance(catalog_parts, list)
+        or any(not isinstance(c, dict) for c in catalog_parts)
+        or len(catalog_parts) != len(components)
+        or {c.get("name") for c in catalog_parts} != set(components)
+    ):
+        raise FullReleaseUnavailable("Missing, duplicate or undeclared part")
+    fields = None
+    primary_key = None
+    table = None
+    ordered = []
+    for part in catalog_parts:
+        name = part["name"]
+        if not re.fullmatch(r"[a-zA-Z0-9_-]+", name):
+            raise FullReleaseUnavailable("Unsafe component name")
+        entry = components[name]
+        if (
+            not isinstance(entry, dict)
+            or not isinstance(entry.get("rights"), dict)
+            or not isinstance(entry.get("metadata"), dict)
+        ):
+            raise FullReleaseUnavailable("Malformed component contract")
+        for key in (
+            "dataset_id",
+            "title",
+            "row_grain",
+            "primary_key",
+            "record_count",
+            "fields",
+            "rights",
+            "download_permitted",
+            "contract_sha256",
+            "metadata",
+        ):
+            if part.get(key) != entry.get(key):
+                raise FullReleaseUnavailable("Component differs from catalog")
+        expected = entry["files"]["records.jsonl"]
+        if part.get("files", {}).get("records.jsonl") != expected:
+            raise FullReleaseUnavailable("Component artifact pin differs")
+        if part.get("path") != prefix + "/components/" + name:
+            raise FullReleaseUnavailable("Untrusted component route")
+        rights = entry["rights"]
+        if (
+            rights.get("publication_class") not in {"public", "publishable"}
+            or rights.get("redistribution") is not True
+            or entry.get("download_permitted") is not True
+        ):
+            raise FullReleaseUnavailable("Component rights prohibit delivery")
+        meta = entry["metadata"]
+        ordinal = meta.get("ordinal")
+        if (
+            type(ordinal) is not int
+            or ordinal < 0
+            or not isinstance(meta.get("logical_table"), str)
+        ):
+            raise FullReleaseUnavailable("Missing explicit table or partition order")
+        if fields is None:
+            fields, primary_key, table = (
+                entry["fields"],
+                entry["primary_key"],
+                meta["logical_table"],
+            )
+        if (
+            fields != entry["fields"]
+            or primary_key != entry["primary_key"]
+            or table != meta["logical_table"]
+        ):
+            raise FullReleaseUnavailable("Partition schema, key or table mismatch")
+        if (
+            type(entry["record_count"]) is not int
+            or entry["record_count"] < 1
+            or type(expected["bytes"]) is not int
+            or not 0 < expected["bytes"] <= MAX_RELEASE_BYTES
+            or not isinstance(expected["sha256"], str)
+            or not re.fullmatch(r"[0-9a-f]{64}", expected["sha256"])
+        ):
+            raise FullReleaseUnavailable("Invalid partition size, count or digest")
+        ordered.append((ordinal, name, entry))
+    ordered.sort()
+    if [p[0] for p in ordered] != list(range(len(ordered))):
+        raise FullReleaseUnavailable("Partition ordinals must be contiguous and unique")
+    header = [field["name"] for field in fields]
+    fmap = json.loads(
+        (Path(__file__).resolve().parents[2] / "data/cedar/field_map.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    contract = fmap["tables"].get(collection_id + "/" + table)
+    if (
+        not contract
+        or header != contract["order"]
+        or len(set(header)) != len(header)
+        or not isinstance(primary_key, list)
+        or not primary_key
+        or not set(primary_key) <= set(header)
+    ):
+        raise FullReleaseUnavailable("Partition schema does not match the product contract")
+    count = sum(entry["record_count"] for _, _, entry in ordered)
+    if type(pin.get("record_count")) is not int or pin["record_count"] != count:
+        raise FullReleaseUnavailable("Collection count mismatch")
+    result = {
+        "kind": "full",
+        "release_id": rid,
+        "manifest_sha256": pin["manifest_sha256"],
+        "record_count": count,
+        "fields": header,
+        "table_id": table,
+        "format": "jsonl",
+        "schema_version": 1,
+        "scope": "Development rehearsal; complete pinned logical table in manifest ordinal order",
+        "filename": f"{collection_id}.jsonl",
+        "media_type": "application/x-ndjson",
+        "citation": launch.collection_citation(collection_id)
+        or f"Lumecon, {collection_id}, Cedar Press collection.",
+        "download_path": f"/press/collections/{collection_id}/full-download?release_id={rid}",
+    }
+    if metadata_only:
+        return result
+    # Lifetime intentionally transfers to StreamingResponse after verification.
+    spool = tempfile.TemporaryFile(mode="w+b")  # noqa: SIM115
+    try:
+        with tempfile.TemporaryDirectory(prefix="cedar-release-keys-") as temporary:
+            database = sqlite3.connect(str(Path(temporary) / "keys.sqlite"))
+            try:
+                database.execute("PRAGMA cache_size = -65536")
+                database.execute("CREATE TABLE row_keys (key TEXT PRIMARY KEY)")
+                digest = hashlib.sha256()
+                with _release_response(prefix + "/download") as response:
+                    total_bytes = sum(e["files"]["records.jsonl"]["bytes"] for _, _, e in ordered)
+                    if (
+                        response.headers.get("X-Lumecon-Release") != rid
+                        or response.headers.get("X-Lumecon-Rows") != str(count)
+                        or response.headers.get("Content-Length") != str(total_bytes)
+                        or not re.fullmatch(
+                            r"[0-9a-f]{64}", response.headers.get("X-Lumecon-SHA256", "")
+                        )
+                    ):
+                        raise FullReleaseUnavailable("Logical table response metadata mismatch")
+                    for _, _name, entry in ordered:
+                        expected = entry["files"]["records.jsonl"]
+                        _append_verified_records(
+                            response,
+                            expected,
+                            entry["record_count"],
+                            header,
+                            primary_key,
+                            database,
+                            spool,
+                            digest,
+                        )
+                    if (
+                        response.read(1)
+                        or digest.hexdigest() != response.headers["X-Lumecon-SHA256"]
+                    ):
+                        raise FullReleaseUnavailable(
+                            "Logical table response digest or size mismatch"
+                        )
+                database.commit()
+            finally:
+                database.close()
+        spool.seek(0)
+        result.update(spool=spool, sha256=digest.hexdigest())
+        return result
+    except BaseException:
+        spool.close()
+        raise
+
+
+def _unique_json_object(pairs):
+    result = {}
+    for name, value in pairs:
+        if name in result:
+            raise ValueError("Duplicate JSON field")
+        result[name] = value
+    return result
+
+
+def _reject_json_constant(_value):
+    raise ValueError("Nonfinite JSON")
+
+
+def _append_verified_records(response, expected, count, header, primary_key, keys, spool, digest):
+    """Append exact pinned bytes, then validate one record at a time on disk.
+
+    A short network read is not EOF. Consume only this part's declared size,
+    leaving the next part untouched in a logical-table response. Callers check
+    response EOF, and own the private spool until every part has passed.
+    """
+    start = spool.tell()
+    remaining = expected["bytes"]
+    part_digest = hashlib.sha256()
+    while remaining:
+        chunk = response.read(min(64 * 1024, remaining))
+        if not chunk or len(chunk) > remaining:
+            raise FullReleaseUnavailable("Partition size differs from approved release")
+        spool.write(chunk)
+        part_digest.update(chunk)
+        digest.update(chunk)
+        remaining -= len(chunk)
+    end = spool.tell()
+    if part_digest.hexdigest() != expected["sha256"]:
+        raise FullReleaseUnavailable("Partition bytes differ from approved release")
+    spool.seek(start)
+    actual = 0
+    fields = set(header)
+    while spool.tell() < end:
+        line = spool.readline(end - spool.tell())
+        if not line.endswith(b"\n"):
+            raise FullReleaseUnavailable("Partition record lacks a final newline")
+        row = json.loads(
+            line,
+            object_pairs_hook=_unique_json_object,
+            parse_constant=_reject_json_constant,
+        )
+        if not isinstance(row, dict) or set(row) != fields:
+            raise FullReleaseUnavailable("Partition row schema mismatch")
+        key = [row[name] for name in primary_key]
+        if any(
+            not isinstance(value, (str, int)) or isinstance(value, bool) or value == ""
+            for value in key
+        ):
+            raise FullReleaseUnavailable("Invalid partition primary key")
+        try:
+            keys.execute(
+                "INSERT INTO row_keys VALUES (?)",
+                (json.dumps(key, ensure_ascii=False, separators=(",", ":")),),
+            )
+        except sqlite3.IntegrityError as error:
+            raise FullReleaseUnavailable("Duplicate key across collection parts") from error
+        actual += 1
+        if actual > count:
+            raise FullReleaseUnavailable("Partition row count mismatch")
+    if actual != count:
+        raise FullReleaseUnavailable("Partition row count mismatch")
+    return actual
+
+
+def _verified_component_spool(pin, parts, header, primary_key):
+    """One disk-backed validation path for single and partitioned components."""
+    spool = tempfile.TemporaryFile(mode="w+b")  # noqa: SIM115 - returned to response owner
+    digest = hashlib.sha256()
+    total = 0
+    try:
+        with closing(sqlite3.connect("")) as keys:
+            keys.execute("PRAGMA cache_size = -2048")
+            keys.execute("CREATE TABLE row_keys (key TEXT PRIMARY KEY)")
+            for component, count, expected in parts:
+                with _release_response(
+                    _grove_prefix(pin) + f"/components/{component}/download"
+                ) as response:
+                    total += _append_verified_records(
+                        response,
+                        expected,
+                        count,
+                        header,
+                        primary_key,
+                        keys,
+                        spool,
+                        digest,
+                    )
+                    if response.read(1):
+                        raise FullReleaseUnavailable("Component exceeds pinned size")
+        spool.seek(0)
+        return spool, digest.hexdigest(), total
+    except BaseException:
+        spool.close()
+        raise
+
+
+def full_release(collection_id, requested_release_id=None, *, metadata_only=False):
+    """Exact pinned Lumecon artifact, checked against the existing product field map.
+
+    A trusted, reviewed catalog enables a collection; user parameters cannot select
+    a different release. Holds remain enforced by the canonical publication owner.
+    """
+    if not any(item.id == collection_id for item in launch.LAUNCH_COLLECTION):
+        raise FullReleaseUnavailable("Unknown collection")
+    assert_collection_publishable(collection_id)
+    location = os.environ.get("CEDAR_PRESS_RELEASE_CATALOG")
+    if not location:
+        raise FullReleaseUnavailable("No pinned release catalog configured")
+    try:
+        catalog = json.loads(Path(location).read_text(encoding="utf-8"))
+        if not isinstance(catalog, dict):
+            raise FullReleaseUnavailable("Malformed catalog")
+        if catalog.get("catalog_kind") != "collection_releases" and (
+            not isinstance(catalog.get("collections"), list)
+            or any(not isinstance(item, dict) for item in catalog["collections"])
+        ):
+            raise FullReleaseUnavailable("Malformed catalog entries")
+        catalog_id = catalog.pop("catalog_id")
+        if hashlib.sha256(_canonical_bytes(catalog)).hexdigest() != catalog_id:
+            raise FullReleaseUnavailable("Catalog checksum mismatch")
+        if (
+            type(catalog.get("schema_version")) is not int
+            or catalog["schema_version"] != 1
+            or catalog.get("product") != "cedar_press"
+            or catalog.get("entitlement_required") is not True
+        ):
+            raise FullReleaseUnavailable("Wrong product catalog")
+        if catalog.get("catalog_kind") == "collection_releases":
+            return _partitioned_release(catalog, collection_id, requested_release_id, metadata_only)
+        # Legacy dataset v1 manifests have no governed production eligibility
+        # label. Mirror the database loader's rehearsal-only native bridge before
+        # touching the data API; rights alone cannot promote a review release.
+        if (
+            os.environ.get("CEDAR_PRESS_ENVIRONMENT", "development") != "development"
+            or os.environ.get("LUMECON_ENVIRONMENT") != "review"
+        ):
+            raise FullReleaseUnavailable("Legacy dataset delivery requires explicit review")
+        pins = [item for item in catalog["collections"] if item["dataset_id"] == collection_id]
+        if len(pins) != 1:
+            raise FullReleaseUnavailable("Exactly one pinned collection release required")
+        pin = pins[0]
+        release_id = pin["release_id"]
+        if not isinstance(release_id, str) or not re.fullmatch(r"[0-9a-f]{64}", release_id):
+            raise FullReleaseUnavailable("Malformed release ID")
+        if not metadata_only and requested_release_id != release_id:
+            raise FullReleaseUnavailable("Requested release is not the approved catalog pin")
+        manifest_digest = pin.get("manifest_sha256")
+        if not isinstance(manifest_digest, str) or not re.fullmatch(
+            r"[0-9a-f]{64}", manifest_digest
+        ):
+            raise FullReleaseUnavailable("Catalog lacks an approved manifest digest")
+        prefix = f"/v1/datasets/{collection_id}/releases/{release_id}"
+        manifest = _release_json(prefix + "/manifest")
+        if not isinstance(manifest, dict) or not isinstance(manifest.get("rights"), dict):
+            raise FullReleaseUnavailable("Malformed manifest")
+        if hashlib.sha256(_canonical_bytes(manifest)).hexdigest() != manifest_digest:
+            raise FullReleaseUnavailable("Manifest differs from the approved catalog pin")
+        for name in ("dataset_id", "release_id", "record_count", "fields", "rights", "synthetic"):
+            if manifest[name] != pin[name]:
+                raise FullReleaseUnavailable("Release metadata differs from pinned catalog")
+        if (
+            type(manifest.get("schema_version")) is not int
+            or manifest["schema_version"] != 1
+            or manifest["synthetic"] is not False
+            or manifest["rights"]["publication_class"] not in {"public", "publishable"}
+            or manifest["rights"].get("redistribution") is not True
+        ):
+            raise FullReleaseUnavailable("Release is not eligible for customer delivery")
+        header = [field["name"] for field in manifest["fields"]]
+        field_map = json.loads(
+            (Path(__file__).resolve().parents[2] / "data/cedar/field_map.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        entries = [
+            (name, entry)
+            for name, entry in field_map["tables"].items()
+            if name.startswith(collection_id + "/")
+        ]
+        if len(entries) != 1 or header != entries[0][1]["order"]:
+            raise FullReleaseUnavailable("Full release does not match product field map")
+        table_id = entries[0][0].split("/", 1)[1]
+        count = manifest["record_count"]
+        expected = manifest["files"]["records.jsonl"]
+        if (
+            type(count) is not int
+            or count < 1
+            or type(expected["bytes"]) is not int
+            or not 0 < expected["bytes"] <= MAX_RELEASE_BYTES
+            or not re.fullmatch(r"[0-9a-f]{64}", expected["sha256"])
+        ):
+            raise FullReleaseUnavailable("Invalid or oversized release artifact")
+        route = f"/press/collections/{collection_id}/full-download?release_id={release_id}"
+        if metadata_only:
+            return {
+                "kind": "full",
+                "release_id": release_id,
+                "manifest_sha256": manifest_digest,
+                "schema_version": 1,
+                "record_count": count,
+                "fields": header,
+                "table_id": table_id,
+                "scope": "Pinned flagship table only; ancillary tables excluded",
+                "format": "jsonl",
+                "records_sha256": expected["sha256"],
+                "download_path": route,
+            }
+        content = _release_bytes(prefix + "/download", limit=expected["bytes"])
+        if (
+            len(content) != expected["bytes"]
+            or hashlib.sha256(content).hexdigest() != expected["sha256"]
+        ):
+            raise FullReleaseUnavailable("Served bytes differ from verified release artifact")
+        rows = [json.loads(line) for line in content.splitlines()]
+        if len(rows) != count or any(
+            not isinstance(row, dict) or set(row) != set(header) for row in rows
+        ):
+            raise FullReleaseUnavailable("Record count or schema mismatch")
+        primary_key = manifest["primary_key"]
+        if (
+            not isinstance(primary_key, list)
+            or not primary_key
+            or not set(primary_key) <= set(header)
+        ):
+            raise FullReleaseUnavailable("Missing declared row identity")
+        keys = [tuple(row[key] for key in primary_key) for row in rows]
+        if (
+            any(any(value is None or value == "" for value in key) for key in keys)
+            or len(set(keys)) != count
+        ):
+            raise FullReleaseUnavailable("Invalid primary keys")
+        return {
+            "content": content,
+            "release_id": release_id,
+            "record_count": count,
+            "sha256": expected["sha256"],
+            "fields": header,
+            "citation": launch.collection_citation(collection_id)
+            or f"Lumecon, {collection_id}, Cedar Press collection.",
+            "filename": f"{collection_id}.jsonl",
+            "media_type": "application/x-ndjson",
+        }
+    except (OSError, HTTPException, ValueError, KeyError, TypeError, sqlite3.Error) as error:
+        raise FullReleaseUnavailable(
+            "Pinned full release unavailable or failed verification"
+        ) from error
+
+
+#: THE Cedar Grove release pin: the one file naming the immutable Lumecon-data
+#: COLLECTION release Cedar serves for each declared Grove collection. It
+#: extends the existing ``CEDAR_GROVE_RELEASE_CATALOG`` mechanism rather than
+#: replacing it: that variable still says where the reviewed catalog's bytes
+#: are, and this committed pin says WHICH bytes they must be (catalog SHA-256
+#: and catalog_id) and which one release inside them (release_id and the
+#: collection-manifest SHA-256). A catalog, manifest or artifact that differs is
+#: refused; nothing falls back to a sample, a local CSV, a branch or a
+#: ``current`` pointer. Changing what Cedar serves is a reviewed edit of this
+#: file; rollback is the revert of that edit, and every component moves with it.
+GROVE_RELEASE_PIN = Path(__file__).resolve().parents[2] / "data/cedar/grove_release_pin.json"
+PRESS_COMPONENT_RELEASE_PIN = (
+    Path(__file__).resolve().parents[2] / "data/cedar/press_component_release_pin.json"
+)
+GROVE_RELEASE_CATALOG_ENV = "CEDAR_GROVE_RELEASE_CATALOG"
+#: Lumecon release classes this server delivers. A rehearsal (real candidate,
+#: PROPOSED IDs) and a synthetic fixture never reach a customer; only the
+#: consumer tests widen these two settings, explicitly.
+GROVE_SERVED_RELEASE_CLASSES: frozenset[str] = frozenset({"production"})
+GROVE_SERVE_SYNTHETIC = False
+#: The one switch that lets a REHEARSAL (real candidate, PROPOSED IDs) be
+#: served: ``CEDAR_GROVE_ENVIRONMENT=review``, mirroring Lumecon-data's
+#: ``LUMECON_ENVIRONMENT=review``. Unset or ``production`` serves production
+#: releases only. ``review`` is refused outright when
+#: ``CEDAR_PRESS_ENVIRONMENT=production`` (nothing is served, not even the
+#: production release), and any other value is refused, so a typo or a review
+#: flag leaking into production fails closed rather than widening delivery.
+#: A synthetic fixture stays unservable in review too (``GROVE_SERVE_SYNTHETIC``).
+GROVE_ENVIRONMENT_ENV = "CEDAR_GROVE_ENVIRONMENT"
+GROVE_REVIEW_RELEASE_CLASSES: frozenset[str] = frozenset({"rehearsal"})
+
+
+def grove_served_release_classes() -> frozenset[str]:
+    """Release classes this process may deliver, from the explicit Grove setting."""
+    mode = os.environ.get(GROVE_ENVIRONMENT_ENV, "") or "production"
+    if mode == "production":
+        return GROVE_SERVED_RELEASE_CLASSES
+    if mode != "review":
+        raise FullReleaseUnavailable("Unknown Grove release environment")
+    if os.environ.get("CEDAR_PRESS_ENVIRONMENT", "development") == "production":
+        raise FullReleaseUnavailable("Rehearsal review is never enabled in production")
+    return GROVE_SERVED_RELEASE_CLASSES | GROVE_REVIEW_RELEASE_CLASSES
+
+
+_SHA256 = re.compile(r"[0-9a-f]{64}")
+_PIN_KEYS = {"catalog_id", "catalog_sha256", "collection_id", "release_id", "manifest_sha256"}
+
+
+class GroveReleaseNotPinned(FullReleaseUnavailable):
+    """No immutable release is pinned for this Grove collection (production until issuance)."""
+
+
+def grove_release_pin(collection_id: str) -> dict[str, str]:
+    """The reviewed pin for one Grove collection, strictly shaped, or a refusal.
+
+    Exactly one collection release: the pinned ``collection_id`` IS the Grove
+    collection. A per-table dataset (``<collection>--<table>``) is never
+    assembled into a collection, so a pin naming one is refused.
+    """
+    shared = collection_id in governed_collections.SHARED_COLLECTIONS
+    location = (
+        Path(os.environ.get("CEDAR_PRESS_COMPONENT_RELEASE_PIN", PRESS_COMPONENT_RELEASE_PIN))
+        if shared
+        else Path(os.environ.get("CEDAR_GROVE_RELEASE_PIN", GROVE_RELEASE_PIN))
+    )
+    product = "cedar_press" if shared else "cedar_grove"
+    try:
+        document = json.loads(location.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as error:
+        raise FullReleaseUnavailable("Grove release pin unreadable") from error
+    if (
+        not isinstance(document, dict)
+        or document.get("schema_version") != 1
+        or document.get("product") != product
+        or not isinstance(document.get("pins"), dict)
+    ):
+        raise FullReleaseUnavailable("Malformed Grove release pin")
+    pin = document["pins"].get(collection_id)
+    if pin is None:
+        raise GroveReleaseNotPinned(
+            f"No Lumecon {collection_id} release is pinned; unavailable until one is issued"
+        )
+    if (
+        not isinstance(pin, dict)
+        or set(pin) != _PIN_KEYS
+        or not all(isinstance(pin[key], str) for key in _PIN_KEYS)
+        or not all(_SHA256.fullmatch(pin[key]) for key in _PIN_KEYS - {"collection_id"})
+    ):
+        raise FullReleaseUnavailable("Malformed Grove release pin")
+    if pin["collection_id"] != collection_id:
+        raise FullReleaseUnavailable(
+            "A Grove pin names one collection release, never a per-table release"
+        )
+    return dict(pin)
+
+
+def _grove_prefix(pin: dict[str, str]) -> str:
+    return f"/v1/collections/{pin['collection_id']}/releases/{pin['release_id']}"
+
+
+def _grove_catalog(pin: dict[str, str]) -> dict[str, Any]:
+    """The pinned catalog's one entry for the pinned release, verified by hash."""
+    shared = pin["collection_id"] in governed_collections.SHARED_COLLECTIONS
+    catalog_env = "CEDAR_PRESS_COMPONENT_RELEASE_CATALOG" if shared else GROVE_RELEASE_CATALOG_ENV
+    location = os.environ.get(catalog_env)
+    if not location:
+        raise FullReleaseUnavailable("No pinned release catalog configured")
+    raw = Path(location).read_bytes()
+    if hashlib.sha256(raw).hexdigest() != pin["catalog_sha256"]:
+        raise FullReleaseUnavailable("Catalog differs from the pinned catalog")
+    catalog = json.loads(raw)
+    if not isinstance(catalog, dict):
+        raise FullReleaseUnavailable("Malformed catalog")
+    catalog_id = catalog.pop("catalog_id", None)
+    if (
+        catalog_id != pin["catalog_id"]
+        or hashlib.sha256(_canonical_bytes(catalog)).hexdigest() != catalog_id
+    ):
+        raise FullReleaseUnavailable("Catalog checksum mismatch")
+    if (
+        type(catalog.get("schema_version")) is not int
+        or catalog["schema_version"] != 1
+        or catalog.get("product") != ("cedar_press" if shared else "cedar_grove")
+        or catalog.get("entitlement_required") is not True
+    ):
+        raise FullReleaseUnavailable("Wrong product catalog")
+    # A dataset catalog of per-table releases is not a collection release,
+    # however its dataset IDs are spelled.
+    if catalog.get("catalog_kind") != "collection_releases" or "collections" in catalog:
+        raise FullReleaseUnavailable("Per-table releases cannot stand in for a collection release")
+    entries = catalog.get("collection_releases")
+    if not isinstance(entries, list) or any(not isinstance(item, dict) for item in entries):
+        raise FullReleaseUnavailable("Malformed catalog entries")
+    mine = [item for item in entries if item.get("collection_id") == pin["collection_id"]]
+    if len(mine) != 1:
+        raise FullReleaseUnavailable("Exactly one pinned collection release required")
+    entry = mine[0]
+    if (
+        entry.get("release_id") != pin["release_id"]
+        or entry.get("manifest_sha256") != pin["manifest_sha256"]
+        or entry.get("manifest_path") != _grove_prefix(pin) + "/manifest"
+    ):
+        raise FullReleaseUnavailable("Catalog entry differs from the pinned release")
+    return entry
+
+
+def _grove_manifest(pin: dict[str, str]) -> dict[str, Any]:
+    """The one collection-level manifest, byte-verified against the pin."""
+    manifest = _release_json(_grove_prefix(pin) + "/manifest", limit=MAX_COLLECTION_MANIFEST_BYTES)
+    if not isinstance(manifest, dict):
+        raise FullReleaseUnavailable("Malformed manifest")
+    if hashlib.sha256(_canonical_bytes(manifest)).hexdigest() != pin["manifest_sha256"]:
+        raise FullReleaseUnavailable("Manifest differs from the pinned release")
+    if (
+        manifest.get("collection_id") != pin["collection_id"]
+        or manifest.get("release_id") != pin["release_id"]
+        or manifest.get("release_kind") != "collection"
+        or manifest.get("product")
+        != (
+            "cedar_press"
+            if pin["collection_id"] in governed_collections.SHARED_COLLECTIONS
+            else "cedar_grove"
+        )
+        or type(manifest.get("schema_version")) is not int
+        or manifest["schema_version"] != 1
+        or not isinstance(manifest.get("components"), dict)
+    ):
+        raise FullReleaseUnavailable("Malformed collection manifest")
+    if manifest.get("release_class") not in grove_served_release_classes() or (
+        manifest.get("synthetic") is not False and not GROVE_SERVE_SYNTHETIC
+    ):
+        raise FullReleaseUnavailable("Release is not eligible for customer delivery")
+    _grove_partitioned_parts(manifest)
+    return manifest
+
+
+def _grove_partitioned_parts(manifest: dict[str, Any]) -> frozenset[str]:
+    """Every component name that belongs to a partitioned (bounded-parts) component.
+
+    Lumecon ships a large table (Gaming payments) as ordinary part components
+    plus one ``partitioned_components`` entry naming them. Logical downloads
+    are verified and disk-spooled before serving; direct part requests refuse.
+    The declaration must still agree with
+    the part entries of this same pinned manifest (every part present, its
+    record count and ``records.jsonl`` hash identical, the logical count their
+    sum); any disagreement is an incomplete or unverified release, refused whole.
+    """
+    declared = manifest.get("partitioned_components", [])
+    if not isinstance(declared, list):
+        raise FullReleaseUnavailable("Malformed partitioned components")
+    names: set[str] = set()
+    logical_names: set[str] = set()
+    for logical in declared:
+        parts = logical.get("parts") if isinstance(logical, dict) else None
+        name = logical.get("name") if isinstance(logical, dict) else None
+        if (
+            not isinstance(name, str)
+            or not _COMPONENT_ID.fullmatch(name)
+            or name in manifest["components"]
+            or name in logical_names
+            or not parts
+            or type(logical.get("record_count")) is not int
+            or logical["record_count"] < 0
+        ):
+            raise FullReleaseUnavailable("Malformed partitioned components")
+        if not isinstance(parts, list):
+            raise FullReleaseUnavailable("Malformed partitioned components")
+        logical_names.add(name)
+        total = 0
+        labels: set[tuple[tuple[str, str], ...]] = set()
+        for part in parts:
+            component = part.get("component") if isinstance(part, dict) else None
+            entry = manifest["components"].get(component) if isinstance(component, str) else None
+            files = entry.get("files") if isinstance(entry, dict) else None
+            artifact = files.get("records.jsonl") if isinstance(files, dict) else None
+            label = part.get("partition") if isinstance(part, dict) else None
+            if (
+                not isinstance(entry, dict)
+                or not isinstance(component, str)
+                or not _PHYSICAL_COMPONENT_ID.fullmatch(component)
+                or not isinstance(label, dict)
+                or not label
+                or any(not isinstance(k, str) or not isinstance(v, str) for k, v in label.items())
+                or tuple(sorted(label.items())) in labels
+                or not isinstance(artifact, dict)
+                or type(artifact.get("bytes")) is not int
+                or artifact["bytes"] < 1
+                or not isinstance(artifact.get("sha256"), str)
+                or not _SHA256.fullmatch(artifact["sha256"])
+                or type(entry.get("record_count")) is not int
+                or component in names
+                or type(part.get("record_count")) is not int
+                or part["record_count"] < 0
+                or part["record_count"] != entry.get("record_count")
+                or part.get("records.jsonl") != artifact
+            ):
+                raise FullReleaseUnavailable(
+                    "Partitioned component parts are incomplete or unverified"
+                )
+            labels.add(tuple(sorted(label.items())))
+            total += part["record_count"]
+            names.add(component)
+        if logical.get("record_count") != total:
+            raise FullReleaseUnavailable("Partitioned component parts are incomplete or unverified")
+        names.add(name)
+    return frozenset(names)
+
+
+def grove_component_contract(
+    manifest: dict[str, Any], collection_id: str, component: str, *, presentation_component=None
+):
+    """One component's embedded contract, checked against Cedar's presentation
+    entry ``<collection>/<component>`` in the field map (no schema copy here:
+    the field map may only present what the pinned contract declares)."""
+    if presentation_component is None and component in _grove_partitioned_parts(manifest):
+        # Parts are never assembled here, and no part is presented today.
+        raise FullReleaseUnavailable("A partitioned component is not served by Cedar")
+    contract = manifest["components"].get(component)
+    if not isinstance(contract, dict):
+        raise FullReleaseUnavailable("Component is not in the pinned release")
+    if collection_id == "need" and not need_publication.reviewed_base_permitted(
+        manifest, component, contract
+    ):
+        raise ComponentPublicationHeld("Only the evidence-pinned NEED reviewed base is public")
+    metadata = contract.get("metadata", {})
+    if not isinstance(metadata, dict):
+        raise FullReleaseUnavailable("Malformed component metadata")
+    for flag in ("internal_only", "publication_hold"):
+        if flag in metadata and type(metadata[flag]) is not bool:
+            raise FullReleaseUnavailable("Malformed component publication flag")
+    publication_status = metadata.get("publication_status", "public")
+    if not isinstance(publication_status, str) or not publication_status:
+        raise FullReleaseUnavailable("Malformed component publication status")
+    rights = contract.get("rights")
+    if (
+        isinstance(rights, dict)
+        and rights.get("publication_class")
+        in {"public", "publishable", "restricted", "tenant_private", "withheld"}
+        and type(rights.get("redistribution")) is bool
+        and type(contract.get("download_permitted")) is bool
+        and (
+            rights["publication_class"] in {"restricted", "tenant_private", "withheld"}
+            or rights["redistribution"] is False
+            or contract["download_permitted"] is False
+        )
+    ):
+        raise ComponentPublicationHeld("Component is not eligible for customer delivery")
+    if (
+        not isinstance(rights, dict)
+        or rights.get("publication_class") not in {"public", "publishable"}
+        or rights.get("redistribution") is not True
+        or contract.get("download_permitted") is not True
+    ):
+        raise FullReleaseUnavailable("Component is not eligible for customer delivery")
+    if (
+        metadata.get("internal_only")
+        or metadata.get("publication_hold")
+        or publication_status not in {"public", "publishable", "eligible"}
+    ):
+        raise ComponentPublicationHeld("Component metadata holds customer delivery")
+    fields = contract.get("fields")
+    if not isinstance(fields, list) or any(not isinstance(f, dict) for f in fields):
+        raise FullReleaseUnavailable("Malformed component contract")
+    header = [field.get("name") for field in fields]
+    display_component = presentation_component or component
+    entry = _field_map_tables().get(f"{collection_id}/{display_component}")
+    if collection_id == "need" and component == need_publication.COMPONENT:
+        # The reviewed policy above validates the exact version and claim fields.
+        # The preview field map can still describe the older reviewed version.
+        entry = governed_collections.presentation(collection_id, display_component)
+    if entry is None:
+        entry = governed_collections.presentation(collection_id, display_component)
+    if (
+        not entry
+        or entry.get("collection") != collection_id
+        or header not in [entry.get("order"), *entry.get("compatible_orders", [])]
+    ):
+        raise FullReleaseUnavailable("Full release does not match product field map")
+    declared_rights = metadata.get("field_rights")
+    if collection_id == "gaming" or declared_rights is not None:
+        if (
+            not isinstance(declared_rights, dict)
+            or set(declared_rights) != set(header)
+            or any(not isinstance(value, str) or not value for value in declared_rights.values())
+        ):
+            raise FullReleaseUnavailable("Component field-rights metadata is incomplete")
+        # Downloads stream exact verified bytes. A presentation declaration
+        # cannot clear or silently remove a restricted column from that file.
+        public_rights = {
+            "public",
+            "publishable",
+            "public_official",
+            "public_derived",
+            "public_first_party",
+        }
+        if any(value.lower() not in public_rights for value in declared_rights.values()):
+            raise FullReleaseUnavailable("Raw component includes a held or unknown field")
+    declared_rights = declared_rights or {}
+    for item in entry.get("fields", []):
+        if (
+            item.get("decision") in {"keep", "rename"}
+            and item["column"] in declared_rights
+            and item.get("rights_class") != declared_rights[item["column"]]
+        ):
+            raise FullReleaseUnavailable("Field-map rights differ from the pinned contract")
+    status_field = contract.get("publication_status_field")
+    value_fields = contract.get("status_value_fields", [])
+    if (
+        status_field is not None
+        and (not isinstance(status_field, str) or status_field not in header)
+    ) or (
+        not isinstance(value_fields, list)
+        or any(not isinstance(name, str) or name not in header for name in value_fields)
+        or len(value_fields) != len(set(value_fields))
+    ):
+        raise FullReleaseUnavailable("Malformed component publication fields")
+    primary_key = contract.get("primary_key")
+    if not isinstance(primary_key, list) or not primary_key or not set(primary_key) <= set(header):
+        raise FullReleaseUnavailable("Missing declared row identity")
+    expected = (contract.get("files") or {}).get("records.jsonl") or {}
+    count = contract.get("record_count")
+    if (
+        type(count) is not int
+        or count < 1
+        or type(expected.get("bytes")) is not int
+        or not 0 < expected["bytes"] <= MAX_RELEASE_BYTES
+        or not isinstance(expected.get("sha256"), str)
+        or not _SHA256.fullmatch(expected["sha256"])
+    ):
+        raise FullReleaseUnavailable("Invalid or oversized release artifact")
+    return contract, header, primary_key, count, expected
+
+
+def _grove_partitioned_release(pin, manifest, logical, *, metadata_only=False):
+    """Verify all bounded parts before exposing a disk-spooled customer artifact.
+
+    The concatenation order and each exact part hash come from the one pinned
+    manifest. SQLite checks global primary keys without retaining them in RAM.
+    No response begins until every part has passed; failures discard the spool.
+    """
+    collection_id, release_id = pin["collection_id"], pin["release_id"]
+    component = logical["name"]
+    contracts = []
+    reference = None
+    for part in logical["parts"]:
+        contract = grove_component_contract(
+            manifest, collection_id, part["component"], presentation_component=component
+        )
+        signature = (
+            contract[0]["fields"],
+            contract[2],
+            contract[0].get("publication_status_field"),
+            contract[0].get("status_value_fields", []),
+        )
+        if reference is not None and signature != reference:
+            raise FullReleaseUnavailable(
+                "Partition schemas, primary keys or publication fields disagree"
+            )
+        reference = signature
+        contracts.append(contract)
+    header, primary_key = contracts[0][1:3]
+    if metadata_only:
+        return {
+            "kind": "full",
+            "release_id": release_id,
+            "schema_version": 1,
+            "manifest_sha256": pin["manifest_sha256"],
+            "record_count": logical["record_count"],
+            "fields": header,
+            "table_id": component,
+            "scope": "All manifest-ordered verified component parts",
+            "format": "jsonl",
+            "parts": logical["parts"],
+            "download_path": f"/press/collections/{collection_id}/full-download"
+            f"?release_id={release_id}&component={component}",
+        }
+    parts = [
+        (part["component"], contract[3], contract[4])
+        for part, contract in zip(logical["parts"], contracts, strict=True)
+    ]
+    spool, digest, total = _verified_component_spool(pin, parts, header, primary_key)
+    try:
+        if total != logical["record_count"]:
+            raise FullReleaseUnavailable("Partition total count mismatch")
+        product_name = (
+            "Cedar Press"
+            if collection_id in governed_collections.SHARED_COLLECTIONS
+            else "Cedar Grove"
+        )
+        return {
+            "content_file": spool,
+            "release_id": release_id,
+            "record_count": total,
+            "sha256": digest,
+            "fields": header,
+            "component": component,
+            "citation": (
+                launch.collection_citation(collection_id)
+                or f"Lumecon, {collection_id}, {product_name} collection."
+            ),
+            "filename": f"{collection_id}--{component}.jsonl",
+            "media_type": "application/x-ndjson",
+        }
+    except BaseException:
+        spool.close()
+        raise
+
+
+def _grove_component_release(pin, manifest, component, *, metadata_only=False):
+    """Read a component from this request's already verified manifest."""
+    collection_id, release_id = pin["collection_id"], pin["release_id"]
+    logical = next(
+        (
+            entry
+            for entry in manifest.get("partitioned_components", [])
+            if entry["name"] == component
+        ),
+        None,
+    )
+    if logical is not None:
+        return _grove_partitioned_release(pin, manifest, logical, metadata_only=metadata_only)
+    _contract, header, primary_key, count, expected = grove_component_contract(
+        manifest, collection_id, component
+    )
+    route = (
+        f"/press/collections/{collection_id}/full-download"
+        f"?release_id={release_id}&component={component}"
+    )
+    if metadata_only:
+        return {
+            "kind": "full",
+            "release_id": release_id,
+            "manifest_sha256": pin["manifest_sha256"],
+            "schema_version": 1,
+            "record_count": count,
+            "fields": header,
+            "table_id": component,
+            "scope": "One governed component of a pinned collection release",
+            **need_publication.descriptor_metadata(manifest, component),
+            "format": "jsonl",
+            "records_sha256": expected["sha256"],
+            "download_path": route,
+        }
+    spool, digest, _count = _verified_component_spool(
+        pin,
+        [(component, count, expected)],
+        header,
+        primary_key,
+    )
+    product_name = (
+        "Cedar Press" if collection_id in governed_collections.SHARED_COLLECTIONS else "Cedar Grove"
+    )
+    return {
+        "content_file": spool,
+        "release_id": release_id,
+        "record_count": count,
+        "sha256": digest,
+        "fields": header,
+        "component": component,
+        "citation": (
+            launch.collection_citation(collection_id)
+            or f"Lumecon, {collection_id}, {product_name} collection."
+        ),
+        "filename": f"{collection_id}--{component}.jsonl",
+        "media_type": "application/x-ndjson",
+    }
+
+
+def grove_full_release(
+    collection_id, requested_release_id=None, *, component=None, metadata_only=False
+):
+    """One authorized component of the ONE pinned Lumecon release of a Grove collection.
+
+    Order: declared collection, offered component, publication hold, pin,
+    pinned catalog bytes, pinned collection manifest, the component's embedded
+    contract against the field map, then (unless ``metadata_only``) the exact
+    component bytes. Any mismatch fails closed; nothing is substituted.
+    """
+    if not is_component_release(collection_id):
+        raise FullReleaseUnavailable("Unknown collection")
+    if not isinstance(component, str) or not _COMPONENT_ID.fullmatch(component):
+        raise FullReleaseUnavailable("A Grove release names a well-formed component")
+    if component not in grove_components(collection_id):
+        raise FullReleaseUnavailable("Component is not offered for this collection")
+    if collection_id != "need" or component != need_publication.COMPONENT:
+        assert_collection_publishable(collection_id)
+    try:
+        pin = grove_release_pin(collection_id)
+        release_id = pin["release_id"]
+        if not metadata_only and requested_release_id != release_id:
+            raise FullReleaseUnavailable("Requested release is not the approved catalog pin")
+        _grove_catalog(pin)
+        manifest = _grove_manifest(pin)
+        assert_collection_publishable(collection_id, manifest=manifest, component=component)
+        return _grove_component_release(pin, manifest, component, metadata_only=metadata_only)
+    except FullReleaseUnavailable:
+        raise
+    except (OSError, HTTPException, ValueError, KeyError, TypeError, sqlite3.Error) as error:
+        raise FullReleaseUnavailable(
+            "Pinned full release unavailable or failed verification"
+        ) from error
+
+
+def grove_release_metadata(collection_id):
+    """The landing page's descriptors: one verified entry per governed component.
+
+    ``None`` when no release is pinned; an unverifiable component is reported
+    as unavailable rather than dropped, and never replaced by a sample.
+    """
+    if not is_component_release(collection_id):
+        return None
+    components = grove_components(collection_id)
+    unavailable = [
+        {"kind": "full", "table_id": name, "status": "unavailable"} for name in components
+    ]
+    try:
+        if collection_id != "need" or not os.environ.get("CEDAR_PRESS_COMPONENT_RELEASE_PIN"):
+            assert_collection_publishable(collection_id)
+        pin = grove_release_pin(collection_id)
+        _grove_catalog(pin)
+        manifest = _grove_manifest(pin)
+        assert_collection_publishable(
+            collection_id, manifest=manifest, component=need_publication.COMPONENT
+        )
+    except GroveReleaseNotPinned:
+        return unavailable if collection_id == "need" else None
+    except (
+        FullReleaseUnavailable,
+        OSError,
+        HTTPException,
+        ValueError,
+        KeyError,
+        TypeError,
+        sqlite3.Error,
+    ):
+        return unavailable
+    out = []
+    for component, missing in zip(components, unavailable, strict=True):
+        try:
+            out.append(_grove_component_release(pin, manifest, component, metadata_only=True))
+        except (
+            FullReleaseUnavailable,
+            OSError,
+            HTTPException,
+            ValueError,
+            KeyError,
+            TypeError,
+            sqlite3.Error,
+        ):
+            out.append(missing)
+    return out
+
+
+def assert_collection_publishable(collection_id, *, manifest=None, component=None):
+    """Run the maintained policy before component selection or release lookup."""
+    try:
+        policy = _publication_policy()
+    except (OSError, ImportError, AttributeError) as error:
+        raise FullReleaseUnavailable("Publication policy unavailable") from error
+    try:
+        policy.assert_collection_publishable(collection_id)
+    except policy.FieldMapRefusal as error:
+        if (
+            collection_id == "need"
+            and isinstance(manifest, dict)
+            and component == need_publication.COMPONENT
+        ):
+            entry = manifest.get("components", {}).get(component)
+            if isinstance(entry, dict) and need_publication.reviewed_base_permitted(
+                manifest, component, entry
+            ):
+                return
+        raise FullReleaseUnavailable("Collection publication is held") from error
+
+
+def full_release_metadata(collection_id):
+    """Preview counts are never substituted for a verified full-release descriptor."""
+    if not os.environ.get("CEDAR_PRESS_RELEASE_CATALOG"):
+        return None
+    try:
+        return full_release(collection_id, metadata_only=True)
+    except FullReleaseUnavailable:
+        return {"kind": "full", "status": "unavailable"}
+
+
+def release_targets_for(tier: str) -> dict[str, Any]:
+    """Tier-filtered integration targets; unpinned data has no invented sample or count."""
+    targets = (
+        [
+            {"id": item.id, "name": item.name, "shelf": item.shelf}
+            for item in launch.LAUNCH_COLLECTION
+        ]
+        + [
+            {"id": key, "name": value["name"], "shelf": value["shelf"]}
+            for key, value in governed_collections.SHARED_COLLECTIONS.items()
+        ]
+        + [dict(item) for item in launch.GROVE_RELEASE_COLLECTIONS]
+    )
+    # NEED is already one of the original twelve; a component transport adds no collection.
+    targets = list({item["id"]: item for item in reversed(targets)}.values())[::-1]
+    visible = []
+    for target in targets:
+        key = target["id"]
+        if not may_download_full(tier, key):
+            continue
+        metadata = (
+            grove_release_metadata(key) if is_component_release(key) else full_release_metadata(key)
+        )
+        from cedar_press.spreadsheet import metadata as spreadsheet_metadata
+
+        visible.append(
+            {
+                **target,
+                "release": metadata,
+                "sample": None,
+                "spreadsheet": spreadsheet_metadata(key),
+            }
+        )
+    return {
+        "kind": "release_target_registry",
+        "target_count": len(targets),
+        "press_target_count": sum(item["shelf"] != "grove" for item in targets),
+        "collections": visible,
+    }

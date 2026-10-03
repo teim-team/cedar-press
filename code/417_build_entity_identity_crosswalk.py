@@ -50,12 +50,16 @@ FIVE RULES THIS BUILD OBEYS, EACH ONE PAID FOR
    `mapping_status`. **This file does not adopt it and no consumer should read
    it as adopted.**
 4. **LICENSED AND PRIVATE IDENTIFIERS ARE MARKED AT THE ROW.**
-   `cedar_domain.may_publish_identifier` refuses DUNS at every tier, and
-   `cedar_domain.may_publish_individual_native_field` withholds a UEI whose
-   legal name is a natural person's - SAM's public search resolves it to that
-   person in one hop. **A digest of a UEI is NOT a privacy control**: SAM's
-   entity space is enumerable, so any digest is reversible by hashing every UEI
-   and comparing. The protection is that the column does not ship.
+   `cedar_domain.may_publish_identifier` refuses DUNS at every tier.
+   `cedar_domain.may_publish_individual_native_field` is asked for every
+   UEI/CAGE on the individually Native-owned class; since the owner ruling
+   of 2026-10-02 it publishes them (a firm is a business entity whatever it
+   is named after, and its registration is a public business record), where
+   until that date it withheld one whose legal name read as a natural
+   person's. **A digest of a UEI is NOT a privacy control**: SAM's entity
+   space is enumerable, so any digest is reversible by hashing every UEI and
+   comparing. Where a column is withheld, the protection is that it does not
+   ship.
 5. **THE KEY IS DETERMINISTIC, NEVER POSITIONAL.** `crosswalk_id` is
    `cedar_keys.surrogate_id` over the stated columns, per class 7. Never
    `enumerate`, never `hash()`, never a rank.
@@ -304,18 +308,18 @@ def main():
             restriction = ("LICENSED - cedar_domain.LICENSED_IDENTIFIER_TYPES."
                            " Join internally; never publishes at any tier.")
         elif cls == D.INDIVIDUAL_NATIVE_CLASS and it in ("UEI", "CAGE"):
-            pub = False
-            restriction = (
+            # Owner ruling 2026-10-02: the rule publishes these. A firm is a
+            # business entity regardless of what it is named after, and its
+            # UEI/CAGE is a public business registration; the pre-ruling
+            # one-hop withholding for a legal name reading as a person's is
+            # lifted. Read live so this file cannot drift from the rule.
+            field = "awardee_uei" if it == "UEI" else "cage_code"
+            pub = D.may_publish_individual_native_field(field)
+            restriction = "" if pub else (
                 "WITHHELD - cedar_domain.may_publish_individual_native_field. "
-                "SAM's public entity search resolves a UEI to a legal name and "
-                "a street address, so for a firm whose legal name IS a "
-                "person's name, publishing the identifier publishes the person "
-                "by ONE HOP. A DIGEST IS NOT A FIX: SAM's entity space is "
-                "enumerable, so a hashed UEI is reversible by hashing every "
-                "UEI and comparing. The protection is that the column does not "
-                "ship. consent_status is NOT_ASKED on every row of this class "
-                "- a firm's website statement is our EVIDENCE, never its "
-                "PERMISSION.")
+                "A DIGEST IS NOT A FIX: SAM's entity space is enumerable, so a "
+                "hashed UEI is reversible by hashing every UEI and comparing. "
+                "The protection is that the column does not ship.")
 
         emit(cedar_entity_id=e, cedar_entity_name=g(sm, "canonical_name"),
              cedar_entity_class=cls,

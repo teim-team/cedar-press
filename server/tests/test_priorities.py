@@ -158,6 +158,33 @@ class _Influence:
 
 
 class _Requests:
+    def test_request_and_optional_support_commit_together(self) -> None:
+        s = self.store()
+        account = pr.Account("request-atomic", "reader@example.org", "press")
+        s.accrue(account, "2026-09")
+        target = s.priorities()[0]["id"]
+        with self.assertRaises(pr.PointsError):
+            s.submit_request(
+                account, "A request that needs two points", priority_id=target, support_points=2
+            )
+        self.assertEqual(s.evidence(target)["requests"], 0)
+        self.assertEqual(s.balance(account.account_id), 1)
+        result = s.submit_request(
+            account, "A request that needs one point", priority_id=target, support_points=1
+        )
+        self.assertEqual(result["support"]["your_points"], 1)
+        self.assertEqual(s.evidence(target)["requests"], 1)
+        self.assertEqual(s.balance(account.account_id), 0)
+
+    def test_support_requires_a_priority_and_nonnegative_integer(self) -> None:
+        s = self.store()
+        account = pr.Account("request-invalid", "reader@example.org", "press")
+        for points in [-1, True, 1.5]:
+            with self.assertRaises(pr.PointsError):
+                s.submit_request(account, "A substantive research request", support_points=points)
+        with self.assertRaises(pr.PointsError):
+            s.submit_request(account, "A substantive research request", support_points=1)
+
     def test_a_request_reads_as_the_priority_it_is_about(self) -> None:
         s = self.store()
         text = "I wish you had a dataset showing which tribal enterprises own which subsidiaries"

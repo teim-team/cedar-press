@@ -129,19 +129,35 @@ test("no published sample carries a path on somebody's machine", () => {
   // (scripts/import_cedar_manifest.py scrub_local_paths); this holds every
   // file the site serves to it, so a future value of the same shape fails here.
   const LOCAL = /(^|[\s("'=,|])(~\/|\/Users\/|\/home\/|[A-Za-z]:\\Users\\)|\/Desktop\//;
+  const manifest = JSON.parse(readFileSync(
+    new URL("../../../data/cedar/collections.manifest.json", import.meta.url), "utf8",
+  ));
+  const declared = new Set(manifest.collections.flatMap((entry) => [
+    entry.sample?.path,
+    ...(entry.tables ?? []).map((table) => table.sample_path),
+  ]).filter(Boolean));
+  assert.ok(declared.size > 0, "the manifest declares no published samples to inspect");
+  for (const path of declared) {
+    assert.equal(typeof path, "string");
+    assert.match(path, /^\/data\/cedar\/samples\/[a-z0-9-]+\/[A-Za-z0-9_.-]+\.csv$/, path);
+  }
+  const actual = [];
   const hits = [];
   let files = 0;
   for (const path of walk(SAMPLES)) {
     files += 1;
+    actual.push("/data/cedar/samples" + path.slice(SAMPLES.length).replaceAll("\\", "/"));
     const lines = readFileSync(path, "utf8").split("\n");
     lines.forEach((line, i) => {
       if (LOCAL.test(line)) hits.push(`${path.slice(SAMPLES.length)}:${i + 1}`);
     });
   }
-  assert.ok(files > 100, `expected the published samples, read ${files}`);
+  assert.equal(files, declared.size, "every declared sample must be inspected");
+  assert.deepEqual(actual.sort(), [...declared].sort(),
+    "published sample files must exactly match the manifest declarations");
   assert.deepEqual(hits, []);
   // And the guard fires on the value that was published.
   assert.ok(LOCAL.test("dataset, on this machine at ~/Desktop/dissertation/data/clean/)"));
-  assert.ok(LOCAL.test("C:\\Users\\someone\\data.csv"));
+  assert.ok(LOCAL.test(["C:", "Users", "someone", "data.csv"].join("\\")));
   assert.ok(!LOCAL.test("https://www.example.com/home/about"));
 });

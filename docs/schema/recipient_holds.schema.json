@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "cedar-press/data/cedar/recipient_holds.json",
+  "title": "Recipient holds and rebinds",
+  "description": "Per-UEI policy input read by code/cedar_publication.recipient_holds(). An entry states that the recipient behind an exact UEI, on exact award keys, is a legal entity distinct from the Cedar entity the projection currently binds it to (withhold), or is a different registered Cedar entity (rebind). It is not a not_native denial and may never say so. The hand validator in cedar_publication.validate_recipient_holds() is the enforced rule; this schema documents the same shape. Written 2026-10-02 for the Siletz repair.",
+  "type": "object",
+  "required": ["schema_version", "policy", "entries"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "policy": { "const": "recipient_hold" },
+    "_note": { "type": "string" },
+    "_pending": { "type": "string" },
+    "entries": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/entry" }
+    }
+  },
+  "$defs": {
+    "cedar_uid": { "type": "string", "pattern": "^CE-[0-9A-Z]{5}-[0-9A-Z]{2}$" },
+    "date": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+    "entry": {
+      "type": "object",
+      "required": [
+        "hold_id", "collection", "recipient_uei", "award_ids", "hold_kind", "action",
+        "bound_cedar_uid", "correct_recipient", "ruling", "evidence", "status",
+        "recorded_on", "recorded_by", "owner_review"
+      ],
+      "properties": {
+        "hold_id": {
+          "type": "string",
+          "pattern": "^RH-\\d{4}-\\d{4}$",
+          "description": "The hold record's own id (what). Never a CE- or CB- id."
+        },
+        "collection": { "type": "string", "description": "The collection id the scoped transactions belong to, e.g. funding." },
+        "recipient_uei": {
+          "type": "string",
+          "pattern": "^[A-HJ-NP-Z0-9]{12}$",
+          "description": "The exact SAM UEI the hold scopes to. A dated attribute of the recipient, not an identity."
+        },
+        "award_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 },
+          "description": "Exact award keys (USAspending generated unique award id or the collection's award key). A (recipient_uei, award_id) pair is scoped by at most one entry."
+        },
+        "hold_kind": { "enum": ["distinct_recipient", "rebind_to_entity"] },
+        "action": {
+          "enum": ["withhold", "rebind"],
+          "description": "withhold pairs with distinct_recipient and writes attribution_status withheld_distinct_recipient; rebind pairs with rebind_to_entity and moves the binding to correct_recipient.cedar_uid."
+        },
+        "bound_cedar_uid": {
+          "oneOf": [{ "$ref": "#/$defs/cedar_uid" }, { "type": "null" }],
+          "description": "The uid the projection currently carries on the scoped transactions, read off the projection, never inferred from the register. null only while status is evidence_incomplete."
+        },
+        "correct_recipient": {
+          "type": "object",
+          "required": ["name", "cedar_uid", "register_status"],
+          "properties": {
+            "name": { "type": "string", "minLength": 1 },
+            "cedar_uid": { "oneOf": [{ "$ref": "#/$defs/cedar_uid" }, { "type": "null" }] },
+            "register_status": { "enum": ["not_in_register", "in_register"] }
+          },
+          "description": "Who the recipient is. For a withhold the uid is null (the recipient is not in the register, or is not asserted); for a rebind it is a uid the register already holds. A hold never mints."
+        },
+        "ruling": {
+          "type": "string",
+          "minLength": 1,
+          "not": { "pattern": "(?i)not[ _-]?(a[ _-])?native" },
+          "description": "The fact the hold states, in the owner's or reviewer's words. May not say not_native: that vocabulary belongs to the ruling ledger and means something else."
+        },
+        "evidence": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["url", "quoted", "checked_on"],
+            "properties": {
+              "url": { "type": "string", "pattern": "^https://" },
+              "quoted": { "type": "string", "minLength": 1 },
+              "checked_on": { "$ref": "#/$defs/date" }
+            }
+          }
+        },
+        "status": {
+          "enum": ["evidence_incomplete", "ready", "applied"],
+          "description": "evidence_incomplete: recorded, not applicable yet (bound_cedar_uid may be null). ready: every field present; the producer rebuild may consume it. applied: consumed by a pinned release; keep the entry, it is the record."
+        },
+        "recorded_on": { "$ref": "#/$defs/date" },
+        "recorded_by": { "type": "string" },
+        "owner_review": { "type": "string", "description": "Who reviews the entry (AGENTS.md section 5: Havala Hanson for Press data; identity questions to Elijah Moreno through her)." }
+      }
+    }
+  }
+}

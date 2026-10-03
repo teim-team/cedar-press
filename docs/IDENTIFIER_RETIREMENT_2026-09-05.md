@@ -1,12 +1,12 @@
-# Identifier retirement report
+# Historical identifier retirement report
 
-Generated from `data/cedar/field_map.json` and the sample headers by `scripts/field-map-markdown.mjs`; edit the map, not this file. Written 2026-09-05 under the retirement rule in `docs/PUBLIC_DATASET_SPEC_2026-09-05.md` (addendum): migrate, reconcile, verify, retire, regression-test.
+Generated from `data/cedar/field_map.json` and the sample headers by `scripts/docs-markdown.mjs --kind field-map`; edit the map, not this file. Written 2026-09-05 under the retirement rule in `docs/PUBLIC_DATASET_SPEC_2026-09-05.md` (addendum): migrate, reconcile, verify, retire, regression-test.
 
 ## The rule, as enforced
 
 `cedar_uid` is Cedar's one cross-dataset identity. Every competing entity identifier in a flagship's header has a retirement entry in the map with what it identifies and its disposition. The writer (`cedar_publication.apply_field_map`) enforces the dispositions on every build: an `alias_verified` column is compared to `cedar_uid` on every row and the dataset is refused where they differ; an `adjudicate` column stops the dataset wherever it is populated, and is neither retained nor deleted; a `retired_scheme` name in any shipped value, or a prohibited name in the header, stops the dataset. The regression tests (`server/tests/test_field_map.py` and the site's explore test suite) fail if a prohibited identifier returns to any approved header, and the writer fails at build if one returns to a value.
 
-`rows_affected` below is the count of rows carrying the identifier in the ten-row sample; the writer prints the full-table count on every build as `retired: dataset | old_identifier | what_it_identified | cedar_uid_or_replacement | disposition | rows_affected | unresolved_count`, and that line is the report row for the release.
+`rows_affected` below is the count in the historical raw test fixture, not the current public preview or the current release. The historical writer prints its full-table disposition count on its own build. Current release field and identity contracts are documented in `docs/DATASET_CODEBOOK.md`.
 
 ## Flagship identifiers
 
@@ -22,18 +22,18 @@ Generated from `data/cedar/field_map.json` and the sample headers by `scripts/fi
 | `natural-resources` | `beneficiary_entity_id` | the beneficiary, in its declared namespace | kept as beneficiary_entity_id | object_id | 10 | 0 |
 | `natural-resources` | `payer_entity_id` | the payer, in its declared namespace | kept as payer_entity_id | object_id | 10 | 0 |
 | `natural-resources` | `operator_entity_id` | the operator, in its declared namespace | kept as operator_entity_id | object_id | 0 | 0 |
-| `need` | `enterprise_id` | the enterprise (a business), not the Native entity | kept as enterprise_id | object_id | 10 | 0 |
-| `need` | `owner_hub_cedar_uid` | the canonical Native entity, as a second spelling of cedar_uid on the same row | cedar_uid | alias_verified | 10 | 0 |
-| `need` | `uei_candidate` | a candidate UEI for the enterprise | uei, where verified | internal_crosswalk | 0 | 0 |
-| `need` | `enterprise_existing_cedar_uid` | the enterprise as a register entity in its own right, distinct from its owner | Preserve internally; future same-legal-object relationship requires explicit evidence and contract. No identity merge. | internal_crosswalk | 1 | 0 |
-| `nonprofits` | `entity_id` | unknown: an earlier or different entity link that disagrees with cedar_uid on at least one row | cedar_uid | adjudicate | 2 | 2 |
-| `nonprofits` | `cedar_spine_entity_id` | the spine entity the organization was keyed to before a redirect that cedar_uid reflects and this column does not, on at least one row | cedar_uid | adjudicate | 9 | 9 |
+| `need` | `enterprise_id` | the enterprise (a business), not the Native entity | kept as enterprise_id | object_id | — | 0 |
+| `need` | `owner_hub_cedar_uid` | the canonical Native entity, as a second spelling of cedar_uid on the same row | cedar_uid | alias_verified | — | 0 |
+| `need` | `uei_candidate` | a candidate UEI for the enterprise | uei, where verified | internal_crosswalk | — | 0 |
+| `need` | `enterprise_existing_cedar_uid` | the enterprise as a register entity in its own right, distinct from its owner | Preserve internally; future same-legal-object relationship requires explicit evidence and contract. No identity merge. | internal_crosswalk | — | 0 |
+| `nonprofits` | `entity_id` | Preserved organization/object evidence. Do not alias to the affiliated Native entity; explicit pinned source evidence must distinguish the objects. | No automatic replacement; cedar_uid retains its separately evidenced relationship role. | internal_crosswalk | 2 | 0 |
+| `nonprofits` | `cedar_spine_entity_id` | Preserved organization/object evidence. Do not alias to the affiliated Native entity; explicit pinned source evidence must distinguish the objects. | No automatic replacement; cedar_uid retains its separately evidenced relationship role. | internal_crosswalk | 9 | 0 |
 | `nonprofits` | `key_redirect_proposed_entity_id` | a proposed redirect of the entity link | cedar_uid, once the redirect is ruled | internal_crosswalk | 0 | 0 |
 | `owned` | `certifying_authority_entity_id` | the certifying authority, a canonical Native entity | kept; also copied into cedar_uid with role certifying_authority | object_id | — | 0 |
-| `owned` | `nation_id` | the certifying nation, in a namespace the declaration does not name | certifying_authority_entity_id | adjudicate | — | 0 |
+| `owned` | `nation_id` | source-associated nation or authority context from source configuration or staging; not the business legal identity | Preserve internally as unvalidated source context; no automatic equivalence to certifying_authority_entity_id or cedar_uid. | internal_crosswalk | — | 0 |
 | `owned` | `business_entity_id` | the business as a register entity, where the identity system assigns one | kept as business_entity_id | object_id | — | 0 |
 
-NEED remains blocked by a systemic affiliation publication hold, independently of its internal-only enterprise cross-reference. The owner ruling requires a full-route audit, negative controls and a stratified quality sample before promotion. Funding still requires recoding retired attribution vocabulary; Nonprofits still has distinct unadjudicated identity links. Preserve all evidence and issued IDs; do not erase a blocked claim to pass the gate.
+The entries above describe historical raw transform inputs and their unresolved dispositions, not current producer release eligibility. Current NEED publication is restricted to its separately evidence-pinned reviewed base; the original held components are not admitted. Preserve evidence and issued IDs, and distinguish CE associations, business identities and source record keys.
 
 ## Supporting tables
 

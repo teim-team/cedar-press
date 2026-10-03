@@ -14,11 +14,82 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 
-import { LAUNCH_COLLECTION, collectionSample, hasSample, samplePath } from "./collection.js";
+import { LAUNCH_COLLECTION, collectionSample, collectionPublicationHold, collectionCsv, hasSample, samplePath, reviewedPreviewTextMatches } from "./collection.js";
 import { csvFor, hasReleaseFile } from "./pressDownload.js";
 
 const PUBLIC = fileURLToPath(new URL("../../../public", import.meta.url));
 const readSample = (path) => readFile(`${PUBLIC}${path}`, "utf8");
+
+test("stale NEED cached rows cannot acquire the reviewed release citation", async () => {
+  const stale = "enterprise_id,name\nCEDAR-NEST-1,old cached row\n";
+  let calls = 0;
+  const result = await csvFor({ id: "need", name: "Cedar NEED" }, async (path) => {
+    calls++;
+    assert.equal(path, samplePath("need"));
+    return stale;
+  });
+  assert.equal(collectionPublicationHold("need"), null);
+  assert.equal(hasSample("need"), true);
+  assert.equal(collectionCsv("need", stale), null);
+  assert.equal(calls, 1);
+  assert.equal(result.name, "need-collection-description.csv");
+  assert.doesNotMatch(result.csv, /old cached row|CEDAR-NEST-1/);
+});
+
+test("the reviewed finite NEED preview remains available", async () => {
+  const sample = collectionSample("need");
+  assert.equal(sample.of, 43, "the installed release is the reviewed 43-observation base");
+  assert.equal(sample.path, "/data/cedar/samples/need/spreadsheet__10.csv");
+  assert.equal(hasReleaseFile({ id: "need" }), true);
+  const source = await readSample(sample.path);
+  const { csv, name } = await csvFor({ id: "need", name: "Cedar NEED" }, readSample);
+  assert.equal(name, "need.csv");
+  const rows = parseCsv(csv);
+  assert.equal(rows.length, sample.rows + 1);
+  assert.equal(rows[0].length, sample.columns + 1);
+  assert.equal(rows[0].at(-1), "cite_as");
+  assert.ok(rows.slice(1).every((row) => row.at(-1).includes("Cedar")));
+  // A stale schema with the same width also fails: column count alone is
+  // not evidence that cached bytes belong to this release.
+  const wrongHeader = source.replace("record_type", "legacy_record_type");
+  assert.notEqual(wrongHeader, source);
+  assert.equal(collectionCsv("need", wrongHeader), null);
+  const matrix = parseCsv(source);
+  while (matrix.at(-1)?.length === 1 && matrix.at(-1)[0] === "") matrix.pop();
+  const encode = (records) => records.map((record) => record
+    .map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(",")).join("\n");
+  const reordered = matrix.map((record) => [record[1], record[0], ...record.slice(2)]);
+  assert.equal(collectionCsv("need", encode(reordered)), null);
+  assert.equal(collectionCsv("need", encode(matrix.slice(0, -1))), null);
+  assert.equal(collectionCsv("need", encode([...matrix, matrix[1]])), null);
+  const mutated = matrix.map((record) => [...record]);
+  mutated[1][mutated[1].length - 1] = "STALE_NEED_CACHE_MARKER";
+  const refused = await csvFor({ id: "need", name: "Cedar NEED" }, async () => encode(mutated));
+  assert.equal(refused.name, "need-collection-description.csv");
+  assert.doesNotMatch(refused.csv, /STALE_NEED_CACHE_MARKER/);
+});
+
+test("reviewed NEED preview refuses missing, malformed or mismatched public proof metadata", async () => {
+  const manifest = JSON.parse(await readFile(new URL("../../../data/cedar/collections.manifest.json", import.meta.url), "utf8"));
+  const entry = manifest.collections.find((item) => item.id === "need");
+  const text = await readSample(entry.sample.path);
+  const sample = entry.sample;
+  const proof = entry.verified_preview;
+  assert.equal(await reviewedPreviewTextMatches(text, sample, proof), true);
+  for (const invalid of [
+    undefined,
+    { ...proof, component: "unreviewed_graph" },
+    { ...proof, envelope: undefined },
+    { ...proof, envelope_sha256: "not-a-digest" },
+    { ...proof, sample_sha256: "not-a-digest" },
+    { ...proof, sample_sha256: "0".repeat(64) },
+    { ...proof, release_id: "0".repeat(64) },
+    { ...proof, manifest_sha256: "0".repeat(64) },
+    { ...proof, public_records: sample.of + 1 },
+  ]) assert.equal(await reviewedPreviewTextMatches(text, sample, invalid), false);
+  assert.equal(await reviewedPreviewTextMatches(text, { ...sample, release_id: undefined }, proof), false);
+  assert.equal(await reviewedPreviewTextMatches(text, { ...sample, rows: sample.of + 1 }, proof), false);
+});
 
 /**
  * A minimal RFC 4180 reader, because line counting is wrong here and quietly
@@ -46,22 +117,18 @@ function parseCsv(text) {
   return rows;
 }
 
-test("a launch dataset downloads its sample rows, citation row included", async () => {
+test("a launch dataset downloads its sample rows with a citation column", async () => {
   const { csv, name } = await csvFor({ id: "deals", name: "Indian Country Deals" }, readSample);
   assert.equal(name, "deals.csv");
   const rows = parseCsv(csv);
-  // Ten real rows plus a header plus the citation. A preview that quietly
-  // shrank would otherwise still pass every assertion below it.
-  assert.equal(rows.length, 12, `expected header + 10 rows + citation, got ${rows.length}`);
-  const last = rows.at(-1);
-  assert.equal(last[0], "cite_as");
-  assert.ok(last[1].startsWith("Lumecon, "), last[1]);
-  // The version the descriptor carries, not one the release feed invented.
+  assert.equal(rows.length, 11, `expected header + 10 observations, got ${rows.length}`);
+  assert.equal(rows[0].at(-1), "cite_as");
   const deals = LAUNCH_COLLECTION.find((d) => d.id === "deals");
-  assert.ok(last[1].includes(`(${deals.version})`), last[1]);
-  // The citation row is padded to the table's real width, so the file is not
-  // ragged when a spreadsheet opens it.
-  assert.equal(last.length, rows[0].length);
+  for (const row of rows.slice(1)) {
+    assert.ok(row.at(-1).includes(`Updated ${deals.updated}`));
+    assert.ok(!row.at(-1).includes(`(${deals.version})`));
+    assert.equal(row.length, rows[0].length);
+  }
 });
 
 test("every collection with a sample downloads real rows for it", async () => {
@@ -74,10 +141,10 @@ test("every collection with a sample downloads real rows for it", async () => {
     // The manifest states how many rows and columns Cedar published for this
     // table; the file has to match, or the manifest is describing a file that
     // is not the one being handed over.
-    assert.equal(rows.length, sample.rows + 2, dataset.id);
-    assert.equal(rows[0].length, sample.columns, dataset.id);
-    assert.equal(rows.at(-1)[0], "cite_as", dataset.id);
-    assert.equal(rows.at(-1).length, sample.columns, dataset.id);
+    assert.equal(rows.length, sample.rows + 1, dataset.id);
+    assert.equal(rows[0].length, sample.columns + 1, dataset.id);
+    assert.equal(rows[0].at(-1), "cite_as", dataset.id);
+    assert.equal(rows.at(-1).length, sample.columns + 1, dataset.id);
   }
 });
 

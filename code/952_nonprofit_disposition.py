@@ -69,8 +69,9 @@ standing rule is that Native status comes from what an organisation says about
 itself in its own filing - never from an NTEE code and never from a name. A
 generic-token flag therefore does not exclude anything and does not rule
 anything: it says the cited name match does not support the link. Rows already
-verified from a filing (`verified_strict`, `ruled_native_verified`) keep their
-disposition and simply carry the flag as extra evidence. Nothing is deleted.
+with a recorded positive ruling (ruled_native_verified) keep that ruling.
+The legacy verified_strict stage records heuristic name/place filtering, not
+a primary-source Native-status decision; it remains a candidate. Nothing is deleted.
 
 MEASURED, on 12,764 rows:
     generic_token_only                    578  (258 of them live at
@@ -140,7 +141,7 @@ STAGE = {
     "ruled_not_native":          "EXCLUDED_PLACE_NAME_COINCIDENCE",
     "ruled_native_verified":     "NATIVE_RULED_VERIFIED",
     "ruled_native_needs_elijah": "NATIVE_PROPOSED_AWAITING_OWNER_RULING",
-    "verified_strict":           "NATIVE_VERIFIED_STRICT",
+    "verified_strict":           "CANDIDATE_NAME_MATCH_UNVERIFIED",
     "state_validated":           "CANDIDATE_STATE_VALIDATED",
     "canonical_name_match":      "CANDIDATE_NAME_MATCH_UNVERIFIED",
     "raw_name_candidate":        "CANDIDATE_NAME_ONLY",
@@ -192,13 +193,18 @@ def decide(r: dict, sup: str):
                 f"| funnel_stage={stage}; the ruling and its file are named in "
                 "`evidence`. classification_ruling is UNRULED because no HAND "
                 "ruling was recorded, which is a different fact.")
-    if stage == "canonical_name_match" and sup == "generic_token_only":
+    if stage in {"canonical_name_match", "verified_strict"} and sup == "generic_token_only":
         return ("CANDIDATE_NAME_MATCH_GENERIC_TOKEN_ONLY",
-                "funnel_stage=canonical_name_match, and every token shared "
+                f"funnel_stage={stage}, and every token shared "
                 "with the matched tribe's canonical name is a generic English "
                 "or civic word (see name_match_shared_tokens). The cited name "
                 "match does not support the link. This is a statement about "
                 "the EVIDENCE, not a ruling on Native status.")
+    if stage == "verified_strict":
+        return ("CANDIDATE_NAME_MATCH_UNVERIFIED",
+                "funnel_stage=verified_strict is a legacy name/place-filter "
+                "result, not primary evidence of Native governance or service. "
+                "Needs evidence review; no negative Native-status ruling is made.")
     return (STAGE[stage], f"funnel_stage={stage}")
 
 
@@ -349,6 +355,33 @@ def verify(path: Path | None = None) -> int:
 
 
 def selftest() -> int:
+    """Run negative controls on synthetic temporary inputs, never live metadata."""
+    import tempfile
+    global ROOT, TABLE, MANIFEST
+    original = ROOT, TABLE, MANIFEST
+    try:
+        with tempfile.TemporaryDirectory(prefix="cedar952-") as tmp:
+            ROOT = Path(tmp)
+            TABLE = ROOT / "data" / "clean" / "np_orgs.csv"
+            MANIFEST = ROOT / "manifest.json"
+            TABLE.parent.mkdir(parents=True)
+            columns = ["EIN", "org_name", *NEW]
+            with TABLE.open("w", encoding="utf-8", newline="") as fh:
+                writer = csv.DictWriter(fh, fieldnames=columns)
+                writer.writeheader()
+                for index in range(400):
+                    writer.writerow({"EIN": str(index), "org_name": "Fixture organization",
+                                     "disposition": "CANDIDATE_NAME_MATCH_GENERIC_TOKEN_ONLY",
+                                     "disposition_basis": "synthetic negative control",
+                                     "name_match_support": "generic_token_only",
+                                     "name_match_shared_tokens": "UNITED"})
+            MANIFEST.write_text(json.dumps({"rows": 400, "md5_base_fields": "fixture"}), encoding="utf-8")
+            return _selftest_cases()
+    finally:
+        ROOT, TABLE, MANIFEST = original
+
+
+def _selftest_cases() -> int:
     """Prove each NAMED invariant fires, one injection at a time."""
     import contextlib
     if not MANIFEST.exists():

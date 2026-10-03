@@ -63,10 +63,10 @@ git ls-files src/<dir>/grove                                   # files to move
 
 | | |
 |---|---|
-| Files to move | 138 — `features/grove` 94, `pages/grove` 41, `components/grove` 1, `styles/grove` 2 |
-| Path references to rewrite | 404, across 96 files |
-| Referencing files inside `src/` | 48 — `pages/` 32, `features/` 12, `context/` 2, `components/` 1, `main.jsx` 1 |
-| Referencing files outside `src/` | 48 — `server/cedar_press/` 8, `scripts/` 10, `docs/` 14, `code/` 5, `server/tests/` 4, `tests/` 2, `data/` 1, `.github/` 1, `.env.example` 1, `AGENTS.md` 1, `eslint.config.js` 1 |
+| Files to move | 170 — `features/grove` 123, `pages/grove` 44, `components/grove` 1, `styles/grove` 2 |
+| Path references to rewrite | 472, across 106 files |
+| Referencing files inside `src/` | 52 — `pages/` 34, `features/` 14, `context/` 2, `components/` 1, `main.jsx` 1 |
+| Referencing files outside `src/` | 54 — `server/cedar_press/` 8, `scripts/` 7, `docs/` 21, `code/` 5, `server/tests/` 6, `tests/` 2, `data/` 1, `.github/` 1, `.env.example` 1, `AGENTS.md` 1, `eslint.config.js` 1 |
 
 The reason this was deferred has expired. The table used to carry a fifth row
 — twelve files also touched by an open PR, which would each have become a
@@ -79,7 +79,7 @@ as its own commit — moving the four directories to `press/` and rewriting the
 references in one pass — for two reasons that are about review rather than
 about risk.
 
-First, "did all 404 references get rewritten?" is a question the build, the
+First, "did all 472 references get rewritten?" is a question the build, the
 suites and the smoke run answer, and not one a reader can answer from a diff.
 Folded into a change that also alters behaviour or prose, the rename hides
 that change instead of accompanying it.
@@ -97,7 +97,7 @@ day the four directories move, the same measurement turns into the stale-path
 sweep and names every file that still spells the old one.
 
 One precondition, found while re-measuring the rows above. `npm run test:smoke`
-is one of the three things that answer "did all 404 references get rewritten?",
+is one of the three things that answer "did all 472 references get rewritten?",
 and until this commit it could answer for the wrong tree: `playwright.config.js`
 hardcoded port 4180 and kept `reuseExistingServer` on outside CI, so a run in
 one checkout attached to a preview server another checkout had left listening
@@ -401,12 +401,17 @@ run it. The entity register the pickers read is exported to
 publication rule withholds written null.
 
 THE PUBLICATION RULE RUNS BEFORE A FILE IS PUBLIC. The importer
-(`withhold_samples`) strikes any sample that carries the name of an
-individually Native-owned firm without recorded consent
-(`may_publish_individual_native_field`): the table keeps its release facts and
-loses its `sample_path`, gaining `sample_withheld_why`. `--audit` applies the
-same rule to the committed manifest and deletes the files; on 2026-09-05 it
-struck six that were being served. Both suites scan every served sample for
+(`withhold_samples`) strikes any sample that carries a field
+`may_publish_individual_native_field` withholds for an individually
+Native-owned firm: the table keeps its release facts and loses its
+`sample_path`, gaining `sample_withheld_why`. `--audit` applies the same rule
+to the committed manifest and deletes the files; on 2026-09-05 it struck six
+that were being served, when the rule withheld the firm's name absent
+recorded consent. Since the owner ruling of 2026-10-02 (a firm is a business
+entity whatever it is named after; its name, identifiers and business address
+are public business records) the rule publishes those fields, so the importer
+strikes nothing for them and re-admits the six on the next run; the machinery
+stays, reading the rule. Both suites scan every served sample for
 such a name. In the model a withheld register name is `withheld`, never a
 prompt to read the table's own name column, and the masked row is what the
 table, the record, the search and the export read.
@@ -536,7 +541,7 @@ disposition. The column counts are the owner's exactly, except Funding at
 39: the list keeps `recipient_duns` and the retirement rule in the same
 addendum says not to publish DUNS, and the later rule wins. This pass
 changes columns, never rows, identities or eligibility.
-`scripts/field-map-markdown.mjs` renders `docs/FIELD_MAP_2026-09-05.md`
+`scripts/docs-markdown.mjs --kind field-map` renders `docs/FIELD_MAP_2026-09-05.md`
 and `docs/IDENTIFIER_RETIREMENT_2026-09-05.md` (`--check` fails a stale
 document). The unsampled flagship (`owned`) carries its 32-column order as
 owed until its sample lands.
@@ -588,7 +593,7 @@ carries, and `rowEntities` unions them into the row's entities with the
 role on each, so an entity filter finds a row through any supported role
 and never only the first displayed uid.
 
-THE GUIDES. `scripts/guides-markdown.mjs` writes one researcher guide per
+THE GUIDES. `scripts/docs-markdown.mjs --kind guides` writes one researcher guide per
 collection into `docs/guides/` from `data/cedar/guides.json` (the prose),
 the collection descriptor (purpose, sources, method), the field map (row
 unit, roles, approved header, what is owed, the retirement findings that

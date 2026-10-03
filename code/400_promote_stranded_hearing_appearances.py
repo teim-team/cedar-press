@@ -249,10 +249,12 @@ def main():
             continue
         # FAIL CLOSED ON THE INDIVIDUALLY NATIVE-OWNED CLASS.
         #
-        # `cedar_domain.may_publish_individual_native_field` defaults to
-        # WITHHOLDING and says so - "unknown field: withhold. Fail closed." -
-        # because a firm's own website statement is our EVIDENCE, never its
-        # PERMISSION. Attaching a named congressional witness to an
+        # `cedar_domain.may_publish_individual_native_field` fails closed on
+        # a field it does not know - "unknown or internal field: withhold" -
+        # and a witness's name is not a field of the firm. (The owner ruling
+        # of 2026-10-02 published the FIRM's own name and identifiers as
+        # business records; it says nothing about a natural person appearing
+        # beside the firm.) Attaching a named congressional witness to an
         # individually Native-owned FIRM is a linkage that class has its own
         # rules for, and those rules are a person's, not a table's. This
         # script does not have a ruling for it, so it does not make one.

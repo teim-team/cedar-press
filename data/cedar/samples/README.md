@@ -1,3 +1,12 @@
+> **Historical extracts, superseded 2026-10-02 note.** These `*__sample.csv` files and the counts
+> in this README were measured on 2026-09-02 from the workspace's clean tables. They are not
+> the previews the site serves. The served public previews are
+> `public/data/cedar/samples/<collection>/spreadsheet__10.csv`, staged from the producer's
+> verified spreadsheets and pinned by `data/cedar/verified-preview-releases.json`; current
+> observation counts are in `data/cedar/collections.manifest.json` and `docs/REVIEW_STATUS.md`.
+> Nothing reads this directory at build or run time (measured with `grep` on 2026-10-02).
+> The files are kept as dated evidence of the earlier shape; do not quote their counts as current.
+
 # Cedar Press — sample extracts
 
 *Built 2026-09-02 by `code/770_sample_extracts.py`. 10 real rows per dataset, straight from the clean tables — nothing synthesised.*

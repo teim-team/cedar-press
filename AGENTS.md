@@ -1,4 +1,12 @@
 # AGENTS.md — Native Deals & Native Entity Enterprise Data Project
+
+## Owner adjudication boundary (Elijah, 2026-09-24)
+
+Round-half-away-from-zero is ratified and Claude owns its implementation. Codex must not perform rounding work or edit Claude-owned changes; Havala reviews implementation. Elijah's menu contains only fully researched, genuinely ambiguous identity, affiliation or legal-object linkages. Do not expose receipt commands, schemas, engineering holds, optional history checks or unresolved research. Codex handles imports after an export is returned. When nothing qualifies, display exactly **No owner decisions ready** and continue independent work.
+
+
+Elijah is only reviewing genuinely ambiguous identity, affiliation, or legal-object linkages where human judgment is required. Never place code defects, schemas, missing fields, tests, source refreshes, documentation, infrastructure, or other engineering work in his adjudication queue. Codex is a frontier coding model and must diagnose and fix those issues itself, validate the fix, and keep working. Only escalate when the repository and available authoritative sources cannot determine a linkage or when an actual product-policy choice belongs to the owner. A queue that asks Elijah to resolve engineering problems is a failed deliverable.
+
 *Operating guide for AI-agent sessions. Written 2026-07-31 from the full Q3 build conversation. Owner: Elijah Moreno.*
 
 ---
@@ -68,10 +76,11 @@ with Tribal Business News: built by Lumecon and available exclusively through
 Tribal Business News, which handles subscriber plans (payment, renewals and
 issuance). There is no year gating: every subscriber gets full coverage.
 
-**The Cedar data workspace.** The collections themselves — the deal ledger, the
-entity universe and the outcomes panel — and the pipeline that builds them,
-under `code/`, `docs/` and `dist/customer/`. This is what `AGENTS.md` below is
-mostly about.
+**The preserved Cedar data workspace.** Historical acquisition, adjudication and
+reproduction scripts remain under `code/`, with their evidence in `docs/` and
+`dist/customer/`. Current versioned release builds and researcher spreadsheets
+are maintained in Lumecon-data. Press owns the shared consumer, publication
+filters and customer presentation. The journal below preserves earlier work.
 
 **Does not own:**
 
@@ -79,8 +88,9 @@ mostly about.
   to Tribal Business News, whose involvement is with Cedar Press only.
 - The shared data foundation. That is
   [`Lumecon-data`](https://github.com/teim-team/Lumecon-data), the separate
-  data repository decided on 2026-09-21. It exists as of 2026-09-23; the
-  pipeline in `code/` has not moved to it yet.
+  data repository decided on 2026-09-21. Its installed builders and spreadsheet
+  exporter now own current pinned releases. Historical scripts under `code/`
+  remain available for their documented reproduction and adjudication roles.
 - The economic model. That is `teim-engine`, whose reference data this workspace
   reads under ADR-044 `reference_dataset` treatment — pinned, checksummed,
   versioned, never `data_snapshot`.
@@ -96,7 +106,7 @@ mostly about.
 |---|---|---|
 | Web client | Vite + React, deployed as a static build | `npm run dev`; `src/` |
 | API | FastAPI, Python | `server/` — see [`server/README.md`](server/README.md) |
-| Data workspace | Python scripts, numbered | `code/<n>_*.py`; `dist/customer/` holds the built deliverables |
+| Preserved data workspace | Historical Python scripts, numbered | `code/<n>_*.py` and `dist/customer/`; current release entrypoints are linked from [`docs/TERMINAL_HANDOFF.md`](docs/TERMINAL_HANDOFF.md). Scripts with zero references and no tracked output sit in `code/archive/` (moved 2026-10-02, never deleted; `code/archive/INDEX.md` names each; the rule and measurement are `server/tests/code_reference_graph.py`) |
 
 Pointing `VITE_API_URL` at the API is the whole switch from the standalone build
 to a connected one. [`.env.example`](.env.example) lists every configuration
@@ -151,17 +161,20 @@ root: its `-s server/tests -t server` is why a bare
 importable` (`tests/` at the root is the Playwright smoke directory, not a
 Python package).
 
-**Verified 2026-09-24**, in the order above: `npm run lint` exits `0` ·
-`make check-generated` reports all seven files current · `npm run test`
-reports `398 pass, 0 fail` and a coverage floor met at 84.43 lines /
-83.33 branches / 90.24 functions · `ruff check server` reports
-`All checks passed!` · `make test-python` reports `Ran 265 tests … OK
-(skipped=31)` and its floor met · `make audit-python` and `make audit-node`
-report no known vulnerabilities. The Playwright pair, re-run the same day
-(browsers already installed, then `npm run test:smoke`), reports
-`180 passed`, `26 skipped`. `npm run build`, `npm run build:site`
-and `npm run seo:check` also complete; the build's chunk-size warning is
-pre-existing.
+**Verified 2026-10-02** (Linux, Node 22, Python 3.11), in the order above:
+`npm run lint` exits `0` · `make check-generated` reports all six generators
+current · `npm run test` reports `634 pass, 0 fail, 1 skipped` and a coverage
+floor met at 88.64 lines / 85.00 branches / 90.80 functions · `ruff check
+server` reports `All checks passed!` · `make test-python` reports `Ran 664
+tests`, 33 skipped, 85% coverage against the 77 floor, with five import
+errors and one failure that are Python 3.11 artifacts (`code/` scripts use
+3.12 f-string syntax and the writer census parses them with `ast`); on
+Python 3.12, which CI uses, the same suite was recorded green on 2026-10-02
+in `docs/REVIEW_STATUS.md` · `make audit-python` and `make audit-node` report
+no known vulnerabilities · `npm run build` completes; its chunk-size warning
+is pre-existing. The Playwright pair was not rerun on 2026-10-02; the hosted
+Checks run for the pushed head is the record for it. The 2026-09-24 figures
+this block replaced were `398 pass` and `Ran 265 tests`.
 
 **`py -3` is the Windows Python launcher.** The workspace's ~1,000 documented
 commands are written with it, because that is where they were written. On Linux
@@ -325,7 +338,7 @@ editing when several agents run at once.
 
 ## 8. Cross-repo links and status
 
-*Section current as of 2026-09-23.*
+*Current release workflow is recorded in [the maintained consumer handoff](docs/TERMINAL_HANDOFF.md), which links the producer checkpoint. Dated journal entries below preserve history.*
 
 | Repo | What it is | Relationship to this one |
 |---|---|---|
@@ -333,7 +346,7 @@ editing when several agents run at once.
 | [`teim-engine`](https://github.com/teim-team/teim-engine) | The model engine behind Cedar Impact (internal) | This workspace reads its reference data as `reference_dataset` per ADR-044 |
 | [`cedar`](https://github.com/teim-team/cedar) | Cedar, the AI economic analyst, as a service | No runtime dependency in either direction |
 | [`lumecon-website`](https://github.com/teim-team/lumecon-website) | The public site, and the **North Star** for product vocabulary | Product names and their one-line definitions follow its `AGENTS.md` |
-| [`Lumecon-data`](https://github.com/teim-team/Lumecon-data) | The shared Python data foundation behind Cedar Press, Cedar Grove, Cedar and Cedar Impact | The separate data repository decided on 2026-09-21; data extraction and harmonization are to move there. The pipeline in `code/` is still here |
+| [`Lumecon-data`](https://github.com/teim-team/Lumecon-data) | The shared Python data foundation behind Cedar Press, Cedar Grove, Cedar and Cedar Impact | Owns current versioned builders, verification and researcher spreadsheet exports. Press consumes exact pins; historical workspace scripts remain here for reproduction and adjudication. |
 
 **Naming**, per the North Star: the impact product is **Cedar Impact**; "TEIM"
 survives as a repository, database and resource name only; "tribal economic
@@ -9457,6 +9470,16 @@ sample for a withheld name. Run `--audit` again after adding the nineteen
 absent samples: `native_owned_businesses.csv` is the flagship of that
 collection and has not been checked, because it is not here.
 
+*Dated note, 2026-10-02.* The owner ruled that an individually Native-owned
+firm is a business entity regardless of what it is named after, and that its
+name, identifiers and business address are public business records that
+publish without consent. `may_publish_individual_native_field` now answers
+True for every field it withheld; the importer's strike reads that answer and
+so re-admits those six samples on the next run, and `register.json` carries
+every name (`withheld_names: 0`). The paragraph above records the rule as it
+stood. Record: `docs/REVIEW_STATUS.md`, "Owner ruling: individually owned
+firm records publish, 2026-10-02".
+
 The filters, the URL, the saved view, the download and the question to Cedar
 are one object, the cut (`features/grove/explore.js`). Change what a cut is
 there and every use follows; add a control to the card that is not in the cut
@@ -9595,6 +9618,41 @@ repository does once the register exists, and records the owner's two further de
 the id carries two check characters over the uid's alphabet, and the
 individually owned entity class closes to new mints. Documentation only; no
 code changed.
+<!-- BEGIN CEDAR-GIVING-PLOT-CONSUMER-20260926 -->
+The coordinator also assigned this worker the legacy NEED conflict-writer defect
+in `code/1102_need_corroboration_adjudication.py`. The script no longer assigns
+the Chugach narrative to every conflict. Its recognizable prior claims are cleared
+to an explicit unadjudicated hold; original assertions, values and IDs survive.
+Archived candidates remain untouched. Three focused regressions cover distinct
+enterprises, the actual synthetic builder, idempotency and separate human reviews.
+The collection-wide publication hold remains binding.
+The same worker subsequently added bounded queue replay in
+`server/tests/stream_release_rehearsal.py` and fenced legacy dataset v1 delivery
+to explicit development/review. Staging/production refusal occurs before source
+transport. Synthetic streaming and release regression checks cover the mechanism;
+the coordinator records real queue results. Both rehearsal commands refuse
+inherited database configuration before importing the Cedar app.
+The isolated Giving/PLOT worker branch adds only server integration surfaces:
+`governed_collections.py`, the authenticated 15-target release registry,
+Press component pin/catalog configuration, and existing full-release verifier
+dispatch. Original-12 frontend declarations and the PR #131 presentation
+worktree remain separate. Giving is standard Press/shared Grove, PLOT is
+Press+/shared Grove, Gaming remains Grove exclusive. The default shared pin is
+empty. Real reproduction is `server/tests/shared_collection_rehearsal.py` using
+both installed packages and an immutable store: no listener or subprocess.
+Actual PLOT 1,242 permits/3,210 events served with exact hashes; Giving's real14
+remained rights-held. Root owns integrated pins, database proof and final CI.
+<!-- END CEDAR-GIVING-PLOT-CONSUMER-20260926 -->
+
+## 2026-09-27 Source presentation separates publisher from ingestion artifact
+
+Source labels come from the maintained Lumecon intake projection or exact reviewed
+source-system mappings. A seed URL, filename, funder, certifying authority or
+curated transaction title never establishes a row's original publisher/report.
+`sourcePresentation.js` and `SourceCitation.jsx` are the shared Press display
+path; missing evidence stays explicit. NEED publication holds and Grove-only
+Gaming placement remain in force. Current Giving adds three trailing fields;
+`compatible_orders` explicitly preserves its prior pinned schema.
 
 
 ## 2026-09-28: mobile preview rails must scroll inside their frame
@@ -9607,3 +9665,18 @@ compatibility hover/focus changing the specimen first. `tests/mobile-navigation.
 reproduces the old rail at 2,291px inside a 390px viewport and checks native touch
 swiping plus a one-tap selection at the far end. Audience-name tabs remain at
 720px and below; wider cards use their existing previous/next controls.
+
+## 2026-09-28 Living datasets use dates and one cohesive spreadsheet
+
+Owner direction: present each collection as a living dataset. Show Updated dates,
+not public release numbers or component/table counts. Cite the collection name,
+update date and access date. Keep immutable release pins and change history internal.
+A CSV file, storage partition or component is not an upstream source. Attribute
+registered publishers and source systems; never relabel table counts as sources.
+Final delivery is one cohesive data table per collection, with compatible columns,
+explicit record grain and provenance, and blanks for inapplicable fields. Preserve
+all rights and identity holds; joins must not multiply observations or money.
+
+## 2026-10-01: sample counts and connected spreadsheet counts have different populations
+
+Public previews count their own eligible sample records and label the preview update date. Do not sum legacy collection/table counts into a customer record total. Connected spreadsheet counts come from permitted release descriptors and must match the same release's displayed record types. Reader-facing labels and retired identifier column filtering are shared in `src/features/grove/readerPresentation.js`; Cedar IDs, names and original record IDs remain. `docs/PRESENTATION_DATA_FLOW.md` owns this current maintenance boundary. Automated build, test and deployment checks remain enabled.

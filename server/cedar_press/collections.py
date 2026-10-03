@@ -56,7 +56,9 @@ WHAT IS STILL NOT MEASURED, AND SAYS SO
 from __future__ import annotations
 
 import csv
+import io
 import json
+import re
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -69,6 +71,8 @@ from cedar_press.claims import CLAIM_CLASS
 __all__ = [
     "COLLECTION_FIGURES",
     "EXCLUDED_COLLECTIONS",
+    "GROVE_RELEASE_COLLECTIONS",
+    "GROVE_RELEASE_IDS",
     "LAUNCH_COLLECTION",
     "UNMEASURED_FIELDS",
     "CollectionDataset",
@@ -109,6 +113,26 @@ UNMEASURED_FIELDS: dict[str, str] = dict(_MANIFEST["unmeasured_fields"])
 #: nobody can question.
 EXCLUDED_COLLECTIONS: tuple[dict[str, str], ...] = tuple(
     dict(entry) for entry in _MANIFEST["excluded"]
+)
+
+#: THE reviewed Cedar Grove release declaration: the one place that says which
+#: collections the full-download route may serve from a pinned ``cedar_grove``
+#: catalog. A declared id is served only while the manifest still places it on
+#: the ``grove`` shelf in ``excluded`` (the storefront neither sells nor
+#: previews it), so a collection that moves shelf stops being Grove-served
+#: rather than being served twice. WHICH release is served is not listed here:
+#: it is the one Lumecon-data collection release pinned in
+#: ``data/cedar/grove_release_pin.json`` (``repository.grove_release_pin``).
+#: Which COMPONENTS are offered is the collection's field-map presentation
+#: entries (``data/cedar/field_map.json`` keys ``<collection>/<component>``),
+#: each validated against that release's embedded component contract. Access
+#: reuses the existing tier model: a tier whose shelf reaches ``grove``
+#: (``grove``, ``tree``). No tier or route is added.
+GROVE_RELEASE_IDS: tuple[str, ...] = ("gaming", "infrastructure")
+GROVE_RELEASE_COLLECTIONS: tuple[dict[str, str], ...] = tuple(
+    entry
+    for entry in EXCLUDED_COLLECTIONS
+    if entry["id"] in GROVE_RELEASE_IDS and entry.get("shelf") == "grove"
 )
 
 
@@ -170,9 +194,7 @@ _CEDAR: dict[str, dict[str, Any]] = {
 _PUBLISHED: dict[str, Any] = json.loads(
     (_MANIFEST_PATH.parent / "samples.published.json").read_text(encoding="utf-8")
 )
-_UNPUBLISHED: frozenset[str] = frozenset(
-    entry["path"] for entry in _PUBLISHED["unpublished"]
-)
+_UNPUBLISHED: frozenset[str] = frozenset(entry["path"] for entry in _PUBLISHED["unpublished"])
 
 
 def _with_publication(sample: dict[str, Any] | None) -> dict[str, Any] | None:
@@ -272,9 +294,8 @@ def collection_short(dataset: Any) -> str | None:
 
 def collection_context_line() -> str:
     """One line for the context strip: versions and the latest refresh date."""
-    versions = " · ".join(f"{collection_short(d)} {d.version}" for d in LAUNCH_COLLECTION)
     updated = sorted(d.updated for d in LAUNCH_COLLECTION)[-1]
-    return f"{versions} · all current as of {updated}"
+    return f"Updated {updated}"
 
 
 @dataclass(frozen=True)
@@ -301,6 +322,7 @@ class CollectionNeed:
 
     id: str
     text: str
+    demonstration: bool = False
 
 
 @dataclass(frozen=True)
@@ -313,6 +335,7 @@ class CollectionLead:
     need: int
     missing: tuple[str, ...]
     requires: tuple[str, ...]
+    demonstration: bool = True
 
 
 @dataclass(frozen=True)
@@ -342,8 +365,7 @@ def collection_findings() -> CollectionFindings:
     def basis(dataset_id: str, detail: str) -> str:
         dataset = _dataset_for(dataset_id)
         name = collection_short(dataset) if dataset else dataset_id
-        version = dataset.version if dataset else "v0"
-        return f"{name} {version}, {detail}"
+        return f"{name}, {detail}"
 
     supported = (
         CollectionSupported(
@@ -372,58 +394,81 @@ def collection_findings() -> CollectionFindings:
         ),
     )
 
+    availability_needs = []
+    for dataset in LAUNCH_COLLECTION:
+        facts = collection_cedar_facts(dataset.id) or {}
+        sample = collection_sample(dataset.id) or {}
+        missing = []
+        rows = facts.get("n_rows")
+        if type(rows) is not int or not 0 <= rows <= 2**53 - 1:
+            missing.append("The current release does not state a row count.")
+        if not sample.get("path"):
+            missing.append(
+                sample_unavailable_reason(dataset.id)
+                or "No preview file is published for the current release."
+            )
+        if missing:
+            availability_needs.append(
+                CollectionNeed(
+                    id=f"col-need-{dataset.id}-availability",
+                    text=f"{dataset.name}: {' '.join(missing)}",
+                )
+            )
+    without_vintage = [
+        dataset
+        for dataset in LAUNCH_COLLECTION
+        if not isinstance(dataset.vintage, str) or not dataset.vintage.strip()
+    ]
+    vintage_needs = []
+    if without_vintage:
+        vintage_text = (
+            "No collection states a vintage."
+            if len(without_vintage) == len(LAUNCH_COLLECTION)
+            else "A collection vintage is not stated for: "
+            + "; ".join(dataset.name for dataset in without_vintage)
+            + "."
+        )
+        vintage_needs.append(
+            CollectionNeed(
+                id="col-need-vintage",
+                text=vintage_text
+                + " An update date does not establish the periods covered by every source.",
+            )
+        )
+
     needs = (
         CollectionNeed(
             id="col-need-closing",
             text=(
-                "Three large announced deals await closing confirmation before they "
-                "enter totals (Deals, primary source pending)."
+                "Demonstration: Three large announced deals await closing confirmation "
+                "before they enter totals (Deals, primary source pending)."
             ),
+            demonstration=True,
         ),
         CollectionNeed(
             id="col-need-fy26",
             text=(
-                "FY2026 assistance figures are partial until the Q1 release lands "
-                "(Funding, USAspending publication lag)."
+                "Demonstration: FY2026 assistance figures are partial until the Q1 "
+                "release lands (Funding, USAspending publication lag)."
             ),
+            demonstration=True,
         ),
         CollectionNeed(
             id="col-need-matches",
             text=(
-                "Two parent-entity matches are provisional pending SAM "
+                "Demonstration: Two parent-entity matches are provisional pending SAM "
                 "re-registration (Contractors, entity resolution queue)."
             ),
+            demonstration=True,
         ),
-        CollectionNeed(
-            id="col-need-owned-terms",
-            text=(
-                "White Earth listings enter entity rows once the nation confirms "
-                "publication terms; aggregates only until then (Owned, consent pending)."
-            ),
-        ),
-        CollectionNeed(
-            id="col-need-owned-membership",
-            text=(
-                "Native-Owned Businesses publishes no row count and no preview file: "
-                "the table Cedar names as the collection's flagship is not one its "
-                "collection contract claims, and the two memberships have not been "
-                "reconciled (Owned, collection membership unresolved)."
-            ),
-        ),
-        CollectionNeed(
-            id="col-need-vintage",
-            text=(
-                "No collection states a vintage: Cedar's cadence measurement produced "
-                "no newest-held period for any of them, so the field is absent rather "
-                "than estimated."
-            ),
-        ),
+        *availability_needs,
+        *vintage_needs,
     )
 
     narratives = (
         CollectionLead(
             id="col-lead-energy",
-            name="Energy project financing expansion",
+            name="Demonstration: Energy project financing expansion",
             have=3,
             need=3,
             missing=(),
@@ -431,7 +476,7 @@ def collection_findings() -> CollectionFindings:
         ),
         CollectionLead(
             id="col-lead-8a",
-            name="8(a) participation and award growth",
+            name="Demonstration: 8(a) participation and award growth",
             have=3,
             need=3,
             missing=(),
@@ -439,7 +484,7 @@ def collection_findings() -> CollectionFindings:
         ),
         CollectionLead(
             id="col-lead-assist",
-            name="Assistance shifts under new appropriations",
+            name="Demonstration: Assistance shifts under new appropriations",
             have=2,
             need=3,
             missing=("Q1 release",),
@@ -482,7 +527,7 @@ class CollectionFigure:
 def _basis_for(dataset_id: str, fallback: str) -> str:
     """A figure's basis line, derived so it cannot name a stale version."""
     dataset = _dataset_for(dataset_id)
-    return f"{collection_short(dataset)} {dataset.version}" if dataset else fallback
+    return f"{collection_short(dataset)}, updated {dataset.updated}" if dataset else fallback
 
 
 COLLECTION_FIGURES: tuple[CollectionFigure, ...] = (
@@ -577,18 +622,19 @@ def collection_citation(dataset_id: str, accessed_on: str | None = None) -> str 
     dataset = _dataset_for(dataset_id)
     if dataset is None:
         return None
-    vintage = f", vintage {dataset.vintage}" if dataset.vintage else ""
+    updated = f" Updated {dataset.updated}." if dataset.updated else ""
     accessed = f" Accessed {accessed_on}." if accessed_on else ""
-    return (
-        f'Lumecon, "{dataset.name}" ({dataset.version}{vintage}), '
-        f"Cedar Press collection, cedarpress.ai.{accessed}"
-    )
+    return f'Lumecon, "{dataset.name}", Cedar Press collection, cedarpress.ai.{updated}{accessed}'
 
 
 def _csv_cell(value: object) -> str:
     """One CSV cell, quoted only when the value needs it."""
     text = "" if value is None else str(value)
-    if any(ch in text for ch in ('"', ",", "\n")):
+    if re.match(r"^[=+@\t\r]", text) or (
+        text.startswith("-") and not re.fullmatch(r"-?\s*(\d[\d,]*)?(\.\d+)?", text)
+    ):
+        text = "'" + text
+    if any(ch in text for ch in ('"', ",", "\n", "\r")):
         return '"' + text.replace('"', '""') + '"'
     return text
 
@@ -605,25 +651,24 @@ def collection_csv(dataset_id: str) -> str | None:
     ``sample_unavailable_reason`` says why; handing over a metadata file in
     place of the rows a tile promises is the failure this avoids.
 
-    The last row is the citation. A downloaded file outlives the page it came
+    The citation is a column, never an extra observation. A downloaded file outlives the page it came
     from, so the file itself must say what it is, whose work it is and how to
     credit it; provenance that lives only in the UI is provenance the reader
     loses on save.
     """
+    if dataset_id == "need":
+        from cedar_press.need_preview import current_need_preview_permitted
+
+        if not current_need_preview_permitted(_REPO):
+            return None
     sample = _SAMPLE.get(dataset_id)
     if sample is None or not sample.get("path"):
         return None
     path = _SAMPLE_ROOT / str(sample["path"]).lstrip("/")
     if not path.exists():
         return None
-    # Normalized to \n so the two implementations are byte-comparable and the
-    # trailing citation row is appended to a known shape.
     text = path.read_text(encoding="utf-8").replace("\r\n", "\n").rstrip("\n")
-    lines = text.split("\n")
-    width = len(next(csv.reader([lines[0]])))
-    citation = [
-        "cite_as",
-        collection_citation(dataset_id) or "",
-        *[""] * max(0, width - 2),
-    ]
-    return "\n".join([*lines, ",".join(_csv_cell(cell) for cell in citation)])
+    rows = list(csv.reader(io.StringIO(text)))
+    citation = collection_citation(dataset_id) or ""
+    result = [[*rows[0], "cite_as"], *[[*row, citation] for row in rows[1:]]]
+    return "\n".join(",".join(_csv_cell(value) for value in row) for row in result)

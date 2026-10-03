@@ -56,8 +56,10 @@
  * drawn.
  */
 
+import { parseCsv, csvCell } from "./csv.js";
 import manifest from "../../../data/cedar/collections.manifest.json" with { type: "json" };
 import published from "../../../data/cedar/samples.published.json" with { type: "json" };
+import previewCodebook from "../../../data/cedar/codebook.json" with { type: "json" };
 
 import { CLAIM_CLASS } from "./claims.js";
 // The storefront's own naming. `pressCatalog.js` imports nothing, so this is
@@ -153,7 +155,8 @@ function unpublishedReason(table) {
 }
 
 /** A collection's sample, or the same entry marked unpublished with a reason. */
-function withPublication(sample) {
+function withPublication(sample, hold = null) {
+  if (hold) return { ...(sample ?? {}), path: null, unavailable_because: hold.message };
   if (!sample?.path || !UNPUBLISHED.has(sample.path)) return sample;
   const { path, ...rest } = sample;
   return { ...rest, path: null, unpublished_path: path,
@@ -161,19 +164,29 @@ function withPublication(sample) {
 }
 
 /** A table entry, or the same entry with its sample marked unpublished. */
-function tableWithPublication(table) {
+function tableWithPublication(table, hold = null) {
+  if (hold) return { ...table, sample_path: null, sample_withheld_why: hold.message };
   if (!table.sample_path || !UNPUBLISHED.has(table.sample_path)) return table;
   return { ...table, sample_path: null, sample_unpublished: table.sample_path };
 }
 
+const PUBLICATION_HOLDS = deepFreeze(Object.fromEntries(
+  manifest.collections.filter((entry) => entry.publication_hold)
+    .map((entry) => [entry.id, entry.publication_hold]),
+));
+
+export function collectionPublicationHold(datasetId) {
+  return PUBLICATION_HOLDS[datasetId] ?? null;
+}
+
 const SAMPLES = deepFreeze(
   Object.fromEntries(
-    manifest.collections.map((entry) => [entry.id, withPublication(entry.sample)]),
+    manifest.collections.map((entry) => [entry.id, withPublication(entry.sample, entry.publication_hold)]),
   ),
 );
 const TABLES = deepFreeze(
   Object.fromEntries(
-    manifest.collections.map((entry) => [entry.id, entry.tables.map(tableWithPublication)]),
+    manifest.collections.map((entry) => [entry.id, entry.tables.map((table) => tableWithPublication(table, entry.publication_hold))]),
   ),
 );
 
@@ -238,6 +251,7 @@ export function collectionDeclaredSample(datasetId) {
  * instead of reporting the collection missing.
  */
 export function sampleUnavailableReason(datasetId) {
+  if (collectionPublicationHold(datasetId)) return collectionPublicationHold(datasetId).message;
   return SAMPLES[datasetId]?.unavailable_because ?? null;
 }
 
@@ -269,9 +283,8 @@ export function collectionShort(dataset) {
 
 /** One line for the context strip: versions and the latest refresh date. */
 export function collectionContextLine() {
-  const versions = LAUNCH_COLLECTION.map((d) => `${collectionShort(d)} ${d.version}`).join(" · ");
   const updated = LAUNCH_COLLECTION.map((d) => d.updated).sort().slice(-1)[0];
-  return `${versions} · all current as of ${updated}`;
+  return `Updated ${updated}`;
 }
 
 /**
@@ -294,7 +307,7 @@ export function collectionContextLine() {
 export function collectionFindings() {
   const basis = (datasetId, detail) => {
     const dataset = LAUNCH_COLLECTION.find((item) => item.id === datasetId);
-    return `${collectionShort(dataset) ?? datasetId} ${dataset?.version ?? "v0"}, ${detail}`;
+    return `${collectionShort(dataset) ?? datasetId}, ${detail}`;
   };
 
   const supported = [
@@ -330,37 +343,59 @@ export function collectionFindings() {
     },
   ];
 
+  const availabilityNeeds = LAUNCH_COLLECTION.flatMap((dataset) => {
+    const facts = collectionCedarFacts(dataset.id);
+    const sample = collectionSample(dataset.id);
+    const missing = [];
+    if (!Number.isSafeInteger(facts?.n_rows) || facts.n_rows < 0) {
+      missing.push("The current release does not state a row count.");
+    }
+    if (!sample?.path) {
+      missing.push(sampleUnavailableReason(dataset.id) || "No preview file is published for the current release.");
+    }
+    return missing.length ? [{
+      id: `col-need-${dataset.id}-availability`,
+      text: `${dataset.name}: ${missing.join(" ")}`,
+      demonstration: false,
+    }] : [];
+  });
+  const withoutVintage = LAUNCH_COLLECTION.filter(
+    (dataset) => typeof dataset.vintage !== "string" || !dataset.vintage.trim(),
+  );
+  const vintageNeeds = withoutVintage.length ? [{
+    id: "col-need-vintage",
+    text: (withoutVintage.length === LAUNCH_COLLECTION.length
+      ? "No collection states a vintage."
+      : `A collection vintage is not stated for: ${withoutVintage.map((dataset) => dataset.name).join("; ")}.`)
+      + " An update date does not establish the periods covered by every source.",
+    demonstration: false,
+  }] : [];
+
   const needs = [
     {
       id: "col-need-closing",
-      text: "Three large announced deals await closing confirmation before they enter totals (Deals, primary source pending).",
+      text: "Demonstration: Three large announced deals await closing confirmation before they enter totals (Deals, primary source pending).",
+      demonstration: true,
     },
     {
       id: "col-need-fy26",
-      text: "FY2026 assistance figures are partial until the Q1 release lands (Funding, USAspending publication lag).",
+      text: "Demonstration: FY2026 assistance figures are partial until the Q1 release lands (Funding, USAspending publication lag).",
+      demonstration: true,
     },
     {
       id: "col-need-matches",
-      text: "Two parent-entity matches are provisional pending SAM re-registration (Contractors, entity resolution queue).",
+      text: "Demonstration: Two parent-entity matches are provisional pending SAM re-registration (Contractors, entity resolution queue).",
+      demonstration: true,
     },
-    {
-      id: "col-need-owned-terms",
-      text: "White Earth listings enter entity rows once the nation confirms publication terms; aggregates only until then (Owned, consent pending).",
-    },
-    {
-      id: "col-need-owned-membership",
-      text: "Native-Owned Businesses publishes no row count and no preview file: the table Cedar names as the collection's flagship is not one its collection contract claims, and the two memberships have not been reconciled (Owned, collection membership unresolved).",
-    },
-    {
-      id: "col-need-vintage",
-      text: "No collection states a vintage: Cedar's cadence measurement produced no newest-held period for any of them, so the field is absent rather than estimated.",
-    },
+    ...availabilityNeeds,
+    ...vintageNeeds,
   ];
 
   const narratives = [
     {
       id: "col-lead-energy",
-      name: "Energy project financing expansion",
+      name: "Demonstration: Energy project financing expansion",
+      demonstration: true,
       have: 3,
       need: 3,
       missing: [],
@@ -368,7 +403,8 @@ export function collectionFindings() {
     },
     {
       id: "col-lead-8a",
-      name: "8(a) participation and award growth",
+      name: "Demonstration: 8(a) participation and award growth",
+      demonstration: true,
       have: 3,
       need: 3,
       missing: [],
@@ -376,7 +412,8 @@ export function collectionFindings() {
     },
     {
       id: "col-lead-assist",
-      name: "Assistance shifts under new appropriations",
+      name: "Demonstration: Assistance shifts under new appropriations",
+      demonstration: true,
       have: 2,
       need: 3,
       missing: ["Q1 release"],
@@ -390,7 +427,7 @@ export function collectionFindings() {
 /** A figure's basis line, derived so it cannot name a stale version. */
 function basisFor(datasetId, fallback) {
   const dataset = LAUNCH_COLLECTION.find((item) => item.id === datasetId);
-  return dataset ? `${collectionShort(dataset)} ${dataset.version}` : fallback;
+  return dataset ? `${collectionShort(dataset)}, updated ${dataset.updated}` : fallback;
 }
 
 /**
@@ -505,35 +542,12 @@ export function figuresInShelfOrder() {
 export function collectionCitation(datasetId, accessedOn = null) {
   const dataset = LAUNCH_COLLECTION.find((item) => item.id === datasetId);
   if (!dataset) return null;
-  const vintage = dataset.vintage ? `, vintage ${dataset.vintage}` : "";
+  const updated = dataset.updated ? ` Updated ${dataset.updated}.` : "";
   const accessed = accessedOn ? ` Accessed ${accessedOn}.` : "";
   return (
-    `Lumecon, "${dataset.name}" (${dataset.version}${vintage}), ` +
-    `Cedar Press collection, cedarpress.ai.${accessed}`
+    `Lumecon, "${dataset.name}", ` +
+    `Cedar Press collection, cedarpress.ai.${updated}${accessed}`
   );
-}
-
-// One CSV cell, quoted only when the value needs it, so ordinary cells stay
-// byte-identical to what they were before quoting existed.
-function csvCell(value) {
-  const text = String(value ?? "");
-  return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
-}
-
-/**
- * The number of columns in a CSV header line, respecting quoted cells.
- *
- * A header like `a,"b,c",d` is three columns, not four, and the citation row
- * has to be padded to the real width or the file is ragged.
- */
-function columnCount(headerLine) {
-  let count = 1;
-  let quoted = false;
-  for (const character of headerLine) {
-    if (character === '"') quoted = !quoted;
-    else if (character === "," && !quoted) count += 1;
-  }
-  return count;
 }
 
 /**
@@ -549,7 +563,7 @@ function columnCount(headerLine) {
  * the rows a tile promises is the failure this avoids, and `hasReleaseFile` in
  * pressDownload.js reads this to keep the tile honest.
  *
- * The last row is the citation. A downloaded file outlives the page it came
+ * The citation is a column on each observation, never an extra data row. A downloaded file outlives the page it came
  * from, so the file itself must say what it is, whose work it is and how to
  * credit it; provenance that lives only in the UI is provenance the reader
  * loses on save.
@@ -560,12 +574,27 @@ function columnCount(headerLine) {
  * page for a button most readers never press.
  */
 export function collectionCsv(datasetId, sampleText) {
+  if (collectionPublicationHold(datasetId)) return null;
   const sample = SAMPLES[datasetId];
   if (!sample?.path || sampleText == null) return null;
-  const lines = sampleText.replace(/\r\n/g, "\n").replace(/\n+$/, "").split("\n");
-  const width = columnCount(lines[0]);
-  const citation = ["cite_as", collectionCitation(datasetId) ?? "", ...Array(Math.max(0, width - 2)).fill("")];
-  return [...lines, citation.map(csvCell).join(",")].join("\n");
+  const { columns, rows } = parseCsv(sampleText);
+  if (sample.path.endsWith("/spreadsheet__10.csv")) {
+    // The current release replaces historical previews. A cached response
+    // with the old schema must not acquire a citation for the new release.
+    const table = sample.table;
+    const key = typeof table === "string" && table.endsWith(".csv")
+      ? `${datasetId}/${table.slice(0, -4)}` : null;
+    const expected = previewCodebook.tables[key]?.fields?.map((field) => field.column);
+    if (!expected || columns.length !== expected.length
+        || expected.length !== sample.columns
+        || columns.some((column, index) => column !== expected[index])
+        || rows.length !== sample.rows) return null;
+  }
+  const citation = collectionCitation(datasetId) ?? "";
+  return [
+    [...columns, "cite_as"],
+    ...rows.map((row) => [...columns.map((name) => row[name]), citation]),
+  ].map((row) => row.map(csvCell).join(",")).join("\n");
 }
 
 /**
@@ -576,10 +605,49 @@ export function collectionCsv(datasetId, sampleText) {
  * this answers from the manifest alone.
  */
 export function hasSample(datasetId) {
-  return Boolean(SAMPLES[datasetId]?.path);
+  return !collectionPublicationHold(datasetId) && Boolean(SAMPLES[datasetId]?.path);
 }
 
 /** Where the browser fetches a collection's preview file, or `null`. */
 export function samplePath(datasetId) {
-  return SAMPLES[datasetId]?.path ?? null;
+  return collectionPublicationHold(datasetId) ? null : SAMPLES[datasetId]?.path ?? null;
+}
+
+/**
+ * Validate the public manifest binding for NEED's reviewed finite component,
+ * then compare the fetched CSV bytes. The private proof envelope stays off
+ * the client; staging verifies it before publishing this digest.
+ */
+export async function reviewedPreviewTextMatches(sampleText, sample, proof) {
+  const sha256 = (value) => typeof value === "string" && /^[a-f0-9]{64}$/.test(value);
+  if (typeof sampleText !== "string"
+      || sample?.table !== "need.csv"
+      || sample?.path !== "/data/cedar/samples/need/spreadsheet__10.csv"
+      || proof?.component !== "reviewed_public_base"
+      || proof?.envelope !== "data/cedar/need-reviewed-preview.json"
+      || !sha256(proof?.envelope_sha256)
+      || !sha256(proof?.sample_sha256)
+      || !sha256(sample?.release_id) || sample.release_id !== proof?.release_id
+      || !sha256(sample?.manifest_sha256) || sample.manifest_sha256 !== proof?.manifest_sha256
+      || !Number.isSafeInteger(proof?.public_records) || proof.public_records <= 0
+      || proof.public_records !== sample?.of
+      || !Number.isSafeInteger(sample?.rows) || sample.rows <= 0 || sample.rows > sample.of
+      || !Number.isSafeInteger(sample?.columns) || sample.columns <= 0) return false;
+  try {
+    const subtle = globalThis.crypto?.subtle;
+    if (!subtle) return false;
+    const bytes = new TextEncoder().encode(sampleText);
+    const digest = await subtle.digest("SHA-256", bytes);
+    const actual = Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
+    return actual === proof.sample_sha256;
+  } catch {
+    return false;
+  }
+}
+
+/** Exact-byte verification is required for NEED's reviewed public component. */
+export async function sampleTextMatchesRelease(datasetId, sampleText) {
+  if (datasetId !== "need") return true;
+  const proof = manifest.collections.find((entry) => entry.id === datasetId)?.verified_preview;
+  return reviewedPreviewTextMatches(sampleText, SAMPLES[datasetId], proof);
 }

@@ -18,7 +18,7 @@
 
 /** The release an answer was read from, as a person would name it. */
 export function releaseOf(basis) {
-  return [basis?.collectionName, basis?.version].filter(Boolean).join(" ");
+  return basis?.collectionName ?? "";
 }
 
 /**

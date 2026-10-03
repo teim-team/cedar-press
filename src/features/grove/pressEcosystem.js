@@ -12,7 +12,7 @@
 // KEYED BY CATALOG ID
 // The ring used to be a list of ten display names typed here, and it drifted
 // from the catalog twice: it carried Gaming after the storefront stopped
-// selling it, and never gained Subcontracting, Native-Owned Businesses or
+// selling it, and never gained Subcontracting, Individual Native-Owned Businesses or
 // NEED after they arrived. It is keyed by collection id now, the labels come
 // from the catalog's own short names, and a test requires every storefront
 // collection to be on the ring. The name-keyed RING, SOURCES and FEEDS the

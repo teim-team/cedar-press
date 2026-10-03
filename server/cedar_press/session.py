@@ -1,20 +1,13 @@
-"""Who is signed in.
+"""Signed subscriber sessions backed by the existing subscriber store.
 
-Subscriptions are sold and renewed by Tribal Business News, so accounts are
-provisioned rather than self-served: this verifies a subscriber, it never
-creates one. The account list is a stand-in for the subscriber table and is
-read from the environment, so no credential is committed to the repository
-and a deployment without one authenticates nobody.
+PostgreSQL deployments persist accounts and account-wide session revocation.
+Logout advances the subscriber's existing updated_at revision, invalidating all
+sessions for that account without adding a session table. Preview mode remains
+process-local; it is not evidence of durable authentication.
 
-The session rides in a signed, HTTP-only cookie. Not browser storage: a token
-in storage is a token any script on the page can read, and this service's
-readers are exactly the people whose interest in Indian Country's economy is
-worth knowing about.
-
-WHAT REPLACES THIS
-The subscriber table and the platform's own password hashing. The seam is
-``_lookup``: everything else here — the cookie, its flags, the payload shape
-the client reads — stays.
+Cookies expire on the server as well as in the browser. Every request reads the
+current subscriber and tier, and legacy cookies without lifecycle claims are
+refused. No password hash or database revision is exposed in a cookie.
 """
 
 from __future__ import annotations
@@ -22,20 +15,18 @@ from __future__ import annotations
 import hmac
 import json
 import os
-from base64 import urlsafe_b64decode, urlsafe_b64encode
-from dataclasses import dataclass
+import time
+from base64 import b64decode, urlsafe_b64encode
+from dataclasses import dataclass, field
 from hashlib import sha256
 
-from fastapi import Cookie, Response
+from fastapi import Cookie, HTTPException, Response
 
 from cedar_press import subscribers
 
 COOKIE = "cedar_press_session"
 MAX_AGE = 60 * 60 * 24 * 14
-
-#: Signing key for the session cookie. A deployment without one signs with a
-#: value that changes on restart, which invalidates every session rather than
-#: silently accepting cookies anyone could forge.
+_CLOCK_SKEW = 60
 _SECRET = os.environ.get("CEDAR_PRESS_SECRET") or os.urandom(32).hex()
 
 
@@ -43,106 +34,96 @@ _SECRET = os.environ.get("CEDAR_PRESS_SECRET") or os.urandom(32).hex()
 class Session:
     email: str
     tier: str
+    revision: str = field(default="", compare=False, repr=False)
 
     def as_payload(self) -> dict[str, object]:
-        """The session as the client reads it.
-
-        ``workspace_tier`` rather than ``tier`` because that is the field
-        ``src/workspaceTier.js`` resolves entitlement from, and renaming it
-        here would put a translation in every caller.
-        """
         return {"email": self.email, "workspace_tier": self.tier}
 
 
-def _accounts() -> dict[str, tuple[str, str]]:
-    """Provisioned subscribers, as ``email -> (password, tier)``.
-
-    From ``CEDAR_PRESS_ACCOUNTS``, a JSON object::
-
-        {"reader@example.org": {"password": "...", "tier": "press"}}
-
-    Empty by default, so a service started without accounts refuses every
-    sign-in instead of falling back to something convenient.
-    """
-    raw = os.environ.get("CEDAR_PRESS_ACCOUNTS", "").strip()
-    if not raw:
-        return {}
-    try:
-        parsed = json.loads(raw)
-    except json.JSONDecodeError:
-        return {}
-    accounts: dict[str, tuple[str, str]] = {}
-    for email, record in parsed.items():
-        if isinstance(record, dict) and record.get("password"):
-            accounts[email.strip().lower()] = (
-                str(record["password"]),
-                str(record.get("tier", "press")),
-            )
-    return accounts
-
-
 def account_id_for(email: str) -> str:
-    """The SUBSCRIPTION an address belongs to, for Shape the Research.
-
-    Two seats naming one account share one ledger: the organization earns its
-    points once a month, not once per seat, and the priorities page counts
-    subscriptions rather than people.
-
-    THIS READ THE ENVIRONMENT AND ONLY THE ENVIRONMENT, AND THAT WAS A BUG
-    WITH A DATABASE UNDER IT. `subscribers` learned to answer from
-    `cedar_press_subscribers.account_id`; this did not, so on a Postgres
-    deployment every seat of an organization came back as its own email.
-    Every points route builds its `Account` from this, so two seats of one
-    subscription earned two monthly credits, spent from two ledgers, and were
-    counted as two organizations behind a priority — which is the one thing
-    the page's own copy promises it does not do.
-
-    One function, one answer: `subscribers.account_id_for` knows both
-    backends and this is the name the rest of the service already calls.
-    """
     return subscribers.account_id_for(email)
 
 
 def account_exists(email: str) -> bool:
-    """Whether an address already has an account, provisioned or activated.
-
-    Delegated for the same reason as above: this decided whether activation
-    may proceed, and it could not see a `cedar_press_subscribers` row at all.
-    """
     return subscribers.exists(email)
 
 
 def create_account(email: str, password: str, tier: str) -> Session:
-    """Create a subscriber. The caller has already verified the access code.
-
-    No entitlement decision is made here: the code carried the tier, and this
-    records it. Doing it the other way round — letting a caller name a tier —
-    is how an activation route becomes an escalation route.
-
-    The row goes wherever `subscribers` keeps them: a table when this
-    deployment has a `DATABASE_URL`, and the process-local dict below when it
-    does not. That dict is why this module used to say it held "the one
-    behaviour here that must not survive into production".
-    """
+    """Internal activation helper; the caller must already verify its code."""
     made = subscribers.create(email, password, tier)
-    return Session(email=made.email, tier=made.tier)
+    return _issued_session(made.email)
 
 
 def forget_activated_for_tests() -> None:
-    """Drop accounts created by activation. Tests only."""
     subscribers.forget_activated_for_tests()
 
 
-def _lookup(email: str, password: str) -> Session | None:
-    """Verify a subscriber. The seam the subscriber table now fills.
+def validate_auth_configuration() -> None:
+    """Reject ephemeral authentication for staging/production before use."""
+    environment = os.environ.get("CEDAR_PRESS_ENVIRONMENT", "development")
+    if environment == "development":
+        return
+    configured_secret = os.environ.get("CEDAR_PRESS_SECRET", "")
+    database = os.environ.get("DATABASE_URL", "").strip()
+    if (
+        environment not in {"staging", "production"}
+        or len(configured_secret) < 32
+        or not hmac.compare_digest(configured_secret.encode("utf-8"), _SECRET.encode("utf-8"))
+        or not database.startswith(("postgresql://", "postgres://"))
+        or os.environ.get("CEDAR_PRESS_INSECURE_COOKIE") == "1"
+        or bool(os.environ.get("CEDAR_PRESS_ACCOUNTS", "").strip())
+    ):
+        raise HTTPException(
+            status_code=503,
+            detail={
+                "code": "AUTH_CONFIGURATION_REQUIRED",
+                "message": "Sign-in is temporarily unavailable.",
+            },
+        )
 
-    This is the sentence that used to read "the seam the subscriber table
-    replaces", written when there was no table. There is one; `subscribers`
-    owns it, and both of its backends compare in constant time so the answer
-    does not leak through how long it took.
-    """
+
+def _revision(subscriber: subscribers.Subscriber) -> str:
+    # Password and account changes invalidate a token even if an external
+    # account writer forgot to advance updated_at. The tier is read afresh,
+    # never trusted from the cookie; unversioned downgrades apply immediately.
+    material = json.dumps(
+        [
+            "cedar-press-account-session-v2",
+            subscriber.email,
+            subscriber.account_id,
+            subscriber.password_hash,
+            subscriber.session_revision,
+        ],
+        separators=(",", ":"),
+    ).encode("utf-8")
+    return hmac.new(_SECRET.encode("utf-8"), material, sha256).hexdigest()
+
+
+def _issued_session(email: str) -> Session:
+    found = subscribers.find(email)
+    if found is None or found.tier not in subscribers.TIERS:
+        raise ValueError("Subscriber is no longer available")
+    return Session(found.email, found.tier, _revision(found))
+
+
+def _lookup(email: str, password: str) -> Session | None:
+    validate_auth_configuration()
     found = subscribers.authenticate(email, password)
-    return Session(email=found.email, tier=found.tier) if found else None
+    if found is None:
+        return None
+    # Linking updates the subscriber revision. It must finish before issuing
+    # the token, not after the login route has already set its cookie.
+    subscribers.link_platform_account(found.email)
+    current = subscribers.find(found.email)
+    if (
+        current is None
+        or current.tier not in subscribers.TIERS
+        or current.password_hash != found.password_hash
+    ):
+        # A password reset racing the link step must not bless an old password
+        # with the new revision. A later revision change invalidates normally.
+        return None
+    return Session(current.email, current.tier, _revision(current))
 
 
 def _sign(payload: bytes) -> str:
@@ -151,46 +132,76 @@ def _sign(payload: bytes) -> str:
 
 
 def _encode(session: Session) -> str:
-    payload = json.dumps({"email": session.email, "tier": session.tier}).encode("utf-8")
+    if not session.revision:
+        # Internal trusted issuance helpers still resolve the actual account.
+        session = _issued_session(session.email)
+    issued = int(time.time())
+    payload = json.dumps(
+        {
+            "v": 2,
+            "email": session.email,
+            "iat": issued,
+            "exp": issued + MAX_AGE,
+            "rev": session.revision,
+        },
+        separators=(",", ":"),
+    ).encode("utf-8")
     body = urlsafe_b64encode(payload).decode("ascii").rstrip("=")
     return f"{body}.{_sign(payload)}"
 
 
 def _decode(value: str) -> Session | None:
+    if not isinstance(value, str) or len(value) > 4096:
+        return None
     try:
         body, signature = value.split(".", 1)
-    except ValueError:
-        return None
-    padded = body + "=" * (-len(body) % 4)
-    try:
-        payload = urlsafe_b64decode(padded)
-    except (ValueError, TypeError):
-        return None
-    # Verified before it is read: an unsigned cookie is attacker-supplied JSON.
-    if not hmac.compare_digest(_sign(payload), signature):
-        return None
-    try:
+        payload = b64decode(body + "=" * (-len(body) % 4), altchars=b"-_", validate=True)
+        if not hmac.compare_digest(_sign(payload), signature):
+            return None
         parsed = json.loads(payload)
-    except json.JSONDecodeError:
+    except (ValueError, TypeError, UnicodeError):
         return None
-    email, tier = parsed.get("email"), parsed.get("tier")
-    if not isinstance(email, str) or not isinstance(tier, str):
+    if not isinstance(parsed, dict) or type(parsed.get("v")) is not int or parsed["v"] != 2:
         return None
-    return Session(email=email, tier=tier)
+    email, issued, expires, revision = (
+        parsed.get("email"),
+        parsed.get("iat"),
+        parsed.get("exp"),
+        parsed.get("rev"),
+    )
+    if (
+        not isinstance(email, str)
+        or not email
+        or email != email.strip().lower()
+        or type(issued) is not int
+        or type(expires) is not int
+        or not isinstance(revision, str)
+        or len(revision) != 64
+        or not revision.isascii()
+    ):
+        return None
+    now = int(time.time())
+    if issued > now + _CLOCK_SKEW or expires - issued != MAX_AGE or now >= expires:
+        return None
+    found = subscribers.find(email)
+    if found is None or found.tier not in subscribers.TIERS:
+        return None
+    if not hmac.compare_digest(_revision(found), revision):
+        return None
+    return Session(found.email, found.tier, revision)
 
 
 def current_session(cedar_press_session: str | None = Cookie(default=None)) -> Session | None:
-    """The signed-in subscriber, or None. Never raises: routes decide."""
+    """Current subscriber and entitlement; malformed/expired sessions refuse."""
+    validate_auth_configuration()
     return _decode(cedar_press_session) if cedar_press_session else None
 
 
 def issue(session: Session, response: Response) -> Session:
-    """Put a signed session on the response. The activation route's way in.
-
-    Split out of ``sign_in`` so activation does not have to re-verify a
-    password it has just set, and so both paths set one cookie with one set
-    of flags rather than two that can drift.
-    """
+    """Internal trusted issuance; authentication belongs to the caller."""
+    validate_auth_configuration()
+    if not session.revision:
+        session = _issued_session(session.email)
     _set_cookie(session, response)
     return session
 
@@ -204,16 +215,27 @@ def sign_in(email: str, password: str, response: Response) -> Session | None:
 
 
 def _set_cookie(session: Session, response: Response) -> None:
+    secure = os.environ.get("CEDAR_PRESS_INSECURE_COOKIE") != "1"
     response.set_cookie(
         COOKIE,
         _encode(session),
         max_age=MAX_AGE,
         httponly=True,
-        secure=os.environ.get("CEDAR_PRESS_INSECURE_COOKIE") != "1",
-        samesite="none" if os.environ.get("CEDAR_PRESS_INSECURE_COOKIE") != "1" else "lax",
+        secure=secure,
+        samesite="none" if secure else "lax",
         path="/",
     )
 
 
-def sign_out(response: Response) -> None:
-    response.delete_cookie(COOKIE, path="/")
+def sign_out(response: Response, session: Session | None = None) -> None:
+    """Sign out this subscriber on every device; invalid cookies only clear."""
+    if session is not None:
+        subscribers.revoke_sessions(session.email)
+    secure = os.environ.get("CEDAR_PRESS_INSECURE_COOKIE") != "1"
+    response.delete_cookie(
+        COOKIE,
+        path="/",
+        httponly=True,
+        secure=secure,
+        samesite="none" if secure else "lax",
+    )

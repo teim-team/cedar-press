@@ -51,15 +51,19 @@ Every harvested row carries `consent_status = UNRESOLVED`, `publishable = N`
 and a `suppression_key`, exactly as `320`/`321` require. Flipping one field
 admits or removes a whole authority.
 
-PRIVACY - INHERITED, NOT INVENTED
----------------------------------
-`cedar_domain.INDIVIDUAL_NATIVE_WITHHELD_FIELDS` already reasoned this through
-for individually Native-owned firms: where the legal name IS a person's name,
-the name plus a locating identifier publishes a natural person, and
-`owner_name`, `street`, `recipient_city_name`, `dba_name` are withheld absent
-recorded consent. These lists are FULL of exactly that case - a TERO roster of
-sole proprietorships is a list of private individuals with their home addresses
-and mobile numbers.
+PRIVACY - THE CONTACT CHANNEL OF A NATURAL PERSON
+--------------------------------------------------
+This block used to cite `cedar_domain.INDIVIDUAL_NATIVE_WITHHELD_FIELDS` as
+its basis. The owner ruling of 2026-10-02 published that set for the firm
+register (a firm is a business entity whatever it is named after; its name,
+identifiers and business address are public business records), so that
+citation no longer carries this script's withholding. What this script keeps
+in staging stands on its own ground and is unchanged: a TERO roster of sole
+proprietorships prints private individuals' mobile numbers, personal e-mail
+addresses and home addresses, which are a natural person's contact channel,
+not a business registration. Whether `owner_name_raw`, `dba_name` and the
+business street address should now follow the firm register's ruling is a
+separate decision for the owner; nothing here is changed by this note.
 
 So the CLEAN table carries the certification FACT and the firm identity, and
 the CONTACT CHANNEL stays in staging:
@@ -2664,7 +2668,7 @@ DESCRIPTIONS = {
  "identity_scope": "WHOSE Native identity is certified, at the granularity the source states: enrolled_member_100pct, enrolled_member_51pct, enrolled_member_cskt, any_native, any_native_graded, tribally_owned_entity, parent_asserted_subsidiary, shareholder_descendant_or_spouse, vendor_relationship. These are not interchangeable.",
  "identity_claim_text": "The inclusion basis, quoted VERBATIM from the source (ADR-013). This is why the row is in Cedar at all.",
  "inclusion_basis": "ADR-013 standard vocabulary. Always 'program_authority' here: the row is present because a tribal or ANCSA programme certified or listed the firm.",
- "ownership_percent": "Numeric ownership share where the SOURCE prints one per record. Blank otherwise; blank is not zero.",
+ "ownership_percent": "Numeric ownership share where the SOURCE prints one per record, measured on the CERTIFIER'S OWN scope: the share owned by the certifying tribe's members, as the certifier reports it, not the Native ownership share overall. Tulalip's NAOB registry prints 'Tulalip Owned %' and certifies firms Native-owned through other tribes, so a row can legitimately read 0.0 (identity_claim_text: 'Tribe: Snoqualmie; Tulalip Owned: 0%'); that zero is the source's figure and is NOT a parser default. identity_scope says whose Native identity the listing certifies; this column is the certifier's stated share. Blank otherwise; blank is not zero.",
  "ownership_threshold_min": "Minimum ownership share the programme requires, where the programme states one. Sourced from the ordinance or statute when the list itself is silent, and the validation flag says which.",
  "verification_basis": "What the authority says it did - TERO_review, parent_corporation_publication, none_described_by_source. 'none_described_by_source' is a finding.",
  "certification_number": "The authority's certification or vendor number, where published. The only identifier in this dataset that joins a source to itself across vintages.",

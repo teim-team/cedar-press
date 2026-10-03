@@ -94,7 +94,7 @@ export const WORKSPACE_TIERS = Object.freeze({
     accessLabel: "Cedar Press, with part of the collection",
     features: Object.freeze([
       "The Research Briefs and the collection's figures",
-      "The collections on the Cedar Press shelf, with their methods and versions",
+      "The collections on the Cedar Press shelf, with their methods and updates",
       "The citation register",
       "Available only through a Tribal Business News access code",
     ]),
@@ -113,7 +113,7 @@ export const WORKSPACE_TIERS = Object.freeze({
       "Everything in Cedar Press",
       // No count typed here: the catalog states it (`pressCatalog.js`).
       "The Cedar Press+ collections: contracting, subcontracting, resource revenues, individually owned Native businesses, enterprise structures, nonprofits and parcel-level property records",
-      "Versioned releases with documented methods",
+      "Dated updates with documented methods",
     ]),
     setupFeatures: Object.freeze([
       "The datasets only Cedar Grove carries, with bulk export and benchmarks (Cedar Grove)",
@@ -143,7 +143,7 @@ export const WORKSPACE_TIERS = Object.freeze({
       "New economic development datasets as they release",
       "Cedar, grounded in the collection",
       "Learns your organization's workflows the longer you use it",
-      "Documented methods and versioned releases",
+      "Documented methods and dated updates",
       "Unlimited users in one organization",
       "Build platform analyses end to end; full results unlock on upgrade",
     ]),

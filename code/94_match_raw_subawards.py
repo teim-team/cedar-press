@@ -401,9 +401,8 @@ def build_row(r, kind, chunk, attribution, source_dataset):
     direction = DIR_BOTH if (pl and sl) else (DIR_B if sl else DIR_A)
 
     fy = (r.get("subaward_action_date_fiscal_year") or "").strip()
-    amt = m45.fnum(r.get("subaward_amount"))
-    pamt = m45.fnum(r.get("prime_award_amount"))
-    ratio, exceeds = m45.qc(amt, pamt)
+    # Raw reported values, not fnum(): a blank prime is unreported, not 0.0.
+    ratio, exceeds = m45.qc(r.get("subaward_amount"), r.get("prime_award_amount"))
 
     row = m45.blank_row()
     row.update({

@@ -35,21 +35,28 @@
 // null there must never be read as "try the table's own name column": the
 // row is marked withheld, the name column is masked in the table, the
 // record, the search and the export, and the sample that carried it is
-// struck by the importer before it becomes a public file.
+// struck by the importer before it becomes a public file. Since the owner
+// ruling of 2026-10-02 (code/cedar_domain.py: an individually Native-owned
+// firm is a business entity whatever it is named after, and its name is a
+// public business record) the register withholds no name, so this path
+// carries nothing today; it stays so a future withholding reads the same.
 //
 // A SAMPLE, SAID SO
 // Phase one runs over the ten-row samples the site already serves. Every
 // count the card states is a count of sample rows, and the caption says so.
 
+import { csvCell } from "./csv.js";
 import explore from "../../../data/cedar/explore.json" with { type: "json" };
 import codebookJson from "../../../data/cedar/codebook.json" with { type: "json" };
 import scopesJson from "../../../data/cedar/scopes.json" with { type: "json" };
 
-import { collectionCitation, collectionSample, collectionTables, sampleUnavailableReason } from "./collection.js";
+import { collectionCitation, collectionPublicationHold, collectionSample, collectionTables, sampleUnavailableReason } from "./collection.js";
 import { canOpenDataset } from "./pressAccess.js";
 import { recordStructure } from "./pressRecordStructure.js";
+import { safeSourceUrl, sourcePresentation } from "./sourcePresentation.js";
 import { PRESS_CATALOG_BY_ID, STOREFRONT_CATALOG } from "./pressCatalog.js";
 import { firstUrl } from "./readerValues.js";
+import { readerValueLabel } from "./readerPresentation.js";
 
 export const CONTRACTS = Object.freeze(explore.tables);
 
@@ -110,6 +117,7 @@ export function contractFor(key) {
  * dataset to a reader; the rest are supporting tables from the same release.
  */
 export function exploreTables(collectionId) {
+  if (collectionPublicationHold(collectionId)) return [];
   const flagship = collectionSample(collectionId)?.path ?? null;
   const tables = collectionTables(collectionId)
     .filter((table) => table.sample_path)
@@ -138,9 +146,8 @@ export function flagshipKey(collectionId) {
 export function explorableCollections(user) {
   return STOREFRONT_CATALOG.map((entry) => {
     const tables = exploreTables(entry.id);
-    // A collection presented by its record structure (Foundation & Corporate
-    // Giving, PLOT) has no sample rows to preview and is not missing one:
-    // its viewer shows what each record holds instead.
+    // A record-structure guide can accompany an admitted sample. A guide alone
+    // also explains the schema when there is no sample to preview.
     const structure = recordStructure(entry.id);
     const flagship = tables.find((t) => t.flagship) ?? null;
     return {
@@ -161,53 +168,7 @@ export function explorableCollections(user) {
  * carries one, so a line-splitting reader would hand the card eleven rows and
  * a broken one. Every data row is a record; nothing is dropped.
  */
-export function parseCsv(text) {
-  const source = String(text ?? "").replace(/^\uFEFF/, "");
-  const rows = [];
-  let row = [];
-  let cell = "";
-  let quoted = false;
-  for (let i = 0; i < source.length; i += 1) {
-    const ch = source[i];
-    if (quoted) {
-      if (ch === '"' && source[i + 1] === '"') { cell += '"'; i += 1; }
-      else if (ch === '"') quoted = false;
-      else cell += ch;
-    } else if (ch === '"') quoted = true;
-    else if (ch === ",") { row.push(cell); cell = ""; }
-    else if (ch === "\n" || ch === "\r") {
-      if (ch === "\r" && source[i + 1] === "\n") i += 1;
-      row.push(cell);
-      rows.push(row);
-      row = [];
-      cell = "";
-    } else cell += ch;
-  }
-  if (cell.length || row.length) { row.push(cell); rows.push(row); }
-  const [columns = [], ...body] = rows;
-  const records = body
-    .filter((cells) => cells.length > 1 || (cells.length === 1 && cells[0] !== ""))
-    .map((cells) => Object.fromEntries(columns.map((name, i) => [name, cells[i] ?? ""])));
-  return { columns, rows: records };
-}
-
-/**
- * One CSV cell. Quoted when the value needs it. A cell that a spreadsheet
- * would read as a formula (leading =, +, @, or a - that does not start a
- * number) gets a leading apostrophe, the way OWASP describes: the file is
- * opened in Excel by most readers, and "-4163330" must stay a number while
- * "=HYPERLINK(...)" must stay text. Programmatic readers see the apostrophe
- * only on those cells, and the README says so.
- */
-const NUMBER = /^-?\s*(\d[\d,]*)?(\.\d+)?$/;
-
-export function csvCell(value) {
-  let text = String(value ?? "");
-  // A leading minus is exempt only when the WHOLE value is a number:
-  // "-1+HYPERLINK(...)" starts like one and is not (Codex, PR #63).
-  if (/^[=+@]/.test(text) || /^[\t\r]/.test(text) || (/^-/.test(text) && !NUMBER.test(text))) text = `'${text}`;
-  return /[",\n\r]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
-}
+export { parseCsv, csvCell } from "./csv.js";
 
 // ── The register ───────────────────────────────────────────────────────────
 
@@ -276,18 +237,46 @@ export function rowUids(row, contract) {
  * stays withheld whatever the table says.
  */
 export function rowEntities(row, contract, register = EMPTY_REGISTER) {
+  contract = contractForRow(row, contract);
   const uids = rowUids(row, contract);
   const ownName = cell(row, contract?.entity_name) || null;
   const ownType = cell(row, contract?.entity_type) || null;
-  const primary = uids.length
-    ? uids.map((uid, i) => {
-      const known = register.byUid.get(uid);
-      if (known) return { uid, name: known.withheld ? null : known.name, type: known.type, withheld: known.withheld, role: null };
-      // Unknown to the register: the table's own columns describe the first
-      // uid only; the rest are uids and nothing more.
-      return { uid, name: i === 0 ? ownName : null, type: i === 0 ? ownType : null, withheld: false, role: null };
-    })
-    : ownName ? [{ uid: null, name: ownName, type: ownType, withheld: false, role: null }] : [];
+  const names = contract?.entity_name_list ? listCell(ownName) : null;
+  const types = contract?.entity_type_list ? listCell(ownType) : null;
+  const rawRoles = cell(row, contract?.entity_role_column);
+  const roles = contract?.entity_role_list ? listCell(rawRoles) : null;
+  // Keep source positions until after all aligned values have been read:
+  // filtering null ids first would attach the next party's name or role.
+  const positions = contract?.entity_uid_list
+    ? listCell(cell(row, contract?.entity_uid))
+    : uids;
+  const primary = [];
+  const seen = new Map();
+  positions.forEach((uid, index) => {
+    if (!UID.test(uid)) return;
+    const role = (roles ? roles[index] : rawRoles) || contract?.entity_role || null;
+    const existing = seen.get(uid);
+    if (existing) {
+      if (role && role !== existing.role && !(existing.roles ?? []).includes(role)) {
+        existing.roles = [...(existing.roles ?? []), role];
+      }
+      return;
+    }
+    const known = register.byUid.get(uid);
+    const entry = known
+      ? { uid, name: known.withheld ? null : known.name, type: known.type, withheld: known.withheld, role }
+      : {
+        uid,
+        name: names ? names[index] || null : index === 0 ? ownName : null,
+        type: types ? types[index] || null : index === 0 ? ownType : null,
+        withheld: false, role,
+      };
+    seen.set(uid, entry);
+    primary.push(entry);
+  });
+  if (!primary.length && ownName && !contract?.entity_name_list) {
+    primary.push({ uid: null, name: ownName, type: ownType, withheld: false, role: rawRoles || contract?.entity_role || null });
+  }
   // THE OTHER ROLES. A subaward names the prime's owner and the sub's; a
   // NAGPRA notice names who was consulted and who receives; a payment names
   // a beneficiary. The contract declares those columns with their roles, and
@@ -442,7 +431,19 @@ export function rowEntity(row, contract, register = EMPTY_REGISTER) {
  * are different time bases. A table with no year column answers from the
  * date's calendar year, and the contract's `year_basis` says so.
  */
+
+/** Component-qualified meanings apply only to their declared record type. */
+function contractForRow(row, contract) {
+  if (!contract?.row_type_contracts) return contract;
+  const own = contract.row_type_contracts[cell(row, contract.record_type)];
+  // Unknown record kinds must not borrow another component's source or dates.
+  return own
+    ? { ...contract, ...own, row_type_contracts: null }
+    : { ...contract, source: null, source_fallback: null, source_builder: null, source_fields: {}, subject: null, entity_uid: null, entity_name: null, entity_type: null, entity_role_column: null, entity_roles: [], observation: [], amount: null, amount_basis: null, amount_lower: null, amount_upper: null, date: null, year: null, row_type_contracts: null };
+}
+
 export function rowYear(row, contract) {
+  contract = contractForRow(row, contract);
   if (contract?.year) {
     const year = cell(row, contract.year);
     return /^\d{4}(\.0+)?$/.test(year) ? Number.parseInt(year, 10) : null;
@@ -454,6 +455,7 @@ export function rowYear(row, contract) {
 
 /** The row's date, to the day where the table has one, else its year. */
 export function rowDate(row, contract) {
+  contract = contractForRow(row, contract);
   const date = cell(row, contract?.date);
   const day = /^(\d{4}-\d{2}-\d{2})/.exec(date);
   if (day) return day[1];
@@ -462,6 +464,8 @@ export function rowDate(row, contract) {
 }
 
 export function rowAmount(row, contract) {
+  contract = contractForRow(row, contract);
+  if (cell(row, contract?.amount_class).toLowerCase() === "range") return null;
   if (!contract?.amount) return null;
   const raw = cell(row, contract.amount).replace(/[$,\s]/g, "");
   if (raw === "") return null;
@@ -470,8 +474,28 @@ export function rowAmount(row, contract) {
 }
 
 /** What the amount is: the row's own basis column, else the declared label. */
-export function rowAmountBasis(row, contract) {
-  return cell(row, contract?.amount_basis) || contract?.amount_label || null;
+export function rowAmountBasis(row, contract, collection = null) {
+  contract = contractForRow(row, contract);
+  const qualifiers = [contract?.amount_basis, ...(contract?.amount_qualifiers ?? [])].filter(Boolean).map((field) => readerValueLabel(collection, field.split("__").at(-1), cell(row, field))).filter(Boolean);
+  return [...new Set(qualifiers)].join(" · ") || contract?.amount_label || null;
+}
+
+/** Bounds remain bounds. An umbrella/program total is never a recipient amount. */
+export function rowAmountRange(row, contract) {
+  contract = contractForRow(row, contract);
+  if (cell(row, contract?.amount_class).toLowerCase() !== "range") return null;
+  const number = (field) => {
+    const value = cell(row, field).replace(/[$,\s]/g, "");
+    return value && Number.isFinite(Number(value)) ? Number(value) : null;
+  };
+  const lower = number(contract?.amount_lower), upper = number(contract?.amount_upper);
+  return lower == null && upper == null ? null : { lower, upper };
+}
+
+function sourceRow(row, contract) {
+  return contract?.source_fields
+    ? Object.fromEntries(Object.entries(contract.source_fields).map(([field, column]) => [field, row[column]]))
+    : row;
 }
 
 const ORDINAL = (n) => {
@@ -547,12 +571,15 @@ export const SOURCE_BUILDER_KINDS = Object.freeze([
  * is the link and the rest stays in the record as data.
  */
 export function rowSource(row, contract) {
-  return firstUrl(cell(row, contract?.source)) ?? builtSource(row, contract);
+  contract = contractForRow(row, contract);
+  return safeSourceUrl(firstUrl(cell(row, contract?.source)))
+    ?? safeSourceUrl(firstUrl(cell(row, contract?.source_fallback)))
+    ?? safeSourceUrl(builtSource(row, contract));
 }
 
 /** Whether the table says where a record's link comes from at all. */
 export function declaresSource(contract) {
-  return Boolean(contract?.source || contract?.source_builder);
+  return Boolean(contract?.source || contract?.source_builder || Object.values(contract?.row_type_contracts ?? {}).some(declaresSource));
 }
 
 /**
@@ -595,11 +622,30 @@ const OBSERVATION_LIMIT = 180;
  * most telling first. Values, not labels; pipes are the collections' own
  * list separator. The full record is one click away, so this stops at 180.
  */
-export function observationOf(row, contract) {
+export function observationOf(row, contract, collection = null) {
+  contract = contractForRow(row, contract);
   const parts = [];
+  const reviewedOwnership = collection === "need" && cell(row, "relationship_type") === "owned_by" && cell(row, "ownership_extent") === "wholly_owned" && cell(row, "owner_name");
+  if (reviewedOwnership) {
+    parts.push(`Wholly owned by ${cell(row, "owner_name")}${cell(row, "owner_scope") === "immediate" ? " (immediate owner)" : ""}`);
+  }
   for (const column of contract?.observation ?? []) {
-    const value = cell(row, column).replace(/\s*\|\s*/g, ", ").replace(/\s+/g, " ");
+    if (reviewedOwnership && (["owner_name", "ownership_extent", "relationship_type"].includes(column) ||
+        (column === "related_entity_name" && cell(row, column) === cell(row, "owner_name")))) continue;
+    const sourceField = Object.entries(contract?.source_fields ?? {}).find(([, target]) => target === column)?.[0] ?? column;
+    const value = readerValueLabel(collection, sourceField, cell(row, column)).replace(/\s*\|\s*/g, ", ").replace(/\s+/g, " ");
     if (value && !parts.includes(value)) parts.push(value);
+  }
+  // A reviewed NEED row may support identity only. Preserve that distinction
+  // rather than inventing an owner or displaying an empty observation.
+  if (collection === "need" && parts.length === 0) {
+    for (const [label, column] of [["UEI", "uei"], ["CAGE", "cage_code"]]) {
+      const value = cell(row, column);
+      if (value) parts.push(`${label}: ${value}`);
+    }
+    if (parts.length === 0 && cell(row, "enterprise_name")) {
+      parts.push(`Enterprise name: ${cell(row, "enterprise_name")}`);
+    }
   }
   const line = parts.join(" · ");
   return line.length > OBSERVATION_LIMIT ? `${line.slice(0, OBSERVATION_LIMIT - 1).trimEnd()}…` : line;
@@ -611,7 +657,15 @@ export function observationOf(row, contract) {
  * and the download all read the masked row and never the raw one.
  */
 export function publicRow(row, contract, entity) {
-  if (!entity?.withheld || !contract?.entity_name) return row;
+  if (!contract?.entity_name) return row;
+  if (contract.entity_name_list) {
+    const withheld = new Set((entity?.entities ?? []).filter(e => e.withheld).map(e => e.uid));
+    if (!withheld.size) return row;
+    const ids = listCell(cell(row, contract.entity_uid));
+    const names = listCell(cell(row, contract.entity_name));
+    return { ...row, [contract.entity_name]: JSON.stringify(names.map((name, i) => withheld.has(ids[i]) ? WITHHELD_TEXT : name)) };
+  }
+  if (!entity?.withheld) return row;
   return { ...row, [contract.entity_name]: WITHHELD_TEXT };
 }
 
@@ -622,17 +676,23 @@ export const WITHHELD_TEXT = "[name withheld]";
  * record's own id, so a row can be cited and found again in the release;
  * the position is the fallback for a table with no id column.
  */
-export function universalRows(key, rows, register = EMPTY_REGISTER) {
-  const contract = contractFor(key);
+export function universalRows(key, rows, register = EMPTY_REGISTER, contract = contractFor(key)) {
   const [collection] = key.split("/");
   return rows.map((raw, i) => {
-    const entity = rowEntity(raw, contract, register);
-    const row = publicRow(raw, contract, entity);
-    const recordId = rowRecordId(row, contract);
-    const subject = cell(row, contract?.subject) || null;
+    const own = contractForRow(raw, contract);
+    const entity = rowEntity(raw, own, register);
+    let row = publicRow(raw, own, entity);
+    const subjectColumns = own?.subject_candidates ?? (own?.subject ? [own.subject] : []);
+    if (entity.withheld && own?.subject_entity_role === "recipient") {
+      row = { ...row, ...Object.fromEntries(subjectColumns.map(column => [column, WITHHELD_TEXT])) };
+    }
+    const recordId = rowRecordId(row, own);
+    const recordType = contract?.record_type ? cell(row, contract.record_type) : null;
+    const subject = subjectColumns.map(column => cell(row, column)).find(Boolean) || null;
     return {
-      id: recordId ? `${key}:${recordId}` : `${key}#${i}`,
+      id: recordId ? `${key}:${recordType === null ? "" : `${recordType}:`}${recordId}` : `${key}#${i}`,
       recordId,
+      recordType,
       // The row's position in this table's published sample. It is how the
       // record page addresses a row whose table declares no id column, so it
       // is the FILE's order and never a filtered or sorted one.
@@ -645,12 +705,15 @@ export function universalRows(key, rows, register = EMPTY_REGISTER) {
       subject: subject && subject.toLowerCase() !== (entity.name ?? "").toLowerCase() ? subject : null,
       year: rowYear(row, contract),
       date: rowDate(row, contract),
-      amount: rowAmount(row, contract),
-      amountBasis: rowAmountBasis(row, contract),
-      source: rowSource(row, contract),
+      amount: rowAmount(row, own),
+      amountRange: rowAmountRange(row, own),
+      amountBasis: rowAmountBasis(row, own, collection),
+      dateBasis: own?.date && cell(row, own.date) ? own.date_basis ?? null : own?.year ? own.year_basis : null,
+      source: rowSource(row, own),
+      sourceDetails: sourcePresentation(collection, sourceRow(row, own), rowSource(row, own)),
       superseded: rowSuperseded(row, contract),
       replacement: rowReplacement(row, contract),
-      observation: observationOf(row, contract),
+      observation: observationOf(row, contract, collection),
       row,
     };
   });
@@ -873,9 +936,13 @@ function sortKey(item, by) {
     case "entity": return item.entity.name ?? item.entity.uid;
     case "entity_type": return item.entity.type;
     case "collection": return PRESS_CATALOG_BY_ID[item.collection]?.short ?? item.collection;
+    case "__subject": return item.subject ?? item.entity.name ?? item.entity.uid;
+    case "__date":
     case "date": return item.date;
     case "year": return item.year;
+    case "__amount":
     case "amount": return item.amount;
+    case "__observation":
     case "observation": return item.observation;
     case "source":
     case SOURCE_LINK_COLUMN: return item.source;

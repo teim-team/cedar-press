@@ -38,15 +38,15 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router";
 
 import { contactHref } from "../../features/grove/appLink.js";
+import { requestedSignIn, workspaceSignInHref } from "../../features/grove/pressSessionNavigation.js";
 import { useAuth } from "../../context/useAuth";
 import { useFadeIn } from "../../features/grove/useFadeIn";
 import { activatePressAccount, validatePressCode } from "../../api";
-import { LAUNCH_COLLECTION, LAUNCH_ROWS_TOTAL } from "../../features/grove/collection";
 import { coverageFrom } from "../../features/grove/pressAccess";
 import { LUMECON_TEAM_URL, LUMECON_URL, TBN_PLANS_URL, TBN_URL } from "../../features/grove/pressArticles";
 import { PRESS_TIERS, STOREFRONT_CATALOG, collectionsOnShelf } from "../../features/grove/pressCatalog";
 import { formatUpdated, recentlyUpdated } from "../../features/grove/pressReleases";
-import { SOURCE_REACH_FIGURE, SOURCE_ROTATION_ORDER } from "../../features/grove/sourceRotation.js";
+import { SOURCE_REACH_FIGURE, SOURCE_REACH_UPDATED, SOURCE_ROTATION_ORDER } from "../../features/grove/sourceRotation.js";
 import { MAINTENANCE } from "../../features/grove/pressMethod.js";
 import {
   PRESS_METHODS_PATH,
@@ -96,7 +96,6 @@ const SOURCE_ROWS = Array.from({ length: SOURCE_ROW_COUNT }, (_, r) =>
  * The year counts back from this year to the earliest record, the others up
  * from zero. The final value is what is prerendered and what a reader who
  * prefers reduced motion sees. */
-const formatCount = (n) => n.toLocaleString("en-US");
 function Tick({ value, from = 0, format = String }) {
   const ref = useTicker(value, { from, format });
   return <b ref={ref} className="cp-tick">{format(value)}</b>;
@@ -111,7 +110,9 @@ const MARK = "/brand/lumecon-logo-mark-teal.png";
 // "since": the rest start later and two of them are rosters with no start.
 const COLLECTION_STARTS = STOREFRONT_CATALOG.map((entry) => coverageFrom(entry)).filter(Boolean);
 const EARLIEST_YEAR = COLLECTION_STARTS.length ? Math.min(...COLLECTION_STARTS) : null;
-const ROWS_LABEL = Object.fromEntries(LAUNCH_COLLECTION.map((entry) => [entry.id, entry.rowsLabel]));
+// Page revisions and collection refreshes have separate dates. A source-band
+// revision updates the landing page without rewriting any collection release.
+const PAGE_UPDATED = [SOURCE_REACH_UPDATED, ...recentlyUpdated(1).map((release) => release.updated)].sort().at(-1);
 
 // The shelves, each with its collections, in the storefront's order.
 const SHELVES = PRESS_TIERS.filter((tier) => tier.storefront).map((tier) => ({
@@ -178,7 +179,9 @@ export default function PressGate({ user }) {
   // The page reads as one long scroll on a phone, so its sections arrive as
   // they enter the viewport instead of standing there already.
   const fadeRoot = useFadeIn();
-  const [step, setStep] = useState(() => initialPressStep(browserStorage()));
+  const [step, setStep] = useState(() => initialPressStep(browserStorage(), {
+    signInRequested: requestedSignIn(typeof window === "undefined" ? "" : window.location.search),
+  }));
   // Plans or sign-in, one at a time, or NEITHER ON ARRIVAL.
   //
   // This opened on "signin" for any browser that had signed in before, on the
@@ -188,7 +191,8 @@ export default function PressGate({ user }) {
   // form has decided for them what they came for, and the two tabs are
   // already sitting in the bar where a visitor looks for them. Nothing opens
   // until it is asked for.
-  const [panel, setPanel] = useState(null);
+  const [panel, setPanel] = useState(() => requestedSignIn(typeof window === "undefined" ? "" : window.location.search) ? "signin" : null);
+  const workspaceSignIn = workspaceSignInHref(typeof window === "undefined" ? null : window.location);
   const [code, setCode] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -363,6 +367,10 @@ export default function PressGate({ user }) {
 
   const toggle = (which) => setPanel((current) => (current === which ? null : which));
   const openSignIn = () => {
+    if (workspaceSignIn) {
+      window.location.assign(workspaceSignIn);
+      return;
+    }
     setPanel("signin");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -405,7 +413,9 @@ export default function PressGate({ user }) {
               >
                 View plans
               </button>
-              <button
+              {workspaceSignIn ? (
+                <a className="cp-btn cp-btn--primary" href={workspaceSignIn}>Log in</a>
+              ) : <button
                 type="button"
                 id="cp-tab-signin"
                 role="tab"
@@ -415,7 +425,7 @@ export default function PressGate({ user }) {
                 onClick={() => toggle("signin")}
               >
                 Log in
-              </button>
+              </button>}
             </div>
           )}
         </div>
@@ -661,9 +671,8 @@ export default function PressGate({ user }) {
                 use cases start higher. */}
             <ul className="cp-hero3__facts" aria-label="What Cedar Press holds">
               <li><Tick value={STOREFRONT_CATALOG.length} /> collections</li>
-              {LAUNCH_ROWS_TOTAL ? <li><Tick value={LAUNCH_ROWS_TOTAL} format={formatCount} /> records</li> : null}
               {EARLIEST_YEAR ? <li>as far back as <Tick value={EARLIEST_YEAR} from={new Date().getFullYear()} /></li> : null}
-              {recentlyUpdated(1)[0] ? <li>updated <b>{formatUpdated(recentlyUpdated(1)[0].updated)}</b></li> : null}
+              <li>updated <b>{formatUpdated(PAGE_UPDATED)}</b></li>
             </ul>
           </figure>
 
@@ -751,7 +760,7 @@ export default function PressGate({ user }) {
                     Sources Lumecon draws on
                   </Link>
                   <span className="cp-hero3__proofcount">
-                    {SOURCE_REACH_FIGURE} documented upstream sources ·{" "}
+                    {SOURCE_REACH_FIGURE} total sources ·{" "}
                     <span className="cp-nowrap">{STOREFRONT_CATALOG.length} collections</span>
                   </span>
                 </div>

@@ -65,6 +65,19 @@ from pathlib import Path
 csv.field_size_limit(10 ** 9)
 
 CEDAR = Path(__file__).resolve().parent.parent
+
+
+def _load_cedar_domain():
+    spec = importlib.util.spec_from_file_location(
+        "cedar_domain_358", CEDAR / "code" / "cedar_domain.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+#: The live publication rule. Publication answers are read from it, never
+#: restated here (owner ruling 2026-10-02: business-record fields publish).
+D = _load_cedar_domain()
 CLEAN = CEDAR / "data" / "clean"
 SPINE = CEDAR / "data" / "spine" / "cedar_entity_spine.csv"
 REVIEW = CEDAR / "review"
@@ -555,18 +568,26 @@ def main():
             "privacy_class": f["privacy_class"],
             "firm_legal_name_is_person": "UNKNOWN" if f["privacy_class"] in (
                 "POSSIBLE_PERSONAL_NAME", "NO_CORPORATE_FORM", "UNKNOWN") else "0",
-            "publish_name": "0",
-            "publish_uei": "0" if person else "1",
+            # Owner ruling 2026-10-02: a firm is a business entity whatever it
+            # is named after; name and federal identifier are public business
+            # records and publish without consent. `person` stays a measured
+            # fact and gates nothing. Read from the live rule, never restated.
+            "publish_name": "1" if D.may_publish_individual_native_field(
+                "canonical_name", "UNKNOWN" if person else "0") else "0",
+            "publish_uei": "1" if D.may_publish_individual_native_field(
+                "awardee_uei", "UNKNOWN" if person else "0") else "0",
             "publish_uei_reason": (
-                "WITHHELD - SAM's public entity search resolves a UEI to a "
-                "legal name and address, and this legal name reads as a private "
-                "individual's. Publishing the UEI publishes the name by one hop."
-                if person else
-                "Federal identifier on a name carrying a corporate form. Not "
-                "D&B Open Data. Publishes."),
+                "Publishes - owner ruling 2026-10-02: a federal identifier is a "
+                "business entity's public registration, whatever the firm is "
+                "named after. Until that date it was withheld where the legal "
+                "name read as a private individual's (SAM's public entity "
+                "search resolves a UEI to a name and address). Not D&B Open "
+                "Data."),
             "consent_status": "NOT_ASKED",
             "publication_policy_inherited_from":
-                "nrc_meeting_participants; ferc_ex_parte_parties",
+                "Inherited restriction lifted by owner ruling 2026-10-02 for "
+                "business entities (nrc_meeting_participants; "
+                "ferc_ex_parte_parties concern natural persons)",
             "evidence_ceiling": "C",
             "evidence_ceiling_reason":
                 "awardeeBusinessTypeName is a PARTIAL string match over a "
@@ -681,13 +702,15 @@ def main():
         "privacy": {
             f"{c}|{k}": v for (c, k), v in sorted(priv.items())},
         "privacy_rule": (
-            "May publish: contract facts, class totals, distributions, "
-            "small-cell-suppressed aggregates. May NOT publish, in bulk or "
-            "singly: legal/DBA/owner name, address, any person-to-ancestry "
-            "pairing, and the UEI where the legal name is a person's - SAM's "
-            "public entity search resolves a UEI to that name. consent_status "
-            "is NOT_ASKED on every row. Absence is NO_CLAIM_FOUND, never "
-            "NOT_NATIVE."),
+            "Owner ruling 2026-10-02: a firm is a business entity regardless "
+            "of what it is named after; its legal/DBA name, UEI, CAGE, city "
+            "and business address are public business records (SAM and "
+            "USAspending publish them for every awardee) and publish without "
+            "consent. May publish: those, plus contract facts, class totals, "
+            "distributions and small-cell-suppressed aggregates. Small-cell "
+            "suppression is an aggregate rule and is unchanged. consent_status "
+            "is NOT_ASKED on every row and is informational. Absence is "
+            "NO_CLAIM_FOUND, never NOT_NATIVE."),
         "small_cell_threshold_firms": SMALL_CELL,
         "cells_suppressed": sum(1 for r in dist
                                 if r["value_suppressed_small_cell"] == "1"),

@@ -65,20 +65,9 @@
  * and history layer instead, where the rest of the catalog reads it.
  *
  * THE CATALOG IS THE STOREFRONT
- * Every collection the ladder is designed around: fourteen, seven on each
- * shelf. Twelve have a release, and `collection.js` reads those twelve out of
- * the manifest with the measured descriptor behind each. The other two,
- * Foundation & Corporate Giving and PLOT (owner, 2026-09-27: part of Cedar
- * Press now) have no release in the manifest and carry `coverage:
- * STRUCTURE`. They are live on their plans like every other collection on
- * their shelf (owner, 2026-09-27: "treat PLOT and Foundation & Corporate
- * Giving as published and live everywhere"): the pages name them, tier them,
- * describe them and open them for the plan that includes them, and wherever
- * a page would show sample records it shows what each record holds instead
- * (`pressRecordStructure.js`). No row count and no year span is stated for
- * either. A test pins the manifest to exactly the catalog's other entries,
- * and the STRUCTURE ones to exactly the catalog entries the manifest lacks,
- * so a release cannot land without the entry changing.
+ * All fourteen entries have verified local preview records in the manifest.
+ * Gaming remains outside Press. Mixed source-dated observations carry no
+ * continuous-coverage claim; their rows retain their own time and grain.
  *
  * THE NUMBERS IN THE TIER COPY ARE DERIVED
  * "Six collections" and "twelve collections" used to be typed into the
@@ -240,6 +229,9 @@ const TIER_DECLARATIONS = Object.freeze([
  */
 export const STRUCTURE = Object.freeze({ kind: "structure" });
 
+/** Source-dated records with no independently established continuous span. */
+export const OBSERVATIONS = Object.freeze({ kind: "observations" });
+
 export const PRESS_CATALOG = Object.freeze([
   Object.freeze({
     id: "funding",
@@ -338,9 +330,8 @@ export const PRESS_CATALOG = Object.freeze([
     // Owner, 2026-09-26: Cedar Press, which with PLOT in Cedar Press+ makes
     // the fourteen a seven and seven split.
     shelf: "standard",
-    // No measured span to state: see STRUCTURE above. The record structure
-    // is the producer's (Lumecon-data, `foundation_release.py`).
-    coverage: STRUCTURE,
+    // Source records have dates; no continuous year span is established.
+    coverage: OBSERVATIONS,
     // Owner copy, 2026-09-26, bound by the producer contract: one row is one
     // source disclosure or award version; commitments and payments are
     // separate facts; legal recipient and Native beneficiary are separate
@@ -348,10 +339,10 @@ export const PRESS_CATALOG = Object.freeze([
     // because a grant benefits Native people; possible duplicates are never
     // silently summed.
     blurb:
-      "Foundation, corporate and bank funding publicly disclosed for Native nations, organizations and initiatives. Follow the funder, legal recipient, purpose, geography, amount and timing while keeping commitments, payments, authorizations and other reported financial statuses distinct.",
+      "Foundation, corporate and bank giving disclosures concerning Native nations, organizations and initiatives. Examine reported funders, recipients, dates, amounts and financial status; commitments, payments, ranges and program totals remain distinct.",
     // The owner's Methods concepts for this collection (2026-09-26).
     linkage:
-      "Philanthropic, corporate and bank giving, each disclosure kept as its own record: commitments and payments are separate facts, and the legal recipient is kept distinct from the Native beneficiary.",
+      "Philanthropic, corporate and bank giving, each disclosure kept as its own record. The reported recipient may be a program or intermediary; a reviewed Native recipient binding is distinct from ownership or beneficiary status.",
   }),
   Object.freeze({
     id: "contractors",
@@ -406,8 +397,11 @@ export const PRESS_CATALOG = Object.freeze([
   }),
   Object.freeze({
     id: "owned",
-    short: "Native-Owned Businesses",
-    name: "Individually Owned Native Businesses",
+    // Ring and tile label, provisional (Kaylyn Lee owns the copy): the full
+    // name breaks into a 23-character line that shrinks the ecosystem ring
+    // below half the canvas; this keeps the owner's distinguishing words.
+    short: "Individual Native-Owned",
+    name: "Individual Native-Owned Businesses",
     shelf: "pro",
     // Roster, not a series, so it states no year to be covered from. Every
     // certifying office publishes who is certified NOW and none of them
@@ -464,15 +458,12 @@ export const PRESS_CATALOG = Object.freeze([
     short: "Cedar NEED",
     name: "Cedar Native Entity Enterprise Dataset (NEED)",
     shelf: "pro",
-    // Series. Floor: min(first_observed_year) in dist/customer/need.csv, which
-    // is the earliest year any source named an enterprise or a tie. The runs of
-    // source editions are what date a relationship, so this is an observation
-    // series with a left edge rather than a roster.
-    coverage: Object.freeze({ kind: "series", from: 2016 }),
+    // The public component is a reviewed cohort, not the full enterprise register.
+    coverage: OBSERVATIONS,
     blurb:
-      "Enterprises owned or controlled by Native nations, Alaska Native corporations and other Native entities, including subsidiaries, holding companies and joint ventures. Follow parent relationships and organizational changes over time. Where records are available, profiles also carry patents, assigned or later acquired, and dated credit ratings, each kept with the entity it concerns.",
+      "Source-backed enterprise identities and reviewed parent relationships. The current public release contains a limited evidence-pinned cohort; the wider enterprise register and restricted enrichments remain under review.",
     linkage:
-      "This is the structure the rest of the record resolves against, published as a collection in its own right: every tie names the nation or corporation behind it.",
+      "Business identifiers and owner relationships remain separate claims. Each public fact retains its source release and evidence; an owner association never becomes the business identity.",
   }),
   Object.freeze({
     id: "plot",
@@ -480,18 +471,17 @@ export const PRESS_CATALOG = Object.freeze([
     name: "PLOT",
     // Owner, 2026-09-26: PLOT is in Cedar Press+.
     shelf: "pro",
-    // No measured span to state: see STRUCTURE above. The record structure
-    // is the owner's description (2026-09-27).
-    coverage: STRUCTURE,
+    // Source records have dates; no continuous year span is established.
+    coverage: OBSERVATIONS,
     // Owner copy, 2026-09-26. Deals follows a transaction or a capital event
     // between parties; PLOT follows a parcel and the recorded events attached
     // to it. A nation's site acquisition may be a Deal while the parcels it
     // bought appear separately in PLOT: link the two, never collapse them.
     blurb:
-      "Parcel-level ownership and development records associated with Native nations, organizations and enterprises. Follow ownership, transfers, parcel characteristics, geometry, permits and other recorded property activity over time.",
+      "Source observations of tracts, assessor parcels, permits and environmental records. Examine their recorded subjects, dates and citations while keeping parcel observations and permit events at their separate grains.",
     // The owner's Methods concepts for this collection (2026-09-26).
     linkage:
-      "Land ownership, transfers, permitting and development, followed parcel by parcel: each parcel and the recorded events attached to it, linked to the Native entity that holds it.",
+      "Land ownership observations and permitting records retain their source identifiers. An assessor label, mapped tract or regulatory record does not establish Native ownership, legal title or a canonical entity binding.",
   }),
 ]);
 
@@ -713,7 +703,7 @@ export const GROVE_INCLUDES = Object.freeze([
     shelf: "pro",
     blurb: `The ${spellCount(collectionsOnShelf("pro").length)} specialized collections Cedar Press does not carry.`,
     linkage:
-      "Contracting, subcontracting, resources, individually owned Native businesses, enterprise structures, nonprofits and parcels: awards roll up to the parent nation or corporation, and each owned business carries its certifying nation.",
+      "Permitted observations retain source citations and role-specific entity links where reviewed. Businesses, certifying authorities, recipients and property observations remain distinct.",
   }),
 ]);
 

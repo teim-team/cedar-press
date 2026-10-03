@@ -94,6 +94,7 @@ sampled_from: dict = {}
 
 from cedar_publication import (          # noqa: E402
     STOREFRONT_SHELVES, BUILD_SHELVES, shelves, publishable_columns,
+    assert_collection_publishable, FieldMapRefusal,
 )
 
 #: Curated, per dataset, in reading order. The Cedar id goes LAST.
@@ -315,6 +316,11 @@ def run(write: bool) -> int:
     OUT.mkdir(parents=True, exist_ok=True)
     man = []
     for coll in datasets():
+        try:
+            assert_collection_publishable(coll)
+        except FieldMapRefusal:
+            man.append({"dataset": coll, "note": "Collection publication held"})
+            continue
         f = SRC / f"{coll}.csv"
         if not f.exists():
             man.append({"dataset": coll, "note": "delivered file absent"})

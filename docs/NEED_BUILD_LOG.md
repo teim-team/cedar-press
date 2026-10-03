@@ -1800,3 +1800,29 @@ and 6 dependency checks pass. Further NEED expansion is deferred under the
 publication hold while infrastructure becomes the primary review lane.
 
 <!-- END CODEX-NEED-AFFILIATION-ROUTE-AUDIT -->
+
+<!-- BEGIN NEED-CONFLICT-WRITER-RECOVERY-20260927 -->
+## 2026-09-27: conflict evidence must not inherit another enterprise's ruling
+
+The legacy `1102` builder unconditionally wrote the same Chugach-specific
+adjudication to every evidence-conflict row. The preserved candidate-d file
+contains unrelated owners, including Ahtna Builders. Those generated rulings
+cannot support publication or relationship corrections.
+The preserved 52-row conflict file contains 52 copies of this generated ruling;
+50 rows have non-Chugach owners. A separate corrected internal sidecar clears
+all 52 while retaining the original archive, source assertions, values and IDs.
+
+`1102` now preserves each row's original source assertions and recorded value,
+assigns no new ruling, and clears only the recognizable prior claim written by
+this script. Even a matching Chugach name remains unadjudicated: the former writer
+did not establish a row-specific evidence binding. Separately recorded reviews
+survive unchanged. The existing writer retains its pre-write backup and atomic
+finalization. Archived candidates are not rewritten by this correction.
+
+Focused regression command:
+`python -m unittest server/tests/test_need_legacy_adjudication.py -v`.
+Three tests exercise the actual synthetic builder with two distinct enterprises,
+clearance without source/ID mutation, repeated execution, and independent reviews.
+The whole-collection NEED publication hold continues to apply, including to
+previously accepted rows. This repair creates no customer-eligible subset.
+<!-- END NEED-CONFLICT-WRITER-RECOVERY-20260927 -->

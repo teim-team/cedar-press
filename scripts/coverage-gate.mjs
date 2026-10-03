@@ -75,7 +75,7 @@ export function productionFiles(cwd = ROOT, scope = SCOPE) {
       "--",
       ...scope.map((pattern) => `:(glob)${pattern}`),
     ],
-    { cwd, encoding: "utf8" },
+    { cwd, encoding: "utf8", windowsHide: true },
   );
   if (listed.status !== 0) {
     throw new Error(`git ls-files failed in ${cwd}: ${listed.stderr}`);
@@ -95,7 +95,8 @@ export function parseLcov(text) {
     const value = rest.join(":");
     if (key === "SF") {
       current = { lf: 0, lh: 0, brf: 0, brh: 0, fnf: 0, fnh: 0 };
-      records.set(value, current);
+      // Git paths use forward slashes; Node emits native separators on Windows.
+      records.set(value.replaceAll("\\", "/"), current);
     } else if (key === "end_of_record") {
       current = null;
     } else if (current && ["LF", "LH", "BRF", "BRH", "FNF", "FNH"].includes(key)) {
@@ -173,9 +174,10 @@ export function run({
         "--test-reporter=lcov",
         `--test-reporter-destination=${lcovPath}`,
         "--test",
+        "--test-concurrency=2",
         tests,
       ],
-      { cwd, env, stdio: ["ignore", quiet ? "ignore" : "inherit", quiet ? "ignore" : "inherit"] },
+      { cwd, env, windowsHide: true, stdio: ["ignore", quiet ? "ignore" : "inherit", quiet ? "ignore" : "inherit"] },
     );
     if (suite.status !== 0) {
       log(`\nThe test suite failed (exit ${suite.status}); coverage was not assessed.`);

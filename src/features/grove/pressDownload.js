@@ -31,7 +31,7 @@
 
 import { downloadCollection } from "../../api.js";
 import { isConnected } from "../../config.js";
-import { collectionCitation, collectionCsv, hasSample, samplePath } from "./collection.js";
+import { collectionCitation, collectionCsv, collectionPublicationHold, hasSample, samplePath, sampleTextMatchesRelease } from "./collection.js";
 import { coverageLabel } from "./pressAccess.js";
 import { recordStructure } from "./pressRecordStructure.js";
 
@@ -59,12 +59,12 @@ export function hasReleaseFile(entry) {
 export async function csvFor(entry, fetchText = defaultFetchText) {
   if (hasSample(entry.id)) {
     const text = await fetchText(samplePath(entry.id));
-    const shipped = text == null ? null : collectionCsv(entry.id, text);
+    const verified = text != null && await sampleTextMatchesRelease(entry.id, text);
+    const shipped = verified ? collectionCsv(entry.id, text) : null;
     if (shipped) return { csv: shipped, name: `${entry.id}.csv` };
   }
   // The file outlives the page, so it carries its own citation. Launch
-  // datasets cite with their version; the rest of the shelf has no release
-  // bookkeeping yet and cites by name.
+  // datasets cite by name and update date; other shelf entries cite by name.
   const citation =
     collectionCitation(entry.id) ||
     `Lumecon, "${entry.name}", Cedar Press collection, cedarpress.ai.`;
@@ -78,6 +78,10 @@ export async function csvFor(entry, fetchText = defaultFetchText) {
   const rows = [
     ["field", "value"],
     ["collection", entry.name],
+    ...(collectionPublicationHold(entry.id) ? [
+      ["publication_status", "held"],
+      ["publication_hold", collectionPublicationHold(entry.id).message],
+    ] : []),
     ["shelf", entry.shelf || entry.kind || ""],
     ...(coverage ? [["coverage", coverage]] : []),
     ["contents", entry.blurb || ""],

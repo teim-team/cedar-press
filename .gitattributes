@@ -10,3 +10,12 @@ docs/IDENTIFIER_RETIREMENT_2026-09-05.md text eol=lf
 docs/guides/*.md text eol=lf
 index.html text eol=lf
 public/sitemap.xml text eol=lf
+
+# Served proof and sample hashes cover exact bytes, including line endings.
+public/data/cedar/samples/** -text
+data/cedar/need-reviewed-preview.json -text
+data/cedar/verified-preview-releases.json -text
+data/cedar/field_map.json -text
+server/tests/fixtures/legacy-preview/** -text
+code/330_build_native_owned_businesses.py text eol=lf
+data/cedar/preview_definition_overrides.json text eol=lf

@@ -1,0 +1,1776 @@
+[
+  {
+    "id": "welcome-to-cedar",
+    "title": "Indian Country, in clearer view",
+    "dek": "Cedar brings scattered public records into one place, so a good question can lead somewhere new.",
+    "date": "2026-10-02",
+    "byline": "Elijah Moreno and Brian Edwards",
+    "highlights": [
+      "Today’s Press catalog contains 1,778,800 observations across 14 collections. They describe different things, from funding transactions to land records, rather than 1.78 million distinct people or businesses.",
+      "The Cedar team reports drawing on more than 700 sources. This is its current working count and remains subject to review.",
+      "PLOT brings together 151,715 land, ownership, permit and regulatory observations across six record types."
+    ],
+    "draws": [
+      "funding",
+      "contractors",
+      "plot",
+      "deals",
+      "owned",
+      "foundation-corporate-giving",
+      "need"
+    ],
+    "hosted": true,
+    "demonstration": false,
+    "earlyAccess": true,
+    "draft": true,
+    "tone": "teal",
+    "image": "/pitch/lanes/professional-wide.webp",
+    "imageAlt": "People meeting around a conference table, shown as an illustrative photograph.",
+    "caption": "Illustrative photograph. The article describes Cedar Press and its sourced collections.",
+    "tag": "Welcome to Cedar Press",
+    "datasetId": "funding",
+    "minutes": 4,
+    "body": [
+      {
+        "kind": "p",
+        "text": "Some questions about Indian Country should be easier to answer. Which federal programs support a tribe? What businesses does an enterprise group own? Where is an infrastructure project actually being built? Has a funder’s support grown, faded or simply become harder to find?"
+      },
+      {
+        "kind": "p",
+        "text": "The information often exists. Finding it can require an afternoon with an agency website, several spreadsheets, a compliance report and a document whose useful table begins hundreds of pages in. Another afternoon may go toward deciding whether two names refer to the same organization. By then, the question that prompted the search has acquired a second job: data management."
+      },
+      {
+        "kind": "p",
+        "text": "Cedar is being built to shorten that distance. Our early access Press catalog brings together 1,778,800 observations across 14 collections. These are records with different purposes and levels of detail, including federal funding transactions, contracts, business observations, land records and public policy activity. The total measures the size of the catalog. It does not mean we have identified 1.78 million separate Native entities, or that every record can be added to every other record."
+      },
+      {
+        "kind": "p",
+        "text": "The value is what becomes possible when those records can be examined together. A name in a funding table can become the start of a larger inquiry. A deal announcement can be connected to a business and its owner. A land record can help locate a question that otherwise floats somewhere between a headquarters address and a project description."
+      },
+      {
+        "kind": "figure",
+        "chart": "bars",
+        "caption": "Explore the collection",
+        "source": "Cedar Press collection inventory",
+        "points": [
+          {
+            "label": "Federal assistance",
+            "value": 640942
+          },
+          {
+            "label": "Federal contracting",
+            "value": 841002
+          },
+          {
+            "label": "Federal Register",
+            "value": 21258
+          },
+          {
+            "label": "Legislation",
+            "value": 3064
+          },
+          {
+            "label": "Deals",
+            "value": 978
+          },
+          {
+            "label": "Repatriation notices",
+            "value": 6792
+          },
+          {
+            "label": "Lobbying",
+            "value": 27825
+          },
+          {
+            "label": "Subcontracting",
+            "value": 70054
+          },
+          {
+            "label": "Individually owned businesses",
+            "value": 3725
+          },
+          {
+            "label": "NEED profiles",
+            "value": 43
+          },
+          {
+            "label": "Natural resources",
+            "value": 11120
+          },
+          {
+            "label": "Nonprofits",
+            "value": 89
+          },
+          {
+            "label": "Giving disclosures",
+            "value": 193
+          },
+          {
+            "label": "PLOT",
+            "value": 151715
+          }
+        ],
+        "notes": [
+          "Verified October 2, 2026 catalog. Different record grains are shown separately; counts do not measure importance, unique entities or financial value.",
+          "Unit: observations. These values describe this early-access inventory."
+        ]
+      },
+      {
+        "kind": "p",
+        "text": "Cedar has been more than a year in the making. Much of that work has been unglamorous: reading reports, checking identities, preserving sources, correcting fields and deciding when the evidence does not support a confident match. That foundation matters because a polished answer is useful only if someone can follow it back to the underlying records."
+      },
+      {
+        "kind": "p",
+        "text": "Our team has drawn on more than 700 sources, by our current working count. They range from agency data feeds and spreadsheets to compliance reports, newsletters and long PDF documents. Sometimes the first step is extracting a table. Sometimes it is recovering text from a scanned page, then checking what the original document actually says."
+      },
+      {
+        "kind": "p",
+        "text": "Consider a tribal finance office preparing for a budget discussion. The first question may be how federal assistance changed. Cedar’s funding collection currently holds 640,942 transactions. A useful analysis would separate the relevant recipient from similarly named organizations, compare consistent periods and distinguish a recurring program from temporary support. The next question might be whether the apparent increase remains after adjusting for inflation, or whether one unusually large award explains most of it."
+      },
+      {
+        "kind": "p",
+        "text": "A business development team may begin somewhere else: which markets could make its portfolio more resilient? The contracting collection holds 841,002 observations, while the deals and enterprise collections offer other pieces of the story. Together, they can support questions about customers, industries, acquisitions and ownership. A company’s federal obligations are not its revenue, and an acquisition announcement is not proof that a transaction closed. Keeping those distinctions visible makes the resulting comparison more valuable."
+      },
+      {
+        "kind": "figure",
+        "chart": "bars",
+        "caption": "Two ways federal records enter the picture",
+        "source": "Cedar Press collection inventory",
+        "points": [
+          {
+            "label": "Assistance transactions",
+            "value": 640942
+          },
+          {
+            "label": "Contracting observations",
+            "value": 841002
+          }
+        ],
+        "notes": [
+          "These are record counts, not dollar amounts. Assistance and procurement answer different questions.",
+          "Unit: observations. These values describe this early-access inventory."
+        ]
+      },
+      {
+        "kind": "p",
+        "text": "A third user might be a reporter following an infrastructure promise. The useful trail runs from an announcement to a named recipient, a project, a place and evidence of progress. PLOT contains 151,715 observations across six record types. Its land and regulatory records can help investigate that trail. A permit does not establish that construction is finished, and a tribal enterprise’s mailing address does not locate every project it undertakes. Those are reasons to connect records carefully, rather than reasons to abandon the question."
+      },
+      {
+        "kind": "p",
+        "text": "These examples explain what we want Cedar to do well. First, make records easier to find. Second, make their relationships easier to understand. Third, preserve enough context that users can challenge an answer. Fourth, help a straightforward question become a more interesting one. Finally, reduce the repeated work that keeps people from spending time on interpretation, reporting and decisions."
+      },
+      {
+        "kind": "p",
+        "text": "Press is the readable entry point. Collections let readers inspect the evidence behind an article. Grove provides a place for deeper work with connected records and geography. The ambition is a coherent experience across them, with access determined by the collection and the user’s account. A chart can help, but an answer should also work as a sentence, a table or an authorized package of records."
+      },
+      {
+        "kind": "p",
+        "text": "We are also building an internal entity intelligence layer to connect information that belongs together without collapsing distinct organizations into one. Supplemental observations, such as sourced patents or credit ratings, can live there when they do not belong in an existing collection. Historical names, acquisitions and successors should remain traceable. Those foundations can support future analytical and machine learning tools, with human review remaining part of the work."
+      },
+      {
+        "kind": "figure",
+        "chart": "bars",
+        "caption": "What PLOT connects",
+        "source": "Cedar Press collection inventory",
+        "points": [
+          {
+            "label": "Mapped tracts",
+            "value": 141551
+          },
+          {
+            "label": "Ownership observations",
+            "value": 4991
+          },
+          {
+            "label": "Environmental events",
+            "value": 3210
+          },
+          {
+            "label": "Environmental permits",
+            "value": 1242
+          },
+          {
+            "label": "Local permit events",
+            "value": 599
+          },
+          {
+            "label": "Local permits",
+            "value": 122
+          }
+        ],
+        "notes": [
+          "Six record types total 151,715 observations. A tract, permit and permit event can relate to the same place and are not separate projects.",
+          "Unit: observations. These values describe this early-access inventory."
+        ]
+      },
+      {
+        "kind": "p",
+        "text": "Early access means the evidence and the product will continue to change. New sources will expand coverage. Corrections may change a match or a calculation. Sources update on different schedules, so maintenance must follow their actual publication cycles. We will identify material limitations and preserve the source and date behind an observation. A blank field will not quietly become a zero."
+      },
+      {
+        "kind": "p",
+        "text": "Access matters too. Through Cedar’s [tribal data request](https://cedarpress.ai/tribal-data-request), a verified tribal representative may ask for eligible information held about their tribe. Journalists, policymakers, researchers and graduate students who cannot afford a subscription may [request research access](https://cedarpress.ai/research-access) to one or two datasets. These requests still respect source restrictions and the scope of the information involved. They are a way to make useful evidence available to people doing consequential work."
+      },
+      {
+        "kind": "p",
+        "text": "We want readers to help shape what comes next. Which collection saves you time? Which missing source changes the answer? What question should Cedar tackle next? That feedback can guide research priorities and product development."
+      },
+      {
+        "kind": "p",
+        "text": "Indian Country deserves tools that keep pace with technological change and respect the complexity of its institutions. Cedar begins with a practical offer: bring a question, inspect the evidence, and see where it leads. We are opening early because the people who need these answers should have a voice in making the resource better."
+      }
+    ],
+    "authors": [
+      {
+        "name": "Elijah Moreno and Brian Edwards"
+      }
+    ],
+    "sources": [
+      {
+        "id": "cedar-catalog-20261002",
+        "title": "Cedar Press verified collection catalog, October 2, 2026",
+        "path": "data/cedar/collections.manifest.json",
+        "locator": "sample.of across 14 public collections",
+        "verification": "Recomputed by root from verified release inventory"
+      },
+      {
+        "id": "founder-source-inventory",
+        "title": "Cedar team working source count",
+        "verification": "Owner-supplied in task instructions; not independently verified",
+        "claim": "More than 700 sources"
+      }
+    ],
+    "internalReview": {
+      "authorApprovalRequired": [
+        "Elijah Moreno",
+        "Brian Edwards"
+      ],
+      "publish": false,
+      "sourceCountOmitted": "700+ unique sources not verified; do not insert.",
+      "policyLinks": "Verified existing routes: https://cedarpress.ai/tribal-data-request and https://cedarpress.ai/research-access.",
+      "founderContext": "More than a year of work supplied by Elijah in task instructions.",
+      "requiredBeforePublication": [
+        "Confirm exact account entitlements and product capability descriptions",
+        "Confirm eligible-data request policy links",
+        "Reconfirm catalog count at publication",
+        "Verify the 700+ working source count and its counting unit; do not treat registry entries, domains, files and websites as interchangeable."
+      ],
+      "visualIdeas": [
+        "Filterable catalog observations by collection, with record-grain labels",
+        "Federal funding versus contracting record explorer, with separate measures",
+        "PLOT six-type composition and inspectable rows"
+      ],
+      "sourceCountStatus": "User explicitly supplied and requested the 700+ source claim. It is attributed to the team's working count in reader copy and is not independently verified. Establish the counting unit and deduplicate before representing it as an audited statistic.",
+      "importArtifact": "cedar_editorial_welcome_v3.json"
+    },
+    "editorialVisualizations": [
+      {
+        "id": "welcome-catalog",
+        "kind": "bars",
+        "title": "Explore the collection",
+        "unit": "observations",
+        "points": [
+          {
+            "label": "Federal assistance",
+            "value": 640942
+          },
+          {
+            "label": "Federal contracting",
+            "value": 841002
+          },
+          {
+            "label": "Federal Register",
+            "value": 21258
+          },
+          {
+            "label": "Legislation",
+            "value": 3064
+          },
+          {
+            "label": "Deals",
+            "value": 978
+          },
+          {
+            "label": "Repatriation notices",
+            "value": 6792
+          },
+          {
+            "label": "Lobbying",
+            "value": 27825
+          },
+          {
+            "label": "Subcontracting",
+            "value": 70054
+          },
+          {
+            "label": "Individually owned businesses",
+            "value": 3725
+          },
+          {
+            "label": "NEED profiles",
+            "value": 43
+          },
+          {
+            "label": "Natural resources",
+            "value": 11120
+          },
+          {
+            "label": "Nonprofits",
+            "value": 89
+          },
+          {
+            "label": "Giving disclosures",
+            "value": 193
+          },
+          {
+            "label": "PLOT",
+            "value": 151715
+          }
+        ],
+        "interaction": "Search collections, sort by name/count, and switch between chart and data table.",
+        "caption": "Verified October 2, 2026 catalog. Different record grains are shown separately; counts do not measure importance, unique entities or financial value.",
+        "source": "cedar-catalog-20261002"
+      },
+      {
+        "id": "welcome-funding",
+        "kind": "bars",
+        "title": "Two ways federal records enter the picture",
+        "unit": "observations",
+        "points": [
+          {
+            "label": "Assistance transactions",
+            "value": 640942
+          },
+          {
+            "label": "Contracting observations",
+            "value": 841002
+          }
+        ],
+        "interaction": "Select a record family to reveal its definition and connected collection.",
+        "caption": "These are record counts, not dollar amounts. Assistance and procurement answer different questions.",
+        "source": "cedar-catalog-20261002"
+      },
+      {
+        "id": "welcome-land",
+        "kind": "bars",
+        "title": "What PLOT connects",
+        "unit": "observations",
+        "points": [
+          {
+            "label": "Mapped tracts",
+            "value": 141551
+          },
+          {
+            "label": "Ownership observations",
+            "value": 4991
+          },
+          {
+            "label": "Environmental events",
+            "value": 3210
+          },
+          {
+            "label": "Environmental permits",
+            "value": 1242
+          },
+          {
+            "label": "Local permit events",
+            "value": 599
+          },
+          {
+            "label": "Local permits",
+            "value": 122
+          }
+        ],
+        "interaction": "Select a record type, inspect its definition, and switch to the corresponding table.",
+        "caption": "Six record types total 151,715 observations. A tract, permit and permit event can relate to the same place and are not separate projects.",
+        "source": "cedar-catalog-20261002"
+      }
+    ],
+    "preliminary": true,
+    "wordCount": 988,
+    "statusLabel": "Early access • Preliminary findings, subject to change"
+  },
+  {
+    "id": "two-tribes-one-building",
+    "title": "Two tribes, one building",
+    "dek": "A Grand Rapids acquisition shows how Native economic diversification can be shared, local and bigger than an industry label.",
+    "date": "2026-10-02",
+    "byline": "Cedar Research",
+    "earlyAccess": true,
+    "preliminary": true,
+    "statusLabel": "Early access • Preliminary analysis, subject to change",
+    "draws": [
+      "deals"
+    ],
+    "highlights": [
+      "Gun Lake Investments and Waséyabek announced a $17.5 million joint purchase of McKay Tower in January 2020.",
+      "The acquisition brought together the economic development arms of two distinct tribal governments.",
+      "In March 2022, the owners and property manager announced a new identity for the building spanning its residential, retail, event and business uses."
+    ],
+    "body": [
+      {
+        "kind": "p",
+        "text": "A single building in downtown Grand Rapids offers a useful way to rethink tribal economic diversification. McKay Tower is a real-estate asset. It is also a partnership between two Native nations, a place where different kinds of customers pay for different uses, and an investment in a city with a history that reaches well beyond the purchase date."
+      },
+      {
+        "kind": "p",
+        "text": "In January 2020, Gun Lake Investments and Waséyabek Development Company announced their joint acquisition of the property for $17.5 million. Gun Lake Investments belongs to the Match-E-Be-Nash-She-Wish Band of Pottawatomi Indians. Waséyabek manages non-gaming economic development for the Nottawaseppi Huron Band of Potawatomi Indians. The transaction connected two separate tribal investment organizations around one asset. [Read the owners’ announcement](https://waseyabek.com/two-michigan-tribes-announce-joint-venture-to-purchase-mckay-tower-in-grand-rapids/)."
+      },
+      {
+        "kind": "figure",
+        "chart": "relationships",
+        "id": "mckay-participants",
+        "caption": "Two tribal investment organizations joined in one purchase.",
+        "source": "Owner announcement, January 15, 2020",
+        "relationships": [
+          {
+            "from": "Match-E-Be-Nash-She-Wish Band of Pottawatomi Indians",
+            "relationship": "owns",
+            "to": "Gun Lake Investments",
+            "asOf": "2020-01-15",
+            "detail": "The announcement identifies Gun Lake Investments as wholly owned by this tribe.",
+            "sources": [
+              {
+                "url": "https://waseyabek.com/two-michigan-tribes-announce-joint-venture-to-purchase-mckay-tower-in-grand-rapids/",
+                "title": "Joint McKay Tower purchase announcement",
+                "publisher": "Waséyabek Development Company",
+                "date": "2020-01-15"
+              }
+            ]
+          },
+          {
+            "from": "Nottawaseppi Huron Band of Potawatomi Indians",
+            "relationship": "owns",
+            "to": "Waséyabek Development Company",
+            "asOf": "2020-01-15",
+            "detail": "The announcement identifies Waséyabek Development Company as wholly owned by this tribe.",
+            "sources": [
+              {
+                "url": "https://waseyabek.com/two-michigan-tribes-announce-joint-venture-to-purchase-mckay-tower-in-grand-rapids/",
+                "title": "Joint McKay Tower purchase announcement",
+                "publisher": "Waséyabek Development Company",
+                "date": "2020-01-15"
+              }
+            ]
+          },
+          {
+            "from": "Gun Lake Investments",
+            "relationship": "joint purchaser",
+            "to": "McKay Tower",
+            "asOf": "2020-01-15",
+            "detail": "One jointly announced acquisition with Waséyabek. No equity percentage is established here.",
+            "sources": [
+              {
+                "url": "https://waseyabek.com/two-michigan-tribes-announce-joint-venture-to-purchase-mckay-tower-in-grand-rapids/",
+                "title": "Joint McKay Tower purchase announcement",
+                "publisher": "Waséyabek Development Company",
+                "date": "2020-01-15"
+              }
+            ]
+          },
+          {
+            "from": "Waséyabek Development Company",
+            "relationship": "joint purchaser",
+            "to": "McKay Tower",
+            "asOf": "2020-01-15",
+            "detail": "One jointly announced acquisition with Gun Lake Investments. No equity percentage is established here.",
+            "sources": [
+              {
+                "url": "https://waseyabek.com/two-michigan-tribes-announce-joint-venture-to-purchase-mckay-tower-in-grand-rapids/",
+                "title": "Joint McKay Tower purchase announcement",
+                "publisher": "Waséyabek Development Company",
+                "date": "2020-01-15"
+              }
+            ]
+          }
+        ],
+        "notes": [
+          "Connections identify reported relationships as of the announcement, not ownership percentages.",
+          "Both purchasers participate in the same $17.5 million transaction; do not count the purchase twice."
+        ],
+        "sources": [
+          {
+            "url": "https://waseyabek.com/two-michigan-tribes-announce-joint-venture-to-purchase-mckay-tower-in-grand-rapids/",
+            "title": "Joint McKay Tower purchase announcement",
+            "publisher": "Waséyabek Development Company",
+            "date": "2020-01-15"
+          }
+        ]
+      },
+      {
+        "kind": "p",
+        "text": "The familiar diversification story is about leaving one sector and entering another. A government with gaming interests invests in manufacturing, professional services or property. That is an important change. McKay Tower points toward another dimension: how an investment is organized and which relationships make it possible."
+      },
+      {
+        "kind": "p",
+        "text": "A co-investment gives a project more than one institutional home. It can create an opportunity to share work, combine experience and consider an asset that either partner might approach differently alone. Those are possibilities of the structure, rather than measured results of this transaction. The public announcement establishes joint ownership, but it does not disclose enough about the partners’ contributions or agreements to calculate who supplied how much capital or how risk was divided."
+      },
+      {
+        "kind": "p",
+        "text": "That distinction matters to anyone following Native investment. If one buyer appears in an enterprise profile and another in a separate announcement, the same property can look like two unrelated acquisitions. If a table assigns the whole transaction to only one buyer, the partnership disappears. The useful unit is one deal with its participants intact. That permits the story to appear on both profiles without pretending that two buildings changed hands."
+      },
+      {
+        "kind": "p",
+        "text": "The property’s business mix adds another layer. The original announcement described offices, retail, event space and apartments. These uses create different relationships with tenants and customers. They do not automatically make the building immune to a downturn, but they give an analyst more to examine than a single real-estate label."
+      },
+      {
+        "kind": "p",
+        "text": "For an investor or tribal council, the next questions are practical. How much of the property’s income comes from each use? Do leases expire together? What improvements will be needed? How sensitive is the asset to conditions in downtown Grand Rapids? The answers would come from operating and financial information, not from counting the number of activities listed in a news release."
+      },
+      {
+        "kind": "p",
+        "text": "Two years after the acquisition, Waséyabek described a new website, signage and branding for McKay Tower. The March 2022 announcement linked the building’s residential, retail, event and business activities under a renewed identity. It also identified Gun Lake Investments as both an owner and a tenant. That is a specific example of how an investment organization can occupy more than one role in the same property. [See the 2022 announcement](https://waseyabek.com/mckay-tower-sports-a-new-look-in-2022/)."
+      },
+      {
+        "kind": "figure",
+        "chart": "timeline",
+        "id": "mckay-timeline",
+        "caption": "The purchase and the later property update are separate events.",
+        "source": "Owner announcements, 2020 and 2022",
+        "events": [
+          {
+            "date": "2020-01-15",
+            "title": "Joint purchase announced",
+            "detail": "Gun Lake Investments and Waséyabek Development Company announce the $17.5 million acquisition of McKay Tower.",
+            "sources": [
+              {
+                "url": "https://waseyabek.com/two-michigan-tribes-announce-joint-venture-to-purchase-mckay-tower-in-grand-rapids/",
+                "title": "Joint McKay Tower purchase announcement",
+                "publisher": "Waséyabek Development Company",
+                "date": "2020-01-15"
+              }
+            ]
+          },
+          {
+            "date": "2022-03-14",
+            "title": "New website, signage and branding announced",
+            "detail": "Waséyabek describes the property's refreshed identity and its residential, retail, event and business uses. This is not another purchase.",
+            "sources": [
+              {
+                "url": "https://waseyabek.com/mckay-tower-sports-a-new-look-in-2022/",
+                "title": "McKay Tower announces new branding",
+                "publisher": "Waséyabek Development Company",
+                "date": "2022-03-14"
+              }
+            ]
+          }
+        ],
+        "notes": [
+          "Dates identify the published announcements, not independently established legal closing dates.",
+          "The later announcement does not supply a new purchase price or current valuation."
+        ],
+        "sources": [
+          {
+            "url": "https://waseyabek.com/two-michigan-tribes-announce-joint-venture-to-purchase-mckay-tower-in-grand-rapids/",
+            "title": "Joint McKay Tower purchase announcement",
+            "publisher": "Waséyabek Development Company",
+            "date": "2020-01-15"
+          },
+          {
+            "url": "https://waseyabek.com/mckay-tower-sports-a-new-look-in-2022/",
+            "title": "McKay Tower announces new branding",
+            "publisher": "Waséyabek Development Company",
+            "date": "2022-03-14"
+          }
+        ]
+      },
+      {
+        "kind": "p",
+        "text": "The owner-and-tenant relationship raises an interesting analytical question. An office can be a place to conduct an investment business and an asset within that business’s portfolio. A rent payment and a return on ownership represent different flows, even when related organizations appear on both sides. Understanding the arrangement requires relationships and dates as well as names."
+      },
+      {
+        "kind": "figure",
+        "chart": "evidenceTable",
+        "id": "mckay-roles",
+        "caption": "The same property connects owners, a tenant and a manager.",
+        "source": "Waséyabek property update, March 14, 2022",
+        "columns": [
+          {
+            "key": "entity",
+            "label": "Organization"
+          },
+          {
+            "key": "role",
+            "label": "Reported role"
+          },
+          {
+            "key": "asOf",
+            "label": "As of"
+          }
+        ],
+        "rows": [
+          {
+            "entity": "Gun Lake Investments",
+            "role": "Owner and tenant",
+            "asOf": "2022-03-14",
+            "detail": "The owner’s update explicitly names both roles.",
+            "sources": [
+              {
+                "url": "https://waseyabek.com/mckay-tower-sports-a-new-look-in-2022/",
+                "title": "McKay Tower announces new branding",
+                "publisher": "Waséyabek Development Company",
+                "date": "2022-03-14"
+              }
+            ]
+          },
+          {
+            "entity": "Waséyabek Development Company",
+            "role": "Co-owner",
+            "asOf": "2022-03-14",
+            "detail": "The owner’s update describes its continuing ownership role.",
+            "sources": [
+              {
+                "url": "https://waseyabek.com/mckay-tower-sports-a-new-look-in-2022/",
+                "title": "McKay Tower announces new branding",
+                "publisher": "Waséyabek Development Company",
+                "date": "2022-03-14"
+              }
+            ]
+          },
+          {
+            "entity": "Rockford Property Management",
+            "role": "Property manager",
+            "asOf": "2022-03-14",
+            "detail": "Management is a separate role and does not establish an ownership interest.",
+            "sources": [
+              {
+                "url": "https://waseyabek.com/mckay-tower-sports-a-new-look-in-2022/",
+                "title": "McKay Tower announces new branding",
+                "publisher": "Waséyabek Development Company",
+                "date": "2022-03-14"
+              }
+            ]
+          }
+        ],
+        "notes": [
+          "Roles describe this dated source, not a claim about current leases or ownership.",
+          "Select a row for the source; the tenant role does not establish rents or investment returns."
+        ],
+        "sources": [
+          {
+            "url": "https://waseyabek.com/mckay-tower-sports-a-new-look-in-2022/",
+            "title": "McKay Tower announces new branding",
+            "publisher": "Waséyabek Development Company",
+            "date": "2022-03-14"
+          }
+        ]
+      },
+      {
+        "kind": "p",
+        "text": "This is where connected data can improve the conversation. Cedar’s Deals record provides the transaction. An enterprise profile can establish the participants and their relationship to the relevant Native governments. A verified property record can locate the asset itself. Each source contributes something different. Together, they can support a clearer account of who invested, where the investment sits and how it fits into a larger portfolio."
+      },
+      {
+        "kind": "p",
+        "text": "The broader research context is already richer than the idea that tribal business means casinos alone. A 2025 Federal Reserve Bank of Minneapolis study identified 5,559 establishments owned by 344 federally recognized tribes in its historical snapshot. It found almost three times as many establishments outside leisure and hospitality as within it. That study covers a different population and period from Cedar’s current public enterprise profiles, but it reinforces the value of looking across sectors. [Read the study](https://www.minneapolisfed.org/article/2025/new-data-showcase-the-breadth-of-tribally-owned-businesses)."
+      },
+      {
+        "kind": "p",
+        "text": "McKay Tower adds a question that a sector count cannot answer: how often do tribal investment organizations build portfolios together? A growing set of well-documented transactions could reveal whether partnerships recur, which kinds of assets attract them and how their geography develops. One case cannot establish that pattern. It can show why the question deserves an answer."
+      },
+      {
+        "kind": "p",
+        "text": "There is a second reason to keep the story grounded in a place. A downtown property links tribal capital to an urban business district. Describing the deal only by the location of the tribal governments would miss that economic connection. Conversely, placing a dot in Grand Rapids would not describe the full geography of the communities that own the investment."
+      },
+      {
+        "kind": "p",
+        "text": "The enduring interest in this acquisition is therefore larger than its price. It shows several dimensions of diversification meeting in one place: a non-gaming asset, multiple uses, two tribal owners and continuing management of an existing building. The next useful comparison is with other joint investments, using verified ownership and operating evidence. That is a more revealing question than simply asking whether a tribe bought another business."
+      }
+    ],
+    "sources": [
+      {
+        "id": "mckay-2020",
+        "title": "Waséyabek: joint acquisition announcement, January 15, 2020",
+        "url": "https://waseyabek.com/two-michigan-tribes-announce-joint-venture-to-purchase-mckay-tower-in-grand-rapids/"
+      },
+      {
+        "id": "mckay-2022",
+        "title": "Waséyabek: McKay Tower update, March 14, 2022",
+        "url": "https://waseyabek.com/mckay-tower-sports-a-new-look-in-2022/"
+      },
+      {
+        "id": "fed-enterprises-2025",
+        "title": "Federal Reserve Bank of Minneapolis: New data showcase the breadth of tribally owned businesses",
+        "url": "https://www.minneapolisfed.org/article/2025/new-data-showcase-the-breadth-of-tribally-owned-businesses"
+      },
+      {
+        "id": "cedar-deals-acq2020-016",
+        "title": "Cedar Deals: ACQ2020-016",
+        "collection": "deals",
+        "recordId": "ACQ2020-016",
+        "release": "f9f50ccadc3bfe10089e47a0c8710a3ac382651703571f38ed6a2d57ba47623b"
+      }
+    ],
+    "internalReview": {
+      "publish": false,
+      "classification": "Historical case analysis, not a new transaction announcement or a finding about all tribal deals.",
+      "requiredBeforePublication": [
+        "Ensure exact Cedar party bindings agree with the two owner primary sources",
+        "Do not display the disputed capital_source='Federal' or industry classifications from the source row",
+        "Apply actual tier access and collection links",
+        "This article directly draws on Deals and external owner sources. Do not present an existing NEED or PLOT record linkage unless an exact reviewed match is confirmed."
+      ],
+      "claimsChecked": "Purchase price, date, participants, original property uses and 2022 owner/tenant role checked against direct owner sources.",
+      "limitations": "No investment returns, ownership percentages, financing source, tenant mix shares or current valuation established.",
+      "visualPlanStatus": "Three figures are placed in the reader body using new semantic chart types; renderer and server projection must support them before merge. No fabricated numeric edge weights.",
+      "importArtifact": "cedar_editorial_mckay_figures_v3.json"
+    },
+    "wordCount": 874,
+    "relatedCollections": [
+      {
+        "id": "need",
+        "reason": "Investigate business ownership where an exact reviewed entity match exists."
+      },
+      {
+        "id": "plot",
+        "reason": "Explore land evidence; this article has not established a PLOT match for McKay Tower."
+      }
+    ],
+    "draft": true,
+    "tone": "teal",
+    "datasetId": "deals",
+    "tag": "Original Research",
+    "image": "/pitch/lanes/professional-wide.webp",
+    "imageAlt": "People meeting around a conference table, shown as an illustrative photograph.",
+    "caption": "Illustrative photograph. The organizations and property in this article are identified through the cited announcements.",
+    "hosted": true,
+    "demonstration": false,
+    "minutes": 4,
+    "authors": [
+      {
+        "name": "Cedar Research"
+      }
+    ]
+  },
+  {
+    "id": "native-climate-grants-behind-the-names",
+    "title": "The names behind $22 million",
+    "dek": "Two of the largest grants in a Native climate funding round connected a legal recipient to a different, more specific program.",
+    "date": "2026-10-02",
+    "byline": "Cedar Research",
+    "draft": true,
+    "earlyAccess": true,
+    "preliminary": true,
+    "statusLabel": "Early access • Preliminary analysis, subject to change",
+    "draws": [
+      "foundation-corporate-giving"
+    ],
+    "highlights": [
+      "The Bezos Earth Fund’s December 2021 announcement identified five grants totaling $38 million for Native communities and related climate work.",
+      "Two grants associated with GRID Alternatives and New Venture Fund totaled $22 million, or 57.9% of that explicitly defined group.",
+      "The named programs were the Tribal Solar Accelerator Fund and Alaska Venture Fund. Their legal hosts and their intended work belong in the same funding story."
+    ],
+    "body": [
+      {
+        "kind": "p",
+        "text": "The two largest grants in one $38 million Native climate funding announcement tell an unusually clear story about how philanthropic money travels. Their records name GRID Alternatives and New Venture Fund. Read one level further, and the work comes into focus: the Tribal Solar Accelerator Fund and Alaska Venture Fund."
+      },
+      {
+        "kind": "p",
+        "text": "Cedar’s Giving records preserve those distinctions. They identify a $12 million commitment associated with GRID’s tribal solar work and a $10 million commitment associated with Alaska Venture Fund. Together, those two awards account for 57.9% of the five-grant Native-community group in the Bezos Earth Fund’s December 6, 2021 announcement. This is a calculation for that specific group, not an estimate of all Native philanthropy. [See the donor’s announcement](https://www.bezosearthfund.org/news-and-insights/bezos-earth-fund-announces-443-million-in-grants-to-advance-environmental-justice-conserve-and-restore-nature-and-improve-monitoring-and-accountability)."
+      },
+      {
+        "kind": "figure",
+        "chart": "bars",
+        "caption": "Five announced grants in the donor’s explicitly identified Native-community group, December 2021.",
+        "source": "Bezos Earth Fund, December 6, 2021",
+        "points": [
+          {
+            "label": "GRID Alternatives / Tribal Solar Accelerator Fund",
+            "value": 12000000
+          },
+          {
+            "label": "New Venture Fund / Alaska Venture Fund",
+            "value": 10000000
+          },
+          {
+            "label": "NDN Collective",
+            "value": 8000000
+          },
+          {
+            "label": "First Nations Development Institute",
+            "value": 5000000
+          },
+          {
+            "label": "Native Movement",
+            "value": 3000000
+          }
+        ],
+        "notes": [
+          "Amounts are announced grant commitments in nominal dollars, not verified annual cash payments.",
+          "This is one defined five-grant group, not all grants to Native communities."
+        ],
+        "sources": [
+          {
+            "url": "https://www.bezosearthfund.org/news-and-insights/bezos-earth-fund-announces-443-million-in-grants-to-advance-environmental-justice-conserve-and-restore-nature-and-improve-monitoring-and-accountability",
+            "title": "Donor grant list",
+            "publisher": "Bezos Earth Fund",
+            "date": "2021-12-06",
+            "locator": "Native communities grant group"
+          }
+        ],
+        "id": "giving-announced-commitments"
+      },
+      {
+        "kind": "p",
+        "text": "The distinction is easy to overlook because the same transaction can be described differently in different places. A donor may use the organization that receives the grant. A project may describe the program the money supports. A community may know the local partner doing the work. None of those names necessarily tells the whole story alone."
+      },
+      {
+        "kind": "p",
+        "text": "In the solar case, the donor’s project page names GRID Alternatives and the Tribal Solar Accelerator Fund together. It describes support for developing, financing and implementing renewable-energy projects, alongside education and workforce training. The stated objectives included work with more than 25 tribes and training for more than 200 tribal members. Those were project goals, not a completion count. [Read the award description](https://www.bezosearthfund.org/grants/advancing-energy-sovereignty-in-tribal-communities)."
+      },
+      {
+        "kind": "p",
+        "text": "The recipient also described the award as a multiyear grant to expand the program. That gives the figure a different meaning from a single year’s spending or a payment to one tribe. A large commitment can finance several kinds of activity over time. Dividing it by a target number of tribes would create an average allocation that the source never promised. [Read GRID’s grant announcement](https://gridalternatives.org/sites/default/files/Bezos%20Earth%20Fund%20Press%20Release.pdf)."
+      },
+      {
+        "kind": "p",
+        "text": "Alaska Venture Fund presents a related structure. Its own website identifies it as a project of New Venture Fund and describes a portfolio that includes climate and clean energy, community resilience, healthy natural systems and Native nation building. The project name communicates place and purpose; the fiscal host supplies another essential part of its organizational identity. [See Alaska Venture Fund’s portfolio](https://alaskaventure.org/ventures/)."
+      },
+      {
+        "kind": "figure",
+        "chart": "sankey",
+        "caption": "Two legal recipient names connect to two specified programs.",
+        "source": "Donor announcement and recipient organizational statements",
+        "flows": [
+          {
+            "from": "Bezos Earth Fund",
+            "to": "GRID Alternatives",
+            "value": 12000000
+          },
+          {
+            "from": "GRID Alternatives",
+            "to": "Tribal Solar Accelerator Fund",
+            "value": 12000000
+          },
+          {
+            "from": "Bezos Earth Fund",
+            "to": "New Venture Fund",
+            "value": 10000000
+          },
+          {
+            "from": "New Venture Fund",
+            "to": "Alaska Venture Fund",
+            "value": 10000000
+          }
+        ],
+        "notes": [
+          "Edges show the same two announced commitments at successive organizational levels. Do not add edges together.",
+          "The diagram does not represent verified subgrant disbursements or equal allocations to communities."
+        ],
+        "sources": [
+          {
+            "url": "https://www.bezosearthfund.org/news-and-insights/bezos-earth-fund-announces-443-million-in-grants-to-advance-environmental-justice-conserve-and-restore-nature-and-improve-monitoring-and-accountability",
+            "title": "Donor grant list",
+            "publisher": "Bezos Earth Fund",
+            "date": "2021-12-06"
+          }
+        ],
+        "id": "giving-recipient-program-links"
+      },
+      {
+        "kind": "p",
+        "text": "This does not make the legal recipient unimportant. It makes the relationship important. A grant record needs to preserve who received the award and what program it supported. Replacing one name with the other would make some questions easier while making others impossible to answer. Financial accountability follows the legal organization. Understanding the intended work may require the program and its partners."
+      },
+      {
+        "kind": "p",
+        "text": "For a tribal organization seeking funding, that second layer can be particularly useful. The relevant connection may be a program with technical staff, local relationships and experience assembling a project. The donor’s name explains where the grant originated. The program’s name can explain how a community might encounter the work. A directory that retains only the first relationship misses a practical route through the funding system."
+      },
+      {
+        "kind": "p",
+        "text": "The solar record illustrates why assistance can matter before construction begins. Developing a project can involve assessing the site, arranging financing, coordinating partners and training people who will install or maintain equipment. The award description explicitly combines several of those functions. A funding story focused only on panels installed would miss the work intended to make those installations possible."
+      },
+      {
+        "kind": "p",
+        "text": "There are public examples of that work taking a recognizable local form. In May 2024, GRID described a Tribal Solar Accelerator Fund grant for solar on the Hopland Band of Pomo Indians’ gym, which also serves as an emergency center. That account ties a program to a specific community facility. It does not, by itself, establish which donor’s dollars paid for that particular installation. [Read the Hopland project account](https://gridalternatives.org/regions/bayarea/news/hopland-band-pomo-indians-partnership-grid-north-coast)."
+      },
+      {
+        "kind": "p",
+        "text": "That last connection is the next reporting question. Can a grant to a national organization be followed through a program to a local award and then to a completed project? Answering it would require subgrant records, project documentation and consistent dates. Where those records exist, they could connect philanthropy to infrastructure in a way that a donor total cannot."
+      },
+      {
+        "kind": "p",
+        "text": "It would also make comparisons more useful. Direct grants to tribal governments, grants to Native-led nonprofits and grants to programs serving Native communities represent different relationships. They can all be relevant to a funding inquiry. They should not be treated as interchangeable evidence about who controls the money or how much ultimately reaches a particular community."
+      },
+      {
+        "kind": "p",
+        "text": "The two awards also show why one announcement cannot settle the question of whether philanthropy is rising or falling. A multiyear commitment can produce a prominent headline in its first year and spending in later years. The comparison needs a consistent measure and a consistent set of funders. The specific conclusion here is narrower and stronger: a majority of this defined grant group sat in two records whose legal names alone did not describe the Native programs."
+      },
+      {
+        "kind": "p",
+        "text": "For readers, the payoff is a better question after the first answer. Once the donor and recipient are known, follow the program. Once the program is known, look for the community project. The result can be a fuller account of Native funding, with the organizations, commitments and outcomes kept distinct enough to see how they actually connect."
+      }
+    ],
+    "sources": [
+      {
+        "url": "https://www.bezosearthfund.org/news-and-insights/bezos-earth-fund-announces-443-million-in-grants-to-advance-environmental-justice-conserve-and-restore-nature-and-improve-monitoring-and-accountability",
+        "title": "Bezos Earth Fund grant announcement",
+        "publisher": "Bezos Earth Fund",
+        "date": "2021-12-06",
+        "locator": "Supporting Native communities and Tribal Justice40 efforts"
+      },
+      {
+        "url": "https://www.bezosearthfund.org/grants/advancing-energy-sovereignty-in-tribal-communities",
+        "title": "Advancing Energy Sovereignty in Tribal Communities",
+        "publisher": "Bezos Earth Fund",
+        "date": "2021-11",
+        "locator": "Amount granted and project objectives"
+      },
+      {
+        "url": "https://alaskaventure.org/ventures/",
+        "title": "Alaska Venture Fund ventures and fiscal-host statement",
+        "publisher": "Alaska Venture Fund",
+        "date": "accessed 2026-10-02"
+      },
+      {
+        "url": "https://gridalternatives.org/regions/bayarea/news/hopland-band-pomo-indians-partnership-grid-north-coast",
+        "title": "Hopland partnership project",
+        "publisher": "GRID Alternatives",
+        "date": "2024-05-28"
+      }
+    ],
+    "internalReview": {
+      "publish": false,
+      "classification": "Source-verified analysis of one historical grant group; not a sector-wide trend.",
+      "sourceCollectionRows": "Root verified all five current download-permitted policy-eligible Giving observations; exact IDs retained in cedarRecordEvidence.",
+      "calculations": {
+        "selectedAmountsUsd": [
+          12000000,
+          10000000
+        ],
+        "definedGroupAmountsUsd": [
+          10000000,
+          5000000,
+          12000000,
+          3000000,
+          8000000
+        ],
+        "numeratorUsd": 22000000,
+        "denominatorUsd": 38000000,
+        "sharePercent": 57.89473684210526
+      },
+      "excludedClaims": [
+        "No claim all $22M was paid in 2021",
+        "No claim sponsors are themselves tribal governments or Native-owned businesses",
+        "No claim the Hopland project was financed by this donor",
+        "No 2026 program availability claim",
+        "No sector giving decline or total"
+      ],
+      "thirdView": "Do not fabricate a third chart. A project-level table requires verified subgrant or installation observations and an implemented table renderer.",
+      "cedarRecordEvidence": {
+        "collection": "foundation-corporate-giving",
+        "component": "policy_eligible_disclosures_p00000",
+        "status": "All five current permitted observations confirmed by root against exact release rows",
+        "sourceDocumentSha256": "389dc5c85d2071a51fa74a832cd8c28f682edfa68f3e0d8eb5baafb503a340da",
+        "locator": "Native Justice40 grants list, lines85–86",
+        "reportYear": 2021,
+        "amountBasis": "commitment",
+        "financialStatus": "committed",
+        "records": [
+          {
+            "id": "FF-165267636CC8B728B8FF",
+            "recipient": "First Nations Development Institute",
+            "amount": 5000000
+          },
+          {
+            "id": "FF-375CEB685FA9C343E742",
+            "recipient": "GRID Alternatives",
+            "beneficiary": "Tribal Solar Accelerator Fund",
+            "amount": 12000000
+          },
+          {
+            "id": "FF-98E24F2E0C5AE30C0032",
+            "recipient": "Native Movement",
+            "amount": 3000000
+          },
+          {
+            "id": "FF-A1DC06E668682D2F9049",
+            "recipient": "New Venture Fund",
+            "beneficiary": "Alaska Venture Fund",
+            "amount": 10000000
+          },
+          {
+            "id": "FF-C9A1B48C0F75FEAC9F3A",
+            "recipient": "NDN Collective",
+            "amount": 8000000
+          }
+        ],
+        "releasePinStatus": "Attach exact current release pin from root inventory before merge"
+      },
+      "readerFigureProvenance": {
+        "artifact": "cedar_editorial_giving_names_v2.json",
+        "figureIds": [
+          "giving-announced-commitments",
+          "giving-recipient-program-links"
+        ]
+      },
+      "importArtifact": "cedar_editorial_giving_names_v2.json + cedar_editorial_copy_fixes_v1.json:givingNames"
+    },
+    "wordCount": 868,
+    "tone": "green",
+    "datasetId": "foundation-corporate-giving",
+    "tag": "Original Research",
+    "image": "/pitch/lanes/professional-wide.webp",
+    "imageAlt": "People meeting around a conference table, shown as an illustrative photograph.",
+    "caption": "Illustrative photograph. The grants and programs discussed are documented in the cited records.",
+    "hosted": true,
+    "demonstration": false,
+    "minutes": 4,
+    "authors": [
+      {
+        "name": "Cedar Research"
+      }
+    ]
+  },
+  {
+    "id": "tribal-solar-fund-balance-and-work",
+    "title": "A smaller balance, more funds released",
+    "dek": "The Tribal Solar Accelerator Fund’s latest accounts complicate a simple story about declining money.",
+    "date": "2026-10-02",
+    "byline": "Cedar Research",
+    "draft": true,
+    "earlyAccess": true,
+    "preliminary": true,
+    "statusLabel": "Early access • Preliminary analysis, subject to change",
+    "draws": [
+      "foundation-corporate-giving"
+    ],
+    "highlights": [
+      "TSAF donor-restricted net assets fell 56.4%, from $16.87 million at the end of 2024 to $7.36 million at the end of 2025.",
+      "Annual amounts released from the TSAF restriction rose 12.4%, from $8.53 million to $9.58 million.",
+      "A release from a donor restriction is an accounting measure, distinct from new commitments and payments to individual tribes."
+    ],
+    "body": [
+      {
+        "kind": "p",
+        "text": "A smaller balance can mean a quieter year. It can also mean money is moving through a program. The Tribal Solar Accelerator Fund presents a striking example: its donor-restricted balance fell sharply in 2025 even as more funds were released from those restrictions. Those two movements tell a more interesting story than either number alone."
+      },
+      {
+        "kind": "p",
+        "text": "GRID Alternatives’ audited accounts put the fund’s restricted net assets at $7.36 million at the end of 2025, down from $16.87 million a year earlier. Meanwhile, amounts released from that restriction rose from $8.53 million to $9.58 million. Cedar calculates a 56.4% decline in the balance and a 12.4% increase in releases. These are nominal-dollar accounting measures, not a count of grants or cash delivered to tribes. [See Note 14, page 30](https://gridalternatives.org/sites/default/files/2026-07/2025%20GRID%20Alternatives%20FS%20%28GT%29.pdf)."
+      },
+      {
+        "kind": "figure",
+        "chart": "bars",
+        "caption": "The fund’s donor-restricted year-end balance declined in 2025.",
+        "source": "GRID Alternatives 2025 audited financial statements",
+        "points": [
+          {
+            "label": "2024",
+            "value": 16867368
+          },
+          {
+            "label": "2025",
+            "value": 7360335
+          }
+        ],
+        "notes": [
+          "Nominal dollars, balances at December 31; not annual awards or cash paid.",
+          "This is the TSAF restriction category, not all GRID or Tribal Energy Alternatives assets."
+        ],
+        "sources": [
+          {
+            "url": "https://gridalternatives.org/sites/default/files/2026-07/2025%20GRID%20Alternatives%20FS%20%28GT%29.pdf",
+            "title": "2025 audited consolidated financial statements",
+            "publisher": "GRID Alternatives",
+            "date": "2026-06-26",
+            "locator": "Note14 printedp30; policy printedp18"
+          }
+        ],
+        "id": "solar-restricted-balance"
+      },
+      {
+        "kind": "p",
+        "text": "The pairing matters because tribal philanthropy is often discussed through announcements. A large commitment arrives with a date, a dollar amount and an ambitious description. Its later life is less visible. Work develops over several years, while the original headline remains easy to find. Following that money requires a second kind of record."
+      },
+      {
+        "kind": "p",
+        "text": "Cedar’s Giving collection provides one starting point: the Bezos Earth Fund’s 2021 commitment of $12 million associated with GRID and the Tribal Solar Accelerator Fund. The donor described a program intended to help tribes develop, finance and implement renewable-energy projects, with education and workforce training alongside construction. That record describes an award and its intended scope, rather than a single year’s completed work. [Read the award description](https://www.bezosearthfund.org/grants/advancing-energy-sovereignty-in-tribal-communities)."
+      },
+      {
+        "kind": "p",
+        "text": "Another major commitment followed. In December 2023, GRID announced a $25 million award from the Waverley Street Foundation for the fund. Its explanation placed predevelopment and technical assistance among the needs the investment would address. Those activities can precede visible construction by a considerable distance. They still belong in the economic story of getting a project built. [Read the Waverley award announcement](https://gridalternatives.org/learn/press/press-releases/grid-alternatives-tribal-solar-accelerator-fund-awarded-25-million)."
+      },
+      {
+        "kind": "figure",
+        "chart": "bars",
+        "caption": "Two separately announced commitments preceded the 2025 financial position.",
+        "source": "Donor and recipient announcements",
+        "points": [
+          {
+            "label": "Bezos Earth Fund, 2021",
+            "value": 12000000
+          },
+          {
+            "label": "Waverley Street Foundation, 2023",
+            "value": 25000000
+          }
+        ],
+        "notes": [
+          "Nominal announced commitments in different years; not a complete annual funding series.",
+          "These announcements cannot identify the donor composition of later balances or releases."
+        ],
+        "sources": [
+          {
+            "url": "https://www.bezosearthfund.org/grants/advancing-energy-sovereignty-in-tribal-communities",
+            "title": "Advancing Energy Sovereignty in Tribal Communities",
+            "publisher": "Bezos Earth Fund",
+            "date": "2021-11"
+          },
+          {
+            "url": "https://gridalternatives.org/learn/press/press-releases/grid-alternatives-tribal-solar-accelerator-fund-awarded-25-million",
+            "title": "TSAF awarded $25 million from Waverley Street Foundation",
+            "publisher": "GRID Alternatives",
+            "date": "2023-12-05"
+          }
+        ],
+        "id": "solar-announced-commitments"
+      },
+      {
+        "kind": "p",
+        "text": "The financial statements describe what happens when donor restrictions are satisfied through the organization’s actions or the passage of time. A release changes the classification of net assets. It is not automatically a payment to a particular tribe, and it cannot identify which donor financed a particular installation. [See the accounting policy, page 18](https://gridalternatives.org/sites/default/files/2026-07/2025%20GRID%20Alternatives%20FS%20%28GT%29.pdf)."
+      },
+      {
+        "kind": "figure",
+        "chart": "bars",
+        "caption": "Amounts released from the TSAF restriction increased over the same period.",
+        "source": "GRID Alternatives 2025 audited financial statements",
+        "points": [
+          {
+            "label": "2024",
+            "value": 8527025
+          },
+          {
+            "label": "2025",
+            "value": 9583783
+          }
+        ],
+        "notes": [
+          "Annual accounting reclassifications when purpose or time restrictions are satisfied.",
+          "Not a direct measure of subgrant cash payments; do not add to year-end balances."
+        ],
+        "sources": [
+          {
+            "url": "https://gridalternatives.org/sites/default/files/2026-07/2025%20GRID%20Alternatives%20FS%20%28GT%29.pdf",
+            "title": "2025 audited consolidated financial statements",
+            "publisher": "GRID Alternatives",
+            "date": "2026-06-26",
+            "locator": "Note14 printedp30; policy printedp18"
+          }
+        ],
+        "id": "solar-restriction-releases"
+      },
+      {
+        "kind": "p",
+        "text": "That still leaves a substantive finding. A program can be drawing down accumulated restricted resources while activity recognized against those resources increases. The year-end balance is a stock. The release is a flow. A lower stock, by itself, cannot establish that the program did less. Equally, rising releases do not prove that new fundraising kept pace."
+      },
+      {
+        "kind": "p",
+        "text": "For a tribal partner, that distinction points to two separate practical questions. What work can the existing commitments support? And what will replenish resources for the next round of projects? The first concerns delivery. The second concerns continuity. Treating them as one question can hide either progress or emerging pressure."
+      },
+      {
+        "kind": "p",
+        "text": "There is a useful project counterpart to the financial accounts. The tribal program’s 2024 impact report lists $4.6 million in grant funding and 24 grantees across 12 states. Its construction section separately describes work in New Mexico, Nevada and Washington. Those sections cover different activities and can overlap; their figures are not additional pots of money to pile onto the audited balance. [Read the 2024 impact report](https://tribalalternatives.org/wp-content/uploads/2026/03/2024-TEA-Impact-Report.pdf)."
+      },
+      {
+        "kind": "p",
+        "text": "The report gives the financial story a physical setting. Solar development includes facilities and homes, but also the people and institutions needed to keep projects moving. A grantmaker can support planning or technical capacity before an installation exists to photograph. A construction team can then work on a project that also appears in a grant program’s records. Following one project across those stages is more revealing than counting each mention as another success."
+      },
+      {
+        "kind": "p",
+        "text": "The organization itself changed during this period. Tribal Energy Alternatives says it was formed in early 2025 by bringing together GRID’s National Tribal Program and the Tribal Solar Accelerator Fund. It describes itself as the first tribal-led affiliate office at GRID. That relationship helps explain why a reader may encounter different organizational names while following related work. It does not turn the parent organization’s entire finances into tribal-program finances. [See Tribal Energy Alternatives’ account of its formation](https://tribalalternatives.org/about/)."
+      },
+      {
+        "kind": "p",
+        "text": "The next useful comparison is therefore specific: the program’s funding commitments, its restricted resources, its grantmaking and its completed projects, each measured on its own terms. Connecting those records could show where a major gift supported several years of work, where a project needed another funding partner, and where an award remained in development."
+      },
+      {
+        "kind": "p",
+        "text": "It would also improve reporting on a possible decline in philanthropy. New commitments might fall while earlier awards continue to support work. Delivery might accelerate while future resources become thinner. Or a fund might secure another large gift that changes the picture again. The accounts here establish the movement of two measures; they do not establish a trend for all Native giving."
+      },
+      {
+        "kind": "p",
+        "text": "For this fund, the preliminary finding is concrete: the restricted balance became substantially smaller while releases increased. That deserves attention because it changes the question. Instead of asking only whether a large gift was announced, ask how the resources are being put to work and what comes after them. The answer can reveal both the progress already underway and the decisions that will shape the next set of tribal energy projects."
+      }
+    ],
+    "sources": [
+      {
+        "url": "https://gridalternatives.org/sites/default/files/2026-07/2025%20GRID%20Alternatives%20FS%20%28GT%29.pdf",
+        "title": "2025 audited consolidated financial statements",
+        "publisher": "GRID Alternatives",
+        "date": "2026-06-26",
+        "locator": "Note14 printedp30; policy printedp18"
+      },
+      {
+        "url": "https://www.bezosearthfund.org/grants/advancing-energy-sovereignty-in-tribal-communities",
+        "title": "Advancing Energy Sovereignty in Tribal Communities",
+        "publisher": "Bezos Earth Fund",
+        "date": "2021-11"
+      },
+      {
+        "url": "https://gridalternatives.org/learn/press/press-releases/grid-alternatives-tribal-solar-accelerator-fund-awarded-25-million",
+        "title": "TSAF awarded $25 million from Waverley Street Foundation",
+        "publisher": "GRID Alternatives",
+        "date": "2023-12-05"
+      },
+      {
+        "url": "https://tribalalternatives.org/wp-content/uploads/2026/03/2024-TEA-Impact-Report.pdf",
+        "title": "2024 impact report",
+        "publisher": "Tribal Energy Alternatives",
+        "date": "2024 reporting year",
+        "locator": "Grant programs and construction sections"
+      },
+      {
+        "url": "https://tribalalternatives.org/about/",
+        "title": "About Tribal Energy Alternatives",
+        "publisher": "Tribal Energy Alternatives",
+        "date": "accessed2026-10-02"
+      }
+    ],
+    "wordCount": 873,
+    "internalReview": {
+      "publish": false,
+      "status": "Primary-source checked; new audit evidence supplements existing Giving observation, not yet imported as normalized observations.",
+      "cedarEvidence": {
+        "id": "FF-375CEB685FA9C343E742",
+        "reportYear": 2021,
+        "amount": 12000000,
+        "amountBasis": "commitment"
+      },
+      "financialScope": "TSAF donor-restriction category within GRID consolidated financial statements; do not substitute affiliate-wide or parent-wide finances.",
+      "calculations": {
+        "balance2024": 16867368,
+        "balance2025": 7360335,
+        "balanceChangePercent": -56.3634646496122,
+        "released2024": 8527025,
+        "released2025": 9583783,
+        "releasedChangePercent": 12.393044467443225
+      },
+      "excludedClaims": [
+        "No donor-to-project allocation inferred",
+        "No annual grant disbursement inferred from releases",
+        "No sector-wide philanthropy decline",
+        "No proof that prior grants explain all later balances",
+        "No causal claim that funding-policy changes produced these exact movements"
+      ],
+      "needsBeforeMerge": [
+        "Attach exact existing Giving release pin",
+        "Capture immutable2025audit and normalize restricted-balance/release observations in entity enrichment, not as new grant events",
+        "Review current program language before external publication"
+      ],
+      "readerFigureProvenance": {
+        "artifact": "cedar_editorial_copy_fixes_v1.json:solarBalance",
+        "figureIds": [
+          "solar-restricted-balance",
+          "solar-restriction-releases",
+          "solar-announced-commitments"
+        ]
+      },
+      "importArtifact": "cedar_editorial_copy_fixes_v1.json:solarBalance"
+    },
+    "tone": "gold",
+    "datasetId": "foundation-corporate-giving",
+    "tag": "Original Research",
+    "image": "/pitch/lanes/construction-wide.webp",
+    "imageAlt": "Crews working at a construction site, shown as an illustrative photograph.",
+    "caption": "Illustrative construction photograph. Project-specific evidence appears in the cited records.",
+    "hosted": true,
+    "demonstration": false,
+    "minutes": 4,
+    "authors": [
+      {
+        "name": "Cedar Research"
+      }
+    ]
+  },
+  {
+    "id": "brief-owned",
+    "hosted": true,
+    "demonstration": false,
+    "tone": "gold",
+    "image": "/pitch/lanes/construction-wide.webp",
+    "imageAlt": "Crews working a large construction site",
+    "caption": "White Earth Nation's certified list runs heavily to the building trades: construction, drywall, tile and site services, most of it first-preference certified.",
+    "datasetId": "owned",
+    "draws": [
+      "owned"
+    ],
+    "tag": "Original Research",
+    "title": "The first nation-shared roster of individually owned Native businesses is in",
+    "dek": "White Earth Nation's TERO sent its certified Indian-owned business list in answer to a request through the office's public contact, the first roster in a consent-first dataset of the businesses no federal register counts.",
+    "date": "August 2026",
+    "byline": "Elijah S. Moreno",
+    "minutes": 3,
+    "highlights": [
+      "White Earth Nation's TERO sent its certified Indian-owned business list on request, the first roster in the collection",
+      "The roster certifies 22 individually owned businesses, 17 at first preference, mostly in the building trades",
+      "Each nation decides how its list may be used; until it does, its businesses appear only in aggregate"
+    ],
+    "authors": [
+      {
+        "name": "Elijah S. Moreno",
+        "role": "Founder and CEO, Lumecon",
+        "photo": "/photo/authors/elijah-moreno.webp"
+      }
+    ],
+    "body": [
+      {
+        "kind": "p",
+        "text": "Federal datasets count Native entity-owned enterprises well: tribally owned firms, ANC and NHO subsidiaries, 8(a) participants. What they do not count is the individually owned side of Indian Country's economy, the businesses certified not by a federal registry but by their own nations' TERO and commerce offices. Those certification lists exist, office by office, and no public source collates them."
+      },
+      {
+        "kind": "p",
+        "text": "The Owned collection is built to close that gap the only defensible way: by asking. Each nation's office is asked through its public contact, each decides whether and how its list may be used, and a roster enters the dataset only under the terms its office states. White Earth Nation's TERO answered first, sending its current Certified Indian Owned Businesses list the morning after the request went out."
+      },
+      {
+        "kind": "pull",
+        "text": "Nothing overrides what a nation says about its own certified businesses."
+      },
+      {
+        "kind": "h2",
+        "text": "What one roster shows"
+      },
+      {
+        "kind": "p",
+        "text": "White Earth's list certifies 22 individually owned businesses, 17 of them at first preference, concentrated in the building trades: construction, drywall, tile, tree and site services. That is one nation's certified economy in a single sheet, and it is exactly the layer the federal registers miss, because none of these firms needs a federal registration to work tribal preference contracts at home."
+      },
+      {
+        "kind": "figure",
+        "chart": "bars",
+        "caption": "White Earth's certified businesses by preference tier",
+        "source": "owned",
+        "points": [
+          {
+            "label": "1st preference",
+            "value": 17
+          },
+          {
+            "label": "2nd preference",
+            "value": 4
+          },
+          {
+            "label": "4th preference",
+            "value": 1
+          }
+        ],
+        "notes": [
+          "Counts the 22 individually owned businesses on the roster White Earth Nation's TERO supplied on Aug. 28, 2026.",
+          "Preference tiers are the nation's own; a tier with no business on the roster is not drawn.",
+          "One nation's list. It is not a sample of Native-owned businesses anywhere else."
+        ]
+      },
+      {
+        "kind": "p",
+        "text": "One roster is a beginning, not a finding. The outreach wave behind it spans TERO and commerce offices across the country, and the early responses already sketch the range of governance the dataset has to respect: one office is taking the request to its commission for formal review, and another keeps its list confidential but is forwarding the invitation to its businesses so each can opt in itself. Both of those are good outcomes. A dataset assembled on those terms is slower, and it is the only version of this dataset worth building."
+      },
+      {
+        "kind": "image",
+        "src": "/pitch/lanes/professional-wide.webp",
+        "tone": "green",
+        "alt": "A meeting around a conference table",
+        "caption": "Each nation's office decides the terms: publication, aggregates only, or a process of its own design."
+      },
+      {
+        "kind": "p",
+        "text": "Until each nation confirms how its listings may appear, its businesses show up here in aggregates only, credited to the office that certified them. As terms land, the entity rows follow."
+      }
+    ]
+  },
+  {
+    "id": "brief-deals",
+    "hosted": true,
+    "demonstration": true,
+    "tone": "teal",
+    "image": "/pitch/lanes/professional-wide.webp",
+    "imageAlt": "A negotiation around a conference table",
+    "caption": "Announced capital in energy and project finance is concentrated in a small number of large transactions, which makes the annual figure sensitive to a single closing.",
+    "datasetId": "deals",
+    "draws": [
+      "deals",
+      "funding"
+    ],
+    "tag": "Original Research",
+    "title": "Announced deals in Indian Country are running ahead of any year in the series",
+    "dek": "Energy and project finance lead 2026's announced transactions, the Deals database shows, with closings confirmed against primary sources before they enter totals.",
+    "date": "July 2026",
+    "byline": "Cedar Press research desk",
+    "minutes": 4,
+    "highlights": [
+      "Energy and project finance carry most of the rise in announced transactions",
+      "A deal enters the totals only once a primary source confirms it",
+      "Ownership changes visible only in federal contracting are reported, with the record cited"
+    ],
+    "authors": [
+      {
+        "name": "Cedar Press research desk",
+        "role": "Lumecon"
+      }
+    ],
+    "body": [
+      {
+        "kind": "p",
+        "text": "Announced transactions in Indian Country are running ahead of any comparable period in the Deals series, and the composition has moved as much as the count. Energy and project finance carry most of the increase, with tribal governments and tribal enterprises appearing as principals rather than as counterparties. A nation financing its own generation capacity is a different economic actor from one leasing land to somebody else's project, and the record is starting to show the difference."
+      },
+      {
+        "kind": "p",
+        "text": "Deals is the one Cedar collection that exists nowhere else in any form. There is no federal register of tribal acquisitions, no filing that captures a tribal enterprise buying an operating business, and no index that follows an Alaska Native corporation's holding company as it restructures. The 2,662 records in the current release are assembled from tribal newsletters and tribal press, trade and journalist coverage, ANCSA shareholder filings and Cedar's own federal contracting record, and every one of them links to the document it came from."
+      },
+      {
+        "kind": "figure",
+        "chart": "line",
+        "caption": "Announced against confirmed transactions, by quarter",
+        "source": "deals",
+        "series": [
+          "announced",
+          "confirmed"
+        ],
+        "points": [
+          {
+            "label": "Q2'25",
+            "announced": 31,
+            "confirmed": 24
+          },
+          {
+            "label": "Q3'25",
+            "announced": 38,
+            "confirmed": 29
+          },
+          {
+            "label": "Q4'25",
+            "announced": 34,
+            "confirmed": 28
+          },
+          {
+            "label": "Q1'26",
+            "announced": 47,
+            "confirmed": 33
+          },
+          {
+            "label": "Q2'26",
+            "announced": 52,
+            "confirmed": 35
+          }
+        ],
+        "notes": [
+          "Announced counts a transaction at first public report. Confirmed counts it once its status is verified against a primary source, which is usually one to three quarters later.",
+          "The most recent quarter is therefore always understated on the confirmed line.",
+          "Undisclosed values are counted as transactions and excluded from any dollar total."
+        ]
+      },
+      {
+        "kind": "h2",
+        "text": "Announced is not closed"
+      },
+      {
+        "kind": "p",
+        "text": "The distinction matters for anyone reading a total. Announced and closed are labeled separately, and a transaction enters totals only once its status is confirmed against a primary source. A year that looks strong on announcements can settle differently, and the gap between the two lines is worth watching in its own right: the latest quarters always read low on the confirmed line, because confirmation usually follows announcement by one to three quarters."
+      },
+      {
+        "kind": "p",
+        "text": "That rule costs speed and buys citability. A figure built from announcements moves every time a press release is withdrawn or a closing slips; a figure built from confirmed transactions moves only when the underlying record does. Where a value is not disclosed, the transaction is counted and the value is not, rather than being estimated into a dollar total that nobody could check."
+      },
+      {
+        "kind": "pull",
+        "text": "A transaction enters the totals only once a primary source confirms it. Until then it is an announcement, and it is labeled as one."
+      },
+      {
+        "kind": "h2",
+        "text": "The deals nobody announced"
+      },
+      {
+        "kind": "p",
+        "text": "Some of the most consequential transactions in Indian Country were never announced at all. A tribal holding company acquires a federal contractor, the contractor keeps its name and its registrations, and the only public trace is that its parent identifier changes in the federal contracting record. Cedar reports those changes as transactions, cites the contracting record with the identifier and the years involved, and leaves the check open for a reader to re-run."
+      },
+      {
+        "kind": "p",
+        "text": "The same discipline runs the other way. A change of reporting parent inside one tribal corporate family, a subsidiary moved from one holding company to its sister, is an internal reorganization rather than a deal, and it is not counted as one. Treating it as a transaction would inflate the count and misstate who is buying what."
+      },
+      {
+        "kind": "pair",
+        "images": [
+          {
+            "src": "/pitch/lanes/publicadmin-wide.webp",
+            "tone": "bronze",
+            "alt": "The United States Capitol",
+            "caption": "Federal programs remain the counterparty on a large share of project financings."
+          },
+          {
+            "src": "/pitch/lanes/construction-wide.webp",
+            "tone": "gold",
+            "alt": "Crews working a large construction site",
+            "caption": "Construction starts trail announcements by two to four quarters in most of the series."
+          }
+        ]
+      },
+      {
+        "kind": "h2",
+        "text": "Who is on the other side"
+      },
+      {
+        "kind": "p",
+        "text": "Resolving counterparties is where a transaction record becomes readable. A financing that names a subsidiary says very little until the subsidiary is joined to its parent nation or corporation, and the same acquisition can appear under three names across a decade of filings. A tribal enterprise formed in 1998, renamed in 2006, reorganized under a holding company in 2014 and acquired in 2021 leaves four record trails that no public source connects. Cedar maintains that chain once, so an ownership change recorded in Deals also corrects rows in Prime Contracting and in Cedar NEED."
+      },
+      {
+        "kind": "p",
+        "text": "Read at face value, the transaction record looks more distributed than it is, because one buyer appears as several. Resolved to parents, the leading acquirers account for a larger share of announced capital than the unresolved list suggests, and the direction of that error is the same in every year of the series."
+      },
+      {
+        "kind": "h2",
+        "text": "What to watch"
+      },
+      {
+        "kind": "p",
+        "text": "Project finance in energy is the line to follow into next year. Announced capital is concentrated in a small number of large projects, so a single delay moves the annual figure more than the underlying rate of activity would suggest, and projects at the permitting stage carry the least predictable timelines."
+      },
+      {
+        "kind": "p",
+        "text": "Property and hospitality are the quieter half of the increase and the steadier one: smaller transactions, more of them, and less exposure to any single closing. Bond issuance is the third thread and the one most sensitive to conditions outside Indian Country. The collection carries all three together so they can be read against each other rather than separately."
+      },
+      {
+        "kind": "h2",
+        "text": "How to read the totals"
+      },
+      {
+        "kind": "p",
+        "text": "Inclusion rules travel with every release, so a transaction missing from the collection is a documented gap rather than a silent one. The confirmation rate below is the clearest way to see why the two lines in the first figure should never be added together or swapped for one another."
+      },
+      {
+        "kind": "figure",
+        "chart": "bars",
+        "caption": "Share of announced transactions confirmed, by quarter (percent)",
+        "source": "deals",
+        "points": [
+          {
+            "label": "Q2'25",
+            "value": 77
+          },
+          {
+            "label": "Q3'25",
+            "value": 76
+          },
+          {
+            "label": "Q4'25",
+            "value": 82
+          },
+          {
+            "label": "Q1'26",
+            "value": 70
+          },
+          {
+            "label": "Q2'26",
+            "value": 67
+          }
+        ],
+        "notes": [
+          "Confirmed transactions divided by announced transactions in the same quarter, from the first figure in this piece, rounded to a whole percent.",
+          "The latest quarters read low because confirmation usually follows announcement by one to three quarters."
+        ]
+      },
+      {
+        "kind": "p",
+        "text": "Anyone reproducing these numbers should note the as-of date beside each figure. The collection updates continuously, every correction is logged on the What's New page, and a figure cited with its date stays explainable. Comparisons are best made within this series: most national deal indices exclude the tribal enterprise structures that account for a large share of the activity here."
+      }
+    ]
+  },
+  {
+    "id": "brief-contractors",
+    "hosted": true,
+    "demonstration": true,
+    "tone": "green",
+    "image": "/pitch/lanes/construction-wide.webp",
+    "imageAlt": "Crews working a large construction site",
+    "caption": "Construction carries most of the obligation volume and almost none of the recent increase, which is in professional and technical services.",
+    "datasetId": "contractors",
+    "draws": [
+      "contractors",
+      "subcontracting"
+    ],
+    "tag": "Original Research",
+    "title": "Federal contracting to Native entities rises for a fourth straight quarter",
+    "dek": "Award histories rolled up to parent tribes, ANCs and NHOs show broad growth, led by 8(a) participants.",
+    "date": "June 2026",
+    "byline": "Cedar Press research desk",
+    "minutes": 4,
+    "highlights": [
+      "Obligations to Native-owned firms rose for a fourth straight quarter",
+      "$65.2 billion in candidate awards stays unattributed rather than guessed",
+      "Summed naively, subaward reporting overstates the true total by 63.4 percent"
+    ],
+    "authors": [
+      {
+        "name": "Cedar Press research desk",
+        "role": "Lumecon"
+      }
+    ],
+    "body": [
+      {
+        "kind": "p",
+        "text": "Obligations to Native-owned firms rose for a fourth consecutive quarter, and the growth is broader than the headline suggests. Rolled up to parent tribes, Alaska Native corporations and Native Hawaiian organizations, the increase reaches more entities than in any quarter of the prior year rather than concentrating in the largest holders."
+      },
+      {
+        "kind": "p",
+        "text": "The Native Federal Contractors collection holds 3,345,971 records across its tables, drawn from the Federal Procurement Data System through USAspending, SAM entity registrations and the subsidiary disclosures parent corporations publish themselves, including the audited filings Alaska Native corporations make under Alaska Statute 45.55.139. Coverage begins in fiscal 2000, because before then the federal record does not identify Native ownership at all."
+      },
+      {
+        "kind": "figure",
+        "chart": "stacked",
+        "caption": "Obligations by parent entity type, by quarter",
+        "source": "contractors",
+        "series": [
+          "Tribal enterprise",
+          "ANC subsidiary",
+          "NHO subsidiary"
+        ],
+        "points": [
+          {
+            "label": "Q3'25",
+            "Tribal enterprise": 41,
+            "ANC subsidiary": 33,
+            "NHO subsidiary": 9
+          },
+          {
+            "label": "Q4'25",
+            "Tribal enterprise": 44,
+            "ANC subsidiary": 34,
+            "NHO subsidiary": 10
+          },
+          {
+            "label": "Q1'26",
+            "Tribal enterprise": 49,
+            "ANC subsidiary": 35,
+            "NHO subsidiary": 11
+          },
+          {
+            "label": "Q2'26",
+            "Tribal enterprise": 56,
+            "ANC subsidiary": 36,
+            "NHO subsidiary": 13
+          }
+        ],
+        "notes": [
+          "These are obligations rather than receipts. An obligation is the government committing funds; the work and the payment can fall in later periods.",
+          "Each award is attributed to the parent the firm had at the date of award rather than the parent it has now.",
+          "Band order is fixed across every quarter, so only the bottom band and the total share a baseline."
+        ]
+      },
+      {
+        "kind": "h2",
+        "text": "The names do not match"
+      },
+      {
+        "kind": "p",
+        "text": "Resolving the vendor list to parents is what turns a procurement record into an industry picture, and it is harder than it looks. A subsidiary's legal name routinely shares no word with its owner's: ASRC Federal's operating companies file as BROADLEAF, INUTEQ and VISTRONIX. Federal reporting names the awardee, and the awardee is often two or three levels below the nation or corporation that owns it."
+      },
+      {
+        "kind": "p",
+        "text": "So awardees are matched by identifier first: the unique entity identifier, the CAGE code and the parent identifier a firm declares. A name match is accepted only with corroboration, the attribution tier is recorded on every row, and a tier is never promoted on a name alone. 8(a) status is handled the same way, as a status with a start and an end rather than a permanent attribute, so a firm that graduated in 2019 is not counted as an 8(a) awardee today."
+      },
+      {
+        "kind": "pull",
+        "text": "$65.2 billion in candidate awards stays unattributed rather than being handed to a plausible owner."
+      },
+      {
+        "kind": "p",
+        "text": "That caution has a visible cost, and the collection publishes it rather than hiding it. Candidate rows worth $65.2 billion remain unattributed because the evidence to name their owner is not there yet. Any total for the sector built from this collection is therefore a floor, and the release says so beside the number."
+      },
+      {
+        "kind": "h2",
+        "text": "The subaward layer"
+      },
+      {
+        "kind": "p",
+        "text": "Prime awards are the visible half. The Native Federal Subcontracting collection, 90,479 records in the current release, resolves both sides of every subaward independently, so a Native prime paying a non-Native subcontractor and the reverse are distinguishable, and work moving between Native firms appears that neither record describes on its own."
+      },
+      {
+        "kind": "p",
+        "text": "Subaward reporting needs its own care. A single subaward is often refiled month after month, and each filing is a real event, so the filings are kept and flagged rather than deleted. Summed without that flag, the subaward file comes to $57.02 billion; counted correctly, $34.91 billion. The $22.11 billion difference is 63.4 percent of the correct total and 38.8 percent of the unfiltered one. A subaward is also a slice of a prime award, so it is never added to prime obligations."
+      },
+      {
+        "kind": "image",
+        "src": "/pitch/lanes/professional-wide.webp",
+        "tone": "gold",
+        "alt": "A meeting around a conference table",
+        "caption": "Professional and technical services carry the quarters that moved, on smaller awards spread across more firms."
+      },
+      {
+        "kind": "h2",
+        "text": "Where the growth is not"
+      },
+      {
+        "kind": "p",
+        "text": "Construction and facilities services carry most of the volume and almost none of the increase. The quarters that moved are professional services and information technology, where the average award is smaller and the number of distinct entities winning work is higher. Read only in dollars, the sector looks flat; read in entities and awards, it does not."
+      },
+      {
+        "kind": "figure",
+        "chart": "sankey",
+        "caption": "Prime obligations reaching subcontracted work, by sector",
+        "source": "subcontracting",
+        "flows": [
+          {
+            "from": "Construction",
+            "to": "Native subcontractors",
+            "value": 12
+          },
+          {
+            "from": "Construction",
+            "to": "Other subcontractors",
+            "value": 46
+          },
+          {
+            "from": "Professional services",
+            "to": "Native subcontractors",
+            "value": 27
+          },
+          {
+            "from": "Professional services",
+            "to": "Other subcontractors",
+            "value": 19
+          },
+          {
+            "from": "Information technology",
+            "to": "Native subcontractors",
+            "value": 16
+          },
+          {
+            "from": "Information technology",
+            "to": "Other subcontractors",
+            "value": 14
+          }
+        ],
+        "notes": [
+          "Ribbon width is the only quantity. Vertical position carries no meaning.",
+          "Covers reported subawards only. Work performed in-house by the prime does not appear.",
+          "A subcontractor is counted as Native where ownership is established from filings or primary-source confirmation."
+        ]
+      },
+      {
+        "kind": "p",
+        "text": "That composition is worth watching beyond the totals. A base of many small awards across many firms responds differently from a base of a few large ones when an agency changes how it buys, and consolidation of small contracts into larger vehicles has been the direction of federal procurement for a decade."
+      },
+      {
+        "kind": "h2",
+        "text": "What the collection does and does not claim"
+      },
+      {
+        "kind": "p",
+        "text": "Obligations are not receipts. An obligation is the government committing funds, and the work and the payment can fall in later periods or, on a terminated contract, never arrive. Where a firm's parent changed during the period covered, the award is attributed to the parent it had at the time of award, and the rule is stated with the release so a figure can be reproduced or deliberately recomputed the other way."
+      },
+      {
+        "kind": "p",
+        "text": "Nor does the collection claim that every Native-owned firm appears. Ownership is established from identifiers, filings and primary-source confirmation, and a firm that has never declared it in a record Cedar reads will be missing. That gap is documented with the release, and it is the honest limit on any statement about the total size of the sector."
+      }
+    ]
+  },
+  {
+    "id": "brief-funding",
+    "demonstration": true,
+    "href": "https://tribalbusinessnews.com",
+    "tone": "slate",
+    "image": "/pitch/lanes/publicadmin-wide.webp",
+    "imageAlt": "The United States Capitol",
+    "datasetId": "funding",
+    "tag": "Original Research",
+    "title": "Where federal dollars reached Indian Country in FY2025",
+    "dek": "Assistance awards by program and recipient, from the Funding collection's first full-year release.",
+    "date": "May 2026"
+  }
+]

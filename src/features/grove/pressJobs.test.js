@@ -18,6 +18,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
+import { join, relative, sep } from "node:path";
+import { fileURLToPath } from "node:url";
 
 import codebookJson from "../../../data/cedar/codebook.json" with { type: "json" };
 import { PRESS_CATALOG, STOREFRONT_CATALOG } from "./pressCatalog.js";
@@ -61,8 +63,8 @@ function runtimeSources() {
   for (const entry of readdirSync(SRC, { recursive: true, withFileTypes: true })) {
     if (!entry.isFile() || !/\.(jsx?|mjs)$/.test(entry.name) || /\.test\./.test(entry.name)) continue;
     const dir = entry.parentPath ?? entry.path;
-    const full = `${dir}/${entry.name}`;
-    out.push({ rel: full.slice(SRC.pathname.length), text: readFileSync(full, "utf8") });
+    const full = join(dir, entry.name);
+    out.push({ rel: relative(fileURLToPath(SRC), full).split(sep).join("/"), text: readFileSync(full, "utf8") });
   }
   return out;
 }
@@ -119,8 +121,9 @@ test("every surface the brief names reads the layer", () => {
 
 /** The codebook table a collection's questions are checked against. */
 function codebookTable(id) {
-  const keys = Object.keys(codebookJson.tables).filter((key) => key.split("/")[0] === id);
-  return keys.length === 1 ? codebookJson.tables[keys[0]] : null;
+  // The public file has one producer spreadsheet. Historical dictionaries
+  // may remain for transform documentation and are not its current schema.
+  return codebookJson.tables[`${id}/${id}`] ?? null;
 }
 
 test("every collection has two or three questions, and nothing else does", () => {
@@ -161,73 +164,20 @@ test("every collection question rests on fields its codebook table holds", () =>
   assert.ok(checked > 60, `only ${checked} fields checked`);
 });
 
-/**
- * The columns the producer declares for Foundation & Corporate Giving's
- * reviewed-disclosure table: `FIELDS` in `src/lumecon_data/collections/
- * foundation_release.py`, teim-team/Lumecon-data at f917e6e (branch
- * codex/foundation-corporate-giving). Copied, not invented, and only until a
- * release brings the collection's codebook table here; then that table is
- * what the questions are held to and this list goes.
- */
-const PRODUCER_FIELDS = Object.freeze({
-  "foundation-corporate-giving": Object.freeze([
-    "disclosure_id", "award_id", "version_kind", "funder_name", "recipient_name", "cedar_uid",
-    "recipient_entity_type", "recipient_affiliation", "purpose", "amount_exact_usd", "amount_lower_usd",
-    "amount_upper_usd", "amount_aggregate_usd", "financial_status", "announcement_date", "report_year",
-    "award_period_text", "project_geography", "source_url", "source_document_sha256",
-    "source_retrieved_date", "source_class", "source_id", "publication_rights_status", "overlap_status",
-    "addability_status", "observation",
-  ]),
-});
-
-/** Collections with no codebook and no producer anywhere: named, and only these. */
-const NO_PRODUCER = Object.freeze(["plot"]);
-
-test("a collection with no release holds its questions to the producer's fields, or is named as having none", () => {
-  assert.deepEqual([...STRUCTURE_ONLY].sort(), ["foundation-corporate-giving", "plot"]);
-  for (const id of STRUCTURE_ONLY) {
-    const questions = collectionQuestions(id);
-    assert.ok(questions.length >= 2, `${id} has no questions`);
-    if (codebookTable(id)) {
-      assert.fail(`${id} has a codebook table now: move its questions into COLLECTION_JOBS and hold them to it`);
-    }
-    if (NO_PRODUCER.includes(id)) {
-      // No producer exists, so there is nothing to name; the day one does,
-      // its fields go on these questions and the id comes off NO_PRODUCER.
-      assert.ok(!PRODUCER_FIELDS[id], `${id} has a producer contract: take it off NO_PRODUCER`);
-      for (const item of questions) assert.deepEqual([...item.fields], [], `"${item.q}" names a field nothing declares`);
-      continue;
-    }
-    const columns = new Set(PRODUCER_FIELDS[id] ?? []);
-    assert.ok(columns.size, `${id} has neither a codebook table nor a producer contract to check against`);
-    for (const item of questions) {
-      assert.ok(item.fields.length, `"${item.q}" names no field`);
-      for (const column of item.fields) assert.ok(columns.has(column), `"${item.q}" rests on ${column}, which the producer does not declare`);
-    }
-  }
-});
-
-// "What each record holds" (owner, 2026-09-27): the field list a viewer
-// shows for these two in place of sample records. Foundation & Corporate
-// Giving's is the producer's FIELDS, in order, with nothing added or
-// dropped; PLOT's is the owner's description, heading by heading. Every
-// meaning is one plain sentence and none states a figure.
-test("the record structure is the producer's fields for giving and the owner's headings for PLOT", () => {
+test("Giving and PLOT use verified release codebooks rather than a second imagined structure", () => {
+  assert.deepEqual([...STRUCTURE_ONLY], []);
   assert.equal(RECORD_STRUCTURE_TITLE, "What each record holds");
-  assert.deepEqual(Object.keys(RECORD_STRUCTURE).sort(), [...STRUCTURE_ONLY].sort(), "one structure per collection with no sample rows");
-  assert.deepEqual(
-    RECORD_STRUCTURE["foundation-corporate-giving"].fields.map((field) => field.name),
-    [...PRODUCER_FIELDS["foundation-corporate-giving"]],
-  );
-  assert.deepEqual(
-    RECORD_STRUCTURE.plot.fields.map((field) => field.name),
-    ["Owner or entity", "Parcel ID", "Transfers", "Parcel characteristics", "Geometry", "Permits", "Development activity", "Dates", "Source"],
-  );
-  for (const [id, structure] of Object.entries(RECORD_STRUCTURE)) {
-    for (const { name, meaning } of structure.fields) {
-      assert.match(meaning, /^[A-Z][^&\u2014]*\.$/, `${id} ${name}: one plain sentence`);
-      assert.doesNotMatch(meaning, /\d/, `${id} ${name}: a meaning states no figure`);
-      assert.doesNotMatch(meaning, /\bimpact\b/i, `${id} ${name}`);
+  assert.deepEqual(RECORD_STRUCTURE, {});
+  for (const id of ["foundation-corporate-giving", "plot"]) {
+    assert.ok(isReleased(id), id);
+    const table = codebookTable(id);
+    assert.ok(table, id);
+    assert.ok(table.fields.some(field => field.column === "record_type"), id);
+    assert.ok(table.fields.some(field => field.column === "record_grain"), id);
+    assert.ok(cedarQuestions(id).length >= 2, id);
+    for (const question of collectionQuestions(id)) {
+      assert.ok(question.fields.length, question.q);
+      for (const field of question.fields) assert.ok(table.fields.some(item => item.column === field), field);
     }
   }
 });
@@ -555,7 +505,8 @@ test("the fourteen split seven and seven: giving in Cedar Press, PLOT in Cedar P
   assert.equal(byId.plot.shelf, "pro");
   // The owner's Methods concepts are each collection's linkage line.
   assert.match(byId["foundation-corporate-giving"].linkage, /^Philanthropic, corporate and bank giving/);
-  assert.match(byId.plot.linkage, /^Land ownership, transfers, permitting and development/);
+  assert.match(byId.plot.linkage, /^Land ownership observations and permitting records/);
+  assert.match(byId.plot.linkage, /does not establish Native ownership/);
 });
 
 test("the owner's cross-collection examples for the two new collections are in Methods", () => {

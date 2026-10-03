@@ -162,6 +162,10 @@ THE NAMED INVARIANTS
 """
 from __future__ import annotations
 
+# Recovery correction (2026-09-27): the historical Chugach discussion above is
+# not a row-level decision. This script no longer assigns that narrative to
+# conflict rows. The independent whole-NEED publication hold remains in force.
+
 import csv
 import hashlib
 import json
@@ -276,6 +280,31 @@ def ledger_uid_bindings(ledger, history):
         identifier = (row.get("identifier") or "").strip()
         if uid and identifier:
             result.setdefault(identifier, set()).add(uid)
+    return result
+
+
+def clear_unbound_conflict_adjudication(row):
+    """Remove only this script's recognizable, unbound legacy Chugach claim.
+
+    The old writer applied one narrative to every conflict, including unrelated
+    owners. Even a matching Chugach name was not a verified evidence binding.
+    Original assertions and published values remain intact; this assigns no new
+    adjudication. Historical files are preserved by the writer's existing backup.
+    """
+    result = dict(row)
+    if (
+        row.get("adjudicated_by") == "code/1102_need_corroboration_adjudication.py"
+        and (row.get("adjudication") or "").startswith("UPHELD, and now on two of three sources")
+        and "www.chugach.com/business/directory" in (row.get("adjudication") or "")
+        and "lists Chugach Commercial Holdings" in (row.get("third_source_says") or "")
+    ):
+        for field in ("adjudicated_by", "adjudicated_date", "adjudication",
+                      "third_source", "third_source_says"):
+            result[field] = ""
+        result["adjudication_hold_reason"] = (
+            "Legacy Chugach narrative had no row-specific evidence binding; "
+            "unadjudicated. Source assertions and original archive retained."
+        )
     return result
 
 
@@ -491,35 +520,10 @@ def build(dry_run=False) -> int:
         if dupes:
             write_table(DUPES, sorted(dupes, key=lambda d: d["group_id"]),
                         list(dupes[0].keys()))
-        # the Chugach adjudication, recorded on the conflict rows themselves
+        # Keep conflict evidence separate from unsupported automated adjudication.
         crows, cfields = read_table(CONFLICTS)
-        add = ["adjudicated_by", "adjudicated_date", "adjudication",
-               "third_source", "third_source_says"]
-        for c in crows:
-            for a in add:
-                c.setdefault(a, "")
-            c["adjudicated_by"] = "code/1102_need_corroboration_adjudication.py"
-            c["adjudicated_date"] = TODAY
-            c["third_source"] = ("anc_tribal_subsidiary_lookup.csv "
-                                 "(ANC_TRIBE_LOOKUP)")
-            c["third_source_says"] = (
-                "lists Chugach Commercial Holdings (CCH), Chugach Government "
-                "Solutions (CGS), Chugach Investment Holdings (CIH) and "
-                "Chugach Regional Development (CRD) identically as "
-                "`subsidiary` directly under Chugach Alaska Corporation - four "
-                "parallel siblings at one tier, two of them named Holdings")
-            c["adjudication"] = (
-                "UPHELD, and now on two of three sources rather than on rank. "
-                "The conflict is genuine and not a vocabulary artefact: the "
-                "SAME page, www.chugach.com/business/directory, calls Chugach "
-                "Commercial Holdings a holding company while calling CGS and "
-                "CRD operating companies, so the site is asserting a different "
-                "role rather than omitting one. But `relationship` fuses a "
-                "THIRD axis nobody had named: a consolidation note answers "
-                "WHERE AN ENTITY SITS, a business directory answers WHAT A "
-                "FIRM SELLS, and both render into the same six words. The "
-                "audited AS 45.55.139 filing answers the question the column "
-                "is asking. Published value `holding_company` stands.")
+        crows = [clear_unbound_conflict_adjudication(c) for c in crows]
+        add = ["adjudication_hold_reason"]
         if crows:
             write_table(CONFLICTS, crows,
                         list(cfields) + [a for a in add if a not in cfields],
@@ -542,7 +546,8 @@ def build(dry_run=False) -> int:
     if not dry_run:
         print(f"  [1102] wrote {CONTRA.relative_to(ROOT)} ({len(contra)})")
         print(f"  [1102] wrote {DUPES.relative_to(ROOT)} ({len(dupes)})")
-        print(f"  [1102] adjudicated {CONFLICTS.relative_to(ROOT)}")
+        print(f"  [1102] preserved conflict evidence at {CONFLICTS.relative_to(ROOT)}; "
+              "no new adjudications")
         MANIFEST.write_text(json.dumps(
             {"built": TODAY,
              "script": "1102_need_corroboration_adjudication.py",
@@ -638,7 +643,17 @@ def fixture_selftest() -> int:
             write_table(LEDGER, ledger, list(ledger[0]))
             history = [{"handle": "LEGACY-A", "cedar_uid": "CE-A"}]
             write_table(HANDLE_HISTORY, history, list(history[0]))
+            conflicts = [
+                {"enterprise_id": "A", "enterprise_name": "Example A",
+                 "owner_hub_name": "Nation A", "published_value": "wholly_owned"},
+                {"enterprise_id": "C", "enterprise_name": "Example C",
+                 "owner_hub_name": "Nation C", "published_value": "unspecified"},
+            ]
+            write_table(CONFLICTS, conflicts, list(conflicts[0]))
             assert build() == 0
+            reviewed, _ = read_table(CONFLICTS)
+            assert all(not row.get("adjudication") for row in reviewed)
+            assert [{key: row[key] for key in conflicts[0]} for row in reviewed] == conflicts
             actual, fields = read_table(NEED)
             by_id = {row["enterprise_id"]: row for row in actual}
             assert by_id["A"]["fpds_parent_corroboration"] == "CORROBORATED"
