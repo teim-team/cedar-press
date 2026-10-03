@@ -4010,8 +4010,9 @@ The root coordinator owns the points request lifecycle, its hook/callers and
 API cancellation, preserving the existing server ledger and earning rules.
 The Press live-wiring agent supplies reviewed release-feed patches; the root
 applies and validates them without overwriting other publication work.
-Points, voting and research briefs belong to Press. Selected future datasets
-can enter Grove by explicit publication decision; voting does not grant access.
+Points, voting and research briefs belong to Press. Grove includes every Cedar
+Press and Press Plus dataset, including future additions, plus Grove-only data.
+The reverse does not apply: a Press plan does not grant Grove-only data access.
 Press earns one point per active month and Press Plus earns two, once per
 subscription. Grove has no earning rule. Three institutional points remain a
 proposal, not an implemented rate. Existing twelve-month expiry is unchanged.
