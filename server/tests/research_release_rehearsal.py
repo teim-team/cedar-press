@@ -48,7 +48,8 @@ def run_one(item, output):
             }
         )
     )
-    product = "cedar_grove" if key == "gaming" else "cedar_press"
+    grove_only = repository.is_grove_release(key)
+    product = "cedar_grove" if grove_only else "cedar_press"
     catalog = build_catalog(
         store,
         [(key, rid)],
@@ -102,13 +103,13 @@ def run_one(item, output):
         response_cache[path] = result.content
         return result.json()
 
-    tier = "grove" if key == "gaming" else "press_pro"
+    tier = "grove" if grove_only else "press_pro"
     results = []
     with ExitStack() as stack:
         stack.enter_context(patch.dict(os.environ, environment))
         source_client = stack.enter_context(TestClient(source))
         stack.enter_context(patch.object(repository, "_release_json", side_effect=fetch_json))
-        if key == "gaming":
+        if grove_only:
             stack.enter_context(patch.object(repository, "GROVE_RELEASE_PIN", pin_path))
         stack.enter_context(
             patch.object(
@@ -151,7 +152,7 @@ def run_one(item, output):
             assert (
                 payload["source_rows"] == packet_receipt["tables"][logical]["permitted_review_rows"]
             )
-            if key != "gaming":
+            if not grove_only:
                 params = {"release_id": rid, **({"component": component} if component else {})}
                 response = client.get("/press/collections/" + key + "/research", params=params)
                 assert response.status_code == 200, response.text[:300]

@@ -50,3 +50,23 @@ Retain existing owner decisions, stable IDs and source receipts. Engineering
 fixes, schema repair, infrastructure and missing research stay with the coding
 workflow; only fully researched, genuinely ambiguous subject linkages belong in
 the owner's adjudication queue.
+
+## 2026-10-03 Infrastructure research acceptance
+
+The real-release research rehearsal now derives Grove-only handling from
+`repository.is_grove_release` for both Gaming and Infrastructure. It no longer
+selects a Press product, tier or pin for Infrastructure.
+
+The corrected real Infrastructure release aeaf2aa17b50ff1edd45222fe4c8469f2cdb0f5f5fad9824ec6b118cb410c09b
+passed the isolated producer-metadata and shared-consumer rehearsal. Records has
+28,484 permitted rows, 30 examples and 41 fields. The other 13 components were
+refused according to existing holds, and the research packet was refused in
+production mode. Packet receipt SHA256:
+b2743050ae728dd63e4b7a000fa7c35ee6f533f0347f0b9b83726a5c6cab1f2a.
+This is review evidence, not deployment or new human approval. The packet currently
+contains zero map features; map serving and consumer re-pins remain unfinished.
+
+Producer 39a1ca7 adds the tested persistent review core. Its authenticated webpage,
+runtime provisioning and actual human-review-to-publication acceptance remain
+handoff work. Havala and Kaylyn are now explicit assignees on Press #132. Articles
+remain paused. No customer login, account or production pointer changed here.
