@@ -4026,4 +4026,22 @@ isolated PostgreSQL schema, including concurrent spending, 16 client/session
 tests, 78 API tests, lint and the Vite build. Intentional old-owner and split-
 transaction mutations each failed their regression test before restoration.
 This does not establish that the running deployment is configured with Postgres.
+
+What’s New, the overview update rail and briefing now share the authenticated
+release service through `useReleaseFeed`. The API projects current verified,
+tier-permitted releases; missing service data cannot fall back to a bundled
+snapshot. Available spreadsheet observations are counted once, without adding
+overlapping component totals. A preview date is displayed only when both the
+release and manifest hashes match its recorded descriptor. Publication dates are
+left unknown because the current producer contract does not record them.
+Historical public preview anchors remain separately labeled and expose no old
+full-release totals as current facts. A complete publication timeline still
+requires immutable events recorded when an approved serving pin changes.
+
+Feed validation: 109 focused API/shared-consumer tests, 21 release/lifecycle tests,
+the frontend coverage gate, lint, Ruff and Vite build passed locally. A synthetic
+connected browser check exercised late permalink expansion, historical preview
+anchors, one shared landing/briefing request and unavailable-service behavior.
+Desktop and mobile screenshots were inspected. These fixtures do not certify
+the deployed service or completed data publication.
 <!-- END PRESS-LIVE-WIRING-20261003 -->

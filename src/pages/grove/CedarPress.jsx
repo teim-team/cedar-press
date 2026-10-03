@@ -38,12 +38,15 @@ import { openCedarQuestions } from "../../features/grove/pressJobs";
 import { PRESS_WHATS_NEW_PATH } from "../../features/grove/pressRoutes";
 import PressGate from "./PressGate";
 import PressBriefing from "./PressBriefing";
+import { useReleaseFeed } from "../../features/grove/useReleaseFeed.js";
 import PressPrioritiesBlock from "./PressPrioritiesBlock";
 
 export default function CedarPress() {
   // The door is the one page every visitor and every crawler reaches.
   useDocumentTitle(undefined, { index: true });
   const { user, loading } = useAuth();
+  const releaseState = useReleaseFeed(user, loading);
+  const releases = releaseState.data?.releases ?? {};
   const entitled = canReadCedarPress(user);
   // Sections arrive as they enter the viewport, sitewide language.
   const fadeRoot = useFadeIn();
@@ -115,7 +118,7 @@ export default function CedarPress() {
               signed in has already chosen this product; what they do not
               know is what moved. Every line of the briefing is read from the
               release record and the article list, so it cannot go stale. */}
-          <PressBriefing />
+          <PressBriefing releaseState={releaseState} />
           <PressPrioritiesBlock user={user} />
         </div>
 
@@ -146,8 +149,9 @@ export default function CedarPress() {
                 beside them is that the collections keep moving; a reader who
                 wants to check it should be one click from the evidence. */}
             <ul className="cp-new">
-              {recentlyUpdated(3).map((release) => {
-                const latest = latestRelease(release.id);
+              {!releaseState.data ? <li role="status">{releaseState.status === "loading" ? "Loading collection updates…" : "Collection updates are unavailable."}</li> : null}
+              {recentlyUpdated(3, releases).map((release) => {
+                const latest = latestRelease(release.id, releases);
                 const to = latest
                   ? `${PRESS_WHATS_NEW_PATH}#${anchorOf({ id: release.id, version: latest.version })}`
                   : PRESS_WHATS_NEW_PATH;
@@ -155,14 +159,14 @@ export default function CedarPress() {
                   <li className="cp-new__item" key={release.id}>
                     <Link className="cp-new__link" to={to}>
                       <b>{PRESS_CATALOG_BY_ID[release.id]?.name ?? release.id}</b>
-                      <span className="cp-new__date">{formatUpdated(release.updated)}</span>
+                      <span className="cp-new__date">{release.updated ? `Preview updated ${formatUpdated(release.updated)}` : "Current verified data"}</span>
                     </Link>
                   </li>
                 );
               })}
               <li className="cp-new__item cp-new__more">
                 <Link className="cp-new__link" to={PRESS_WHATS_NEW_PATH}>
-                  See every release <span aria-hidden="true">&#8594;</span>
+                  View collection updates <span aria-hidden="true">&#8594;</span>
                 </Link>
               </li>
             </ul>

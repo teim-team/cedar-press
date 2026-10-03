@@ -23,6 +23,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
+import { useAuth } from "../../context/useAuth";
+import { useReleaseFeed } from "../../features/grove/useReleaseFeed.js";
 
 
 // The Press routes code-split separately, so a direct visit or refresh loads
@@ -31,8 +33,6 @@ import { Link } from "react-router";
 
 import { PRESS_CATALOG } from "../../features/grove/pressCatalog";
 import {
-  PRESS_RELEASES,
-  RELEASE_FEED,
   RELEASE_KIND,
   formatUpdated,
   recentActivity,
@@ -48,9 +48,10 @@ import { PressCedarFab } from "./PressCedarFab";
 
 /** One screen's worth. More arrives a page at a time, on request. */
 const PAGE = 8;
+const EMPTY_FEED = Object.freeze([]);
 
 /** Whether the address names a release in the feed. */
-const linkedAnchor = (hash) => Boolean(hash) && RELEASE_FEED.some((entry) => entry.anchor === hash);
+const linkedAnchor = (hash, feed) => Boolean(hash) && feed.some((entry) => entry.anchor === hash);
 
 /**
  * Scroll a release into view, clear of the sticky filter bar.
@@ -64,6 +65,8 @@ const linkedAnchor = (hash) => Boolean(hash) && RELEASE_FEED.some((entry) => ent
 function landOn(hash) {
   const target = document.getElementById(hash);
   if (!target) return;
+  const disclosure = target.closest("details");
+  if (disclosure) disclosure.open = true;
   target.scrollIntoView();
   const bar = document.querySelector(".cp-filter--stick");
   if (bar) window.scrollBy(0, -(bar.getBoundingClientRect().height + 16));
@@ -77,7 +80,13 @@ export default function CedarPressWhatsNew() {
   const fadeRoot = useFadeIn();
   // The feed is static data, flattened, sorted and indexed once at module
   // load (pressReleases.js); this page filters it and derives nothing.
-  const all = RELEASE_FEED;
+  const { user, loading: authLoading } = useAuth();
+  const releaseState = useReleaseFeed(user, authLoading);
+  const model = releaseState.data;
+  const all = model?.feed ?? EMPTY_FEED;
+  const history = model?.previewHistory ?? EMPTY_FEED;
+  const anchors = useMemo(() => [...all, ...history], [all, history]);
+  const current = model?.source === "verified_current";
   const [collection, setCollection] = useState("all");
   const [kind, setKind] = useState("all");
   const [query, setQuery] = useState("");
@@ -86,7 +95,7 @@ export default function CedarPressWhatsNew() {
   // starts fully open when the address names a release.
   const [shown, setShown] = useState(() => {
     const hash = typeof window === "undefined" ? "" : window.location.hash.slice(1);
-    return linkedAnchor(hash) ? Number.POSITIVE_INFINITY : PAGE;
+    return linkedAnchor(hash, anchors) ? Number.POSITIVE_INFINITY : PAGE;
   });
 
   const entries = useMemo(() => {
@@ -111,24 +120,25 @@ export default function CedarPressWhatsNew() {
   // permalink pasted while already on the page, where only the fragment
   // changes and the initializer above never re-runs.
   useEffect(() => {
+    let frame;
     const land = () => {
       const hash = window.location.hash.slice(1);
-      if (!linkedAnchor(hash)) return;
+      if (!linkedAnchor(hash, anchors)) return;
       setShown(Number.POSITIVE_INFINITY);
-      requestAnimationFrame(() => landOn(hash));
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => landOn(hash));
     };
-    const hash = window.location.hash.slice(1);
-    if (hash) requestAnimationFrame(() => landOn(hash));
+    land();
     window.addEventListener("hashchange", land);
-    return () => window.removeEventListener("hashchange", land);
-  }, [all]);
+    return () => { cancelAnimationFrame(frame); window.removeEventListener("hashchange", land); };
+  }, [anchors]);
 
   // Only collections that actually have releases, so the filter never offers
   // a choice that returns nothing.
-  const options = PRESS_CATALOG.filter((entry) => PRESS_RELEASES[entry.id]);
+  const options = PRESS_CATALOG.filter((entry) => model?.releases[entry.id]);
   // The trailing month, computed from the log itself: the maintenance is the
   // product, and these four lines are it made tangible.
-  const activity = useMemo(() => recentActivity(30), []);
+  const activity = useMemo(() => recentActivity(30, new Date(), all), [all]);
   const filtered = collection !== "all" || kind !== "all" || query.trim() !== "";
   const visible = entries.slice(0, shown);
   const rest = entries.length - visible.length;
@@ -145,7 +155,7 @@ export default function CedarPressWhatsNew() {
             feed, so repeating it here said nothing. */}
         <section className="cp-nh cp-fade">
           <p className="cp-hero__access">Collection updates</p>
-          <h1 className="cp-nh__title">Everything that changed, newest first.</h1>
+          <h1 className="cp-nh__title">Collection updates.</h1>
           {/* ONE LINE, NOT TWO PARAGRAPHS.
               The ledger below is the page, and this was 60 words of preamble
               above it saying what a changelog is. What survives is the part a
@@ -154,17 +164,17 @@ export default function CedarPressWhatsNew() {
               versions stay addressable. */}
           <div className="cp-nh__say">
             <p className="cp-nh__sub">
-              Collections are maintained weekly with human review, and every change lands here.
-              Methodology changes are marked because they can affect published figures.
-              Each collection is a living dataset; dated updates explain what changed.
+              {!model ? "See the latest collection information available to your subscription." : current
+                ? "Current verified data available to your subscription. Publication dates and complete update history are not recorded yet."
+                : "Public preview history records updates to the preview files. These dates do not establish when the full subscriber data was published."}
             </p>
-            <p className="cp-nh__sub cp-nh__sub--use">
-              Use the release history to see what changed before reusing an earlier figure or
-              analysis.
-            </p>
+            {model ? <p className="cp-nh__sub cp-nh__sub--use">
+              {current ? "Public preview history is kept separately for earlier citations."
+                : "Use the preview history to check earlier preview citations."}
+            </p> : null}
           </div>
-          <dl className="cp-nh__pulse">
-            <dt>Last {activity.days} days</dt>
+          {model && !current ? <dl className="cp-nh__pulse" aria-label="Public preview activity">
+            <dt>Preview updates, last {activity.days} days</dt>
             <dd className="cp-nh__pulselead">
               {activity.releases} {activity.releases === 1 ? "release" : "releases"}
             </dd>
@@ -181,12 +191,14 @@ export default function CedarPressWhatsNew() {
               </>
             ) : null}
             {activity.latest ? <dd>Latest: {formatUpdated(activity.latest)}</dd> : null}
-          </dl>
+          </dl> : current ? <p>{all.length} collections with verified available data</p> : null}
+          {!model ? <p role="status">{authLoading || releaseState.status === "loading"
+            ? "Loading collection updates…" : "Collection updates are unavailable on this connection."}</p> : null}
         </section>
 
         {/* Sticky: the feed will eventually hold hundreds of releases, and
             the way through them should not scroll away with the hero. */}
-        <div className="cp-filter cp-filter--stick">
+        {model ? <div className="cp-filter cp-filter--stick">
           <div className="cp-filter__set cp-filter__set--scroll" role="group" aria-label="Filter by collection">
             <span className="cp-filter__cap">Collection</span>
             <button
@@ -233,10 +245,10 @@ export default function CedarPressWhatsNew() {
             aria-label="Search releases"
           />
           <p className="cp-filter__count" aria-live="polite">
-            {entries.length} {entries.length === 1 ? "release" : "releases"}
+            {model ? `${entries.length} ${current ? "available collections" : "preview updates"}` : "Updates unavailable"}
             {filtered ? " matching" : ""}
           </p>
-        </div>
+        </div> : null}
 
         {visible.length ? (
           <ol className="cp-feed cp-fade">
@@ -255,12 +267,12 @@ export default function CedarPressWhatsNew() {
               const runStart = i === 0 || visible[i - 1].date !== entry.date;
               return (
                 <li className="cp-feed__item" id={anchor} key={anchor}>
-                  <time
+                  {entry.date ? <time
                     className={`cp-feed__when${runStart ? "" : " cp-feed__when--same"}`}
                     dateTime={entry.date}
                   >
                     {runStart ? formatUpdated(entry.date) : <span className="sr-only">{formatUpdated(entry.date)}</span>}
-                  </time>
+                  </time> : <span className="cp-feed__when">Update date not recorded</span>}
                   <div className="cp-feed__what">
                     {/* The kind on every entry, not only in the filter: a
                         methodology release read cold must announce itself. */}
@@ -273,17 +285,18 @@ export default function CedarPressWhatsNew() {
                         for. */}
                     <h2 className="cp-feed__name">
                       <span className={`cp-feed__kind${method ? " cp-feed__kind--method" : ""}`}>
-                        {method ? "Methodology" : "Data update"}
+                        {current ? "Currently available" : method ? "Methodology" : "Preview update"}
                       </span>
                       <span>{name}</span>
                       {/* The version is the release's permalink: a citation
                           names one, and #funding-v4-2 gives the name a stable
                           address to point at. */}
                       <a className="cp-feed__ver" href={`#${anchor}`} title="Link to this release">
-                        Updated
+                        {current ? "Link" : "Updated"}
                       </a>
                     </h2>
                     {entry.note ? <p className="cp-feed__note">{entry.note}</p> : null}
+                    {model.releases[entry.id]?.preview_updated ? <p className="cp-feed__note">Preview updated {formatUpdated(model.releases[entry.id].preview_updated)}</p> : null}
                     {/* WHAT CHANGED, THEN THE ARITHMETIC.
                         Every release lists its table and row counts beside
                         whatever actually changed, at the same weight, so a
@@ -305,7 +318,7 @@ export default function CedarPressWhatsNew() {
                       return (
                         <details className="cp-feed__detail">
                           <summary>
-                            What changed{news.length ? ` · ${news.length} ${news.length === 1 ? "note" : "notes"}` : ""}
+                            {current ? "Available data" : "What changed"}{news.length ? ` · ${news.length} ${news.length === 1 ? "note" : "notes"}` : ""}
                           </summary>
                           {news.length ? (
                             <ul className="cp-feed__list">
@@ -349,13 +362,13 @@ export default function CedarPressWhatsNew() {
                               detail: {
                                 id: entry.id,
                                 name,
-                                q: `What changed in ${name} on ${entry.date}?`,
+                                q: entry.date ? `What changed in the ${name} preview on ${entry.date}?` : `What information is available in ${name}?`,
                               },
                             }),
                           )
                         }
                       >
-                        Ask Cedar about this update <span aria-hidden="true">&#8594;</span>
+                        Ask Cedar about these records <span aria-hidden="true">&#8594;</span>
                       </button>
                     </p>
                   </div>
@@ -364,7 +377,7 @@ export default function CedarPressWhatsNew() {
             })}
           </ol>
         ) : (
-          <p className="cp-feed__none">No releases match that combination yet.</p>
+          <p className="cp-feed__none">{model ? "No available updates match that combination." : "The service has not supplied current release information."}</p>
         )}
 
         {/* The list and the control that continues it are one thing, so
@@ -384,7 +397,14 @@ export default function CedarPressWhatsNew() {
         {/* Sponsorship rule 5: never in a filtered view. The slot rides the
             full feed only, and never an empty result. It sits after the feed
             and its control, which is where a page pauses. */}
-        {filtered ? null : <PressAd slot={AD_SLOT.FEED} />}
+        {history.length ? <details className="cp-feed__detail" data-testid="public-preview-history">
+          <summary>Public preview history</summary>
+          <p>Earlier preview dates remain available for citation. They do not establish historical full-data counts or publication dates.</p>
+          <ul>{history.map((entry) => <li key={entry.anchor} id={entry.anchor}>
+            <a href={`#${entry.anchor}`}>{entry.name}</a>: preview updated {formatUpdated(entry.date)}
+          </li>)}</ul>
+        </details> : null}
+        {filtered || !model ? null : <PressAd slot={AD_SLOT.FEED} />}
 
         <PressFoot />
         <PressCedarFab />

@@ -305,18 +305,77 @@ def download_name(collection_id: str) -> str:
     return f"{collection_id}-{updated}-sample.csv"
 
 
-def releases() -> list[dict[str, Any]]:
-    """Release history per collection, most recently updated first.
-
-    Served from the dumped snapshot of ``pressReleases.js`` â€” the same
-    change notes the What's New feed renders â€” so the service and the page
-    describe one history rather than two.
-    """
-    rows = [
-        {"id": collection_id, **_thaw(release)}
-        for collection_id, release in press_catalog.RELEASES.items()
-    ]
-    return sorted(rows, key=lambda row: row.get("updated", ""), reverse=True)
+def releases(tier: str) -> dict[str, Any]:
+    """Current permitted releases; preview dates are never publication dates."""
+    press_ids = {item.id for item in launch.LAUNCH_COLLECTION}
+    press_ids.update(governed_collections.SHARED_COLLECTIONS)
+    previews = {item.id: item for item in launch.LAUNCH_COLLECTION}
+    rows = []
+    for target in release_targets_for(tier)["collections"]:
+        collection_id = target["id"]
+        if collection_id not in press_ids or target.get("shelf") == "grove":
+            continue
+        supplied = target.get("release")
+        parts = supplied if isinstance(supplied, list) else [supplied]
+        available = [
+            part
+            for part in parts
+            if isinstance(part, dict)
+            and part.get("kind") == "full"
+            and part.get("status") != "unavailable"
+            and isinstance(part.get("release_id"), str)
+            and _SHA256.fullmatch(part["release_id"])
+            and isinstance(part.get("manifest_sha256"), str)
+            and _SHA256.fullmatch(part["manifest_sha256"])
+            and type(part.get("record_count")) is int
+            and part["record_count"] >= 0
+        ]
+        identities = {(part["release_id"], part["manifest_sha256"]) for part in available}
+        if len(identities) != 1:
+            continue
+        release_id, manifest_sha256 = next(iter(identities))
+        sheet = target.get("spreadsheet")
+        changed = ["Verified observations are available for this account."]
+        row = {
+            "id": collection_id,
+            "name": target["name"],
+            "version": release_id,
+            "updated": None,
+            "cadence": None,
+            "retired": False,
+        }
+        if (
+            isinstance(sheet, dict)
+            and sheet.get("kind") == "spreadsheet"
+            and sheet.get("format") == "csv"
+            and sheet.get("release_id") == release_id
+            and sheet.get("manifest_sha256", manifest_sha256) == manifest_sha256
+            and type(sheet.get("record_count")) is int
+            and sheet["record_count"] >= 0
+        ):
+            row["record_count"] = sheet["record_count"]
+            changed = [f"Available spreadsheet: {sheet['record_count']:,} observations."]
+        if len(available) < len(parts):
+            changed.append("Some collection components are unavailable.")
+        row["history"] = [
+            {
+                "version": release_id,
+                "date": None,
+                "date_basis": "not_recorded",
+                "kind": "data",
+                "changed": changed,
+            }
+        ]
+        facts = launch.collection_cedar_facts(collection_id) or {}
+        preview = previews.get(collection_id)
+        if (
+            preview is not None
+            and facts.get("release_id") == release_id
+            and facts.get("manifest_sha256") == manifest_sha256
+        ):
+            row["preview_updated"] = preview.updated
+        rows.append(row)
+    return {"source": "verified_current", "history_complete": False, "releases": rows}
 
 
 def _thaw(value: Any) -> Any:

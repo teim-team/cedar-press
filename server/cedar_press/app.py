@@ -583,8 +583,15 @@ def press_shelf(
 
 
 @app.get("/press/releases")
-def releases(session: Session = Depends(require_session)) -> dict[str, object]:
-    return {"releases": repository.releases()}
+def releases(response: Response, session: Session = Depends(require_session)) -> dict[str, object]:
+    response.headers["Cache-Control"] = "private, no-store"
+    try:
+        subscriber = subscribers.find(session.email)
+    except Exception as error:
+        raise HTTPException(status_code=503, detail="Authorization unavailable") from error
+    if subscriber is None:
+        raise HTTPException(status_code=401, detail="Authentication required")
+    return repository.releases(subscriber.tier)
 
 
 def require_article_reader(session: Session | None = Depends(current_session)) -> Session:

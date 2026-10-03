@@ -611,3 +611,115 @@ class SharedCollectionReleaseTest(unittest.TestCase):
                 self.assertRaisesRegex(SystemExit, "isolated environment"),
             ):
                 module.main()
+
+
+class CurrentReleaseFeedTest(unittest.TestCase):
+    def target(self, collection="funding"):
+        part = {
+            "kind": "full",
+            "release_id": "a" * 64,
+            "manifest_sha256": "b" * 64,
+            "record_count": 17,
+        }
+        return {
+            "id": collection,
+            "name": "Fixture",
+            "shelf": "standard",
+            "release": part,
+            "spreadsheet": {"format": "csv", **part, "record_count": 17, "kind": "spreadsheet"},
+        }
+
+    def feed(self, targets, tier="press_pro"):
+        with patch.object(
+            repository, "release_targets_for", return_value={"collections": targets}
+        ) as lookup:
+            result = repository.releases(tier)
+        lookup.assert_called_once_with(tier)
+        return result
+
+    def test_current_release_has_no_invented_publication_date(self):
+        row = self.feed([self.target()])["releases"][0]
+        self.assertEqual(row["record_count"], 17)
+        self.assertIsNone(row["updated"])
+        self.assertIsNone(row["history"][0]["date"])
+        self.assertEqual(row["history"][0]["date_basis"], "not_recorded")
+
+    def test_overlapping_components_are_not_summed(self):
+        target = self.target()
+        part = target["release"]
+        target["release"] = [
+            part,
+            {**part, "record_count": 90},
+            {"status": "unavailable", "record_count": 9999},
+        ]
+        row = self.feed([target])["releases"][0]
+        self.assertEqual(row["record_count"], 17)
+        self.assertIn("Some collection components are unavailable.", row["history"][0]["changed"])
+        self.assertNotIn("9999", str(row))
+
+    def test_conflicting_versions_and_manifests_do_not_make_a_current_entry(self):
+        for key in ("release_id", "manifest_sha256"):
+            target = self.target()
+            part = target["release"]
+            target["release"] = [part, {**part, key: "c" * 64}]
+            self.assertEqual(self.feed([target])["releases"], [])
+
+    def test_missing_malformed_and_grove_releases_stay_out(self):
+        for supplied in (
+            None,
+            {"kind": "full", "status": "unavailable"},
+            {"kind": "full", "release_id": "legacy"},
+        ):
+            target = self.target()
+            target["release"] = supplied
+            self.assertEqual(self.feed([target])["releases"], [])
+        self.assertEqual(
+            self.feed([self.target("gaming"), self.target("infrastructure")])["releases"], []
+        )
+
+    def test_spreadsheet_count_requires_matching_release_and_manifest(self):
+        for key in ("release_id", "manifest_sha256"):
+            target = self.target()
+            target["spreadsheet"][key] = "c" * 64
+            row = self.feed([target])["releases"][0]
+            self.assertNotIn("record_count", row)
+            self.assertNotIn("17", str(row["history"]))
+
+    def test_preview_date_requires_both_exact_source_hashes(self):
+        target = self.target()
+        facts = {"release_id": "a" * 64, "manifest_sha256": "b" * 64}
+        with patch.object(repository.launch, "collection_cedar_facts", return_value=facts):
+            row = self.feed([target])["releases"][0]
+            self.assertIn("preview_updated", row)
+            self.assertIsNone(row["updated"])
+        for key in facts:
+            with patch.object(
+                repository.launch, "collection_cedar_facts", return_value={**facts, key: "c" * 64}
+            ):
+                self.assertNotIn("preview_updated", self.feed([target])["releases"][0])
+
+    def test_endpoint_uses_fresh_subscription_and_refuses_failed_auth(self):
+        self.addCleanup(app.dependency_overrides.clear)
+        app.dependency_overrides[current_session] = lambda: Session(
+            "feed@example.invalid", "press_pro"
+        )
+        payload = {"source": "verified_current", "history_complete": False, "releases": []}
+        with (
+            TestClient(app) as client,
+            patch.object(repository, "releases", return_value=payload) as service,
+        ):
+            with patch.object(
+                subscribers,
+                "find",
+                return_value=subscribers.Subscriber("feed@example.invalid", "press", "fixture"),
+            ):
+                response = client.get("/press/releases")
+                self.assertEqual(response.status_code, 200)
+                service.assert_called_once_with("press")
+                self.assertEqual(response.headers["cache-control"], "private, no-store")
+            with patch.object(subscribers, "find", return_value=None):
+                self.assertEqual(client.get("/press/releases").status_code, 401)
+            with patch.object(subscribers, "find", side_effect=RuntimeError("unavailable")):
+                self.assertEqual(client.get("/press/releases").status_code, 503)
+            app.dependency_overrides[current_session] = lambda: None
+            self.assertEqual(client.get("/press/releases").status_code, 401)

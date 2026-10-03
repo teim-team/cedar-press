@@ -21,6 +21,8 @@ import {
 import { PRESS_CATALOG } from "./pressCatalog.js";
 import {
   CADENCE,
+  connectedReleaseModel,
+  previewReleaseModel,
   DECLARED_CADENCE,
   PRESS_RELEASES,
   RELEASE_FEED,
@@ -329,4 +331,52 @@ test("dates are spelled one way everywhere", () => {
   assert.equal(freshnessLine("not-a-collection"), "");
   assert.equal(latestRelease("need").version, releaseFor("need").version);
   assert.equal(latestRelease("not-a-collection"), null);
+});
+
+
+function currentFixture() {
+  const version = "a".repeat(64);
+  return { source: "verified_current", history_complete: false, releases: [{
+    id: "funding", name: "Funding", version, updated: null, retired: false,
+    history: [{ version, date: null, date_basis: "not_recorded", kind: "data", changed: ["Available observations."] }],
+  }] };
+}
+
+test("current feed never borrows publication dates or aggregate totals from public previews", () => {
+  const model = connectedReleaseModel(currentFixture());
+  assert.equal(model.source, "verified_current");
+  assert.equal(model.historyComplete, false);
+  assert.equal(model.feed.length, 1);
+  assert.equal(model.feed[0].date, null);
+  assert.equal(model.feed[0].anchor, `funding-${"a".repeat(64)}`);
+  assert.ok(model.previewHistory.length);
+  assert.ok(model.previewHistory.every((event) => event.date_basis === "public_preview"));
+  assert.ok(model.previewHistory.every((event) => event.changed.join() === "Public preview updated."));
+  const preview = previewReleaseModel();
+  assert.equal(preview.source, "public_preview");
+  assert.deepEqual(preview.feed.map((item) => item.anchor), RELEASE_FEED.map((item) => item.anchor));
+});
+
+test("invalid live response cannot masquerade as a release feed", () => {
+  const invalid = [null, { releases: [] }];
+  for (const mutate of [
+    (p) => p.releases.push(p.releases[0]),
+    (p) => { p.releases[0].id = "infrastructure"; },
+    (p) => { p.releases[0].id = "__proto__"; },
+    (p) => { p.releases[0].updated = "2026-10-03"; },
+    (p) => { p.releases[0].history[0].date = "2026-10-03"; },
+    (p) => { p.releases[0].version = "v3"; },
+    (p) => { p.releases[0].record_count = -1; },
+    (p) => { p.releases[0].preview_updated = "2026-02-30"; },
+  ]) { const fixture = currentFixture(); mutate(fixture); invalid.push(fixture); }
+  for (const value of invalid) assert.throws(() => connectedReleaseModel(value));
+});
+
+test("activity excludes undated current entries and future dates", () => {
+  const current = connectedReleaseModel(currentFixture()).feed[0];
+  const activity = recentActivity(30, new Date("2026-10-03T12:00:00Z"), [
+    { ...current, date: "2026-12-01" }, current, { ...current, date: "2026-10-01" },
+  ]);
+  assert.equal(activity.releases, 1);
+  assert.equal(activity.latest, "2026-10-01");
 });

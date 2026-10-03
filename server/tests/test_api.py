@@ -53,6 +53,7 @@ from cedar_press import (
     codes,  # noqa: E402
     press_catalog,  # noqa: E402
     ratelimit,  # noqa: E402
+    repository,  # noqa: E402
 )
 from cedar_press import collections as launch  # noqa: E402
 from cedar_press import session as session_module  # noqa: E402
@@ -448,28 +449,21 @@ class TestCatalog(unittest.TestCase):
         answer = response.json()["answer"]
         self.assertIn(f"Indian Country Deals, updated {dataset.updated}", answer)
 
-    def test_every_storefront_collection_has_a_release_the_feed_serves(self) -> None:
-        # The feed covered ten collections while the storefront sold twelve;
-        # derived from the manifest, it covers exactly the storefront.
-        response = client.get("/press/releases")
+    def test_release_feed_uses_current_permitted_metadata(self) -> None:
+        payload = {"source": "verified_current", "history_complete": False, "releases": []}
+        with mock.patch.object(repository, "releases", return_value=payload) as service:
+            response = client.get("/press/releases")
         self.assertEqual(response.status_code, 200)
-        served = {row["id"]: row for row in response.json()["releases"]}
-        self.assertEqual(set(served), {d.id for d in launch.LAUNCH_COLLECTION})
-        for dataset in launch.LAUNCH_COLLECTION:
-            with self.subTest(collection=dataset.id):
-                self.assertEqual(served[dataset.id]["version"], dataset.version)
-                self.assertEqual(served[dataset.id]["updated"], dataset.updated)
-                self.assertTrue(served[dataset.id]["history"])
+        self.assertEqual(response.json(), payload)
+        self.assertEqual(response.headers["cache-control"], "private, no-store")
+        self.assertIn(service.call_args.args[0], ("press", "press_pro"))
 
-    def test_releases_are_served_from_the_dumped_history(self) -> None:
-        response = client.get("/press/releases")
+    def test_missing_live_metadata_does_not_return_the_dumped_history(self) -> None:
+        with mock.patch.object(repository, "release_targets_for", return_value={"collections": []}):
+            response = client.get("/press/releases")
         self.assertEqual(response.status_code, 200)
-        rows = response.json()["releases"]
-        self.assertTrue(rows)
-        # Most recently updated first, and each row names its collection.
-        dates = [row["updated"] for row in rows]
-        self.assertEqual(dates, sorted(dates, reverse=True))
-        self.assertIn("funding", {row["id"] for row in rows})
+        self.assertEqual(response.json()["releases"], [])
+        self.assertIs(response.json()["history_complete"], False)
 
     def test_a_catalog_only_collection_profile_is_served(self) -> None:
         # A collection the catalog carries and the storefront does not sell
