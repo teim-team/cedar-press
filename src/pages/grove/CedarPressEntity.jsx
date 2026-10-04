@@ -285,6 +285,12 @@ export default function CedarPressEntity() {
           ) : (
             <p className="cp-rec__fine cp-ent__notice">{notice}</p>
           )}
+          {/* Always present, so the failure is announced when it arrives; the
+              visible line below is inserted with it and would not be. Out of
+              flow (sr-only is absolute), so it takes no cell in the header. */}
+          <span className="sr-only" role="status">
+            {missing.length ? `Not reachable right now: ${missing.map((key) => PRESS_CATALOG_BY_ID[key.split("/")[0]]?.short ?? key).join(", ")}.` : ""}
+          </span>
           {missing.length ? (
             <p className="cp-rec__fine">
               Not reachable right now: {missing.map((key) => PRESS_CATALOG_BY_ID[key.split("/")[0]]?.short ?? key).join(", ")}.{" "}

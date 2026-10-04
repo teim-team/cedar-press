@@ -85,6 +85,7 @@ import PressCollectionRail from "./PressCollectionRail.jsx";
 import { COLLECTION_ICONS } from "./pressCollectionIcons";
 import PressCollectionAbout from "./PressCollectionAbout.jsx";
 import Explain from "./Explain";
+import { useDismissable } from "./useDismissable.jsx";
 import { TierName } from "./TierName";
 
 /** Row counts as the launch descriptors state them, keyed by collection. */
@@ -178,7 +179,10 @@ function Picker({ label, value, children, testId }) {
       node.open = false;
       if (refocus) node.querySelector("summary")?.focus();
     };
-    const onKey = (event) => { if (event.key === "Escape") { event.stopPropagation(); close(true); } };
+    // Only an open picker claims Escape. It stopped propagation even when
+    // closed, so Escape on a picker's own button could not close the Filters
+    // panel around it.
+    const onKey = (event) => { if (event.key === "Escape" && node.open) { event.stopPropagation(); close(true); } };
     const onPointer = (event) => { if (!node.contains(event.target)) close(false); };
     node.addEventListener("keydown", onKey);
     document.addEventListener("pointerdown", onPointer);
@@ -952,6 +956,8 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
 
   const [saved, setSaved] = useState(() => (typeof window === "undefined" ? [] : readSaved()));
   const [naming, setNaming] = useState(false);
+  const filtersRef = useDismissable();
+  const moreRef = useDismissable();
   const [name, setName] = useState("");
   const [copied, setCopied] = useState(false);
   const [showAll, setShowAll] = useState(false);
@@ -1176,7 +1182,7 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
               were three controls wide enough to need their own row; behind a
               disclosure they cost one button, and the button says when they
               are doing something. */}
-          <details className="cp-ex__filters">
+          <details className="cp-ex__filters" ref={filtersRef}>
             <summary className="cp-ex__act">Filters{recordFiltersActive ? " \u00b7 on" : ""}</summary>
             <div className="cp-ex__filtersin">{filters}</div>
           </details>
@@ -1192,7 +1198,7 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
                 collection's own ten-row sample CSV carrying `cite_as` in the
                 rows — so it keeps its own entry, in the menu where the other
                 downloads are. */}
-            <details className="cp-ex__more">
+            <details className="cp-ex__more" ref={moreRef}>
               <summary className="cp-ex__act" aria-label="More actions">More</summary>
               <div className="cp-ex__morein">
                 {!atlas && single ? <SampleDownload entry={single.entry} /> : null}
@@ -1249,7 +1255,7 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
               />
             )
           ) : (
-            <p className="cp-ex__empty">
+            <p className="cp-ex__empty" role="status">
               {loading
                 ? "Loading the preview records…"
                 : selected.length === 0

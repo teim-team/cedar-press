@@ -142,7 +142,7 @@ export default function CollectionPreview({ entry, tier, register }) {
       <div className="cp-pane__head">
         <div className="cp-pane__id">
           <span className="cp-pane__cap">Included in <TierName name={tier.name} /></span>
-          <h3 className="cp-pane__name"><TierName name={entry.name} /></h3>
+          <h2 className="cp-pane__name"><TierName name={entry.name} /></h2>
         </div>
         <p className="cp-pane__facts">
           {coverage ? <span>{coverage}</span> : null}
@@ -197,9 +197,12 @@ export default function CollectionPreview({ entry, tier, register }) {
           </div>
         </>
       ) : status === "loading" ? (
-        <p className="cp-pane__empty" aria-busy="true">Reading the sample…</p>
+        // One live region across loading and failure: React keeps this
+        // element and swaps its class and content, so a screen reader hears
+        // "could not be read" when the read fails rather than nothing.
+        <div className="cp-pane__empty" role="status" aria-busy="true">Reading the sample…</div>
       ) : (
-        <div className="cp-pane__pending">
+        <div className="cp-pane__pending" role="status">
           <span className="cp-pane__pendingcap">
             {status === "none" ? "Preview pending" : "The sample could not be read"}
           </span>
