@@ -15,7 +15,7 @@ import test from "node:test";
 import { fileURLToPath } from "node:url";
 
 import { LAUNCH_COLLECTION, collectionSample, collectionCsv, hasSample, samplePath, reviewedPreviewTextMatches } from "./collection.js";
-import { csvFor, hasReleaseFile } from "./pressDownload.js";
+import { csvFor, downloadPath, downloadRecord, hasReleaseFile } from "./pressDownload.js";
 import { loadCodebook } from "./codebook.js";
 // The codebook loads on demand in the browser (codebook.js); the readers
 // under test read it synchronously once it has.
@@ -29,7 +29,7 @@ test("stale NEED cached rows cannot acquire the reviewed release citation", asyn
   let calls = 0;
   const result = await csvFor({ id: "need", name: "Cedar NEED" }, async (path) => {
     calls++;
-    assert.equal(path, samplePath("need"));
+    assert.equal(path, downloadPath("need"));
     return stale;
   });
   assert.equal(hasSample("need"), true);
@@ -59,8 +59,10 @@ test("the reviewed finite NEED preview remains available", async () => {
   const { csv, name } = await csvFor({ id: "need", name: "Cedar NEED" }, readSample);
   assert.equal(name, "need.csv");
   const rows = parseCsv(csv);
+  // The customer table (render_sample_downloads.py): the preview's rows, under
+  // the customer-table rules, with a citation column.
   assert.equal(rows.length, sample.rows + 1);
-  assert.equal(rows[0].length, sample.columns + 1);
+  assert.equal(rows[0].length, downloadRecord("need").columns);
   assert.equal(rows[0].at(-1), "cite_as");
   assert.ok(rows.slice(1).every((row) => row.at(-1).includes("Cedar")));
   // A stale schema with the same width also fails: column count alone is
@@ -149,17 +151,53 @@ test("every collection with a sample downloads real rows for it", async () => {
   for (const dataset of LAUNCH_COLLECTION) {
     if (!hasSample(dataset.id)) continue;
     const { csv, name } = await csvFor(dataset, readSample);
-    const sample = collectionSample(dataset.id);
+    const record = downloadRecord(dataset.id);
+    assert.ok(record, `${dataset.id}: a sample with no rendered download`);
     assert.equal(name, `${dataset.id}.csv`, dataset.id);
     const rows = parseCsv(csv);
-    // The manifest states how many rows and columns Cedar published for this
-    // table; the file has to match, or the manifest is describing a file that
+    // The record states how many rows and columns the rendered customer table
+    // holds; the file has to match, or the record is describing a file that
     // is not the one being handed over.
-    assert.equal(rows.length, sample.rows + 1, dataset.id);
-    assert.equal(rows[0].length, sample.columns + 1, dataset.id);
+    assert.equal(rows.length, record.rows + 1, dataset.id);
+    assert.equal(rows[0].length, record.columns, dataset.id);
     assert.equal(rows[0].at(-1), "cite_as", dataset.id);
-    assert.equal(rows.at(-1).length, sample.columns + 1, dataset.id);
+    assert.equal(rows.at(-1).length, record.columns, dataset.id);
   }
+});
+
+// Owner rulings 2026-10-04: a download never carries a retired Cedar scheme,
+// Casino City key or DUNS column. The standalone (no API) build used to hand
+// over the raw preview, `CEDAR-NEST-` IDs and all; it now serves the rendered
+// customer table, the same bytes the service sends.
+const RETIRED_SCHEME = /(?<![A-Za-z0-9_-])(?:CEDAR-NEST-|CEDAR-PLACE-|NESTREL-|TRBF-|VP-|CEDAR-FAC-|CCP-)/;
+
+test("no served download carries a retired identifier scheme or a DUNS column", async () => {
+  let served = 0;
+  for (const dataset of LAUNCH_COLLECTION) {
+    if (!hasReleaseFile(dataset)) continue;
+    const fetched = [];
+    const { csv, name } = await csvFor(dataset, async (path) => {
+      fetched.push(path);
+      return readSample(path);
+    });
+    assert.equal(name, `${dataset.id}.csv`, dataset.id);
+    assert.deepEqual(fetched, [downloadPath(dataset.id)], dataset.id);
+    assert.notEqual(fetched[0], samplePath(dataset.id), `${dataset.id} served the raw preview`);
+    assert.doesNotMatch(csv, RETIRED_SCHEME, dataset.id);
+    const header = parseCsv(csv)[0];
+    assert.deepEqual(header.filter((column) => /duns/i.test(column)), [], dataset.id);
+    served += 1;
+  }
+  assert.ok(served >= 10, `only ${served} collections served a download`);
+});
+
+test("the raw preview served in place of the download is refused", async () => {
+  // NEED's raw preview carries CEDAR-NEST- enterprise IDs.
+  const raw = await readSample(samplePath("need"));
+  assert.match(raw, RETIRED_SCHEME);
+  const { csv, name } = await csvFor({ id: "need", name: "Cedar NEED" }, async () => raw);
+  assert.equal(name, "need-collection-description.csv");
+  assert.doesNotMatch(csv, RETIRED_SCHEME);
 });
 
 // The one collection with no preview is `owned`, and the reason is a real

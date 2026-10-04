@@ -22,17 +22,28 @@
 // the real file, and the manifest's `full_files.served` is `false` until one
 // exists.
 //
+// THE DOWNLOAD IS THE CUSTOMER TABLE, IN BOTH MODES
+// Connected, the service passes the preview through the customer-table rules
+// (server/cedar_press/customer_sheet.py, vendored from Lumecon-data; owner
+// rulings 2026-10-04) before handing it over. Standalone there is no service,
+// and until 2026-10-04 this file handed over the raw preview, retired
+// `CEDAR-NEST-` IDs and all. Now both modes serve the same bytes:
+// `scripts/render_sample_downloads.py` writes the server's output to
+// `public/data/cedar/downloads/<id>.csv` and records each file's SHA-256 in
+// `data/cedar/sample_downloads.json`, and a fetched file is handed over only
+// when its digest matches. The raw previews stay for the Explore reader.
+//
 // WHY THESE ARE ASYNC
 // The sample rows are static files the built site serves, not bundled bytes:
 // 169 sample files across the twelve collections is 1.4 MB of CSV, and
 // inlining it would load every reader's page for a button most never press.
-// So the file is fetched at click time. `hasSample` answers from the manifest
+// So the file is fetched at click time. `hasReleaseFile` answers from the record
 // alone, with no fetch, because a tile has to label itself before the click.
 
 import { downloadCollection } from "../../api.js";
 import { isConnected } from "../../config.js";
-import { loadCodebook } from "./codebook.js";
-import { collectionCitation, collectionCsv, hasSample, samplePath, sampleTextMatchesRelease } from "./collection.js";
+import downloads from "../../../data/cedar/sample_downloads.json" with { type: "json" };
+import { collectionCitation } from "./collection.js";
 import { spreadsheetSafe } from "./csv.js";
 import { coverageLabel } from "./pressAccess.js";
 import { recordStructure } from "./pressRecordStructure.js";
@@ -51,25 +62,48 @@ const csvCell = (value) => `"${spreadsheetSafe(value).replace(/"/g, '""')}"`;
  * label that has to await a network round trip renders wrong first.
  */
 export function hasReleaseFile(entry) {
-  return hasSample(entry?.id);
+  return Boolean(downloadRecord(entry?.id));
+}
+
+/** The rendered customer-table download for a collection, or `null`. */
+export function downloadRecord(id) {
+  return Object.hasOwn(downloads.collections, id ?? "") ? downloads.collections[id] : null;
+}
+
+/** Where the browser fetches a collection's customer-table download, or `null`. */
+export function downloadPath(id) {
+  return downloadRecord(id)?.path ?? null;
+}
+
+/**
+ * Whether fetched bytes are exactly the rendered download. A cached response
+ * from before a re-render, or the raw preview served in its place, is refused.
+ */
+export async function downloadTextMatches(id, text) {
+  const expected = downloadRecord(id)?.sha256;
+  if (typeof text !== "string" || !/^[a-f0-9]{64}$/.test(expected ?? "")) return false;
+  try {
+    const subtle = globalThis.crypto?.subtle;
+    if (!subtle) return false;
+    const digest = await subtle.digest("SHA-256", new TextEncoder().encode(text));
+    const actual = Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
+    return actual === expected;
+  } catch {
+    return false;
+  }
 }
 
 /**
  * The file for a collection: the shipped extract, or its own description.
  *
  * `fetchText` is injectable so this can be exercised without a network and
- * without a DOM; it defaults to fetching the sample the manifest names.
+ * without a DOM; it defaults to fetching the rendered customer-table download
+ * (`downloadPath`), never the raw preview.
  */
 export async function csvFor(entry, fetchText = defaultFetchText) {
-  if (hasSample(entry.id)) {
-    const text = await fetchText(samplePath(entry.id));
-    const verified = text != null && await sampleTextMatchesRelease(entry.id, text);
-    // The sample is checked against the codebook, which loads on demand. If
-    // it cannot load, this is the same honest fallback as a sample that
-    // cannot be fetched: the collection's description, named as such.
-    const checkable = verified && await loadCodebook().then(() => true, () => false);
-    const shipped = checkable ? collectionCsv(entry.id, text) : null;
-    if (shipped) return { csv: shipped, name: `${entry.id}.csv` };
+  if (downloadRecord(entry.id)) {
+    const text = await fetchText(downloadPath(entry.id));
+    if (await downloadTextMatches(entry.id, text)) return { csv: text, name: `${entry.id}.csv` };
   }
   // The file outlives the page, so it carries its own citation. Launch
   // datasets cite by name and update date; other shelf entries cite by name.
@@ -120,8 +154,8 @@ async function defaultFetchText(path) {
  * serves it: `GET /press/collections/:id/download` enforces the entitlement
  * and hands over what the platform published, and a refusal (`NOT_INCLUDED`,
  * `NO_SAMPLE`) is thrown with the service's own sentence for the caller to
- * show. STANDALONE, the shipped sample or the collection's description, as
- * `csvFor` decides.
+ * show. STANDALONE, the same customer table rendered ahead of time, or the
+ * collection's description, as `csvFor` decides.
  */
 export async function downloadCsv(entry) {
   // A collection presented by its record structure has no file on the

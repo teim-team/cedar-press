@@ -10,9 +10,12 @@ namespace, NESTREL-) are removed; public-citation sources, one table per
 collection, no version labels -- are one set of rules on both sides.
 """
 
+import contextlib
 import csv
+import importlib.util
 import io
 import os
+import re
 import sys
 import unittest
 from pathlib import Path
@@ -20,6 +23,7 @@ from pathlib import Path
 from cedar_press import customer_sheet
 
 ROOT = Path(__file__).resolve().parents[2]
+DOWNLOADS = ROOT / "public" / "data" / "cedar" / "downloads"
 
 
 class VendoredPolicy(unittest.TestCase):
@@ -194,6 +198,46 @@ class SampleDownloads(unittest.TestCase):
                 for packaging in ("record_type", "record_key", "record_grain"):
                     self.assertNotIn(packaging, header)
                 self.assertIn("cite_as", rows[0])
+
+    #: Retired Cedar schemes and Casino City keys the owner ruled out (2026-10-04).
+    RETIRED_SCHEME = re.compile(
+        r"(?<![A-Za-z0-9_-])(?:CEDAR-NEST-|CEDAR-PLACE-|NESTREL-|TRBF-|VP-|CEDAR-FAC-|CCP-)"
+    )
+
+    def test_no_served_download_carries_a_retired_scheme_or_a_duns_column(self):
+        """Both modes: the service's download and the standalone build's rendered copy.
+
+        Until 2026-10-04 the standalone (no-API) download handed over the raw
+        preview, ``CEDAR-NEST-`` IDs and all (Lumecon-data review ledger).
+        """
+        from cedar_press import collections as launch
+        from cedar_press import repository
+
+        served = [d.id for d in launch.LAUNCH_COLLECTION if launch.collection_csv(d.id)]
+        self.assertGreaterEqual(len(served), 10)
+        for collection in served:
+            for mode, text in (
+                ("connected", repository.collection_csv(collection)),
+                ("standalone", (DOWNLOADS / f"{collection}.csv").read_text("utf-8")),
+            ):
+                with self.subTest(collection=collection, mode=mode):
+                    self.assertIsNone(self.RETIRED_SCHEME.search(text))
+                    header = next(csv.reader(io.StringIO(text, newline="")))
+                    self.assertFalse([c for c in header if customer_sheet.is_private_identifier(c)])
+        # The raw NEED preview is what leaked; it does carry the retired scheme.
+        raw = (ROOT / "public/data/cedar/samples/need/spreadsheet__10.csv").read_text("utf-8")
+        self.assertIsNotNone(self.RETIRED_SCHEME.search(raw))
+
+    def test_standalone_downloads_are_the_servers_bytes(self):
+        """``scripts/render_sample_downloads.py --check``: rendered from the current rules."""
+        spec = importlib.util.spec_from_file_location(
+            "render_sample_downloads", ROOT / "scripts" / "render_sample_downloads.py"
+        )
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        with contextlib.redirect_stdout(io.StringIO()) as out:
+            status = module.main(["--check"])
+        self.assertEqual(status, 0, out.getvalue())
 
     def test_identity_collections_carry_the_native_identity_basis(self):
         """Owner request 2026-10-04: the evidence behind each record's Native identity."""

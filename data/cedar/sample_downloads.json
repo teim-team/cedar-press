@@ -1,0 +1,89 @@
+{
+  "about": "Customer-table sample downloads for the standalone build, rendered by `python3 scripts/render_sample_downloads.py` from the committed previews through server/cedar_press/customer_sheet.py (the server's own bytes). Generated; do not edit.",
+  "collections": {
+    "contractors": {
+      "path": "/data/cedar/downloads/contractors.csv",
+      "sha256": "a4bc87ca7b7f2709d47390302da46ad9a6ac47234f883ebc20900154d574e09d",
+      "rows": 10,
+      "columns": 52
+    },
+    "deals": {
+      "path": "/data/cedar/downloads/deals.csv",
+      "sha256": "21e99d7c59bb0d8908f129d598d260f4a89dacd64b60edd6961179c8ce6025f7",
+      "rows": 10,
+      "columns": 36
+    },
+    "federal-register": {
+      "path": "/data/cedar/downloads/federal-register.csv",
+      "sha256": "3841c99dbb91dab9487490b2f6c995834bd2ab332b91cd7eec97389c8ad6296b",
+      "rows": 5,
+      "columns": 25
+    },
+    "foundation-corporate-giving": {
+      "path": "/data/cedar/downloads/foundation-corporate-giving.csv",
+      "sha256": "8b710db196158cc716085cccbb7ca1bba5de539c474c72be4197c19ecf375543",
+      "rows": 10,
+      "columns": 65
+    },
+    "funding": {
+      "path": "/data/cedar/downloads/funding.csv",
+      "sha256": "81ce6c333aeaa02df56d341338a2aa442eaabeaa69b20631a16d4eb48254947a",
+      "rows": 10,
+      "columns": 42
+    },
+    "legislation": {
+      "path": "/data/cedar/downloads/legislation.csv",
+      "sha256": "adc8fb5590f0f7e5984c8cf3f23e7be67479915b5974417f1f679aac0b205def",
+      "rows": 10,
+      "columns": 31
+    },
+    "lobbying": {
+      "path": "/data/cedar/downloads/lobbying.csv",
+      "sha256": "43a9cd8ffbfce27f66e304de415fff6f901693875cd2f2b9f8fce468ffe39ee2",
+      "rows": 10,
+      "columns": 39
+    },
+    "nagpra": {
+      "path": "/data/cedar/downloads/nagpra.csv",
+      "sha256": "5fb714a82da9dafb442d3b63b70ff6ff77bb92a450231896745e214eb3848d0f",
+      "rows": 10,
+      "columns": 53
+    },
+    "natural-resources": {
+      "path": "/data/cedar/downloads/natural-resources.csv",
+      "sha256": "73a28211779a7bce1d7e7087ad733b6cb79ccb73d477a6732fdb60e5cdccd8bd",
+      "rows": 10,
+      "columns": 39
+    },
+    "need": {
+      "path": "/data/cedar/downloads/need.csv",
+      "sha256": "7d305add4c07188ae26cbefbeca119659d03d3fc126843b167bb13a1c9eb62aa",
+      "rows": 10,
+      "columns": 21
+    },
+    "nonprofits": {
+      "path": "/data/cedar/downloads/nonprofits.csv",
+      "sha256": "9f4ba781bcb8c90b63d5d725376402c4a83807ec463871ba5bfc6506cb7752dc",
+      "rows": 10,
+      "columns": 25
+    },
+    "owned": {
+      "path": "/data/cedar/downloads/owned.csv",
+      "sha256": "63da435984334d9d628ee79d024041fc9152317264d84fd11556f2966c8e9334",
+      "rows": 10,
+      "columns": 35
+    },
+    "plot": {
+      "path": "/data/cedar/downloads/plot.csv",
+      "sha256": "63a4b3f339a9f19320cee1d360a2790cb77e6a7a1771342f129fe03ef01b48a3",
+      "rows": 3,
+      "columns": 33
+    },
+    "subcontracting": {
+      "path": "/data/cedar/downloads/subcontracting.csv",
+      "sha256": "b49babf83f8a9c1369f115dd2ef9a8c39c4b0f373ef78ff29f609311b3074119",
+      "rows": 10,
+      "columns": 57
+    }
+  }
+}
