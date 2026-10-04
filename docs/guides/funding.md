@@ -16,7 +16,7 @@ One federal assistance transaction (an award action or modification), preserved 
 
 This pass changes columns, never rows: no aggregation, deduplication, change of publication eligibility or reassignment of Cedar IDs.
 
-**Note:** The owner's list carries recipient_duns (40 columns). The retirement rule in the same addendum says DUNS is used internally to reconcile historical records and is not published; the later rule wins, DUNS is internal_crosswalk, and the file ships 39.
+**Note:** The owner's list carries recipient_duns (40 columns). The retirement rule in the same addendum says DUNS is used internally to reconcile historical records and is not published; the later rule wins, DUNS is internal_crosswalk, and the file ships 39. Under the owner's ruling of 2026-10-04 (DUNS is private) the publication gate drops every column whose name contains `duns` before the map runs (cedar_publication.DROP_SUBSTRINGS), so recipient_duns no longer reaches the sample header.
 
 ## Key identifiers
 

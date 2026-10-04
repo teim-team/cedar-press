@@ -62,7 +62,7 @@
         "path": "/data/cedar/samples/funding/federal_funding_transactions__10.csv",
         "rows": 10,
         "of": 701955,
-        "columns": 63
+        "columns": 62
       },
       "tables": [
         {
@@ -152,7 +152,7 @@
           "rows_published": 60661,
           "rows_withheld": 0,
           "withheld_why": null,
-          "columns_published": 25,
+          "columns_published": 24,
           "sample_rows": 10,
           "full_file": {
             "shippable": true,
@@ -168,7 +168,7 @@
           "rows_published": 2769748,
           "rows_withheld": 0,
           "withheld_why": null,
-          "columns_published": 40,
+          "columns_published": 39,
           "sample_rows": 10,
           "full_file": {
             "shippable": true,
@@ -200,7 +200,7 @@
           "rows_published": 701955,
           "rows_withheld": 0,
           "withheld_why": null,
-          "columns_published": 63,
+          "columns_published": 62,
           "sample_rows": 10,
           "full_file": {
             "shippable": true,
@@ -248,7 +248,7 @@
           "rows_published": 37704,
           "rows_withheld": 0,
           "withheld_why": null,
-          "columns_published": 15,
+          "columns_published": 14,
           "sample_rows": 10,
           "full_file": {
             "shippable": false,

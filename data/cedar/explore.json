@@ -1956,7 +1956,7 @@
       "scopes": null,
       "link_status": null,
       "reviewed": false,
-      "columns": 25
+      "columns": 24
     },
     "funding/faads_transactions_all_agencies": {
       "entity_uid": "cedar_uid",
@@ -1984,7 +1984,7 @@
       "scopes": null,
       "link_status": null,
       "reviewed": false,
-      "columns": 40
+      "columns": 39
     },
     "funding/federal_funding_rulings_from_dofile": {
       "entity_uid": null,
@@ -2066,7 +2066,7 @@
         "confidence_tier",
         "attribution_source_line"
       ],
-      "columns": 63
+      "columns": 62
     },
     "funding/federal_funding_tribe_year_panel": {
       "entity_uid": "cedar_uid",
@@ -2142,20 +2142,20 @@
       "amount_basis": null,
       "year_basis": "first year",
       "observation": [
-        "recipient_duns",
         "recipient_ein",
-        "recipient_state"
+        "recipient_state",
+        "recipient_city"
       ],
       "search": [
         "recipient_name",
-        "recipient_duns",
         "recipient_ein",
-        "recipient_state"
+        "recipient_state",
+        "recipient_city"
       ],
       "scopes": null,
       "link_status": null,
       "reviewed": false,
-      "columns": 15
+      "columns": 14
     },
     "funding/funding_identifier_netnew_ueis": {
       "entity_uid": null,
