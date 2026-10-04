@@ -34,13 +34,13 @@
   "docs/schema/**"
  ],
  "summary": {
-  "numbered_scripts": 619,
-  "pure_numeric_prefix": 602,
+  "numbered_scripts": 620,
+  "pure_numeric_prefix": 603,
   "letter_suffixed_prefix": 17,
-  "at_code_top_level": 601,
+  "at_code_top_level": 602,
   "in_code_archive": 18,
-  "referenced": 601,
-  "referenced_outside_journal": 598,
+  "referenced": 602,
+  "referenced_outside_journal": 599,
   "zero_references": 18,
   "archive_eligible_by_rule": [
    "1172_codebook_block_generator.py",
@@ -86,15 +86,15 @@
    "makefile": 4,
    "ci": 4,
    "package_json": 0,
-   "script": 429,
-   "product_code": 105,
+   "script": 430,
+   "product_code": 108,
    "documented": 579,
    "journal": 239,
    "data_or_config": 35,
-   "stem_only": 57,
-   "number_keyed": 243
+   "stem_only": 58,
+   "number_keyed": 245
   },
-  "text_files_scanned": 2152
+  "text_files_scanned": 2177
  },
  "scripts": {
   "00_run_all.py": {
@@ -280,6 +280,7 @@
      "docs/defect_class_retro_sweep.json"
     ],
     "number_keyed": [
+     "code/1001_link_businesses_to_contracting.py",
      "code/1050_preflight.py",
      "code/1081_stale_tail_dated_facts.py",
      "code/1085_prime_psc_desc_repull.py",
@@ -313,7 +314,7 @@
      "code/62_no_regression_check.py"
     ]
    },
-   "reference_count": 32,
+   "reference_count": 33,
    "tracked_artifacts_named": [],
    "tracked_artifacts_written": [],
    "census": {
@@ -733,6 +734,7 @@
     ],
     "number_keyed": [
      "code/1100_nob_crosswalk_promotion.py",
+     "code/cedar_domain.py",
      "code/cedar_publication.py"
     ],
     "script": [
@@ -742,7 +744,7 @@
      "code/954_register_promoted_columns_codebook.py"
     ]
    },
-   "reference_count": 9,
+   "reference_count": 10,
    "tracked_artifacts_named": [],
    "tracked_artifacts_written": [],
    "census": {
@@ -1582,16 +1584,20 @@
      "code/1130_need_owner_v6_reconcile.py",
      "code/1133_need_owner_v6_builder_input.py",
      "code/1170_dependency_contract_test.py",
+     "code/1189_need_attribution_rulings.py",
      "code/500_build_architecture_map.py",
      "code/512_build_dataset_contracts.py",
      "code/518_dataset_readiness.py",
      "code/521_inventory.py",
      "code/build.py",
      "code/cedar_domain.py",
-     "code/cedar_ids.py"
+     "code/cedar_ids.py",
+     "code/cedar_publication.py",
+     "code/need_attribution.py",
+     "server/tests/test_need_attribution.py"
     ]
    },
-   "reference_count": 12,
+   "reference_count": 16,
    "tracked_artifacts_named": [],
    "tracked_artifacts_written": [],
    "census": {
@@ -1628,13 +1634,19 @@
      "AGENTS.md"
     ],
     "number_keyed": [
-     "code/518_dataset_readiness.py"
+     "code/518_dataset_readiness.py",
+     "code/cedar_publication.py",
+     "code/need_attribution.py"
+    ],
+    "product_code": [
+     "server/tests/test_need_attribution.py"
     ],
     "script": [
      "code/1072_migration_test.py",
      "code/1130_need_owner_v6_reconcile.py",
      "code/1133_need_owner_v6_builder_input.py",
      "code/1170_dependency_contract_test.py",
+     "code/1189_need_attribution_rulings.py",
      "code/500_build_architecture_map.py",
      "code/512_build_dataset_contracts.py",
      "code/521_inventory.py",
@@ -1643,7 +1655,7 @@
      "code/cedar_ids.py"
     ]
    },
-   "reference_count": 20,
+   "reference_count": 24,
    "tracked_artifacts_named": [
     "data/spine/cedar_identity_register.csv"
    ],
@@ -1651,7 +1663,7 @@
    "census": {
     "present": true,
     "maintenance_status": "ACTIVE",
-    "operational_role": "unresolved",
+    "operational_role": "active validator/migration/review",
     "never_run": false,
     "in_a_contract": false,
     "in_an_ordering": false,
@@ -4152,6 +4164,7 @@
      "review/OWNER_DECISION_QUEUE.md"
     ],
     "product_code": [
+     "server/tests/test_need_attribution.py",
      "server/tests/test_portable_paths.py"
     ],
     "script": [
@@ -4162,7 +4175,7 @@
      "code/cedar_publication.py"
     ]
    },
-   "reference_count": 14,
+   "reference_count": 15,
    "tracked_artifacts_named": [
     "data/spine/cedar_identity_register.csv"
    ],
@@ -4201,13 +4214,14 @@
      "code/1133_need_owner_v6_builder_input.py",
      "code/512_build_dataset_contracts.py",
      "code/cedar_publication.py",
+     "server/tests/test_need_attribution.py",
      "server/tests/test_portable_paths.py"
     ],
     "script": [
      "code/build.py"
     ]
    },
-   "reference_count": 7,
+   "reference_count": 8,
    "tracked_artifacts_named": [
     "data/spine/cedar_identity_register.csv"
    ],
@@ -5201,12 +5215,15 @@
     "documented": [
      "docs/DATASET_NORTH_STAR.md"
     ],
+    "number_keyed": [
+     "code/need_attribution.py"
+    ],
     "script": [
      "code/1162_twelve_dataset_report.py",
      "code/521_inventory.py"
     ]
    },
-   "reference_count": 3,
+   "reference_count": 4,
    "tracked_artifacts_named": [
     "dist/preview/MANIFEST.json"
    ],
@@ -5215,7 +5232,7 @@
    ],
    "census": {
     "present": true,
-    "maintenance_status": "ACTIVE",
+    "maintenance_status": "REQUIRES-REVIEW",
     "operational_role": "unresolved",
     "never_run": false,
     "in_a_contract": false,
@@ -6707,6 +6724,45 @@
      "notes.json",
      "queue.csv"
     ]
+   },
+   "disposition": "referenced"
+  },
+  "1189_need_attribution_rulings.py": {
+   "location": "code/1189_need_attribution_rulings.py",
+   "number": "1189",
+   "references": {
+    "number_keyed": [
+     "code/cedar_publication.py",
+     "code/need_attribution.py"
+    ],
+    "product_code": [
+     "server/tests/test_need_attribution.py"
+    ],
+    "script": [
+     "code/1151_customer_preview_ten.py"
+    ],
+    "stem_only": [
+     "docs/NEED_BUILD_LOG.md"
+    ]
+   },
+   "reference_count": 5,
+   "tracked_artifacts_named": [
+    "data/cedar/need_attribution_rulings.csv",
+    "data/cedar/need_attribution_rulings.source.json",
+    "data/cedar/samples/need__sample.csv",
+    "data/spine/cedar_identity_register.csv",
+    "dist/preview/need.csv",
+    "dist/review/samples/need/need_enterprises__10.csv"
+   ],
+   "tracked_artifacts_written": [],
+   "census": {
+    "present": true,
+    "maintenance_status": "ACTIVE",
+    "operational_role": "active validator/migration/review",
+    "never_run": false,
+    "in_a_contract": false,
+    "in_an_ordering": false,
+    "untracked_writes": []
    },
    "disposition": "referenced"
   },
@@ -12543,6 +12599,7 @@
      "docs/CLASS7_KEY_TRIAGE.json",
      "docs/HUB_GRAIN_AND_REBUILD.md",
      "docs/RELEASE_REPLAY_LOG.md",
+     "docs/REVIEW_STATUS.md",
      "docs/SHIP_GAP_REPORT.json",
      "docs/_clean_scripts_checked_2026-08-26.txt",
      "docs/defect_class_retro_sweep.json",
@@ -12562,6 +12619,9 @@
      "code/27_build_dataset_manifests.py",
      "code/516_release_manifest.py"
     ],
+    "product_code": [
+     "server/tests/release_gap_register.py"
+    ],
     "script": [
      "code/293_lint_bug_classes.py",
      "code/374_build_cedar_taxonomy_export.py",
@@ -12571,7 +12631,7 @@
      "code/cedar_pipeline.py"
     ]
    },
-   "reference_count": 26,
+   "reference_count": 28,
    "tracked_artifacts_named": [],
    "tracked_artifacts_written": [],
    "census": {
@@ -12649,13 +12709,14 @@
      "AGENTS.md"
     ],
     "number_keyed": [
-     "code/25_build_publication_layer.py"
+     "code/25_build_publication_layer.py",
+     "code/cedar_domain.py"
     ],
     "script": [
      "code/242_build_individual_native_firm_contracts.py"
     ]
    },
-   "reference_count": 12,
+   "reference_count": 13,
    "tracked_artifacts_named": [],
    "tracked_artifacts_written": [],
    "census": {
@@ -18496,12 +18557,13 @@
      "code/cedar_codebook.py",
      "data/cedar/gaming_component_contracts.json",
      "data/cedar/need-reviewed-preview.json",
+     "data/cedar/need_attribution_rulings.csv",
      "data/cedar/need_component_contracts.json",
      "docs/ASSERTION_LAYER.md",
      "docs/EXTERNAL_REVIEW_PACKET_R2.md"
     ]
    },
-   "reference_count": 20,
+   "reference_count": 21,
    "tracked_artifacts_named": [
     "data/spine/cedar_identity_register.csv"
    ],

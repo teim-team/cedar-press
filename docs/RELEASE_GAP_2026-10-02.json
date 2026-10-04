@@ -297,7 +297,7 @@
    "id": "GAP-21",
    "collection": "code/ / 618 numbered workspace scripts",
    "gate": "reference graph: Makefile, CI, package.json, other script, product code, document, journal, loader by stem or number",
-   "exists": "619 numbered scripts (602 numeric-prefixed, 17 letter-suffixed; the brief's 606 counted non-Python files with a numeric prefix). Referenced: 601 (598 outside AGENTS.md). Zero references: 18.",
+   "exists": "620 numbered scripts (603 numeric-prefixed, 17 letter-suffixed; the brief's 606 counted non-Python files with a numeric prefix). Referenced: 602 (599 outside AGENTS.md). Zero references: 18.",
    "served": "18 moved to code/archive/ (zero references, no tracked artifact written, not ACTIVE, not NEVER_RUN, in no contract or ordering), indexed in code/archive/INDEX.md; census refreshed (python3.12 code/521_inventory.py scripts-only).",
    "gate_location": "docs/CODE_REFERENCE_GRAPH_2026-10-02.json; server/tests/code_reference_graph.py; docs/schema/inventory.json script_census",
    "closing_condition": "Closed for this pass; the test module proves every archived script still has zero references in the tree.",
@@ -1200,13 +1200,13 @@
    ]
   },
   "graph": {
-   "numbered_scripts": 619,
-   "pure_numeric_prefix": 602,
+   "numbered_scripts": 620,
+   "pure_numeric_prefix": 603,
    "letter_suffixed_prefix": 17,
-   "at_code_top_level": 601,
+   "at_code_top_level": 602,
    "in_code_archive": 18,
-   "referenced": 601,
-   "referenced_outside_journal": 598,
+   "referenced": 602,
+   "referenced_outside_journal": 599,
    "zero_references": 18,
    "archive_eligible_by_rule": [
     "1172_codebook_block_generator.py",
@@ -1252,15 +1252,15 @@
     "makefile": 4,
     "ci": 4,
     "package_json": 0,
-    "script": 429,
-    "product_code": 105,
+    "script": 430,
+    "product_code": 108,
     "documented": 579,
     "journal": 239,
     "data_or_config": 35,
-    "stem_only": 57,
-    "number_keyed": 243
+    "stem_only": 58,
+    "number_keyed": 245
    },
-   "text_files_scanned": 2152
+   "text_files_scanned": 2177
   },
   "census": {
    "scripts": 690,
