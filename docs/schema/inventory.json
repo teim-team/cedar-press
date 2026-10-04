@@ -104511,20 +104511,20 @@
    },
    "writer_evidence": [
     {
-     "line": 3135,
+     "line": 3177,
      "operation": "COMPAT_FILE.write_text",
      "target": "<unresolved>/code/770_sample_extracts.py",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "c532bd4f91de69f06259fa9fb83d33685d8139db849dbb10b3be5598a6fbb68e"
+     "signature": "2d4c8c49c1638e98fbbea57e6ad0f38b066944c059dfe5431bbde5d3b88fb6b5"
     },
     {
-     "line": 3384,
+     "line": 3426,
      "operation": "path.open",
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "6eefcc01817bc711241e4143274e14cdb197b32794496041b519a76bf4ea40a0"
+     "signature": "c27ee9ae3c829cc5165c5b542aa9c95c5975edd891e79053c225e0f052d237de"
     }
    ],
    "writer_analysis_error": null,

@@ -25,7 +25,7 @@ class SpreadsheetCountsTest(unittest.TestCase):
         self.assertEqual(metadata["release_id"], source["release_id"])
         verified.assert_called_once_with("funding", None, metadata_only=True)
 
-    def test_component_count_uses_only_groups_the_verified_layout_permits(self):
+    def test_component_count_uses_only_the_customer_tables_main_grain(self):
         manifest = {"components": {"held": {"record_count": 999}}}
         pin = {
             "release_id": "b" * 64,
@@ -33,10 +33,16 @@ class SpreadsheetCountsTest(unittest.TestCase):
                 json.dumps(manifest, sort_keys=True, separators=(",", ":")).encode()
             ).hexdigest(),
         }
-        groups = [
-            ("permits", {}, {"record_count": 12}),
-            ("events", {}, {"record_count": 8}),
-        ]
+        tables = {
+            "tract_observations": {"contract": {}, "descriptor": {"record_count": 12}},
+            "ownership_observations": {"contract": {}, "descriptor": {"record_count": 8}},
+            "permits": {"contract": {}, "descriptor": {"record_count": 999}},
+        }
+        layout = {
+            "grain": "One land observation.",
+            "main": {"tables": ["tract_observations", "ownership_observations"]},
+            "attach": [],
+        }
         with (
             patch.object(spreadsheet.r, "assert_collection_publishable"),
             patch.object(spreadsheet.r, "is_component_release", return_value=True),
@@ -47,7 +53,10 @@ class SpreadsheetCountsTest(unittest.TestCase):
                 "_grove_manifest",
                 return_value=manifest,
             ),
-            patch.object(spreadsheet, "_layout", return_value=(groups, ["record_type"], {})),
+            patch.object(spreadsheet, "_tables", return_value=tables),
+            patch.object(
+                spreadsheet, "_layout", return_value=(layout, {"columns": {"amount": {}}})
+            ),
         ):
             metadata = spreadsheet.download("plot", metadata_only=True)
         self.assertEqual(metadata["record_count"], 20)

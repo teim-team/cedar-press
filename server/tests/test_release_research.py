@@ -129,10 +129,14 @@ class ReleaseResearchTest(unittest.TestCase):
 
     def test_exact_values_and_codebook_remove_internal_display_fields(self):
         value = self.read()
-        self.assertEqual(value["rows"][0]["row"], {"disclosure_id": "TEST-1", "amount": "1.01"})
+        # The verified row is shown under the owner's rules of 2026-10-04: the
+        # internal disclosure key is not a Cedar ID and is not shown.
+        self.assertEqual(value["rows"][0]["row"], {"amount": "1.01"})
         self.assertEqual(value["source_rows"], 1)
         self.assertNotIn("private", json.dumps(value))
-        self.assertEqual(value["display_order"], ["disclosure_id", "amount"])
+        self.assertNotIn("TEST-1", json.dumps(value["rows"]))
+        self.assertEqual(value["display_order"], ["amount"])
+        self.assertEqual([field["name"] for field in value["codebook"]["fields"]], ["amount"])
         self.assertEqual(value["provenance"]["consumer_manifest_sha256"], "b" * 64)
 
     def test_missing_or_modified_packet_artifacts_are_refused(self):

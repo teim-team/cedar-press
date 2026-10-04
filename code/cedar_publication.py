@@ -475,6 +475,37 @@ def lobbying_row_counts(row) -> bool:
 DROP_COLS = ("casino_city_id", "duns", "duns_number", "dnb_duns",
              "ultimate_duns", "parent_duns")
 
+# ANY column whose name CONTAINS one of these drops, not only an exact
+# DROP_COLS entry. FOUND 2026-10-04 (895854c): `recipient_duns` shipped in four
+# funding samples while docs/PUBLICATION_POLICY.md (2026-09-02) says D-U-N-S
+# "never ship, in any dataset, at any tier" and data/cedar/field_map.json
+# records DUNS as internal. The rule was reverted with the publication holds in
+# 341f950; it is not a hold but a licensing and identifier rule, and the owner
+# reaffirmed it on 2026-10-04, so it is restored. A coverage statistic named
+# for DUNS (`pct_with_duns`) carries no identifier and stays (owner,
+# 2026-10-04): `DUNS_STATISTIC` exempts it.
+DROP_SUBSTRINGS = ("duns",)
+DUNS_STATISTIC = re.compile(r"^(?:pct|share|n|count|rate)_|_(?:pct|share|count|rate)$")
+
+# A DUNS carried as a VALUE: the subject of a row in an identifier graph, or
+# a `DUNS:<nine digits>` node key. The row is withheld (`row_ok`), because
+# the identifier is what the row is about and masking it leaves nothing.
+DUNS_VALUE = re.compile(r"(?i)\bduns\W{0,3}\d{9}\b")
+DUNS_TYPE_SUFFIXES = ("identifier_type", "id_type")
+
+
+def is_proprietary_column(name: str) -> bool:
+    """Does this column NAME carry a licensed identifier (DROP_COLS)?
+
+    Exact DROP_COLS entries, case-insensitively, plus any name containing a
+    `DROP_SUBSTRINGS` entry other than a coverage statistic. Every consumer
+    that used `c.lower() in DROP_COLS` calls this instead.
+    """
+    n = (name or "").lower()
+    if n in DROP_COLS:
+        return True
+    return any(s in n for s in DROP_SUBSTRINGS) and not DUNS_STATISTIC.search(n)
+
 # RETIRED IDENTITY SCHEME - the CICD NEID. Dropped as COLUMNS, like DROP_COLS.
 #
 # Owner, 2026-09-01: *"I think the CICD ID system sucks ass. Just remove it. We
@@ -1923,6 +1954,16 @@ def row_ok(r: dict) -> tuple[bool, str]:
     for col in NEVER:
         if col in r and (r.get(col) or "").strip():
             return False, "personal:" + col
+    # A DUNS as the row's subject (see DUNS_VALUE). Column drops cannot reach
+    # it: the identifier sits under a generic name like `identifier`.
+    for col, value in r.items():
+        v = (value or "").strip() if isinstance(value, str) else ""
+        if not v:
+            continue
+        if (col or "").lower().endswith(DUNS_TYPE_SUFFIXES) and v.lower() == "duns":
+            return False, "proprietary:duns"
+        if DUNS_VALUE.search(v):
+            return False, "proprietary:duns"
     return True, ""
 
 
@@ -3000,7 +3041,8 @@ def publishable_columns(header) -> list:
     lower_drop |= {c.lower() for c in DEALS_INTERNAL}
     never = set(NEVER)
     return [c for c in (header or [])
-            if c.lower() not in lower_drop and c not in never
+            if c.lower() not in lower_drop and not is_proprietary_column(c)
+            and c not in never
             and not is_lineage_column(c)]
 
 
