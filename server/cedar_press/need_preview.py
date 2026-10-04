@@ -102,11 +102,9 @@ def need_preview_permitted(repo, collection, table, sample_path=None):
             if any(value is None or value == "" for value in key_values):
                 return False
             key = json.dumps(key_values, ensure_ascii=False, separators=(",", ":"))
-            if key in keys or row.get(entry.get("publication_status_field")) in {
-                "held",
-                "contested",
-                "withheld",
-            }:
+            # Owner ruling 2026-10-04: a row's review status no longer refuses
+            # the preview; only a duplicate key does.
+            if key in keys:
                 return False
             keys.add(key)
             expected_rows.add(

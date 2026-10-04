@@ -252,17 +252,19 @@ class ReleaseDownloadTest(unittest.TestCase):
             )
         self.mock_fetch.assert_not_called()
 
-    def test_held_need_and_excluded_gaming_never_fetch(self):
+    def test_excluded_gaming_never_fetches_and_need_is_not_held(self):
         app.dependency_overrides[current_session] = lambda: Session("fixture", "press_pro")
-        for collection, status in [("need", 503), ("gaming", 403)]:
-            self.assertEqual(
-                self.client.get(
-                    f"/press/collections/{collection}/full-download",
-                    params={"release_id": self.rid},
-                ).status_code,
-                status,
-            )
+        response = self.client.get(
+            "/press/collections/gaming/full-download", params={"release_id": self.rid}
+        )
+        self.assertEqual(response.status_code, 403)
         self.mock_fetch.assert_not_called()
+        # Owner ruling 2026-10-04: NEED has no publication hold. With no
+        # release pinned for it in this fixture it is unavailable, never held.
+        response = self.client.get(
+            "/press/collections/need/full-download", params={"release_id": self.rid}
+        )
+        self.assertNotIn("held", response.text.lower(), response.text)
 
     def test_corruption_is_refused_without_sample_fallback(self):
         self.rows[0]["title"] = "tampered"

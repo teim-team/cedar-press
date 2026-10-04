@@ -564,9 +564,9 @@ SELF_CERTIFICATION_IS_NOT_A_VERDICT = (
 # `consent_source` stay as recorded informational columns (schema unchanged);
 # they no longer gate anything.
 #
-# WHAT THIS DID NOT CHANGE. Small-cell suppression (INDIVIDUAL_NATIVE_MIN_CELL_FIRMS,
-# suppress_small_cell) is an aggregate-statistics rule about cells, not a
-# rule about naming a firm, and is unrelated to the ruling.
+# Small-cell suppression (INDIVIDUAL_NATIVE_MIN_CELL_FIRMS, suppress_small_cell)
+# survived that ruling and was lifted by the owner ruling of 2026-10-04: no
+# hold other than a specific misattribution stands.
 # ---------------------------------------------------------------------------
 
 #: Fields that publish for this class. Facts about a contract or a segment,
@@ -649,10 +649,14 @@ def may_publish_individual_native_field(field, name_is_person=None,
 
 
 def suppress_small_cell(n_firms) -> bool:
-    try:
-        return int(n_firms) < INDIVIDUAL_NATIVE_MIN_CELL_FIRMS
-    except (TypeError, ValueError):
-        return True
+    """Always False since the owner ruling of 2026-10-04 (Elijah Moreno).
+
+    Individual Native-owned business records are publicly sourced and Lumecon
+    has permission to publish them; a firm-level aggregate under
+    INDIVIDUAL_NATIVE_MIN_CELL_FIRMS is no longer suppressed. The constant and
+    the function stay so every caller keeps working.
+    """
+    return False
 
 
 # ---------------------------------------------------------------------------

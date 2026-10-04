@@ -172,13 +172,17 @@ NEVER = ("owner_name_raw", "email", "phone", "home_address", "personal_email",
 # their parents. EMMA/MSRB - the third-party licensor the ruling explicitly
 # does not reach - has no rows anywhere in data/clean, and must not acquire any
 # through this list.
-GATES = {"publishable": {"Y", "y", "1", "true", "TRUE", ""},
-         "source_terms_status": {"SILENT", "TERMS_STATED_NO_REUSE_RESTRICTION",
-                                 # released 2026-09-02, see above
-                                 "TERMS_STATED_RESTRICTIVE",
-                                 "NO_TERMS_PAGE_SERVED",
-                                 "TERMS_STATED_COPYRIGHT_ONLY",
-                                 ""}}
+# OWNER RULING 2026-10-04 (Elijah Moreno): Lumecon decides what is blocked.
+# The only hold is a specific record flagged as attributed to the wrong
+# entity; records in the database have already been reviewed and sourced and
+# are not held. Attribution review is an ongoing process, not a standing hold.
+# Agents do not impose publication holds.
+#
+# `publishable` (a permission/consent flag) and `source_terms_status` were row
+# gates here until this ruling. Neither is a misattribution flag, so neither
+# withholds a row any more. The mapping stays (empty) because 770's `keep()`
+# and `row_ok()` iterate it.
+GATES: dict = {}
 
 # ---------------------------------------------------------------------------
 # ADJUDICATION STATES - THE DENY-BY-DEFAULT PUBLICATION POLICY  (CP-002)
@@ -237,8 +241,9 @@ BLOCKED_STATES = {
     # openly-labelled candidate - and a candidate that says it is a candidate
     # is a finding, not a leak.
     "disposition": {
-        "NATIVE_PROPOSED_AWAITING_OWNER_RULING": WITHHOLD,
-        "CONFLICT_EXCLUDED_AND_RULED_NATIVE": WITHHOLD,
+        # Owner ruling 2026-10-04: pending review and contested are not holds.
+        "NATIVE_PROPOSED_AWAITING_OWNER_RULING": FLAG,
+        "CONFLICT_EXCLUDED_AND_RULED_NATIVE": FLAG,
         "NATIVE_VERIFIED_STRICT": PUBLISH,
         "NATIVE_RULED_VERIFIED": PUBLISH,
         "EXCLUDED_PRIOR_RULING": FLAG,
@@ -265,8 +270,11 @@ BLOCKED_STATES = {
     # otherwise WITHHOLD 297 real filings instead of masking their keys.
     "key_review_disposition": {
         "SUPPORTED": PUBLISH,
-        "HELD_STATE_DISAGREES": MASK,
-        "REDIRECT_PROPOSED": MASK,
+        # Owner ruling 2026-10-04: a held or proposed key is not a hold; the
+        # two REFUSED_* values are keys ruled to be the wrong entity, so they
+        # remain the misattribution mask.
+        "HELD_STATE_DISAGREES": FLAG,
+        "REDIRECT_PROPOSED": FLAG,
         "REFUSED_GENERIC_TOKEN_ONLY": MASK,
         "REFUSED_PLACE_NAME_IS_THE_ADDRESS": MASK,
     },
@@ -302,9 +310,9 @@ BLOCKED_STATES = {
         "RULED_TIER_UNSTATED": FLAG,
         "RULED_NOT_NATIVE": MASK,
         "RULED_CLASS_ONLY": MASK,
-        "RULED_HOLD": MASK,
+        "RULED_HOLD": FLAG,              # owner ruling 2026-10-04: no holds
         "RULED_NAME_KEY_ONLY_NOT_ATTRIBUTED": MASK,
-        "RULING_CONFLICT": MASK,
+        "RULING_CONFLICT": FLAG,         # contested is not a hold (2026-10-04)
         "RULED_OWNER_NOT_IN_SPINE": FLAG,
         "RULED_TIER_C_NOT_ATTRIBUTED": MASK,
     },
@@ -324,7 +332,7 @@ BLOCKED_STATES = {
     "identifier_ruling_review": {
         "KEEP": PUBLISH,
         "REPOINTED_BY_1079": PUBLISH,
-        "HOLD": MASK,
+        "HOLD": FLAG,                    # owner ruling 2026-10-04: no holds
         "WITHDRAWN_BY_1079": MASK,
     },
     # -- lobbying -----------------------------------------------------------
@@ -384,12 +392,11 @@ BLOCKED_STATES = {
 # is tier A today, so the two are the same set right now. They stop being the
 # same set the moment an owner rules on one of these identifiers, and at that
 # moment this rule must let go of it by itself. Read the SIGN, not the batch.
-BLOCKED_COMBINATIONS = (
-    {"reason": "quarantined_method_not_ruled_tier_A",
-     "when": {"identifier_ruling_quarantined": {"Y"}},
-     "unless": {"identifier_ruling_tier": {"A"}},
-     "disposition": MASK},
-)
+# LIFTED by the owner ruling of 2026-10-04: a batch-level quarantine masks a
+# whole set, not a specific record flagged as wrongly attributed, and records
+# in the database have already been reviewed. The tuple stays so the
+# mechanism can carry a future owner-ordered rule.
+BLOCKED_COMBINATIONS: tuple = ()
 
 # What a MASK blanks, per state column. Named per column rather than globally
 # because `cedar_uid` is the only name these tables share and the rest differ:
@@ -906,26 +913,17 @@ class FieldMapRefusal(SystemExit):
         super().__init__(f"{collection}: {message}")
 
 
-class NEEDAffiliationPublicationHold(FieldMapRefusal):
-    """Owner-directed route quarantine, independent of the identity cross-reference."""
-    def __init__(self):
-        super().__init__("need", ["cedar_uid", "owner_hub_cedar_uid", "need_enterprise_relations"],
-                         "NEED affiliation publication is quarantined pending the route audit, "
-                         "regression tests and stratified source-evidence review. Changing or "
-                         "removing enterprise_existing_cedar_uid does not release this hold. "
-                         "No customer export is authorized by a field-level ruling alone.")
-
-
 def assert_collection_publishable(collection: str) -> None:
     """Enforce collection-level holds before any public schema transformation.
 
-    The September 23 owner directive quarantines NEED affiliation derivation,
-    including previously accepted links. No environment flag, blank field or
-    metadata-only edit can lift it; release requires a reviewed policy change
-    supported by the route audit and evidence checks.
+    The September 23 NEED affiliation quarantine is superseded by the owner
+    ruling of 2026-10-04: Lumecon decides what is blocked, and no collection-
+    wide hold stands. Kept as a no-op so every caller keeps working.
     """
-    if collection == "need":
-        raise NEEDAffiliationPublicationHold()
+    # LIFTED, owner ruling 2026-10-04 (Elijah Moreno): NEED records come from
+    # publicly available websites and Lumecon has permission to publish them.
+    # No collection-wide hold stands; this function holds nothing.
+    return None
 
 
 class UndecidedColumns(FieldMapRefusal):
@@ -1913,8 +1911,8 @@ def row_ok(r: dict) -> tuple[bool, str]:
 def adjudication(r) -> tuple[str, str]:
     """(disposition, reason) for one row against `BLOCKED_STATES`.
 
-    Deny-by-default: a value this policy has never seen WITHHOLDS and names
-    itself, so a new vocabulary entry upstream is loud instead of silent.
+    A value this policy has never seen is FLAGGED and names itself (owner
+    ruling 2026-10-04: no holds other than a specific misattribution).
 
     The strongest disposition on the row wins - WITHHOLD over MASK over FLAG -
     because a row can trip two policies at once (a contractors row is commonly
@@ -1936,7 +1934,12 @@ def adjudication(r) -> tuple[str, str]:
             d = next((x for k, x in vocab.items() if k.lower() == v.lower()),
                      None)
         if d is None:
-            return WITHHOLD, f"unknown_state:{col}={v}"
+            # Owner ruling 2026-10-04: an unrecognised state is surfaced, not
+            # held. Only a specific misattribution flag masks.
+            d = FLAG
+            if rank[d] > rank[best]:
+                best, why = d, f"unknown_state:{col}={v}"
+            continue
         if rank[d] > rank[best]:
             best, why = d, f"{col}={v}"
     # Conjunctions last: they outrank a single-column PUBLISH or FLAG, because
@@ -2760,13 +2763,8 @@ def is_publication_eligible(r) -> tuple[bool, str, str]:
     strictly safer than the old behaviour but is not the policy - so 1137 and
     1135 both apply it, and `verify` checks they do.
     """
-    if str(r.get("publish_hold") or "").strip().upper() in {"Y", "YES", "TRUE", "1"}:
-        return False, "publish_hold", WITHHOLD
-    if r.get("bill_id") or r.get("vote_id"):
-        from lumecon_data.collections.legislation import legislation_admission_hold
-        reason = legislation_admission_hold(r)
-        if reason:
-            return False, reason, WITHHOLD
+    # `publish_hold` and the legislation admission hold were checked here
+    # until the owner ruling of 2026-10-04; neither is a misattribution flag.
     ok, why = row_ok(r)
     if not ok:
         return False, why, WITHHOLD

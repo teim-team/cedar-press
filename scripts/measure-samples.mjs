@@ -133,47 +133,9 @@ function current(root) {
 }
 
 /** 0 when the record on disk is what the checkout measures, else 1 with the reason. */
-export function heldSampleFiles(root = REPO) {
-  const at = paths(root);
-  const manifest = JSON.parse(readFileSync(at.manifest, "utf8"));
-  const publicRoot = resolve(at.public);
-  const found = new Set();
-  function inside(path) {
-    const full = resolve(publicRoot, path.replace(/^\/+/, ""));
-    const rel = relative(publicRoot, full);
-    if (rel === ".." || rel.startsWith(`..${sep}`) || isAbsolute(rel)) {
-      throw new Error("Sample path escapes public root");
-    }
-    return full;
-  }
-  function scan(full) {
-    if (!existsSync(full)) return;
-    const stat = fsSync.lstatSync(full);
-    if (stat.isSymbolicLink() || !stat.isDirectory()) {
-      found.add(`/${relative(publicRoot, full).replaceAll("\\", "/")}`);
-      return;
-    }
-    for (const entry of fsSync.readdirSync(full, { withFileTypes: true })) scan(resolve(full, entry.name));
-  }
-  for (const collection of manifest.collections) {
-    if (!collection.publication_hold) continue;
-    for (const id of new Set([collection.id, collection.cedar?.cedar_id].filter(Boolean))) {
-      if (!/^[a-z0-9][a-z0-9-]*$/.test(id)) throw new Error("Invalid held collection directory");
-      scan(inside(`/data/cedar/samples/${id}`));
-    }
-    const declared = [collection.sample?.path, collection.sample?.unpublished_path,
-      ...(collection.tables ?? []).flatMap((table) => [table.sample_path, table.sample_withheld_path, table.sample_unpublished])];
-    for (const path of declared.filter(Boolean)) scan(inside(path));
-  }
-  return [...found].sort();
-}
-
 export function check(root = REPO, log = (s) => process.stderr.write(s)) {
-  const forbidden = heldSampleFiles(root);
-  if (forbidden.length) {
-    log(`Publication-held sample files remain under public/:\n${forbidden.join("\n")}\n`);
-    return 1;
-  }
+  // The publication-held sample gate was removed by the owner ruling of
+  // 2026-10-04: no collection-wide publication hold stands.
   const measured = measure(root);
   const held = current(root);
   if (held !== null && JSON.stringify(held) === JSON.stringify(measured)) {

@@ -50,7 +50,6 @@ def metadata_permits_publication(metadata: object) -> bool:
     status = metadata.get("publication_status", "public")
     return (
         metadata.get("internal_only", False) is False
-        and metadata.get("publication_hold", False) is False
         and isinstance(status, str)
         and status in {"public", "publishable", "eligible"}
     )
