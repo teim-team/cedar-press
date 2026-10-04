@@ -2,24 +2,31 @@
 
 Owner rules, 2026-10-04 (Elijah Moreno), for every published collection:
 
-1. Identifiers. The only identifiers customers see are Cedar IDs (``CE-``,
-   ``CB-`` and ``CEDAR-`` identifiers). Internal keys are removed: source
-   record IDs, legacy ``CCP-``/``VP-``/``NESTREL-`` keys, relationship keys,
-   row hashes, dedup bases, batch IDs and ``[legacy record]`` placeholders.
-   External public registry identifiers (EIN, UEI, CAGE, FAIN, document
-   numbers and the like) stay, listed in ``PUBLIC_REGISTRY_ID_COLUMNS`` for the
-   owner to rule on. DUNS is a private, proprietary identifier and is removed
-   everywhere (owner decision, 2026-10-04).
+1. Identifiers. Dataset and public registry identifiers stay; only proprietary
+   identifiers (DUNS, Casino City) are removed (owner correction, 2026-10-04).
+   Every identifier a source dataset carries (lobbying, deal, disclosure,
+   award, activity, plot, permit and event IDs, source record IDs, supersession
+   links and the like), every public registry identifier (EIN, UEI, CAGE,
+   FAIN, document numbers and the like) and every Cedar ID (``CE-``, ``CB-``
+   and ``CEDAR-`` identifiers) is kept. Removed: DUNS in any form (a column
+   whose name contains "duns", a value whose identifier scheme is DUNS, a DUNS
+   number in text) and Casino City identifiers and content (Casino City is not
+   published at all: ``CCP-``/``TPL-`` property keys, columns or values naming
+   Casino City). Nothing else is removed on identifier grounds.
 2. Sources. A published source is a real public citation. A value that points
    at a local spreadsheet, path, terminal, desktop, workstation, dissertation
    workspace, notebook or "manual" entry is traced to the component's recorded
    public origin when one is recorded, and is otherwise left blank and counted.
    Nothing is invented.
-3. No version labels. Release, contract, transform and schema version columns
-   and version-label values stay internal.
+3. No version labels. Release, contract, transform and schema version columns,
+   batch labels and version-label values stay internal, as do internal
+   checksums (row, record and decision content hashes) and dedup bases. A hash
+   that identifies a source document is kept.
 4. One table. Customers get one flat table per collection, designed from its
    grain in ``LAYOUTS``: related-table detail becomes columns on the main row
-   or is left out of the customer table (and kept internally).
+   or is left out of the customer table (and kept internally). The old
+   multi-table packaging columns (``record_type``, ``record_key``,
+   ``record_grain``) do not exist in it.
 
 This module only presents rows the caller has already verified. It never
 touches release bytes, hashes or manifests, so internal verification and
@@ -37,7 +44,7 @@ from collections.abc import Callable, Generator, Iterable, Mapping
 from typing import Any
 
 #: Internal only; never written into customer data.
-POLICY = "customer-sheet-2026-10-04"
+POLICY = "customer-sheet-2026-10-04.2"
 
 Row = dict[str, Any]
 
@@ -49,17 +56,19 @@ CEDAR_ID = re.compile(
     r"|CEDAR-(?:NEST|PLACE|ENT|NEED)-[0-9]{6}-[0-9A-Z]{2}"
     r"|CEDAR-(?:OBS|EVENT|REL|SRC|CONTRACT)-[0-9]{6,9})$"
 )
-#: Retired or vendor keys that must never reach a customer, inside any cell.
-INTERNAL_KEY = re.compile(
-    r"^(?:\[legacy record\]"
-    r"|(?:CCP|VP|TPL|CEDAR-FAC)-[0-9]+"
-    r"|(?:NESTREL|NEID|CICD)[-_][A-Za-z0-9_-]+"
-    r"|TRBF-[A-Z0-9]+-[0-9]+|NEST-[0-9a-f]{6,}-[A-Z0-9]+|lsg_[0-9a-f]+"
-    r"|GKEY~.*"
-    r"|[0-9a-f]{40}|[0-9a-f]{64})$"
+#: Casino City property keys (``CCP-`` Casino City Press property numbers,
+#: ``TPL-`` Casino City's Tribal Property List; ``gaming.facilities``) and any
+#: value naming Casino City. Casino City is proprietary and not published.
+CASINO_CITY_KEY = re.compile(r"^(?:CCP|TPL)-[0-9]+$")
+CASINO_CITY_TEXT = re.compile(
+    r"(?<![a-z])casino[ _-]?city(?![a-z])|(?<![A-Za-z0-9])(?:CCP|TPL)-[0-9]+(?![0-9])", re.I
 )
-#: Kept: identifiers issued by an external public registry. The owner decides
-#: on each (2026-10-04); they are listed per collection in every export report.
+CASINO_CITY_COLUMN = re.compile(r"casino[ _-]?city|(?:^|_)(?:ccp|tpl)(?:_|$)", re.I)
+#: Pipeline placeholders, not identifiers: an unbound key token or a
+#: "[legacy record]" stand-in carries no source value.
+PLACEHOLDER = re.compile(r"^(?:\[legacy record\]|GKEY~.*)$")
+#: Identifiers issued by an external public registry; kept and listed per
+#: collection in every export report.
 PUBLIC_REGISTRY_ID_COLUMNS = frozenset(
     {
         # IRS
@@ -123,31 +132,10 @@ PUBLIC_REGISTRY_ID_COLUMNS = frozenset(
         "patent_number",
     }
 )
-#: A registry column that, in one collection, actually holds an internal key.
-COLLECTION_INTERNAL_COLUMNS = {
-    "foundation-corporate-giving": frozenset({"award_id"}),
-}
-#: Internal by name, whatever the values look like.
-INTERNAL_ID_COLUMNS = frozenset(
-    {
-        "record_key",
-        "record_type",
-        "record_grain",
-        "source_record_id",
-        "source_row_number",
-        "source_id",
-        "source_edition",
-        "source_dataset",
-        "consultation_record_key",
-        "supersession_group_id",
-        "superseded_by_record_id",
-        "subject_binding",
-        "evidence_key",
-        "hold_codes",
-        "hold_id",
-    }
-)
-#: Columns whose identifiers are Cedar IDs; a non-Cedar value in one is removed.
+#: Packaging of the retired multi-table export and internal review machinery:
+#: not identifiers from any source, and absent from the one-table shape.
+INTERNAL_COLUMNS = frozenset({"record_key", "record_type", "record_grain", "hold_codes", "hold_id"})
+#: Columns whose identifiers are Cedar IDs; listed first in the table.
 CEDAR_ID_COLUMNS = frozenset(
     {
         "enterprise_id",
@@ -161,12 +149,14 @@ CEDAR_ID_COLUMNS = frozenset(
     }
 )
 _CEDAR_NAME = re.compile(r"cedar_uids?$|cedar_business_uid$|(?:^|_)business_uid$")
-#: Retired identity schemes and vendor directory keys (NEID, CICD, Casino City):
-#: legacy keys, never presented, by column name or inside a value. Reuses the
-#: patterns of cedar-press code/cedar_publication.py.
-LEGACY_SCHEME_COLUMN = re.compile(r"neid|cicd|casino[ _-]?city|tribe_id", re.I)
-LEGACY_SCHEME_VALUE = re.compile(r"(?<![a-z])(neid|cicd|casino[ _-]?city)(?![a-z])", re.I)
-_INTERNAL_NAME = re.compile(r"sha256|hash|dedup|batch|legacy|_binding$|candidate|crosswalk")
+#: Internal checksums: a hash of Lumecon's own row, record, decision or
+#: manifest content. A hash that identifies a source document is kept.
+_CHECKSUM_NAME = re.compile(
+    r"(?:^|_)(?:row|record|decision|content|payload|line|manifest|proof|register)_?"
+    r"(?:sha256|sha1|md5|hash|digest)$|^(?:sha256|sha1|md5|hash|digest)$"
+)
+#: Dedup bases and batch labels: pipeline machinery, not identifiers.
+_MACHINERY_NAME = re.compile(r"dedup|(?:^|_)batch(?:_|$)")
 _ID_NAME = re.compile(r"(?:^|_)(?:id|ids|uid|uids|key|keys)$")
 _DUNS_NAME = re.compile(r"duns", re.I)
 #: A coverage statistic about DUNS carries no identifier (owner, 2026-10-04).
@@ -221,9 +211,14 @@ _LOCAL_SOURCE = re.compile(
 
 # -- Rule 3: versions ----------------------------------------------------------
 
+#: Lumecon's own release, transform and build labels. A source dataset's
+#: identifier that happens to share a word (``contract_id``, ``policy_id``) is
+#: an identifier and stays.
 _VERSION_NAME = re.compile(
     r"(?:^|_)(?:schema|contract|transform|release|policy|producer|pipeline|build)_?"
-    r"(?:version|id|class|sha|commit)$|(?:^|_)version$|^versions?$"
+    r"(?:version|sha|commit)$"
+    r"|(?:^|_)(?:release|transform|producer|pipeline|build)_(?:id|class)$"
+    r"|(?:^|_)version$|^versions?$"
 )
 _VERSION_VALUE = re.compile(r"^(?:[A-Za-z][\w.-]*[-_.])?[vV]\d+(?:\.\d+){0,3}$")
 #: A version-named column that holds a real-world attribute, renamed instead.
@@ -379,8 +374,12 @@ LAYOUTS: dict[str, dict[str, Any]] = {
 }
 
 LIST_SEPARATOR = "; "
-#: Column classes that never reach a customer.
-REMOVED_CLASSES = frozenset({"private_id", "internal_id", "version", "local_source"})
+#: Column classes that never reach a customer: DUNS (``private_id``), Casino
+#: City (``proprietary_id``), version labels, internal machinery (packaging,
+#: internal checksums, dedup and batch labels) and local file locations.
+REMOVED_CLASSES = frozenset({"private_id", "proprietary_id", "version", "internal", "local_source"})
+#: Identifier classes kept in the table.
+IDENTIFIER_CLASSES = frozenset({"cedar_id", "registry_id", "dataset_id"})
 
 
 # -- Classification ------------------------------------------------------------
@@ -398,30 +397,42 @@ def is_private_identifier(name: str) -> bool:
     return bool(_DUNS_NAME.search(lowered)) and not _DUNS_STATISTIC.search(lowered)
 
 
+def is_proprietary_identifier(name: str) -> bool:
+    """A Casino City column: proprietary, never published (owner, 2026-10-04)."""
+    return CASINO_CITY_COLUMN.search(name) is not None
+
+
 def column_class(collection: str, name: str) -> str:
     """How a source column is presented.
 
-    ``private_id`` (DUNS), ``internal_id``, ``version`` and ``local_source`` are
-    removed. ``registry_id`` is kept and reported. ``cedar_id`` keeps only Cedar
-    ID values. Any other identifier-shaped name is internal. ``source`` values
-    are checked for local origins. Everything else is ``data``. The decision
-    depends on the name alone, so a preview and its full table share a header.
+    Removed: ``private_id`` (DUNS), ``proprietary_id`` (Casino City),
+    ``version``, ``internal`` (packaging, internal checksums, dedup and batch
+    labels) and ``local_source``. Kept: ``cedar_id``, ``registry_id`` (listed
+    public registries) and ``dataset_id`` (any other identifier the source
+    dataset carries), whose values lose only DUNS and Casino City content;
+    ``source`` values are checked for local origins; everything else is
+    ``data``. The decision depends on the name alone, so a preview and its
+    full table share a header. ``collection`` is accepted for callers that
+    pass it; no rule depends on it.
     """
+    del collection
     lowered = name.lower()
     if is_private_identifier(lowered):
         return "private_id"
+    if is_proprietary_identifier(lowered):
+        return "proprietary_id"
     if lowered in VERSION_RENAMES:
         return "data"
-    if LEGACY_SCHEME_COLUMN.search(lowered):
-        return "internal_id"
     if _VERSION_NAME.search(lowered):
         return "version"
-    if lowered in COLLECTION_INTERNAL_COLUMNS.get(collection, frozenset()):
-        return "internal_id"
     if lowered in PUBLIC_REGISTRY_ID_COLUMNS:
         return "registry_id"
-    if lowered in INTERNAL_ID_COLUMNS or _INTERNAL_NAME.search(lowered):
-        return "internal_id"
+    if (
+        lowered in INTERNAL_COLUMNS
+        or _CHECKSUM_NAME.search(lowered)
+        or _MACHINERY_NAME.search(lowered)
+    ):
+        return "internal"
     if _LOCAL_COLUMN.search(lowered):
         return "local_source"
     if lowered in SOURCE_COLUMNS or _SOURCE_NAME.search(lowered):
@@ -429,7 +440,7 @@ def column_class(collection: str, name: str) -> str:
     if lowered in CEDAR_ID_COLUMNS or _CEDAR_NAME.search(lowered):
         return "cedar_id"
     if _ID_NAME.search(lowered):
-        return "internal_id"
+        return "dataset_id"
     return "data"
 
 
@@ -476,21 +487,6 @@ def _elements(value: Any) -> tuple[list[Any], Callable[[list[Any]], Any]] | None
 
 def _blank(value: Any) -> bool:
     return value is None or (isinstance(value, str) and not value.strip()) or value == []
-
-
-def _cedar_only(value: Any) -> tuple[Any, int]:
-    """Keep only Cedar ID values; count the removed ones."""
-    if _blank(value):
-        return None, 0
-    if is_cedar_id(value):
-        return value, 0
-    found = _elements(value)
-    if found is None:
-        return None, 1
-    items, rebuild = found
-    kept = list(dict.fromkeys(item for item in items if is_cedar_id(item)))
-    removed = sum(1 for item in items if not _blank(item) and not is_cedar_id(item))
-    return (rebuild(kept) if kept else None), removed
 
 
 def _urls(value: Any) -> list[str] | None:
@@ -555,37 +551,62 @@ def public_origin(url: Any) -> str | None:
     return url if isinstance(url, str) and _URL.fullmatch(url.strip()) else None
 
 
-def _scrub_data(value: Any, counts: dict[str, int], *, edition: bool = False) -> Any:
-    """Remove internal keys, DUNS tokens and version labels inside a data cell.
+def _dropped_member(item: Any, *, identifier: bool) -> str | None:
+    """Why one value (or list member) is removed, or None to keep it."""
+    if not isinstance(item, str):
+        return None
+    text = item.strip()
+    if CASINO_CITY_TEXT.search(text):
+        return "casino_city_values_removed"
+    if PLACEHOLDER.fullmatch(text):
+        return "placeholder_values_blanked"
+    if not identifier and is_version_label(text):
+        return "version_label_values_blanked"
+    return None
 
-    ``edition`` marks a column that records a public source's own edition
-    (``source_vintage``): its label is a citation detail, not a Lumecon version.
+
+def _scrub_data(
+    value: Any, counts: dict[str, int], *, edition: bool = False, identifier: bool = False
+) -> Any:
+    """Remove Casino City content, DUNS tokens, placeholders and version labels.
+
+    Identifier values (Cedar, registry and dataset IDs) are otherwise kept as
+    the source carries them; a version-shaped identifier is still an
+    identifier. ``edition`` marks a column that records a public source's own
+    edition (``source_vintage``): its label is a citation detail, not a
+    Lumecon version.
     """
     if not isinstance(value, (str, list)):
         return value
-    if isinstance(value, str):
-        if INTERNAL_KEY.fullmatch(value.strip()) or LEGACY_SCHEME_VALUE.search(value):
-            counts["internal_key_values_blanked"] += 1
-            return None
-        if is_version_label(value) and not edition:
-            counts["version_label_values_blanked"] += 1
-            return None
-        if _DUNS_TOKEN.search(value):
-            counts["duns_values_removed"] += 1
-            value = _DUNS_TOKEN.sub("", value).strip(" ;,|") or None
-            return value
+    keep_versions = identifier or edition
     found = _elements(value)
     if found is None:
-        return value
+        # One value: removed whole when it is Casino City content, a
+        # placeholder or a version label; a DUNS number is cut out of text.
+        reason = _dropped_member(value, identifier=keep_versions)
+        if reason:
+            counts[reason] += 1
+            return None
+        return _without_duns(value, counts)
     items, rebuild = found
-    kept = [
-        item
-        for item in items
-        if not (isinstance(item, str) and (INTERNAL_KEY.fullmatch(item) or is_version_label(item)))
-    ]
+    kept = []
+    for item in items:
+        reason = _dropped_member(item, identifier=keep_versions)
+        if reason:
+            counts[reason] += 1
+        else:
+            kept.append(item)
     if len(kept) != len(items):
-        counts["internal_key_values_blanked"] += len(items) - len(kept)
-        return rebuild(kept) if any(not _blank(item) for item in kept) else None
+        if not any(not _blank(item) for item in kept):
+            return None
+        value = rebuild(kept)
+    return _without_duns(value, counts)
+
+
+def _without_duns(value: Any, counts: dict[str, int]) -> Any:
+    if isinstance(value, str) and _DUNS_TOKEN.search(value):
+        counts["duns_values_removed"] += 1
+        return _DUNS_TOKEN.sub("", value).strip(" ;,|") or None
     return value
 
 
@@ -756,8 +777,8 @@ def flatten(
     columns = layout_plan["columns"]
     counts: dict[str, int] = {
         "rows": 0,
-        "cedar_id_values_removed": 0,
-        "internal_key_values_blanked": 0,
+        "casino_city_values_removed": 0,
+        "placeholder_values_blanked": 0,
         "version_label_values_blanked": 0,
         "duns_values_removed": 0,
         "duns_scheme_values_removed": 0,
@@ -848,6 +869,8 @@ def flatten(
         "public_registry_id_columns": [
             name for name in header if columns[name]["class"] == "registry_id"
         ],
+        "dataset_id_columns": [name for name in header if columns[name]["class"] == "dataset_id"],
+        "cedar_id_columns": [name for name in header if columns[name]["class"] == "cedar_id"],
         "counts": counts,
     }
 
@@ -864,13 +887,9 @@ def flatten(
 
 def _present(column: Row, value: Any, origin: str | None, counts: dict[str, int]) -> Any:
     kind = column["class"]
-    if kind == "cedar_id":
-        kept, removed = _cedar_only(value)
-        counts["cedar_id_values_removed"] += removed
-        return kept
     if kind == "source":
-        if isinstance(value, str) and LEGACY_SCHEME_VALUE.search(value):
-            # A retired vendor or scheme is never a published source.
+        if isinstance(value, str) and CASINO_CITY_TEXT.search(value):
+            # Casino City is never a published source.
             value = origin or None
             counts["sources_" + ("traced" if origin else "blanked")] += 1
             return value
@@ -878,7 +897,12 @@ def _present(column: Row, value: Any, origin: str | None, counts: dict[str, int]
         if status != "empty":
             counts["sources_" + status] += 1
         return kept
-    return _scrub_data(value, counts, edition="vintage" in str(column.get("field") or ""))
+    return _scrub_data(
+        value,
+        counts,
+        edition="vintage" in str(column.get("field") or ""),
+        identifier=kind in IDENTIFIER_CLASSES,
+    )
 
 
 def _scheme_scrubbed(row: Row, counts: dict[str, int]) -> Row:
@@ -898,32 +922,25 @@ def check_table(header: Iterable[str], rows: Iterable[Mapping[str, Any]]) -> lis
     """Problems that would break the owner's rules in a finished customer table."""
     problems = []
     names = list(header)
+    classes = {name: column_class("", name) for name in names}
     for name in names:
-        kind = column_class("", name)
-        if kind in REMOVED_CLASSES:
-            problems.append(f"column {name}: {kind}")
-        if name in {"record_type", "record_key", "record_grain"}:
-            problems.append(f"column {name}: component packaging")
+        if classes[name] in REMOVED_CLASSES:
+            problems.append(f"column {name}: {classes[name]}")
     for index, row in enumerate(rows):
         for name in names:
             value = row.get(name)
             if _blank(value):
                 continue
-            kind = column_class("", name)
-            if kind == "cedar_id":
-                text = str(value)
-                found = _elements(text)
-                if not all(is_cedar_id(item) for item in (found[0] if found else [text])):
-                    problems.append(f"row {index} {name}: non-Cedar identifier")
+            kind = classes[name]
             if kind == "source" and is_local_source(str(value)):
                 problems.append(f"row {index} {name}: local source")
             if isinstance(value, str) and (
-                INTERNAL_KEY.fullmatch(value.strip())
-                or LEGACY_SCHEME_VALUE.search(value)
-                or is_version_label(value)
+                CASINO_CITY_TEXT.search(value)
+                or PLACEHOLDER.fullmatch(value.strip())
                 or _DUNS_TOKEN.search(value)
+                or (kind not in IDENTIFIER_CLASSES and is_version_label(value))
             ):
-                problems.append(f"row {index} {name}: internal value")
+                problems.append(f"row {index} {name}: removed value")
     return problems
 
 

@@ -38,10 +38,12 @@ class SpreadsheetRoutes(unittest.TestCase):
         rows = list(csv.DictReader(io.StringIO(response.text)))
         self.assertEqual(len(rows), 1)
         self.assertEqual(rows[0]["land_record_kind"], "BIA tract")
-        # The internal record key and packaging columns never reach the table.
-        for internal in ("record_type", "record_key", "plot_record_id", "source_id"):
+        # Packaging columns never reach the table; the dataset's record and
+        # source IDs do (owner correction 2026-10-04).
+        for internal in ("record_type", "record_key", "record_grain"):
             self.assertNotIn(internal, rows[0])
-        self.assertNotIn("SYNTHETIC-1", response.text)
+        self.assertEqual(rows[0]["plot_record_id"], "SYNTHETIC-1")
+        self.assertIn("source_id", rows[0])
         self.assertEqual(customer_sheet.check_table(list(rows[0]), rows), [])
         self.assertNotIn(pin["release_id"], response.headers["x-cedar-citation"])
         self.assertEqual(self.client.get(path, params={"release_id": "d" * 64}).status_code, 503)
@@ -165,14 +167,17 @@ class SpreadsheetUnion(unittest.TestCase):
             self.assertEqual(rows[0]["amount"], "9007199254740993.01")
             self.assertEqual(rows[1]["amount"], "")
             self.assertEqual([row["record_kind"] for row in rows], ["award", "payment"])
-            # The source key "id" is internal and never a customer column.
-            self.assertEqual(list(rows[0]), ["amount", "record_kind"])
-            self.assertEqual(result["customer_sheet"]["removed_columns"], {"id": "internal_id"})
+            # The source key "id" is a dataset identifier and stays (owner
+            # correction 2026-10-04).
+            self.assertEqual(list(rows[0]), ["id", "amount", "record_kind"])
+            self.assertEqual(result["customer_sheet"]["removed_columns"], {})
             manifest["components"]["payments"]["fields"] = [dict(field) for field in fields]
             manifest["components"]["payments"]["fields"][1]["unit"] = "thousands of USD"
             metadata = spreadsheet.metadata("fixture")
             # Different units never share a column.
-            self.assertEqual(metadata["fields"], ["amount", "payments__amount", "record_kind"])
+            self.assertEqual(
+                metadata["fields"], ["id", "amount", "payments__amount", "record_kind"]
+            )
 
     def test_cells_preserve_nulls_zeros_and_exact_decimals(self):
         self.assertEqual(spreadsheet._cell(None), "")

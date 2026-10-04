@@ -136,11 +136,10 @@ class ReviewedNeedReleaseTest(unittest.TestCase):
         self.assertEqual(result.status_code, 200, result.text)
         rows = list(csv.DictReader(io.StringIO(result.text)))
         self.assertEqual(len(rows), 1)
-        # One row per enterprise, no packaging columns, and only Cedar IDs:
-        # the synthetic "NEST-SYNTHETIC-1" key is not one (owner rules 2026-10-04).
+        # One row per enterprise and no packaging columns; the dataset's own
+        # enterprise ID stays as given (owner correction 2026-10-04).
         self.assertNotIn("record_type", rows[0])
-        self.assertEqual(rows[0]["enterprise_id"], "")
-        self.assertNotIn("NEST-SYNTHETIC-1", result.text)
+        self.assertEqual(rows[0]["enterprise_id"], "NEST-SYNTHETIC-1")
         self.assertNotIn("private_rating", result.text)
         metadata = spreadsheet.metadata("need")
         self.assertEqual(metadata["publication_scope"], "reviewed_public_base_only")
