@@ -122,7 +122,7 @@ jobs:
     permissions:
       contents: read
     env:
-      LUMECON_DATA_SHA: 354b7b3b311bb1a8f041821f785f001952a4a6c6  # Producer PR #17: 2026-10-04 rights ruling applied to Gaming rows and downloads (projection rule gaming-presented-rows-v3)
+      LUMECON_DATA_SHA: 230c387e36513da7c6482d5b9c61896ed1c07f56  # Producer PR #17: FAC and bond filings moved out of Gaming to entity filings (gaming.2026-10-04.3); public-sources Gaming candidate
       CEDAR_REQUIRE_LUMECON_GAMING: "1"
     steps:
       - name: Require the Lumecon-data read token
