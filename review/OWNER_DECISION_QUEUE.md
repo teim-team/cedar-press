@@ -3267,3 +3267,46 @@ over-exclusion:
 Nothing in this item is urgent for correctness: the data is harvested, keyed
 and provenanced either way. It decides only what ships.
 <!-- END NOB-DIRECTORIES-2026-09-02 -->
+
+---
+
+<!-- BEGIN TRIAGE-2026-10-04 -->
+# Triage pass, 2026-10-04: written onto the items that asked
+
+*Under the owner's standing triage rule (2026-10-04): obvious cases are resolved by
+the agent, a person sees only misattribution flags, ownership changes, real conflicts
+and cases with no direct source, ranked by impact. Rule as code and inputs:
+Lumecon-data `src/lumecon_data/adjudication_triage.py`, `decisions/identity/`,
+`docs/adjudication-triage.md`. Rows: `docs/RULINGS_TRIAGE_2026-10-04.csv` (a copy of the producer file, force-added past the `*.csv` ignore like the other small docs CSVs)
+(`cedar_rulings` columns plus triage columns). Nothing was applied to any table;
+no uid was minted, merged or rewritten; no hold was touched.*
+
+**Resolved by the agent (12), for the ledger owner to apply:**
+
+- **EL-1 / LAD-1a, the seven tier-B repoints, CONFIRMED** (TRI-20261004-001..007): each
+  registrant's legal name is the government itself. Fresh-source spot checks agree for
+  `LWRAHAFNKQ13`, `50WN1`, `4AD60` (Flandreau, SD) and `4XH62` (Chignik Lagoon Village
+  Council); `HLTFBD3FTDG8`, `3XGD7` and `3VFL3` were inconclusive (registries
+  unreachable from the session) and need one `cage.dla.mil`/SAM read before tier A is
+  restored.
+- **EL-1 `PHLGX6MG6UK1` ELY SHOSHONE TRIBE -> Ely Shoshone `CE-00148-8H`**
+  (TRI-20261004-008): the legal name names one government; an independent record gives
+  505 S Pioche Hwy, Ely NV.
+- **NEST-1 / DS-1 ledger rows -> Winnebago `CE-001C8-GH`** for `DMA6EKCMAPB7` and
+  `S4LTC7CL8RW7`/`8APB4` (TRI-20261004-009, -010): Ho-Chunk Construction Group states it
+  is a division of Ho-Chunk, Inc., the Winnebago Tribe of Nebraska's economic
+  development corporation. `3VFL3` goes to the Ho-Chunk Nation of Wisconsin (-007).
+- **Kaiva Services `CDBFJXPN7KL5`/`8N8Q5` -> Shivwits Band of Paiutes `CE-000QS-91`**
+  (TRI-20261004-012). Muscogee certification of the Tulsa office is not ownership.
+- **Sea Lion Security & Control Systems -> Sea Lion Corporation `CE-000BV-SK`**
+  (TRI-20261004-013); re-check inconclusive, exact UEI not in Git.
+
+**Human review, ranked by impact (12)**: Kupono `5XMJ1` ($351.0M, ownership change
+2026-06-02), Marshall Communications ($336.3M, misattribution: a Mission Solutions
+Group subsidiary), Hui O Ka Koa ($64.3M, no source), Friend Contractors - White
+Mountain JV ($19.5M, JV partner unnamed), ASCG Inc of New Mexico ($16.6M, sold by
+ASRC to NANA, date unknown), then Akiptan duplicate uids, Siletz recipient hold,
+the NEED Sea Lion/Choggiung parent, the NCAIED/NADC EIN, Laulima dating, Ho-Chunk
+Farms `7CE83` and Sea Lion International. Full table with reasons:
+Lumecon-data `docs/adjudication-triage.md`.
+<!-- END TRIAGE-2026-10-04 -->
