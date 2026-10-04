@@ -63,7 +63,7 @@ class NeedStaticPreviewTest(unittest.TestCase):
                     row["name"],
                 ]
             )
-        sample = root / "public" / n.URL.lstrip("/")
+        sample = root / n.URL.lstrip("/")
         sample.parent.mkdir(parents=True)
         sample.write_bytes(out.getvalue().encode())
         sha = digest(_canonical_bytes(manifest))

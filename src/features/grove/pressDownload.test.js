@@ -9,20 +9,28 @@
 
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
+import { extname } from "node:path";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 
 import { LAUNCH_COLLECTION, collectionSample, collectionCsv, hasSample, samplePath, reviewedPreviewTextMatches } from "./collection.js";
-import { csvFor, downloadPath, downloadRecord, hasReleaseFile } from "./pressDownload.js";
+import { csvFor, downloadPath, downloadRecord, hasReleaseFile, sampleLabel } from "./pressDownload.js";
 import { loadCodebook } from "./codebook.js";
+import { cutCsv, exploreTables, parseCsv as parseExplore, universalRows } from "./explore.js";
 // The codebook loads on demand in the browser (codebook.js); the readers
 // under test read it synchronously once it has.
 await loadCodebook();
 
 const PUBLIC = fileURLToPath(new URL("../../../public", import.meta.url));
+const REPO = fileURLToPath(new URL("../../..", import.meta.url));
+// What the built site serves at a path (public/), as a fetch would return it.
 const readSample = (path) => readFile(`${PUBLIC}${path}`, "utf8");
+// A producer preview: a manifest sample path resolved under the repository
+// root (data/cedar/samples/), the renderer's input. Never served since
+// 2026-10-04, so `readSample` of the same path finds nothing.
+const readRaw = (path) => readFile(`${REPO}${path}`, "utf8");
 
 test("stale NEED cached rows cannot acquire the reviewed release citation", async () => {
   const stale = "enterprise_id,name\nCEDAR-NEST-1,old cached row\n";
@@ -43,7 +51,7 @@ test("owner ruling 2026-10-04: NEED and Owned previews publish with no collectio
   for (const id of ["need", "owned"]) {
     assert.equal(hasSample(id), true, id);
     assert.ok(samplePath(id), id);
-    const text = await readSample(samplePath(id));
+    const text = await readRaw(samplePath(id));
     const csv = collectionCsv(id, text);
     assert.ok(csv, id);
     assert.doesNotMatch(csv, /publication_hold|publication_status,held/, id);
@@ -55,7 +63,7 @@ test("the reviewed finite NEED preview remains available", async () => {
   assert.equal(sample.of, 43, "the installed release is the reviewed 43-observation base");
   assert.equal(sample.path, "/data/cedar/samples/need/spreadsheet__10.csv");
   assert.equal(hasReleaseFile({ id: "need" }), true);
-  const source = await readSample(sample.path);
+  const source = await readRaw(sample.path);
   const { csv, name } = await csvFor({ id: "need", name: "Cedar NEED" }, readSample);
   assert.equal(name, "need.csv");
   const rows = parseCsv(csv);
@@ -88,7 +96,7 @@ test("the reviewed finite NEED preview remains available", async () => {
 test("reviewed NEED preview refuses missing, malformed or mismatched public proof metadata", async () => {
   const manifest = JSON.parse(await readFile(new URL("../../../data/cedar/collections.manifest.json", import.meta.url), "utf8"));
   const entry = manifest.collections.find((item) => item.id === "need");
-  const text = await readSample(entry.sample.path);
+  const text = await readRaw(entry.sample.path);
   const sample = entry.sample;
   const proof = entry.verified_preview;
   assert.equal(await reviewedPreviewTextMatches(text, sample, proof), true);
@@ -191,9 +199,77 @@ test("no served download carries a retired identifier scheme or a DUNS column", 
   assert.ok(served >= 10, `only ${served} collections served a download`);
 });
 
+// Every public path, not only the download: the Explore reader, its cut and
+// the record, entity and preview pages read sample rows too, and until
+// 2026-10-04 they read the raw producer previews under public/ directly
+// (NEED's carrying CEDAR-NEST- IDs). Now every reader takes its table from
+// exploreTables, every table is a rendered customer table, and nothing else
+// under public/ is a CSV.
+const SERVED_TEXT = new Set([".csv", ".json", ".txt", ".xml", ".md", ".svg", ".html", ".js", ".css", ""]);
+function* publicFiles(dir = PUBLIC) {
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const path = `${dir}/${entry.name}`;
+    if (entry.isDirectory()) yield* publicFiles(path);
+    else yield path;
+  }
+}
+
+test("no public path, the Explore reader's included, carries a retired scheme or a DUNS column", async () => {
+  const tables = new Set();
+  for (const dataset of LAUNCH_COLLECTION) {
+    for (const table of exploreTables(dataset.id)) {
+      // The reader's table is the customer table, never the raw preview.
+      assert.equal(table.path, downloadPath(dataset.id), table.key);
+      assert.equal(table.sha256, downloadRecord(dataset.id).sha256, table.key);
+      tables.add(`${PUBLIC}${table.path}`);
+      const text = await readSample(table.path);
+      assert.doesNotMatch(text, RETIRED_SCHEME, table.key);
+      const { columns } = parseExplore(text);
+      assert.deepEqual(columns.filter((column) => /duns/i.test(column)), [], table.key);
+      for (const packaging of ["record_type", "record_key", "record_grain"]) {
+        assert.ok(!columns.includes(packaging), `${table.key}: ${packaging}`);
+      }
+      // And what the cut exports from it.
+      const rows = universalRows(table.key, parseExplore(text).rows);
+      const cut = cutCsv(rows, { view: "table", columns, cut: { collections: [dataset.id], table: table.key } });
+      assert.doesNotMatch(cut, RETIRED_SCHEME, `${table.key}: the cut`);
+      assert.deepEqual(parseCsv(cut)[0].filter((column) => /duns/i.test(column)), [], `${table.key}: the cut`);
+    }
+  }
+  assert.ok(tables.size >= 10, `only ${tables.size} collections open in Explore`);
+  let files = 0;
+  for (const path of publicFiles()) {
+    const suffix = extname(path).toLowerCase();
+    if (!SERVED_TEXT.has(suffix)) continue;
+    files += 1;
+    const text = readFileSync(path, "utf8");
+    assert.doesNotMatch(text, RETIRED_SCHEME, path.slice(PUBLIC.length));
+    if (suffix !== ".csv") continue;
+    assert.ok(tables.has(path), `${path.slice(PUBLIC.length)} is a served CSV that no reader opens as a customer table`);
+    assert.deepEqual(parseCsv(text)[0].filter((column) => /duns/i.test(column)), [], path);
+  }
+  assert.ok(files > tables.size, "the walk reached the rest of public/");
+});
+
+// The button said "Ten-row sample" for every collection, but the customer
+// table keeps only rows at the collection's own grain: Federal Register's
+// renders 5 and PLOT's 3. The label is the file's own count.
+test("the download label states the customer table's real row count", async () => {
+  assert.equal(sampleLabel("federal-register"), "5-row sample");
+  assert.equal(sampleLabel("plot"), "3-row sample");
+  assert.equal(sampleLabel("deals"), "10-row sample");
+  assert.equal(sampleLabel("not-a-collection"), null);
+  for (const dataset of LAUNCH_COLLECTION) {
+    if (!hasReleaseFile(dataset)) continue;
+    const { csv } = await csvFor(dataset, readSample);
+    const rows = parseCsv(csv).length - 1;
+    assert.equal(sampleLabel(dataset.id), `${rows}-row sample`, dataset.id);
+  }
+});
+
 test("the raw preview served in place of the download is refused", async () => {
   // NEED's raw preview carries CEDAR-NEST- enterprise IDs.
-  const raw = await readSample(samplePath("need"));
+  const raw = await readRaw(samplePath("need"));
   assert.match(raw, RETIRED_SCHEME);
   const { csv, name } = await csvFor({ id: "need", name: "Cedar NEED" }, async () => raw);
   assert.equal(name, "need-collection-description.csv");
@@ -232,7 +308,13 @@ test("every storefront collection serves a sample or says why it cannot", () => 
       path || sample?.unavailable_because,
       `${dataset.id} has no sample path and no reason for it`,
     );
-    if (path) assert.ok(existsSync(`${PUBLIC}${path}`), `${dataset.id}: ${path} would 404`);
+    // The producer preview is kept (the renderer's input) and NOT served; the
+    // customer table rendered from it is what the site serves.
+    if (path) {
+      assert.ok(existsSync(`${REPO}${path}`), `${dataset.id}: ${path} is declared and missing`);
+      assert.ok(!existsSync(`${PUBLIC}${path}`), `${dataset.id}: ${path} is served again`);
+      assert.ok(existsSync(`${PUBLIC}${downloadPath(dataset.id)}`), `${dataset.id}: its customer table would 404`);
+    }
     assert.equal(hasReleaseFile(dataset), Boolean(path), `${dataset.id}: the tile disagrees with the path`);
   }
 });
@@ -240,7 +322,7 @@ test("every storefront collection serves a sample or says why it cannot", () => 
 // The record of unpublished samples is measured from the disk, so it must
 // agree with the disk: a sample added or removed without re-running the
 // measurement fails here, naming the command.
-test("samples.published.json matches what public/ holds", () => {
+test("samples.published.json matches what data/cedar/samples/ holds", () => {
   const script = fileURLToPath(new URL("../../../scripts/measure-samples.mjs", import.meta.url));
   const run = spawnSync(process.execPath, [script, "--check"], { encoding: "utf8" });
   assert.equal(run.status, 0, run.stderr || run.stdout);

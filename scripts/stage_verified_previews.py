@@ -330,7 +330,7 @@ def _refresh_context(repo, manifest, queue, collections, expected_releases, inpu
         expected_url = f"/data/cedar/samples/{cid}/spreadsheet__10.csv"
         if entry["sample"].get("path") != expected_url:
             raise ValueError(f"{cid}: unexpected installed spreadsheet preview path")
-        bind("public" + expected_url, pin["sample_sha256"])
+        bind(expected_url.lstrip("/"), pin["sample_sha256"])
         if "verified_preview" in entry:
             proof = entry["verified_preview"]
             if (proof.get("release_id"), proof.get("manifest_sha256")) != pair:
@@ -515,7 +515,7 @@ def stage(repo, producer, queue_path, output, producer_commit, updated, *,
             replacements[cid] = proposed_entry(prior, metadata, counts, rows, updated, layout)
             asset = (
                 output
-                / "assets/public/data/cedar/samples"
+                / "assets/data/cedar/samples"
                 / cid
                 / "spreadsheet__10.csv"
             )
@@ -664,7 +664,7 @@ def stage(repo, producer, queue_path, output, producer_commit, updated, *,
             "followup": [
                 ("Install only the listed selected sample/proof files and complete staged metadata; preserve every unselected sample."
                  if refresh is not None else
-                 "Inspect complete staged asset diff; replace stale public sample subtree only within its checked absolute path."),
+                 "Inspect complete staged asset diff; replace stale data/cedar/samples subtree only within its checked absolute path, then re-render the customer tables (scripts/render_sample_downloads.py)."),
                 "Preserve Gaming exclusion and production pin files.",
                 "Refresh measure-samples, derive-explore and dump.mjs --kind press after explicitly staging reviewed assets; regenerate docs with docs-markdown.mjs --kind all.",
                 "Run collection/publication/preview tests and browser review before committing.",
@@ -830,7 +830,7 @@ def admit(repo, producer, queue_path, staging, producer_commit, receipt, apply=F
             if kind not in descriptor["types"] or not row[header.index("record_key")] or not row[header.index("record_grain")]:
                 raise ValueError(f"{cid}: invalid source observation identity")
         url = f"/data/cedar/samples/{cid}/spreadsheet__10.csv"
-        destination = repo / "public" / url.lstrip("/")
+        destination = repo / url.lstrip("/")
         if destination.exists():
             raise ValueError(f"{cid}: new preview destination already exists")
         new_files[destination] = raw

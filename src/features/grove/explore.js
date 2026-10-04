@@ -42,7 +42,8 @@
 // carries nothing today; it stays so a future withholding reads the same.
 //
 // A SAMPLE, SAID SO
-// Phase one runs over the ten-row samples the site already serves. Every
+// Phase one runs over the sample customer tables the site serves, one flat
+// table per collection (customerTables.js). Every
 // count the card states is a count of sample rows, and the caption says so.
 
 import { csvCell } from "./csv.js";
@@ -50,6 +51,7 @@ import explore from "../../../data/cedar/explore.json" with { type: "json" };
 import scopesJson from "../../../data/cedar/scopes.json" with { type: "json" };
 
 import { codebookTables } from "./codebook.js";
+import { CUSTOMER_COLUMNS, CUSTOMER_COMPONENTS, CUSTOMER_RENAMES, downloadRecord } from "./customerTables.js";
 import { collectionCitation, collectionSample, collectionTables, sampleUnavailableReason } from "./collection.js";
 import { canOpenDataset } from "./pressAccess.js";
 import { recordStructure } from "./pressRecordStructure.js";
@@ -75,26 +77,66 @@ export { loadCodebook } from "./codebook.js";
  * not imported). They throw if it has not loaded; every surface that calls
  * them awaits it first.
  */
+/**
+ * The dictionary of the table a reader sees. For a collection with a customer
+ * table (customerTables.js) that is the customer table itself: its header in
+ * order, each column with its label and meaning (`labelFor`, `meaningFor`),
+ * and its one-row grain from the render record. The producer preview's own
+ * entry, which describes the raw multi-table layout ("one permitted
+ * observation at its declared record_type and record_grain"), is what
+ * `codebookTables()` still holds, for the documents generated from it.
+ */
 export function codebookFor(key) {
-  return codebookTables()[key] ?? null;
+  const book = codebookTables()[key] ?? null;
+  const [collection, stem] = String(key ?? "").split("/");
+  const record = downloadRecord(collection);
+  const sample = collectionSample(collection);
+  if (!record?.header || !sample?.table || tableKey(collection, sample.table) !== `${collection}/${stem}`) return book;
+  return {
+    ...(book ?? {}),
+    collection,
+    row: record.grain ?? null,
+    fields: record.header.map((column) => ({ column, label: labelFor(key, column), meaning: meaningFor(key, column) })),
+  };
 }
 
 
+/**
+ * The codebook field that describes a column of a collection's customer
+ * table: the producer field of the same name, the one a customer column was
+ * renamed from, or the component field the customer table lifted it from
+ * (customerTables.js says why each exists). `null` for a column none covers.
+ */
+function codebookField(key, column) {
+  const fields = codebookTables()[key]?.fields ?? [];
+  const named = (name) => fields.find((f) => f.column === name) ?? null;
+  const [collection] = String(key).split("/");
+  return named(column)
+    ?? (Object.hasOwn(CUSTOMER_RENAMES, column) ? named(CUSTOMER_RENAMES[column]) : null)
+    ?? (CUSTOMER_COMPONENTS[collection] ?? []).map((component) => named(`${component}__${column}`)).find(Boolean)
+    ?? null;
+}
+
 /** The plain-English label for a column, or a heading made from its name. */
 export function labelFor(key, column) {
-  const field = codebookTables()[key]?.fields.find((f) => f.column === column);
+  const field = codebookField(key, column);
   if (field) return field.label;
+  if (Object.hasOwn(CUSTOMER_COLUMNS, column)) return CUSTOMER_COLUMNS[column].label;
   const words = String(column).replace(/_/g, " ").replace(/([a-z])([A-Z])/g, "$1 $2").trim();
   return words.charAt(0).toUpperCase() + words.slice(1);
 }
 
 export function meaningFor(key, column) {
-  return codebookTables()[key]?.fields.find((f) => f.column === column)?.meaning ?? null;
+  return codebookField(key, column)?.meaning
+    ?? (Object.hasOwn(CUSTOMER_COLUMNS, column) ? CUSTOMER_COLUMNS[column].meaning : null);
 }
 
-/** The codebook's columns for a table, in its order, that the sample actually has. */
+/** The documented columns a table actually has, in the table's dictionary order. */
 export function codebookColumns(key, columns) {
-  return (codebookTables()[key]?.fields ?? []).map((f) => f.column).filter((c) => columns.includes(c));
+  return (codebookFor(key)?.fields ?? [])
+    .filter((f) => f.meaning)
+    .map((f) => f.column)
+    .filter((c) => columns.includes(c));
 }
 // 2 since the cut carries collective scopes (`sc`) and the broad toggle
 // (`b`), 2026-09-05; a version-1 cut reads as version 2 with neither.
@@ -118,24 +160,31 @@ export function contractFor(key) {
 }
 
 /**
- * The tables a collection lets the card open: those with a published sample
- * and a contract, the flagship first because it is the collection's own
- * dataset to a reader; the rest are supporting tables from the same release.
+ * The table a collection lets the card open: its customer table, one flat
+ * table per collection (owner ruling 2026-10-04), rendered by the vendored
+ * `customer_sheet` rules and served from `public/data/cedar/downloads/`
+ * (customerTables.js). Until 2026-10-04 this listed each release table's raw
+ * producer preview, multi-table layout and retired identifier schemes
+ * included; those are no longer served, so there is exactly one table here
+ * or none. It keeps the flagship's key (`<collection>/<table stem>`), which
+ * is the key its contract and codebook entry are filed under.
  */
 export function exploreTables(collectionId) {
-  const flagship = collectionSample(collectionId)?.path ?? null;
-  const tables = collectionTables(collectionId)
-    .filter((table) => table.sample_path)
-    .map((table) => ({
-      key: tableKey(collectionId, table.table),
-      table: table.table.replace(/\.csv$/, ""),
-      path: table.sample_path,
-      rows: table.rows_published ?? table.rows_in ?? null,
-      sampleRows: table.sample_rows ?? null,
-      flagship: table.sample_path === flagship,
-    }))
-    .filter((table) => contractFor(table.key));
-  return tables.sort((a, b) => Number(b.flagship) - Number(a.flagship) || a.table.localeCompare(b.table));
+  const sample = collectionSample(collectionId);
+  const record = downloadRecord(collectionId);
+  if (!sample?.path || !sample.table || !record) return [];
+  const key = tableKey(collectionId, sample.table);
+  if (!contractFor(key)) return [];
+  const declared = collectionTables(collectionId).find((table) => table.table === sample.table) ?? {};
+  return [{
+    key,
+    table: sample.table.replace(/\.csv$/, ""),
+    path: record.path,
+    sha256: record.sha256,
+    rows: declared.rows_published ?? declared.rows_in ?? sample.of ?? null,
+    sampleRows: record.rows,
+    flagship: true,
+  }];
 }
 
 /** The flagship table's key for a collection, or null when it has none. */
@@ -1224,7 +1273,7 @@ export function cutReadme(rows, { view, cut, register = EMPTY_REGISTER, columns 
       ? ["", `NOT INCLUDED: the preview for ${missing.map((id) => PRESS_CATALOG_BY_ID[id]?.short ?? id).join(", ")} could not be read when this file was made, so the cut above selected more than this file holds.`]
       : []),
     "",
-    "These are ten-row SAMPLES of each table, not the release. Counts here are counts of sample records.",
+    "These are SAMPLES: each collection's customer table (one flat table per collection, up to ten rows), not the release. Counts here are counts of sample records.",
     "Cells that a spreadsheet would read as a formula (a leading =, + or @) carry a leading apostrophe.",
     "",
     "Cite as:",

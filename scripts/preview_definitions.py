@@ -272,11 +272,11 @@ def main() -> None:
         book = codebook["tables"].get(key)
         if not book or book.get("collection") != collection:
             raise ValueError(f"Missing current dictionary: {key}")
-        sample_path = (root / "public" / sample["path"].lstrip("/")).resolve(
-            strict=True
-        )
-        if not sample_path.is_relative_to((root / "public").resolve()):
-            raise ValueError("Sample escapes public directory")
+        # Raw previews are kept under data/cedar/samples/, not served (2026-10-04).
+        samples_root = (root / "data" / "cedar" / "samples").resolve()
+        sample_path = (root / sample["path"].lstrip("/")).resolve(strict=True)
+        if not sample_path.is_relative_to(samples_root):
+            raise ValueError("Sample escapes data/cedar/samples")
         with sample_path.open(encoding="utf-8-sig", newline="") as stream:
             header = next(csv.reader(stream))
         if header != [field["column"] for field in book["fields"]]:

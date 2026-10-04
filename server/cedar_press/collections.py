@@ -94,12 +94,25 @@ __all__ = [
 
 #: The repository root, from ``server/cedar_press/collections.py``. The
 #: manifest and the sample rows are repository data rather than package data:
-#: the browser bundle reads the same manifest and the built site serves the
-#: same sample files, and a second copy inside the package would be a second
-#: set of numbers to keep in agreement.
+#: the browser bundle reads the same manifest, and a second copy inside the
+#: package would be a second set of numbers to keep in agreement.
 _REPO = Path(__file__).resolve().parents[2]
 _MANIFEST_PATH = _REPO / "data" / "cedar" / "collections.manifest.json"
-_SAMPLE_ROOT = _REPO / "public"
+#: Where a manifest ``sample_path`` resolves: the repository root, so
+#: ``/data/cedar/samples/<c>/spreadsheet__10.csv`` is
+#: ``data/cedar/samples/<c>/spreadsheet__10.csv``. Until 2026-10-04 this was
+#: ``public/`` and the built site served those raw producer previews, retired
+#: ``CEDAR-NEST-`` IDs and all. They are now inputs only: the site serves the
+#: customer table rendered from them (``scripts/render_sample_downloads.py``).
+_SAMPLE_ROOT = _REPO
+
+
+def raw_preview_file(url: str) -> Path:
+    """The raw producer preview a manifest ``sample_path`` names, on disk.
+
+    Not served: the browser reads ``/data/cedar/downloads/<c>.csv`` instead.
+    """
+    return _SAMPLE_ROOT / str(url).lstrip("/")
 
 _MANIFEST: dict[str, Any] = json.loads(_MANIFEST_PATH.read_text(encoding="utf-8"))
 
@@ -656,7 +669,7 @@ def collection_csv(dataset_id: str) -> str | None:
     sample = _SAMPLE.get(dataset_id)
     if sample is None or not sample.get("path"):
         return None
-    path = _SAMPLE_ROOT / str(sample["path"]).lstrip("/")
+    path = raw_preview_file(sample["path"])
     if not path.exists():
         return None
     text = path.read_text(encoding="utf-8").replace("\r\n", "\n").rstrip("\n")

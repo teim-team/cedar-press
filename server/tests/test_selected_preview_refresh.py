@@ -64,7 +64,7 @@ class SelectedPreviewRefreshTest(unittest.TestCase):
             if cid == "gaming":
                 continue
             url = f"/data/cedar/samples/{cid}/spreadsheet__10.csv"
-            path = self.repo / "public" / url.lstrip("/")
+            path = self.repo / url.lstrip("/")
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_bytes(raw)
             self.entries.append(
@@ -193,7 +193,7 @@ class SelectedPreviewRefreshTest(unittest.TestCase):
             {p.relative_to(self.repo): p.read_bytes() for p in self.repo.rglob("*") if p.is_file()},
         )
         self.assertEqual(
-            [p.parent.name for p in (assets / "public/data/cedar/samples").rglob("*.csv")],
+            [p.parent.name for p in (assets / "data/cedar/samples").rglob("*.csv")],
             ["funding"],
         )
         ready = stage.read_json(self.output / "READY.json")
@@ -234,7 +234,7 @@ class SelectedPreviewRefreshTest(unittest.TestCase):
         self.spreadsheet.spool.assert_not_called()
 
     def test_tampered_installed_unselected_sample_refuses_before_spooling(self):
-        path = self.repo / "public/data/cedar/samples/contractors/spreadsheet__10.csv"
+        path = self.repo / "data/cedar/samples/contractors/spreadsheet__10.csv"
         path.write_text("tampered")
         with self.assertRaisesRegex(ValueError, "artifact hash mismatch"):
             self.run_stage()
@@ -248,7 +248,7 @@ class SelectedPreviewRefreshTest(unittest.TestCase):
 
     def test_concurrent_unselected_sample_edit_prevents_ready_marker(self):
         def changed_sample(*_):
-            (self.repo / "public/data/cedar/samples/contractors/spreadsheet__10.csv").write_text(
+            (self.repo / "data/cedar/samples/contractors/spreadsheet__10.csv").write_text(
                 "race"
             )
             return io.BytesIO(self.raw), copy.deepcopy(self.metadata)

@@ -211,12 +211,16 @@ workspace keeps every collection and this repository keeps
 `samples/newsletters__sample.csv`. What the ruling withdrew is a storefront
 slot, not a dataset.
 
-**Downloads hand over ten rows, and say so.** Each collection's download button
-serves its flagship table's ten-row sample from
-`public/data/cedar/samples/<collection>/<table>__10.csv`, with a `cite_as` row
-appended. Every tile, label and filename says "sample": a button called
+**Downloads hand over a sample, and say how many rows.** Each collection's
+download button serves its customer table,
+`public/data/cedar/downloads/<collection>.csv`: the flagship's producer sample
+rendered through the vendored `customer_sheet` rules, one flat table with a
+`cite_as` column (2026-10-04; `scripts/render_sample_downloads.py`). Every
+tile, label and filename says "sample", and the label states the table's real
+row count, which can be under ten (Federal Register 5, PLOT 3): a button called
 "Download Federal Register" that hands over ten rows is the defect this whole
-exercise is about.
+exercise is about. The raw producer samples sit under
+`data/cedar/samples/<collection>/spreadsheet__10.csv` and are not served.
 
 **The legacy full spreadsheets are referenced, never committed.** 1135 also writes
 `dist/review/spreadsheets/`, measured at **6.2 GB**, with single tables over

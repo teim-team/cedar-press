@@ -68,7 +68,7 @@ import { recordHref, rememberReturn, takeReturn } from "../../features/grove/pre
 import { PRESS_METHODS_PATH } from "../../features/grove/pressRoutes.js";
 import { LAUNCH_COLLECTION } from "../../features/grove/collection.js";
 import { formatUpdated } from "../../features/grove/pressReleases.js";
-import { downloadCsv, hasReleaseFile, saveZip } from "../../features/grove/pressDownload.js";
+import { downloadCsv, hasReleaseFile, sampleLabel, saveZip } from "../../features/grove/pressDownload.js";
 import { PRESS_CATALOG_BY_ID } from "../../features/grove/pressCatalog.js";
 
 /** What Collections opens on when the URL does not say. */
@@ -777,7 +777,7 @@ function StructureCollection({ collection, onAbout }) {
   );
 }
 
-/** The selected collection's ten-row sample, with its citation in the file. */
+/** The selected collection's sample customer table, labelled with its real row count, with its citation in the file. */
 function SampleDownload({ entry }) {
   const [refusal, setRefusal] = useState(null);
   return (
@@ -800,7 +800,7 @@ function SampleDownload({ entry }) {
                 full-screen page the name is what the button gives back so
                 the collection's own heading is not the thing that
                 truncates; everywhere else it reads in full. */}
-            Ten-row sample<span className="cp-ex__samplefor"> of {entry.short || entry.name}</span>
+            {sampleLabel(entry.id) ?? "Sample"}<span className="cp-ex__samplefor"> of {entry.short || entry.name}</span>
           </>
         ) : (
           "Collection description (sample pending)"
@@ -1195,7 +1195,7 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
                 It used to be a button of its own beside the heading. It is
                 not the same file as Download — that one hands over the
                 current CUT as a ZIP with its README, and this is the
-                collection's own ten-row sample CSV carrying `cite_as` in the
+                collection's own sample CSV (its customer table) carrying `cite_as` in the
                 rows — so it keeps its own entry, in the menu where the other
                 downloads are. */}
             <details className="cp-ex__more" ref={moreRef}>

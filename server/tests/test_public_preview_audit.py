@@ -31,7 +31,7 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 ROOT = Path(__file__).resolve().parents[2]
-SAMPLES = ROOT / "public" / "data" / "cedar" / "samples"
+SAMPLES = ROOT / "data" / "cedar" / "samples"
 SPINE = ROOT / "data" / "spine"
 # Source renderings of a register name (diacritics, case, spacing) live here,
 # never in the published-names file: the register's spelling is canonical and
@@ -561,7 +561,7 @@ class PublicPreviewAuditTest(unittest.TestCase):
         method = deals["descriptor"]["method"]
         self.assertIn("excerpted from the verified producer spreadsheet", method)
         self.assertNotIn("contains ten selected events checked against primary sources", method)
-        with (ROOT / "public/data/cedar/samples/deals/spreadsheet__10.csv").open(
+        with (ROOT / "data/cedar/samples/deals/spreadsheet__10.csv").open(
             newline="", encoding="utf-8"
         ) as handle:
             rows = list(csv.DictReader(handle))

@@ -317,7 +317,7 @@ function parseCsv(text) {
 function sampleFor(collection) {
   const { MANIFEST } = guideData();
   const entry = MANIFEST.collections.find((c) => c.id === collection);
-  const path = entry?.sample?.path ? `${REPO}public${entry.sample.path}` : null;
+  const path = entry?.sample?.path ? `${REPO}${entry.sample.path.replace(/^\//, "")}` : null;
   if (!path || !existsSync(path)) return null;
   return parseCsv(readFileSync(path, "utf8"));
 }

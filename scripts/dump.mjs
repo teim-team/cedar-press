@@ -18,7 +18,8 @@ import { CITATIONS, REPORT_CITATION_HREF } from "../src/features/grove/pressCita
 import { COLLECTION_JOBS, cedarQuestions } from "../src/features/grove/pressJobs.js";
 import { PRESS_RELEASES } from "../src/features/grove/pressReleases.js";
 import { WORK_KINDS } from "../src/features/grove/readerWork.js";
-const PUBLIC = fileURLToPath(new URL("../public", import.meta.url));
+// The raw previews sit under the repository root (data/cedar/samples/), not public/.
+const REPO_ROOT = fileURLToPath(new URL("..", import.meta.url)).replace(/\/$/, "");
 const PRESS_TARGET = fileURLToPath(new URL("../server/cedar_press/_press_data.json", import.meta.url));
 
 function accessPayload() {
@@ -96,7 +97,7 @@ for (const dataset of LAUNCH_COLLECTION) {
     csvs[dataset.id] = null;
     continue;
   }
-  const text = await readFile(`${PUBLIC}${samplePath(dataset.id)}`, "utf8");
+  const text = await readFile(`${REPO_ROOT}${samplePath(dataset.id)}`, "utf8");
   csvs[dataset.id] = collectionCsv(dataset.id, text);
 }
 

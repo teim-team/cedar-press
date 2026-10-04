@@ -15,8 +15,14 @@ This writes the server's bytes, unchanged, to
 SHA-256, row and column counts in ``data/cedar/sample_downloads.json``. The
 standalone download (``src/features/grove/pressDownload.js``) serves only a
 file whose digest matches that record, so both modes hand over the same file.
-The raw previews stay where they are: the Explore reader is built on their
-layout.
+These are the only sample files the site serves. The raw producer previews
+they are rendered from (``data/cedar/samples/<collection>/spreadsheet__10.csv``)
+carry the multi-table layout and retired identifier schemes; since 2026-10-04
+they sit outside ``public/`` and every reader -- the download, the Explore
+reader and its cut, the record, entity and preview pages -- reads these
+instead (``src/features/grove/customerTables.js``). The record also carries
+each table's header and one-row grain, so a page can describe the table
+without fetching it.
 
     python3 scripts/render_sample_downloads.py           rewrite the files
     python3 scripts/render_sample_downloads.py --check   exit 1 if any differs
@@ -59,6 +65,33 @@ def render() -> dict[str, str]:
     return files
 
 
+def grain(collection: str) -> str | None:
+    """What one row of the customer table is, in its producer's words.
+
+    The customer_sheet layout's own ``grain`` where it designs one (a table
+    joined from several components); otherwise the one ``record_grain`` the
+    raw preview's rows declare, which is the customer table's grain because it
+    keeps exactly that table. ``None`` where neither says, rather than a guess.
+    """
+    sys.path.insert(0, str(ROOT / "server"))
+    from cedar_press import collections as launch
+    from cedar_press import customer_sheet
+
+    declared = (customer_sheet.LAYOUTS.get(collection) or {}).get("grain")
+    if declared:
+        return declared
+    sample = launch.collection_sample(collection)
+    path = launch.raw_preview_file(sample["path"]) if sample.get("path") else None
+    if path is None or not path.exists():
+        return None
+    with path.open(encoding="utf-8", newline="") as handle:
+        grains = {row.get("record_grain") or "" for row in csv.DictReader(handle)}
+    if len(grains) != 1 or not next(iter(grains)):
+        return None
+    text = next(iter(grains))
+    return text[0].upper() + text[1:] + ("" if text.endswith(".") else ".")
+
+
 def record(files: dict[str, str]) -> dict:
     collections = {}
     for collection, text in sorted(files.items()):
@@ -68,6 +101,8 @@ def record(files: dict[str, str]) -> dict:
             "sha256": hashlib.sha256(text.encode("utf-8")).hexdigest(),
             "rows": len(rows) - 1,
             "columns": len(rows[0]),
+            "header": rows[0],
+            "grain": grain(collection),
         }
     return {
         "about": "Customer-table sample downloads for the standalone build, rendered by "

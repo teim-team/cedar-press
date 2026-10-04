@@ -115,7 +115,7 @@ def measure() -> dict:
             "served": cid in collections,
         }
         if cid in collections:
-            served_rows = read_csv(ROOT / ("public" + collections[cid]["sample"]["path"]))
+            served_rows = read_csv(ROOT / collections[cid]["sample"]["path"].lstrip("/"))
             served_header = list(served_rows[0].keys())
             lowered = {c.lower(): c for c in served_header}
             key = header[0]
@@ -149,7 +149,7 @@ def measure() -> dict:
     fixture = ROOT / "server/tests/fixtures/legacy-preview/samples/deals/deals_classified__10.csv"
     cev_rows = read_csv(fixture)
     cev_ids = [r["Deal_ID"] for r in cev_rows]
-    served_deals = read_csv(ROOT / "public/data/cedar/samples/deals/spreadsheet__10.csv")
+    served_deals = read_csv(ROOT / "data/cedar/samples/deals/spreadsheet__10.csv")
     cev_in_served = sorted(set(cev_ids) & {r["deal_id"] for r in served_deals})
     cev_elsewhere = subprocess.run(
         [
@@ -204,7 +204,7 @@ def measure() -> dict:
     )
 
     # Owned preview scope values.
-    owned_rows = read_csv(ROOT / "public/data/cedar/samples/owned/spreadsheet__10.csv")
+    owned_rows = read_csv(ROOT / "data/cedar/samples/owned/spreadsheet__10.csv")
     owned_scope = dict(Counter(r["identity_scope"] for r in owned_rows))
     owned_assertion = dict(Counter(r["assertion_class"] for r in owned_rows))
     # The vendored customer_sheet.py reads identity_scope to derive the
@@ -230,7 +230,7 @@ def measure() -> dict:
     # publication_status conventions in the served previews.
     status_values = {}
     for cid, c in collections.items():
-        rows = read_csv(ROOT / ("public" + c["sample"]["path"]))
+        rows = read_csv(ROOT / c["sample"]["path"].lstrip("/"))
         for column in rows[0]:
             if column in ("publication_status", "publication_rights_status"):
                 status_values.setdefault(cid, {})[column] = dict(
@@ -440,7 +440,7 @@ def rows(m: dict) -> list[dict]:
             "spreadsheets are not in Git, and a preview is a selection, not a population.",
             gate_location="data/cedar/samples/README.md banner; scripts/stage_verified_previews.py (the only path that writes a served sample)",
             closing_condition="Per collection, join the legacy key column to the producer's full spreadsheet; any legacy row absent needs a NAMED disposition in the producer.",
-            evidence="data/cedar/samples/*__sample.csv; public/data/cedar/samples/*/spreadsheet__10.csv; the key comparison above",
+            evidence="data/cedar/samples/*__sample.csv; data/cedar/samples/*/spreadsheet__10.csv; the key comparison above",
             classification="EVIDENCE_NEEDED",
             owner=OWNERS["havala"],
             question=None,

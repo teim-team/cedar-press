@@ -6,8 +6,8 @@
 // THE RECORDS ARE THE PICTURE
 // A marketing page stages a screenshot of the product beside its promise.
 // Cedar Press has something better than a screenshot: the product is rows,
-// and ten real rows of every flagship table already ship with the site
-// (public/data/cedar/samples/*__10.csv), public by design — see
+// and the real sample rows of every collection's table already ship with the site
+// (public/data/cedar/downloads/<id>.csv, the customer tables), public by design — see
 // pressDemoGate.js: nothing in the bundle is confidential, and the samples
 // are the whole of what a visitor can reach. So the pane shows six of them,
 // through the same contracts and the same row shape the viewer on /data
@@ -91,7 +91,7 @@ function usePreviewSample(collectionId) {
     pending.current.add(table.path);
     // The rows are drawn by the product's own table, which reads the
     // codebook's labels; the two arrive together.
-    Promise.all([fetchSampleText(table.path).then(parseCsv), loadCodebook()]).then(
+    Promise.all([fetchSampleText(table.path, { sha256: table.sha256 }).then(parseCsv), loadCodebook()]).then(
       ([parsed]) => {
         pending.current.delete(table.path);
         setLoaded((prev) => (prev.has(table.path) ? prev : new Map(prev).set(table.path, parsed)));

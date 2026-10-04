@@ -6,16 +6,19 @@ import { CONTRACTS, universalRows } from "./explore.js";
 import { findRecord, neighbours, readRecordParams, recordHref } from "./pressRecord.js";
 
 function componentRows() {
-  const declared = Object.entries(CONTRACTS).find(([, contract]) =>
-    contract.record_id && contract.record_type);
-  assert.ok(declared, "the combined spreadsheet must declare its record id and record type");
-  const [key, contract] = declared;
+  // A producer spreadsheet with several record types under one record id.
+  // Since 2026-10-04 no served table has this shape (each collection is one
+  // flat customer table, CONTRACTS has no record_type), but record addressing
+  // still has to keep component identity for any table that does.
+  assert.ok(Object.values(CONTRACTS).every((contract) => !contract.record_type),
+    "a served contract dispatches by record type again");
+  const contract = { record_id: "record_key", record_type: "record_type", observation: [] };
   const types = ["first-component", "second-component", "third-component"];
   const rows = types.map((recordType) => ({
     [contract.record_id]: "SHARED-001",
     [contract.record_type]: recordType,
   }));
-  return universalRows(key, rows);
+  return universalRows("legacy/spreadsheet", rows, undefined, contract);
 }
 
 function asked(href) {

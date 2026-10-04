@@ -82,11 +82,21 @@ same depth. Each collection's grain, keys, field dictionary, missing-value
 rules, units and citation are in its researcher guide under
 [`docs/guides/`](docs/guides/README.md), regenerated from the release manifest
 and the served preview by `node scripts/docs-markdown.mjs --kind guides`.
-The public preview of each collection is ten rows
-(`public/data/cedar/samples/<collection>/spreadsheet__10.csv`), byte-identical
-to the producer's pinned sample; a preview describes itself, not the full
-spreadsheet. Gaming and Native Infrastructure are Cedar Grove collections and
-are not sold or previewed here.
+The public preview of each collection is one flat customer table,
+`public/data/cedar/downloads/<collection>.csv`: the producer's pinned ten-row
+sample passed through the vendored `customer_sheet` rules (policy
+`customer-sheet-2026-10-04.5`), byte-identical to what the API's download
+route sends. It keeps only rows at the collection's own grain, so it can hold
+fewer than ten (Federal Register 5, PLOT 3), and the download button states
+the real count. The download, the Collections reader (Explore) and its cut
+export, and the record, entity and preview pages all read this one table and
+check its SHA-256 against `data/cedar/sample_downloads.json` before showing
+it. The raw producer samples it is rendered from
+(`data/cedar/samples/<collection>/spreadsheet__10.csv`) are inputs only and
+are not served (2026-10-04); re-render with
+`python3 scripts/render_sample_downloads.py` after they change. A preview
+describes itself, not the full spreadsheet. Gaming and Native Infrastructure
+are Cedar Grove collections and are not sold or previewed here.
 
 ### Where the data comes from
 

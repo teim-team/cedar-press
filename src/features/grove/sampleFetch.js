@@ -20,17 +20,33 @@
  * reports it is back online (`onBackOnline`).
  */
 
+import { textMatchesDigest } from "./customerTables.js";
+
 /** A sample is ten rows: fifteen seconds is a stalled connection, not a slow file. */
 export const SAMPLE_TIMEOUT_MS = 15_000;
 
-/** The sample's text, or a thrown error naming why it could not be read. */
-export async function fetchSampleText(path, { timeoutMs = SAMPLE_TIMEOUT_MS, fetchImpl = globalThis.fetch } = {}) {
+/**
+ * The sample's text, or a thrown error naming why it could not be read.
+ *
+ * `sha256` is required: every sample a reader sees is a rendered customer
+ * table with its digest in `data/cedar/sample_downloads.json`
+ * (customerTables.js), and bytes that do not match it are refused. A stale
+ * cached copy, or any other file served at that path, never reaches a table.
+ */
+export async function fetchSampleText(path, { sha256, timeoutMs = SAMPLE_TIMEOUT_MS, fetchImpl = globalThis.fetch } = {}) {
+  if (!/^[a-f0-9]{64}$/.test(sha256 ?? "")) {
+    throw new Error(`No published digest for ${path}; only a rendered customer table is read.`);
+  }
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
     const response = await fetchImpl(path, { signal: controller.signal });
     if (!response.ok) throw new Error(`The sample answered ${response.status}.`);
-    return await response.text();
+    const text = await response.text();
+    if (!(await textMatchesDigest(text, sha256))) {
+      throw new Error("The sample is not the published customer table (digest mismatch).");
+    }
+    return text;
   } catch (error) {
     if (controller.signal.aborted) {
       throw new Error(`The sample did not arrive within ${timeoutMs / 1000} seconds.`, { cause: error });

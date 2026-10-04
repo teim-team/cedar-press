@@ -17,7 +17,12 @@ import {
   tableLabel,
 } from "./readerValues.js";
 
-const SAMPLES = fileURLToPath(new URL("../../../public/data/cedar/samples/", import.meta.url));
+// The raw producer previews, kept outside public/ since 2026-10-04. The
+// directory's top level holds dated 2026-09-02 extracts nobody reads (its
+// README); the manifest's previews are one directory down.
+const SAMPLES = fileURLToPath(new URL("../../../data/cedar/samples/", import.meta.url));
+// What the site actually serves: one customer table per collection.
+const DOWNLOADS = fileURLToPath(new URL("../../../public/data/cedar/downloads/", import.meta.url));
 
 function* walk(dir) {
   for (const name of readdirSync(dir)) {
@@ -145,6 +150,7 @@ test("no published sample carries a path on somebody's machine", () => {
   const hits = [];
   let files = 0;
   for (const path of walk(SAMPLES)) {
+    if (path.slice(SAMPLES.length).split("/").filter(Boolean).length < 2) continue;
     files += 1;
     actual.push("/data/cedar/samples" + path.slice(SAMPLES.length).replaceAll("\\", "/"));
     const lines = readFileSync(path, "utf8").split("\n");
@@ -155,6 +161,11 @@ test("no published sample carries a path on somebody's machine", () => {
   assert.equal(files, declared.size, "every declared sample must be inspected");
   assert.deepEqual(actual.sort(), [...declared].sort(),
     "published sample files must exactly match the manifest declarations");
+  for (const path of walk(DOWNLOADS)) {
+    readFileSync(path, "utf8").split("\n").forEach((line, i) => {
+      if (LOCAL.test(line)) hits.push(`downloads/${path.slice(DOWNLOADS.length)}:${i + 1}`);
+    });
+  }
   assert.deepEqual(hits, []);
   // And the guard fires on the value that was published.
   assert.ok(LOCAL.test("dataset, on this machine at ~/Desktop/dissertation/data/clean/)"));

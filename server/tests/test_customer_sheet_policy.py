@@ -225,8 +225,69 @@ class SampleDownloads(unittest.TestCase):
                     header = next(csv.reader(io.StringIO(text, newline="")))
                     self.assertFalse([c for c in header if customer_sheet.is_private_identifier(c)])
         # The raw NEED preview is what leaked; it does carry the retired scheme.
-        raw = (ROOT / "public/data/cedar/samples/need/spreadsheet__10.csv").read_text("utf-8")
+        raw = (ROOT / "data/cedar/samples/need/spreadsheet__10.csv").read_text("utf-8")
         self.assertIsNotNone(self.RETIRED_SCHEME.search(raw))
+
+    #: Text files the static build serves from public/; images and fonts carry no identifiers.
+    SERVED_TEXT = frozenset(
+        {".csv", ".json", ".txt", ".xml", ".md", ".svg", ".html", ".js", ".css", ""}
+    )
+
+    def test_no_public_path_carries_a_retired_scheme_or_a_duns_column(self):
+        """Every path the site serves: all of ``public/``, and the data the bundle imports.
+
+        Until 2026-10-04 ``public/data/cedar/samples/`` served the raw producer
+        previews, which the Explore reader, its cut and the record pages read
+        directly: NEED's carried ``CEDAR-NEST-`` IDs. They now sit outside
+        ``public/``, and the only CSV the site serves is a rendered customer
+        table (``data/cedar/sample_downloads.json``).
+        """
+        import json
+
+        record = json.loads((ROOT / "data/cedar/sample_downloads.json").read_text("utf-8"))
+        tables = {
+            ROOT / "public" / entry["path"].lstrip("/") for entry in record["collections"].values()
+        }
+        self.assertGreaterEqual(len(tables), 10)
+        public = ROOT / "public"
+        served = [
+            path
+            for path in sorted(public.rglob("*"))
+            if path.is_file() and path.suffix.lower() in self.SERVED_TEXT
+        ]
+        # The data files the client bundle imports ship in the bundle, so they
+        # are public too (src/**/*.js[x], tests excluded).
+        imports = re.compile(r"""["'](?:\.\./)+(data/cedar/[\w.-]+\.json)["']""")
+        bundled = sorted(
+            {
+                ROOT / match
+                for source in (ROOT / "src").rglob("*.js*")
+                if ".test." not in source.name
+                for match in imports.findall(source.read_text("utf-8"))
+            }
+        )
+        self.assertIn(ROOT / "data/cedar/explore.json", bundled)
+        self.assertIn(ROOT / "data/cedar/sample_downloads.json", bundled)
+        csvs = 0
+        for path in [*served, *bundled]:
+            name = path.relative_to(ROOT).as_posix()
+            text = path.read_text("utf-8")
+            with self.subTest(path=name):
+                found = self.RETIRED_SCHEME.search(text)
+                self.assertIsNone(found, f"{name} serves {found.group(0) if found else ''}")
+                if path.suffix.lower() != ".csv":
+                    continue
+                csvs += 1
+                self.assertIn(path, tables, f"{name} is served, not a rendered customer table")
+                header = next(csv.reader(io.StringIO(text, newline="")))
+                private = [c for c in header if customer_sheet.is_private_identifier(c)]
+                self.assertEqual(private, [], name)
+                self.assertEqual([c for c in header if "duns" in c.lower()], [], name)
+                for packaging in ("record_type", "record_key", "record_grain"):
+                    self.assertNotIn(packaging, header, name)
+        self.assertEqual(csvs, len(tables), "every rendered customer table is served and checked")
+        # The raw previews are kept for the renderer and are not served.
+        self.assertFalse((public / "data" / "cedar" / "samples").exists())
 
     def test_standalone_downloads_are_the_servers_bytes(self):
         """``scripts/render_sample_downloads.py --check``: rendered from the current rules."""

@@ -47,7 +47,7 @@ test("the preview download applies it", () => {
   let checked = 0;
   for (const { id } of LAUNCH_COLLECTION) {
     if (!hasSample(id)) continue;
-    const text = readFileSync(new URL(`../../../public${samplePath(id)}`, import.meta.url), "utf8");
+    const text = readFileSync(new URL(`../../..${samplePath(id)}`, import.meta.url), "utf8");
     const { columns, rows } = parseCsv(text);
     if (!rows.length) continue;
     rows[0][columns[0]] = "=1+1";

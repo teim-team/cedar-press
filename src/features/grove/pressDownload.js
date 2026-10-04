@@ -31,18 +31,20 @@
 // `scripts/render_sample_downloads.py` writes the server's output to
 // `public/data/cedar/downloads/<id>.csv` and records each file's SHA-256 in
 // `data/cedar/sample_downloads.json`, and a fetched file is handed over only
-// when its digest matches. The raw previews stay for the Explore reader.
+// when its digest matches. The Explore reader, its cut and the record pages
+// read the same files (customerTables.js); the raw previews are no longer
+// served at all.
 //
 // WHY THESE ARE ASYNC
 // The sample rows are static files the built site serves, not bundled bytes:
-// 169 sample files across the twelve collections is 1.4 MB of CSV, and
-// inlining it would load every reader's page for a button most never press.
+// one customer table per collection, and inlining them would load every
+// reader's page for a button most never press.
 // So the file is fetched at click time. `hasReleaseFile` answers from the record
 // alone, with no fetch, because a tile has to label itself before the click.
 
 import { downloadCollection } from "../../api.js";
 import { isConnected } from "../../config.js";
-import downloads from "../../../data/cedar/sample_downloads.json" with { type: "json" };
+import { downloadPath, downloadRecord, downloadTextMatches } from "./customerTables.js";
 import { collectionCitation } from "./collection.js";
 import { spreadsheetSafe } from "./csv.js";
 import { coverageLabel } from "./pressAccess.js";
@@ -65,33 +67,24 @@ export function hasReleaseFile(entry) {
   return Boolean(downloadRecord(entry?.id));
 }
 
-/** The rendered customer-table download for a collection, or `null`. */
-export function downloadRecord(id) {
-  return Object.hasOwn(downloads.collections, id ?? "") ? downloads.collections[id] : null;
-}
-
-/** Where the browser fetches a collection's customer-table download, or `null`. */
-export function downloadPath(id) {
-  return downloadRecord(id)?.path ?? null;
-}
-
 /**
- * Whether fetched bytes are exactly the rendered download. A cached response
- * from before a re-render, or the raw preview served in its place, is refused.
+ * What a collection's download button says it hands over: the customer
+ * table's real row count, read from the render record, never a fixed "ten".
+ * The customer table keeps only rows at the collection's own grain, so a
+ * ten-row producer preview can render fewer (Federal Register keeps 5 of 10,
+ * PLOT 3 of 10), and a label that promised ten would be wrong on its face.
+ * `null` when the collection has no rendered table.
  */
-export async function downloadTextMatches(id, text) {
-  const expected = downloadRecord(id)?.sha256;
-  if (typeof text !== "string" || !/^[a-f0-9]{64}$/.test(expected ?? "")) return false;
-  try {
-    const subtle = globalThis.crypto?.subtle;
-    if (!subtle) return false;
-    const digest = await subtle.digest("SHA-256", new TextEncoder().encode(text));
-    const actual = Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
-    return actual === expected;
-  } catch {
-    return false;
-  }
+export function sampleLabel(id) {
+  const rows = downloadRecord(id)?.rows;
+  if (!Number.isSafeInteger(rows) || rows < 1) return null;
+  return `${rows}-row sample`;
 }
+
+// The record, the paths and the digest check live in customerTables.js, the
+// one module every sample reader shares; re-exported here for the callers
+// that already read them from this file.
+export { downloadPath, downloadRecord, downloadTextMatches } from "./customerTables.js";
 
 /**
  * The file for a collection: the shipped extract, or its own description.

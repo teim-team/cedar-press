@@ -68,7 +68,7 @@ Classifications: **CODE** (fixed or fixable here, with a test), **EVIDENCE_IN_RE
 - **Served:** The producer's pinned 10-row previews only. Whether each legacy row is in the 2026-10-01 full release is not measurable here: the full spreadsheets are not in Git, and a preview is a selection, not a population.
 - **Gate location:** data/cedar/samples/README.md banner; scripts/stage_verified_previews.py (the only path that writes a served sample)
 - **Closing condition:** Per collection, join the legacy key column to the producer's full spreadsheet; any legacy row absent needs a NAMED disposition in the producer.
-- **Evidence in the repository:** data/cedar/samples/*__sample.csv; public/data/cedar/samples/*/spreadsheet__10.csv; the key comparison above
+- **Evidence in the repository:** data/cedar/samples/*__sample.csv; data/cedar/samples/*/spreadsheet__10.csv; the key comparison above
 - **Classification:** EVIDENCE_NEEDED; owner Havala Hanson (@Havala-Hanson), Cedar Grove and Cedar Press including their data
 - **Needs (exact):** The producer's full spreadsheets (Lumecon-data release store, release ids in data/cedar/verified-preview-releases.json). Command per collection: `python3 -c "import csv;a={r['<key>'] for r in csv.DictReader(open('data/cedar/samples/<id>__sample.csv',encoding='utf-8-sig'))};b={r['<key>'] for r in csv.DictReader(open('<full spreadsheet>.csv',encoding='utf-8-sig'))};print(sorted(a-b))"`
 

@@ -285,7 +285,7 @@ class TestCrossLanguageParity(unittest.TestCase):
             sample = launch.collection_sample(dataset.id)
             if not sample.get("path"):
                 continue
-            path = _REPO / "public" / sample["path"].lstrip("/")
+            path = _REPO / sample["path"].lstrip("/")
             with self.subTest(dataset=dataset.id):
                 self.assertTrue(path.exists(), f"{path} is declared and missing")
                 with path.open(encoding="utf-8", newline="") as handle:
@@ -311,7 +311,7 @@ class TestCrossLanguageParity(unittest.TestCase):
                         )
                         self.assertTrue(recorded, f"{table['table']} has no sample and no record")
                     continue
-                path = _REPO / "public" / table["sample_path"].lstrip("/")
+                path = _REPO / table["sample_path"].lstrip("/")
                 # In the INDEX, not merely on this disk. `.gitignore` drops
                 # every `*.csv` by extension, so a sample the importer wrote
                 # and nobody force-added passes on the importer's machine
@@ -346,7 +346,8 @@ class TestCrossLanguageParity(unittest.TestCase):
         # must never arrive here by accident.
         oversized = [
             str(path.relative_to(_REPO))
-            for path in (_REPO / "public" / "data" / "cedar").rglob("*")
+            for root in (_REPO / "public" / "data" / "cedar", _REPO / "data" / "cedar" / "samples")
+            for path in root.rglob("*")
             if path.is_file() and path.stat().st_size > 1_000_000
         ]
         self.assertEqual(oversized, [], "a file this large under samples/ is not a sample")
@@ -727,11 +728,11 @@ class TestGeneratorAndManifestAgree(unittest.TestCase):
                     self.assertTrue(table["sample_path"], table["table"])
                 self.assertNotIn("sample_withheld_why", table)
             self.assertTrue(live["collections"][0]["sample"]["path"])
-            plant(root / "public" / "data" / "cedar" / "samples" / "fixture", samples)
+            plant(root / "data" / "cedar" / "samples" / "fixture", samples)
             audited_live = manifest()
             self.assertEqual(
                 self.script.withhold_samples(
-                    audited_live, self.script.public_sample(root), names, uids
+                    audited_live, self.script.sample_file(root), names, uids
                 ),
                 [],
             )
@@ -763,28 +764,28 @@ class TestGeneratorAndManifestAgree(unittest.TestCase):
             self.assertIsNone(flagship["path"])
             self.assertIn("the publication rule withholds", flagship["unavailable_because"])
             # The served copy of a struck sample from an earlier import goes.
-            plant(root / "public" / "data" / "cedar" / "samples" / "fixture", samples)
+            plant(root / "data" / "cedar" / "samples" / "fixture", samples)
             self.script.unpublish(root, struck)
-            served = root / "public" / "data" / "cedar" / "samples" / "fixture"
+            served = root / "data" / "cedar" / "samples" / "fixture"
             self.assertFalse((served / "owner__10.csv").exists())
             self.assertFalse((served / "named__10.csv").exists())
             self.assertTrue((served / "clean__10.csv").exists())
-            # The audit layout, on a public/ that still serves the two.
+            # The audit layout, on a data/cedar/samples/ that still keeps the two.
             plant(served, samples)
             audited = manifest()
             struck_public = self.script.withhold_samples(
-                audited, self.script.public_sample(root), names, uids
+                audited, self.script.sample_file(root), names, uids
             )
             self.assertEqual(sorted(s["table"] for s in struck_public), ["named.csv", "owner.csv"])
-        # The files public/ serves.
-        for path in (_REPO / "public" / "data" / "cedar" / "samples").rglob("*.csv"):
+        # The raw previews the API and the renderer read.
+        for path in (_REPO / "data" / "cedar" / "samples").glob("*/*.csv"):
             self.assertEqual(
                 self.script.sample_violations(path, names, uids),
                 [],
                 f"{path} publishes a withheld field; run import_cedar_manifest.py --audit",
             )
 
-    def test_sample_paths_cannot_delete_or_overwrite_outside_public(self) -> None:
+    def test_sample_paths_cannot_delete_or_overwrite_outside_the_samples_directory(self) -> None:
         import tempfile
 
         with tempfile.TemporaryDirectory() as folder:
@@ -793,8 +794,8 @@ class TestGeneratorAndManifestAgree(unittest.TestCase):
             outside.write_text("retained\n", encoding="utf-8")
             valid = "/data/cedar/samples/deals/example.csv"
             self.assertEqual(
-                self.script.public_sample_path(root, valid),
-                root.resolve() / "public" / valid[1:],
+                self.script.sample_file_path(root, valid),
+                root.resolve() / valid[1:],
             )
             for bad in (
                 "/../retained.csv",
@@ -803,6 +804,9 @@ class TestGeneratorAndManifestAgree(unittest.TestCase):
                 "/C:/retained.csv",
                 "/data\\..\\retained.csv",
                 "/%2e%2e/retained.csv",
+                # Inside the repository, outside the samples directory.
+                "/data/cedar/collections.manifest.json",
+                "/public/data/cedar/downloads/deals.csv",
             ):
                 with self.subTest(path=bad), self.assertRaises(ValueError):
                     self.script.unpublish(root, [{"path": bad}])
@@ -886,15 +890,15 @@ class TestGeneratorAndManifestAgree(unittest.TestCase):
         self.assertEqual(clean.count('"'), leaked.count('"'))
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            served = root / "public" / "data" / "cedar" / "samples" / "fixture"
+            served = root / "data" / "cedar" / "samples" / "fixture"
             served.mkdir(parents=True)
             (served / "leak__10.csv").write_text(leaked, encoding="utf-8", newline="")
             (served / "clean__10.csv").write_text("id,x\n1,y\n", encoding="utf-8", newline="")
-            rewritten = self.script.scrub_public_samples(root)
+            rewritten = self.script.scrub_samples(root)
             self.assertEqual([p.name for p in rewritten], ["leak__10.csv"])
             self.assertEqual((served / "leak__10.csv").read_text(encoding="utf-8"), clean)
             self.assertEqual(
-                self.script.scrub_public_samples(root), [], "a second pass finds nothing"
+                self.script.scrub_samples(root), [], "a second pass finds nothing"
             )
             # The import path writes through the same scrub.
             target = root / "out" / "leak__10.csv"
@@ -905,7 +909,7 @@ class TestGeneratorAndManifestAgree(unittest.TestCase):
             source.write_text(leaked, encoding="utf-8", newline="")
             self.assertTrue(self.script.publish_sample(source, target))
             self.assertEqual(target.read_text(encoding="utf-8"), clean)
-        for path in (_REPO / "public" / "data" / "cedar" / "samples").rglob("*.csv"):
+        for path in (_REPO / "data" / "cedar" / "samples").glob("*/*.csv"):
             text = path.read_text(encoding="utf-8")
             self.assertEqual(
                 self.script.scrub_local_paths(text),

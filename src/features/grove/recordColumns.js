@@ -52,14 +52,17 @@ export function columnPlan(tableKey, contract, tableColumns) {
   // The codebook's order is a fallback for a table with no declared view;
   // it is not a reason to open on a column of Cedar's own file names.
   const listed = tableKey ? codebookColumns(tableKey, publicColumns).filter((c) => !isInternalProvenanceColumn(c)) : [];
-  // Producer spreadsheets already declare the complete opening view, including
+  // Producer spreadsheets and customer tables already declare the complete opening view, including
   // role and amount qualifications. A union's sparse component source columns
   // share the same dispatched source link that the record page uses.
   const dispatchedSources = new Set(built
     ? Object.values(contract?.row_type_contracts ?? {})
       .flatMap((type) => [type.source, type.source_fallback]).filter(Boolean)
     : []);
-  const defaults = contract?.mapping_kind === "producer_spreadsheet" && declared.length
+  // A customer table's contract (derive-explore customerTableContract) also
+  // declares its complete opening view, so it opens on exactly that.
+  const reviewedView = ["producer_spreadsheet", "customer_table"].includes(contract?.mapping_kind);
+  const defaults = reviewedView && declared.length
     ? [...new Set([...declared.filter((column) => !dispatchedSources.has(column)), ...(built ? [SOURCE_LINK_COLUMN] : [])])]
     : [...new Set([...roleFirst, ...(declared.length ? declared : listed)])];
   const all = [...new Set([...lead, ...publicColumns, ...declared.filter((column) => Object.hasOwn(PRESENTATION_COLUMNS, column)), ...(built ? [SOURCE_LINK_COLUMN] : [])])];

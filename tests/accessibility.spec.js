@@ -4,7 +4,8 @@
 // the fix and watching the test fail.
 import { expect, test } from "@playwright/test";
 
-const SAMPLES = "**/data/cedar/samples/**";
+// The sample tables every reader fetches: one customer table per collection.
+const SAMPLES = "**/data/cedar/downloads/**";
 
 /** A signed-in Cedar Press+ reader, as the standalone gate stores one. */
 async function signedIn(page) {

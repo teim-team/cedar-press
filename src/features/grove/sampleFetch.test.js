@@ -4,7 +4,13 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
+import { createHash } from "node:crypto";
+
 import { SAMPLE_TIMEOUT_MS, fetchSampleText, onBackOnline } from "./sampleFetch.js";
+
+const digestOf = (text) => createHash("sha256").update(text, "utf8").digest("hex");
+// Any well-formed digest: the timeout and status tests fail before it is read.
+const ANY = "0".repeat(64);
 
 const abortError = () => Object.assign(new Error("aborted"), { name: "AbortError" });
 const flush = () => new Promise((resolve) => setImmediate(resolve));
@@ -17,7 +23,7 @@ test("a sample that never answers is abandoned at the deadline, and the fetch ca
     return new Promise((_, reject) => options.signal.addEventListener("abort", () => reject(abortError())));
   };
   let outcome = null;
-  fetchSampleText("/data/cedar/samples/x__10.csv", { fetchImpl }).then(
+  fetchSampleText("/data/cedar/downloads/x.csv", { sha256: ANY, fetchImpl }).then(
     () => { outcome = "resolved"; },
     (error) => { outcome = error; },
   );
@@ -40,7 +46,7 @@ test("a body that stalls after the headers is held to the deadline too", async (
     },
   })));
   let outcome = null;
-  fetchSampleText("/s.csv", { fetchImpl }).then(() => { outcome = "resolved"; }, (error) => { outcome = error; });
+  fetchSampleText("/s.csv", { sha256: ANY, fetchImpl }).then(() => { outcome = "resolved"; }, (error) => { outcome = error; });
   await flush();
   t.mock.timers.tick(SAMPLE_TIMEOUT_MS);
   await flush();
@@ -50,11 +56,11 @@ test("a body that stalls after the headers is held to the deadline too", async (
 
 test("a non-200 is a failure, thrown, not a value", async () => {
   await assert.rejects(
-    fetchSampleText("/s.csv", { fetchImpl: async () => new Response("<html>", { status: 404 }) }),
+    fetchSampleText("/s.csv", { sha256: ANY, fetchImpl: async () => new Response("<html>", { status: 404 }) }),
     /answered 404/,
   );
   await assert.rejects(
-    fetchSampleText("/s.csv", { fetchImpl: async () => { throw new TypeError("Failed to fetch"); } }),
+    fetchSampleText("/s.csv", { sha256: ANY, fetchImpl: async () => { throw new TypeError("Failed to fetch"); } }),
     /Failed to fetch/,
   );
 });
@@ -62,10 +68,26 @@ test("a non-200 is a failure, thrown, not a value", async () => {
 test("a sample in time is its text, with nothing left to abort it", async (t) => {
   t.mock.timers.enable({ apis: ["setTimeout"] });
   let signal;
-  const text = await fetchSampleText("/s.csv", { fetchImpl: async (path, options) => { signal = options.signal; return new Response("a,b\n1,2\n"); } });
+  const text = await fetchSampleText("/s.csv", { sha256: digestOf("a,b\n1,2\n"), fetchImpl: async (path, options) => { signal = options.signal; return new Response("a,b\n1,2\n"); } });
   assert.equal(text, "a,b\n1,2\n");
   t.mock.timers.tick(SAMPLE_TIMEOUT_MS * 2);
   assert.equal(signal.aborted, false);
+});
+
+test("only bytes matching the published digest are a sample; nothing is fetched without one", async () => {
+  let fetched = 0;
+  const fetchImpl = async () => { fetched += 1; return new Response("record_type,record_key\nx,1\n"); };
+  // The wrong bytes at the right path: a stale cache, or the raw preview.
+  await assert.rejects(
+    fetchSampleText("/data/cedar/downloads/need.csv", { sha256: digestOf("cedar_uid\nCE-1\n"), fetchImpl }),
+    /digest mismatch/,
+  );
+  assert.equal(fetched, 1);
+  // No digest, or a malformed one: refused before any request is made.
+  for (const sha256 of [undefined, null, "", "abc", "G".repeat(64)]) {
+    await assert.rejects(fetchSampleText("/data/cedar/downloads/need.csv", { sha256, fetchImpl }), /No published digest/);
+  }
+  assert.equal(fetched, 1);
 });
 
 test("onBackOnline calls back on each online event until unsubscribed", () => {

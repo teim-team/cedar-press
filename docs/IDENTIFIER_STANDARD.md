@@ -556,8 +556,10 @@ input, source keys and compatibility evidence; their mere presence there is
 not a new issuance. The `code/audit_retired_ids.py` CSV inventory prints exact
 path, column, prefix, occurrence count, row count and example for every file
 under the supplied roots, including ignored files. Run it against `data/spine`,
-`data/clean`, `dist/customer`, `dist/review/samples`, and
-`public/data/cedar/samples` in the populated workspace before each release.
+`data/clean`, `dist/customer`, `dist/review/samples`, `data/cedar/samples`
+(the producer samples, not served since 2026-10-04) and
+`public/data/cedar/downloads` (the customer tables the site serves) in the
+populated workspace before each release.
 
 The independent `1165_delivered_publication_audit.py` full scan found zero
 **retired Native-handle** violations in 16 delivered CSVs, including an old
@@ -599,7 +601,7 @@ are not registered handles. Exact membership and object-role checks determine
 violations. Reproduce every path/column/count with:
 
 ```powershell
-python code/audit_retired_ids.py data/spine data/clean dist/customer dist/review/samples public/data/cedar/samples
+python code/audit_retired_ids.py data/spine data/clean dist/customer dist/review/samples data/cedar/samples public/data/cedar/downloads
 ```
 
 The active Press release gate is red independently of Gaming. Its customer

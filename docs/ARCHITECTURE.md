@@ -63,8 +63,8 @@ git ls-files src/<dir>/grove                                   # files to move
 
 | | |
 |---|---|
-| Files to move | 181 — `features/grove` 133, `pages/grove` 45, `components/grove` 1, `styles/grove` 2 |
-| Path references to rewrite | 489, across 112 files |
+| Files to move | 182 — `features/grove` 134, `pages/grove` 45, `components/grove` 1, `styles/grove` 2 |
+| Path references to rewrite | 493, across 112 files |
 | Referencing files inside `src/` | 56 — `pages/` 37, `features/` 15, `context/` 2, `components/` 1, `main.jsx` 1 |
 | Referencing files outside `src/` | 56 — `server/cedar_press/` 8, `scripts/` 8, `docs/` 21, `code/` 5, `server/tests/` 6, `tests/` 3, `data/` 1, `.github/` 1, `.env.example` 1, `AGENTS.md` 1, `eslint.config.js` 1 |
 
@@ -79,7 +79,7 @@ as its own commit — moving the four directories to `press/` and rewriting the
 references in one pass — for two reasons that are about review rather than
 about risk.
 
-First, "did all 489 references get rewritten?" is a question the build, the
+First, "did all 493 references get rewritten?" is a question the build, the
 suites and the smoke run answer, and not one a reader can answer from a diff.
 Folded into a change that also alters behaviour or prose, the rename hides
 that change instead of accompanying it.
@@ -97,7 +97,7 @@ day the four directories move, the same measurement turns into the stale-path
 sweep and names every file that still spells the old one.
 
 One precondition, found while re-measuring the rows above. `npm run test:smoke`
-is one of the three things that answer "did all 489 references get rewritten?",
+is one of the three things that answer "did all 493 references get rewritten?",
 and until this commit it could answer for the wrong tree: `playwright.config.js`
 hardcoded port 4180 and kept `reuseExistingServer` on outside CI, so a run in
 one checkout attached to a preview server another checkout had left listening
@@ -364,8 +364,9 @@ does is keep the preview shut to a casual visitor and let a named reviewer in.
 
 It is acceptable only because nothing behind it is confidential. The
 standalone bundle carries the catalog, the methods, the release history and
-ten sampled rows per table (`public/data/cedar/samples/*__10.csv`); the
-collections are not in it. If that stops being true the deployment has to
+one sample customer table per collection, up to ten rows
+(`public/data/cedar/downloads/<collection>.csv`); the collections are not in
+it. If that stops being true the deployment has to
 connect.
 
 Two properties make it defensible on its own terms. The account arrives as a

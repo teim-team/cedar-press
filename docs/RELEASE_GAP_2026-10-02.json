@@ -63,7 +63,7 @@
    "served": "The producer's pinned 10-row previews only. Whether each legacy row is in the 2026-10-01 full release is not measurable here: the full spreadsheets are not in Git, and a preview is a selection, not a population.",
    "gate_location": "data/cedar/samples/README.md banner; scripts/stage_verified_previews.py (the only path that writes a served sample)",
    "closing_condition": "Per collection, join the legacy key column to the producer's full spreadsheet; any legacy row absent needs a NAMED disposition in the producer.",
-   "evidence": "data/cedar/samples/*__sample.csv; public/data/cedar/samples/*/spreadsheet__10.csv; the key comparison above",
+   "evidence": "data/cedar/samples/*__sample.csv; data/cedar/samples/*/spreadsheet__10.csv; the key comparison above",
    "classification": "EVIDENCE_NEEDED",
    "owner": "Havala Hanson (@Havala-Hanson), Cedar Grove and Cedar Press including their data",
    "question": null,

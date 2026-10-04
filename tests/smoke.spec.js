@@ -26,8 +26,10 @@ import { recordHref } from "../src/features/grove/pressRecord.js";
 
 // The browser suite follows the exact published release, including refreshed
 // source keys. It never revives retired samples just to keep a fixture alive.
+// What a reader sees is each collection's customer table (customerTables.js),
+// so that is what the suite reads too.
 async function currentSample(id) {
-  const path = new URL(`../public/data/cedar/samples/${id}/spreadsheet__10.csv`, import.meta.url);
+  const path = new URL(`../public/data/cedar/downloads/${id}.csv`, import.meta.url);
   return parseCsv(await readFile(path, "utf8"));
 }
 const FUNDING_SAMPLE = await currentSample("funding");
@@ -417,7 +419,7 @@ test.describe("the gate", () => {
   // catalog's count; the records are the point, since a preview with a
   // description and no rows is a brochure. The reader's shelf (#catalog)
   // stays absent — asserted above — because the preview reads the public
-  // ten-row samples and nothing else.
+  // sample customer tables and nothing else.
   test("the door lists every collection and stages real records", async ({ page }) => {
     const errors = watchConsole(page);
     await page.goto("/");
@@ -943,12 +945,16 @@ test.describe("Explore the collections", () => {
     const files = unzipStored(bytes);
     expect(Object.keys(files).sort()).toEqual(["README.txt", "records.csv"]);
     const lines = files["records.csv"].split("\n");
+    // The cut is a slice of the collection's one flat customer table: the same
+    // header, column for column, citation column included (2026-10-04).
+    expect(lines[0].split(",")).toEqual(FUNDING_SAMPLE.columns);
     expect(lines[0].split(",")).toContain("transaction_id");
+    for (const packaging of ["record_type", "record_key", "record_grain"]) expect(lines[0].split(",")).not.toContain(packaging);
+    expect(files["records.csv"]).not.toMatch(/(?<![A-Za-z0-9_-])(?:CEDAR-NEST-|CEDAR-PLACE-|NESTREL-|TRBF-|VP-|CEDAR-FAC-|CCP-)/);
     // Every listed preview record is in the export.
     expect(lines.length - 1).toBe(await records.count());
     const width = lines[0].split(",").length;
     for (const line of lines) expect(line.split(",").length).toBeGreaterThanOrEqual(width);
-    expect(files["records.csv"]).not.toContain("cite_as");
     expect(files["README.txt"]).toContain("cedarpress.ai");
     expect(files["README.txt"]).toContain("Cut query");
     expect(errors).toEqual([]);
@@ -1031,7 +1037,7 @@ test.describe("Explore the collections", () => {
         await signIn(page, account);
         const requested = [];
         page.on("request", (request) => {
-          if (new URL(request.url()).pathname.startsWith("/data/cedar/samples/" + id + "/")) requested.push(request.url());
+          if (new URL(request.url()).pathname === "/data/cedar/downloads/" + id + ".csv") requested.push(request.url());
         });
         await page.goto("/data?c=" + id);
         const explore = page.getByTestId("explore");
@@ -1989,7 +1995,7 @@ test.describe("the record page", () => {
     const errors = watchConsole(page);
     await signIn(page);
     const source = rowSource(FR_ROW, contractFor(FR_KEY));
-    await page.goto(recordHref({ key: FR_KEY, recordId: FR_ROW.record_key, recordType: FR_ROW.record_type }));
+    await page.goto(recordHref({ key: FR_KEY, recordId: FR_ROW[contractFor(FR_KEY).record_id] }));
     await expect(page.getByTestId("record-head")).toBeVisible();
     await expect(page.getByRole("link", { name: /Open cited source/ })).toHaveAttribute("href", source);
     await page.getByTestId("record-more").click();
@@ -1998,18 +2004,21 @@ test.describe("the record page", () => {
     expect(errors).toEqual([]);
   });
 
-  test("a row with no link in a table that has links says so for the row", async ({ page }) => {
-    // Controlled missing-source response, preserving the current schema and key.
-    // The source file on disk and all other sample rows remain unchanged.
+  test("a served table whose bytes are not the published customer table is refused, not shown", async ({ page }) => {
+    // Until 2026-10-04 this edited one row's source to test the no-link line.
+    // Every reader now checks a fetched table against its published digest
+    // (customerTables.js, sampleFetch.js), so edited bytes are a stale cache or
+    // a substituted file, and the page must refuse them rather than render them.
     const first = LOBBYING_SAMPLE.rows[0];
     const quote = (value) => '"' + String(value ?? "").replaceAll('"', '""') + '"';
     const rows = LOBBYING_SAMPLE.rows.map((row, index) => index ? row : { ...row, source_url: "" });
     const body = [LOBBYING_SAMPLE.columns, ...rows.map((row) => LOBBYING_SAMPLE.columns.map((column) => row[column]))]
       .map((row) => row.map(quote).join(",")).join("\n") + "\n";
-    await page.route("**/samples/lobbying/spreadsheet__10.csv", (route) => route.fulfill({ status: 200, contentType: "text/csv", body }));
+    await page.route("**/data/cedar/downloads/lobbying.csv", (route) => route.fulfill({ status: 200, contentType: "text/csv", body }));
     await signIn(page);
-    await page.goto(recordHref({ key: "lobbying/lobbying", recordId: first.record_key, recordType: first.record_type }));
-    await expect(page.getByTestId("record-no-link")).toHaveText("No link was recorded for this row.");
+    await page.goto(recordHref({ key: "lobbying/lobbying", recordId: first[contractFor("lobbying/lobbying").record_id] }));
+    await expect(page.getByText("The published sample could not be loaded.")).toBeVisible();
+    await expect(page.getByTestId("record-no-link")).toHaveCount(0);
   });
 
   test("a record that is not in the preview says so rather than showing a neighbour", async ({ page }) => {

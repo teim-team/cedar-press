@@ -7,7 +7,7 @@
 //
 // WHY THIS EXISTS
 // The manifest declares a ten-row sample for every table, and the importer
-// copies each one under public/ from dist/review/samples/. Both directories
+// copies each one under data/cedar/samples/ from dist/review/samples/. Both directories
 // are ignored by git (`/data/*`, `dist/`, `*.csv`), so a sample the importer
 // wrote on one machine reaches the repository only when somebody adds it. On
 // 2026-09-04 nineteen did not, and every deploy from then on failed the same
@@ -33,7 +33,11 @@ import { resolve, relative, isAbsolute, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const REPO = fileURLToPath(new URL("..", import.meta.url));
-const SAMPLES_DIR = "public/data/cedar/samples";
+// The raw producer previews, kept under the repository root rather than
+// public/ since 2026-10-04: a manifest `sample_path` is the file's path from
+// the repository root. The site serves only the customer tables rendered from
+// them (scripts/render_sample_downloads.py).
+const SAMPLES_DIR = "data/cedar/samples";
 
 /** The one sentence the site shows for a sample the repository lacks. */
 const REASON =
@@ -43,7 +47,7 @@ const REASON =
 const paths = (root) => ({
   manifest: `${root}/data/cedar/collections.manifest.json`,
   record: `${root}/data/cedar/samples.published.json`,
-  public: `${root}/public`,
+  samples: root.replace(/\/$/, ""),
 });
 
 function git(root, args) {
@@ -53,7 +57,7 @@ function git(root, args) {
 /**
  * What the INDEX holds for the samples directory, not merely the disk.
  *
- * Codex, PR #60: the importer copies every sample under public/ before it
+ * Codex, PR #60: the importer copies every sample into the repository before it
  * runs this script, so on the importer's machine a disk check saw all of
  * them, wrote an empty record, and the clean checkout CI builds from would
  * have had neither the files nor a record naming them - the red deploy this
@@ -75,7 +79,7 @@ function indexState(root) {
       "index, so it cannot be written without one.",
     );
   }
-  const site = (rel) => `/${rel.replace(/^public\//, "")}`;
+  const site = (rel) => `/${rel}`;
   return {
     tracked: new Set(listed.split("\0").filter(Boolean).map(site)),
     modified: new Set(differing.split("\0").filter(Boolean).map(site)),
@@ -83,8 +87,8 @@ function indexState(root) {
 }
 
 /** Why a declared sample is not published, or null when it is. */
-function whyUnpublished(path, index, pub) {
-  const onDisk = existsSync(`${pub}${path}`);
+function whyUnpublished(path, index, base) {
+  const onDisk = existsSync(`${base}${path}`);
   if (!onDisk) return "not in repository";
   if (!index.tracked.has(path)) return "on disk, NOT in the index";
   if (index.modified.has(path)) return "on disk, modified and NOT staged";
@@ -97,7 +101,7 @@ export function measure(root = REPO) {
   const index = indexState(root);
   const unpublished = [];
   const consider = (collection, table, path, flagship) => {
-    const why = whyUnpublished(path, index, at.public);
+    const why = whyUnpublished(path, index, at.samples);
     if (why) unpublished.push({ collection: collection.id, table, path, flagship, why });
   };
   for (const collection of manifest.collections) {
@@ -118,7 +122,7 @@ export function measure(root = REPO) {
     generated_by: "scripts/measure-samples.mjs",
     note:
       "Every path here is declared by collections.manifest.json and not " +
-      "published: absent from public/, on disk but not in the git index, or " +
+      "published: absent from data/cedar/samples/, on disk but not in the git index, or " +
       "on disk with changes not staged. Measured, never typed; re-run the " +
       "script after `git add`ing or removing a sample file.",
     reason: REASON,
@@ -239,7 +243,7 @@ function main(argv) {
   if (measured.unpublished.length) {
     process.stdout.write(
       "  A file on disk and not in the index, or changed and not staged, is the one " +
-      "that goes missing in a clean checkout: `git add public/data/cedar/samples`, " +
+      "that goes missing in a clean checkout: `git add data/cedar/samples`, " +
       "then re-run this.\n",
     );
   }

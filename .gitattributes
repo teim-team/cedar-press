@@ -12,7 +12,8 @@ index.html text eol=lf
 public/sitemap.xml text eol=lf
 
 # Served proof and sample hashes cover exact bytes, including line endings.
-public/data/cedar/samples/** -text
+data/cedar/samples/*/*.csv -text
+public/data/cedar/downloads/*.csv -text
 data/cedar/need-reviewed-preview.json -text
 data/cedar/verified-preview-releases.json -text
 data/cedar/field_map.json -text

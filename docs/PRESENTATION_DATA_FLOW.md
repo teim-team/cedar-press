@@ -7,8 +7,15 @@ Grove calls that consumer through its pinned process protocol.
 
 ## Two preview populations
 
-Public Press previews read the committed, publication-eligible sample files.
-Their captions count those sample records. The snapshot's update date describes
+Public Press previews read one flat customer table per collection,
+`public/data/cedar/downloads/<collection>.csv`, rendered from the committed
+producer samples by the vendored `customer_sheet` rules
+(`scripts/render_sample_downloads.py`, the same bytes the API's download route
+sends). The download, the Explore reader and its cut export, and the record,
+entity and preview pages all read that table and refuse it unless its SHA-256
+matches `data/cedar/sample_downloads.json`. The producer samples themselves
+(`data/cedar/samples/<collection>/spreadsheet__10.csv`) are inputs and are not
+served (2026-10-04). Captions count the customer table's records. The snapshot's update date describes
 the preview. A sample is not a current full-dataset count, and counts across
 supporting tables or collections are not an unduplicated entity or event total.
 No collection carries a publication hold (owner ruling 2026-10-04), so no preview is removed for one.
@@ -26,9 +33,11 @@ Review-only material does not become a public sample when a local count changes.
 
 | Responsibility | Authority or entry point |
 | --- | --- |
-| Public descriptor and sample import | scripts/import_cedar_manifest.py |
+| Public descriptor and sample import | scripts/import_cedar_manifest.py (writes data/cedar/samples/, not served) |
 | Sample publication availability | scripts/measure-samples.mjs; measures committed bytes against the Git index |
-| Public sample display contracts | scripts/derive-explore.mjs; reads sample headers plus reviewed explore.overrides.json |
+| Public sample tables (one customer table per collection) | scripts/render_sample_downloads.py; public/data/cedar/downloads/ and data/cedar/sample_downloads.json |
+| Public sample display contracts | scripts/derive-explore.mjs; reads the customer-table headers plus reviewed explore.overrides.json |
+| One reader path for every sample surface, with the digest check | src/features/grove/customerTables.js, src/features/grove/sampleFetch.js |
 | Connected catalog and release checks | server/cedar_press/repository.py |
 | Connected preview rows and source definitions | server/cedar_press/release_research.py |
 | One verified spreadsheet per collection | server/cedar_press/spreadsheet.py |

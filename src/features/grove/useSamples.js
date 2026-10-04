@@ -1,4 +1,5 @@
-// The published ten-row samples, fetched once each and kept.
+// The published samples -- one customer table per collection
+// (customerTables.js) -- fetched once each, digest-checked, and kept.
 //
 // Lifted out of PressExplore unchanged when the record page and the entity
 // page came along: three surfaces reading the same files with three copies of
@@ -25,7 +26,7 @@ import { EMPTY_REGISTER, parseCsv, universalRows } from "./explore.js";
 import { fetchSampleText, onBackOnline } from "./sampleFetch.js";
 
 /**
- * `tables` is a list of `{ key, path }`. Returns the rows of every table that
+ * `tables` is a list of `{ key, path, sha256 }` (exploreTables). Returns the rows of every table that
  * has answered, in universal form; the keys of those that could not be read;
  * the raw column order per table; whether anything is still in flight; and
  * `retry`, which fetches the failed ones again.
@@ -38,7 +39,7 @@ export function useSampleRows(tables, register = EMPTY_REGISTER) {
   useEffect(() => {
     for (const t of tables) {
       if (loaded.has(t.path) || failed.has(t.path) || pending.current.has(t.path)) continue;
-      const promise = fetchSampleText(t.path)
+      const promise = fetchSampleText(t.path, { sha256: t.sha256 })
         .then((text) => parseCsv(text))
         .then(
           (parsed) => {

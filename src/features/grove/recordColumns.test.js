@@ -1,8 +1,12 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { spreadsheetDefaultColumns } from "../../../scripts/derive-explore.mjs";
-import { CONTRACTS, SOURCE_LINK_COLUMN, labelFor, meaningFor, rowDate, rowSource } from "./explore.js";
+import { readFileSync } from "node:fs";
+
+import manifest from "../../../data/cedar/collections.manifest.json" with { type: "json" };
+import { spreadsheetContract, spreadsheetDefaultColumns } from "../../../scripts/derive-explore.mjs";
+import { downloadRecord } from "./customerTables.js";
+import { CONTRACTS, SOURCE_LINK_COLUMN, labelFor, meaningFor, parseCsv, rowDate, rowSource } from "./explore.js";
 import { columnPlan } from "./recordColumns.js";
 import { loadCodebook } from "./codebook.js";
 // The codebook loads on demand in the browser (codebook.js); the readers
@@ -107,48 +111,49 @@ test("legacy tables keep their role-first source-link behavior", () => {
   assert.ok(plan.all.includes(SOURCE_LINK_COLUMN));
 });
 
-test("installed producer contracts open on their curated columns and retain raw row context", () => {
-  const current = Object.entries(CONTRACTS).filter(([, contract]) => contract.mapping_kind === "producer_spreadsheet");
-  assert.ok(current.length > 0, "no current producer spreadsheets");
+test("installed customer contracts open on their declared columns and carry no packaging column", () => {
+  const current = Object.entries(CONTRACTS);
+  assert.equal(current.length, 14);
   for (const [key, contract] of current) {
-    const columns = [...new Set([
-      ...contract.default_columns, ...(contract.observation ?? []),
-      contract.entity_uid, contract.entity_name, contract.entity_type,
-      "record_type", "record_key", "record_grain",
-    ].filter(Boolean))];
-    const plan = columnPlan(key, contract, columns);
-    const componentSources = new Set([
-      "consultation_participants__source_url", "federal_actions__source_url", "html_url",
-    ]);
-    const expected = contract.row_type_contracts
-      ? [...contract.default_columns.filter((column) => !componentSources.has(column)), SOURCE_LINK_COLUMN]
-      : contract.default_columns;
-    assert.deepEqual(plan.defaults, expected, key);
+    assert.equal(contract.mapping_kind, "customer_table", key);
+    const header = downloadRecord(key.split("/")[0])?.header;
+    assert.ok(header?.length, key + ": no rendered customer table");
+    const plan = columnPlan(key, contract, header);
+    assert.deepEqual(plan.defaults, contract.default_columns, key);
+    for (const column of plan.defaults) assert.ok(header.includes(column), key + ": opens on " + column);
     assert.ok(plan.defaults.length <= 8, key + ": opening view exceeds eight columns");
+    for (const column of header) assert.ok(plan.all.includes(column), key + ": customer column lost " + column);
     for (const column of ["record_type", "record_key", "record_grain"]) {
-      assert.ok(plan.all.includes(column), key + ": raw row context lost");
-    }
-    if (key !== "need/need") {
-      if (!contract.row_type_contracts) assert.ok(!plan.defaults.includes("record_type"), key);
-      assert.ok(!plan.defaults.includes("record_key"), key);
-      assert.ok(!plan.defaults.includes("record_grain"), key);
+      assert.ok(!plan.all.includes(column), key + ": packaging column " + column);
     }
   }
 });
 
-test("NEED keeps its seven reviewed enterprise and relationship columns", () => {
+test("NEED keeps its six reviewed enterprise and relationship columns", () => {
   const contract = CONTRACTS["need/need"];
   assert.ok(contract);
-  assert.deepEqual(contract.default_columns, ["enterprise_name", "related_entity_name", "relationship_type", "ownership_extent", "uei", "cage_code", "record_grain"]);
-  const plan = columnPlan("need/need", contract, [
-    ...contract.default_columns, "record_type", "record_key", "evidence_pins",
-  ]);
+  assert.deepEqual(contract.default_columns, ["enterprise_name", "related_entity_name", "relationship_type", "ownership_extent", "uei", "cage_code"]);
+  const header = downloadRecord("need").header;
+  const plan = columnPlan("need/need", contract, header);
   assert.deepEqual(plan.defaults, contract.default_columns);
-  assert.ok(plan.all.includes("evidence_pins"));
+  assert.ok(plan.all.includes("source_urls"));
+  // The retired enterprise scheme is not a column a reader can open.
+  assert.ok(!header.includes("enterprise_id"));
 });
 
 test("Federal Register keeps separate component dates and sources within the curated view", () => {
-  const contract = CONTRACTS["federal-register/federal-register"];
+  // The served table is the flat federal-action table: one date, one source.
+  const served = CONTRACTS["federal-register/federal-register"];
+  assert.equal(served.row_type_contracts ?? null, null);
+  assert.equal(served.date, "publication_date");
+  assert.equal(served.source, "source_url");
+  // The producer preview it is rendered from is a union of two components;
+  // its contract (derive-explore spreadsheetContract) still dispatches each
+  // row's date and source by record type.
+  const table = manifest.collections.find((c) => c.id === "federal-register").tables
+    .find((t) => t.table === "federal-register.csv");
+  const raw = parseCsv(readFileSync(new URL("../../.." + table.sample_path, import.meta.url), "utf8"));
+  const contract = spreadsheetContract(raw.columns, raw.rows, { collection: "federal-register", record_type_fields: table.record_type_fields });
   assert.ok(contract?.row_type_contracts);
   assert.ok(contract.default_columns.length <= 8);
   assert.ok(contract.default_columns.includes("record_type"));

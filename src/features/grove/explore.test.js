@@ -30,6 +30,7 @@ import {
   WITHHELD_TEXT,
   buildRegister,
   codebookColumns,
+  codebookFor as currentCodebookFor,
   contractFor as currentContractFor,
   csvCell,
   cutCsv,
@@ -149,13 +150,21 @@ test("every published table has a contract and every contract names real columns
   }
 });
 
+// Customer tables whose sample carries no unique record identifier, so a row
+// is addressed by its position. Each says why; a new entry needs a reason.
+const POSITIONAL = Object.freeze({
+  // Registry grain (customer_sheet: no events). Its Cedar Business ID is blank
+  // on every sample row, flagged needs_cedar_id, and nothing else is a record key.
+  need: "business_uid is blank on every sample row (needs_cedar_id)",
+});
+
 test("every flagship the shelf serves is declared reviewed, with its record id and its entity relationship", () => {
   for (const dataset of LAUNCH_COLLECTION) {
     const key = flagshipKey(dataset.id);
     if (!key) continue;
     const contract = contractFor(key);
     assert.equal(contract.reviewed, true, `${key} is not declared reviewed in explore.overrides.json`);
-    assert.ok(contract.record_id, `${key} has no record id`);
+    assert.ok(contract.record_id || Object.hasOwn(POSITIONAL, dataset.id), `${key} has no record id`);
     assert.ok(!contract.entity_uid || contract.entity_role || contract.entity_role_column, `${key} does not say how its entity relates to the record`);
     assert.ok(currentColumnPlan(key, contract, load(key).columns).defaults.length >= 5, `${key} declares no default columns`);
     // A dated table says what its year means; a register says it has none.
@@ -179,17 +188,28 @@ test("the flagship comes first among a collection's tables and locked shelves st
   assert.equal(owned.previewUnavailable, null);
   // A collection presented by its record structure carries that structure,
   // and is not a collection missing its preview.
+  // Since 2026-10-04 each is one flat customer table: no record type to
+  // dispatch on, and its own source column (customerTables.js).
   for (const id of ["plot", "foundation-corporate-giving"]) {
     const described = standard.find((c) => c.entry.id === id);
     assert.equal(described.flagship?.key, id + "/" + id, id);
     assert.equal(described.tables.length, 1, id);
-    assert.equal(contractFor(described.flagship.key).mapping_kind, "producer_spreadsheet", id);
+    assert.equal(described.flagship.path, `/data/cedar/downloads/${id}.csv`, id);
+    assert.equal(contractFor(described.flagship.key).mapping_kind, "customer_table", id);
     assert.equal(described.previewUnavailable, null, id);
     const { columns } = load(described.flagship.key);
     const contract = contractFor(described.flagship.key);
-    assert.deepEqual(CURRENT_CODEBOOK[described.flagship.key].fields.map((field) => field.column), columns, id);
-    assert.ok(Object.keys(contract.row_type_contracts).length > 1, id);
-    assert.ok(currentColumnPlan(described.flagship.key, contract, columns).defaults.includes(SOURCE_LINK_COLUMN), id);
+    assert.deepEqual(currentCodebookFor(described.flagship.key).fields.map((field) => field.column), columns, id);
+    assert.equal(contract.row_type_contracts ?? null, null, id);
+    assert.ok(!columns.includes("record_type"), id);
+    assert.ok(currentColumnPlan(described.flagship.key, contract, columns).defaults.includes(contract.source), id);
+  }
+  // Every collection's table is its customer table, never a raw preview.
+  for (const collection of standard) {
+    for (const table of collection.tables) {
+      assert.equal(table.path, `/data/cedar/downloads/${collection.entry.id}.csv`, table.key);
+      assert.match(table.sha256, /^[a-f0-9]{64}$/, table.key);
+    }
   }
 });
 
@@ -723,7 +743,12 @@ test("every flagship sample reads through its contract without a thrown row", ()
     const f = facets(items, REGISTER);
     if (contractFor(key).year_basis) assert.ok(f.dated > 0, `${key}: no row has a year`);
     assert.ok(items.every((item) => item.observation.length > 0), `${key}: a row has an empty observation`);
-    assert.ok(items.every((item) => item.recordId), `${key}: a row has no record id`);
+    if (Object.hasOwn(POSITIONAL, dataset.id)) {
+      assert.equal(contractFor(key).record_id, null, key);
+      assert.equal(new Set(items.map((item) => item.id)).size, items.length, `${key}: positional ids collide`);
+    } else {
+      assert.ok(items.every((item) => item.recordId), `${key}: a row has no record id`);
+    }
   }
   // A Cedar Press+ reader's plan reaches all fourteen and a Cedar Press
   // reader's seven, the two new collections included like any other on
@@ -759,20 +784,25 @@ test("the codebook names real columns in every flagship, with a label and a mean
   for (const dataset of LAUNCH_COLLECTION) {
     const key = flagshipKey(dataset.id);
     if (!key) continue;
-    const book = CODEBOOK[key];
+    // The dictionary a reader sees is the customer table's own
+    // (explore.codebookFor): the producer preview's entry describes the raw
+    // multi-table layout, which is no longer served.
+    const book = currentCodebookFor(key);
     assert.ok(book, `${key} has no codebook entry`);
     assert.ok(book.row && book.where, `${key}: no row or where`);
+    assert.doesNotMatch(book.row, /record_type|record_grain/, `${key}: the row names the raw layout`);
     const { columns } = load(key);
     for (const field of book.fields) {
       assert.ok(field.label && field.meaning, `${key}.${field.column} lacks a label or meaning`);
-      if (!field.add) assert.ok(columns.includes(field.column), `${key}: codebook column ${field.column} is not in the sample`);
+      assert.ok(columns.includes(field.column), `${key}: codebook column ${field.column} is not in the sample`);
     }
-    // Producer reserved columns preserve component identity and grain.
-    assert.deepEqual(book.fields.slice(0, 3).map(f => f.column), ["record_type", "record_key", "record_grain"], key);
+    for (const packaging of ["record_type", "record_key", "record_grain"]) {
+      assert.ok(!columns.includes(packaging), `${key}: the customer table carries ${packaging}`);
+    }
     assert.deepEqual(book.fields.map(f => f.column), columns, `${key}: exact shipped dictionary`);
     // Every column the contract declares as a default is a column the codebook explains.
     const listed = new Set(book.fields.map((f) => f.column));
-    for (const column of contractFor(key).default_columns ?? []) assert.ok(listed.has(column) || (contractFor(key).mapping_kind === "producer_spreadsheet" && Object.hasOwn(currentPresentationColumns, column)), `${key}: default column ${column} is not in the codebook`);
+    for (const column of contractFor(key).default_columns ?? []) assert.ok(listed.has(column), `${key}: default column ${column} is not in the codebook`);
     assert.ok(codebookColumns(key, columns).length >= 10, `${key}: fewer than ten codebook columns present`);
   }
   // The identity block's class is the register's, never a scope or a source's own type (Codex, PR #64).
@@ -910,7 +940,8 @@ test("the field map decides every column of every sampled flagship in the owner'
   assert.equal(sampled, 10);
   assert.deepEqual(legacyTables("need"), []);
   const reviewedNeed = currentContractFor(flagshipKey("need"));
-  assert.equal(reviewedNeed.record_id, "record_key");
+  // The customer table has no record key; NEED rows are addressed by position.
+  assert.equal(reviewedNeed.record_id, null);
   assert.equal(reviewedNeed.entity_uid, null);
   // The historical NEED graph was held; the current finite reviewed base is
   // covered above. Owned's old unsampled flagship used a builder declaration.

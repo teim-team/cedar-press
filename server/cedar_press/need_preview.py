@@ -119,7 +119,7 @@ def need_preview_permitted(repo, collection, table, sample_path=None):
                 )
             )
         supplied = sample_path() if callable(sample_path) else sample_path
-        path = Path(supplied) if supplied is not None else Path(repo) / "public" / URL.lstrip("/")
+        path = Path(supplied) if supplied is not None else Path(repo) / URL.lstrip("/")
         csv_bytes = _bytes(path, repo)
         if hashlib.sha256(csv_bytes).hexdigest() != pin.get("sample_sha256"):
             return False

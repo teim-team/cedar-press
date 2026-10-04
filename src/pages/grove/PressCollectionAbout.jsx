@@ -178,7 +178,7 @@ export default function PressCollectionAbout({ entry, flagship, onClose, article
         <Block title="What is not in it">
           <>
             <p>
-              This viewer reads the published preview: up to ten sample observations per record type. A search
+              This viewer reads the published preview: up to ten sample rows of the collection's one flat table. A search
               that returns nothing may mean the collection holds nothing, or that the sampled rows
               did not include it. The downloadable dataset contains the permitted observations.
             </p>

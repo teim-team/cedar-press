@@ -9891,3 +9891,53 @@ figures until 873 is rerun on the workstation.
 **customer_sheet `customer-sheet-2026-10-04.5`**, vendored byte for byte:
 `benefit_entity_id` is a Cedar ID column holding `CE-` IDs only, and
 `home_community_source` a source column holding public http(s) URLs only.
+
+## 2026-10-04: Every public sample is the customer table; the raw previews are no longer served
+
+Closes the "still open" item in the entry above. Owner ruling: one whole flat
+spreadsheet per collection, built by the shared `customer_sheet` rules.
+
+**Moved, not deleted.** The producer previews went from
+`public/data/cedar/samples/<c>/spreadsheet__10.csv` to
+`data/cedar/samples/<c>/spreadsheet__10.csv` (`git mv`, bytes unchanged). A
+manifest `sample_path` is now a path from the repository root, not a URL.
+`collections.raw_preview_file`, the importer (`sample_file_path`,
+`scrub_samples`), `preview_definitions.py`, `stage_verified_previews.py`,
+`measure-samples.mjs`, `dump.mjs` and `docs-markdown.mjs` resolve it there.
+Nothing under `public/` is a CSV except the 14 customer tables in
+`public/data/cedar/downloads/`.
+
+**One reader path.** `src/features/grove/customerTables.js` holds the render
+record (`data/cedar/sample_downloads.json`, which now also carries each
+table's header and one-row grain). `exploreTables` returns exactly one table
+per collection, its customer table, so Explore, its cut export and the
+record, entity and preview pages read the same bytes as the download.
+`fetchSampleText` requires the published SHA-256 and refuses bytes that do
+not match, which is the `e96fd6a` digest check applied to every reader.
+
+**Contracts.** `derive-explore.mjs` derives each contract from the customer
+table (`customerTableContract`, `mapping_kind: "customer_table"`): no
+`record_type`/`record_key`/`record_grain`, the dataset's own event ID as the
+record id where unique (NEED has none in its sample and is addressed by
+position), and a short `CUSTOMER_PRESENTATION` list carrying the reviewed
+NEED, Giving and PLOT readings over to customer column names. `codebookFor`
+now describes the customer table; `data/cedar/codebook.json` stays the
+producer preview's dictionary, and the few columns the rules add or rename
+take their meaning from `customerTables.js`, restating `customer_sheet.py`.
+
+**Label.** The button said "Ten-row sample" for all 14; Federal Register's
+customer table holds 5 rows and PLOT's 3. `pressDownload.sampleLabel` reads
+the count from the render record.
+
+**Tests.** `test_no_public_path_carries_a_retired_scheme_or_a_duns_column`
+(Python) and "no public path, the Explore reader's included, ..." (node) walk
+every text file under `public/` plus the data the bundle imports, and fail on
+any retired scheme, a DUNS column, a packaging column, or a CSV that is not a
+rendered customer table. Proved by mutation: the raw NEED preview copied back
+under `public/`, `CEDAR-NEST-` written into a served table, a DUNS column
+added, `VP-` appended to `robots.txt`, `CEDAR-PLACE-` in `explore.json`, and
+`exploreTables` pointed back at the raw path; each fails, and the restore
+passes. The smoke test that edited one Lobbying row to show the no-link line
+now asserts the edited bytes are refused, since no reader renders them any
+more. **Not changed:** the docstrings in `code/1135`, `1169` and `1189` that
+name the old `public/` path, under the data workspace's no-commit rule.

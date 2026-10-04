@@ -46,7 +46,7 @@ import {
 } from "../../features/grove/pressArticles";
 import { canOpenDataset, canReadCedarPress, upgradeFor } from "../../features/grove/pressAccess";
 import PressGate from "./PressGate";
-import { downloadCsv, hasReleaseFile } from "../../features/grove/pressDownload";
+import { downloadCsv, hasReleaseFile, sampleLabel } from "../../features/grove/pressDownload";
 import { PRESS_CATALOG_BY_ID, groupOf } from "../../features/grove/pressCatalog";
 import { formatUpdated, releaseFor } from "../../features/grove/pressReleases";
 import {
@@ -297,12 +297,13 @@ function DrawnFrom({ id, user }) {
             downloadCsv(entry).catch((error) => setRefusal(error?.message || "The download did not go through."));
           }}
         >
-          {/* Same honesty as the shelf tiles: what downloads is ten real rows
-              of the collection's flagship table, not the collection, and a
-              collection without even a sample delivers its description. The
-              label says which one is arriving. */}
+          {/* Same honesty as the shelf tiles: what downloads is the real
+              rows of the collection's customer table, not the collection,
+              and a collection without even a sample delivers its
+              description. The label says which one is arriving, and how
+              many rows: the count is the file's own (pressDownload.js). */}
           {hasReleaseFile(entry)
-            ? "Download a ten-row sample"
+            ? `Download a ${sampleLabel(entry.id) ?? "sample"}`
             : "Download the collection description"}{" "}
           <span aria-hidden="true">&#8595;</span>
         </button>

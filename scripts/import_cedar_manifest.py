@@ -573,30 +573,39 @@ def review_sample_path(workspace: Path, cedar_id: str, table: str) -> Path:
     return source
 
 
-def public_sample_path(repo: Path, url: str) -> Path:
-    """Resolve a local asset URL inside public; refuse traversal and external links."""
+#: Where the raw producer previews live, repository-relative. A manifest
+#: ``sample_path`` (``/data/cedar/samples/<c>/<t>__10.csv``) is a path under
+#: the repository root, not a URL: until 2026-10-04 these files sat under
+#: ``public/`` and the built site served them, multi-table layout and retired
+#: ``CEDAR-NEST-`` IDs and all. The site now serves only the customer table
+#: rendered from them (``scripts/render_sample_downloads.py``).
+SAMPLE_DIR = ("data", "cedar", "samples")
+
+
+def sample_file_path(repo: Path, url: str) -> Path:
+    """Resolve a manifest sample path inside data/cedar/samples; refuse traversal and external links."""
     if not isinstance(url, str) or not url.startswith("/") or url.startswith("//"):
-        raise ValueError("Sample must use a local public URL")
+        raise ValueError("Sample must use a local repository path")
     if "\\" in url or ":" in url or "?" in url or "#" in url or "%" in url:
-        raise ValueError("Invalid public sample URL")
+        raise ValueError("Invalid sample path")
     relative = Path(url[1:])
     if ".." in relative.parts:
-        raise ValueError("Public sample path traversal")
+        raise ValueError("Sample path traversal")
     repository = repo.resolve()
-    root = (repository / "public").resolve()
+    root = repository.joinpath(*SAMPLE_DIR).resolve()
     if not root.is_relative_to(repository):
-        raise ValueError("Public directory escapes repository")
-    target = (root / relative).resolve()
+        raise ValueError("Sample directory escapes repository")
+    target = (repository / relative).resolve()
     if not target.is_relative_to(root) or target == root:
-        raise ValueError("Sample path escapes public directory")
+        raise ValueError("Sample path escapes data/cedar/samples")
     return target
 
 
-def public_sample(repo: Path):
-    """Where the site serves a table's sample: the manifest's own path under public/."""
+def sample_file(repo: Path):
+    """Where a table's raw preview is kept: the manifest's own path under the repository."""
 
     def locate(collection: dict, table: dict) -> Path:
-        return public_sample_path(repo, table["sample_path"])
+        return sample_file_path(repo, table["sample_path"])
 
     return locate
 
@@ -612,7 +621,7 @@ def withhold_samples(
     """Strike every declared sample that publishes what the rule withholds.
 
     ``locate(collection, table)`` says where the file is: the review bundle's
-    layout on an import, ``public/`` on an audit (Codex, PR #63: the manifest
+    layout on an import, ``data/cedar/samples/`` on an audit (Codex, PR #63: the manifest
     path is a URL, not the bundle's layout, and joining it to the bundle found
     nothing and struck nothing). Applied to the manifest in place: the table
     keeps its row counts and its release facts and loses its ``sample_path``,
@@ -663,17 +672,17 @@ def withhold_samples(
 
 def unpublish(repo: Path, struck: list[dict]) -> None:
     """Delete the served copy of every struck sample, if an earlier import published one."""
-    paths = [public_sample_path(repo, entry["path"]) for entry in struck]
+    paths = [sample_file_path(repo, entry["path"]) for entry in struck]
     for served in paths:
         if served.exists():
             served.unlink()
 
 
 def audit(repo: Path = REPO) -> list[dict]:
-    """Apply the withholding rule to the committed manifest and public/ files.
+    """Apply the withholding rule to the committed manifest and data/cedar/samples/ files.
 
     ``python scripts/import_cedar_manifest.py --audit``. Rewrites the manifest,
-    deletes each struck file under public/, removes local filesystem paths
+    deletes each struck file under data/cedar/samples/, removes local filesystem paths
     from the samples still served (``scrub_local_paths``), and prints what it
     struck and what it scrubbed. The
     caller re-runs measure-samples and derive-explore (the test suites name
@@ -683,10 +692,10 @@ def audit(repo: Path = REPO) -> list[dict]:
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     original = json.dumps(manifest, sort_keys=True)
     names, uids = withheld_entities(repo / "data" / "spine" / "cedar_entity_names.csv")
-    struck = withhold_samples(manifest, public_sample(repo), names, uids, repo=repo)
+    struck = withhold_samples(manifest, sample_file(repo), names, uids, repo=repo)
     unpublish(repo, struck)
     # And the text rules (local paths, D-U-N-S), on what is already served.
-    for sample in scrub_public_samples(repo):
+    for sample in scrub_samples(repo):
         print(f"  scrubbed  {sample.relative_to(repo)}")
     for path, was, now in sync_column_counts(manifest, repo):
         print(f"  columns   {path}: {was} -> {now}")
@@ -794,7 +803,7 @@ def sync_column_counts(manifest: dict, repo: Path = REPO) -> list[tuple[str, int
     for collection in manifest["collections"]:
         for table in collection["tables"]:
             path = table.get("sample_path")
-            served = repo / "public" / (path or "").lstrip("/")
+            served = repo / (path or "").lstrip("/")
             if not path or not served.exists():
                 continue
             with served.open(encoding="utf-8", newline="") as handle:
@@ -808,12 +817,12 @@ def sync_column_counts(manifest: dict, repo: Path = REPO) -> list[tuple[str, int
     return changed
 
 
-def scrub_public_samples(repo: Path = REPO) -> list[Path]:
-    """Rewrite every served sample under ``public/`` that ``clean_sample_text``
-    would change: a local path or D-U-N-S."""
+def scrub_samples(repo: Path = REPO) -> list[Path]:
+    """Rewrite every kept preview under ``data/cedar/samples/<c>/`` that
+    ``clean_sample_text`` would change: a local path or D-U-N-S."""
     rewritten: list[Path] = []
-    root = repo / "public" / "data" / "cedar" / "samples"
-    for sample in sorted(root.rglob("*.csv")):
+    root = repo.joinpath(*SAMPLE_DIR)
+    for sample in sorted(root.glob("*/*.csv")):
         raw = sample.read_text(encoding="utf-8")
         if clean_sample_text(raw) != raw:
             publish_sample(sample, sample)
@@ -824,11 +833,11 @@ def scrub_public_samples(repo: Path = REPO) -> list[Path]:
 def copy_samples(workspace: Path, manifest: dict) -> int:
     """The ten-row samples the manifest points at, and nothing else.
 
-    Copied under ``public/`` so the built site serves them at the same URL the
-    manifest states, and so the Python side and the browser read one set of
-    bytes rather than two copies that can disagree -- bar one deliberate
-    difference: a local filesystem path in the review bundle never reaches the
-    served copy (``scrub_local_paths``).
+    Copied under ``data/cedar/samples/`` at the path the manifest states. They
+    are inputs, not served files: the API and
+    ``scripts/render_sample_downloads.py`` render each one as the customer
+    table, and that is what the site serves. A local filesystem path in the
+    review bundle never reaches the kept copy (``scrub_local_paths``).
     """
     written = 0
     for collection in manifest["collections"]:
@@ -839,7 +848,7 @@ def copy_samples(workspace: Path, manifest: dict) -> int:
             source = review_sample_path(workspace, cedar_id, table["table"])
             if not source.exists():
                 raise SystemExit(f"missing sample: {source}")
-            target = public_sample_path(REPO, table["sample_path"])
+            target = sample_file_path(REPO, table["sample_path"])
             if publish_sample(source, target):
                 print(f"  scrubbed  local path(s) from {target.relative_to(REPO)}")
             written += 1
@@ -852,7 +861,7 @@ def main() -> int:
     parser.add_argument(
         "--audit",
         action="store_true",
-        help="apply the publication rule to the committed manifest and public/ "
+        help="apply the publication rule to the committed manifest and data/cedar/samples/ "
         "samples instead of importing; strikes and deletes what it withholds",
     )
     args = parser.parse_args()
@@ -913,7 +922,7 @@ def main() -> int:
     print(f"  manifest  {out.relative_to(REPO)}")
     print(f"  storefront {len(manifest['collections'])} collections")
     print(f"  excluded   {', '.join(e['id'] for e in manifest['excluded'])}")
-    print(f"  samples    {written} files copied under public/data/cedar/samples/")
+    print(f"  samples    {written} files copied under data/cedar/samples/")
     for collection in manifest["collections"]:
         cedar = collection["cedar"]
         flag = "BLOCKED" if cedar["blockers"] else "        "

@@ -4,7 +4,7 @@ Documents, as code a test can hold, how a row of the historical
 ``deals_classified`` extract (the shape ``server/tests/fixtures/legacy-preview/
 samples/deals/deals_classified__10.csv`` carries, with PR #149's ten reviewed
 ``CEV-*`` events) maps onto the header the producer's pinned Deals release
-serves at ``public/data/cedar/samples/deals/spreadsheet__10.csv``. Every
+kept at ``data/cedar/samples/deals/spreadsheet__10.csv``. Every
 decision is read from ``data/cedar/field_map.json`` (``deals/deals_classified``),
 the owner's 2026-09-05 specification; nothing here is a new decision.
 
@@ -57,7 +57,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 FIELD_MAP = ROOT / "data" / "cedar" / "field_map.json"
 REGISTER_NAMES = ROOT / "data" / "spine" / "cedar_entity_names.csv"
-SERVED_SAMPLE = ROOT / "public" / "data" / "cedar" / "samples" / "deals" / "spreadsheet__10.csv"
+SERVED_SAMPLE = ROOT / "data" / "cedar" / "samples" / "deals" / "spreadsheet__10.csv"
 LEGACY_FIXTURE = (
     ROOT
     / "server"
