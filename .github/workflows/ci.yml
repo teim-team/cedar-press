@@ -122,7 +122,7 @@ jobs:
     permissions:
       contents: read
     env:
-      LUMECON_DATA_SHA: 019ded32166e3fb2c712986137e23c08028719f6  # Producer PR #17: 2026-10-04 rights ruling applied to Gaming columns (projection rule gaming-presented-fields-v2)
+      LUMECON_DATA_SHA: 354b7b3b311bb1a8f041821f785f001952a4a6c6  # Producer PR #17: 2026-10-04 rights ruling applied to Gaming rows and downloads (projection rule gaming-presented-rows-v3)
       CEDAR_REQUIRE_LUMECON_GAMING: "1"
     steps:
       - name: Require the Lumecon-data read token

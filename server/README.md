@@ -249,7 +249,12 @@ every column of any field-rights class (projection rule
 `gaming-presented-fields-v2`), so each changed entry, and the
 `gaming_government_payments` field-map entry, also lists that column set in
 `compatible_orders`; `order` stays the saved release's columns. The added
-columns are in `fields` with their rights class and are not in `display_order`. Component rights, proposed-ID review restrictions and
+columns are in `fields` with their rights class and are not in `display_order`.
+Since projection rule `gaming-presented-rows-v3` (Lumecon-data
+`gaming.2026-10-04.2`) a Gaming row of any row-level rights class or publication
+status ships too, with both recorded, and every component, partitioned parts
+included, is downloadable; the columns did not change, so no declaration did.
+Component rights, proposed-ID review restrictions and
 Grove-only entitlement remain runtime gates. Internal tables remain unavailable.
 The stream rehearsal now refuses to resume an old two-table receipt as evidence
 for the complete declaration. It checks each component, including held responses.
