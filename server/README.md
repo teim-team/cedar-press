@@ -242,7 +242,14 @@ that synthetic check is not a real collection receipt.
 the exact saved Gaming release: 24 logical tables, including nine tables with
 permitted downloads. It contains schema metadata only. Existing field-map
 entries take precedence; additional tables must still match their pinned
-producer schema exactly. Component rights, proposed-ID review restrictions and
+producer schema exactly. Since the owner ruling of 2026-10-04 ("Lumecon
+transforms the data it publishes; source rights statuses are recorded as
+provenance and do not block publication") Lumecon-data's Gaming releases ship
+every column of any field-rights class (projection rule
+`gaming-presented-fields-v2`), so each changed entry, and the
+`gaming_government_payments` field-map entry, also lists that column set in
+`compatible_orders`; `order` stays the saved release's columns. The added
+columns are in `fields` with their rights class and are not in `display_order`. Component rights, proposed-ID review restrictions and
 Grove-only entitlement remain runtime gates. Internal tables remain unavailable.
 The stream rehearsal now refuses to resume an old two-table receipt as evidence
 for the complete declaration. It checks each component, including held responses.

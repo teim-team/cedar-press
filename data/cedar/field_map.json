@@ -6331,6 +6331,13 @@
      "why": "Row-level publication status [rights class: public_official]",
      "spec": "Lumecon-data gaming/revenue.py CONTRACTS",
      "rights_class": "public_official"
+    },
+    {
+     "column": "entity_match_method",
+     "decision": "keep",
+     "why": "How the upstream builder linked the source name to the cedar_uid [rights class: internal_crosswalk]; shipped since the Lumecon-data Gaming projection rule gaming-presented-fields-v2 (owner ruling 2026-10-04), so only in compatible_orders",
+     "spec": "Lumecon-data gaming/revenue.py CONTRACTS",
+     "rights_class": "internal_crosswalk"
     }
    ],
    "new": [],
@@ -6381,7 +6388,57 @@
     "rights_class",
     "publication_status"
    ],
-   "retire": []
+   "retire": [],
+   "compatible_orders": [
+    [
+     "payment_observation_id",
+     "source_system",
+     "source_record_id",
+     "source_metric",
+     "state",
+     "fund",
+     "payer_name",
+     "payer_type",
+     "recipient_name",
+     "recipient_type",
+     "party_cedar_uid",
+     "party_cedar_uid_role",
+     "entity_match_method",
+     "direction",
+     "amount_kind",
+     "amount_role",
+     "payment_status",
+     "is_forecast",
+     "amount_nominal_usd",
+     "amount_as_published",
+     "published_unit",
+     "period_start",
+     "period_end",
+     "period_cadence",
+     "fiscal_year_definition",
+     "basis",
+     "compact_reference",
+     "compact_rate_text",
+     "value_suppressed_by_source",
+     "sum_exclusion_flag",
+     "sum_exclusion_reason",
+     "summable_within_series",
+     "nonadditive_series_key",
+     "upstream_revenue_evidence_class",
+     "overlaps_online_sportsbook_observation_id",
+     "nonadditive_with_table",
+     "document_status",
+     "source_authority",
+     "source_document_type",
+     "source_url",
+     "source_page",
+     "source_quote",
+     "source_date",
+     "retrieved_date",
+     "rights_class",
+     "publication_status"
+    ]
+   ]
   },
   "gaming/gaming_regional_revenue": {
    "collection": "gaming",

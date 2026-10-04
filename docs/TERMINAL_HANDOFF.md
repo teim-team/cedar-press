@@ -51,12 +51,27 @@ fixes, schema repair, infrastructure and missing research stay with the coding
 workflow; only fully researched, genuinely ambiguous subject linkages belong in
 the owner's adjudication queue.
 
+## 2026-10-04 Gaming columns follow the rights ruling
+
+Lumecon-data #17 (`019ded3`, now the Gaming consumer job's `LUMECON_DATA_SHA`)
+applies the owner ruling of 2026-10-04 to Gaming releases: a field-rights class
+is provenance, so a release ships every column of any class (projection rule
+`gaming-presented-fields-v2`) except personal data and a few columns whose
+content the identity contract or a fact check refuses. The consumer still
+matches columns exactly: each changed Gaming declaration in
+`data/cedar/gaming_component_contracts.json`, and the `gaming_government_payments`
+field-map entry, now also lists the new column set in `compatible_orders`, so
+the saved release (`order`) and a newer one both serve. The added columns are
+in `fields` with their rights class, not in `display_order`.
+`server/tests/test_gaming_release.py` checks both column sets against the
+pinned producer.
+
 ## 2026-10-04 NEED integration
 
 NEED has no publication hold (owner ruling 2026-10-04, Elijah Moreno), and the
 consumer applies none: it presents NEED's `reviewed_public_base` (43 reviewed
 rows, release `428d1104...`) like any other component. The Gaming consumer job
-now installs producer `363c13e` (Lumecon-data #17), which carries the rights
+installed producer `363c13e` (Lumecon-data #17) when this was written; it carries the rights
 ruling and the producer-side NEED fixes. Merge order, the pins each repository
 expects, the commands that prove the chain and the open owner decisions (which
 NEED table customers get, re-cutting the pre-ruling release) are in the

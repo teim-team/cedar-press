@@ -158,6 +158,30 @@
           "display_disposition": "keep",
           "label": "rights class",
           "rights_class": "public_derived"
+        },
+        {
+          "column": "source_event_id",
+          "decision": "keep",
+          "description": "That table's own event key, verbatim (LDA filing_uuid, consultation_event_id, comment row id, testimony_id); internal join key because some consultation keys embed a retired entity handle",
+          "display_disposition": "keep",
+          "label": "source event id",
+          "rights_class": "internal_crosswalk"
+        },
+        {
+          "column": "link_basis",
+          "decision": "keep",
+          "description": "Rule that made the link (issue code, matched term, attribution method, facility/compact rule)",
+          "display_disposition": "keep",
+          "label": "link basis",
+          "rights_class": "internal_crosswalk"
+        },
+        {
+          "column": "crossref_source_key",
+          "decision": "keep",
+          "description": "Source key for orchestrator resolution to other lanes (FR doc number, docket, LDA period)",
+          "display_disposition": "keep",
+          "label": "crossref source key",
+          "rights_class": "internal_crosswalk"
         }
       ],
       "order": [
@@ -178,6 +202,30 @@
         "source_date",
         "retrieved_date",
         "rights_class"
+      ],
+      "compatible_orders": [
+        [
+          "advocacy_link_id",
+          "source_collection",
+          "source_event_id",
+          "source_native_id",
+          "source_event_type",
+          "event_date",
+          "link_target_type",
+          "target_id",
+          "link_basis",
+          "evidence_text",
+          "topics",
+          "crossref_source_key",
+          "confidence",
+          "review_status",
+          "source_system",
+          "source_record_id",
+          "source_url",
+          "source_date",
+          "retrieved_date",
+          "rights_class"
+        ]
       ]
     },
     "gaming_compact_terms": {
@@ -481,6 +529,22 @@
           "display_disposition": "keep",
           "label": "rights class",
           "rights_class": "public_derived"
+        },
+        {
+          "column": "confidence_tier",
+          "decision": "keep",
+          "description": "Source build tier",
+          "display_disposition": "keep",
+          "label": "confidence tier",
+          "rights_class": "internal_crosswalk"
+        },
+        {
+          "column": "extraction_method",
+          "decision": "keep",
+          "description": "Extraction method recorded by the source build",
+          "display_disposition": "keep",
+          "label": "extraction method",
+          "rights_class": "internal_crosswalk"
         }
       ],
       "order": [
@@ -517,6 +581,45 @@
         "source_date",
         "retrieved_date",
         "rights_class"
+      ],
+      "compatible_orders": [
+        [
+          "gaming_term_id",
+          "term_id",
+          "term_source_table",
+          "compact_id",
+          "version_id",
+          "cedar_uid",
+          "state",
+          "term_field",
+          "term_class",
+          "value_semantics",
+          "value_text",
+          "value_numeric",
+          "unit",
+          "applies_to",
+          "revenue_concept",
+          "base_scope",
+          "formula_invertibility",
+          "measurement_type",
+          "is_payment_observation",
+          "effective_from",
+          "effective_from_basis",
+          "effective_to",
+          "effective_to_basis",
+          "is_instrument_language",
+          "doc_zone",
+          "confidence_tier",
+          "source_page",
+          "source_quote",
+          "extraction_method",
+          "source_system",
+          "source_record_id",
+          "source_url",
+          "source_date",
+          "retrieved_date",
+          "rights_class"
+        ]
       ]
     },
     "gaming_compact_versions": {
@@ -1055,6 +1158,14 @@
           "display_disposition": "keep",
           "label": "rights class",
           "rights_class": "public_derived"
+        },
+        {
+          "column": "cedar_uid_basis",
+          "decision": "keep",
+          "description": "How the source build linked the entity (method; basis)",
+          "display_disposition": "keep",
+          "label": "cedar uid basis",
+          "rights_class": "internal_crosswalk"
         }
       ],
       "order": [
@@ -1085,6 +1196,38 @@
         "source_date",
         "retrieved_date",
         "rights_class"
+      ],
+      "compatible_orders": [
+        [
+          "compact_id",
+          "instrument_type",
+          "state",
+          "tribe_name_as_published",
+          "bia_tribes_column_conflict",
+          "cedar_uid",
+          "cedar_uid_basis",
+          "approval_type",
+          "bia_decision",
+          "bia_decision_date",
+          "original_effective_date",
+          "original_effective_date_basis",
+          "fr_document_number",
+          "fr_notice_url",
+          "term_end",
+          "term_end_basis",
+          "renewal_provisions",
+          "status",
+          "status_basis",
+          "successor_compact_id",
+          "n_versions",
+          "source_pdf",
+          "source_system",
+          "source_record_id",
+          "source_url",
+          "source_date",
+          "retrieved_date",
+          "rights_class"
+        ]
       ]
     },
     "gaming_coverage_gaps": {
@@ -1271,6 +1414,14 @@
           "display_disposition": "keep",
           "label": "publication status",
           "rights_class": "public_official"
+        },
+        {
+          "column": "next_action",
+          "decision": "keep",
+          "description": "What would close the gap",
+          "display_disposition": "keep",
+          "label": "next action",
+          "rights_class": "internal_crosswalk"
         }
       ],
       "order": [
@@ -1294,6 +1445,31 @@
         "affected_record_id",
         "rights_class",
         "publication_status"
+      ],
+      "compatible_orders": [
+        [
+          "coverage_gap_id",
+          "gap_source",
+          "component_table",
+          "state",
+          "cedar_uid",
+          "entity_name_in_source",
+          "subject",
+          "measure",
+          "expected_frequency",
+          "known_start",
+          "known_end",
+          "missing_from",
+          "missing_through",
+          "missing_periods",
+          "source_status",
+          "reason",
+          "next_action",
+          "evidence_url",
+          "affected_record_id",
+          "rights_class",
+          "publication_status"
+        ]
       ]
     },
     "gaming_environmental_reviews": {
@@ -1534,6 +1710,14 @@
           "display_disposition": "keep",
           "label": "rights class",
           "rights_class": "public_derived"
+        },
+        {
+          "column": "local_sha256",
+          "decision": "keep",
+          "description": "SHA-256 of the local copy when a manifest records one",
+          "display_disposition": "keep",
+          "label": "local sha256",
+          "rights_class": "internal_crosswalk"
         }
       ],
       "order": [
@@ -1563,6 +1747,37 @@
         "source_date",
         "retrieved_date",
         "rights_class"
+      ],
+      "compatible_orders": [
+        [
+          "environmental_review_id",
+          "project_key",
+          "project_key_basis",
+          "review_level",
+          "document_role",
+          "lead_agency",
+          "document_title",
+          "document_date",
+          "document_date_precision",
+          "document_date_basis",
+          "related_decision_id",
+          "related_decision_date",
+          "related_decision_status",
+          "cedar_uid",
+          "subject_name_as_published",
+          "state",
+          "applicant_projection_rows",
+          "mitigation_agreement_rows",
+          "facility_scenario_rows",
+          "local_sha256",
+          "also_cited_by",
+          "source_system",
+          "source_record_id",
+          "source_url",
+          "source_date",
+          "retrieved_date",
+          "rights_class"
+        ]
       ]
     },
     "gaming_facility_capacity": {
@@ -1740,6 +1955,22 @@
           "display_disposition": "keep",
           "label": "rights class",
           "rights_class": "public_derived"
+        },
+        {
+          "column": "attribution_basis",
+          "decision": "keep",
+          "description": "How the source record was attributed to this facility",
+          "display_disposition": "keep",
+          "label": "attribution basis",
+          "rights_class": "internal_crosswalk"
+        },
+        {
+          "column": "source_record_id",
+          "decision": "keep",
+          "description": "Original source record ID (may be a vendor ID, hence internal)",
+          "display_disposition": "keep",
+          "label": "source record id",
+          "rights_class": "internal_crosswalk"
         }
       ],
       "order": [
@@ -1762,6 +1993,31 @@
         "source_date",
         "retrieved_date",
         "rights_class"
+      ],
+      "compatible_orders": [
+        [
+          "capacity_observation_id",
+          "gaming_facility_id",
+          "metric",
+          "metric_family",
+          "value",
+          "value_text",
+          "unit",
+          "measurement_type",
+          "as_of_date",
+          "as_of_precision",
+          "period_start",
+          "period_end",
+          "qualifier",
+          "attribution_basis",
+          "evidence_quote",
+          "source_system",
+          "source_record_id",
+          "source_url",
+          "source_date",
+          "retrieved_date",
+          "rights_class"
+        ]
       ]
     },
     "gaming_facility_history": {
@@ -1930,6 +2186,22 @@
           "display_disposition": "keep",
           "label": "rights class",
           "rights_class": "public_derived"
+        },
+        {
+          "column": "source_value_verbatim",
+          "decision": "keep",
+          "description": "Source date string exactly as held (may be vendor)",
+          "display_disposition": "keep",
+          "label": "source value verbatim",
+          "rights_class": "internal_crosswalk"
+        },
+        {
+          "column": "source_record_id",
+          "decision": "keep",
+          "description": "Original source record ID (may be a vendor ID, hence internal)",
+          "display_disposition": "keep",
+          "label": "source record id",
+          "rights_class": "internal_crosswalk"
         }
       ],
       "order": [
@@ -1951,6 +2223,30 @@
         "source_date",
         "retrieved_date",
         "rights_class"
+      ],
+      "compatible_orders": [
+        [
+          "history_id",
+          "gaming_facility_id",
+          "record_kind",
+          "event_type",
+          "status_value",
+          "event_date",
+          "date_precision",
+          "date_not_before",
+          "date_not_after",
+          "date_is_placeholder",
+          "source_value_verbatim",
+          "event_qualifier",
+          "evidence_text",
+          "review_status",
+          "source_system",
+          "source_record_id",
+          "source_url",
+          "source_date",
+          "retrieved_date",
+          "rights_class"
+        ]
       ]
     },
     "gaming_facility_names": {
@@ -2092,6 +2388,14 @@
           "display_disposition": "keep",
           "label": "rights class",
           "rights_class": "public_derived"
+        },
+        {
+          "column": "source_record_id",
+          "decision": "keep",
+          "description": "Original source record ID (may be a vendor ID, hence internal)",
+          "display_disposition": "keep",
+          "label": "source record id",
+          "rights_class": "internal_crosswalk"
         }
       ],
       "order": [
@@ -2110,6 +2414,26 @@
         "source_date",
         "retrieved_date",
         "rights_class"
+      ],
+      "compatible_orders": [
+        [
+          "name_id",
+          "gaming_facility_id",
+          "name",
+          "name_type",
+          "first_observed",
+          "last_observed",
+          "observation_precision",
+          "is_selected_public_name",
+          "n_observations",
+          "evidence_quote",
+          "source_system",
+          "source_record_id",
+          "source_url",
+          "source_date",
+          "retrieved_date",
+          "rights_class"
+        ]
       ]
     },
     "gaming_facility_relationships": {
@@ -2350,6 +2674,14 @@
           "display_disposition": "keep",
           "label": "rights class",
           "rights_class": "public_derived"
+        },
+        {
+          "column": "source_record_id",
+          "decision": "keep",
+          "description": "Original source record ID (may be a vendor ID, hence internal)",
+          "display_disposition": "keep",
+          "label": "source record id",
+          "rights_class": "internal_crosswalk"
         }
       ],
       "order": [
@@ -2379,6 +2711,37 @@
         "source_date",
         "retrieved_date",
         "rights_class"
+      ],
+      "compatible_orders": [
+        [
+          "relationship_id",
+          "gaming_facility_id",
+          "party_kind",
+          "cedar_uid",
+          "enterprise_id",
+          "business_uid",
+          "business_binding_status",
+          "party_name",
+          "party_external_id",
+          "party_external_id_scheme",
+          "relationship_type",
+          "claimed_relationship_type",
+          "role_as_stated",
+          "ownership_percent",
+          "effective_start",
+          "effective_end",
+          "observed_as_of",
+          "evidence_text",
+          "confidence",
+          "review_status",
+          "n_source_records",
+          "source_system",
+          "source_record_id",
+          "source_url",
+          "source_date",
+          "retrieved_date",
+          "rights_class"
+        ]
       ]
     },
     "gaming_financial_disclosures": {
@@ -3169,6 +3532,14 @@
           "display_disposition": "keep",
           "label": "publication status",
           "rights_class": "public_official"
+        },
+        {
+          "column": "entity_match_method",
+          "decision": "keep",
+          "description": "How the upstream builder linked the source name to the cedar_uid",
+          "display_disposition": "keep",
+          "label": "entity match method",
+          "rights_class": "internal_crosswalk"
         }
       ],
       "order": [
@@ -3217,6 +3588,56 @@
         "retrieved_date",
         "rights_class",
         "publication_status"
+      ],
+      "compatible_orders": [
+        [
+          "payment_observation_id",
+          "source_system",
+          "source_record_id",
+          "source_metric",
+          "state",
+          "fund",
+          "payer_name",
+          "payer_type",
+          "recipient_name",
+          "recipient_type",
+          "party_cedar_uid",
+          "party_cedar_uid_role",
+          "entity_match_method",
+          "direction",
+          "amount_kind",
+          "amount_role",
+          "payment_status",
+          "is_forecast",
+          "amount_nominal_usd",
+          "amount_as_published",
+          "published_unit",
+          "period_start",
+          "period_end",
+          "period_cadence",
+          "fiscal_year_definition",
+          "basis",
+          "compact_reference",
+          "compact_rate_text",
+          "value_suppressed_by_source",
+          "sum_exclusion_flag",
+          "sum_exclusion_reason",
+          "summable_within_series",
+          "nonadditive_series_key",
+          "upstream_revenue_evidence_class",
+          "overlaps_online_sportsbook_observation_id",
+          "nonadditive_with_table",
+          "document_status",
+          "source_authority",
+          "source_document_type",
+          "source_url",
+          "source_page",
+          "source_quote",
+          "source_date",
+          "retrieved_date",
+          "rights_class",
+          "publication_status"
+        ]
       ]
     },
     "gaming_grove_facilities": {
@@ -3574,6 +3995,70 @@
           "display_disposition": "keep",
           "label": "n public relationship rows",
           "rights_class": "public_derived"
+        },
+        {
+          "column": "withheld_fields",
+          "decision": "keep",
+          "description": "Field groups withheld on this row and why (field:reason;...)",
+          "display_disposition": "keep",
+          "label": "withheld fields",
+          "rights_class": "internal_crosswalk"
+        },
+        {
+          "column": "n_legacy_records",
+          "decision": "keep",
+          "description": "Number of legacy source records resolved to this facility (mapped + merged_into + unresolved)",
+          "display_disposition": "keep",
+          "label": "n legacy records",
+          "rights_class": "internal_crosswalk"
+        },
+        {
+          "column": "n_name_rows",
+          "decision": "keep",
+          "description": "Rows in gaming_facility_names (all rights)",
+          "display_disposition": "keep",
+          "label": "n name rows",
+          "rights_class": "internal_crosswalk"
+        },
+        {
+          "column": "n_history_rows",
+          "decision": "keep",
+          "description": "Rows in gaming_facility_history (all rights)",
+          "display_disposition": "keep",
+          "label": "n history rows",
+          "rights_class": "internal_crosswalk"
+        },
+        {
+          "column": "n_capacity_rows",
+          "decision": "keep",
+          "description": "Rows in gaming_facility_capacity (all rights)",
+          "display_disposition": "keep",
+          "label": "n capacity rows",
+          "rights_class": "internal_crosswalk"
+        },
+        {
+          "column": "n_relationship_rows",
+          "decision": "keep",
+          "description": "Rows in gaming_facility_relationships (all rights)",
+          "display_disposition": "keep",
+          "label": "n relationship rows",
+          "rights_class": "internal_crosswalk"
+        },
+        {
+          "column": "cedar_place_id",
+          "decision": "keep",
+          "description": "Underlying CEDAR-PLACE id (1129); equals gaming_facility_id, kept for the internal crosswalk join",
+          "display_disposition": "keep",
+          "label": "cedar place id",
+          "rights_class": "internal_crosswalk"
+        },
+        {
+          "column": "qa_flags",
+          "decision": "keep",
+          "description": "Conflicts found (address/coordinate/status/listing) - internal because some cite vendor values",
+          "display_disposition": "keep",
+          "label": "qa flags",
+          "rights_class": "internal_crosswalk"
         }
       ],
       "order": [
@@ -3616,6 +4101,57 @@
         "n_public_history_rows",
         "n_public_capacity_rows",
         "n_public_relationship_rows"
+      ],
+      "compatible_orders": [
+        [
+          "gaming_facility_id",
+          "record_status",
+          "publication_status",
+          "public_name",
+          "public_name_source_system",
+          "public_name_source_url",
+          "public_name_as_of",
+          "public_name_rights",
+          "facility_type",
+          "facility_type_basis",
+          "street_address",
+          "city",
+          "state",
+          "postal_code",
+          "address_source_system",
+          "address_source_url",
+          "address_as_of",
+          "address_rights",
+          "county",
+          "county_fips",
+          "county_source_system",
+          "county_rights",
+          "latitude",
+          "longitude",
+          "coordinate_source_system",
+          "coordinate_method",
+          "coordinate_as_of",
+          "coordinate_rights",
+          "current_status",
+          "status_as_of",
+          "status_basis",
+          "status_source_system",
+          "status_source_url",
+          "status_rights",
+          "withheld_fields",
+          "n_legacy_records",
+          "n_independent_sources",
+          "n_name_rows",
+          "n_public_name_rows",
+          "n_history_rows",
+          "n_public_history_rows",
+          "n_capacity_rows",
+          "n_public_capacity_rows",
+          "n_relationship_rows",
+          "n_public_relationship_rows",
+          "cedar_place_id",
+          "qa_flags"
+        ]
       ]
     },
     "gaming_labor_observations": {
@@ -3856,6 +4392,22 @@
           "display_disposition": "keep",
           "label": "rights class",
           "rights_class": "public_official"
+        },
+        {
+          "column": "match_method",
+          "decision": "keep",
+          "description": "How cedar_uid / facility were attached",
+          "display_disposition": "keep",
+          "label": "match method",
+          "rights_class": "internal_crosswalk"
+        },
+        {
+          "column": "legacy_observation_ids",
+          "decision": "keep",
+          "description": "INTERNAL: gaming_employment_observations observation_id(s) this row re-grains",
+          "display_disposition": "keep",
+          "label": "legacy observation ids",
+          "rights_class": "internal_crosswalk"
         }
       ],
       "order": [
@@ -3885,6 +4437,38 @@
         "source_date",
         "retrieved_date",
         "rights_class"
+      ],
+      "compatible_orders": [
+        [
+          "labor_observation_id",
+          "source_system",
+          "source_record_id",
+          "measure",
+          "measured_concept",
+          "evidence_class",
+          "value",
+          "value_status",
+          "unit",
+          "disclosure_limitation",
+          "suppression_flag",
+          "period",
+          "period_type",
+          "outcome",
+          "cedar_uid",
+          "gaming_facility_id",
+          "employer_name_as_reported",
+          "establishment_or_unit_as_reported",
+          "reported_state",
+          "match_method",
+          "confidence",
+          "review_status",
+          "flags",
+          "legacy_observation_ids",
+          "source_url",
+          "source_date",
+          "retrieved_date",
+          "rights_class"
+        ]
       ]
     },
     "gaming_land_eligibility": {
@@ -4441,6 +5025,14 @@
           "display_disposition": "keep",
           "label": "rights class",
           "rights_class": "public_derived"
+        },
+        {
+          "column": "gaming_facility_id",
+          "decision": "keep",
+          "description": "Facility only when the source carries a place id (none currently do)",
+          "display_disposition": "keep",
+          "label": "gaming facility id",
+          "rights_class": "internal_crosswalk"
         }
       ],
       "order": [
@@ -4473,6 +5065,40 @@
         "source_date",
         "retrieved_date",
         "rights_class"
+      ],
+      "compatible_orders": [
+        [
+          "license_id",
+          "license_family",
+          "authority_name",
+          "authority_level",
+          "authority_cedar_uid",
+          "holder_name_as_published",
+          "holder_cedar_uid",
+          "holder_sec_cik",
+          "gaming_facility_id",
+          "state",
+          "product_type",
+          "license_type_as_published",
+          "license_number",
+          "status",
+          "status_basis",
+          "effective_start",
+          "effective_end",
+          "operation_start_date",
+          "cessation_date",
+          "authorized_quantity",
+          "quantity_unit",
+          "measurement_type",
+          "compact_citation",
+          "evidence_quote",
+          "source_system",
+          "source_record_id",
+          "source_url",
+          "source_date",
+          "retrieved_date",
+          "rights_class"
+        ]
       ]
     },
     "gaming_litigation": {
@@ -4704,6 +5330,14 @@
           "display_disposition": "keep",
           "label": "rights class",
           "rights_class": "public_derived"
+        },
+        {
+          "column": "party_link_basis",
+          "decision": "keep",
+          "description": "How party links were made",
+          "display_disposition": "keep",
+          "label": "party link basis",
+          "rights_class": "internal_crosswalk"
         }
       ],
       "order": [
@@ -4732,6 +5366,36 @@
         "source_date",
         "retrieved_date",
         "rights_class"
+      ],
+      "compatible_orders": [
+        [
+          "litigation_id",
+          "proceeding_kind",
+          "case_name",
+          "forum",
+          "docket_number",
+          "reporter_citation",
+          "filing_date",
+          "filing_date_precision",
+          "decision_date",
+          "decision_date_precision",
+          "date_basis",
+          "subject_area",
+          "related_decision_id",
+          "affected_subject_cedar_uid",
+          "party_cedar_uids",
+          "party_link_basis",
+          "parties_as_published",
+          "outcome_as_stated",
+          "outcome_basis",
+          "also_cited_by",
+          "source_system",
+          "source_record_id",
+          "source_url",
+          "source_date",
+          "retrieved_date",
+          "rights_class"
+        ]
       ]
     },
     "gaming_online_sportsbook_financials": {
@@ -5269,6 +5933,38 @@
           "display_disposition": "keep",
           "label": "publication status",
           "rights_class": "public_official"
+        },
+        {
+          "column": "source_package",
+          "decision": "keep",
+          "description": "Delivered package label",
+          "display_disposition": "keep",
+          "label": "source package",
+          "rights_class": "internal_crosswalk"
+        },
+        {
+          "column": "source_revenue_usd",
+          "decision": "keep",
+          "description": "Secondary publisher's revenue figure under its own unreconciled definition (PlayAZ / PlayNJ / Arkansas Business); never mapped to gross or adjusted",
+          "display_disposition": "keep",
+          "label": "source revenue usd",
+          "rights_class": "secondary_corroboration"
+        },
+        {
+          "column": "raw_sha256",
+          "decision": "keep",
+          "description": "SHA-256 of the bundled raw report (re-verified in this build)",
+          "display_disposition": "keep",
+          "label": "raw sha256",
+          "rights_class": "internal_crosswalk"
+        },
+        {
+          "column": "qa_status",
+          "decision": "keep",
+          "description": "Package extraction/reconciliation disposition",
+          "display_disposition": "keep",
+          "label": "qa status",
+          "rights_class": "internal_crosswalk"
         }
       ],
       "order": [
@@ -5331,6 +6027,73 @@
         "discrepancy_disposition",
         "rights_class",
         "publication_status"
+      ],
+      "compatible_orders": [
+        [
+          "financial_observation_id",
+          "sportsbook_unit_id",
+          "source_package",
+          "source_record_id",
+          "source_series_id",
+          "source_table",
+          "jurisdiction",
+          "period_type",
+          "period_start",
+          "period_end",
+          "period_label",
+          "period_convention",
+          "partial_period_flag",
+          "revision_label",
+          "revision_note",
+          "record_status",
+          "currency",
+          "handle_usd",
+          "payouts_usd",
+          "voided_wagers_usd",
+          "resettlements_usd",
+          "other_adjustments_usd",
+          "gross_revenue_usd",
+          "federal_excise_tax_usd",
+          "unadjusted_revenue_usd",
+          "promotional_credits_usd",
+          "promotional_deduction_usd",
+          "adjusted_revenue_usd",
+          "taxable_revenue_usd",
+          "state_payment_usd",
+          "local_payment_usd",
+          "per_wager_tax_usd",
+          "source_revenue_usd",
+          "gross_revenue_method",
+          "revenue_definition_id",
+          "revenue_definition_gross_label",
+          "revenue_definition_adjusted_label",
+          "source_metric_labels",
+          "source_value_precision",
+          "source_class",
+          "source_url",
+          "raw_sha256",
+          "source_locator",
+          "source_publication_date",
+          "retrieved_date",
+          "retrieved_at",
+          "qa_status",
+          "source_notes",
+          "additivity",
+          "nonadditive_with_observation_ids",
+          "nonadditive_reason",
+          "existing_overlap_source_record_ids",
+          "existing_overlap_value_check",
+          "discrepancy_flag",
+          "discrepancy_measure",
+          "discrepancy_formula",
+          "discrepancy_published_value",
+          "discrepancy_calculated_value",
+          "discrepancy_difference",
+          "discrepancy_citation",
+          "discrepancy_disposition",
+          "rights_class",
+          "publication_status"
+        ]
       ]
     },
     "gaming_online_sportsbook_relationships": {
@@ -5856,6 +6619,14 @@
           "display_disposition": "keep",
           "label": "publication status",
           "rights_class": "public_official"
+        },
+        {
+          "column": "source_package",
+          "decision": "keep",
+          "description": "Delivered package label (online_sports_2026-09-24)",
+          "display_disposition": "keep",
+          "label": "source package",
+          "rights_class": "internal_crosswalk"
         }
       ],
       "order": [
@@ -5889,6 +6660,41 @@
         "source_notes",
         "rights_class",
         "publication_status"
+      ],
+      "compatible_orders": [
+        [
+          "sportsbook_unit_id",
+          "source_package",
+          "source_series_id",
+          "jurisdiction",
+          "reported_unit_type",
+          "source_reporting_grain",
+          "reporting_entity_as_reported",
+          "platform_labels_as_reported",
+          "property_named_in_source",
+          "gaming_facility_id",
+          "facility_link_status",
+          "evidence_tier",
+          "source_class",
+          "period_type",
+          "first_period",
+          "last_period",
+          "record_count",
+          "reported_zero_months",
+          "internal_missing_months",
+          "handle_available",
+          "revenue_definition_id",
+          "revenue_definition_interpretation",
+          "shared_report",
+          "linked_entity_count",
+          "allocation_status",
+          "nonadditive_with_unit_ids",
+          "nonadditive_reason",
+          "source_url",
+          "source_notes",
+          "rights_class",
+          "publication_status"
+        ]
       ]
     },
     "gaming_regional_revenue": {
@@ -6545,6 +7351,22 @@
           "display_disposition": "keep",
           "label": "evidence note",
           "rights_class": "public_official"
+        },
+        {
+          "column": "subject_link_basis",
+          "decision": "keep",
+          "description": "How the subject links were made by the source builds",
+          "display_disposition": "keep",
+          "label": "subject link basis",
+          "rights_class": "internal_crosswalk"
+        },
+        {
+          "column": "gaming_facility_id",
+          "decision": "keep",
+          "description": "Facility (via gaming_grove.facility_id_for) only when the source carries a place id; else blank",
+          "display_disposition": "keep",
+          "label": "gaming facility id",
+          "rights_class": "internal_crosswalk"
         }
       ],
       "order": [
@@ -6577,6 +7399,41 @@
         "retrieved_date",
         "rights_class",
         "evidence_note"
+      ],
+      "compatible_orders": [
+        [
+          "regulatory_event_id",
+          "event_type",
+          "event_subtype",
+          "agency",
+          "action_date",
+          "action_date_precision",
+          "action_date_basis",
+          "posted_date",
+          "status",
+          "status_basis",
+          "cedar_uid",
+          "subject_cedar_uids",
+          "subject_link_basis",
+          "subject_name_as_published",
+          "state",
+          "gaming_facility_id",
+          "compact_id",
+          "version_id",
+          "decision_id",
+          "fr_document_number",
+          "docket_ids",
+          "title_or_description",
+          "source_system",
+          "source_record_id",
+          "also_cited_by",
+          "n_source_records",
+          "source_url",
+          "source_date",
+          "retrieved_date",
+          "rights_class",
+          "evidence_note"
+        ]
       ]
     },
     "gaming_reported_revenue_observations": {
@@ -7234,6 +8091,14 @@
           "display_disposition": "keep",
           "label": "rights class",
           "rights_class": "public_official"
+        },
+        {
+          "column": "source_band_id",
+          "decision": "keep",
+          "description": "Upstream nigc_revenue_bands.band_id",
+          "display_disposition": "keep",
+          "label": "source band id",
+          "rights_class": "internal_crosswalk"
         }
       ],
       "order": [
@@ -7265,6 +8130,39 @@
         "retrieved_date",
         "review_status",
         "rights_class"
+      ],
+      "compatible_orders": [
+        [
+          "band_observation_id",
+          "source_band_id",
+          "fiscal_year",
+          "fiscal_year_definition",
+          "band_ordinal",
+          "band_label",
+          "band_lower_usd",
+          "band_upper_usd",
+          "pct_of_operations",
+          "pct_of_revenue",
+          "pct_precision",
+          "national_operation_count",
+          "national_ggr_nominal_usd",
+          "implied_operation_count_low",
+          "implied_operation_count_high",
+          "implied_band_ggr_nominal_low_usd",
+          "implied_band_ggr_nominal_high_usd",
+          "suppression_status",
+          "derivation_note",
+          "source_system",
+          "source_record_id",
+          "source_document",
+          "source_page",
+          "source_quote",
+          "source_url",
+          "source_date",
+          "retrieved_date",
+          "review_status",
+          "rights_class"
+        ]
       ]
     }
   },

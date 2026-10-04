@@ -821,6 +821,21 @@ class PinnedLumeconReleaseTest(_ServerCase):
                         if PAY_CONTRACT["field_rights"][name] in PUBLIC_RIGHTS
                     ]
                     self.assertEqual(entry["order"], public_fields)
+                    # Lumecon-data projection rule gaming-presented-fields-v2
+                    # (owner ruling 2026-10-04): field-rights classes are
+                    # provenance, so a newer release also ships these columns.
+                    from lumecon_data.gaming.contract import presented_columns
+
+                    self.assertEqual(
+                        entry["compatible_orders"],
+                        [
+                            presented_columns(
+                                "gaming_government_payments.csv",
+                                PAY_CONTRACT["header"],
+                                PAY_CONTRACT["field_rights"],
+                            )
+                        ],
+                    )
                     self.assertNotIn(component, manifest["components"])
                     continue  # Minimal regional fixture deliberately has no payments.
                 contract = manifest["components"][component]
@@ -841,6 +856,41 @@ class PinnedLumeconReleaseTest(_ServerCase):
             mutate(drifted["gaming/" + SERVED])
             with patch.object(repository, "_field_map_tables", return_value=drifted):
                 self.assertEqual(self.get(SERVED, self.a["release_id"])[0].status_code, 503)
+
+    def test_gaming_declarations_accept_both_projection_rules(self):
+        """Each Gaming presentation declaration names the columns of a release
+        built before the Lumecon-data projection rule gaming-presented-fields-v2
+        (`order`) and after it (`compatible_orders`); field-rights classes are
+        provenance since the owner ruling of 2026-10-04."""
+        from lumecon_data.gaming import candidate as producer
+        from lumecon_data.gaming import contract as gaming_contract
+
+        contracts = producer.all_contracts()
+        declared = repository.governed_collections.component_declarations("gaming")
+        for component, entry in declared.items():
+            with self.subTest(component=component):
+                table = component + ".csv"
+                rights = contracts[table]["field_rights"]
+                header = list(rights)
+                before = gaming_contract.presented_columns(
+                    table, header, rights, gaming_contract.LEGACY_PROJECTION_RULE
+                )
+                after = gaming_contract.presented_columns(table, header, rights)
+                self.assertEqual(entry["order"], before)
+                self.assertIn(after, [entry["order"], *entry.get("compatible_orders", [])])
+                listed = {f["column"]: f["rights_class"] for f in entry["fields"]}
+                for column in after:
+                    self.assertEqual(listed.get(column), rights[column], column)
+        # The fixture release, built by the pinned producer, now ships a
+        # rights-restricted column and is still served.
+        compacts = self.metadata(self.verify(self.store_a, "gaming", self.a["release_id"]))[
+            "components"
+        ]["gaming_compacts"]
+        rights = compacts["metadata"]["field_rights"]
+        self.assertEqual(rights["cedar_uid_basis"], "internal_crosswalk")
+        self.assertEqual(compacts["metadata"]["projection_rule"], gaming_contract.PROJECTION_RULE)
+        self.pin(self.a)
+        self.assertEqual(self.get("gaming_compacts", self.a["release_id"])[0].status_code, 200)
 
     def test_missing_or_partial_gaming_field_rights_are_refused(self):
         original = self.metadata(self.verify(self.store_a, "gaming", self.a["release_id"]))
@@ -978,6 +1028,8 @@ class PinnedLumeconReleaseTest(_ServerCase):
             repository.governed_collections.component_declarations("gaming")
         )
         declaration["gaming_compacts"]["order"].reverse()
+        for order in declaration["gaming_compacts"].get("compatible_orders", []):
+            order.reverse()
         with patch.object(
             repository.governed_collections, "component_declarations", return_value=declaration
         ):
