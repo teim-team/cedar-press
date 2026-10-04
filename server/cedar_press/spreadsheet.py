@@ -6,10 +6,10 @@ import csv
 import hashlib
 import io
 import json
-import re
 import tempfile
 from contextlib import closing
 
+from cedar_press import csv_safety
 from cedar_press import repository as r
 
 RESERVED = ("record_type", "record_key", "record_grain")
@@ -89,13 +89,8 @@ def _cell(value):
     if isinstance(value, (list, dict)):
         return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
     text = str(value)
-    if (
-        isinstance(value, str)
-        and text.lstrip().startswith(("=", "+", "-", "@"))
-        and not re.fullmatch(r"-?[0-9]+(?:\.[0-9]+)?", text)
-    ):
-        return "'" + text
-    return text
+    # Only text can be a formula; a typed number is written as itself.
+    return csv_safety.spreadsheet_safe(text) if isinstance(value, str) else text
 
 
 def download(collection, release_id=None, *, metadata_only=False):

@@ -22,7 +22,7 @@ from hashlib import sha256
 
 from fastapi import Cookie, HTTPException, Response
 
-from cedar_press import subscribers
+from cedar_press import ratelimit, subscribers
 
 COOKIE = "cedar_press_session"
 MAX_AGE = 60 * 60 * 24 * 14
@@ -61,6 +61,11 @@ def forget_activated_for_tests() -> None:
 def validate_auth_configuration() -> None:
     """Reject ephemeral authentication for staging/production before use."""
     environment = os.environ.get("CEDAR_PRESS_ENVIRONMENT", "development")
+    # Proxy settings are read on every environment: a rate limit keyed on an
+    # identity nobody can work out is no limit, so unreadable settings refuse
+    # rather than fall back. Outside development they must also be explicit.
+    if ratelimit.configuration_error(require_explicit=environment != "development"):
+        _configuration_required()
     if environment == "development":
         return
     configured_secret = os.environ.get("CEDAR_PRESS_SECRET", "")
@@ -73,13 +78,17 @@ def validate_auth_configuration() -> None:
         or os.environ.get("CEDAR_PRESS_INSECURE_COOKIE") == "1"
         or bool(os.environ.get("CEDAR_PRESS_ACCOUNTS", "").strip())
     ):
-        raise HTTPException(
-            status_code=503,
-            detail={
-                "code": "AUTH_CONFIGURATION_REQUIRED",
-                "message": "Sign-in is temporarily unavailable.",
-            },
-        )
+        _configuration_required()
+
+
+def _configuration_required() -> None:
+    raise HTTPException(
+        status_code=503,
+        detail={
+            "code": "AUTH_CONFIGURATION_REQUIRED",
+            "message": "Sign-in is temporarily unavailable.",
+        },
+    )
 
 
 def _revision(subscriber: subscribers.Subscriber) -> str:

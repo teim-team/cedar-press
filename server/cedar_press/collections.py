@@ -58,14 +58,13 @@ from __future__ import annotations
 import csv
 import io
 import json
-import re
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
 # The storefront's own naming. `press_catalog` reads a committed snapshot and
 # imports nothing from this package, so it is a leaf and cannot close a cycle.
-from cedar_press import press_catalog
+from cedar_press import csv_safety, press_catalog
 from cedar_press.claims import CLAIM_CLASS
 
 __all__ = [
@@ -629,11 +628,7 @@ def collection_citation(dataset_id: str, accessed_on: str | None = None) -> str 
 
 def _csv_cell(value: object) -> str:
     """One CSV cell, quoted only when the value needs it."""
-    text = "" if value is None else str(value)
-    if re.match(r"^[=+@\t\r]", text) or (
-        text.startswith("-") and not re.fullmatch(r"-?\s*(\d[\d,]*)?(\.\d+)?", text)
-    ):
-        text = "'" + text
+    text = csv_safety.spreadsheet_safe("" if value is None else str(value))
     if any(ch in text for ch in ('"', ",", "\n", "\r")):
         return '"' + text.replace('"', '""') + '"'
     return text

@@ -1,0 +1,30 @@
+{
+  "_about": "One rule for every CSV this repository writes, on either side. Read by server/tests/test_csv_formula.py and the client's csvFormula.test.js; a case added here is enforced in both. `neutralized` means the cell is written with a leading apostrophe so a spreadsheet shows it as text rather than running it.",
+  "cases": [
+    {"value": "=SUM(A1)", "neutralized": true},
+    {"value": "=HYPERLINK(\"https://example.org\",\"x\")", "neutralized": true},
+    {"value": "+1 (555) 000", "neutralized": true},
+    {"value": "@SUM(A1)", "neutralized": true},
+    {"value": "\t=1+1", "neutralized": true},
+    {"value": "\r=1+1", "neutralized": true},
+    {"value": "\tplain after a tab", "neutralized": true},
+    {"value": "\rplain after a return", "neutralized": true},
+    {"value": " =1+1", "neutralized": true},
+    {"value": "\n@cmd", "neutralized": true},
+    {"value": "  -2+3", "neutralized": true},
+    {"value": "-1+2", "neutralized": true},
+    {"value": "-1-1", "neutralized": true},
+    {"value": "-not a number", "neutralized": true},
+    {"value": "-1+HYPERLINK(\"x\")", "neutralized": true},
+    {"value": "-4163330", "neutralized": false},
+    {"value": "-4,163,330.50", "neutralized": false},
+    {"value": "-0.25", "neutralized": false},
+    {"value": " -12", "neutralized": false},
+    {"value": "-", "neutralized": false},
+    {"value": "plain", "neutralized": false},
+    {"value": "", "neutralized": false},
+    {"value": "3-2", "neutralized": false},
+    {"value": "a=b", "neutralized": false},
+    {"value": "contact@lumecon.ai", "neutralized": false}
+  ]
+}

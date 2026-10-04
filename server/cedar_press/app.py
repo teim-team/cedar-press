@@ -60,7 +60,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from cedar_press import (
     cedar_service,
@@ -150,9 +150,19 @@ class PointsMove(BaseModel):
     points: int
 
 
+#: Upper bounds on what a subscriber types, enforced by the model so an
+#: over-long body is a 422 before it reaches a store or Cedar. Generous beside
+#: the forms (the Cedar panel's input stops at 280 characters; a research
+#: request is a paragraph or two), and finite, so one request cannot write
+#: megabytes into the requests table or forward them upstream.
+MAX_REQUEST_TEXT = 4000
+MAX_USE_CASE = 500
+MAX_QUESTION = 1000
+
+
 class ResearchRequest(BaseModel):
-    text: str
-    use_case: str | None = None
+    text: str = Field(max_length=MAX_REQUEST_TEXT)
+    use_case: str | None = Field(default=None, max_length=MAX_USE_CASE)
     priority_id: str | None = None
     support_points: int = 0
 
@@ -178,7 +188,7 @@ def _points_error(exc: priorities.PointsError) -> HTTPException:
 
 
 class Question(BaseModel):
-    question: str
+    question: str = Field(max_length=MAX_QUESTION)
     surface: str = "cedar-press"
     collectionId: str | None = None
     #: Cedar's own conversation id. Absent on the first turn -- Cedar mints

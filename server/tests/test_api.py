@@ -622,6 +622,15 @@ class TestCedarConversation(unittest.TestCase):
             body["collectionId"] = collection_id
         return client.post("/cedar/ask", json=body)
 
+    def test_a_question_has_a_length_limit(self) -> None:
+        from cedar_press.app import MAX_QUESTION
+
+        over = self._ask("reader@example.org", "q" * (MAX_QUESTION + 1), "deals")
+        self.assertEqual(over.status_code, 422)
+        # No collection: answered with a question back, never sent to Cedar.
+        at_limit = self._ask("reader@example.org", "q" * MAX_QUESTION)
+        self.assertEqual(at_limit.status_code, 200, at_limit.text)
+
     def test_an_answer_a_reader_can_open_says_its_records_are_reachable(self) -> None:
         basis = self._ask("reader@example.org", "What does this collection cover?", "deals").json()[
             "answerBasis"
@@ -769,7 +778,36 @@ class TestActivation(unittest.TestCase):
             "/press/activation/validate",
             json={"code": "TBN4-9K2M-X7QD", "email": "someone@example.org"},
         )
-        self.assertEqual(response.json()["code"], "PRESS_CODE_EMAIL_MISMATCH")
+        self.assertEqual(response.json()["code"], "PRESS_CODE_INVALID")
+
+    def test_a_real_code_with_the_wrong_address_reads_as_an_unissued_one(self) -> None:
+        # The endpoint must not be an oracle for which codes exist: issued to
+        # someone else, spent by someone else, expired for someone else and
+        # never issued at all are one answer, byte for byte, until the code
+        # AND the address match.
+        def ask(code: str, email: str):
+            return client.post(
+                "/press/activation/validate", json={"code": code, "email": email}
+            )
+
+        unissued = ask("TBN4-0000-0000", "guess@example.org")
+        self.assertEqual(unissued.status_code, 400)
+        client.post(
+            "/press/activation",
+            json={
+                "code": "TBN4-9K2M-X7QD",
+                "email": "new@example.org",
+                "password": "a-long-enough-password",
+            },
+        )
+        client.cookies.clear()
+        for code in ("TBN4-9K2M-X7QE", "TBN4-0000-EXPD", "TBN4-9K2M-X7QD"):
+            with self.subTest(code=code):
+                response = ask(code, "guess@example.org")
+                self.assertEqual(response.status_code, unissued.status_code)
+                self.assertEqual(response.json(), unissued.json())
+        # The owner of a spent code is still told it was used.
+        self.assertEqual(ask("TBN4-9K2M-X7QD", "new@example.org").json()["code"], "PRESS_CODE_USED")
 
     def test_an_expired_code_says_so(self) -> None:
         response = client.post(
@@ -940,6 +978,49 @@ class TestRateLimiting(unittest.TestCase):
             )
         self.assertIn(429, seen)
 
+    def test_a_forwarded_header_cannot_reset_the_allowance_behind_a_proxy(self) -> None:
+        # Behind CloudFront the caller writes the left of X-Forwarded-For and
+        # CloudFront appends the address it saw. Varying the caller's part on
+        # every attempt must not mint a fresh allowance.
+        with mock.patch.dict(os.environ, {"CEDAR_PRESS_TRUST_PROXY": "1"}):
+            seen = []
+            for i in range(30):
+                seen.append(
+                    client.post(
+                        "/auth/login",
+                        json={"email": "reader@example.org", "password": "wrong"},
+                        headers={"X-Forwarded-For": f"10.0.{i}.{i}, 198.51.100.7"},
+                    ).status_code
+                )
+        self.assertIn(429, seen)
+        self.assertEqual(seen.index(429), ratelimit.LOGIN_ATTEMPTS)
+
+    def test_subscribers_behind_the_proxy_keep_their_own_allowances(self) -> None:
+        # The other half: trusting no header at all behind a proxy would key
+        # everyone to the proxy's address, and one stranger's typos would lock
+        # out every subscriber.
+        with mock.patch.dict(os.environ, {"CEDAR_PRESS_TRUST_PROXY": "1"}):
+            for _ in range(ratelimit.LOGIN_ATTEMPTS + 2):
+                client.post(
+                    "/auth/login",
+                    json={"email": "reader@example.org", "password": "wrong"},
+                    headers={"X-Forwarded-For": "198.51.100.7"},
+                )
+            other = client.post(
+                "/auth/login",
+                json={"email": "reader@example.org", "password": "correct-horse"},
+                headers={"X-Forwarded-For": "198.51.100.8"},
+            )
+        self.assertEqual(other.status_code, 200)
+
+    def test_unreadable_proxy_settings_refuse_sign_in_rather_than_guess(self) -> None:
+        with mock.patch.dict(
+            os.environ, {"CEDAR_PRESS_TRUST_PROXY": "1", "CEDAR_PRESS_PROXY_HOPS": "zero"}
+        ):
+            response = sign_in()
+        self.assertEqual(response.status_code, 503)
+        self.assertEqual(response.json()["code"], "AUTH_CONFIGURATION_REQUIRED")
+
     def test_reading_is_not_rate_limited(self) -> None:
         # The limit is on guessing a secret, not on using the service.
         ratelimit.reset_for_tests()
@@ -1036,3 +1117,17 @@ class TestShapeTheResearch(unittest.TestCase):
         card = c.get("/press/influence").json()
         self.assertEqual(card["requests"][0]["title"], hits[0]["title"])
         self.assertEqual(c.post("/press/requests", json={"text": "short"}).status_code, 400)
+
+    def test_a_request_has_a_length_limit(self) -> None:
+        from cedar_press.app import MAX_REQUEST_TEXT, MAX_USE_CASE
+
+        c = self._sign_in("reader@example.org")
+        at_limit = c.post("/press/requests", json={"text": "x" * MAX_REQUEST_TEXT})
+        self.assertEqual(at_limit.status_code, 201, at_limit.text)
+        over = c.post("/press/requests", json={"text": "x" * (MAX_REQUEST_TEXT + 1)})
+        self.assertEqual(over.status_code, 422)
+        long_use = c.post(
+            "/press/requests",
+            json={"text": "a request long enough", "use_case": "u" * (MAX_USE_CASE + 1)},
+        )
+        self.assertEqual(long_use.status_code, 422)

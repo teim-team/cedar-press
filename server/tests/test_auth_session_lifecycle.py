@@ -241,6 +241,7 @@ class TestSessionLifecycle(unittest.TestCase):
             "DATABASE_URL": "postgresql://unused/synthetic",
             "CEDAR_PRESS_INSECURE_COOKIE": "0",
             "CEDAR_PRESS_ACCOUNTS": "",
+            "CEDAR_PRESS_TRUST_PROXY": "1",
         }
         with mock.patch.dict(os.environ, valid):
             session.validate_auth_configuration()
@@ -251,6 +252,10 @@ class TestSessionLifecycle(unittest.TestCase):
                 ("CEDAR_PRESS_INSECURE_COOKIE", "1"),
                 ("CEDAR_PRESS_ACCOUNTS", '{"example":{}}'),
                 ("CEDAR_PRESS_ENVIRONMENT", "unrecognized"),
+                # Unset behind CloudFront keys everyone to one address.
+                ("CEDAR_PRESS_TRUST_PROXY", ""),
+                ("CEDAR_PRESS_TRUST_PROXY", "true"),
+                ("CEDAR_PRESS_PROXY_HOPS", "0"),
             ):
                 with (
                     self.subTest(field=field, value=value),

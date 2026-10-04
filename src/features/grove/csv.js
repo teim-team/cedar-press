@@ -30,20 +30,29 @@ export function parseCsv(text) {
 }
 
 /**
- * One CSV cell. Quoted when the value needs it. A cell that a spreadsheet
- * would read as a formula (leading =, +, @, or a - that does not start a
- * number) gets a leading apostrophe, the way OWASP describes: the file is
- * opened in Excel by most readers, and "-4163330" must stay a number while
- * "=HYPERLINK(...)" must stay text. Programmatic readers see the apostrophe
- * only on those cells, and the README says so.
+ * A cell a spreadsheet would run as a formula, made text. Most readers open a
+ * download in Excel or Sheets, which execute a cell beginning with =, +, - or
+ * @ (and, in some versions, one beginning with a tab or carriage return, or
+ * with whitespace before one of those). Such a cell gets a leading
+ * apostrophe, the way OWASP describes. A negative number is the one
+ * exemption: "-4163330" must stay a number while "-1+HYPERLINK(...)", which
+ * starts like one, must not (Codex, PR #63). Programmatic readers see the
+ * apostrophe only on those cells, and the README says so.
+ *
+ * The API applies the same rule (server/cedar_press/csv_safety.py) and both
+ * suites read one table of cases, server/tests/fixtures/csv_formula_cases.json.
  */
 const NUMBER = /^-?\s*(\d[\d,]*)?(\.\d+)?$/;
 
-export function csvCell(value) {
-  let text = String(value ?? "");
-  // A leading minus is exempt only when the WHOLE value is a number:
-  // "-1+HYPERLINK(...)" starts like one and is not (Codex, PR #63).
-  if (/^[=+@]/.test(text) || /^[\t\r]/.test(text) || (/^-/.test(text) && !NUMBER.test(text))) text = `'${text}`;
-  return /[",\n\r]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+export function spreadsheetSafe(value) {
+  const text = String(value ?? "");
+  const formula = /^[\t\r]/.test(text) || /^[ \t\r\n]*[=+@]/.test(text)
+    || (/^[ \t\r\n]*-/.test(text) && !NUMBER.test(text.replace(/^[ \t\r\n]+|[ \t\r\n]+$/g, "")));
+  return formula ? `'${text}` : text;
 }
 
+/** One CSV cell: spreadsheet-safe, and quoted when the value needs it. */
+export function csvCell(value) {
+  const text = spreadsheetSafe(value);
+  return /[",\n\r]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+}

@@ -171,6 +171,7 @@ function RequestForm({ priorities, connected, canMove, available, onSubmitReques
         id="pri-text"
         className="cp-pri__text"
         rows={4}
+        maxLength={4000}
         value={text}
         onChange={(e) => { setText(e.target.value); setServerMatches(null); setSent(null); }}
         placeholder="I wish you had a dataset showing which tribal enterprises own which subsidiaries…"
@@ -187,6 +188,7 @@ function RequestForm({ priorities, connected, canMove, available, onSubmitReques
         id="pri-use"
         type="text"
         className="cp-pri__use"
+        maxLength={500}
         value={useCase}
         onChange={(e) => setUseCase(e.target.value)}
         placeholder={USE_PLACEHOLDER}

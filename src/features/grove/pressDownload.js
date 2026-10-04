@@ -32,10 +32,13 @@
 import { downloadCollection } from "../../api.js";
 import { isConnected } from "../../config.js";
 import { collectionCitation, collectionCsv, collectionPublicationHold, hasSample, samplePath, sampleTextMatchesRelease } from "./collection.js";
+import { spreadsheetSafe } from "./csv.js";
 import { coverageLabel } from "./pressAccess.js";
 import { recordStructure } from "./pressRecordStructure.js";
 
-const csvCell = (value) => `"${String(value ?? "").replace(/"/g, '""')}"`;
+// Every cell quoted, as this file has always been written, and spreadsheet-safe
+// by the one rule every CSV here shares (csv.js).
+const csvCell = (value) => `"${spreadsheetSafe(value).replace(/"/g, '""')}"`;
 
 /**
  * Whether a real extract exists for this collection. Everything else
