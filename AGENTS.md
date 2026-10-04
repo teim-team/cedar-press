@@ -9796,7 +9796,7 @@ longer refuses a component for `publication_class` restricted or withheld,
 `publication_status` (`internal`, `source_limited`) or a non-public field rights
 class; the partitioned-part, pinned-release and research-packet checks drop the
 same conditions; `source_presentation` no longer hides a row's source citation
-for a held or rights status (and `src/features/grove/sourcePresentation.js`
+for a held or rights status (and the site's `sourcePresentation.js`
 likewise). What still refuses: `tenant_private` (a customer's own data, an
 authorization boundary), `internal_only` working tables, malformed rights, and
 the field map's own consistency checks. The licensed-identifier column drops
