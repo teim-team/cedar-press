@@ -3,24 +3,31 @@
 Owner rules, 2026-10-04 (Elijah Moreno), for every published collection:
 
 1. Identifiers. Dataset and public registry identifiers stay; proprietary
-   identifiers (DUNS, Casino City) and retired internal Cedar identifier
-   schemes ("no CICD IDs") are removed (owner rules, 2026-10-04). Every
-   identifier a source dataset carries (lobbying, deal, disclosure, award,
-   activity, plot, permit and event IDs, source record IDs, supersession links
-   and the like), every public registry identifier (EIN, UEI, CAGE, FAIN,
-   document numbers and the like) and every current Cedar ID (``CE-``, ``CB-``,
-   the issued ``CEDAR-NEST-``, ``CEDAR-PLACE-`` and component ``CEDAR-``
-   identifiers, and NEED's issued ``NESTREL-`` relationship IDs) is kept.
-   Removed: DUNS in any form (a column whose name contains "duns", a value
-   whose identifier scheme is DUNS, a DUNS number in text); Casino City
+   identifiers (DUNS, Casino City) and outdated Cedar identifier schemes are
+   removed (owner rulings, 2026-10-04). The only Cedar identifiers a customer
+   sees are the Cedar Entity ID (``CE-``) and the Cedar Business ID (``CB-``);
+   an event is identified by its own dataset's event ID (``EVENT_ID_COLUMNS``),
+   never by another dataset's. Every identifier a source dataset carries
+   (lobbying, deal, disclosure, award, activity, plot, permit and event IDs,
+   source record IDs, supersession links and the like) and every public
+   registry identifier (EIN, UEI, CAGE, FAIN, document numbers and the like) is
+   kept. Removed: DUNS in any form (a column whose name contains "duns", a
+   value whose identifier scheme is DUNS, a DUNS number in text); Casino City
    identifiers and content (``CCP-``/``TPL-`` property keys, columns or values
-   naming Casino City); and the retired Cedar schemes in ``RETIRED_ID``: the
+   naming Casino City); every outdated Cedar scheme in ``RETIRED_ID``: the
    CICD/NEID entity handles (``TRBF-``, ``AKNF-`` and the other class-prefixed
-   handles, ``CEDAR-ENT-``, never-issued ``CEDAR-HOLD-``), the legacy facility
-   keys (``VP-``, ``CEDAR-FAC-``, ``CED-``), pre-migration ``PROV-`` keys,
-   codes naming NEID or CICD, and the columns that only hold them (``tribe_id``
-   and its variants, ``legacy_facility_id``, names containing ``neid`` or
-   ``cicd``). Nothing else is removed on identifier grounds.
+   handles), every ``CEDAR-`` namespace (``CEDAR-NEST-``, ``CEDAR-PLACE-``,
+   ``CEDAR-ENT-``, ``CEDAR-FAC-``, ``CEDAR-OBS-``, ``CEDAR-EVENT-``,
+   ``CEDAR-REL-``, ``CEDAR-SRC-``, ``CEDAR-CONTRACT-`` and the rest),
+   ``NESTREL-`` relationship keys, the legacy facility keys (``VP-``,
+   ``CED-``), pre-migration ``PROV-`` keys, codes naming NEID or CICD, and the
+   columns that only hold them (``tribe_id`` and its variants,
+   ``legacy_facility_id``, names containing ``neid`` or ``cicd``); and another
+   dataset's event IDs (``foreign_event_id``). A Cedar ID column whose value
+   was an outdated scheme takes the Cedar Entity or Business ID an exact
+   crosswalk binds it to, or is left blank and the row flagged
+   ``needs_cedar_id``; nothing is matched, minted or inferred. Nothing else is
+   removed on identifier grounds.
 2. Sources. A published source is a real public citation. A value that points
    at a local spreadsheet, path, terminal, desktop, workstation, dissertation
    workspace, notebook or "manual" entry is traced to the component's recorded
@@ -52,18 +59,17 @@ from collections.abc import Callable, Generator, Iterable, Mapping
 from typing import Any
 
 #: Internal only; never written into customer data.
-POLICY = "customer-sheet-2026-10-04.3"
+POLICY = "customer-sheet-2026-10-04.4"
 
 Row = dict[str, Any]
 
 # -- Rule 1: identifiers ------------------------------------------------------
 
-CEDAR_ID = re.compile(
-    r"^(?:CE-[0-9A-Z]{5}-[0-9A-Z]{2}"
-    r"|CB-[0-9]{7}"
-    r"|CEDAR-(?:NEST|PLACE|NEED)-[0-9]{6}-[0-9A-Z]{2}"
-    r"|CEDAR-(?:OBS|EVENT|REL|SRC|CONTRACT)-[0-9]{6,9})$"
-)
+#: The only Cedar identifiers in customer output (owner ruling 2026-10-04,
+#: Elijah Moreno): the Cedar Entity ID (``CE-00001-6S``) and the Cedar Business
+#: ID (``CB-0000001``), cedar-press docs/CEDAR_IDENTITY_SYSTEM_2026-09-13.md
+#: sections 1-2. Event IDs are each dataset's own (``EVENT_ID_COLUMNS``).
+CEDAR_ID = re.compile(r"^(?:CE-[0-9A-Z]{5}-[0-9A-Z]{2}|CB-[0-9]{7})$")
 #: Casino City property keys (``CCP-`` Casino City Press property numbers,
 #: ``TPL-`` Casino City's Tribal Property List; ``gaming.facilities``) and any
 #: value naming Casino City. Casino City is proprietary and not published.
@@ -72,22 +78,27 @@ CASINO_CITY_TEXT = re.compile(
     r"(?<![a-z])casino[ _-]?city(?![a-z])|(?<![A-Za-z0-9])(?:CCP|TPL)-[0-9]+(?![0-9])", re.I
 )
 CASINO_CITY_COLUMN = re.compile(r"casino[ _-]?city|(?:^|_)(?:ccp|tpl)(?:_|$)", re.I)
-#: Retired internal Cedar identifier schemes (owner, 2026-10-04: "no CICD
-#: IDs"). Each was minted by Cedar, not by a source or registry, and is
-#: superseded by a current Cedar ID: the CICD/NEID entity handles (class
-#: prefixes refused by cedar-press ``cedar_ids.RETIRED_ISSUANCE_PREFIXES``,
-#: shaped ``TRBF-CHKNAT-00`` or composite ``TRBF-POARCH-00-NIGC-...``; and
-#: ``CEDAR-ENT-``/``CEDAR-HOLD-``) replaced by ``CE-``; the legacy facility keys
-#: ``VP-``, ``CEDAR-FAC-`` and ``CED-`` replaced by ``CEDAR-PLACE-``; the
-#: pre-migration ``PROV-`` keys replaced by bound component IDs; and codes that
-#: name the NEID or CICD scheme (``cedar_neid``, ``NEID-0042``). Prose naming
-#: CICD, the Federal Reserve's Center for Indian Country Development, is not an
-#: identifier and stays.
+#: Outdated internal Cedar identifier schemes (owner rulings 2026-10-04: "no
+#: CICD IDs"; NESTREL-, TRBF-, VP-, CEDAR-FAC- and tribe_id are "all outdated").
+#: Each was minted by Cedar, not by a source or registry: the CICD/NEID entity
+#: handles (class prefixes refused by cedar-press
+#: ``cedar_ids.RETIRED_ISSUANCE_PREFIXES``, shaped ``TRBF-CHKNAT-00`` or
+#: composite ``TRBF-POARCH-00-NIGC-...``), superseded by ``CE-``; every
+#: ``CEDAR-`` namespace (the NEED enterprise key ``CEDAR-NEST-``, the place key
+#: ``CEDAR-PLACE-``, ``CEDAR-ENT-``, never-issued ``CEDAR-HOLD-``, the legacy
+#: ``CEDAR-FAC-`` and the component ``CEDAR-OBS-``/``-EVENT-``/``-REL-``/
+#: ``-SRC-``/``-CONTRACT-`` keys, none of which names its dataset);
+#: ``NESTREL-`` relationship keys; the legacy facility keys ``VP-`` and
+#: ``CED-``; the pre-migration ``PROV-`` keys; and codes that name the NEID or
+#: CICD scheme (``cedar_neid``, ``NEID-0042``). Prose naming CICD, the Federal
+#: Reserve's Center for Indian Country Development, is not an identifier and
+#: stays.
 _RETIRED_HANDLE_PREFIXES = "TRBF|TRBS|AKNF|ANVC|ANRC|CNSF|CNSS|NHO|ITO|TCU|CDFI|BIE|UIO|SGVF"
 _RETIRED_FORMS = (
     rf"(?:{_RETIRED_HANDLE_PREFIXES})-[A-Z0-9]{{3,10}}-[A-Z0-9]{{2}}(?:-[A-Z0-9]+)*"
-    r"|CEDAR-(?:ENT|HOLD)-[0-9]{6}(?:-[0-9A-Z]{2})?"
-    r"|(?:VP|CED|CEDAR-FAC)-[0-9]+"
+    r"|CEDAR-[A-Z]+-[0-9]+(?:-[0-9A-Z]{2})?"
+    r"|NESTREL-[0-9A-F]+"
+    r"|(?:VP|CED)-[0-9]+"
     r"|PROV-[A-Za-z0-9_-]+"
     r"|[A-Za-z0-9]+_(?i:neid|cicd)(?:_[A-Za-z0-9]+)*"
     r"|(?i:neid|cicd)_[A-Za-z0-9_]+"
@@ -99,6 +110,76 @@ RETIRED_ID_TEXT = re.compile(rf"(?<![A-Za-z0-9_.:-])(?:{_RETIRED_FORMS})(?![A-Za
 RETIRED_ID_COLUMN = re.compile(
     r"(?:^|_)tribe_ids?(?:_|$)|(?:^|_)(?:neid|cicd)(?:_|$)|^legacy_facility_ids?$", re.I
 )
+#: Cedar ID columns that identified a business, enterprise or facility by an
+#: outdated scheme (NEED's ``CEDAR-NEST-`` enterprise keys, Gaming's
+#: ``CEDAR-PLACE-`` facility keys). They now carry the Cedar Business ID, under
+#: these names, when an exact register binds one; otherwise they are blank and
+#: the row says ``needs_cedar_id``.
+BUSINESS_ID_RENAMES = {
+    "enterprise_id": "business_uid",
+    "parent_enterprise_id": "parent_business_uid",
+    "owner_enterprise_ids": "owner_business_uids",
+    "gaming_facility_id": "business_uid",
+}
+NEEDS_CEDAR_ID_COLUMN = "needs_cedar_id"
+#: Each event-grain collection's own event ID: the collection-scoped record ID
+#: naming one event in that dataset (cedar-press
+#: docs/CEDAR_IDENTITY_SYSTEM_2026-09-13.md section 5; code/525_event_ids.py:
+#: a stable key the source assigns is the event ID, and no surrogate is minted
+#: beside it). Registry-grain collections (need, gaming, owned, nonprofits,
+#: infrastructure, newsletters) and plot's land observations have no events.
+EVENT_ID_COLUMNS = {
+    "contractors": "transaction_id",
+    "deals": "deal_id",
+    "federal-register": "document_number",
+    "foundation-corporate-giving": "disclosure_id",
+    "funding": "transaction_id",
+    "legislation": "bill_id",
+    "lobbying": "activity_id",
+    "nagpra": "document_number",
+    "natural-resources": "resource_revenue_event_id",
+    "subcontracting": "subaward_record_id",
+}
+#: Event IDs a Cedar dataset issues in its own namespace, by owning collection:
+#: in any other collection's table they name another dataset's event and are
+#: removed (owner ruling 2026-10-04: no "lobbying event id in deals"). Public
+#: registry keys (Federal Register document numbers, FPDS and USAspending
+#: transaction keys, bill IDs) belong to their registry, not to a dataset, and
+#: stay wherever a source cites them; federal-register and nagpra share the
+#: Federal Register document number on purpose (a NAGPRA notice is a Federal
+#: Register document; cedar-press code/525_event_ids.py).
+DATASET_EVENT_ID_COLUMNS = {
+    "deal_id": "deals",
+    "deal_ids": "deals",
+    "deal_candidate_id": "deals",
+    "lobbying_activity_id": "lobbying",
+    "filing_uuid": "lobbying",
+    "resource_revenue_event_id": "natural-resources",
+    "disclosure_id": "foundation-corporate-giving",
+    "consultation_event_id": "federal-register",
+    "subaward_record_id": "subcontracting",
+}
+DATASET_EVENT_ID_FORMS = {
+    "deals": r"CEV-[0-9]{4}-[0-9A-F]{10}",
+    "lobbying": r"lda:[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}",
+    "natural-resources": r"RRE-[A-Za-z0-9_-]+",
+    "foundation-corporate-giving": r"FG-[0-9A-F]{20}",
+    "federal-register": r"CONS-FR-[A-Za-z0-9_-]+",
+}
+
+
+def _foreign_event_forms(collection: str) -> tuple[re.Pattern[str], re.Pattern[str]] | None:
+    """Whole-value and in-text patterns for every other dataset's event IDs."""
+    forms = [form for owner, form in DATASET_EVENT_ID_FORMS.items() if owner != collection]
+    if not forms:
+        return None
+    joined = "|".join(forms)
+    return (
+        re.compile(rf"^(?:{joined})$"),
+        re.compile(rf"(?<![A-Za-z0-9_.:-])(?:{joined})(?![A-Za-z0-9_-])"),
+    )
+
+
 #: Pipeline placeholders, not identifiers: an unbound key token or a
 #: "[legacy record]" stand-in carries no source value.
 PLACEHOLDER = re.compile(r"^(?:\[legacy record\]|GKEY~.*)$")
@@ -177,13 +258,16 @@ CEDAR_ID_COLUMNS = frozenset(
         "parent_enterprise_id",
         "owner_enterprise_ids",
         "gaming_facility_id",
+        "business_uid",
+        "parent_business_uid",
+        "owner_business_uids",
         "beneficiary_entity_id",
         "operator_entity_id",
         "payer_entity_id",
         "certifying_authority_entity_id",
     }
 )
-_CEDAR_NAME = re.compile(r"cedar_uids?$|cedar_business_uid$|(?:^|_)business_uid$")
+_CEDAR_NAME = re.compile(r"cedar_uids?$|cedar_business_uids?$|(?:^|_)business_uids?$")
 #: Internal checksums: a hash of Lumecon's own row, record, decision or
 #: manifest content. A hash that identifies a source document is kept.
 _CHECKSUM_NAME = re.compile(
@@ -310,7 +394,12 @@ LAYOUTS: dict[str, dict[str, Any]] = {
     },
     "gaming": {
         "grain": "One physical gaming facility, with its owning and operating entities.",
-        "main": [{"tables": ["gaming_grove_facilities"]}],
+        "main": [
+            {
+                "tables": ["gaming_grove_facilities"],
+                "rename": {"gaming_facility_id": "business_uid"},
+            }
+        ],
         "drop": ["cedar_place_id"],
         "attach": [
             {
@@ -321,7 +410,7 @@ LAYOUTS: dict[str, dict[str, Any]] = {
                 "columns": {
                     "owner_cedar_uids": ["cedar_uid", "distinct"],
                     "owner_names": ["party_name", "distinct"],
-                    "owner_enterprise_ids": ["enterprise_id", "distinct"],
+                    "owner_business_uids": ["enterprise_id", "distinct"],
                     "owner_source_urls": ["source_url", "distinct"],
                 },
             },
@@ -364,12 +453,18 @@ LAYOUTS: dict[str, dict[str, Any]] = {
         "main": [
             {
                 "tables": ["reviewed_public_base"],
-                "rename": {"evidence_pins": "source_urls"},
+                "rename": {
+                    "evidence_pins": "source_urls",
+                    "enterprise_id": "business_uid",
+                    "parent_enterprise_id": "parent_business_uid",
+                },
                 "attach_ref": "enterprises",
             },
             {
                 "tables": ["enterprises"],
                 "rename": {
+                    "enterprise_id": "business_uid",
+                    "parent_enterprise_id": "parent_business_uid",
                     "asserted_owner_hub_cedar_uid": "owner_cedar_uid",
                     "owner_hub_name": "owner_entity_name",
                     "parent_name": "parent_enterprise_name",
@@ -386,7 +481,7 @@ LAYOUTS: dict[str, dict[str, Any]] = {
                     "owner_cedar_uid": ["asserted_owner_hub_cedar_uid", "distinct"],
                     "owner_entity_name": ["owner_hub_name", "distinct"],
                     "owner_entity_class": ["owner_hub_entity_class", "distinct"],
-                    "parent_enterprise_id": ["parent_enterprise_id", "distinct"],
+                    "parent_business_uid": ["parent_enterprise_id", "distinct"],
                     "parent_enterprise_name": ["parent_name", "distinct"],
                 },
             }
@@ -605,11 +700,20 @@ def native_identity(collection: str, row: Mapping[str, Any]) -> tuple[str, Any]:
 
 LIST_SEPARATOR = "; "
 #: Column classes that never reach a customer: DUNS (``private_id``), Casino
-#: City (``proprietary_id``), retired Cedar schemes (``retired_id``), version
+#: City (``proprietary_id``), outdated Cedar schemes (``retired_id``), another
+#: dataset's event IDs (``foreign_event_id``), version
 #: labels, internal machinery (packaging, internal checksums, dedup and batch
 #: labels) and local file locations.
 REMOVED_CLASSES = frozenset(
-    {"private_id", "proprietary_id", "retired_id", "version", "internal", "local_source"}
+    {
+        "private_id",
+        "proprietary_id",
+        "retired_id",
+        "foreign_event_id",
+        "version",
+        "internal",
+        "local_source",
+    }
 )
 #: Identifier classes kept in the table.
 IDENTIFIER_CLASSES = frozenset({"cedar_id", "registry_id", "dataset_id"})
@@ -649,19 +753,23 @@ def column_class(collection: str, name: str) -> str:
     """How a source column is presented.
 
     Removed: ``private_id`` (DUNS), ``proprietary_id`` (Casino City),
-    ``retired_id`` (a retired Cedar scheme), ``version``, ``internal``
+    ``retired_id`` (an outdated Cedar scheme), ``foreign_event_id``,
+    ``version``, ``internal``
     (packaging, internal checksums, dedup and batch labels) and
     ``local_source``. Kept: ``cedar_id``, ``registry_id`` (listed
     public registries) and ``dataset_id`` (any other identifier the source
     dataset carries), whose values lose only DUNS, Casino City and retired
     Cedar scheme content;
     ``source`` values are checked for local origins; everything else is
-    ``data``. The decision depends on the name alone, so a preview and its
-    full table share a header. ``collection`` is accepted for callers that
-    pass it; no rule depends on it.
+    ``data``. The decision depends on the name and the collection alone, so a
+    preview and its full table share a header. The collection decides only
+    ``foreign_event_id``: a column naming another dataset's own event ID
+    (``DATASET_EVENT_ID_COLUMNS``); with no collection (``""``) none is foreign.
     """
-    del collection
     lowered = name.lower()
+    owner = DATASET_EVENT_ID_COLUMNS.get(lowered)
+    if owner and collection and owner != collection:
+        return "foreign_event_id"
     if is_private_identifier(lowered):
         return "private_id"
     if is_proprietary_identifier(lowered):
@@ -798,7 +906,10 @@ def public_origin(url: Any) -> str | None:
     return url if isinstance(url, str) and _URL.fullmatch(url.strip()) else None
 
 
-def _dropped_member(item: Any, *, identifier: bool) -> str | None:
+Foreign = tuple[re.Pattern[str], re.Pattern[str]] | None
+
+
+def _dropped_member(item: Any, *, identifier: bool, foreign: Foreign = None) -> str | None:
     """Why one value (or list member) is removed, or None to keep it."""
     if not isinstance(item, str):
         return None
@@ -807,6 +918,8 @@ def _dropped_member(item: Any, *, identifier: bool) -> str | None:
         return "casino_city_values_removed"
     if RETIRED_ID.fullmatch(text):
         return "retired_id_values_removed"
+    if foreign is not None and foreign[0].fullmatch(text):
+        return "foreign_event_id_values_removed"
     if PLACEHOLDER.fullmatch(text):
         return "placeholder_values_blanked"
     if not identifier and is_version_label(text):
@@ -815,7 +928,12 @@ def _dropped_member(item: Any, *, identifier: bool) -> str | None:
 
 
 def _scrub_data(
-    value: Any, counts: dict[str, int], *, edition: bool = False, identifier: bool = False
+    value: Any,
+    counts: dict[str, int],
+    *,
+    edition: bool = False,
+    identifier: bool = False,
+    foreign: Foreign = None,
 ) -> Any:
     """Remove Casino City content, retired Cedar IDs, DUNS tokens, placeholders
     and version labels.
@@ -834,15 +952,17 @@ def _scrub_data(
         # One value: removed whole when it is Casino City content, a retired
         # Cedar ID, a placeholder or a version label; a DUNS number or a
         # retired Cedar ID is cut out of text.
-        reason = _dropped_member(value, identifier=keep_versions)
+        reason = _dropped_member(value, identifier=keep_versions, foreign=foreign)
         if reason:
             counts[reason] += 1
             return None
-        return _without_duns(_without_retired(value, counts), counts)
+        return _without_duns(
+            _without_retired(_without_foreign(value, counts, foreign), counts), counts
+        )
     items, rebuild = found
     kept = []
     for item in items:
-        reason = _dropped_member(item, identifier=keep_versions)
+        reason = _dropped_member(item, identifier=keep_versions, foreign=foreign)
         if reason:
             counts[reason] += 1
         else:
@@ -851,7 +971,52 @@ def _scrub_data(
         if not any(not _blank(item) for item in kept):
             return None
         value = rebuild(kept)
-    return _without_duns(_without_retired(value, counts), counts)
+    return _without_duns(_without_retired(_without_foreign(value, counts, foreign), counts), counts)
+
+
+def _without_foreign(value: Any, counts: dict[str, int], foreign: Foreign) -> Any:
+    if foreign is not None and isinstance(value, str) and foreign[1].search(value):
+        counts["foreign_event_id_values_removed"] += 1
+        text = re.sub(r"\(\s*\)|\[\s*\]", "", foreign[1].sub("", value))
+        return re.sub(r"\s{2,}", " ", text).strip(" ;,|") or None
+    return value
+
+
+def _with_cedar_ids(
+    value: Any, crosswalk: Mapping[str, str], counts: dict[str, int]
+) -> tuple[Any, int]:
+    """A Cedar ID cell holding only Cedar Entity and Business IDs.
+
+    Any other member (an outdated Cedar scheme such as ``CEDAR-NEST-`` or
+    ``CEDAR-PLACE-``, or anything else that is not ``CE-``/``CB-``) becomes the
+    Cedar Entity or Business ID that ``crosswalk`` (an exact, reviewed register)
+    binds it to; with no binding it is removed and counted as unmapped. Nothing
+    is matched or minted. Returns the cell and the number of members left
+    unmapped.
+    """
+    if not isinstance(value, (str, list)):
+        return value, 0
+    found = _elements(value)
+    items, rebuild = found if found is not None else ([value], lambda kept: kept[0])
+    out: list[Any] = []
+    unmapped = 0
+    for item in items:
+        if _blank(item) or not isinstance(item, str) or is_cedar_id(item.strip()):
+            out.append(item)
+            continue
+        bound = crosswalk.get(item.strip())
+        if is_cedar_id(bound):
+            counts["cedar_ids_mapped"] += 1
+            out.append(bound)
+        else:
+            counts["cedar_ids_unmapped"] += 1
+            unmapped += 1
+    if not unmapped and out == items:
+        return value, 0
+    present = [item for item in out if not _blank(item)]
+    if not present:
+        return None, unmapped
+    return rebuild(list(dict.fromkeys(out)) if found is not None else out), unmapped
 
 
 def _without_retired(value: Any, counts: dict[str, int]) -> Any:
@@ -1009,9 +1174,27 @@ def plan(
             "sources": {},
         }
 
+    if any(
+        column["class"] == "cedar_id"
+        and (column.get("field") in BUSINESS_ID_RENAMES or name in BUSINESS_ID_RENAMES.values())
+        for name, column in columns.items()
+    ):
+        columns[NEEDS_CEDAR_ID_COLUMN] = {
+            "type": "string",
+            "unit": None,
+            "description": "yes when this record was identified by an outdated Cedar identifier "
+            "scheme that no exact register binds to a Cedar Entity or Business ID, so its Cedar "
+            "ID is blank until one is issued; otherwise no.",
+            "class": "data",
+            "needs_cedar_id": True,
+            "sources": {},
+        }
+
     def order(item: tuple[str, Row]) -> int:
         _name, column = item
         if column["class"] == "cedar_id" and not column.get("attach"):
+            return 0
+        if column.get("needs_cedar_id"):
             return 0
         if column["class"] == "source":
             return 3
@@ -1046,19 +1229,31 @@ def flatten(
     layout_plan: Mapping[str, Any],
     rows: Callable[[str], Iterable[Row]],
     origins: Mapping[str, str | None],
+    crosswalk: Mapping[str, str] | None = None,
 ) -> tuple[list[str], Generator[Row, None, None], dict[str, Any]]:
     """The customer table: header, row iterator and an internal report.
 
     ``rows(table)`` yields that table's already verified rows. ``origins`` maps
-    a table to its recorded public source URL for tracing local sources. Rows
-    are staged in a private temporary database, so every count in the report
-    is final before the first row is written.
+    a table to its recorded public source URL for tracing local sources.
+    ``crosswalk`` maps an outdated Cedar identifier to the Cedar Entity or
+    Business ID an exact, reviewed register binds it to (for example cedar-press
+    ``data/spine/cedar_retired_neid_crosswalk.csv``); it is never built by
+    matching. Rows are staged in a private temporary database, so every count
+    in the report is final before the first row is written.
     """
     columns = layout_plan["columns"]
+    bindings = crosswalk or {}
+    foreign = _foreign_event_forms(collection)
+    event_column = EVENT_ID_COLUMNS.get(collection)
     counts: dict[str, int] = {
         "rows": 0,
         "casino_city_values_removed": 0,
         "retired_id_values_removed": 0,
+        "cedar_ids_mapped": 0,
+        "cedar_ids_unmapped": 0,
+        "needs_cedar_id_rows": 0,
+        "foreign_event_id_values_removed": 0,
+        "event_id_missing": 0,
         "placeholder_values_blanked": 0,
         "version_label_values_blanked": 0,
         "duns_values_removed": 0,
@@ -1098,15 +1293,19 @@ def flatten(
             for row in rows(table):
                 row = _scheme_scrubbed(row, counts)
                 out: Row = {}
+                unmapped = 0
                 for target, column in columns.items():
-                    if column.get("attach") is not None:
+                    if column.get("attach") is not None or column.get("needs_cedar_id"):
                         continue
                     if target == main.get("kind"):
                         out[target] = main["labels"][table]
                         continue
                     source = column["sources"].get(table)
                     value = row.get(source) if source else None
-                    out[target] = _present(column, value, origin, counts)
+                    if column["class"] == "cedar_id":
+                        value, missed = _with_cedar_ids(value, bindings, counts)
+                        unmapped += missed
+                    out[target] = _present(column, value, origin, counts, foreign)
                 for slot, item in enumerate(attachments):
                     key = row.get(item["on"])
                     related = (
@@ -1129,7 +1328,12 @@ def flatten(
                         value = _aggregate(
                             [r.get(column["field"]) for r in related], column["aggregation"]
                         )
-                        out[target] = _present(column, value, origins.get(item["table"]), counts)
+                        if column["class"] == "cedar_id":
+                            value, missed = _with_cedar_ids(value, bindings, counts)
+                            unmapped += missed
+                        out[target] = _present(
+                            column, value, origins.get(item["table"]), counts, foreign
+                        )
                 if IDENTITY_COLUMN in columns and columns[IDENTITY_COLUMN].get("identity"):
                     attached = {
                         name: out.get(name)
@@ -1139,9 +1343,15 @@ def flatten(
                     basis, cited = native_identity(collection, {**row, **attached})
                     out[IDENTITY_COLUMN] = basis
                     out[IDENTITY_SOURCE_COLUMN] = _present(
-                        columns[IDENTITY_SOURCE_COLUMN], cited, origin, counts
+                        columns[IDENTITY_SOURCE_COLUMN], cited, origin, counts, foreign
                     )
                     identity_counts[basis] = identity_counts.get(basis, 0) + 1
+                if NEEDS_CEDAR_ID_COLUMN in columns:
+                    out[NEEDS_CEDAR_ID_COLUMN] = "yes" if unmapped else "no"
+                if unmapped:
+                    counts["needs_cedar_id_rows"] += 1
+                if event_column and event_column in columns and _blank(out.get(event_column)):
+                    counts["event_id_missing"] += 1
                 counts["rows"] += 1
                 store.execute("INSERT INTO out (payload) VALUES (?)", (json.dumps(out),))
         for slot, _item in enumerate(attachments):
@@ -1165,6 +1375,7 @@ def flatten(
         ],
         "dataset_id_columns": [name for name in header if columns[name]["class"] == "dataset_id"],
         "cedar_id_columns": [name for name in header if columns[name]["class"] == "cedar_id"],
+        "event_id_column": event_column if event_column in columns else None,
         "counts": counts,
     }
     if IDENTITY_COLUMN in columns:
@@ -1181,13 +1392,22 @@ def flatten(
     return header, staged(), report
 
 
-def _present(column: Row, value: Any, origin: str | None, counts: dict[str, int]) -> Any:
+def _present(
+    column: Row,
+    value: Any,
+    origin: str | None,
+    counts: dict[str, int],
+    foreign: Foreign = None,
+) -> Any:
     kind = column["class"]
     if kind == "source":
         if isinstance(value, str) and (
-            CASINO_CITY_TEXT.search(value) or RETIRED_ID_TEXT.search(value)
+            CASINO_CITY_TEXT.search(value)
+            or RETIRED_ID_TEXT.search(value)
+            or (foreign is not None and foreign[1].search(value))
         ):
-            # Casino City and retired Cedar IDs are never a published source.
+            # Casino City, outdated Cedar IDs and other datasets' event IDs are
+            # never a published source.
             value = origin or None
             counts["sources_" + ("traced" if origin else "blanked")] += 1
             return value
@@ -1200,6 +1420,7 @@ def _present(column: Row, value: Any, origin: str | None, counts: dict[str, int]
         counts,
         edition="vintage" in str(column.get("field") or ""),
         identifier=kind in IDENTIFIER_CLASSES,
+        foreign=foreign,
     )
 
 
@@ -1216,11 +1437,19 @@ def _scheme_scrubbed(row: Row, counts: dict[str, int]) -> Row:
     return row
 
 
-def check_table(header: Iterable[str], rows: Iterable[Mapping[str, Any]]) -> list[str]:
-    """Problems that would break the owner's rules in a finished customer table."""
+def check_table(
+    header: Iterable[str], rows: Iterable[Mapping[str, Any]], collection: str = ""
+) -> list[str]:
+    """Problems that would break the owner's rules in a finished customer table.
+
+    With ``collection``, another dataset's event IDs (columns and values) are
+    problems too, and a Cedar ID column may hold only Cedar Entity and Business
+    IDs.
+    """
     problems = []
     names = list(header)
-    classes = {name: column_class("", name) for name in names}
+    classes = {name: column_class(collection, name) for name in names}
+    foreign = _foreign_event_forms(collection) if collection else None
     for name in names:
         if classes[name] in REMOVED_CLASSES:
             problems.append(f"column {name}: {classes[name]}")
@@ -1232,6 +1461,13 @@ def check_table(header: Iterable[str], rows: Iterable[Mapping[str, Any]]) -> lis
             kind = classes[name]
             if kind == "source" and is_local_source(str(value)):
                 problems.append(f"row {index} {name}: local source")
+            if collection and kind == "cedar_id":
+                found = _elements(value)
+                members = found[0] if found is not None else [value]
+                if any(not _blank(m) and not is_cedar_id(str(m).strip()) for m in members):
+                    problems.append(f"row {index} {name}: not a Cedar Entity or Business ID")
+            if foreign is not None and isinstance(value, str) and foreign[1].search(value):
+                problems.append(f"row {index} {name}: another dataset's event ID")
             if isinstance(value, str) and (
                 CASINO_CITY_TEXT.search(value)
                 or RETIRED_ID_TEXT.search(value)
@@ -1248,6 +1484,7 @@ def present_rows(
     fields: list[Row],
     rows: Iterable[Row],
     origin: str | None = None,
+    crosswalk: Mapping[str, str] | None = None,
 ) -> tuple[list[str], list[Row], dict[str, Any]]:
     """One table's rows under the same rules, for bounded previews and samples.
 
@@ -1263,6 +1500,6 @@ def present_rows(
     sheet = plan(collection, {"rows": fields}, layout)
     materialized = list(rows)
     header, records, report = flatten(
-        collection, layout, sheet, lambda _name: iter(materialized), {"rows": origin}
+        collection, layout, sheet, lambda _name: iter(materialized), {"rows": origin}, crosswalk
     )
     return header, list(records), report

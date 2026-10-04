@@ -95,18 +95,24 @@ one subscription's ledger.
 Every spreadsheet and sample download is one flat table per collection, built
 by `cedar_press/customer_sheet.py` (vendored byte for byte from Lumecon-data
 `src/lumecon_data/customer_sheet.py`; `tests/test_customer_sheet_policy.py`
-compares the copies where the producer is installed). Dataset and public
-registry identifiers and current Cedar IDs stay; proprietary identifiers (DUNS,
-Casino City) and retired Cedar identifier schemes are removed (owner rules,
-2026-10-04: "no CICD IDs"): current Cedar IDs (`CE-`, `CB-`, `CEDAR-NEST-`,
-`CEDAR-PLACE-`, the component `CEDAR-` IDs, NEED's issued `NESTREL-` IDs), the
-public registry identifiers in `PUBLIC_REGISTRY_ID_COLUMNS` and every other
-identifier the source dataset carries ship as the source carries them; DUNS
-never ships; Casino City columns, `CCP-`/`TPL-` keys and values are removed;
-retired Cedar schemes (`RETIRED_ID`: the CICD/NEID handles such as
-`TRBF-CHKNAT-00`, `CEDAR-ENT-`, the `VP-`/`CEDAR-FAC-`/`CED-` facility keys,
-`PROV-` keys, NEID/CICD codes) are removed from every column, and the
-`tribe_id` and `legacy_facility_id` columns that hold them are not shown;
+compares the copies where the producer is installed). Owner rulings,
+2026-10-04: the only Cedar identifiers published are the Cedar Entity ID
+(`CE-00001-6S`) and the Cedar Business ID (`CB-0000001`); an event-grain row
+carries its own dataset's event ID (`EVENT_ID_COLUMNS`) and never another
+dataset's (`DATASET_EVENT_ID_COLUMNS`, `DATASET_EVENT_ID_FORMS`); the public
+registry identifiers in `PUBLIC_REGISTRY_ID_COLUMNS` and every other identifier
+the source dataset carries ship as the source carries them; DUNS never ships;
+Casino City columns, `CCP-`/`TPL-` keys and values are removed; outdated Cedar
+schemes (`RETIRED_ID`: the CICD/NEID handles such as `TRBF-CHKNAT-00`, every
+`CEDAR-` namespace including `CEDAR-NEST-` and the Gaming facility keys
+`CEDAR-PLACE-`, `NESTREL-`, the `VP-`/`CED-` facility keys, `PROV-` keys,
+NEID/CICD codes) are removed from every column, and the `tribe_id` and
+`legacy_facility_id` columns that hold them are not shown. A Cedar ID column
+holds only `CE-`/`CB-`: another value takes the ID the exact register
+`data/spine/cedar_retired_neid_crosswalk.csv` binds it to
+(`spreadsheet.cedar_id_crosswalk`), otherwise it is blank. NEED and Gaming show
+`business_uid` with `needs_cedar_id`; no Cedar Business ID is issued yet, so
+those rows read `yes`. No replacement place ID exists or is built;
 internal content checksums, dedup and batch labels stay internal; a local source value (path, spreadsheet, terminal, desktop, manual entry)
 is traced to the release's recorded public source URL or left blank; version
 columns and labels stay internal. `spreadsheet.download` presents the pinned
