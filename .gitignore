@@ -216,6 +216,10 @@ data/restricted/
 # Per-UEI recipient holds and rebinds (not not_native denials): the policy
 # input code/cedar_publication.recipient_holds() reads. Added 2026-10-02.
 !/data/cedar/recipient_holds.json
+# NEED attribution rulings (cedar_rulings format), vendored byte for byte from
+# Lumecon-data and applied by code/1189. Added 2026-10-04.
+!/data/cedar/need_attribution_rulings.csv
+!/data/cedar/need_attribution_rulings.source.json
 
 # Requirements / lockfiles, wherever they turn up.
 !requirements*.txt

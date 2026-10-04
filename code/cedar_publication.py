@@ -335,6 +335,19 @@ BLOCKED_STATES = {
         "HOLD": FLAG,                    # owner ruling 2026-10-04: no holds
         "WITHDRAWN_BY_1079": MASK,
     },
+    # -- need -----------------------------------------------------------------
+    # The owner's one legitimate hold (2026-10-04): a specific record whose owner
+    # link is attributed to the wrong entity. `code/1072` writes the guard code
+    # (`code/need_attribution.py`); the enterprise is real and ships, the owner
+    # link does not. A ruled correction or rejection reaches the same column
+    # through `code/1189` (the cedar_rulings file in Lumecon-data).
+    "attribution_refusal": {
+        "REFUSED_GENERIC_TOKEN_ONLY": MASK,
+        "REFUSED_VILLAGE_GOVERNMENT_ANCSA_CORPORATION": MASK,
+        "REFUSED_HUB_IS_THE_ENTERPRISE": MASK,
+        "REJECTED_BY_RULING": MASK,
+        "MISATTRIBUTION_FLAGGED": MASK,
+    },
     # -- lobbying -----------------------------------------------------------
     # KEPT AND FLAGGED, every value. A superseded LDA filing is a real filed
     # public record and the supersession is part of what a buyer is buying -
@@ -412,6 +425,11 @@ MASK_COLS = {
     "key_review_disposition": ("cedar_uid", "tribe_id", "tribe_canonical_name",
                                "cedar_spine_entity_id",
                                "cedar_spine_canonical_name", "cedar_link_key"),
+    "attribution_refusal": ("cedar_uid", "owner_hub_cedar_uid", "owner_hub_handle",
+                            "owner_hub_name", "owner_hub_entity_class",
+                            "owner_class", "owner_hub_state",
+                            "parent_enterprise_id", "parent_name",
+                            "parent_is_hub"),
 }
 
 # A boolean that ASSERTS the attribution. When a mask fires it must be set to

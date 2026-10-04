@@ -227,5 +227,33 @@ _edges, _refused, _, _, _ = _b.classify(
 check("explicit prior hand ruling is not automatically rejected by route quarantine",
       len(_edges) == 1 and not _refused and _edges[0]["source_review_status"] == "reviewed")
 
+print("\n=== tribe_id -> cedar_uid: rule 7 residue and handle/name agreement (2026-10-04) ===")
+# The NEED linkage audit found four owner hand rulings under a same-word sibling tribe.
+# Route 3 used to take the candidate with the MOST contained tokens; these are the
+# owner-row names it must now resolve to the tribe they name, against the real register.
+for _canon, _want in [
+    ("Flandreau Santee Sioux Tribe", "CE-0014E-C7"),          # was Santee Sioux, NE
+    ("Confederated Salish and Kootenai Tribes", "CE-0013X-1E"),  # was a Kootenai tie
+    ("Mashpee Wampanoag Tribe", "CE-0017D-NY"),               # not Aquinnah
+    ("Crow Tribe of Indians", "CE-0013W-VN"),                 # not Crow Creek
+    ("Oneida Nation of Wisconsin", "CE-0017Y-V7"),            # not Oneida (NY)
+    ("Santee Sioux Nation", "CE-0019J-XV"),                   # the real Santee still resolves
+    ("Kootenai Tribe of Idaho", "CE-0015Z-Q0"),
+]:
+    _uid, _method, _ = M.resolve_parent("TRBF-NOTLIVE-00", _canon, {}, {}, REG)
+    check("route 3 resolves %r to the tribe it names" % _canon, _uid == _want,
+          "%s via %s" % (_uid, _method))
+_uid, _method, _ = M.resolve_parent("TRBF-NOTLIVE-00", "Oneida Nation", {}, {}, REG)
+check("a name two tribes both account for stays unresolved", _uid == "" and "AMBIGUOUS" in _method)
+_k = next(r for r in REG if r["cedar_uid"] == "CE-0015Z-Q0")
+_bh = {"TRBF-KTNIID-00": dict(_k, handle="TRBF-KTNIID-00")}
+_uid, _method, _ = M.resolve_parent(
+    "TRBF-KTNIID-00", "Confederated Salish and Kootenai Tribes", _bh, {}, REG)
+check("a live handle whose row names another tribe is not silently taken",
+      _uid == "" and _method == "UNRESOLVED_HANDLE_NAME_DISAGREES", "%s %s" % (_uid, _method))
+_uid, _method, _ = M.resolve_parent("TRBF-KTNIID-00", "Kootenai Tribe of Idaho", _bh, {}, REG)
+check("a live handle whose row agrees still resolves by handle",
+      (_uid, _method) == ("CE-0015Z-Q0", "handle_exact"))
+
 print(f"\n{PASS} passed, {FAIL} failed")
 raise SystemExit(1 if FAIL else 0)

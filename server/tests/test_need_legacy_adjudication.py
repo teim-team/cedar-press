@@ -57,3 +57,47 @@ class NeedConflictEvidenceTest(unittest.TestCase):
             "published_value": "subsidiary",
         }
         self.assertEqual(self.producer.clear_unbound_conflict_adjudication(row), row)
+
+
+class RowBoundChugachAdjudicationTest(unittest.TestCase):
+    """The two rows the Chugach ruling was written for keep it (restored 2026-10-04)."""
+
+    @classmethod
+    def setUpClass(cls):
+        path = Path(__file__).parents[2] / "code/1102_need_corroboration_adjudication.py"
+        spec = importlib.util.spec_from_file_location("need_evidence_enricher_bound", path)
+        cls.producer = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(cls.producer)
+
+    def blanket(self, enterprise_id, name, owner="Chugach Alaska Corporation"):
+        return {
+            "enterprise_id": enterprise_id, "enterprise_name": name,
+            "owner_hub_name": owner, "published_value": "holding_company",
+            "adjudicated_by": "code/1102_need_corroboration_adjudication.py",
+            "adjudicated_date": "2026-09-23",
+            "adjudication": "UPHELD, and now on two of three sources; "
+                            "www.chugach.com/business/directory",
+            "third_source": "ANC_TRIBE_LOOKUP",
+            "third_source_says": "lists Chugach Commercial Holdings (CCH)",
+        }
+
+    def test_bound_rows_carry_the_row_specific_decision(self):
+        for eid, name in (("CEDAR-NEST-000473-WH", "Chugach Government Solutions, LLC"),
+                          ("CEDAR-NEST-000479-07", "Chugach Regional Development, LLC")):
+            result = self.producer.clear_unbound_conflict_adjudication(self.blanket(eid, name))
+            self.assertIn("published value `holding_company` stands", result["adjudication"])
+            self.assertIn("NEED_BUILD_LOG", result["adjudication"])
+            self.assertEqual(result["adjudication_hold_reason"], "")
+            self.assertEqual(result["published_value"], "holding_company")
+            # Restored even where a previous run already cleared the copy.
+            cleared = dict(result, adjudication="", adjudicated_by="", adjudicated_date="")
+            again = self.producer.clear_unbound_conflict_adjudication(cleared)
+            self.assertEqual(again["adjudication"], self.producer.ROW_BOUND_TEXT)
+
+    def test_copies_on_other_rows_stay_cleared(self):
+        for eid, name in (("CEDAR-NEST-000049-BS", "Ahtna Builders, LLC"),
+                          ("CEDAR-NEST-000473-WH", "Ahtna Builders, LLC"),
+                          ("CEDAR-NEST-000999-XX", "Chugach Government Solutions, LLC")):
+            result = self.producer.clear_unbound_conflict_adjudication(self.blanket(eid, name))
+            self.assertEqual(result["adjudication"], "")
+            self.assertIn("unadjudicated", result["adjudication_hold_reason"])

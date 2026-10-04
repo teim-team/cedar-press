@@ -163,8 +163,10 @@ THE NAMED INVARIANTS
 from __future__ import annotations
 
 # Recovery correction (2026-09-27): the historical Chugach discussion above is
-# not a row-level decision. This script no longer assigns that narrative to
-# conflict rows. The independent whole-NEED publication hold remains in force.
+# not a row-level decision for any other row. This script no longer assigns that
+# narrative to conflict rows; the two rows it was written for keep it as a
+# row-bound decision (ROW_BOUND_ADJUDICATIONS, 2026-10-04). There is no NEED
+# publication hold since the owner ruling of 2026-10-04.
 
 import csv
 import hashlib
@@ -283,6 +285,32 @@ def ledger_uid_bindings(ledger, history):
     return result
 
 
+# THE TWO ROWS THE CHUGACH ADJUDICATION WAS WRITTEN FOR (restored 2026-10-04).
+# The 2026-09-26 recovery cleared every recognizable copy of the blanket ruling,
+# including these two, for which it was never a copy: docs/NEED_BUILD_LOG.md
+# (2026-09-02, "The two that survive") adjudicates exactly Chugach Government
+# Solutions and Chugach Regional Development - audited filing `holding_company`,
+# web list `operating_company`, "The audited filing wins". Bound by enterprise_id
+# AND name, so the 50 copies on other owners stay cleared.
+ROW_BOUND_ADJUDICATIONS = {
+    "CEDAR-NEST-000473-WH": "chugach government solutions",
+    "CEDAR-NEST-000479-07": "chugach regional development",
+}
+ROW_BOUND_TEXT = (
+    "UPHELD (row-bound decision of 2026-09-02, docs/NEED_BUILD_LOG.md; restored "
+    "2026-10-04). The audited AS 45.55.139 filing records this firm as a "
+    "holding_company and the parent's website (www.chugach.com/business/directory) "
+    "as an operating_company. A consolidation note answers where an entity sits; "
+    "a business directory answers what a firm sells. The audited filing answers "
+    "the question the column asks: published value `holding_company` stands.")
+
+
+def _row_bound(row):
+    key = ROW_BOUND_ADJUDICATIONS.get((row.get("enterprise_id") or "").strip())
+    name = re.sub(r"[^a-z0-9 ]+", " ", (row.get("enterprise_name") or "").lower())
+    return bool(key) and " ".join(name.split()).startswith(key)
+
+
 def clear_unbound_conflict_adjudication(row):
     """Remove only this script's recognizable, unbound legacy Chugach claim.
 
@@ -292,6 +320,13 @@ def clear_unbound_conflict_adjudication(row):
     adjudication. Historical files are preserved by the writer's existing backup.
     """
     result = dict(row)
+    if _row_bound(row):
+        result["adjudicated_by"] = "code/1102_need_corroboration_adjudication.py"
+        result["adjudication"] = ROW_BOUND_TEXT
+        result["adjudication_hold_reason"] = ""
+        if not (result.get("adjudicated_date") or "").strip():
+            result["adjudicated_date"] = "2026-09-02"
+        return result
     if (
         row.get("adjudicated_by") == "code/1102_need_corroboration_adjudication.py"
         and (row.get("adjudication") or "").startswith("UPHELD, and now on two of three sources")

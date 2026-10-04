@@ -283,6 +283,6 @@ Classifications: **CODE** (fixed or fixable here, with a test), **EVIDENCE_IN_RE
 | plot | 151,715 | no extract | no extract |
 | subcontracting | 70,054 | subawards.csv 89,809 | source_dataset: different table |
 
-Withheld register names: 0 ({}). CEV ids in the served Deals preview: 0 of 10. Retired Explore overrides: 27; live override keys: none. Lobbying `superseded_by` after the fix: `superseded_by_record_id`. Scripts: 619 numbered, 601 referenced, 18 archived; census 688 scripts, maintenance {'ACTIVE': 165, 'DUPLICATE': 0, 'SUPERSEDED': 0, 'HISTORICAL-RETAIN': 38, 'SAFE-DELETE-CANDIDATE': 0, 'REQUIRES-REVIEW': 485}.
+Withheld register names: 0 ({}). CEV ids in the served Deals preview: 0 of 10. Retired Explore overrides: 27; live override keys: none. Lobbying `superseded_by` after the fix: `superseded_by_record_id`. Scripts: 619 numbered, 601 referenced, 18 archived; census 690 scripts, maintenance {'ACTIVE': 167, 'DUPLICATE': 0, 'SUPERSEDED': 0, 'HISTORICAL-RETAIN': 38, 'SAFE-DELETE-CANDIDATE': 0, 'REQUIRES-REVIEW': 485}.
 
 Not found, recorded so it is not re-investigated: no consumer file filters rows on `identity_scope` (GAP-12); no tracked file under `public/`, `data/cedar/`, `src/` or `server/cedar_press/` names a `CEV-*` id (GAP-05). GAP-11's 45 register names are no longer withheld: the owner ruled on 2026-10-02 that they are business records, and the producer rebuild that applies it is pending.

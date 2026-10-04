@@ -1263,17 +1263,17 @@
    "text_files_scanned": 2152
   },
   "census": {
-   "scripts": 688,
+   "scripts": 690,
    "operational_role_counts": {
     "active producer": 76,
-    "active validator/migration/review": 11,
+    "active validator/migration/review": 13,
     "historical": 18,
     "product consumer/shared service": 8,
     "test/fixture": 8,
     "unresolved": 567
    },
    "maintenance_status_counts": {
-    "ACTIVE": 165,
+    "ACTIVE": 167,
     "DUPLICATE": 0,
     "SUPERSEDED": 0,
     "HISTORICAL-RETAIN": 38,

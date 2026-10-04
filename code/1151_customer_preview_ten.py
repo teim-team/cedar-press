@@ -189,6 +189,16 @@ DULL = ("source_file", "build_date", "_basis", "_flag", "inflation_base_year",
         "n_capacity", "vintage")
 
 
+def _1189():
+    """`code/1189_need_attribution_rulings.py`, loaded by path."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "need_attribution_rulings_1189", ROOT / "code" / "1189_need_attribution_rulings.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
 def score_fallback(hdr, rows):
     """Only for a dataset with no curated list. Named by `verify`."""
     def ok(c):
@@ -357,6 +367,13 @@ def run(write: bool) -> int:
                         if j < POOL:
                             rows[j] = row
                 sampled_from[coll] = n_seen
+        if coll == "need":
+            # THE OWNER LINK IS CORRECTED BEFORE THE ROWS ARE CHOSEN (2026-10-04).
+            # 92 of the 100 NEED preview rows sat under the wrong owner; `1189`
+            # applies the attribution rulings and guards (re-attribute, or blank
+            # the owner of a specific misattribution - the row still ships), and
+            # doing it first lets `pick()` prefer rows whose owner stands.
+            _1189().annotate(rows)
         curated = PREVIEW.get(coll)
         if curated:
             cols = [c for c in curated if c in hdr]
