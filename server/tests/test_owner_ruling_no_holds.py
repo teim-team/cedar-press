@@ -35,7 +35,10 @@ class NoPublicationHold(unittest.TestCase):
         need = _collection("need")
         self.assertTrue(need["sample"]["path"])
         served = [t["sample_path"] for t in need["tables"] if t.get("sample_path")]
-        self.assertEqual(len(served), 3)
+        # Not a fixed count: main serves three legacy NEED tables and #132
+        # replaces them with one reviewed table. Every declared one must serve.
+        self.assertTrue(served)
+        self.assertEqual(len(served), len(need["tables"]))
         for path in served:
             with self.subTest(path=path):
                 file = ROOT / "public" / path.lstrip("/")
