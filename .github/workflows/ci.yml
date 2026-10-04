@@ -122,7 +122,7 @@ jobs:
     permissions:
       contents: read
     env:
-      LUMECON_DATA_SHA: bdb630841bc344872d79a444eadebcde61b21bb7  # Verified download runtime, producer PR #17
+      LUMECON_DATA_SHA: 363c13e21288421649829c5914f9826775f1e568  # Producer PR #17 with the 2026-10-04 rulings and NEED integration fixes
       CEDAR_REQUIRE_LUMECON_GAMING: "1"
     steps:
       - name: Require the Lumecon-data read token

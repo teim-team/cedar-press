@@ -51,6 +51,19 @@ fixes, schema repair, infrastructure and missing research stay with the coding
 workflow; only fully researched, genuinely ambiguous subject linkages belong in
 the owner's adjudication queue.
 
+## 2026-10-04 NEED integration
+
+NEED has no publication hold (owner ruling 2026-10-04, Elijah Moreno), and the
+consumer applies none: it presents NEED's `reviewed_public_base` (43 reviewed
+rows, release `428d1104...`) like any other component. The Gaming consumer job
+now installs producer `363c13e` (Lumecon-data #17), which carries the rights
+ruling and the producer-side NEED fixes. Merge order, the pins each repository
+expects, the commands that prove the chain and the open owner decisions (which
+NEED table customers get, re-cutting the pre-ruling release) are in the
+producer's [NEED integration checklist](https://github.com/teim-team/Lumecon-data/blob/363c13e21288421649829c5914f9826775f1e568/docs/need-integration-checklist.md).
+Rows that look like they lost their linkage context are flagged there for the
+identity audit, not changed.
+
 ## 2026-10-03 Infrastructure research acceptance
 
 The real-release research rehearsal now derives Grove-only handling from
