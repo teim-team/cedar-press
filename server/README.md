@@ -202,7 +202,7 @@ production eligibility or complete PLOT parcel/ownership coverage.
 The legacy dataset v1 format has no governed production eligibility label.
 Its full-download path now requires both `CEDAR_PRESS_ENVIRONMENT=development`
 and `LUMECON_ENVIRONMENT=review`; staging and production refuse before calling
-the data API. Collection releases retain their existing production/class gates.
+the data API. Collection releases keep their production gate; a rights class is recorded as provenance and no longer gates (owner ruling 2026-10-04), except `tenant_private`.
 Neither redistribution rights nor a successful database import issues a release.
 
 `tests/stream_release_rehearsal.py` runs saved native datasets, original
