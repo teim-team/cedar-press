@@ -1042,15 +1042,17 @@ test.describe("Explore the collections", () => {
     await expect(atlas.getByTestId("atlas-row")).toHaveCount(STOREFRONT_CATALOG.length);
     // Every collection on the reader's shelf is included and every one on
     // the Plus shelf is offered, Foundation & Corporate Giving and PLOT like
-    // the rest (owner, 2026-09-27). Owned alone is its own state: a release
-    // whose sample preview is not published.
+    // the rest (owner, 2026-09-27). Owned and NEED are their own state: a
+    // release whose sample preview is not published (NEED's previews are
+    // withheld under its publication hold since 2026-10-04).
+    const PENDING = ["owned", "need"];
     await expect(atlas.locator(".cp-atlas__included")).toHaveCount(
       STOREFRONT_CATALOG.filter((entry) => entry.shelf === "standard").length,
     );
     await expect(atlas.locator(".cp-atlas__locked")).toHaveCount(
-      STOREFRONT_CATALOG.filter((entry) => entry.shelf === "pro" && entry.id !== "owned").length,
+      STOREFRONT_CATALOG.filter((entry) => entry.shelf === "pro" && !PENDING.includes(entry.id)).length,
     );
-    await expect(atlas.locator(".cp-atlas__pending")).toHaveCount(1);
+    await expect(atlas.locator(".cp-atlas__pending")).toHaveCount(PENDING.length);
     await expect(atlas).not.toContainText(/not yet published|first release/i);
     // Neither states a row count, a span or a version: the cells are empty
     // rather than holding a placeholder.
