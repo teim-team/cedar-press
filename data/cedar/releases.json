@@ -409,6 +409,15 @@
           "of": 5820
         },
         "blockers": []
+      },
+      {
+        "version": "v3",
+        "date": "2026-10-04",
+        "name": "Cedar Native Entity Enterprise Dataset (NEED)",
+        "tables": 3,
+        "rowsLabel": "14,868 rows",
+        "preview": null,
+        "blockers": []
       }
     ],
     "natural-resources": [

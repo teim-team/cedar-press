@@ -87,6 +87,9 @@ from cedar_publication import (          # noqa: E402
     # name `SPINE` for the `data/spine` DIRECTORY, so the shared constant
     # had to say which it is. This file's local name is unchanged.
     SPINE_TABLES as SPINE,
+    # The 2026-10-04 rules: the NEED publication hold, a DUNS as a row's
+    # subject, contact data inside free text, and DUNS-named columns.
+    need_row_cleared, row_ok, redact_personal_contacts, is_proprietary_column,
 )
 
 csv.field_size_limit(10_000_000)
@@ -778,6 +781,13 @@ def keep(r: dict) -> bool:
     for col, ok in GATES.items():
         if col in r and (r.get(col) or "").strip() not in ok:
             return False
+    # The NEED hold and the DUNS-subject rule (2026-10-04). Identifier-based,
+    # so a NEED row is held whichever table carries it.
+    if not need_row_cleared(r)[0]:
+        return False
+    ok, why = row_ok(r)
+    if not ok and why == "proprietary:duns":
+        return False
     return True
 
 
@@ -1031,6 +1041,8 @@ def main() -> int:
         else:
             cols, rows = load(src)
         bad = [c for c in cols if c.lower() in NEVER]
+        # A licensed identifier column drops; it does not refuse the table.
+        cols = [c for c in cols if not is_proprietary_column(c)]
         if bad:
             unsafe.append(f"{did}: {tbl} carries {bad}")
             continue
@@ -1082,6 +1094,8 @@ def main() -> int:
             sparse.append((did, blank))
         if absent:
             notincols.append((did, absent))
+        for _r in rs:
+            redact_personal_contacts(_r)
         dst = OUT / f"{product_id(did)}__sample.csv"
         if not verify:
             with dst.open("w", encoding="utf-8", newline="") as fh:

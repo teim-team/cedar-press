@@ -74,6 +74,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from cedar_publication import (
     BLOCKED_STATES,
     DROP_COLS,
+    is_proprietary_column,
     MASK,
     MASK_COLS,
     MASK_FLAGS,
@@ -259,7 +260,8 @@ def audit_one(path: Path, vocab: set | None = None) -> dict:
         res["header"] = hdr
         res["columns"] = len(hdr)
         res["never_columns_present"] = [c for c in hdr if c in NEVER]
-        res["drop_columns_present"] = [c for c in hdr if c.lower() in lower_drop]
+        res["drop_columns_present"] = [c for c in hdr if c.lower() in lower_drop
+                                       or is_proprietary_column(c)]
         res["lineage_columns_present"] = [c for c in hdr if is_lineage_column(c)]
         lower_neid = {c.lower() for c in NEID_COLS} | {
             c.lower() for c in PROPOSED_COLS}

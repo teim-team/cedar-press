@@ -93,15 +93,6 @@
       "full_columns": 51
     },
     {
-      "dataset": "need",
-      "rows": 100,
-      "columns": 8,
-      "curated": 1,
-      "curated_columns_absent": "",
-      "distinct_entities": 100,
-      "full_columns": 85
-    },
-    {
       "dataset": "nonprofits",
       "rows": 100,
       "columns": 8,
@@ -118,6 +109,13 @@
       "curated_columns_absent": "",
       "distinct_entities": 100,
       "full_columns": 86
+    }
+  ],
+  "withheld": [
+    {
+      "dataset": "need",
+      "withheld_on": "2026-10-04",
+      "why": "NEED is under a whole-collection publication hold; none of the 100 preview rows is in the cleared set (data/cedar/need_cleared_enterprise_ids.json). Rebuilding with 1151 after 1137 applies the hold yields only cleared rows."
     }
   ]
 }

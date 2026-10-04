@@ -499,7 +499,7 @@ Collection `owned` · table `native_owned_businesses` · 4,273 rows in the full 
 
 ### Native Enterprises
 
-Collection `need` · table `need_enterprises` · 5,820 rows in the full table · Cedar Press+ shelf
+Collection `need` · table `need_enterprises` · Cedar Press+ shelf
 
 **One row is** One enterprise (a subsidiary, a joint venture, an affiliate) with the Native entity that owns or is affiliated with it and how.
 

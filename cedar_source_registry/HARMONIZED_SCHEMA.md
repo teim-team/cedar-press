@@ -15,7 +15,7 @@ Files in this package:
 |---|---|
 | `schema/source_record.schema.json` | JSON Schema for layer 1 — formalizes the workbook's "Recommended Schema" sheet |
 | `schema/harmonized_entity.schema.json` | JSON Schema for layer 2 — the entity template |
-| `templates/source_record.example.jsonl` | Worked layer-1 examples (real Tulalip record + illustrative cross-reference) |
+| `templates/source_record.example.jsonl` | Worked layer-1 examples (a synthetic TERO-shaped record + illustrative cross-reference; every name and contact value is invented) |
 | `templates/harmonized_entity.example.json` | Worked layer-2 example merging those records |
 | `templates/source_record.header.csv` | Empty CSV header for layer-1 exports |
 

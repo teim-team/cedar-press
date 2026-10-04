@@ -12,7 +12,7 @@ Generated from `data/cedar/field_map.json` and the sample headers by `scripts/fi
 
 | dataset | old_identifier | what_it_identified | cedar_uid_or_replacement | disposition | rows_affected (sample) | unresolved_count (sample) |
 |---|---|---|---|---|---:|---:|
-| `funding` | `recipient_duns` | the recipient in the pre-2022 federal record | recipient_uei and cedar_uid | internal_crosswalk | 10 | 0 |
+| `funding` | `recipient_duns` | the recipient in the pre-2022 federal record | recipient_uei and cedar_uid | internal_crosswalk | 0 | 0 |
 | `funding` | `attribution_status` | how the row was attributed, in a vocabulary naming the retired scheme | a recoded attribution_status vocabulary | retired_scheme | 10 | 10 |
 | `lobbying` | `entity_id` | the canonical Native entity, as a second spelling of cedar_uid on the same row | cedar_uid | alias_verified | 10 | 0 |
 | `lobbying` | `client_id` | the client in the LDA database | client_id, kept | object_id | 10 | 0 |
@@ -22,10 +22,10 @@ Generated from `data/cedar/field_map.json` and the sample headers by `scripts/fi
 | `natural-resources` | `beneficiary_entity_id` | the beneficiary, in its declared namespace | kept as beneficiary_entity_id | object_id | 10 | 0 |
 | `natural-resources` | `payer_entity_id` | the payer, in its declared namespace | kept as payer_entity_id | object_id | 10 | 0 |
 | `natural-resources` | `operator_entity_id` | the operator, in its declared namespace | kept as operator_entity_id | object_id | 0 | 0 |
-| `need` | `enterprise_id` | the enterprise (a business), not the Native entity | kept as enterprise_id | object_id | 10 | 0 |
-| `need` | `owner_hub_cedar_uid` | the canonical Native entity, as a second spelling of cedar_uid on the same row | cedar_uid | alias_verified | 10 | 0 |
-| `need` | `uei_candidate` | a candidate UEI for the enterprise | uei, where verified | internal_crosswalk | 0 | 0 |
-| `need` | `enterprise_existing_cedar_uid` | the enterprise as a register entity in its own right, distinct from its owner | Preserve internally; future same-legal-object relationship requires explicit evidence and contract. No identity merge. | internal_crosswalk | 1 | 0 |
+| `need` | `enterprise_id` | the enterprise (a business), not the Native entity | kept as enterprise_id | object_id | — | 0 |
+| `need` | `owner_hub_cedar_uid` | the canonical Native entity, as a second spelling of cedar_uid on the same row | cedar_uid | alias_verified | — | 0 |
+| `need` | `uei_candidate` | a candidate UEI for the enterprise | uei, where verified | internal_crosswalk | — | 0 |
+| `need` | `enterprise_existing_cedar_uid` | the enterprise as a register entity in its own right, distinct from its owner | Preserve internally; future same-legal-object relationship requires explicit evidence and contract. No identity merge. | internal_crosswalk | — | 0 |
 | `nonprofits` | `entity_id` | unknown: an earlier or different entity link that disagrees with cedar_uid on at least one row | cedar_uid | adjudicate | 2 | 2 |
 | `nonprofits` | `cedar_spine_entity_id` | the spine entity the organization was keyed to before a redirect that cedar_uid reflects and this column does not, on at least one row | cedar_uid | adjudicate | 9 | 9 |
 | `nonprofits` | `key_redirect_proposed_entity_id` | a proposed redirect of the entity link | cedar_uid, once the redirect is ruled | internal_crosswalk | 0 | 0 |
@@ -50,10 +50,6 @@ Supporting tables are not customer downloads, but the rule reaches the whole pip
 | `federal-register/nepa_administrative_record_parties` | `resolved_native_entity_id` |
 | `federal-register/nepa_eplanning_projects` | `tribe_ids_named_in_record` |
 | `federal-register/section_106_project_parties` | `resolved_native_entity_id` |
-| `funding/faads_identifier_coverage_by_agency_year` | `pct_with_duns`, `pct_with_duns_tribal_rows_only` |
-| `funding/faads_transactions` | `recipient_duns` |
-| `funding/faads_transactions_all_agencies` | `recipient_duns` |
-| `funding/funding_identifier_harvest` | `recipient_duns` |
 | `funding/native_passthrough` | `from_tribe_id`, `to_tribe_id` |
 | `funding/native_passthrough_pairs` | `from_tribe_id`, `to_tribe_id` |
 | `legislation/congressional_correspondence_log` | `tribe_entity_id` |
@@ -90,7 +86,7 @@ Supporting tables are not customer downloads, but the rule reaches the whole pip
 | `nonprofits/np_schedule_i_filers` | `filer_tribe_id_np_orgs`, `cedar_filer_spine_entity_id` |
 | `nonprofits/np_schedule_i_grants` | `recipient_np_orgs_tribe_id`, `recipient_entity_id`, `cedar_filer_spine_entity_id`, `cedar_recipient_spine_entity_id` |
 
-48 supporting tables carry such a column in their samples. Columns whose name ends in `_entity_id` are listed because they may hold a Cedar uid under another name (an alias to verify) or a non-Cedar namespace (an object id to keep, as Natural Resources' payer and operator ids are); each needs the same determination the flagship columns received.
+44 supporting tables carry such a column in their samples. Columns whose name ends in `_entity_id` are listed because they may hold a Cedar uid under another name (an alias to verify) or a non-Cedar namespace (an object id to keep, as Natural Resources' payer and operator ids are); each needs the same determination the flagship columns received.
 
 ## The rest of the pipeline
 

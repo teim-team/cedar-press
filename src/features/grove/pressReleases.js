@@ -110,10 +110,23 @@ export const DECLARED_CADENCE = Object.freeze(
  * note for a version the ledger does not hold fails a test, because a note
  * can only describe a release that shipped.
  *
- * Empty today. Every collection is on its first release, and what a first
- * release changed is said from the ledger's facts rather than typed.
+ * Otherwise what a release changed is said from the ledger's facts rather
+ * than typed. NEED v3 (2026-10-04) is noted because the generic text for a
+ * release with no preview ("the flagship table is unsettled") would be wrong:
+ * the flagship is settled and its sample was withdrawn under the collection's
+ * publication hold (code/cedar_publication.need_row_cleared).
  */
-export const RELEASE_NOTES = Object.freeze({});
+export const RELEASE_NOTES = Object.freeze({
+  need: Object.freeze({
+    v3: Object.freeze({
+      kind: RELEASE_KIND.DATA,
+      changed: Object.freeze([
+        "Release: 3 tables, 14,868 rows.",
+        "The ten-row previews are withdrawn. This collection's records are held for review before publication, and no preview is published until its rows are reviewed and cleared.",
+      ]),
+    }),
+  }),
+});
 
 /** The ledger's entries for a collection, oldest first, as recorded. */
 export function ledgerFor(id, source = ledger) {
