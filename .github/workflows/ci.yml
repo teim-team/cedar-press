@@ -122,7 +122,7 @@ jobs:
     permissions:
       contents: read
     env:
-      LUMECON_DATA_SHA: fff9ecbaf372ff45c897cae987519c4aee4c3a5c  # Producer PR #17: customer_sheet.py with the owner correction of 2026-10-04 (dataset and registry IDs stay; only DUNS and Casino City removed) and the native_identity_basis column
+      LUMECON_DATA_SHA: f776b2fa5f358dafa66e3d409986f79b73e1450a  # Producer PR #17: customer_sheet.py customer-sheet-2026-10-04.3 (owner rules of 2026-10-04: dataset, registry and current Cedar IDs stay; DUNS, Casino City and retired Cedar identifier schemes removed) and the native_identity_basis column
       CEDAR_REQUIRE_LUMECON_GAMING: "1"
     steps:
       - name: Require the Lumecon-data read token

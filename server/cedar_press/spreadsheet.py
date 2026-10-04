@@ -2,9 +2,10 @@
 
 The table follows the owner's rules of 2026-10-04 (Elijah Moreno), shared with the
 producer in ``customer_sheet`` (vendored byte for byte from Lumecon-data): one flat
-table at the collection's declared grain; Cedar IDs and every dataset and public
-registry identifier kept, only proprietary identifiers (DUNS, Casino City)
-removed (owner correction 2026-10-04); public sources only; no version labels.
+table at the collection's declared grain; current Cedar IDs and every dataset and
+public registry identifier kept, proprietary identifiers (DUNS, Casino City) and
+retired Cedar identifier schemes removed (owner rules 2026-10-04); public sources
+only; no version labels.
 Every component is still read through the pinned, byte-verified download path; the
 rules apply only to what is presented.
 """

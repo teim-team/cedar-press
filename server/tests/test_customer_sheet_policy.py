@@ -2,9 +2,10 @@
 
 ``cedar_press/customer_sheet.py`` is vendored byte for byte from Lumecon-data
 (``src/lumecon_data/customer_sheet.py``): the owner's rulings of 2026-10-04 --
-dataset and public registry identifiers stay and only proprietary identifiers
-(DUNS, Casino City) are removed, public-citation sources, one table per
-collection, no version labels -- are one set of rules on both sides.
+dataset and public registry identifiers and current Cedar IDs stay; proprietary
+identifiers (DUNS, Casino City) and retired Cedar identifier schemes ("no CICD
+IDs") are removed; public-citation sources, one table per collection, no
+version labels -- are one set of rules on both sides.
 """
 
 import csv
@@ -36,7 +37,8 @@ class VendoredPolicy(unittest.TestCase):
 
 
 class IdentifierRules(unittest.TestCase):
-    """Owner correction 2026-10-04: dataset IDs stay; DUNS and Casino City go."""
+    """Owner rules 2026-10-04: dataset and current Cedar IDs stay; DUNS, Casino
+    City and retired Cedar schemes go."""
 
     DATASET_IDS = {
         "deal_id": "ACQ2020-015",
@@ -54,7 +56,9 @@ class IdentifierRules(unittest.TestCase):
         "uei": "Y1WNAYBJH9Z6",
         "ein": "47-0000001",
         "cedar_uid": "CE-0017X-NE",
-        "legacy_facility_id": "VP-0170",
+        "enterprise_id": "CEDAR-NEST-000049-BS",
+        "enterprise_edge_id": "NESTREL-291D0B2DBBCBD1",
+        "gaming_facility_id": "CEDAR-PLACE-000123-AB",
     }
     REMOVED = {
         "recipient_duns": "123456789",
@@ -62,7 +66,20 @@ class IdentifierRules(unittest.TestCase):
         "row_sha256": "a" * 64,
         "schema_version": "v1.0",
         "record_key": '["K"]',
+        "legacy_facility_id": "VP-0170",
+        "tribe_id": "TRBF-CHKNAT-00",
+        "neid_join_status": "joined",
     }
+    RETIRED_VALUES = (
+        "TRBF-",
+        "AKNF-",
+        "CEDAR-ENT-",
+        "VP-",
+        "CEDAR-FAC-",
+        "CED-",
+        "PROV-",
+        "cedar_neid",
+    )
 
     def test_dataset_ids_are_presented_and_proprietary_ids_are_not(self):
         row = {
@@ -70,7 +87,11 @@ class IdentifierRules(unittest.TestCase):
             **self.REMOVED,
             "identifier_type": "DUNS",
             "identifier_value": "987654321",
-            "facility_keys": "CCP-843900; VP-0171",
+            "facility_keys": "CCP-843900; VP-0171; CEDAR-FAC-000011; CEDAR-PLACE-000123-AB",
+            "entity_ids": "TRBF-POARCH-00-NIGC-2007-0011-0010|CE-0016T-YK|CEDAR-ENT-000048",
+            "attribution_status": "cedar_neid",
+            "component_key": "PROV-OBS-ABCDEF123456",
+            "match_note": "matched AKNF-AFGNAK-00-KONIAG via CICD crosswalk, CED-12",
             "note": "listed by Casino City",
             "remark": "DUNS 123456789 per vendor list",
             "label": "v1.0",
@@ -83,13 +104,18 @@ class IdentifierRules(unittest.TestCase):
         for name in self.REMOVED:
             self.assertNotIn(name, header)
         self.assertIsNone(rows[0]["identifier_value"])
-        self.assertEqual(rows[0]["facility_keys"], "VP-0171")
+        self.assertEqual(rows[0]["facility_keys"], "CEDAR-PLACE-000123-AB")
+        self.assertEqual(rows[0]["entity_ids"], "CE-0016T-YK")
+        self.assertIsNone(rows[0]["attribution_status"])
+        self.assertIsNone(rows[0]["component_key"])
+        self.assertEqual(rows[0]["match_note"], "matched via CICD crosswalk")
         self.assertIsNone(rows[0]["note"])
         self.assertEqual(rows[0]["remark"], "per vendor list")
         self.assertIsNone(rows[0]["label"])
         text = repr(rows)
-        for leaked in ("123456789", "987654321", "CCP-", "Casino City"):
+        for leaked in ("123456789", "987654321", "CCP-", "Casino City", *self.RETIRED_VALUES):
             self.assertNotIn(leaked, text)
+        self.assertGreater(report["counts"]["retired_id_values_removed"], 0)
         self.assertIn("deal_id", report["dataset_id_columns"])
         self.assertIn("uei", report["public_registry_id_columns"])
         self.assertEqual(customer_sheet.check_table(header, rows), [])

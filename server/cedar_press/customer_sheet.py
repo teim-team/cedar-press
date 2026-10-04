@@ -2,17 +2,25 @@
 
 Owner rules, 2026-10-04 (Elijah Moreno), for every published collection:
 
-1. Identifiers. Dataset and public registry identifiers stay; only proprietary
-   identifiers (DUNS, Casino City) are removed (owner correction, 2026-10-04).
-   Every identifier a source dataset carries (lobbying, deal, disclosure,
-   award, activity, plot, permit and event IDs, source record IDs, supersession
-   links and the like), every public registry identifier (EIN, UEI, CAGE,
-   FAIN, document numbers and the like) and every Cedar ID (``CE-``, ``CB-``
-   and ``CEDAR-`` identifiers) is kept. Removed: DUNS in any form (a column
-   whose name contains "duns", a value whose identifier scheme is DUNS, a DUNS
-   number in text) and Casino City identifiers and content (Casino City is not
-   published at all: ``CCP-``/``TPL-`` property keys, columns or values naming
-   Casino City). Nothing else is removed on identifier grounds.
+1. Identifiers. Dataset and public registry identifiers stay; proprietary
+   identifiers (DUNS, Casino City) and retired internal Cedar identifier
+   schemes ("no CICD IDs") are removed (owner rules, 2026-10-04). Every
+   identifier a source dataset carries (lobbying, deal, disclosure, award,
+   activity, plot, permit and event IDs, source record IDs, supersession links
+   and the like), every public registry identifier (EIN, UEI, CAGE, FAIN,
+   document numbers and the like) and every current Cedar ID (``CE-``, ``CB-``,
+   the issued ``CEDAR-NEST-``, ``CEDAR-PLACE-`` and component ``CEDAR-``
+   identifiers, and NEED's issued ``NESTREL-`` relationship IDs) is kept.
+   Removed: DUNS in any form (a column whose name contains "duns", a value
+   whose identifier scheme is DUNS, a DUNS number in text); Casino City
+   identifiers and content (``CCP-``/``TPL-`` property keys, columns or values
+   naming Casino City); and the retired Cedar schemes in ``RETIRED_ID``: the
+   CICD/NEID entity handles (``TRBF-``, ``AKNF-`` and the other class-prefixed
+   handles, ``CEDAR-ENT-``, never-issued ``CEDAR-HOLD-``), the legacy facility
+   keys (``VP-``, ``CEDAR-FAC-``, ``CED-``), pre-migration ``PROV-`` keys,
+   codes naming NEID or CICD, and the columns that only hold them (``tribe_id``
+   and its variants, ``legacy_facility_id``, names containing ``neid`` or
+   ``cicd``). Nothing else is removed on identifier grounds.
 2. Sources. A published source is a real public citation. A value that points
    at a local spreadsheet, path, terminal, desktop, workstation, dissertation
    workspace, notebook or "manual" entry is traced to the component's recorded
@@ -44,7 +52,7 @@ from collections.abc import Callable, Generator, Iterable, Mapping
 from typing import Any
 
 #: Internal only; never written into customer data.
-POLICY = "customer-sheet-2026-10-04.2"
+POLICY = "customer-sheet-2026-10-04.3"
 
 Row = dict[str, Any]
 
@@ -53,7 +61,7 @@ Row = dict[str, Any]
 CEDAR_ID = re.compile(
     r"^(?:CE-[0-9A-Z]{5}-[0-9A-Z]{2}"
     r"|CB-[0-9]{7}"
-    r"|CEDAR-(?:NEST|PLACE|ENT|NEED)-[0-9]{6}-[0-9A-Z]{2}"
+    r"|CEDAR-(?:NEST|PLACE|NEED)-[0-9]{6}-[0-9A-Z]{2}"
     r"|CEDAR-(?:OBS|EVENT|REL|SRC|CONTRACT)-[0-9]{6,9})$"
 )
 #: Casino City property keys (``CCP-`` Casino City Press property numbers,
@@ -64,6 +72,33 @@ CASINO_CITY_TEXT = re.compile(
     r"(?<![a-z])casino[ _-]?city(?![a-z])|(?<![A-Za-z0-9])(?:CCP|TPL)-[0-9]+(?![0-9])", re.I
 )
 CASINO_CITY_COLUMN = re.compile(r"casino[ _-]?city|(?:^|_)(?:ccp|tpl)(?:_|$)", re.I)
+#: Retired internal Cedar identifier schemes (owner, 2026-10-04: "no CICD
+#: IDs"). Each was minted by Cedar, not by a source or registry, and is
+#: superseded by a current Cedar ID: the CICD/NEID entity handles (class
+#: prefixes refused by cedar-press ``cedar_ids.RETIRED_ISSUANCE_PREFIXES``,
+#: shaped ``TRBF-CHKNAT-00`` or composite ``TRBF-POARCH-00-NIGC-...``; and
+#: ``CEDAR-ENT-``/``CEDAR-HOLD-``) replaced by ``CE-``; the legacy facility keys
+#: ``VP-``, ``CEDAR-FAC-`` and ``CED-`` replaced by ``CEDAR-PLACE-``; the
+#: pre-migration ``PROV-`` keys replaced by bound component IDs; and codes that
+#: name the NEID or CICD scheme (``cedar_neid``, ``NEID-0042``). Prose naming
+#: CICD, the Federal Reserve's Center for Indian Country Development, is not an
+#: identifier and stays.
+_RETIRED_HANDLE_PREFIXES = "TRBF|TRBS|AKNF|ANVC|ANRC|CNSF|CNSS|NHO|ITO|TCU|CDFI|BIE|UIO|SGVF"
+_RETIRED_FORMS = (
+    rf"(?:{_RETIRED_HANDLE_PREFIXES})-[A-Z0-9]{{3,10}}-[A-Z0-9]{{2}}(?:-[A-Z0-9]+)*"
+    r"|CEDAR-(?:ENT|HOLD)-[0-9]{6}(?:-[0-9A-Z]{2})?"
+    r"|(?:VP|CED|CEDAR-FAC)-[0-9]+"
+    r"|PROV-[A-Za-z0-9_-]+"
+    r"|[A-Za-z0-9]+_(?i:neid|cicd)(?:_[A-Za-z0-9]+)*"
+    r"|(?i:neid|cicd)_[A-Za-z0-9_]+"
+    r"|(?i:neid|cicd)-[0-9][A-Za-z0-9-]*"
+)
+RETIRED_ID = re.compile(rf"^(?:{_RETIRED_FORMS})$")
+RETIRED_ID_TEXT = re.compile(rf"(?<![A-Za-z0-9_.:-])(?:{_RETIRED_FORMS})(?![A-Za-z0-9_-])")
+#: Columns that only ever hold a retired scheme.
+RETIRED_ID_COLUMN = re.compile(
+    r"(?:^|_)tribe_ids?(?:_|$)|(?:^|_)(?:neid|cicd)(?:_|$)|^legacy_facility_ids?$", re.I
+)
 #: Pipeline placeholders, not identifiers: an unbound key token or a
 #: "[legacy record]" stand-in carries no source value.
 PLACEHOLDER = re.compile(r"^(?:\[legacy record\]|GKEY~.*)$")
@@ -570,9 +605,12 @@ def native_identity(collection: str, row: Mapping[str, Any]) -> tuple[str, Any]:
 
 LIST_SEPARATOR = "; "
 #: Column classes that never reach a customer: DUNS (``private_id``), Casino
-#: City (``proprietary_id``), version labels, internal machinery (packaging,
-#: internal checksums, dedup and batch labels) and local file locations.
-REMOVED_CLASSES = frozenset({"private_id", "proprietary_id", "version", "internal", "local_source"})
+#: City (``proprietary_id``), retired Cedar schemes (``retired_id``), version
+#: labels, internal machinery (packaging, internal checksums, dedup and batch
+#: labels) and local file locations.
+REMOVED_CLASSES = frozenset(
+    {"private_id", "proprietary_id", "retired_id", "version", "internal", "local_source"}
+)
 #: Identifier classes kept in the table.
 IDENTIFIER_CLASSES = frozenset({"cedar_id", "registry_id", "dataset_id"})
 
@@ -597,14 +635,26 @@ def is_proprietary_identifier(name: str) -> bool:
     return CASINO_CITY_COLUMN.search(name) is not None
 
 
+def is_retired_identifier(name: str) -> bool:
+    """A column that only holds a retired Cedar scheme (owner, 2026-10-04)."""
+    return RETIRED_ID_COLUMN.search(name) is not None
+
+
+def is_retired_id(value: Any) -> bool:
+    """A whole value in a retired Cedar identifier scheme."""
+    return isinstance(value, str) and RETIRED_ID.fullmatch(value.strip()) is not None
+
+
 def column_class(collection: str, name: str) -> str:
     """How a source column is presented.
 
     Removed: ``private_id`` (DUNS), ``proprietary_id`` (Casino City),
-    ``version``, ``internal`` (packaging, internal checksums, dedup and batch
-    labels) and ``local_source``. Kept: ``cedar_id``, ``registry_id`` (listed
+    ``retired_id`` (a retired Cedar scheme), ``version``, ``internal``
+    (packaging, internal checksums, dedup and batch labels) and
+    ``local_source``. Kept: ``cedar_id``, ``registry_id`` (listed
     public registries) and ``dataset_id`` (any other identifier the source
-    dataset carries), whose values lose only DUNS and Casino City content;
+    dataset carries), whose values lose only DUNS, Casino City and retired
+    Cedar scheme content;
     ``source`` values are checked for local origins; everything else is
     ``data``. The decision depends on the name alone, so a preview and its
     full table share a header. ``collection`` is accepted for callers that
@@ -616,6 +666,8 @@ def column_class(collection: str, name: str) -> str:
         return "private_id"
     if is_proprietary_identifier(lowered):
         return "proprietary_id"
+    if is_retired_identifier(lowered):
+        return "retired_id"
     if lowered in VERSION_RENAMES:
         return "data"
     if _VERSION_NAME.search(lowered):
@@ -753,6 +805,8 @@ def _dropped_member(item: Any, *, identifier: bool) -> str | None:
     text = item.strip()
     if CASINO_CITY_TEXT.search(text):
         return "casino_city_values_removed"
+    if RETIRED_ID.fullmatch(text):
+        return "retired_id_values_removed"
     if PLACEHOLDER.fullmatch(text):
         return "placeholder_values_blanked"
     if not identifier and is_version_label(text):
@@ -763,7 +817,8 @@ def _dropped_member(item: Any, *, identifier: bool) -> str | None:
 def _scrub_data(
     value: Any, counts: dict[str, int], *, edition: bool = False, identifier: bool = False
 ) -> Any:
-    """Remove Casino City content, DUNS tokens, placeholders and version labels.
+    """Remove Casino City content, retired Cedar IDs, DUNS tokens, placeholders
+    and version labels.
 
     Identifier values (Cedar, registry and dataset IDs) are otherwise kept as
     the source carries them; a version-shaped identifier is still an
@@ -776,13 +831,14 @@ def _scrub_data(
     keep_versions = identifier or edition
     found = _elements(value)
     if found is None:
-        # One value: removed whole when it is Casino City content, a
-        # placeholder or a version label; a DUNS number is cut out of text.
+        # One value: removed whole when it is Casino City content, a retired
+        # Cedar ID, a placeholder or a version label; a DUNS number or a
+        # retired Cedar ID is cut out of text.
         reason = _dropped_member(value, identifier=keep_versions)
         if reason:
             counts[reason] += 1
             return None
-        return _without_duns(value, counts)
+        return _without_duns(_without_retired(value, counts), counts)
     items, rebuild = found
     kept = []
     for item in items:
@@ -795,7 +851,15 @@ def _scrub_data(
         if not any(not _blank(item) for item in kept):
             return None
         value = rebuild(kept)
-    return _without_duns(value, counts)
+    return _without_duns(_without_retired(value, counts), counts)
+
+
+def _without_retired(value: Any, counts: dict[str, int]) -> Any:
+    if isinstance(value, str) and RETIRED_ID_TEXT.search(value):
+        counts["retired_id_values_removed"] += 1
+        text = re.sub(r"\(\s*\)|\[\s*\]", "", RETIRED_ID_TEXT.sub("", value))
+        return re.sub(r"\s{2,}", " ", text).strip(" ;,|") or None
+    return value
 
 
 def _without_duns(value: Any, counts: dict[str, int]) -> Any:
@@ -994,6 +1058,7 @@ def flatten(
     counts: dict[str, int] = {
         "rows": 0,
         "casino_city_values_removed": 0,
+        "retired_id_values_removed": 0,
         "placeholder_values_blanked": 0,
         "version_label_values_blanked": 0,
         "duns_values_removed": 0,
@@ -1119,8 +1184,10 @@ def flatten(
 def _present(column: Row, value: Any, origin: str | None, counts: dict[str, int]) -> Any:
     kind = column["class"]
     if kind == "source":
-        if isinstance(value, str) and CASINO_CITY_TEXT.search(value):
-            # Casino City is never a published source.
+        if isinstance(value, str) and (
+            CASINO_CITY_TEXT.search(value) or RETIRED_ID_TEXT.search(value)
+        ):
+            # Casino City and retired Cedar IDs are never a published source.
             value = origin or None
             counts["sources_" + ("traced" if origin else "blanked")] += 1
             return value
@@ -1167,6 +1234,7 @@ def check_table(header: Iterable[str], rows: Iterable[Mapping[str, Any]]) -> lis
                 problems.append(f"row {index} {name}: local source")
             if isinstance(value, str) and (
                 CASINO_CITY_TEXT.search(value)
+                or RETIRED_ID_TEXT.search(value)
                 or PLACEHOLDER.fullmatch(value.strip())
                 or _DUNS_TOKEN.search(value)
                 or (kind not in IDENTIFIER_CLASSES and is_version_label(value))
