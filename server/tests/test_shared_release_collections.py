@@ -340,7 +340,11 @@ class SharedCollectionReleaseTest(unittest.TestCase):
         # Owner ruling 2026-10-04: only `internal_only` still refuses; a
         # publication_hold flag or a review status no longer does (see
         # test_review_states_no_longer_hold_a_component).
-        holds = ({"internal_only": True},)
+        holds = (
+            {"internal_only": True},
+            {"publication_status": "internal"},
+            {"publication_status": "source_limited"},
+        )
         with (
             patch.object(repository, "_grove_manifest", return_value=manifest),
             patch.object(repository, "_release_response") as rows,
