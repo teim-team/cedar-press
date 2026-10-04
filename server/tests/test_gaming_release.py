@@ -986,21 +986,10 @@ class PinnedLumeconReleaseTest(_ServerCase):
         self.assertEqual(
             self.get("gaming_facility_crosswalk", self.a["release_id"])[0].status_code, 503
         )
-        # A presented component whose download Lumecon does not permit is refused.
-        manifest = self.metadata(self.verify(self.store_a, "gaming", self.a["release_id"]))
-        history = manifest["components"]["gaming_facility_history"]
-        self.assertIs(history["download_permitted"], False)
-        tables = copy.deepcopy(repository._field_map_tables())
-        tables["gaming/gaming_facility_history"] = {
-            "collection": "gaming",
-            "order": [f["name"] for f in history["fields"]],
-            "fields": [],
-        }
-        with patch.object(repository, "_field_map_tables", return_value=tables):
-            self.assertEqual(
-                self.get("gaming_facility_history", self.a["release_id"])[0].status_code, 503
-            )
-        self.assertFalse(any(p.endswith("gaming_facility_history/download") for p in self.fetched))
+        # Owner ruling 2026-10-04 (Elijah Moreno): Lumecon transforms the data it
+        # publishes; a table's `download_permitted` is rights provenance and no
+        # longer refuses a presented component here, whichever value the pinned
+        # Lumecon release records for it.
         # A catalog of per-table dataset releases cannot stand in for the collection.
         entry = json.loads(Path(self.a["catalog_path"]).read_bytes())["collection_releases"][0]
         per_table = {
