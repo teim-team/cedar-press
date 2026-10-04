@@ -197,13 +197,17 @@ def packet(tier: str, collection: str, release_id: str, component: str | None = 
             raise repository.FullReleaseUnavailable("Preview row checksum mismatch")
         verified.append(row)
     # Verified first, then presented under the owner's rules of 2026-10-04:
-    # Cedar IDs and listed public registry IDs only, public sources only, no
-    # version labels. The packet and its hashes are unchanged.
+    # Cedar Entity and Business IDs, each dataset's own event IDs and listed
+    # public registry IDs only, public sources only, no version labels. The
+    # packet and its hashes are unchanged.
+    from cedar_press.spreadsheet import cedar_id_crosswalk
+
     by_name = {field["name"]: field for field in fields}
     header, presented, _report = customer_sheet.present_rows(
         collection,
         [{"name": name, "type": by_name.get(name, {}).get("type")} for name in release["fields"]],
         verified,
+        crosswalk=cedar_id_crosswalk(),
     )
     renamed = {**customer_sheet.VERSION_RENAMES}
     shown = set(header)
@@ -232,7 +236,8 @@ def packet(tier: str, collection: str, release_id: str, component: str | None = 
             renamed.get(name, name)
             for name in declaration.get("display_order", release["fields"])
             if name not in PRIVATE_FIELDS and renamed.get(name, name) in shown
-        ],
+        ]
+        + [name for name in (customer_sheet.NEEDS_CEDAR_ID_COLUMN,) if name in shown],
         "codebook": {
             "row_grain": codebook["row_grain"],
             "primary_key": [name for name in codebook["primary_key"] if name in shown],

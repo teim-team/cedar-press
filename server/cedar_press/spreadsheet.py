@@ -2,10 +2,14 @@
 
 The table follows the owner's rules of 2026-10-04 (Elijah Moreno), shared with the
 producer in ``customer_sheet`` (vendored byte for byte from Lumecon-data): one flat
-table at the collection's declared grain; current Cedar IDs and every dataset and
-public registry identifier kept, proprietary identifiers (DUNS, Casino City) and
-retired Cedar identifier schemes removed (owner rules 2026-10-04); public sources
-only; no version labels.
+table at the collection's declared grain; the Cedar Entity and Business IDs, each
+dataset's own event IDs and every dataset and public registry identifier kept;
+proprietary identifiers (DUNS, Casino City), outdated Cedar identifier schemes
+(``CEDAR-NEST-``, ``CEDAR-PLACE-``, ``NESTREL-``, NEID handles and the rest) and
+other datasets' event IDs removed (owner rulings 2026-10-04); public sources only;
+no version labels. An outdated Cedar ID takes the Cedar ID the exact register
+``data/spine/cedar_retired_neid_crosswalk.csv`` binds it to (``cedar_ids``), or
+is left blank with ``needs_cedar_id``.
 Every component is still read through the pinned, byte-verified download path; the
 rules apply only to what is presented.
 """
@@ -18,9 +22,37 @@ import io
 import json
 import tempfile
 from contextlib import closing
+from functools import lru_cache
+from pathlib import Path
 
 from cedar_press import csv_safety, customer_sheet
 from cedar_press import repository as r
+
+#: The exact register binding each retired NEID handle to its Cedar Entity ID
+#: (1,555 rows, every one ``unique``). No Cedar Business ID register is issued
+#: here yet (docs/CEDAR_IDENTITY_SYSTEM_2026-09-13.md section 6), so an outdated
+#: business or facility key (``CEDAR-NEST-``, ``CEDAR-PLACE-``) binds to nothing.
+CEDAR_ID_REGISTERS = (
+    Path(__file__).resolve().parents[2] / "data/spine/cedar_retired_neid_crosswalk.csv",
+)
+
+
+@lru_cache(maxsize=1)
+def cedar_id_crosswalk():
+    """Exact outdated-ID -> Cedar ID bindings; only rows the register calls unique."""
+    bindings = {}
+    for path in CEDAR_ID_REGISTERS:
+        if not path.is_file():
+            continue
+        with path.open(encoding="utf-8", newline="") as handle:
+            for row in csv.DictReader(handle):
+                uid = row.get("cedar_uid")
+                if row.get("status") != "unique" or not customer_sheet.is_cedar_id(uid):
+                    continue
+                old = (row.get("retired_neid") or "").strip()
+                if old and bindings.setdefault(old, uid) != uid:
+                    raise ValueError(f"Cedar ID register binds {old} twice")
+    return bindings
 
 
 def _tables(collection, pin, manifest):
@@ -107,7 +139,9 @@ def _spool(collection, layout, sheet, rows, origins):
         digest.update(content)
 
     try:
-        header, records, report = customer_sheet.flatten(collection, layout, sheet, rows, origins)
+        header, records, report = customer_sheet.flatten(
+            collection, layout, sheet, rows, origins, cedar_id_crosswalk()
+        )
         write(header)
         with closing(records):
             for record in records:
@@ -230,7 +264,7 @@ def preview_table(collection, fields, values):
     layout = {**customer_sheet.choose_layout(collection, fields), "attach": []}
     plan = customer_sheet.plan(collection, fields, layout)
     header, records, _report = customer_sheet.flatten(
-        collection, layout, plan, lambda name: iter(values[name]), {}
+        collection, layout, plan, lambda name: iter(values[name]), {}, cedar_id_crosswalk()
     )
     with closing(records):
         return header, [[_cell(record.get(name)) for name in header] for record in records]
