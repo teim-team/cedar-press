@@ -19,11 +19,15 @@ This supersedes every instruction anywhere in this file, in `START_HERE.md`, in
 internal or not publish data or a collection pending review, consent, preview,
 contested status or a publication class. Older dated entries below are left as the
 history they are; where one reads as a standing hold, or as a licence or source
-term that blocks publication, this ruling wins. Only two kinds of data stay out of
-published output: DUNS numbers (private) and a private individual's personal data
-(`NEVER` columns). The code has not caught up on one point: `DROP_COLS` in
-`code/cedar_publication.py` still drops `casino_city_id` beside the DUNS columns; that
-is a leftover licensing rule, not a standing exclusion. The one record-level hold is a specific record ruled to be
+term that blocks publication, this ruling wins. What stays out of published
+output: proprietary identifiers and a private individual's personal data (`NEVER`
+columns). Owner correction 2026-10-04 (Elijah Moreno): "Dataset and public
+registry identifiers stay; only proprietary identifiers (DUNS, Casino City) are
+removed." So DUNS numbers and Casino City identifiers and content (Casino City is
+not published at all; `DROP_COLS` in `code/cedar_publication.py` drops
+`casino_city_id` beside the DUNS columns) stay out, and every other identifier that
+comes with a dataset (lobbying, deal, disclosure, award and event IDs, UEI, CAGE,
+EIN and the like) stays in. The one record-level hold is a specific record ruled to be
 attributed to the wrong entity (the mask in `code/cedar_publication.py`). Accuracy
 rules about how a figure may be totalled or described, and duplicate filings
 collapsed to one record, are correctness rules, not exclusions. What was lifted is
