@@ -122,7 +122,7 @@ jobs:
     permissions:
       contents: read
     env:
-      LUMECON_DATA_SHA: 1ebe63e92b25588dba2136e7dc5a2a8d23943a63  # Producer PR #17: Casino City data not published (projection rule gaming-public-sources-v4); FAC and bond filings moved to entity filings
+      LUMECON_DATA_SHA: 462d4186354aab4a8f992d074f11c35b8256f9d3  # Producer PR #17: one customer table per collection (customer_sheet.py, owner rulings 2026-10-04); DUNS refused in presented_fields
       CEDAR_REQUIRE_LUMECON_GAMING: "1"
     steps:
       - name: Require the Lumecon-data read token
