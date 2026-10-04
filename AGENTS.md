@@ -7,6 +7,8 @@
 
 **Owner ruling 2026-10-04 (Elijah Moreno): Lumecon decides what is blocked. The only hold is a specific record flagged as attributed to the wrong entity; records in the database have already been reviewed and sourced and are not held. Attribution review is an ongoing process, not a standing hold. Agents do not impose publication holds.**
 
+**Owner ruling 2026-10-04 (Elijah Moreno), on rights: Lumecon transforms the data it publishes; source rights statuses are recorded as provenance and do not block publication.**
+
 Also: NEED records and individual Native-owned business records come from publicly
 available websites, and Lumecon has permission to publish them. Neither collection
 carries a collection-wide publication hold. **Do not reinstate one without a new
@@ -17,7 +19,7 @@ This supersedes every instruction anywhere in this file, in `START_HERE.md`, in
 internal or not publish data or a collection pending review, consent, preview,
 contested status or a publication class. Older dated entries below are left as the
 history they are; where one reads as a standing hold, this ruling wins. What is not
-a hold, and stays: licensing terms a source imposes (D&B / DUNS, Casino City), a
+a hold, and stays: the licensed-identifier column drops (D&B / DUNS, Casino City ids), a
 private individual's personal data (`NEVER` columns), accuracy rules about how a
 figure may be totalled or described, duplicate filings collapsed to one record,
 and a specific record ruled to be attributed to the wrong entity (the mask in
@@ -9649,3 +9651,8 @@ template were all agents' own blocking decisions, not the owner's. NEED's
 samples, preview and entity-layer rows are restored. The code-level holds that
 predate those commits are lifted on `codex/cedar-convergence-consumer-20260926`
 (PR #132), which carries the same ruling.
+
+Owner ruling 2026-10-04 (Elijah Moreno), later the same day, on rights: "We are
+transforming the data, so remove those blocks." Lumecon transforms the data it publishes; source rights statuses are recorded as provenance and do not block publication. The rights-status
+gates in the Press server and site are lifted on PR #132.
+
