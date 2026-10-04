@@ -260,6 +260,10 @@ filings, not Gaming: `gaming_financial_disclosures` carries only SEC facility
 figures, management-contract terms and NIGC financing reviews, with the same
 columns, and Lumecon-data's `entity-filings` producer writes
 `tribal_entity_financial_filings.csv` for the entity layer keyed by Cedar ID.
+Since projection rule `gaming-public-sources-v4` (owner ruling 2026-10-04:
+"Casino City data is not published; Gaming publishes from public sources") a
+Gaming row of `rights_class` `internal_vendor`, or naming Casino City or
+4wheeler, is not published; columns are unchanged, so no declaration changed.
 Component rights, proposed-ID review restrictions and
 Grove-only entitlement remain runtime gates. Internal tables remain unavailable.
 The stream rehearsal now refuses to resume an old two-table receipt as evidence
