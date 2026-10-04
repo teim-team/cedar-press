@@ -419,10 +419,7 @@ class TestApplyFieldMap(unittest.TestCase):
     def test_the_samples_the_retirement_rule_refuses_are_refused_by_name(self):
         for coll, (cols, exc) in REFUSED_AS_SAMPLED.items():
             table = pub.field_map()[coll]["key"].split("/")[1]
-            # NEED's samples are withheld under its publication hold
-            # (2026-10-04); its refusal is collection-level and fires before
-            # any row is read, so it is proven on an empty table.
-            header, rows = sample(coll, table) if has_sample(coll, table) else ([], [])
+            header, rows = sample(coll, table)
             with self.subTest(collection=coll), self.assertRaises(exc) as caught:
                 pub.apply_field_map(coll, header, rows, set(header))
             self.assertIn(caught.exception.columns[0], cols)

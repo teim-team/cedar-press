@@ -992,27 +992,18 @@
     },
     "need": {
       "name": "Cedar Native Entity Enterprise Dataset (NEED)",
-      "version": "v3",
-      "updated": "2026-10-04",
+      "version": "v2",
+      "updated": "2026-09-26",
       "cadence": "Updated weekly",
       "retired": false,
       "history": [
-        {
-          "version": "v3",
-          "date": "2026-10-04",
-          "kind": "data",
-          "changed": [
-            "Release: 3 tables, 14,868 rows.",
-            "The ten-row previews are withdrawn. This collection's records are held for review before publication, and no preview is published until its rows are reviewed and cleared."
-          ]
-        },
         {
           "version": "v2",
           "date": "2026-09-26",
           "kind": "data",
           "changed": [
             "Release: 3 tables, 14,868 rows.",
-            "A 10-row preview of need_enterprises.csv, the collection's flagship table, was published with this release; the shelf now serves the current release's preview."
+            "A 10-row preview of need_enterprises.csv, the collection's flagship table, downloads from the shelf."
           ]
         },
         {

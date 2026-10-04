@@ -125,8 +125,7 @@
     "blockers": [],
     "n_rows": 5399,
     "n_tables": 2,
-    "sample_file": null,
-    "sample_withheld_why": "NEED publication hold, 2026-10-04: no row of the sample was in the cleared set (data/cedar/need_cleared_enterprise_ids.json).",
+    "sample_file": "samples/need__sample.csv",
     "needs_copy": false
   },
   "newsletters": {

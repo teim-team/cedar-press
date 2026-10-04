@@ -25,9 +25,6 @@
     "owned/individual_native_prior_rulings",
     "owned/individual_native_verification_candidates",
     "owned/native_owned_businesses",
-    "need/need_enterprise_relations",
-    "need/need_enterprises",
-    "need/need_entity_dual_role",
     "nonprofits/fac_native_nontribal_sefa_programs",
     "nonprofits/fac_native_nontribal_single_audits"
   ],
@@ -1920,16 +1917,18 @@
       "year_basis": "fiscal year",
       "observation": [
         "agency",
-        "pct_business_type_other_X"
+        "pct_with_duns",
+        "pct_with_duns_tribal_rows_only"
       ],
       "search": [
         "agency",
-        "pct_business_type_other_X"
+        "pct_with_duns",
+        "pct_with_duns_tribal_rows_only"
       ],
       "scopes": null,
       "link_status": null,
       "reviewed": false,
-      "columns": 9
+      "columns": 11
     },
     "funding/faads_transactions": {
       "entity_uid": "cedar_uid",
@@ -1957,7 +1956,7 @@
       "scopes": null,
       "link_status": null,
       "reviewed": false,
-      "columns": 24
+      "columns": 25
     },
     "funding/faads_transactions_all_agencies": {
       "entity_uid": "cedar_uid",
@@ -1985,7 +1984,7 @@
       "scopes": null,
       "link_status": null,
       "reviewed": false,
-      "columns": 39
+      "columns": 40
     },
     "funding/federal_funding_rulings_from_dofile": {
       "entity_uid": null,
@@ -2067,7 +2066,7 @@
         "confidence_tier",
         "attribution_source_line"
       ],
-      "columns": 62
+      "columns": 63
     },
     "funding/federal_funding_tribe_year_panel": {
       "entity_uid": "cedar_uid",
@@ -2143,20 +2142,20 @@
       "amount_basis": null,
       "year_basis": "first year",
       "observation": [
+        "recipient_duns",
         "recipient_ein",
-        "recipient_state",
-        "recipient_city"
+        "recipient_state"
       ],
       "search": [
         "recipient_name",
+        "recipient_duns",
         "recipient_ein",
-        "recipient_state",
-        "recipient_city"
+        "recipient_state"
       ],
       "scopes": null,
       "link_status": null,
       "reviewed": false,
-      "columns": 14
+      "columns": 15
     },
     "funding/funding_identifier_netnew_ueis": {
       "entity_uid": null,
@@ -4366,6 +4365,115 @@
       "link_status": null,
       "reviewed": false,
       "columns": 22
+    },
+    "need/need_enterprise_relations": {
+      "entity_uid": "cedar_uid",
+      "entity_name": "owner_hub_name",
+      "entity_type": null,
+      "year": "source_fiscal_year",
+      "date": "source_edition_date",
+      "amount": null,
+      "source": "source_url",
+      "record_id": "enterprise_id",
+      "subject": null,
+      "superseded": null,
+      "superseded_by": null,
+      "amount_basis": null,
+      "year_basis": "source fiscal year",
+      "observation": [
+        "relationship",
+        "child_name_as_recorded",
+        "parent_name_as_recorded"
+      ],
+      "search": [
+        "owner_hub_name",
+        "relationship",
+        "child_name_as_recorded",
+        "parent_name_as_recorded"
+      ],
+      "scopes": null,
+      "link_status": null,
+      "reviewed": false,
+      "columns": 23
+    },
+    "need/need_enterprises": {
+      "entity_uid": "cedar_uid",
+      "entity_name": "owner_hub_name",
+      "entity_type": "owner_hub_entity_class",
+      "year": null,
+      "date": null,
+      "amount": null,
+      "source": "source_url",
+      "record_id": "enterprise_id",
+      "subject": "enterprise_name",
+      "superseded": null,
+      "superseded_by": null,
+      "amount_basis": null,
+      "year_basis": null,
+      "observation": [
+        "sector",
+        "relationship",
+        "status",
+        "city"
+      ],
+      "search": [
+        "owner_hub_name",
+        "sector",
+        "relationship",
+        "status",
+        "city"
+      ],
+      "scopes": null,
+      "link_status": null,
+      "reviewed": true,
+      "entity_role": "owner hub of the enterprise",
+      "default_columns": [
+        "owner_hub_name",
+        "enterprise_name",
+        "parent_name",
+        "relation_class",
+        "ownership_percent_stated",
+        "sector",
+        "status",
+        "source_url"
+      ],
+      "_why": "A register of enterprises, one row each, not events: no row date, so the year filter does not apply. reviewed 2026-09-05 from the sample header and its ten rows.",
+      "default_columns_note": "The owner's default viewer selection (docs/PUBLIC_DATASET_SPEC_2026-09-05.md, addendum) mapped to the sample's current column names by data/cedar/field_map.json; a default whose column does not exist in the sample yet (the plural block, a combined or built column) appears when the export does.",
+      "attribution_columns": [
+        "hub_resolution_method",
+        "hub_resolution_note"
+      ],
+      "columns": 65
+    },
+    "need/need_entity_dual_role": {
+      "entity_uid": "cedar_uid",
+      "entity_name": "canonical_name",
+      "entity_type": "entity_class",
+      "year": null,
+      "date": null,
+      "amount": null,
+      "source": null,
+      "record_id": null,
+      "subject": null,
+      "superseded": null,
+      "superseded_by": null,
+      "amount_basis": null,
+      "year_basis": null,
+      "observation": [
+        "dual_role",
+        "dual_role_class",
+        "role_as_register_entity"
+      ],
+      "search": [
+        "canonical_name",
+        "dual_role",
+        "dual_role_class",
+        "role_as_register_entity"
+      ],
+      "scopes": null,
+      "link_status": null,
+      "reviewed": false,
+      "columns": 23
     },
     "nonprofits/fac_tribal_single_audits": {
       "entity_uid": "cedar_uid",

@@ -428,44 +428,6 @@ WITHHELD_CLASS = _RULE.INDIVIDUAL_NATIVE_CLASS
 WITHHELD_FIELDS = frozenset(_RULE.INDIVIDUAL_NATIVE_WITHHELD_FIELDS)
 may_publish_individual_native_field = _RULE.may_publish_individual_native_field
 
-#: The workspace's publication gate, loaded by path for the same reason as
-#: the rule above: the contact-data redaction, the proprietary-column rule
-#: and the NEED publication hold live in ``code/cedar_publication.py``, and
-#: the copy a visitor downloads must apply the same rules as the writer that
-#: produced it. Missing module -> refuse (fail closed).
-def _publication_gate():
-    import importlib.util
-    source = REPO / "code" / "cedar_publication.py"
-    spec = importlib.util.spec_from_file_location("cedar_publication", source)
-    if spec is None or spec.loader is None:
-        raise SystemExit(f"publication gate not found at {source}; refusing to import samples")
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
-
-
-_GATE = _publication_gate()
-
-#: Reader-facing (the shelf shows it). The rule and the cleared set are in
-#: ``code/cedar_publication.need_row_cleared`` and
-#: ``data/cedar/need_cleared_enterprise_ids.json``.
-NEED_HELD_WHY = (
-    "This collection's records are held for review before publication. Only "
-    "reviewed records are cleared, and this sample carries rows that are not, so "
-    "the file is not published. The table is still in the release."
-)
-
-
-def need_held_rows(sample: Path, cedar_id: str) -> int:
-    """How many rows of a sample the NEED publication hold refuses."""
-    held = 0
-    with sample.open(encoding="utf-8", newline="") as handle:
-        for row in csv.DictReader(handle):
-            ok, _ = _GATE.need_row_cleared(row, cedar_id)
-            held += not ok
-    return held
-
-
 WITHHELD_WHY = (
     "The sample carries a field the publication rule withholds for an individually "
     "Native-owned firm without recorded consent (may_publish_individual_native_field), "
@@ -574,17 +536,10 @@ def withhold_samples(manifest: dict, locate, names: frozenset[str], uids: frozen
             if not file.exists():
                 continue
             columns = sample_violations(file, names, uids)
-            why = WITHHELD_WHY
-            if not columns and need_held_rows(file, collection["cedar"]["cedar_id"]):
-                # The NEED publication hold strikes the whole sample: a sample
-                # is ten rows drawn before the hold, and serving the cleared
-                # subset of them would be a different sample than the one the
-                # manifest describes.
-                columns, why = ["held:need_publication"], NEED_HELD_WHY
             if not columns:
                 continue
             table["sample_path"] = None
-            table["sample_withheld_why"] = why
+            table["sample_withheld_why"] = WITHHELD_WHY
             table["sample_withheld_columns"] = columns
             struck.append({"collection": collection["id"], "table": table["table"],
                            "path": path, "columns": columns})
@@ -592,7 +547,7 @@ def withhold_samples(manifest: dict, locate, names: frozenset[str], uids: frozen
                 collection["sample"] = {
                     "table": flagship.get("table"),
                     "path": None,
-                    "unavailable_because": why,
+                    "unavailable_because": WITHHELD_WHY,
                 }
     return struck
 
@@ -620,14 +575,10 @@ def audit(repo: Path = REPO) -> list[dict]:
     names, uids = withheld_entities(repo / "data" / "spine" / "cedar_entity_names.csv")
     struck = withhold_samples(manifest, public_sample(repo), names, uids)
     unpublish(repo, struck)
-    # And the text rules (local paths, contact data, proprietary columns), on
-    # what is already served.
+    # And the local-path rule, on what is already served.
     for sample in scrub_public_samples(repo):
-        print(f"  scrubbed  {sample.relative_to(repo)}")
-    recounted = sync_column_counts(manifest, repo)
-    for path, was, now in recounted:
-        print(f"  columns   {path}: {was} -> {now}")
-    if struck or recounted:
+        print(f"  scrubbed  local path(s) from {sample.relative_to(repo)}")
+    if struck:
         manifest_path.write_text(
             json.dumps(manifest, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
         )
@@ -668,46 +619,10 @@ def scrub_local_paths(text: str) -> str:
     return LOCAL_PATH.sub(LOCAL_PATH_REMOVED, text)
 
 
-def drop_proprietary_columns(text: str) -> tuple[str, list[str]]:
-    """The CSV text without any column the gate calls proprietary (DUNS).
-
-    ``cedar_publication.is_proprietary_column``: an exact ``DROP_COLS`` name or
-    any name containing ``duns``. FOUND 2026-10-04: ``recipient_duns`` was
-    served in four funding samples because the writer's list matched exact
-    names only. Rewritten with the csv module only when a column goes, keeping
-    the source's line terminator; otherwise the text is returned unchanged.
-    """
-    lines = text.splitlines(keepends=True)
-    if not lines:
-        return text, []
-    header = next(csv.reader([lines[0]]))
-    dropped = [c for c in header if _GATE.is_proprietary_column(c)]
-    if not dropped:
-        return text, []
-    import io
-    terminator = "\r\n" if lines[0].endswith("\r\n") else "\n"
-    keep = [i for i, c in enumerate(header) if c not in dropped]
-    out = io.StringIO()
-    writer = csv.writer(out, lineterminator=terminator)
-    for row in csv.reader(io.StringIO(text, newline="")):
-        writer.writerow([row[i] for i in keep if i < len(row)])
-    return out.getvalue(), dropped
-
-
-def clean_sample_text(raw: str) -> tuple[str, list[str]]:
-    """Every text rule a served sample passes: local paths, contact data in
-    free text (``cedar_publication.redact_contact_text``), proprietary columns.
-    Returns the clean text and the columns dropped."""
-    text = scrub_local_paths(raw)
-    text, _ = _GATE.redact_contact_text(text)
-    return drop_proprietary_columns(text)
-
-
 def publish_sample(source: Path, target: Path) -> bool:
-    """Write ``source`` to ``target`` through ``clean_sample_text``; True if
-    anything was removed."""
+    """Write ``source`` to ``target`` without local paths; True if any were removed."""
     raw = source.read_text(encoding="utf-8")
-    clean, _ = clean_sample_text(raw)
+    clean = scrub_local_paths(raw)
     target.parent.mkdir(parents=True, exist_ok=True)
     # newline="" so a CRLF in the source stays CRLF: the bytes are 1135's.
     with target.open("w", encoding="utf-8", newline="") as handle:
@@ -715,40 +630,13 @@ def publish_sample(source: Path, target: Path) -> bool:
     return clean != raw
 
 
-def sync_column_counts(manifest: dict, repo: Path = REPO) -> list[tuple[str, int, int]]:
-    """Make the manifest's column counts match the served sample headers.
-
-    Every served sample's header is the table's published header (measured
-    2026-10-04: 163 of 163 equal), so a column the text rules drop from a
-    served copy is a column the table no longer publishes. Returns
-    ``(path, was, now)`` for each count changed.
-    """
-    changed: list[tuple[str, int, int]] = []
-    for collection in manifest["collections"]:
-        for table in collection["tables"]:
-            path = table.get("sample_path")
-            served = repo / "public" / (path or "").lstrip("/")
-            if not path or not served.exists():
-                continue
-            with served.open(encoding="utf-8", newline="") as handle:
-                width = len(next(csv.reader(handle), []))
-            if table.get("columns_published") != width:
-                changed.append((path, table.get("columns_published"), width))
-                table["columns_published"] = width
-            flagship = collection.get("sample") or {}
-            if flagship.get("path") == path and flagship.get("columns") != width:
-                flagship["columns"] = width
-    return changed
-
-
 def scrub_public_samples(repo: Path = REPO) -> list[Path]:
-    """Rewrite every served sample under ``public/`` that ``clean_sample_text``
-    would change: a local path, contact data, a proprietary column."""
+    """Rewrite every served sample under ``public/`` that carries a local path."""
     rewritten: list[Path] = []
     root = repo / "public" / "data" / "cedar" / "samples"
     for sample in sorted(root.rglob("*.csv")):
         raw = sample.read_text(encoding="utf-8")
-        if clean_sample_text(raw)[0] != raw:
+        if scrub_local_paths(raw) != raw:
             publish_sample(sample, sample)
             rewritten.append(sample)
     return rewritten
@@ -811,8 +699,6 @@ def main() -> int:
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     written = copy_samples(workspace, manifest)
-    if sync_column_counts(manifest, REPO):
-        out.write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     # The record of which declared samples the repository holds follows every
     # import; the tests refuse a stale one. On the importer's machine every
     # sample was just copied, so the record says none is missing -- until the

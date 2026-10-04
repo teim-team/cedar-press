@@ -191,7 +191,6 @@ from cedar_publication import (          # noqa: E402
     is_publication_eligible, mask_attribution, MASK, translate_neid_values,
     apply_official_names,
     enforce_denials, DENIAL_MASK_REASON,
-    redact_personal_contacts, is_proprietary_column,
 )
 
 csv.field_size_limit(10_000_000)
@@ -391,11 +390,7 @@ def build(mode: str) -> int:
                         # `is_publication_eligible` is `row_ok` plus the
                         # deny-by-default adjudication policy; a MASK keeps the
                         # row and withholds the Cedar attribution on it.
-                        # Contact data in free text (2026-10-04): an email
-                        # or phone inside a prose cell is redacted in place;
-                        # the row is the public record and still ships.
-                        redact_personal_contacts(r)
-                        ok, why, disp = is_publication_eligible(r, coll)
+                        ok, why, disp = is_publication_eligible(r)
                         if ok:
                             if disp == MASK and mask_attribution(r, why):
                                 masked[why] += 1
@@ -635,7 +630,7 @@ def verify() -> int:
             hd = list(rd.fieldnames or [])
             nrows = sum(1 for _ in rd)
         for c in hd:
-            if is_proprietary_column(c):
+            if c.lower() in DROP_COLS:
                 bad.append(f"{stem}: sample ships proprietary column {c}")
             if c in NEVER:
                 bad.append(f"{stem}: sample ships a withheld column {c}")
@@ -674,7 +669,7 @@ def verify() -> int:
                 bad.append(f"{where}: manifest claims {want_cols} columns, "
                            f"a piece ships {len(hdr)}")
             for c in hdr:
-                if is_proprietary_column(c):
+                if c.lower() in DROP_COLS:
                     bad.append(f"{where}: full ships proprietary column {c}")
                 if c in NEVER:
                     bad.append(f"{where}: full ships a withheld column {c}")

@@ -1,6 +1,6 @@
 # Cedar Native Entity Enterprise Dataset (NEED): a researcher's guide
 
-Collection `need` · public file `need.csv` · v3 · 2026-10-04. Generated from `data/cedar/guides.json`, `data/cedar/field_map.json`, `data/cedar/codebook.json` and the collection descriptor by `scripts/guides-markdown.mjs`; edit those, not this file. Written 2026-09-05 under `docs/PUBLIC_DATASET_SPEC_2026-09-05.md`.
+Collection `need` · public file `need.csv` · v2 · 2026-09-26. Generated from `data/cedar/guides.json`, `data/cedar/field_map.json`, `data/cedar/codebook.json` and the collection descriptor by `scripts/guides-markdown.mjs`; edit those, not this file. Written 2026-09-05 under `docs/PUBLIC_DATASET_SPEC_2026-09-05.md`.
 
 ## Purpose
 
@@ -24,7 +24,7 @@ This pass changes columns, never rows: no aggregation, deduplication, change of 
 
 **Sources:** What each owner publishes about itself: audited annual reports filed by ANCSA corporations with the Alaska Division of Banking and Securities under Alaska Statute 45.55.139, whose Principles of Consolidation note enumerates the subsidiaries by legal name; nations' own “Our Companies” and enterprise registers; ANC and NHO subsidiary directories. Publishers whose terms forbid reuse are excluded by every route and named as excluded.
 
-**Rows in the flagship table as released:** not yet measured; the flagship sample is not in the repository.
+**Rows in the flagship table as released (recorded 2026-09-26):** 5,820. This is the count the release recorded for `need_enterprises.csv`, not the sum of the collection's 3 tables; the finished public table is re-measured at release and the count here is replaced by that measurement.
 
 ## Time and geography
 
@@ -52,7 +52,7 @@ The approved header, in the owner's exact order (30 columns, of which 0 are owed
 | 4 | `cedar_entity_role` | Entity role | Why the entity is on this row: read from relationship_type. | text | unattributed or unresolved, with the reason in the attribution status where the table carries one; never non-Native |
 | 5 | `enterprise_id` | Enterprise ID | Cedar's identifier for the enterprise. | identifier, as text | the source states none, or not applicable to this row |
 | 6 | `enterprise_name` | Enterprise | The enterprise's name. | text | the source states none, or not applicable to this row |
-| 7 | `alternative_names` (was `name_variants_observed`) | Also seen as | Other spellings of the name in the sources, separated by \|. | text | the source states none, or not applicable to this row |
+| 7 | `alternative_names` (was `name_variants_observed`) | Also seen as | Other spellings of the name in the sources, separated by \|. | list, separated by | | the source states none, or not applicable to this row |
 | 8 | `parent_enterprise_id` | Parent enterprise ID | The immediate parent enterprise's ID, where the parent is an enterprise rather than the Native entity itself. | identifier, as text | the source states none, or not applicable to this row |
 | 9 | `parent_name` | Parent | The immediate parent, which may itself be an enterprise. | text | the source states none, or not applicable to this row |
 | 10 | `relationship_type` (was `relation_class`) | Entity role | Why the entity is on this row: read from relationship_type: owner, or affiliated entity, of the enterprise. | text | the source states none, or not applicable to this row |
@@ -67,12 +67,12 @@ The approved header, in the owner's exact order (30 columns, of which 0 are owed
 | 19 | `in_federal_contracting` | Federal contractor | Whether the enterprise appears in federal contracting records (yes or no). | yes or no (1 or 0) | not stated; 0 is no |
 | 20 | `first_observed_year` | First seen | The earliest year a source names the enterprise. | year | the source states no date |
 | 21 | `last_observed_year` | Last seen | The latest. | year | the source states no date |
-| 22 | `source_count` (was `n_distinct_sources`) | Sources | How many distinct sources support the relationship. | text | the source states none, or not applicable to this row |
+| 22 | `source_count` (was `n_distinct_sources`) | Sources | How many distinct sources support the relationship. | number | the source states none, or not applicable to this row |
 | 23 | `relationship_evidence_status` (was `evidence_class`) | Kind of evidence | What kind of source establishes the relationship (the owner's own list, an audited report, a resolver). | text | the source states none, or not applicable to this row |
 | 24 | `reported_federal_parent_name` (was `fpds_declared_parent_name`) | Parent declared in FPDS | The parent the enterprise declares in federal contracting records, kept as evidence beside Cedar's relationship. | text | the source states none, or not applicable to this row |
 | 25 | `federal_parent_corroboration` (was `fpds_parent_corroboration`) | Federal records agree | Whether the parent the enterprise declares in federal records agrees with this owner. | text | the source states none, or not applicable to this row |
 | 26 | `source_document` | Source document | The document, where the source is a file. | text | the source states none, or not applicable to this row |
-| 27 | `source_edition_date` | Source date | The date of that source. | text | the source states none, or not applicable to this row |
+| 27 | `source_edition_date` | Source date | The date of that source. | date (YYYY-MM-DD) | the source states no date |
 | 28 | `source_url` | Source | Where the relationship is stated. | web address | the source states none, or not applicable to this row |
 | 29 | `additional_source_urls` | Additional source URLs | Further source URLs, as a JSON list; blank until the sources table supplies them. | JSON array (one list; aligned with its neighbours where the definition says so; null for an unresolved member) | the source states none, or not applicable to this row |
 | 30 | `research_note` | Research note | A concise factual qualification that changes how the row should be read (an uncertain closing date, an amount covering a whole joint venture, a geography that cannot be assigned precisely). Blank when nothing needs saying. | text | the source states none, or not applicable to this row |
@@ -108,9 +108,9 @@ Nothing beyond the grain and harmonization work named above.
 
 ## Release, citation and method
 
-**Version:** v3. **Release date:** 2026-10-04.
+**Version:** v2. **Release date:** 2026-09-26.
 
-**Cite as:** Lumecon, "Cedar Native Entity Enterprise Dataset (NEED)" (v3), Cedar Press collection, cedarpress.ai. Add the date accessed.
+**Cite as:** Lumecon, "Cedar Native Entity Enterprise Dataset (NEED)" (v2), Cedar Press collection, cedarpress.ai. Add the date accessed.
 
 **Method:** Two relations, declared per row and never conflated: a STRUCTURE is ownership — nation, holding company, operating company — and a TIE is a published relationship that is not ownership, such as a joint venture, which genuinely has two parents. Ownership is only ever recorded where a source asserted it; a shared name or a shared address is not evidence and does not create a row. An external identifier appears only where the owner published it, so the register is not padded with plausible matches. Where no external identifier exists the enterprise still gets a permanent, check-digited Cedar identifier and is carried as a sub-hub of its nation, which is what makes visible the enterprises federal contracting never sees.
 

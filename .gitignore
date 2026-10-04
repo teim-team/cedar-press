@@ -201,8 +201,6 @@ data/restricted/
 !/data/cedar/field_map.json
 !/data/cedar/releases.json
 !/data/cedar/samples.published.json
-# The NEED publication hold: the 43 cleared enterprise ids (2026-10-04).
-!/data/cedar/need_cleared_enterprise_ids.json
 
 # Requirements / lockfiles, wherever they turn up.
 !requirements*.txt

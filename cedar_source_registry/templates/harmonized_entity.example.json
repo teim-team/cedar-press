@@ -2,21 +2,21 @@
  "entity_id": "CE-000001",
  "entity_status": "active",
  "merged_into": null,
- "canonical_name": "SYNTHETIC EXAMPLE CONSTRUCTION LLC",
+ "canonical_name": "Clean Prep Sell",
  "name_variants": [
-  "SYNTHETIC EXAMPLE CONSTRUCTION LLC",
-  "SYNTHETIC EXAMPLE CONSTRUCTION INC"
+  "Clean Prep Sell",
+  "Clean Prep Sell LLC"
  ],
  "dba_names": [],
  "identity_assertions": [
   {
-   "business_source_id": "TBD-030:0000",
+   "business_source_id": "TBD-030:4033",
    "source_id": "TBD-030",
    "source_priority_class": "tribal_primary",
    "identity_scope": "any_native",
    "relationship_basis": "member",
    "tribal_affiliation_raw": "Tulalip Tribes",
-   "identity_claim_text": "SYNTHETIC FIXTURE: TERO-certified Native American-owned business (NAOB Registry); Tribe: Tulalip Tribes; Tulalip Owned: 51%",
+   "identity_claim_text": "TERO-certified Native American-owned business (NAOB Registry); Tulalip Owned: 51%",
    "verification_basis": "TERO_review",
    "ownership_percent": 51.0,
    "assertion_precedence_rank": 1,
@@ -38,7 +38,7 @@
    "is_current": true
   }
  ],
- "controlling_assertion_id": "TBD-030:0000",
+ "controlling_assertion_id": "TBD-030:4033",
  "native_ownership_status": "tribal_primary_asserted",
  "nations": [
   {
@@ -46,14 +46,14 @@
    "nation_name": "Tulalip Tribes",
    "relationship": "citizen",
    "evidence_business_source_ids": [
-    "TBD-030:0000"
+    "TBD-030:4033"
    ]
   }
  ],
  "certifications": [
   {
    "certifying_source_id": "TBD-030",
-   "certification_number": "0000",
+   "certification_number": "4033",
    "certification_tier": null,
    "certification_start": null,
    "certification_expiration": null,
@@ -65,36 +65,36 @@
   "561720"
  ],
  "service_categories": [
-  "Construction"
+  "CONSTRUCTION"
  ],
- "description": "SYNTHETIC FIXTURE: general construction services (not observed data)",
- "address": "100 Example Way, Exampleville, WA 00000",
- "city": "Exampleville",
+ "description": "Cleaning services for homes entering the Real Estate/Rental market and maintenance cleaning for homeowners and businesses.",
+ "address": "12916 Marine Dr, Tulalip, WA 98271",
+ "city": "Tulalip",
  "state_province": "WA",
- "postal_code": "00000",
- "phone": "(555) 555-0100",
- "email": "owner@example.com",
- "website": "www.example.com",
+ "postal_code": "98271",
+ "phone": "(425) 583-8976",
+ "email": "cleanprepsell@gmail.com",
+ "website": "www.cleanprepsell.com",
  "field_provenance": {
-  "canonical_name": "TBD-030:0000",
-  "description": "TBD-030:0000",
-  "address": "TBD-030:0000",
-  "city": "TBD-030:0000",
-  "state_province": "TBD-030:0000",
-  "postal_code": "TBD-030:0000",
-  "phone": "TBD-030:0000",
-  "email": "TBD-030:0000",
-  "website": "TBD-030:0000",
+  "canonical_name": "TBD-030:4033",
+  "description": "TBD-030:4033",
+  "address": "TBD-030:4033",
+  "city": "TBD-030:4033",
+  "state_province": "TBD-030:4033",
+  "postal_code": "TBD-030:4033",
+  "phone": "TBD-030:4033",
+  "email": "TBD-030:4033",
+  "website": "TBD-030:4033",
   "naics": "TBD-145:EXAMPLE-0001",
-  "service_categories": "TBD-030:0000"
+  "service_categories": "TBD-030:4033"
  },
  "source_record_ids": [
-  "TBD-030:0000",
+  "TBD-030:4033",
   "TBD-145:EXAMPLE-0001"
  ],
  "match_edges": [
   {
-   "left": "TBD-030:0000",
+   "left": "TBD-030:4033",
    "right": "TBD-145:EXAMPLE-0001",
    "method": "exact_website",
    "confidence": 0.97,
@@ -111,5 +111,5 @@
  "resolution_run_id": "run-2026-08-27-001",
  "first_seen": "2026-08-27T00:00:00Z",
  "last_seen": "2026-08-27T00:00:00Z",
- "notes": "SYNTHETIC FIXTURE (replaced 2026-10-04; every name, address and contact value is invented). Shows a TERO NAOB-shaped record joined with an ILLUSTRATIVE Minnesota OSP row to show cross-reference corroboration without identity upgrade. NAICS is the one field sourced from the cross-reference, permitted because it adds a field without touching identity."
+ "notes": "Worked example: real Tulalip NAOB record (observed 2026-08-27) joined with an ILLUSTRATIVE Minnesota OSP row to show cross-reference corroboration without identity upgrade. NAICS is the one field sourced from the cross-reference — permitted because it adds a field without touching identity."
 }

@@ -31,7 +31,7 @@ the correction.
 | `HARMONIZED_SCHEMA.md` | — | two-layer harmonized dataset design: assertion layer + entity layer |
 | `schema/source_record.schema.json` | — | JSON Schema (2020-12) for Layer-1 records; formalizes the workbook's Recommended Schema sheet |
 | `schema/harmonized_entity.schema.json` | — | JSON Schema for Layer-2 resolved entities (identity as assertions, field provenance, persistent conflicts) |
-| `templates/source_record.example.jsonl` | 2 | worked Layer-1 examples: a synthetic TERO NAOB-shaped record (replaced 2026-10-04; rosters are never committed) + a clearly-marked illustrative cross-reference |
+| `templates/source_record.example.jsonl` | 2 | worked Layer-1 examples: a real Tulalip NAOB record + a clearly-marked illustrative cross-reference |
 | `templates/harmonized_entity.example.json` | 1 | worked Layer-2 entity merging those two, validated against the schema |
 | `templates/source_record.header.csv` | — | empty CSV header for Layer-1 exports |
 

@@ -9612,34 +9612,3 @@ compatibility hover/focus changing the specimen first. `tests/mobile-navigation.
 reproduces the old rail at 2,291px inside a 390px viewport and checks native touch
 swiping plus a one-tap selection at the far end. Audience-name tabs remain at
 720px and below; wider cards use their existing previous/next controls.
-
-## 2026-10-04: the publication gate reads VALUES, not only column names
-
-Four leaks reached this public repository past a gate that matched column
-names only: contact data (emails, phone numbers) inside free-text cells,
-`recipient_duns` (an exact-name list knew `duns` and five other spellings,
-not this one), NEED rows outside the cleared set (served by the site under a
-whole-collection hold), and a real roster row in a source-registry template.
-`code/cedar_publication.py` now carries three value-level rules, applied by
-every writer (`770`, `1135`, `1137`) and by `scripts/import_cedar_manifest.py`
-on every served copy:
-
-- `redact_personal_contacts`: every email and phone in every cell becomes
-  `[email removed]` / `[phone removed]`; the row still ships.
-- `is_proprietary_column`: any column whose name contains `duns` drops, and
-  a row whose subject is a DUNS (`identifier_type = DUNS`, `DUNS:<9 digits>`)
-  is withheld (`proprietary:duns`).
-- `need_row_cleared`: a NEED row publishes only when every NEED id on it is
-  in `data/cedar/need_cleared_enterprise_ids.json` (43 ids, pinned with the
-  sha256 of the reviewed preview they came from); a NEED-collection row with
-  no NEED id is held.
-
-The committed outputs were brought to what the gate now produces: the public
-samples by `python3 scripts/import_cedar_manifest.py --audit`, and the
-`dist/review` samples by applying the same functions (byte-identical to the
-served copies where both exist). They were not rebuilt from `data/clean`,
-which this checkout does not hold; the next `1135`/`1137`/`770` run does that.
-NEED moved to v3 in the release ledger because its previews were withdrawn.
-`server/tests/test_publication_hygiene.py` scans every committed data file
-and the site build for all four, and each check was proven by mutation.
-Git history still carries every removed value; rewriting it is an owner call.

@@ -62,7 +62,7 @@
         "path": "/data/cedar/samples/funding/federal_funding_transactions__10.csv",
         "rows": 10,
         "of": 701955,
-        "columns": 62
+        "columns": 63
       },
       "tables": [
         {
@@ -136,7 +136,7 @@
           "rows_published": 77,
           "rows_withheld": 0,
           "withheld_why": null,
-          "columns_published": 9,
+          "columns_published": 11,
           "sample_rows": 10,
           "full_file": {
             "shippable": false,
@@ -152,7 +152,7 @@
           "rows_published": 60661,
           "rows_withheld": 0,
           "withheld_why": null,
-          "columns_published": 24,
+          "columns_published": 25,
           "sample_rows": 10,
           "full_file": {
             "shippable": true,
@@ -168,7 +168,7 @@
           "rows_published": 2769748,
           "rows_withheld": 0,
           "withheld_why": null,
-          "columns_published": 39,
+          "columns_published": 40,
           "sample_rows": 10,
           "full_file": {
             "shippable": true,
@@ -200,7 +200,7 @@
           "rows_published": 701955,
           "rows_withheld": 0,
           "withheld_why": null,
-          "columns_published": 62,
+          "columns_published": 63,
           "sample_rows": 10,
           "full_file": {
             "shippable": true,
@@ -248,7 +248,7 @@
           "rows_published": 37704,
           "rows_withheld": 0,
           "withheld_why": null,
-          "columns_published": 14,
+          "columns_published": 15,
           "sample_rows": 10,
           "full_file": {
             "shippable": false,
@@ -2994,8 +2994,8 @@
         "origin": "lumecon",
         "rows_label": "14,868 rows",
         "vintage": null,
-        "version": "v3",
-        "updated": "2026-10-04",
+        "version": "v2",
+        "updated": "2026-09-26",
         "downloads": null,
         "name": "Cedar Native Entity Enterprise Dataset (NEED)",
         "short_name": "NEED",
@@ -3012,13 +3012,15 @@
       },
       "sample": {
         "table": "need_enterprises.csv",
-        "path": null,
-        "unavailable_because": "This collection's records are held for review before publication. Only reviewed records are cleared, and this sample carries rows that are not, so the file is not published. The table is still in the release."
+        "path": "/data/cedar/samples/need/need_enterprises__10.csv",
+        "rows": 10,
+        "of": 5820,
+        "columns": 65
       },
       "tables": [
         {
           "table": "need_enterprise_relations.csv",
-          "sample_path": null,
+          "sample_path": "/data/cedar/samples/need/need_enterprise_relations__10.csv",
           "rows_in": 8690,
           "rows_published": 8690,
           "rows_withheld": 0,
@@ -3030,15 +3032,11 @@
             "split": "",
             "files": 0,
             "largest_file_mb": 0.0
-          },
-          "sample_withheld_why": "This collection's records are held for review before publication. Only reviewed records are cleared, and this sample carries rows that are not, so the file is not published. The table is still in the release.",
-          "sample_withheld_columns": [
-            "held:need_publication"
-          ]
+          }
         },
         {
           "table": "need_enterprises.csv",
-          "sample_path": null,
+          "sample_path": "/data/cedar/samples/need/need_enterprises__10.csv",
           "rows_in": 5820,
           "rows_published": 5820,
           "rows_withheld": 0,
@@ -3050,15 +3048,11 @@
             "split": "",
             "files": 0,
             "largest_file_mb": 0.0
-          },
-          "sample_withheld_why": "This collection's records are held for review before publication. Only reviewed records are cleared, and this sample carries rows that are not, so the file is not published. The table is still in the release.",
-          "sample_withheld_columns": [
-            "held:need_publication"
-          ]
+          }
         },
         {
           "table": "need_entity_dual_role.csv",
-          "sample_path": null,
+          "sample_path": "/data/cedar/samples/need/need_entity_dual_role__10.csv",
           "rows_in": 358,
           "rows_published": 358,
           "rows_withheld": 0,
@@ -3070,11 +3064,7 @@
             "split": "",
             "files": 0,
             "largest_file_mb": 0.0
-          },
-          "sample_withheld_why": "This collection's records are held for review before publication. Only reviewed records are cleared, and this sample carries rows that are not, so the file is not published. The table is still in the release.",
-          "sample_withheld_columns": [
-            "held:need_publication"
-          ]
+          }
         }
       ],
       "full_files": {

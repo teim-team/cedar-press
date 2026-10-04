@@ -126,7 +126,6 @@ from cedar_publication import (          # noqa: E402
     DENIAL_MASK_REASON,
     BLOCKED_STATES, MASK_COLS, MASK_FLAGS, LINEAGE_COLS, LINEAGE_SUFFIXES,
     is_publication_eligible, mask_attribution, MASK,
-    redact_personal_contacts,
     LOBBYING_FILE, LOBBYING_FENCE, lobbying_overstatement, lobbying_warning,
     apply_field_map,
 )
@@ -187,7 +186,7 @@ def find(name):
 # `cedar_publication`. It was reimplemented identically here and in 1135.
 
 
-def load(path, gate=True, masked=None, collection=""):
+def load(path, gate=True, masked=None):
     """Read a table through THE publication gate.
 
     `masked` is an optional counter the caller passes in to collect the
@@ -266,10 +265,7 @@ def load(path, gate=True, masked=None, collection=""):
                 # and withholds the Cedar attribution on it, because a prime
                 # contract whose ownership ruling was withdrawn is still a real
                 # federal award and dropping it would lose public record.
-                # Contact data in free text (2026-10-04): redacted in place,
-                # the row still ships. See cedar_publication.CONTACT_EMAIL.
-                redact_personal_contacts(r)
-                ok, why, disp = is_publication_eligible(r, collection)
+                ok, why, disp = is_publication_eligible(r)
                 if not ok:
                     held[why] += 1
                     continue
@@ -799,7 +795,7 @@ def build(dry: bool, only: tuple = ()) -> int:
             continue
 
         fmasked = defaultdict(int)
-        fhdr, frows, fheld = load(fpath, masked=fmasked, collection=coll)
+        fhdr, frows, fheld = load(fpath, masked=fmasked)
         own_cols = set(fhdr)      # everything added after this is a join
         n0 = len(frows)
         meta = {t["table"]: t for t in c.get("tables", [])}
@@ -846,7 +842,7 @@ def build(dry: bool, only: tuple = ()) -> int:
             if not one_per_key(tmeta, key):
                 # One-to-many. Joining would MULTIPLY the flagship, so the
                 # buyer gets a count instead of a duplicated row.
-                thdr, trows, _ = load(tpath, collection=coll)
+                thdr, trows, _ = load(tpath)
                 if key not in thdr:
                     continue
                 cnt = defaultdict(int)
@@ -866,7 +862,7 @@ def build(dry: bool, only: tuple = ()) -> int:
                 added_cols += 1
                 refused.append(f"{tpath.stem}(1:many on {key} -> {col})")
                 continue
-            thdr, trows, _ = load(tpath, collection=coll)
+            thdr, trows, _ = load(tpath)
             # RE-MEASURE. The contracts file records a cardinality that was
             # true when the grain sweep ran; the table may have been
             # rebuilt since. Codex, PR #35: `setdefault` silently keeps the

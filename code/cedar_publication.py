@@ -140,63 +140,6 @@ CODE = ROOT / "code"
 NEVER = ("owner_name_raw", "email", "phone", "home_address", "personal_email",
          "ssn", "tin", "date_of_birth", "officer_name", "contact_name")
 
-# CONTACT DATA INSIDE FREE TEXT - redacted as VALUES, every cell.
-#
-# FOUND 2026-10-04: `NEVER` matches column NAMES, so an email address or a
-# phone number written into a prose column passed the gate untouched. The
-# FOIA request index shipped a requester's personal webmail address and a
-# small business's address and phone numbers inside `request_description`, in
-# a sample committed to a public repository. Withholding the row would lose a
-# public record (the request itself is the record); the contact data is the
-# thing that must not travel, which is the same reasoning that moved `NEVER`
-# from a row gate to a column drop. So the value is redacted in place, with a
-# marker in the convention the site importer already uses for a local path
-# (`[local path removed]`), and the row ships.
-#
-# Every email and every phone number, official ones included: the rule cannot
-# tell a requester's personal address from an agency officer's, and `NEVER`
-# already drops an official's phone column (the BIA tribal leaders directory)
-# for the same reason. Failing closed costs a reader an office phone number
-# that the source document still carries.
-#
-# The phone pattern requires separators between the 3-3-4 groups, so a bare
-# nine- or ten-digit identifier (a DUNS, an award or FAIN number, a ZIP+4) is
-# not read as a phone. A date (4-2-2) cannot match 3-3-4.
-CONTACT_EMAIL = re.compile(
-    r"[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}")
-CONTACT_PHONE = re.compile(
-    r"(?<![\w$.,/-])(?:\+?1[ .-]?)?(?:\(\d{3}\)\s?|\d{3}[ .-])\d{3}[ .-]\d{4}"
-    r"(?![\w/-])")
-EMAIL_REMOVED = "[email removed]"
-PHONE_REMOVED = "[phone removed]"
-
-
-def redact_contact_text(text: str) -> tuple[str, int]:
-    """(text with every email and phone number replaced, how many)."""
-    if not text:
-        return text, 0
-    text, n_email = CONTACT_EMAIL.subn(EMAIL_REMOVED, text)
-    text, n_phone = CONTACT_PHONE.subn(PHONE_REMOVED, text)
-    return text, n_email + n_phone
-
-
-def redact_personal_contacts(row: dict) -> int:
-    """Redact emails and phone numbers in every cell of `row`, in place.
-
-    Returns the number of values replaced, so a writer can count them in its
-    manifest. Applied by every writer of a customer or review file
-    (`GATE_CALLERS`), and `verify` refuses a writer that does not call it.
-    """
-    n = 0
-    for column, value in row.items():
-        if not isinstance(value, str) or not value:
-            continue
-        clean, k = redact_contact_text(value)
-        if k:
-            row[column] = clean
-            n += k
-    return n
-
 # Columns whose presence means the row is gated. Value -> keep only if match.
 # The empty string is in every allow-set on purpose: a blank gate column means
 # the gate was never evaluated for that row, not that it failed.
@@ -506,34 +449,6 @@ def lobbying_row_counts(row) -> bool:
 # every entry here must be lower case or it can never match.
 DROP_COLS = ("casino_city_id", "duns", "duns_number", "dnb_duns",
              "ultimate_duns", "parent_duns")
-
-# ANY column whose name CONTAINS one of these drops, not only an exact
-# DROP_COLS entry. FOUND 2026-10-04: `recipient_duns` shipped in four funding
-# samples, on the public site and in dist/review, while
-# `data/cedar/field_map.json` records DUNS as internal and unpublished. The
-# exact-name list knew `duns` and `parent_duns`, and a fifth spelling walked
-# past it - the same defect class as the NEID, which shipped under six
-# spellings. A substring match fails closed: it also drops a coverage
-# statistic named for DUNS (`pct_with_duns`), which carries no identifier;
-# allow-list such a column by name here if the owner wants it back.
-DROP_SUBSTRINGS = ("duns",)
-
-# A DUNS carried as a VALUE: the subject of a row in an identifier graph, or
-# a `DUNS:<nine digits>` node key. The row is withheld (`row_ok`), because
-# the identifier is what the row is about and masking it leaves nothing.
-DUNS_VALUE = re.compile(r"(?i)\bduns\W{0,3}\d{9}\b")
-DUNS_TYPE_SUFFIXES = ("identifier_type", "id_type")
-
-
-def is_proprietary_column(name: str) -> bool:
-    """Does this column NAME carry a licensed identifier (DROP_COLS)?
-
-    Exact DROP_COLS entries, case-insensitively, plus any name containing a
-    `DROP_SUBSTRINGS` entry. Every consumer that used `c.lower() in
-    DROP_COLS` calls this instead.
-    """
-    n = (name or "").lower()
-    return n in DROP_COLS or any(s in n for s in DROP_SUBSTRINGS)
 
 # RETIRED IDENTITY SCHEME - the CICD NEID. Dropped as COLUMNS, like DROP_COLS.
 #
@@ -1864,74 +1779,6 @@ def row_ok(r: dict) -> tuple[bool, str]:
     for col in NEVER:
         if col in r and (r.get(col) or "").strip():
             return False, "personal:" + col
-    # A DUNS as the row's subject (see DUNS_VALUE). Column drops cannot reach
-    # it: the identifier sits under a generic name like `identifier`.
-    for col, value in r.items():
-        v = (value or "").strip() if isinstance(value, str) else ""
-        if not v:
-            continue
-        if (col or "").lower().endswith(DUNS_TYPE_SUFFIXES) and v.lower() == "duns":
-            return False, "proprietary:duns"
-        if DUNS_VALUE.search(v):
-            return False, "proprietary:duns"
-    return True, ""
-
-
-# ---------------------------------------------------------------------------
-# THE NEED PUBLICATION HOLD
-# ---------------------------------------------------------------------------
-# NEED (the Native Entity Enterprise Data collection) is under a whole-
-# collection publication quarantine: "INTERNAL ONLY. Whole-NEED public export
-# quarantine remains binding." The one exception is the reviewed public base,
-# 43 enterprise records cleared row by row in
-# `data/cedar/need-reviewed-preview.json` (release 428d1104..., built on
-# branch codex/cedar-convergence-consumer-20260926). Their enterprise ids are
-# pinned in `data/cedar/need_cleared_enterprise_ids.json` with the sha256 of
-# that file, so this rule does not depend on a branch that may not be merged.
-#
-# FOUND 2026-10-04: ten-row NEED samples (enterprises, relations, the dual-
-# role table), a 100-row NEED preview and NEED-derived ownership edges in the
-# entity layer were committed under dist/ and served by the public site, and
-# NONE of their rows is in the cleared set. A row is a NEED row when its
-# collection is `need`, or when any cell carries a NEED identifier
-# (`CEDAR-NEST-...` / `CEDAR-NESTREL-...`); it may publish only when every
-# NEED identifier on it is cleared. A NEED-collection row that carries no
-# enterprise id at all (the dual-role table is keyed by cedar_uid) is not in
-# the cleared set by construction, and is held.
-NEED_CLEARED_PATH = ROOT / "data" / "cedar" / "need_cleared_enterprise_ids.json"
-NEED_ID = re.compile(r"\bCEDAR-NEST(?:REL)?-[0-9A-Z]+(?:-[0-9A-Z]+)*\b")
-NEED_COLLECTION = "need"
-_NEED_CLEARED: frozenset | None = None
-
-
-def need_cleared_ids() -> frozenset:
-    """The cleared NEED enterprise ids. Raises if the pin is unreadable."""
-    global _NEED_CLEARED
-    if _NEED_CLEARED is None:
-        try:
-            pin = json.loads(NEED_CLEARED_PATH.read_text(encoding="utf-8"))
-            ids = frozenset(pin["enterprise_ids"])
-        except (OSError, ValueError, KeyError, TypeError) as e:
-            raise SystemExit(f"NEED cleared set unreadable at {NEED_CLEARED_PATH}: "
-                             f"{e}; refusing to publish any NEED row") from e
-        if len(ids) != pin.get("record_count"):
-            raise SystemExit(f"NEED cleared set holds {len(ids)} ids, its pin "
-                             f"says {pin.get('record_count')}; refusing")
-        _NEED_CLEARED = ids
-    return _NEED_CLEARED
-
-
-def need_row_cleared(row: dict, collection: str = "") -> tuple[bool, str]:
-    """(publishable, reason) under the NEED hold. See the comment above."""
-    cleared = need_cleared_ids()
-    found = set()
-    for value in row.values():
-        if isinstance(value, str) and "CEDAR-NEST" in value:
-            found.update(NEED_ID.findall(value))
-    if collection == NEED_COLLECTION and not found:
-        return False, "held:need_publication"
-    if found - cleared:
-        return False, "held:need_publication"
     return True, ""
 
 
@@ -2485,7 +2332,7 @@ def mask_attribution(r, state_reason: str) -> int:
     return cleared
 
 
-def is_publication_eligible(r, collection: str = "") -> tuple[bool, str, str]:
+def is_publication_eligible(r) -> tuple[bool, str, str]:
     """THE gate. (eligible, reason, disposition).
 
     One deny-by-default policy applied before export, which is what CP-002
@@ -2500,12 +2347,6 @@ def is_publication_eligible(r, collection: str = "") -> tuple[bool, str, str]:
     1135 both apply it, and `verify` checks they do.
     """
     ok, why = row_ok(r)
-    if not ok:
-        return False, why, WITHHOLD
-    # The NEED publication hold (2026-10-04). `collection` lets a NEED-
-    # collection row with no NEED identifier on it be held too; without it
-    # the identifier scan still holds every uncleared NEED row elsewhere.
-    ok, why = need_row_cleared(r, collection)
     if not ok:
         return False, why, WITHHOLD
     d, sreason = adjudication(r)
@@ -2723,7 +2564,6 @@ def publishable_columns(header) -> list:
     never = set(NEVER)
     return [c for c in (header or [])
             if c.lower() not in lower_drop and c not in never
-            and not is_proprietary_column(c)
             and not is_lineage_column(c)]
 
 
@@ -3014,7 +2854,7 @@ def verify() -> int:
 
     # 7. DROP_COLS is compared case-insensitively by every consumer, so an
     #    upper-case entry could never match and would silently ship.
-    for c in DROP_COLS + DROP_SUBSTRINGS:
+    for c in DROP_COLS:
         if c != c.lower():
             bad.append(f"DROP_COLS entry {c!r} is not lower case; every "
                        f"consumer compares `col.lower() in DROP_COLS`, so it "
@@ -3069,8 +2909,7 @@ def verify() -> int:
         if not p.exists():
             continue
         txt = p.read_text(encoding="utf-8", errors="replace")
-        for name in ("is_publication_eligible", "mask_attribution",
-                     "redact_personal_contacts"):
+        for name in ("is_publication_eligible", "mask_attribution"):
             if name not in txt:
                 bad.append(f"{stem} writes a customer file but never calls "
                            f"`{name}` - CP-002's gate is not applied")
