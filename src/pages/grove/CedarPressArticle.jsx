@@ -65,6 +65,7 @@ import { PressCedarFab } from "./PressCedarFab";
 import { TierName } from "./TierName";
 
 import { useProtectedArticle, useProtectedArticles } from "../../features/grove/useProtectedArticles.js";
+import { apiAvailable } from "../../api.js";
 
 /**
  * A figure: the chart, what it shows, what it came from, where it was made,
@@ -454,7 +455,12 @@ export default function CedarPressArticle() {
           <p role="status">
             {articleState.status === "loading"
               ? "Loading this article…"
-              : "Articles are unavailable on this connection. Your sign-in is unchanged. Please try again when the article service is available."}
+              : apiAvailable()
+                // Connected, a failure is most often a stalled or dropped
+                // request (api.js deadline), and trying again is the fix.
+                ? <>Articles are unavailable on this connection. Your sign-in is unchanged.{" "}
+                  <button type="button" className="cp-retry" onClick={articleState.retry}>Retry</button></>
+                : "Articles are unavailable on this connection. Your sign-in is unchanged. Please try again when the article service is available."}
           </p>
           <PressFoot />
         </main>

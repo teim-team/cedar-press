@@ -9,6 +9,7 @@ import { EXCLUDED_COLLECTIONS, COLLECTION_FIGURES, LAUNCH_COLLECTION, UNMEASURED
   collectionCedarFacts, collectionCitation, collectionContextLine, collectionCsv,
   collectionFindings, collectionSample, collectionTables, figuresInShelfOrder,
   hasSample, samplePath } from "../src/features/grove/collection.js";
+import { loadCodebook } from "../src/features/grove/codebook.js";
 import { PLAN_REACH, SHELF, canOpenDataset, canReadCedarPress, shelfReach } from "../src/features/grove/pressAccess.js";
 import { PRESS_CATALOG } from "../src/features/grove/pressCatalog.js";
 import { WORKSPACE_TIERS } from "../src/workspaceTier.js";
@@ -86,6 +87,9 @@ async function collectionPayload() {
 // is what would make this comparison flap at midnight.
 const ACCESSED = "1 January 2026";
 
+// collectionCsv checks a spreadsheet sample against the codebook, which the
+// browser loads on demand (src/features/grove/codebook.js); load it here too.
+await loadCodebook();
 const csvs = {};
 for (const dataset of LAUNCH_COLLECTION) {
   if (!hasSample(dataset.id)) {

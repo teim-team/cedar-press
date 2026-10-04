@@ -885,7 +885,7 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
   ), [collections, selectedKey, tableKey]);
   const noPreview = collections.filter((c) => selected.includes(c.entry.id) && !c.flagship && !c.structure);
 
-  const { rows, missing, columns, loading } = useSampleRows(tables, register);
+  const { rows, missing, columns, loading, retry: retrySamples } = useSampleRows(tables, register);
   const facets = useMemo(() => facetsOf(rows, register), [rows, register]);
   const filtered = useMemo(() => sortRows(filterRows(rows, cut, register), cut.sort), [rows, cut, register]);
   const excluded = useMemo(() => excludedBy(rows, cut, register), [rows, cut, register]);
@@ -1254,7 +1254,12 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
                 ? "Loading the preview records…"
                 : selected.length === 0
                   ? "No collection is selected. Choose one above, or all of them."
-                  : "No matching records in this preview. This does not establish whether the full dataset contains matching records. Widen a filter, or clear them."}
+                  : missing.length && !rows.length
+                    // Nothing arrived: that is a failed read, not an empty
+                    // result, and "widen a filter" would send the reader
+                    // after the wrong cause.
+                    ? <>The preview records could not be loaded. Check the connection and try again. <button type="button" className="cp-retry" onClick={retrySamples}>Retry</button></>
+                    : "No matching records in this preview. This does not establish whether the full dataset contains matching records. Widen a filter, or clear them."}
             </p>
           )}
 
@@ -1322,6 +1327,7 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
               <button type="button" className="cp-ex__clear" onClick={() => write({ history: false })}>Hide superseded versions</button>
             ) : null}
             {registerStatus === "failed" ? <button type="button" className="cp-ex__clear" onClick={retryRegister}>Retry the register</button> : null}
+            {missing.length && rows.length ? <button type="button" className="cp-ex__clear" onClick={retrySamples}>Retry the unreachable previews</button> : null}
             </p>
             {/* HOW TO READ THE NUMBERS.
                 Three declarations the collection itself makes — what an

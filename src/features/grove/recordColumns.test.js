@@ -4,6 +4,10 @@ import test from "node:test";
 import { spreadsheetDefaultColumns } from "../../../scripts/derive-explore.mjs";
 import { CONTRACTS, SOURCE_LINK_COLUMN, labelFor, meaningFor, rowDate, rowSource } from "./explore.js";
 import { columnPlan } from "./recordColumns.js";
+import { loadCodebook } from "./codebook.js";
+// The codebook loads on demand in the browser (codebook.js); the readers
+// under test read it synchronously once it has.
+await loadCodebook();
 
 const contractor = {
   mapping_kind: "producer_spreadsheet",

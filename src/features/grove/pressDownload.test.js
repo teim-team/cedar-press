@@ -16,6 +16,10 @@ import { fileURLToPath } from "node:url";
 
 import { LAUNCH_COLLECTION, collectionSample, collectionPublicationHold, collectionCsv, hasSample, samplePath, reviewedPreviewTextMatches } from "./collection.js";
 import { csvFor, hasReleaseFile } from "./pressDownload.js";
+import { loadCodebook } from "./codebook.js";
+// The codebook loads on demand in the browser (codebook.js); the readers
+// under test read it synchronously once it has.
+await loadCodebook();
 
 const PUBLIC = fileURLToPath(new URL("../../../public", import.meta.url));
 const readSample = (path) => readFile(`${PUBLIC}${path}`, "utf8");

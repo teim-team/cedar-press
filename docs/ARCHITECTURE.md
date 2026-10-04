@@ -63,10 +63,10 @@ git ls-files src/<dir>/grove                                   # files to move
 
 | | |
 |---|---|
-| Files to move | 171 — `features/grove` 124, `pages/grove` 44, `components/grove` 1, `styles/grove` 2 |
-| Path references to rewrite | 472, across 106 files |
-| Referencing files inside `src/` | 52 — `pages/` 34, `features/` 14, `context/` 2, `components/` 1, `main.jsx` 1 |
-| Referencing files outside `src/` | 54 — `server/cedar_press/` 8, `scripts/` 7, `docs/` 21, `code/` 5, `server/tests/` 6, `tests/` 2, `data/` 1, `.github/` 1, `.env.example` 1, `AGENTS.md` 1, `eslint.config.js` 1 |
+| Files to move | 178 — `features/grove` 131, `pages/grove` 44, `components/grove` 1, `styles/grove` 2 |
+| Path references to rewrite | 482, across 111 files |
+| Referencing files inside `src/` | 56 — `pages/` 37, `features/` 15, `context/` 2, `components/` 1, `main.jsx` 1 |
+| Referencing files outside `src/` | 55 — `server/cedar_press/` 8, `scripts/` 7, `docs/` 21, `code/` 5, `server/tests/` 6, `tests/` 3, `data/` 1, `.github/` 1, `.env.example` 1, `AGENTS.md` 1, `eslint.config.js` 1 |
 
 The reason this was deferred has expired. The table used to carry a fifth row
 — twelve files also touched by an open PR, which would each have become a
@@ -79,7 +79,7 @@ as its own commit — moving the four directories to `press/` and rewriting the
 references in one pass — for two reasons that are about review rather than
 about risk.
 
-First, "did all 472 references get rewritten?" is a question the build, the
+First, "did all 482 references get rewritten?" is a question the build, the
 suites and the smoke run answer, and not one a reader can answer from a diff.
 Folded into a change that also alters behaviour or prose, the rename hides
 that change instead of accompanying it.
@@ -97,7 +97,7 @@ day the four directories move, the same measurement turns into the stale-path
 sweep and names every file that still spells the old one.
 
 One precondition, found while re-measuring the rows above. `npm run test:smoke`
-is one of the three things that answer "did all 472 references get rewritten?",
+is one of the three things that answer "did all 482 references get rewritten?",
 and until this commit it could answer for the wrong tree: `playwright.config.js`
 hardcoded port 4180 and kept `reuseExistingServer` on outside CI, so a run in
 one checkout attached to a preview server another checkout had left listening
@@ -159,6 +159,20 @@ ride in cookies (`credentials: "include"`) rather than browser storage,
 because a token in storage is a token any script on the page can read.
 Errors come back as `{ code, message }` and are rethrown as an `ApiError`
 carrying `code` — the shape `pressSignup.pressSignupError` already reads.
+
+Every request has a deadline, body included: 15 seconds
+(`REQUEST_TIMEOUT_MS`), 45 for the research preview and 60 for Cedar, whose
+server-side waits are 30 and 45. A miss rejects with code `TIMEOUT`, a
+dropped connection with `NETWORK`, and `isUnreachable(error)` tells either
+from a refusal. The session check, an article and the collection
+spreadsheets answer an unreachable service with a Retry rather than a
+verdict ("no dataset for this account"); the session's notice is portalled
+outside `#root` so the prerender cannot capture it. Before the deadline a
+stalled request left those three waiting indefinitely (2026-10-04 audit:
+Fast 3G, still loading at 45 to 50 seconds; with it, Retry at 19 seconds).
+
+The API compresses (`GZipMiddleware`, over 1 kB): `/press/collections` is
+11,469 bytes instead of 48,283 for a Cedar Press+ account.
 
 | Endpoint | Purpose |
 | --- | --- |
@@ -319,6 +333,22 @@ else answers with a sign-in, which a search engine should not rank.
   bundle was 184 kB gzipped and nine seconds to the first headline; split and
   prerendered, the headline is in the HTML at 0.7 seconds and the first
   bundle is 123 kB.
+- **The codebook is fetched, not bundled.** `data/cedar/codebook.json`
+  (400 kB minified) was compiled into the chunk every page loads.
+  `features/grove/codebook.js` now imports it on demand: the record and the
+  Explore viewer load it with their chunks, the door's preview with its
+  sample, the download before it builds the file; nothing else fetches it.
+  Its synchronous readers throw if called first, and `codebook.test.js`
+  fails if any module imports the file statically again. Measured
+  2026-10-04: the scripts and stylesheet every page loads before it mounts
+  went from 270.5 to 238.6 KiB brotli; on the wire, fonts and HTML included,
+  from 415.5 to 383.5 KiB before the door mounts.
+- **Samples and chunks recover.** A sample that fails (error, non-200, or
+  no answer in 15 seconds, `sampleFetch.js`) is not kept: the page says it
+  could not be loaded, offers Retry, and reads it again when the browser is
+  back online. A page whose code did not arrive keeps its Reload button and
+  also reloads itself once on the `online` event (`reloadOnReconnect.js`).
+  `tests/resilience.spec.js` holds both.
 
 What this does not do: it does not publish records, entity pages or per-tribe
 pages to the open web. The collections stay behind the subscription, and a

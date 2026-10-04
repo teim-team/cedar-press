@@ -59,7 +59,7 @@
 import { parseCsv, csvCell } from "./csv.js";
 import manifest from "../../../data/cedar/collections.manifest.json" with { type: "json" };
 import published from "../../../data/cedar/samples.published.json" with { type: "json" };
-import previewCodebook from "../../../data/cedar/codebook.json" with { type: "json" };
+import { codebookTables } from "./codebook.js";
 
 import { CLAIM_CLASS } from "./claims.js";
 // The storefront's own naming. `pressCatalog.js` imports nothing, so this is
@@ -572,6 +572,10 @@ export function collectionCitation(datasetId, accessedOn = null) {
  * Node reads from disk. The bytes are not bundled: the twelve collections
  * carry 169 sample files and inlining them would put 1.4 MB of CSV into the
  * page for a button most readers never press.
+ *
+ * A current-release spreadsheet sample is checked against the codebook's
+ * columns, so the caller awaits `loadCodebook()` (codebook.js) first;
+ * `csvFor` in pressDownload.js does.
  */
 export function collectionCsv(datasetId, sampleText) {
   if (collectionPublicationHold(datasetId)) return null;
@@ -584,7 +588,7 @@ export function collectionCsv(datasetId, sampleText) {
     const table = sample.table;
     const key = typeof table === "string" && table.endsWith(".csv")
       ? `${datasetId}/${table.slice(0, -4)}` : null;
-    const expected = previewCodebook.tables[key]?.fields?.map((field) => field.column);
+    const expected = codebookTables()[key]?.fields?.map((field) => field.column);
     if (!expected || columns.length !== expected.length
         || expected.length !== sample.columns
         || columns.some((column, index) => column !== expected[index])

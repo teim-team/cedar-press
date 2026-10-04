@@ -22,7 +22,6 @@ import { STOREFRONT_CATALOG } from "./pressCatalog.js";
 import { isInternalProvenanceColumn, namesInternalFile } from "./readerValues.js";
 import { columnPlan } from "./recordColumns.js";
 import {
-  CODEBOOK as CURRENT_CODEBOOK,
   CONTRACTS,
   EMPTY_CUT,
   SOURCE_BUILDER_KINDS,
@@ -77,6 +76,9 @@ import {
   tableKey,
   universalRows as currentUniversalRows,
 } from "./explore.js";
+import { loadCodebook } from "./codebook.js";
+// The codebook loads on demand in the browser (codebook.js).
+const CURRENT_CODEBOOK = await loadCodebook();
 
 const REPO = fileURLToPath(new URL("../../../", import.meta.url));
 const PUBLIC = `${REPO}public`;

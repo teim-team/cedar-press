@@ -18,7 +18,7 @@ import { fileURLToPath } from "node:url";
 import { expect, test } from "@playwright/test";
 
 import { EMAIL, HASH, PASSWORD, PRESS_EMAIL } from "./demoAccount.js";
-import { parseCsv, rowSource, contractFor, exploreTables, labelFor, universalRows } from "../src/features/grove/explore.js";
+import { loadCodebook, parseCsv, rowSource, contractFor, exploreTables, labelFor, universalRows } from "../src/features/grove/explore.js";
 import { LAUNCH_COLLECTION } from "../src/features/grove/collection.js";
 import { coverageLabel } from "../src/features/grove/pressAccess.js";
 import { formatUpdated } from "../src/features/grove/pressReleases.js";
@@ -61,6 +61,10 @@ import {
 // The throwaway account playwright.config.js provisions into the build it
 // starts. It is not a credential and it opens nothing that is deployed
 // anywhere; see tests/demoAccount.js.
+// `labelFor` reads the codebook, which the site loads on demand
+// (src/features/grove/codebook.js); the assertions that call it need it too.
+test.beforeAll(async () => { await loadCodebook(); });
+
 const ACCOUNT = { email: EMAIL, password: PASSWORD };
 const PRESS_ACCOUNT = { email: PRESS_EMAIL, password: PASSWORD };
 const STOREFRONT_NAMES = STOREFRONT_CATALOG.map((entry) => entry.short || entry.name);

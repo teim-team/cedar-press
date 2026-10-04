@@ -31,6 +31,7 @@
 
 import { downloadCollection } from "../../api.js";
 import { isConnected } from "../../config.js";
+import { loadCodebook } from "./codebook.js";
 import { collectionCitation, collectionCsv, collectionPublicationHold, hasSample, samplePath, sampleTextMatchesRelease } from "./collection.js";
 import { spreadsheetSafe } from "./csv.js";
 import { coverageLabel } from "./pressAccess.js";
@@ -63,7 +64,11 @@ export async function csvFor(entry, fetchText = defaultFetchText) {
   if (hasSample(entry.id)) {
     const text = await fetchText(samplePath(entry.id));
     const verified = text != null && await sampleTextMatchesRelease(entry.id, text);
-    const shipped = verified ? collectionCsv(entry.id, text) : null;
+    // The sample is checked against the codebook, which loads on demand. If
+    // it cannot load, this is the same honest fallback as a sample that
+    // cannot be fetched: the collection's description, named as such.
+    const checkable = verified && await loadCodebook().then(() => true, () => false);
+    const shipped = checkable ? collectionCsv(entry.id, text) : null;
     if (shipped) return { csv: shipped, name: `${entry.id}.csv` };
   }
   // The file outlives the page, so it carries its own citation. Launch

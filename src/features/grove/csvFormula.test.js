@@ -10,6 +10,10 @@ import test from "node:test";
 import { collectionCsv, LAUNCH_COLLECTION, hasSample, samplePath } from "./collection.js";
 import { csvCell, parseCsv, spreadsheetSafe } from "./csv.js";
 import { csvFor } from "./pressDownload.js";
+import { loadCodebook } from "./codebook.js";
+// The codebook loads on demand in the browser (codebook.js); the readers
+// under test read it synchronously once it has.
+await loadCodebook();
 
 const { cases: CASES } = JSON.parse(
   readFileSync(new URL("../../../server/tests/fixtures/csv_formula_cases.json", import.meta.url), "utf8"),

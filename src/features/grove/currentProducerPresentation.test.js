@@ -5,6 +5,10 @@ import manifest from "../../../data/cedar/collections.manifest.json" with { type
 import { parseCsv, codebookFor, contractFor, SOURCE_LINK_COLUMN } from "./explore.js";
 import { columnPlan } from "./recordColumns.js";
 import { PRESENTATION_COLUMNS } from "./mixedSpreadsheet.js";
+import { loadCodebook } from "./codebook.js";
+// The codebook loads on demand in the browser (codebook.js); the readers
+// under test read it synchronously once it has.
+await loadCodebook();
 
 test("all fourteen current producer spreadsheets have an exact raw codebook and a valid opening view", () => {
   assert.equal(manifest.collections.length, 14);

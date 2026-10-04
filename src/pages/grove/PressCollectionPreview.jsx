@@ -20,9 +20,11 @@
 // it is given. The action names the way in at Tribal Business News for the
 // shelf the collection sits on, never a route past the paywall.
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { LAUNCH_COLLECTION, collectionPublicationHold } from "../../features/grove/collection";
+import { codebookLoaded, loadCodebook } from "../../features/grove/codebook.js";
+import { fetchSampleText, onBackOnline } from "../../features/grove/sampleFetch.js";
 import { contractFor, exploreTables, parseCsv, universalRows } from "../../features/grove/explore.js";
 import { columnPlan } from "../../features/grove/recordColumns.js";
 import { tableLabel } from "../../features/grove/readerValues.js";
@@ -78,26 +80,39 @@ function usePreviewSample(collectionId) {
     // preview is pending and show what the release holds.
     return tables.find((t) => contractFor(t.key)?.entity_name || contractFor(t.key)?.entity_uid) ?? null;
   }, [collectionId]);
+  // ONLY WHAT ARRIVED IS KEPT. A failure (an error, a non-200, no answer
+  // within the sample deadline, or the codebook the table's labels come
+  // from not loading) is shown with a Retry and cleared when the browser
+  // says it is back online; it used to be kept like a success, so one
+  // dropped request left the pane failed until a reload (sampleFetch.js).
+  const [failed, setFailed] = useState(() => new Set());
   useEffect(() => {
-    if (!table || loaded.has(table.path) || pending.current.has(table.path)) return;
+    if (!table || loaded.has(table.path) || failed.has(table.path) || pending.current.has(table.path)) return;
     pending.current.add(table.path);
-    fetch(table.path)
-      .then(async (r) => (r.ok ? parseCsv(await r.text()) : null))
-      .catch(() => null)
-      .then((parsed) => {
+    // The rows are drawn by the product's own table, which reads the
+    // codebook's labels; the two arrive together.
+    Promise.all([fetchSampleText(table.path).then(parseCsv), loadCodebook()]).then(
+      ([parsed]) => {
         pending.current.delete(table.path);
         setLoaded((prev) => (prev.has(table.path) ? prev : new Map(prev).set(table.path, parsed)));
-      });
-  }, [table, loaded]);
-  if (!table) return { status: "none", table: null, parsed: null };
-  if (!loaded.has(table.path)) return { status: "loading", table, parsed: null };
-  const parsed = loaded.get(table.path);
-  return { status: parsed ? "ok" : "failed", table, parsed };
+      },
+      () => {
+        pending.current.delete(table.path);
+        setFailed((prev) => (prev.has(table.path) ? prev : new Set(prev).add(table.path)));
+      },
+    );
+  }, [table, loaded, failed]);
+  const retry = useCallback(() => setFailed((prev) => (prev.size ? new Set() : prev)), []);
+  useEffect(() => onBackOnline(retry), [retry]);
+  if (!table) return { status: "none", table: null, parsed: null, retry };
+  if (failed.has(table.path)) return { status: "failed", table, parsed: null, retry };
+  if (!loaded.has(table.path) || !codebookLoaded()) return { status: "loading", table, parsed: null, retry };
+  return { status: "ok", table, parsed: loaded.get(table.path), retry };
 }
 
 export default function CollectionPreview({ entry, tier, register }) {
   const publicationHold = collectionPublicationHold(entry.id);
-  const { status, table, parsed } = usePreviewSample(entry.id);
+  const { status, table, parsed, retry } = usePreviewSample(entry.id);
   // A phone gets the same list the product gives a phone, not a table of
   // the collection's own columns squeezed into 320px.
   const narrow = useNarrow();
@@ -111,7 +126,11 @@ export default function CollectionPreview({ entry, tier, register }) {
   // universe here, exactly as the release's is on /data.
   const contract = table ? contractFor(table.key) : null;
   const entityColumn = contract ? (contract.entity_name ?? contract.entity_uid ?? null) : null;
-  const { defaults, all } = columnPlan(table?.key ?? null, contract, parsed?.columns ?? []);
+  // Planned once the sample is in hand: the plan reads the codebook, which
+  // arrives with it (usePreviewSample).
+  const { defaults, all } = status === "ok"
+    ? columnPlan(table?.key ?? null, contract, parsed?.columns ?? [])
+    : { defaults: [], all: [] };
   const shownColumns = defaults.length ? defaults : all;
   const fresh = freshnessLine(entry.id);
   // Presented by its record structure (Foundation & Corporate Giving, PLOT):
@@ -195,7 +214,10 @@ export default function CollectionPreview({ entry, tier, register }) {
               A public sample is not available for this collection yet.
             </p>
           ) : (
-            <p>The public sample could not be loaded. Please try again later.</p>
+            <p>
+              The public sample could not be loaded. Check the connection and try again.{" "}
+              <button type="button" className="cp-retry" onClick={retry}>Retry</button>
+            </p>
           )}
           {SOURCES[entry.id] ? (
             <p className="cp-pane__sources">

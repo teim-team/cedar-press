@@ -76,7 +76,7 @@ export default function CedarPressEntity() {
   );
   const locked = collections.filter((c) => !c.open).length;
   const opened = useMemo(() => new Set(collections.filter((c) => c.open).map((c) => c.entry.id)), [collections]);
-  const { rows, missing, loading: samplesLoading } = useSampleRows(tables, register);
+  const { rows, missing, loading: samplesLoading, retry: retrySamples } = useSampleRows(tables, register);
 
   const entity = register.byUid.get(uid) ?? null;
   // The register has loaded and this id is not in it. The page then has no
@@ -287,7 +287,8 @@ export default function CedarPressEntity() {
           )}
           {missing.length ? (
             <p className="cp-rec__fine">
-              Not reachable right now: {missing.map((key) => PRESS_CATALOG_BY_ID[key.split("/")[0]]?.short ?? key).join(", ")}.
+              Not reachable right now: {missing.map((key) => PRESS_CATALOG_BY_ID[key.split("/")[0]]?.short ?? key).join(", ")}.{" "}
+              <button type="button" className="cp-retry" onClick={retrySamples}>Retry</button>
             </p>
           ) : null}
         </header>

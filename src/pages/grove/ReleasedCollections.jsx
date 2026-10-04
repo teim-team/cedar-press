@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { fetchReleaseCollections, fetchReleaseResearch, spreadsheetDownloadUrl } from "../../api.js";
+import { fetchReleaseCollections, fetchReleaseResearch, isUnreachable, spreadsheetDownloadUrl } from "../../api.js";
 import { researchComponents, researchFields, researchValue, spreadsheetRecordCount } from "../../features/grove/releaseResearch.js";
 import SourceCitation from "./SourceCitation.jsx";
 
@@ -22,14 +22,21 @@ export function PlotGeometryPreview({ packet }) {
 
 function ResearchRows({ collection, part }) {
   const [state, setState] = useState({ status: "loading", packet: null });
+  const [attempt, setAttempt] = useState(0);
   useEffect(() => {
     const controller = new AbortController();
     fetchReleaseResearch(collection, part.releaseId, part.component, { signal: controller.signal })
       .then((packet) => { if (!controller.signal.aborted) setState({ status: "ready", packet }); })
-      .catch(() => { if (!controller.signal.aborted) setState({ status: "unavailable", packet: null }); });
+      .catch((error) => { if (!controller.signal.aborted) setState({ status: isUnreachable(error) ? "unreachable" : "unavailable", packet: null }); });
     return () => controller.abort();
-  }, [collection, part.releaseId, part.component]);
-  if (!state.packet) return <p role="status">{state.status === "loading" ? "Loading examples and definitions…" : "Examples are unavailable for this account."}</p>;
+  }, [collection, part.releaseId, part.component, attempt]);
+  const retry = () => {
+    setState({ status: "loading", packet: null });
+    setAttempt((n) => n + 1);
+  };
+  if (!state.packet) return <p role="status">{state.status === "loading" ? "Loading examples and definitions…"
+    : state.status === "unreachable" ? <>The examples could not be reached. <button type="button" className="cp-retry" onClick={retry}>Retry</button></>
+      : "Examples are unavailable for this account."}</p>;
   return <ResearchPreview packet={state.packet} />;
 }
 
@@ -66,20 +73,30 @@ export default function ReleasedCollections() {
   const [state, setState] = useState({ status: "loading", entries: [] });
   const [choice, setChoice] = useState("");
   const [opened, setOpened] = useState(null);
+  // A Retry is a new attempt. "unreachable" (no answer in time, or no
+  // connection) is kept apart from "unavailable" (the service answered and
+  // refused): only the second says something about this account.
+  const [attempt, setAttempt] = useState(0);
   useEffect(() => {
     const controller = new AbortController();
     fetchReleaseCollections({ signal: controller.signal }).then((result) => {
       if (!controller.signal.aborted) setState({ status: "ready", entries: (result.collections || []).filter((entry) => entry.id !== "gaming") });
-    }).catch(() => { if (!controller.signal.aborted) setState({ status: "unavailable", entries: [] }); });
+    }).catch((error) => { if (!controller.signal.aborted) setState({ status: isUnreachable(error) ? "unreachable" : "unavailable", entries: [] }); });
     return () => controller.abort();
-  }, []);
+  }, [attempt]);
+  const retry = () => {
+    setState({ status: "loading", entries: [] });
+    setAttempt((n) => n + 1);
+  };
   const entry = state.entries.find((item) => item.id === choice) || state.entries[0];
   const parts = researchComponents(entry);
   const recordCount = spreadsheetRecordCount(entry);
   const spreadsheet = entry && spreadsheetDownloadUrl(entry.id, entry.spreadsheet, parts);
   return <section className="cp-sec" aria-label="Collection spreadsheets">
     <h2>Collection spreadsheets</h2>
-    {!entry ? <p role="status">{state.status === "loading" ? "Checking this account’s datasets…" : "No dataset is available for this account."}</p> : <>
+    {!entry ? <p role="status">{state.status === "loading" ? "Checking this account’s datasets…"
+      : state.status === "unreachable" ? <>The datasets could not be reached. Check the connection and try again. <button type="button" className="cp-retry" onClick={retry}>Retry</button></>
+        : "No dataset is available for this account."}</p> : <>
       <label>Collection <select value={entry.id} onChange={(event) => { setChoice(event.target.value); setOpened(null); }}>
         {state.entries.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
       </select></label>

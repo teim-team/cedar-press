@@ -5,6 +5,10 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { spreadsheetContract } from "../../../scripts/derive-explore.mjs";
 import { universalRows, rowEntities, rowEntity, rowRecordId, rowAmount, rowSource, entityVectors, publicRow } from "./explore.js";
+import { loadCodebook } from "./codebook.js";
+// The codebook loads on demand in the browser (codebook.js); the readers
+// under test read it synchronously once it has.
+await loadCodebook();
 
 const base = ["record_type", "record_key", "record_grain"];
 

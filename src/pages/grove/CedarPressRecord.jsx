@@ -250,7 +250,7 @@ export default function CedarPressRecord() {
   const table = collection?.tables.find((t) => t.key === asked.key) ?? null;
   const open = collection ? collection.open : false;
   const tables = useMemo(() => (table && open ? [table] : []), [table, open]);
-  const { rows, missing, loading: samplesLoading } = useSampleRows(tables, register);
+  const { rows, missing, loading: samplesLoading, retry: retrySamples } = useSampleRows(tables, register);
 
   // The reader's own ordering: the cut they came from, applied to this
   // table's rows. A cut naming other collections narrows nothing here — the
@@ -387,7 +387,9 @@ export default function CedarPressRecord() {
             <h1 className="cp-rec__name">
               {samplesLoading || (!rows.length && !missing.length && open && table)
                 ? "Opening the record…"
-                : "That record is not in this preview."}
+                : missing.length
+                  ? "The published sample could not be loaded."
+                  : "That record is not in this preview."}
             </h1>
             <p>
               {!asked.key || !collection
@@ -398,7 +400,9 @@ export default function CedarPressRecord() {
                     ? "This link names a table that has no published preview."
                     : samplesLoading
                       ? "Reading the published sample."
-                      : "Each published table ships up to ten sample rows, and this viewer reads those. A record that is in the release may not be in the sample."}
+                      : missing.length
+                        ? <>Check the connection and try again. <button type="button" className="cp-retry" onClick={retrySamples}>Retry</button></>
+                        : "Each published table ships up to ten sample rows, and this viewer reads those. A record that is in the release may not be in the sample."}
             </p>
           </section>
         ) : (

@@ -47,9 +47,9 @@
 
 import { csvCell } from "./csv.js";
 import explore from "../../../data/cedar/explore.json" with { type: "json" };
-import codebookJson from "../../../data/cedar/codebook.json" with { type: "json" };
 import scopesJson from "../../../data/cedar/scopes.json" with { type: "json" };
 
+import { codebookTables } from "./codebook.js";
 import { collectionCitation, collectionPublicationHold, collectionSample, collectionTables, sampleUnavailableReason } from "./collection.js";
 import { canOpenDataset } from "./pressAccess.js";
 import { recordStructure } from "./pressRecordStructure.js";
@@ -67,28 +67,34 @@ export const CONTRACTS = Object.freeze(explore.tables);
  * does not list is a technical field, shown only on request. The review
  * document docs/DATASET_CODEBOOK.md is generated from the same file.
  */
-export const CODEBOOK = Object.freeze(codebookJson.tables);
+export { loadCodebook } from "./codebook.js";
 
+/*
+ * The four readers below are synchronous, as they always were, and read the
+ * codebook `loadCodebook()` fetched (codebook.js says why it is fetched and
+ * not imported). They throw if it has not loaded; every surface that calls
+ * them awaits it first.
+ */
 export function codebookFor(key) {
-  return CODEBOOK[key] ?? null;
+  return codebookTables()[key] ?? null;
 }
 
 
 /** The plain-English label for a column, or a heading made from its name. */
 export function labelFor(key, column) {
-  const field = CODEBOOK[key]?.fields.find((f) => f.column === column);
+  const field = codebookTables()[key]?.fields.find((f) => f.column === column);
   if (field) return field.label;
   const words = String(column).replace(/_/g, " ").replace(/([a-z])([A-Z])/g, "$1 $2").trim();
   return words.charAt(0).toUpperCase() + words.slice(1);
 }
 
 export function meaningFor(key, column) {
-  return CODEBOOK[key]?.fields.find((f) => f.column === column)?.meaning ?? null;
+  return codebookTables()[key]?.fields.find((f) => f.column === column)?.meaning ?? null;
 }
 
 /** The codebook's columns for a table, in its order, that the sample actually has. */
 export function codebookColumns(key, columns) {
-  return (CODEBOOK[key]?.fields ?? []).map((f) => f.column).filter((c) => columns.includes(c));
+  return (codebookTables()[key]?.fields ?? []).map((f) => f.column).filter((c) => columns.includes(c));
 }
 // 2 since the cut carries collective scopes (`sc`) and the broad toggle
 // (`b`), 2026-09-05; a version-1 cut reads as version 2 with neither.

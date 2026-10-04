@@ -57,6 +57,7 @@ from urllib.parse import quote
 from fastapi import Depends, FastAPI, HTTPException, Request, Response
 from fastapi.exception_handlers import http_exception_handler
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -118,6 +119,17 @@ app.add_middleware(
         "X-Cedar-Citation-Encoding",
     ],
 )
+
+# Responses compressed for any client that accepts gzip. The catalog alone,
+# `/press/collections`, went out uncompressed (2026-10-04 audit); measured
+# with the test accounts, 48,283 bytes become 11,469 for Cedar Press+ and
+# 22,496 become 5,961 for Cedar Press, about 0.7 s saved at Slow 3G's
+# 50 kB/s. Under ~1 kB the header costs more than compression saves.
+# Level 6, not starlette's default 9: the streamed release downloads pass
+# through here too, and 9 buys a few percent for several times the CPU. A
+# browser decodes transparently, so `X-Cedar-SHA256` still describes the
+# bytes a subscriber saves.
+app.add_middleware(GZipMiddleware, minimum_size=1000, compresslevel=6)
 
 #: The repository root, from ``server/cedar_press/app.py``.
 _REPO = Path(__file__).resolve().parents[2]
