@@ -34,6 +34,8 @@
 // The launcher matches teim-app's; whether it moves is the owner's decision,
 // not one to settle in a stylesheet. The panel is the part that had drifted.
 import { useCallback, useEffect, useRef, useState } from "react";
+
+import { focusWasWithin, rememberFocus } from "../../features/grove/focusReturn.js";
 import { Link } from "react-router";
 
 import { askCedar } from "../../api.js";
@@ -156,6 +158,8 @@ export function PressCedarFab({ gated = null, examples = OPEN_EXAMPLES }) {
   const threadRef = useRef(null);
   const inputRef = useRef(null);
   const panelRef = useRef(null);
+  const launcherRef = useRef(null);
+  const restoreRef = useRef(null);
   const connected = isConnected();
 
   // The reader's resolver: the service, with the thread's memory around it.
@@ -230,13 +234,25 @@ export function PressCedarFab({ gated = null, examples = OPEN_EXAMPLES }) {
 
   const { thread, pending, ask, cancel, retire } = useCedarThread({ resolve, followUpsFor });
 
+  // Focus goes into the panel when it opens: the field when Cedar can be
+  // asked, the close button when the composer is disabled. It only went to
+  // the field before, so a disconnected panel kept focus on the launcher,
+  // and on a phone, where the launcher is hidden while the panel is open,
+  // focus fell to <body>. Closing hands it back to what opened the panel.
   useEffect(() => {
-    if (open && connected) {
-      const frame = requestAnimationFrame(() => inputRef.current?.focus());
-      return () => cancelAnimationFrame(frame);
-    }
-    return undefined;
+    if (!open) return undefined;
+    restoreRef.current = rememberFocus();
+    const frame = requestAnimationFrame(() => {
+      (connected ? inputRef.current : panelRef.current?.querySelector(".cp-dc__close"))?.focus();
+    });
+    return () => cancelAnimationFrame(frame);
   }, [open, connected]);
+
+  const close = useCallback(() => {
+    const returning = focusWasWithin(panelRef.current);
+    setOpen(false);
+    if (returning) requestAnimationFrame(() => restoreRef.current?.(launcherRef.current));
+  }, []);
 
   // Escape closes the panel. The launcher toggles it too, but on phones the
   // browser's own toolbar can sit over the launcher while the panel is open,
@@ -244,11 +260,11 @@ export function PressCedarFab({ gated = null, examples = OPEN_EXAMPLES }) {
   useEffect(() => {
     if (!open) return undefined;
     const onKey = (event) => {
-      if (event.key === "Escape") setOpen(false);
+      if (event.key === "Escape") close();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [open]);
+  }, [open, close]);
 
   useEffect(() => {
     const onScope = (event) => {
@@ -386,7 +402,7 @@ export function PressCedarFab({ gated = null, examples = OPEN_EXAMPLES }) {
           onSubmit={(question) => askAt(question, scope)}
           placeholder={scope ? `Ask about ${scope.name}` : "Ask about a collection"}
           inputDisabled={!connected}
-          onClose={() => setOpen(false)}
+          onClose={close}
           panelRef={panelRef}
           inputRef={inputRef}
         />
@@ -395,6 +411,7 @@ export function PressCedarFab({ gated = null, examples = OPEN_EXAMPLES }) {
       <button
         type="button"
         className="cedar-widget__launcher"
+        ref={launcherRef}
         aria-expanded={open}
         aria-label="Ask Cedar"
         onClick={() => setOpen((current) => !current)}

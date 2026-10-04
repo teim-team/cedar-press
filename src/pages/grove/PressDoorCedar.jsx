@@ -58,6 +58,7 @@ import {
 import { TBN_PLANS_URL } from "../../features/grove/pressArticles";
 import { PRESS_METHODS_PATH, PRESS_REQUEST_PATH, PRESS_RESEARCH_PATH } from "../../features/grove/pressRoutes";
 import { EVENT, track } from "../../features/grove/telemetry.js";
+import { rememberFocus } from "../../features/grove/focusReturn.js";
 import { useCedarThread } from "../../features/grove/useCedarThread.js";
 import { CedarPanel, Paragraphs } from "./CedarPanel";
 import { CedarGreeting } from "./CedarGreeting";
@@ -78,6 +79,9 @@ export default function PressDoorCedar() {
   const panelRef = useRef(null);
   const inputRef = useRef(null);
   const fabRef = useRef(null);
+  // What had focus when the panel opened: the launcher, or the pane's and
+  // the hero's own Ask Cedar buttons, which open it without the launcher.
+  const restoreRef = useRef(null);
 
   // The door's resolver is the local bank against the thread's memory. It
   // is synchronous underneath; the hook's pause is what lets a reply read
@@ -111,7 +115,11 @@ export default function PressDoorCedar() {
   const close = useCallback((restoreFocus = true) => {
     const returning = restoreFocus && panelRef.current?.contains(document.activeElement);
     setOpen(false);
-    if (returning) requestAnimationFrame(() => fabRef.current?.focus());
+    // Back to whatever opened it. The launcher alone was the target, and on
+    // the door it is often not on screen (it waits below the first screen),
+    // so Escape from a panel opened by the pane's Ask Cedar left focus on
+    // <body>. Measured at 375 and 1280 px, 2026-10-04.
+    if (returning) requestAnimationFrame(() => restoreRef.current?.(fabRef.current));
   }, []);
 
   // The hero and the pane both hand questions over.
@@ -151,6 +159,7 @@ export default function PressDoorCedar() {
     };
     document.addEventListener("keydown", onKey);
     document.addEventListener("pointerdown", onOutside);
+    restoreRef.current = rememberFocus();
     const frame = requestAnimationFrame(() => inputRef.current?.focus());
     return () => {
       document.removeEventListener("keydown", onKey);

@@ -37,6 +37,7 @@ import { MAINTENANCE, NEED_ENRICHMENTS } from "../../features/grove/pressMethod.
 import { formatUpdated, ledgerFor } from "../../features/grove/pressReleases.js";
 import { PRESS_METHODS_PATH, PRESS_WHATS_NEW_PATH } from "../../features/grove/pressRoutes.js";
 import { COLLECTION_ICONS } from "./pressCollectionIcons";
+import { focusWasWithin, keepTabInside, rememberFocus } from "../../features/grove/focusReturn.js";
 
 /** A section, rendered only when it has something to say. */
 function Block({ title, children }) {
@@ -57,9 +58,23 @@ export default function PressCollectionAbout({ entry, flagship, onClose, article
   // Escape closes, and focus lands inside the panel when it opens: it is a
   // sheet over the table, and a reader who tabs off the end of it should not
   // find themselves in the rows behind it.
+  //
+  // That last clause was the intent and not the behaviour until 2026-10-04:
+  // Tab ran off the end of the sheet into the rail and the rows, and closing
+  // left focus on <body>. Tab now wraps inside the sheet, and closing returns
+  // focus to the control that opened it (`focusReturn.js`).
+  const restoreRef = useRef(null);
+  useEffect(() => {
+    restoreRef.current = rememberFocus();
+    const panel = panelRef.current;
+    return () => {
+      if (focusWasWithin(panel)) restoreRef.current?.();
+    };
+  }, []);
   useEffect(() => {
     const onKey = (event) => {
       if (event.key === "Escape") onClose();
+      else keepTabInside(event, panelRef.current);
     };
     document.addEventListener("keydown", onKey);
     const frame = requestAnimationFrame(() => closeRef.current?.focus());
@@ -79,7 +94,7 @@ export default function PressCollectionAbout({ entry, flagship, onClose, article
   const sampleRows = sampleRecordCount(flagship?.sampleRows);
 
   return (
-    <div className="cp-ab" role="dialog" aria-label={`About ${entry.name}`} ref={panelRef}>
+    <div className="cp-ab" role="dialog" aria-modal="true" aria-label={`About ${entry.name}`} ref={panelRef}>
       <header className="cp-ab__head">
         <p className="cp-ab__cap">Collection profile</p>
         <h2 className="cp-ab__name">

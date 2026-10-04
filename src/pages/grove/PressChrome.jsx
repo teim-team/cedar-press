@@ -5,13 +5,14 @@
 // three copies of a footer drift three ways — which is exactly what had
 // happened: every page carried its own two-link version, so where the footer
 // took you depended on where you already were.
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { Link, NavLink } from "react-router";
 
 import { useAuth } from "../../context/useAuth";
 import { contactHref } from "../../features/grove/appLink.js";
 import { useNarrow } from "../../features/grove/useNarrow.js";
 import { canReadCedarPress } from "../../features/grove/pressAccess";
+import { useDismissable } from "./useDismissable.jsx";
 
 /**
  * The reader's initials, from the address. Two letters where the address
@@ -71,36 +72,6 @@ const NAV = [
  * all open onto a paywall reads as a broken site rather than a map. The
  * wordmark still leads home.
  */
-/**
- * A disclosure that closes on Escape and on a click outside it.
- *
- * Both menus in the masthead are native `<details>`: they work with no state,
- * a keyboard reaches them, and a screen reader announces them. What details
- * does not do on its own is close when the reader looks elsewhere, which is
- * what a menu in a header has to do.
- */
-function useDismissable() {
-  const ref = useRef(null);
-  useEffect(() => {
-    const node = ref.current;
-    if (!node) return undefined;
-    const close = (refocus) => {
-      if (!node.open) return;
-      node.open = false;
-      if (refocus) node.querySelector("summary")?.focus();
-    };
-    const onKey = (event) => { if (event.key === "Escape") close(true); };
-    const onDown = (event) => { if (!node.contains(event.target)) close(false); };
-    node.addEventListener("keydown", onKey);
-    document.addEventListener("pointerdown", onDown);
-    return () => {
-      node.removeEventListener("keydown", onKey);
-      document.removeEventListener("pointerdown", onDown);
-    };
-  }, []);
-  return ref;
-}
-
 /**
  * Who is signed in, as one control on the masthead's own row.
  *

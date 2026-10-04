@@ -395,7 +395,7 @@ function PrioritiesWorkspace({ user }) {
             {["research_question", "dataset"].map((type) => (
               <section key={type} className="cp-pri__group" aria-label={PRIORITY_TYPES[type].plural} data-testid={`priorities-${type}`}>
                 <div className="cp-head">
-                  <span className="cp-sec__band">{PRIORITY_TYPES[type].plural}</span>
+                  <span className="cp-sec__band" role="heading" aria-level={2}>{PRIORITY_TYPES[type].plural}</span>
                 </div>
                 <p className="cp-pri__lede">{PRIORITY_TYPES[type].lede}</p>
                 <ul className="cp-pri__list">

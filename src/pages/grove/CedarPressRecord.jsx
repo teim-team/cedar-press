@@ -391,7 +391,7 @@ export default function CedarPressRecord() {
                   ? "The published sample could not be loaded."
                   : "That record is not in this preview."}
             </h1>
-            <p>
+            <p role="status">
               {!asked.key || !collection
                 ? "This link does not name a collection Cedar Press carries."
                 : !open

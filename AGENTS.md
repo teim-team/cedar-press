@@ -9753,6 +9753,37 @@ Not changed, because it is not a publication hold set by an agent: release
 licensing and product boundary. NEED's components in the pinned release still
 carry them until Lumecon-data re-cuts NEED under this ruling.
 
+## 2026-10-04: a panel that takes focus must give it back, and dteal on the paper ground is 4.49:1
+
+Accessibility pass, axe-core 4.13 (WCAG 2.0/2.1/2.2 A and AA plus best
+practice) with keyboard walks at 375 and 1280 px, over the door, sign-in, the
+overview, Collections, a collection, the downloads menu, Research Briefs, an
+article, Methods, Settings, What's new, Priorities, the tribal data request,
+research access and a record. 220 axe findings before, 149 after, and every
+remaining one is the same pair: `--dteal` `#0A7F74` text on the paper ground
+`#f3f6f8` measures 4.49:1, under 4.5:1. That is a brand-token decision, not a
+fix this pass could make with an existing token, and it is left for the owner.
+
+Fixed: the door pane's collection name is an `h2` (it was an `h3` straight
+under the page `h1`); the Priorities lists' bands are level-two headings; an
+article still loading or unavailable has a page heading; the rail's
+observation counts use the rail's own 0.6 alpha (4.47:1 and 4.09:1 at 0.45);
+the footer's tribal-government link is 24px tall. Focus: the collection
+profile wraps Tab inside itself (its comment said it did; it did not) and is
+`aria-modal`; it, the door's Cedar and the signed-in Cedar return focus to
+what opened them (`src/features/grove/focusReturn.js`), and the signed-in
+Cedar moves focus into itself when its composer is disabled (on a phone the
+launcher is hidden while it is open, so focus fell to `<body>`). The viewer's
+Filters and More panels close on Escape and an outside click, through the
+masthead's hook, now `src/pages/grove/useDismissable.jsx`; a closed entity
+picker no longer swallows that Escape. Live regions: the door preview's
+loading and failure share one `role="status"` element, and the viewer's empty
+line, the record page's line and the entity page's unreachable list announce
+a failed read. Phone width: the Filters panel hangs from the toolbar (it began
+53-63px off the left of a 375px screen) and the Sections menu opens from its
+right edge (it ran 43-59px past the right). Tests: `tests/accessibility.spec.js`
+and `focusReturn.test.js`, each checked by reverting the fix.
+
 ## 2026-10-04 (later): Owner ruling on rights — rights statuses are provenance, not gates
 
 Owner ruling 2026-10-04 (Elijah Moreno): "We are transforming the data, so remove
@@ -9771,4 +9802,3 @@ authorization boundary), `internal_only` working tables, malformed rights, and
 the field map's own consistency checks. The licensed-identifier column drops
 (DUNS, Casino City) in `code/cedar_publication.py` are column rules, not status
 gates, and were not changed; the owner decides them.
-

@@ -452,6 +452,9 @@ export default function CedarPressArticle() {
         <main id="cp-main" className="cp cp-page">
           <PressMast section="articles" />
           <PressBack label="All Research Briefs" to={PRESS_ARTICLES_PATH} />
+          {/* The page's heading for a screen reader while there is no article
+              to title it; the visible page is the status line alone. */}
+          <h1 className="sr-only">Research Brief</h1>
           <p role="status">
             {articleState.status === "loading"
               ? "Loading this article…"
