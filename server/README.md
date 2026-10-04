@@ -110,6 +110,18 @@ examples this way. Release bytes, hashes and the per-component JSONL routes are
 unchanged. The committed sample files and the Explore reader still use the
 earlier appended layout (Lumecon-data `docs/review-ledger.md`, 2026-10-04).
 
+Native identity basis (owner request, 2026-10-04). The customer tables of
+`owned`, `contractors`, `subcontracting`, `funding`, `deals`, `need` and
+`gaming` carry `native_identity_basis`, the strongest evidence behind the
+Native identity the record asserts (`tribal_government`, `ancsa_corporation`,
+`native_hawaiian_organization`, `enrolled_tribal_citizen`, `program_certified`,
+`publicly_stated`, `self_certified`, `unknown`), and `native_identity_source`,
+its public citation. Both are derived by the vendored module from evidence on
+the row, never guessed; the mapping and the measured sample distribution are in
+Lumecon-data `docs/native-identity-basis.md`. A ten-row sample is built without
+related tables, so NEED's sample rows (whose owner class is attached from
+`enterprises`) read `unknown`; the full table carries the owner class.
+
 ## Pinned governed release downloads
 
 The existing sample download remains a sample. The additive

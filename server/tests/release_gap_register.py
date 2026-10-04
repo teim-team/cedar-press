@@ -207,8 +207,21 @@ def measure() -> dict:
     owned_rows = read_csv(ROOT / "public/data/cedar/samples/owned/spreadsheet__10.csv")
     owned_scope = dict(Counter(r["identity_scope"] for r in owned_rows))
     owned_assertion = dict(Counter(r["assertion_class"] for r in owned_rows))
+    # The vendored customer_sheet.py reads identity_scope to derive the
+    # native_identity_basis column (owner request 2026-10-04); it drops no row,
+    # so it is not a scope filter and is excluded from this measurement.
     consumer_scope_filters = subprocess.run(
-        ["git", "grep", "-l", "identity_scope", "--", "server/cedar_press", "src", "scripts"],
+        [
+            "git",
+            "grep",
+            "-l",
+            "identity_scope",
+            "--",
+            "server/cedar_press",
+            "src",
+            "scripts",
+            ":!server/cedar_press/customer_sheet.py",
+        ],
         cwd=ROOT,
         capture_output=True,
         text=True,

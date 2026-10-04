@@ -117,6 +117,35 @@ class SampleDownloads(unittest.TestCase):
                     self.assertNotIn(packaging, header)
                 self.assertIn("cite_as", rows[0])
 
+    def test_identity_collections_carry_the_native_identity_basis(self):
+        """Owner request 2026-10-04: the evidence behind each record's Native identity."""
+        import json
+
+        from cedar_press import collections as launch
+        from cedar_press import repository
+
+        declared = json.loads((ROOT / "data/cedar/field_map.json").read_text("utf-8"))
+        declared = declared["presentation_columns"]
+        self.assertEqual(set(declared["collections"]), set(customer_sheet.IDENTITY_COLLECTIONS))
+        values = next(
+            c["values"] for c in declared["columns"] if c["column"] == "native_identity_basis"
+        )
+        self.assertEqual(tuple(values), customer_sheet.NATIVE_IDENTITY_BASES)
+        served = [d.id for d in launch.LAUNCH_COLLECTION if launch.collection_csv(d.id)]
+        for collection in served:
+            with self.subTest(collection=collection):
+                rows = list(csv.DictReader(io.StringIO(repository.collection_csv(collection))))
+                present = "native_identity_basis" in rows[0]
+                self.assertEqual(present, collection in customer_sheet.IDENTITY_COLLECTIONS)
+                self.assertEqual(present, "native_identity_source" in rows[0])
+                if not present:
+                    continue
+                bases = customer_sheet.NATIVE_IDENTITY_BASES
+                for row in rows:
+                    self.assertIn(row["native_identity_basis"], bases)
+                    if row["native_identity_basis"] == "unknown":
+                        self.assertFalse(row["native_identity_source"])
+
 
 if __name__ == "__main__":
     sys.exit(unittest.main())

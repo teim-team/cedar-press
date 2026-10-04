@@ -6772,5 +6772,37 @@
    ],
    "retire": []
   }
+ },
+ "presentation_columns": {
+  "_note": "Columns the customer table adds at presentation (vendored cedar_press/customer_sheet.py), after this map's per-column decisions; they are not source columns and take no decision here. Owner request 2026-10-04 (Elijah Moreno). Mapping: Lumecon-data docs/native-identity-basis.md.",
+  "collections": [
+   "contractors",
+   "deals",
+   "funding",
+   "gaming",
+   "need",
+   "owned",
+   "subcontracting"
+  ],
+  "columns": [
+   {
+    "column": "native_identity_basis",
+    "definition": "The strongest evidence behind the Native identity the record asserts, derived from evidence on the row, never guessed.",
+    "values": [
+     "tribal_government",
+     "ancsa_corporation",
+     "native_hawaiian_organization",
+     "enrolled_tribal_citizen",
+     "program_certified",
+     "publicly_stated",
+     "self_certified",
+     "unknown"
+    ]
+   },
+   {
+    "column": "native_identity_source",
+    "definition": "Public citation for native_identity_basis, under the public-source rule; blank when the basis is unknown."
+   }
+  ]
  }
 }

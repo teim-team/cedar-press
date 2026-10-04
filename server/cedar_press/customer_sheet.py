@@ -192,6 +192,7 @@ SOURCE_COLUMNS = frozenset(
         "source_document",
         "verification_source",
         "classification_source",
+        "native_identity_source",
     }
 )
 _SOURCE_NAME = re.compile(r"(?:^|_)(?:url|urls|source_system|source_url)$")
@@ -286,6 +287,7 @@ LAYOUTS: dict[str, dict[str, Any]] = {
                     "owner_cedar_uids": ["cedar_uid", "distinct"],
                     "owner_names": ["party_name", "distinct"],
                     "owner_enterprise_ids": ["enterprise_id", "distinct"],
+                    "owner_source_urls": ["source_url", "distinct"],
                 },
             },
             {
@@ -348,6 +350,7 @@ LAYOUTS: dict[str, dict[str, Any]] = {
                 "columns": {
                     "owner_cedar_uid": ["asserted_owner_hub_cedar_uid", "distinct"],
                     "owner_entity_name": ["owner_hub_name", "distinct"],
+                    "owner_entity_class": ["owner_hub_entity_class", "distinct"],
                     "parent_enterprise_id": ["parent_enterprise_id", "distinct"],
                     "parent_enterprise_name": ["parent_name", "distinct"],
                 },
@@ -372,6 +375,198 @@ LAYOUTS: dict[str, dict[str, Any]] = {
         "left_out": {"*": "Permit and EPA tables have other grains and stay internal."},
     },
 }
+
+# -- Native identity basis -----------------------------------------------------
+#
+# Owner request, 2026-10-04 (Elijah Moreno): one column that says what kind of
+# evidence stands behind the Native identity a record asserts, ordered strongest
+# to weakest, and a second that cites it. Derived only from evidence already on
+# the row (or attached to it); a row with none is ``unknown``. When a row
+# carries several bases, the strongest documented one is used.
+
+#: Internal only; never written into customer data.
+IDENTITY_POLICY = "native-identity-basis-2026-10-04"
+IDENTITY_COLUMN = "native_identity_basis"
+IDENTITY_SOURCE_COLUMN = "native_identity_source"
+#: Strongest first. The position is the rank.
+NATIVE_IDENTITY_BASES: tuple[str, ...] = (
+    "tribal_government",
+    "ancsa_corporation",
+    "native_hawaiian_organization",
+    "enrolled_tribal_citizen",
+    "program_certified",
+    "publicly_stated",
+    "self_certified",
+    "unknown",
+)
+NATIVE_IDENTITY_DESCRIPTIONS = {
+    "tribal_government": "Owned by a federally recognized tribe or its government enterprise.",
+    "ancsa_corporation": "An Alaska Native regional or village corporation or its subsidiary.",
+    "native_hawaiian_organization": "Owned by a Native Hawaiian Organization.",
+    "enrolled_tribal_citizen": "An individual owner whose enrollment or citizenship a tribe "
+    "documents.",
+    "program_certified": "Certified by a program that checks Native status (tribal TERO or "
+    "Indian preference office, tribal licensing, an ANC shareholder register).",
+    "publicly_stated": "A public directory or the business's own public statement says it "
+    "is Native-owned.",
+    "self_certified": "Only a self-declaration in a federal registry (SAM or FPDS business "
+    "types, a self-represented Native set-aside).",
+    "unknown": "No basis is recorded.",
+}
+#: Collections whose rows assert Native ownership or identity of a party.
+IDENTITY_COLLECTIONS = frozenset(
+    {"contractors", "deals", "funding", "gaming", "need", "owned", "subcontracting"}
+)
+#: Cedar entity classes, compared case-insensitively, and the basis each is.
+ENTITY_CLASS_BASIS = {
+    "federally recognized tribe": "tribal_government",
+    "federally recognized tribes (joint)": "tribal_government",
+    "federally recognized alaska native village": "tribal_government",
+    "tribal_government": "tribal_government",
+    "alaska native regional corporation": "ancsa_corporation",
+    "alaska native village corporation": "ancsa_corporation",
+    "ancsa group corporation": "ancsa_corporation",
+    "alaska native corporation": "ancsa_corporation",
+    "alaska_native_corporation": "ancsa_corporation",
+    "anc_regional": "ancsa_corporation",
+    "anc": "ancsa_corporation",
+    "native hawaiian organization": "native_hawaiian_organization",
+    "nho": "native_hawaiian_organization",
+}
+#: SAM / FPDS business types (subcontractor_business_types), self-declared.
+SELF_DECLARED_BUSINESS_TYPES = frozenset(
+    {
+        "TRIBAL GOVERNMENT",
+        "INDIAN TRIBE (FEDERALLY RECOGNIZED)",
+        "TRIBALLY OWNED FIRM",
+        "ALASKAN NATIVE CORPORATION OWNED FIRM",
+        "ALASKA NATIVE CORPORATION OWNED FIRM",
+        "NATIVE HAWAIIAN ORGANIZATION OWNED FIRM",
+        "AMERICAN INDIAN OWNED BUSINESS",
+        "AMERICAN INDIAN OWNED",
+        "NATIVE AMERICAN OWNED BUSINESS",
+        "NATIVE AMERICAN OWNED",
+    }
+)
+#: Owned: a tribe's or ANC's register whose listing certifies Native status.
+PROGRAM_DIRECTORY_TYPES = frozenset(
+    {
+        "tero",
+        "indian_preference",
+        "certification_notice",
+        "state_certified",
+        "business_licence",
+        "anc_shareholder",
+        "shareholder_vendor",
+    }
+)
+#: Owned: a public directory listing that asserts ownership without certifying it.
+LISTING_DIRECTORY_TYPES = frozenset(
+    {"member_owned", "artist", "chamber", "regional_directory", "mixed_local"}
+)
+#: Owned: identity scopes under which the register lists enrolled citizens only.
+ENROLLED_IDENTITY_SCOPES = frozenset({"citizen", "enrolled_member_graded"})
+_TRUE_FLAGS = frozenset({"1", "y", "yes", "true", "t"})
+
+
+def _flag(value: Any) -> bool:
+    return str(value or "").strip().lower() in _TRUE_FLAGS
+
+
+def _text(row: Mapping[str, Any], name: str) -> str:
+    value = row.get(name)
+    return "" if value is None else str(value).strip()
+
+
+def entity_class_basis(value: Any) -> str | None:
+    """The basis a Cedar entity class establishes, or None (a non-owning class)."""
+    return ENTITY_CLASS_BASIS.get(str(value or "").strip().lower())
+
+
+def _owned_bases(row: Mapping[str, Any]) -> list[str]:
+    assertion = _text(row, "assertion_class")
+    directory = _text(row, "directory_type")
+    scope = _text(row, "identity_scope")
+    evidence = _text(row, "evidence_class")
+    found: list[str] = []
+    if scope == "tribally_owned_entity" or directory == "tribal_enterprise":
+        found.append("tribal_government")
+    # The parent that lists its own subsidiary is the certifying authority.
+    parent = entity_class_basis(row.get("entity_class"))
+    if (
+        (directory == "subsidiary_directory" or scope == "parent_asserted_subsidiary")
+        and _text(row, "cedar_entity_role") == "certifying_authority"
+        and parent
+    ):
+        found.append(parent)
+    if assertion == "OWNERSHIP":
+        if scope in ENROLLED_IDENTITY_SCOPES and directory in PROGRAM_DIRECTORY_TYPES:
+            found.append("enrolled_tribal_citizen")
+        if directory in PROGRAM_DIRECTORY_TYPES or (
+            _text(row, "certification_number") and _text(row, "certifying_authority_name")
+        ):
+            found.append("program_certified")
+        if directory in LISTING_DIRECTORY_TYPES:
+            found.append("publicly_stated")
+    if evidence == "roster_attestation":
+        found.append("publicly_stated")
+    if assertion == "SELF_CERTIFICATION" or evidence == "self_certified_federal_registration":
+        found.append("self_certified")
+    return found
+
+
+def _business_type_bases(value: Any) -> list[str]:
+    types = {part.strip().upper() for part in re.split(r"[,;|]", str(value or ""))}
+    return ["self_certified"] if types & SELF_DECLARED_BUSINESS_TYPES else []
+
+
+def native_identity(collection: str, row: Mapping[str, Any]) -> tuple[str, Any]:
+    """The Native identity basis of one record and the public citation behind it.
+
+    ``row`` is the source row with any attached columns merged in. Returns
+    ``(basis, source)``: the strongest basis the row's own evidence documents,
+    or ``("unknown", None)``. The source is the row's citation for that basis
+    and is presented under the public-source rule like any source column.
+    """
+    found: list[str] = []
+    source: Any = row.get("source_url")
+    if collection == "owned":
+        found = _owned_bases(row)
+    elif collection == "contractors":
+        if _flag(row.get("attributed_flag")) and "awardee" in _text(row, "cedar_entity_role"):
+            found += [b for b in [entity_class_basis(row.get("entity_class"))] if b]
+        if _flag(row.get("reported_buy_indian")) or _flag(row.get("reported_indian_business")):
+            found.append("self_certified")
+    elif collection == "subcontracting":
+        direction = _text(row, "native_direction")
+        if direction.startswith("a_") and "prime" in _text(row, "cedar_entity_role"):
+            found += [b for b in [entity_class_basis(row.get("entity_class"))] if b]
+        if direction.startswith("b_"):
+            if "subaward" in _text(row, "cedar_entity_role"):
+                found += [b for b in [entity_class_basis(row.get("entity_class"))] if b]
+            found += _business_type_bases(row.get("subcontractor_business_types"))
+    elif collection == "funding":
+        if _flag(row.get("attributed_flag")) and _text(row, "cedar_entity_role") == "recipient":
+            found += [b for b in [entity_class_basis(row.get("entity_class"))] if b]
+    elif collection == "deals":
+        found += [b for b in [entity_class_basis(row.get("native_party_type"))] if b]
+    elif collection == "need":
+        for name in ("owner_entity_class", "owner_hub_entity_class", "owner_class"):
+            for part in str(row.get(name) or "").split(LIST_SEPARATOR):
+                basis = entity_class_basis(part)
+                if basis:
+                    found.append(basis)
+        source = row.get("evidence_pins") or row.get("source_url")
+    elif collection == "gaming" and not _blank(row.get("owner_cedar_uids")):
+        # 25 U.S.C. 2710(b)(2)(A): the tribe holds the sole proprietary interest
+        # in its gaming; an owner is recorded only on official or independent
+        # evidence, and its cedar_uid is set only for a Native entity.
+        found.append("tribal_government")
+        source = row.get("owner_source_urls")
+    if not found:
+        return "unknown", None
+    return min(found, key=NATIVE_IDENTITY_BASES.index), source
+
 
 LIST_SEPARATOR = "; "
 #: Column classes that never reach a customer: DUNS (``private_id``), Casino
@@ -728,6 +923,27 @@ def plan(
                 "aggregation": aggregation,
                 "sources": {},
             }
+    if collection in IDENTITY_COLLECTIONS:
+        columns[IDENTITY_COLUMN] = {
+            "type": "string",
+            "unit": None,
+            "description": "The strongest evidence behind the Native identity this record "
+            "asserts, strongest to weakest: "
+            + "; ".join(
+                f"{name}: {NATIVE_IDENTITY_DESCRIPTIONS[name]}" for name in NATIVE_IDENTITY_BASES
+            ),
+            "class": "data",
+            "identity": True,
+            "sources": {},
+        }
+        columns[IDENTITY_SOURCE_COLUMN] = {
+            "type": "string",
+            "unit": None,
+            "description": f"Public citation for {IDENTITY_COLUMN}; blank when it is unknown.",
+            "class": "source",
+            "identity": True,
+            "sources": {},
+        }
 
     def order(item: tuple[str, Row]) -> int:
         _name, column = item
@@ -788,6 +1004,7 @@ def flatten(
         "sources_blanked": 0,
         "unmatched_related_rows": 0,
     }
+    identity_counts: dict[str, int] = {}
     # An empty name is SQLite's private temporary database, removed on close.
     store = sqlite3.connect("")
     try:
@@ -848,6 +1065,18 @@ def flatten(
                             [r.get(column["field"]) for r in related], column["aggregation"]
                         )
                         out[target] = _present(column, value, origins.get(item["table"]), counts)
+                if IDENTITY_COLUMN in columns and columns[IDENTITY_COLUMN].get("identity"):
+                    attached = {
+                        name: out.get(name)
+                        for name, column in columns.items()
+                        if column.get("attach")
+                    }
+                    basis, cited = native_identity(collection, {**row, **attached})
+                    out[IDENTITY_COLUMN] = basis
+                    out[IDENTITY_SOURCE_COLUMN] = _present(
+                        columns[IDENTITY_SOURCE_COLUMN], cited, origin, counts
+                    )
+                    identity_counts[basis] = identity_counts.get(basis, 0) + 1
                 counts["rows"] += 1
                 store.execute("INSERT INTO out (payload) VALUES (?)", (json.dumps(out),))
         for slot, _item in enumerate(attachments):
@@ -873,6 +1102,8 @@ def flatten(
         "cedar_id_columns": [name for name in header if columns[name]["class"] == "cedar_id"],
         "counts": counts,
     }
+    if IDENTITY_COLUMN in columns:
+        report["native_identity"] = {"policy": IDENTITY_POLICY, "counts": identity_counts}
 
     def staged() -> Generator[Row, None, None]:
         try:
