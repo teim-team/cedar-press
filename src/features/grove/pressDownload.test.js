@@ -14,7 +14,7 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 
-import { LAUNCH_COLLECTION, collectionSample, collectionPublicationHold, collectionCsv, hasSample, samplePath, reviewedPreviewTextMatches } from "./collection.js";
+import { LAUNCH_COLLECTION, collectionSample, collectionCsv, hasSample, samplePath, reviewedPreviewTextMatches } from "./collection.js";
 import { csvFor, hasReleaseFile } from "./pressDownload.js";
 import { loadCodebook } from "./codebook.js";
 // The codebook loads on demand in the browser (codebook.js); the readers
@@ -32,12 +32,22 @@ test("stale NEED cached rows cannot acquire the reviewed release citation", asyn
     assert.equal(path, samplePath("need"));
     return stale;
   });
-  assert.equal(collectionPublicationHold("need"), null);
   assert.equal(hasSample("need"), true);
   assert.equal(collectionCsv("need", stale), null);
   assert.equal(calls, 1);
   assert.equal(result.name, "need-collection-description.csv");
   assert.doesNotMatch(result.csv, /old cached row|CEDAR-NEST-1/);
+});
+
+test("owner ruling 2026-10-04: NEED and Owned previews publish with no collection hold", async () => {
+  for (const id of ["need", "owned"]) {
+    assert.equal(hasSample(id), true, id);
+    assert.ok(samplePath(id), id);
+    const text = await readSample(samplePath(id));
+    const csv = collectionCsv(id, text);
+    assert.ok(csv, id);
+    assert.doesNotMatch(csv, /publication_hold|publication_status,held/, id);
+  }
 });
 
 test("the reviewed finite NEED preview remains available", async () => {

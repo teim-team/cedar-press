@@ -109,14 +109,16 @@ class NeedProfiles(unittest.TestCase):
         with self.assertRaises(repository.FullReleaseUnavailable):
             self.serve(broken=("credit_rating_actions",))
 
-    def test_publication_hold_precedes_pin_and_transport(self):
-        with patch.object(
-            repository, "grove_release_pin", side_effect=AssertionError("No pin read")
+    def test_owner_ruling_need_evidence_is_not_held_before_the_pin(self):
+        # Owner ruling 2026-10-04: no NEED publication hold, so the profile
+        # goes straight to the pinned release instead of answering "held".
+        with (
+            patch.object(
+                repository, "grove_release_pin", side_effect=AssertionError("pin read")
+            ),
+            self.assertRaisesRegex(AssertionError, "pin read"),
         ):
-            result = profiles.entity_evidence(UID)
-        self.assertEqual(result["status"], "publication_held")
-        self.assertIsNone(result["release_id"])
-        self.assertFalse(any(result[key] for key in profiles.COMPONENTS))
+            profiles.entity_evidence(UID)
 
     def test_direct_issuer_and_related_enterprise_never_transfer_identity(self):
         rows = [
@@ -127,7 +129,13 @@ class NeedProfiles(unittest.TestCase):
             self.row(observation_id="unknown", publication_status="unreviewed"),
         ]
         selected = profiles.select_entity_rows(rows, UID, {ENTERPRISE: [self.link()]})
-        self.assertEqual(len(selected), 2)
+        # Owner ruling 2026-10-04: a hold_reason or an unreviewed status no
+        # longer drops a row; only the unrelated enterprise is left out.
+        self.assertEqual(len(selected), 4)
+        self.assertEqual(
+            [row["observation_id"] for row in selected],
+            ["synthetic-1", "direct", "held", "unknown"],
+        )
         self.assertEqual(selected[0]["enterprise_id"], ENTERPRISE)
         self.assertEqual(selected[0]["legal_subject_cedar_uid"], "")
         self.assertEqual(selected[0]["profile_attribution"]["kind"], "related_enterprise")
@@ -159,10 +167,13 @@ class NeedProfiles(unittest.TestCase):
     def test_held_unrelated_missing_and_malformed_links(self):
         for links in (
             [],
-            [self.link(hold_reason="unconfirmed")],
             [self.link(profile_cedar_uid="CE-OTHER-00")],
         ):
             self.assertEqual(self.serve(links=links)["status"], "no_evidence")
+        # A held link is served (owner ruling 2026-10-04: no publication hold).
+        self.assertEqual(
+            self.serve(links=[self.link(hold_reason="unconfirmed")])["status"], "available"
+        )
         for links in (
             [None],
             [self.link(source_url="http://example.org")],
@@ -211,11 +222,6 @@ class NeedProfiles(unittest.TestCase):
             list(profiles._component_rows("synthetic", PIN))
         with patch.object(profiles, "registered_entity", return_value=None):
             self.assertEqual(profiles.entity_evidence(UID)["status"], "identity_held")
-        with (
-            patch.object(repository, "_publication_policy", side_effect=ImportError),
-            self.assertRaises(repository.FullReleaseUnavailable),
-        ):
-            profiles.entity_evidence(UID)
 
     def test_http_requires_live_entitled_account_and_registered_profile(self):
         client = TestClient(app)
@@ -234,10 +240,17 @@ class NeedProfiles(unittest.TestCase):
             with patch(
                 "cedar_press.app.subscribers.find", return_value=SimpleNamespace(tier="press_pro")
             ):
-                response = client.get(path)
-                self.assertEqual(response.status_code, 200)
-                self.assertEqual(response.json()["status"], "publication_held")
-                self.assertEqual(response.headers["cache-control"], "private, no-store")
+                with patch.object(
+                    repository,
+                    "grove_release_pin",
+                    side_effect=repository.GroveReleaseNotPinned("no pin"),
+                ):
+                    response = client.get(path)
+                # No NEED release is pinned in this fixture; the answer is
+                # "unavailable", never a publication hold (owner ruling
+                # 2026-10-04).
+                self.assertEqual(response.status_code, 503)
+                self.assertNotIn("held", response.text.lower())
                 self.assertEqual(
                     client.get(f"/press/entities/{ENTERPRISE}/need-evidence").status_code, 404
                 )

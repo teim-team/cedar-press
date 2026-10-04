@@ -1183,11 +1183,9 @@ class PartitionedConsumerTest(_ServerCase):
     def test_last_part_metadata_hold_refuses_raw_and_spreadsheet_before_fetch(self):
         contract = self.manifest["components"]["payments_part_5"]
         original = copy.deepcopy(contract["metadata"])
-        for changes in (
-            {"internal_only": True},
-            {"publication_hold": True},
-            {"publication_status": "held"},
-        ):
+        # Owner ruling 2026-10-04: publication_hold and a review status no
+        # longer hold a component; internal_only still refuses.
+        for changes in ({"internal_only": True},):
             with self.subTest(changes=changes):
                 contract["metadata"] = {**original, **changes}
                 raw, _ = self.get("gaming_payments")

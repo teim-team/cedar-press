@@ -41,7 +41,12 @@ class CandidateReviewTest(unittest.TestCase):
     def test_load_receipts_conserve_withheld_rows(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "fixture.csv"
-            path.write_text("record_id,publishable\nkeep,Y\nhold,N\n")
+            # `publishable = N` no longer withholds (owner ruling 2026-10-04);
+            # a duplicate filing (grain, not a hold) still does, and is receipted.
+            path.write_text(
+                "record_id,publishable,duplicate_status\n"
+                "keep,N,primary\nhold,Y,exact_repeat_within_source\n"
+            )
             receipt = []
             with (
                 patch.object(customer, "translate_neid_values"),
@@ -56,17 +61,17 @@ class CandidateReviewTest(unittest.TestCase):
                     {
                         "event": "withheld",
                         "source_row_index": 1,
-                        "reason": "publishable",
+                        "reason": "duplicate_status=exact_repeat_within_source",
                         "record_id": "hold",
                     }
                 ],
             )
 
-    def test_accuracy_hold_overrides_stale_publishable_flag(self):
-        self.assertEqual(
-            policy.is_publication_eligible({"publish_hold": "Y", "publishable": "Y"}),
-            (False, "publish_hold", policy.WITHHOLD),
-        )
+    def test_owner_ruling_publish_hold_and_publishable_no_longer_withhold(self):
+        # Owner ruling 2026-10-04 (Elijah Moreno): Lumecon decides what is
+        # blocked; a publish_hold or publishable=N flag is not a hold.
+        for row in ({"publish_hold": "Y", "publishable": "Y"}, {"publishable": "N"}):
+            self.assertEqual(policy.is_publication_eligible(row), (True, "", policy.PUBLISH))
 
     def test_competition_uses_existing_dictionary_and_fails_closed(self):
         rows = [
@@ -118,8 +123,8 @@ class CandidateReviewTest(unittest.TestCase):
             row, reason = customer.publication_row(
                 {"title": "safe", "publishable": "N"}, ["title", "publishable"]
             )
-            self.assertIsNone(row)
-            self.assertEqual(reason, "publishable")
+            # publishable=N no longer withholds (owner ruling 2026-10-04).
+            self.assertIsNotNone(row)
             row, reason = customer.publication_row(
                 {"title": "safe", "publishable": "Y", "email": "private"}, ["title", "publishable"]
             )

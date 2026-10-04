@@ -149,7 +149,7 @@ class NeedStaticPreviewTest(unittest.TestCase):
                 with patch.object(n, "reviewed_base_permitted", return_value=True):
                     self.assertFalse(n.need_preview_permitted(root, collection, altered))
 
-    def test_import_audit_admits_only_the_verified_table_and_strikes_a_later_held_table(self):
+    def test_import_audit_no_longer_strikes_an_unproved_need_table(self):
         spec = importlib.util.spec_from_file_location(
             "need_preview_importer_test", ROOT / "scripts/import_cedar_manifest.py"
         )
@@ -171,9 +171,11 @@ class NeedStaticPreviewTest(unittest.TestCase):
                     frozenset(),
                     repo=root,
                 )
-            self.assertEqual([entry["table"] for entry in struck], ["patents.csv"])
+            # Owner ruling 2026-10-04: a NEED table without the reviewed-base
+            # proof publishes like any other collection's table.
+            self.assertEqual(struck, [])
             self.assertEqual(table["sample_path"], n.URL)
-            self.assertIsNone(held["sample_path"])
+            self.assertEqual(held["sample_path"], "/data/cedar/samples/need/patents.csv")
             self.assertNotIn("publication_hold", collection)
 
     def test_two_tables_cannot_share_the_reviewed_preview_authority(self):

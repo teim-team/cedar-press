@@ -70,8 +70,8 @@ def select_entity_rows(rows, cedar_uid: str, links: dict[str, list[dict]]) -> li
         relationship = links.get(row.get("enterprise_id"))
         if not direct and relationship is None:
             continue
-        if row.get("publication_status") != "eligible" or row.get("hold_reason"):
-            continue
+        # Owner ruling 2026-10-04 (Elijah Moreno): no publication hold; a row's
+        # publication_status / hold_reason no longer drops it.
         if not _source_url(row.get("source_url")):
             raise repository.FullReleaseUnavailable("NEED evidence lacks a source link")
         key = row.get("observation_id") or row.get("availability_id") or row.get("event_id")
@@ -127,18 +127,8 @@ def entity_evidence(cedar_uid: str) -> dict:
         return empty_profile(
             "identity_held", "This entity's identity is withheld from publication."
         )
-    try:
-        policy = repository._publication_policy()
-    except (OSError, ImportError, AttributeError) as error:
-        raise repository.FullReleaseUnavailable("NEED publication policy unavailable") from error
-    try:
-        policy.assert_collection_publishable("need")
-    except policy.FieldMapRefusal:
-        return empty_profile(
-            "publication_held",
-            "NEED enterprise evidence is under publication review. "
-            "No published patent or rating facts are available here yet.",
-        )
+    # Owner ruling 2026-10-04 (Elijah Moreno): NEED evidence is not held for
+    # publication review; it is served from the pinned release.
     pin = repository.grove_release_pin("need")
     result = empty_profile(
         "no_evidence", "No permitted NEED evidence for this entity in this release."
@@ -165,8 +155,8 @@ def entity_evidence(cedar_uid: str) -> dict:
             raise repository.FullReleaseUnavailable("Malformed NEED profile relationship")
         if link.get("profile_cedar_uid") != cedar_uid:
             continue
-        if link.get("publication_status") != "eligible" or link.get("hold_reason"):
-            continue
+        # Owner ruling 2026-10-04: publication_status / hold_reason no longer
+        # drop a relationship.
         if (
             not link.get("enterprise_id")
             or not link.get("enterprise_name")

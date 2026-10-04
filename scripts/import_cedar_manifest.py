@@ -606,57 +606,24 @@ def withhold_samples(
     struck: list[dict] = []
     for collection in manifest["collections"]:
         flagship = collection.get("sample") or {}
-        need_tables = set()
-        if collection.get("id") == "need":
-            from cedar_press.need_preview import need_preview_permitted
-
-            need_tables = {
-                (table.get("table"), table["sample_path"])
-                for table in collection["tables"]
-                if table.get("sample_path")
-                and need_preview_permitted(
-                    repo, collection, table, lambda: locate(collection, table)
-                )
-            }
-        policy_hold = None
-        try:
-            _COLLECTION_RULE.assert_collection_publishable(
-                collection.get("cedar", {}).get("cedar_id", collection["id"])
-            )
-        except _COLLECTION_RULE.FieldMapRefusal:
-            if need_tables:
-                collection.pop("publication_hold", None)
-                collection["publication_scope"] = "reviewed_public_base_only"
-            else:
-                policy_hold = "This collection is withheld from publication under its maintained publication policy."
-                collection["publication_hold"] = {
-                    "code": "COLLECTION_PUBLICATION_HOLD",
-                    "message": policy_hold,
-                }
-                collection.setdefault("cedar", {})["status"] = "BLOCKED"
-                collection["cedar"]["blockers"] = [policy_hold]
+        # Owner ruling 2026-10-04 (Elijah Moreno): Lumecon decides what is
+        # blocked; no collection-wide publication hold stands. The NEED
+        # reviewed-preview proof and the collection-policy hold that used to
+        # strike whole collections here are gone; any stale hold is cleared.
+        collection.pop("publication_hold", None)
         for table in collection["tables"]:
             path = table.get("sample_path")
             if not path:
                 continue
-            table_hold = policy_hold
-            if (
-                collection.get("id") == "need"
-                and (table.get("table"), path) not in need_tables
-            ):
-                table_hold = "Only the exact evidence-pinned reviewed NEED base preview is public."
-            if table_hold:
-                columns = ["all fields: collection publication hold"]
-            else:
-                file = locate(collection, table)
-                if not file.exists():
-                    continue
-                columns = sample_violations(file, names, uids)
-                if not columns:
-                    continue
+            file = locate(collection, table)
+            if not file.exists():
+                continue
+            columns = sample_violations(file, names, uids)
+            if not columns:
+                continue
             table["sample_path"] = None
             table["sample_withheld_path"] = path
-            table["sample_withheld_why"] = table_hold or WITHHELD_WHY
+            table["sample_withheld_why"] = WITHHELD_WHY
             table["sample_withheld_columns"] = columns
             struck.append(
                 {
@@ -670,7 +637,7 @@ def withhold_samples(
                 collection["sample"] = {
                     "table": flagship.get("table"),
                     "path": None,
-                    "unavailable_because": table_hold or WITHHELD_WHY,
+                    "unavailable_because": WITHHELD_WHY,
                 }
     return struck
 
@@ -777,14 +744,6 @@ def copy_samples(workspace: Path, manifest: dict) -> int:
     written = 0
     for collection in manifest["collections"]:
         cedar_id = collection["cedar"]["cedar_id"]
-        try:
-            _COLLECTION_RULE.assert_collection_publishable(cedar_id)
-        except _COLLECTION_RULE.FieldMapRefusal:
-            if any(table.get("sample_path") for table in collection["tables"]):
-                raise ValueError(
-                    "Stale manifest attempts to copy a publication-held collection"
-                ) from None
-            continue
         for table in collection["tables"]:
             if not table.get("sample_path"):
                 continue  # struck by withhold_samples: never copied

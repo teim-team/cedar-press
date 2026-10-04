@@ -161,29 +161,11 @@ class ReviewedNeedReleaseTest(unittest.TestCase):
         _, pin, _ = self.reviewed_fixture()
         with patch.object(
             repository, "_release_response", side_effect=AssertionError("No held bytes")
-        ):
-            with self.assertRaises(repository.FullReleaseUnavailable):
-                repository.grove_full_release("need", pin["release_id"], component="enterprises")
-            # Exercise an explicit legacy declaration, independently of the
-            # current installed preview's finite reviewed-public exception.
-            legacy = {
-                "id": "need",
-                "sample": {"path": "/data/cedar/samples/need/enterprises__10.csv"},
-                "tables": [
-                    {
-                        "table": "enterprises.csv",
-                        "sample_path": "/data/cedar/samples/need/enterprises__10.csv",
-                    }
-                ],
-            }
-            manifest_path = self.root / "data/cedar/collections.manifest.json"
-            manifest_path.parent.mkdir(parents=True, exist_ok=True)
-            manifest_path.write_text(json.dumps({"collections": [legacy]}), encoding="utf-8")
-            with (
-                patch.object(repository.launch, "_REPO", self.root),
-                self.assertRaises(repository.FullReleaseUnavailable),
-            ):
-                repository.collection_csv("need")
+        ), self.assertRaises(repository.FullReleaseUnavailable):
+            repository.grove_full_release("need", pin["release_id"], component="enterprises")
+            # The legacy preview is no longer held by the reviewed-base proof
+            # (owner ruling 2026-10-04); "enterprises" above is still refused
+            # because the release itself marks it internal and restricted.
         rows = repository.grove_release_metadata("need")
         available = [row for row in rows if row.get("record_count")]
         self.assertEqual([row["table_id"] for row in available], [policy.COMPONENT])
@@ -191,7 +173,31 @@ class ReviewedNeedReleaseTest(unittest.TestCase):
     def test_malformed_or_unpaired_evidence_refuses_before_reading_any_component(self):
         manifest, pin, _ = self.reviewed_fixture()
         original = copy.deepcopy(manifest)
-        for failure in ("missing", "unpaired", "bad_receipt", "extra_field", "held_metadata"):
+        # Owner ruling 2026-10-04: the reviewed-base proof no longer gates
+        # NEED, so only a contract/field-map mismatch still refuses here.
+        for failure in ("missing", "unpaired", "bad_receipt", "held_metadata"):
+            with self.subTest(proof_no_longer_required=failure):
+                manifest.clear()
+                manifest.update(copy.deepcopy(original))
+                entry = manifest["components"][policy.COMPONENT]
+                if failure == "missing":
+                    del manifest["attestations"]["reviewed_public_base"]
+                elif failure == "unpaired":
+                    entry["metadata"]["reviewed_public_base"]["decisions_sha256"] = "f" * 64
+                elif failure == "bad_receipt":
+                    for proof in (
+                        manifest["attestations"]["reviewed_public_base"],
+                        entry["metadata"]["reviewed_public_base"],
+                    ):
+                        proof["intake_gate"]["status"] = "failed"
+                else:
+                    entry["metadata"]["publication_hold"] = True
+                self.repin(manifest, pin)
+                release = repository.grove_full_release(
+                    "need", pin["release_id"], component=policy.COMPONENT, metadata_only=True
+                )
+                self.assertEqual(release["table_id"], policy.COMPONENT)
+        for failure in ("extra_field",):
             with self.subTest(failure=failure):
                 manifest.clear()
                 manifest.update(copy.deepcopy(original))
@@ -335,15 +341,10 @@ class ReviewedNeedReleaseTest(unittest.TestCase):
     def test_claim_scoped_proof_is_exact_and_refuses_before_component_fetch(self):
         manifest, pin, _ = self.claim_scoped_fixture()
         original = copy.deepcopy(manifest)
-        for failure in (
-            "unknown_version",
-            "old_version_new_fields",
-            "missing_binding",
-            "nullable_identity",
-            "required_unproved_owner",
-            "licensed_field",
-            "unpaired_proof",
-        ):
+        # Owner ruling 2026-10-04: the reviewed-base proof (version, pairing,
+        # nullability) no longer gates NEED; field-map and licensed-field
+        # mismatches still refuse.
+        for failure in ("missing_binding", "licensed_field"):
             with self.subTest(failure=failure):
                 manifest.clear()
                 manifest.update(copy.deepcopy(original))

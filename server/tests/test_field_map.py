@@ -185,10 +185,10 @@ class MigratedProducerDelegationTest(unittest.TestCase):
         module.legislation_admission_hold = Mock(return_value="evidence_hold")
         row = {"bill_id": "fixture-id"}
         with patch.dict(sys.modules, {module.__name__: module}):
-            self.assertEqual(
-                pub.is_publication_eligible(row), (False, "evidence_hold", pub.WITHHOLD)
-            )
-        module.legislation_admission_hold.assert_called_once_with(row)
+            # Owner ruling 2026-10-04: the legislation admission hold no
+            # longer withholds a row.
+            self.assertEqual(pub.is_publication_eligible(row), (True, "", pub.PUBLISH))
+        module.legislation_admission_hold.assert_not_called()
 
 
 #: Datasets whose samples the applier must REFUSE as they stand, with the
@@ -207,10 +207,6 @@ REFUSED_AS_SAMPLED = {
     "federal-register": (("event_date_basis",), pub.OwedDerivation),
     "deals": (("Deal_Category", "Notes"), pub.OwedDerivation),
     "contractors": (("extent_competed",), pub.OwedDerivation),
-    "need": (
-        ("cedar_uid", "owner_hub_cedar_uid", "need_enterprise_relations"),
-        pub.NEEDAffiliationPublicationHold,
-    ),
     # The governed nonprofit projection must supply its classification; the
     # compatibility applier cannot treat a delegated rule as a local builder.
     "nonprofits": (("classification_ruling",), pub.OwedDerivation),
@@ -383,8 +379,8 @@ class TestCombinedPlan(unittest.TestCase):
                 emit.assert_not_called()
 
 
-class TestNeedExportHold(unittest.TestCase):
-    def test_plan_and_build_stop_without_writing_even_when_cross_reference_is_blank(self):
+class TestNeedExport(unittest.TestCase):
+    def test_plan_runs_and_build_never_writes_through_the_retired_producer(self):
         spec = importlib.util.spec_from_file_location(
             "need_customer_combine_test", CODE / "1137_customer_dataset_combine.py"
         )
@@ -416,8 +412,9 @@ class TestNeedExportHold(unittest.TestCase):
                     stack.enter_context(patch.object(combine, key, value))
                 emit = stack.enter_context(patch.object(combine, "emit"))
                 if dry:
-                    with self.assertRaises(pub.NEEDAffiliationPublicationHold):
-                        combine.build(dry=True, only=("need",))
+                    # Owner ruling 2026-10-04: no NEED publication hold, so a
+                    # dry plan runs through without refusing the collection.
+                    combine.build(dry=True, only=("need",))
                 else:
                     with patch.object(combine, "load") as source_load:
                         with self.assertRaisesRegex(ValueError, "RETIRED PRODUCER"):
@@ -439,12 +436,6 @@ class TestApplyFieldMap(unittest.TestCase):
                 header, rows = sample(coll, table)
                 header, rows = neutralised(coll, header, rows)
                 own = set(header)
-                if coll == "need":
-                    # The owner quarantined the affiliation path independently
-                    # of schema formatting and identifier-field disposition.
-                    with self.assertRaises(pub.NEEDAffiliationPublicationHold):
-                        pub.apply_field_map(coll, header, rows, own)
-                    continue
                 result = pub.apply_field_map(coll, header, rows, own)
                 self.assertTrue(result["mapped"])
                 expected = [c for c in entry["order"] if c not in result["owed"]]
@@ -487,45 +478,45 @@ class TestApplyFieldMap(unittest.TestCase):
                     {r["column"] for r in entry["retire"]},
                 )
 
-    def test_need_affiliation_hold_survives_blank_removed_or_internal_cross_reference(self):
-        from copy import deepcopy
+    def test_owner_ruling_2026_10_04_need_has_no_collection_hold(self):
+        # Owner ruling 2026-10-04 (Elijah Moreno): NEED is publicly sourced and
+        # published with permission; no collection-wide hold stands.
+        for collection in ("need", "owned", "native-owned-businesses", "nagpra"):
+            self.assertIsNone(pub.assert_collection_publishable(collection))
+        row = {
+            "enterprise_id": "CEDAR-NEST-TEST",
+            "cedar_uid": "CE-00002-AA",
+            "owner_hub_cedar_uid": "CE-00002-AA",
+        }
+        self.assertEqual(pub.is_publication_eligible(row), (True, "", pub.PUBLISH))
+        self.assertFalse(hasattr(pub, "NEEDAffiliationPublicationHold"))
 
-        for cross_reference in ("CE-00001-AA", "", None):
-            with self.subTest(cross_reference=cross_reference):
-                row = {
-                    "enterprise_id": "CEDAR-NEST-TEST",
-                    "cedar_uid": "CE-00002-AA",
-                    "owner_hub_cedar_uid": "CE-00002-AA",
-                }
-                if cross_reference is not None:
-                    row["enterprise_existing_cedar_uid"] = cross_reference
-                rows, header = [row], list(row)
-                before = deepcopy((header, rows))
-                with (
-                    patch.object(
-                        pub,
-                        "field_map",
-                        return_value={
-                            "need": {
-                                "fields": [
-                                    {
-                                        "column": "enterprise_existing_cedar_uid",
-                                        "decision": "internal",
-                                    }
-                                ]
-                            }
-                        },
-                    ),
-                    self.assertRaises(pub.NEEDAffiliationPublicationHold),
-                ):
-                    pub.apply_field_map("need", header, rows, set(header))
-                self.assertEqual((header, rows), before)
-        with (
-            patch.object(pub, "field_map", return_value={}),
-            self.assertRaises(pub.NEEDAffiliationPublicationHold),
+    def test_owner_ruling_2026_10_04_only_misattribution_masks(self):
+        # Review states and holds are surfaced (FLAG), never withheld.
+        for row in (
+            {"publish_hold": "Y", "publishable": "N"},
+            {"disposition": "NATIVE_PROPOSED_AWAITING_OWNER_RULING"},
+            {"ruling_status": "RULED_HOLD"},
+            {"ruling_status": "RULING_CONFLICT"},
+            {"identifier_ruling_review": "HOLD"},
+            {"key_review_disposition": "HELD_STATE_DISAGREES"},
+            {"identifier_ruling_quarantined": "Y", "identifier_ruling_tier": "B"},
+            {"source_terms_status": "NOT_CHECKED"},
+            {"ruling_status": "A_STATE_NOBODY_HAS_SEEN"},
         ):
-            pub.apply_field_map("need", [], [], set())
-        pub.assert_collection_publishable("nagpra")
+            with self.subTest(row=row):
+                ok, _why, disposition = pub.is_publication_eligible(row)
+                self.assertTrue(ok)
+                self.assertIn(disposition, (pub.PUBLISH, pub.FLAG))
+        # A specific record ruled to be the wrong entity is still masked.
+        for row in (
+            {"ruling_status": "RULED_NOT_NATIVE"},
+            {"owner_attribution_status": "CONTRADICTED_AS_OF"},
+            {"key_review_disposition": "REFUSED_PLACE_NAME_IS_THE_ADDRESS"},
+            {"identifier_ruling_review": "WITHDRAWN_BY_1079"},
+        ):
+            with self.subTest(row=row):
+                self.assertEqual(pub.is_publication_eligible(row)[2], pub.MASK)
 
     def test_the_singular_block_is_filled_from_the_register(self):
         reg = pub.register()

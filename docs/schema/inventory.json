@@ -104412,30 +104412,30 @@
    },
    "writer_evidence": [
     {
-     "line": 3119,
+     "line": 3117,
      "operation": "COMPAT_FILE.write_text",
      "target": "<unresolved>/code/770_sample_extracts.py",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "abcd6eab6727207b1ecb8963ed860218d490981403324d10dcec9829edb26867"
+     "signature": "6f121a4106828c962f716ac0fb3151bd3a51207a37c0988a067de1be31b3261c"
     },
     {
-     "line": 3368,
+     "line": 3366,
      "operation": "path.open",
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "fe6568e8a883c5a6dd8eb84f6cd173c1e6dd3a6660568154f89f77435eae21b8"
+     "signature": "f9ceee766ccaab6953050c5ac46cebeba473cd50c2691330696492bc663e5d49"
     }
    ],
    "writer_analysis_error": null,
    "writer_risk": "P2_unresolved_write_target",
    "undeclared_governed_tables": [],
-   "source_sha256": "b567cb2da4b397d9205c640e3d3b15d97d8b232a1d26ffe7340e2713e45150ff",
+   "source_sha256": "071398b4dedb332a23b9f1a178b2ff36621120d53fa8e50b34168fa78dbe8fb8",
    "maintenance_status": "ACTIVE",
    "maintenance_evidence": {
     "reason": "declared operational role, CI invocation or reachable Python dependency",
-    "source_sha256": "b567cb2da4b397d9205c640e3d3b15d97d8b232a1d26ffe7340e2713e45150ff",
+    "source_sha256": "071398b4dedb332a23b9f1a178b2ff36621120d53fa8e50b34168fa78dbe8fb8",
     "identical_source_peers": [],
     "ci_commands": [],
     "documented_commands": [

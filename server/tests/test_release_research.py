@@ -184,7 +184,9 @@ class ReleaseResearchTest(unittest.TestCase):
 
     def test_collection_and_tier_denial_precede_disk_access(self):
         with patch.object(release_research, "_read", side_effect=AssertionError("must not read")):
-            for tier, collection in [("press", "gaming"), ("grove", "need")]:
+            # NEED is no longer held (owner ruling 2026-10-04), so only the
+            # tier denial is exercised here.
+            for tier, collection in [("press", "gaming")]:
                 with (
                     self.subTest(collection=collection),
                     self.assertRaises(repository.FullReleaseUnavailable),

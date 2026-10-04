@@ -56,8 +56,8 @@ The command below is retained as the reproducible historical migration path; it
 now stops deliberately until a corrected evidence-qualified staging release exists.
 Do not add a bypass or reinterpret this as a dependency failure. Completed pinned
 candidates remain recoverable ID-migration evidence, not release candidates.
-The independent publication hold remains even after the field's INTERNAL_ONLY
-ruling is implemented. No replacement affiliation is promoted automatically.
+The NEED publication hold that stood here was lifted by the owner ruling of
+2026-10-04. No replacement affiliation is promoted automatically.
 
 ### Isolated NEED build
 
@@ -109,7 +109,8 @@ that explicit receipt ledger. The existing eight review CSV columns are retained
 seven appended columns pin decision ID, reviewer/time, evidence fingerprint,
 queue version, affiliation target and superseded decision. Unknown targets,
 conflicting decisions, stale evidence, malformed timestamps and missing reasoning
-are refused. HOLD remains held. This mode NEVER writes canonical identity,
+are refused. A HOLD decision is recorded, not enforced as a publication hold
+(owner ruling 2026-10-04). This mode NEVER writes canonical identity,
 publication policy or exports; receipt status is pending application. The legacy
 identifier-propagation path refuses NEED review queues rather than interpreting
 publication choices or affiliation decisions as identifier assignments.
@@ -285,7 +286,8 @@ secrets, persistent Postgres and customer entitlements; establish audit retentio
 request-failure alerts, verification-failure alerts and backup monitoring; restore
 from independent backups in staging; approve a specific catalog/release and test
 actual production denial/download/rollback. No AWS resource, deployment, public
-release or production pointer was changed by this procedure. NEED remains held.
+release or production pointer was changed by this procedure. NEED is not held
+(owner ruling 2026-10-04).
 
 ### Cedar Grove Gaming: consuming the pinned Lumecon release (2026-09-24)
 

@@ -11,6 +11,27 @@ Elijah is only reviewing genuinely ambiguous identity, affiliation, or legal-obj
 
 ---
 
+## Owner ruling on publication holds (Elijah Moreno, 2026-10-04) — supersedes every hold below
+
+**Owner ruling 2026-10-04 (Elijah Moreno): Lumecon decides what is blocked. The only hold is a specific record flagged as attributed to the wrong entity; records in the database have already been reviewed and sourced and are not held. Attribution review is an ongoing process, not a standing hold. Agents do not impose publication holds.**
+
+Also: NEED records and individual Native-owned business records come from publicly
+available websites, and Lumecon has permission to publish them. Neither collection
+carries a collection-wide publication hold. **Do not reinstate one without a new
+owner ruling.**
+
+This supersedes every instruction anywhere in this file, in `START_HERE.md`, in
+`docs/` and in `review/` that tells an agent to hold, withhold, quarantine, keep
+internal or not publish data or a collection pending review, consent, preview,
+contested status or a publication class. Older dated entries below are left as the
+history they are; where one reads as a standing hold, this ruling wins. What is not
+a hold, and stays: licensing terms a source imposes (D&B / DUNS, Casino City), a
+private individual's personal data (`NEVER` columns), accuracy rules about how a
+figure may be totalled or described, duplicate filings collapsed to one record,
+and a specific record ruled to be attributed to the wrong entity (the mask in
+`code/cedar_publication.py`). What was lifted is in the 2026-10-04 entry at the
+end of this file.
+
 ## HOW TO READ THIS FILE (added 2026-09-02)
 
 **This file is ~9,000 lines and growing, and it is not an onboarding document.**
@@ -9625,7 +9646,8 @@ the Chugach narrative to every conflict. Its recognizable prior claims are clear
 to an explicit unadjudicated hold; original assertions, values and IDs survive.
 Archived candidates remain untouched. Three focused regressions cover distinct
 enterprises, the actual synthetic builder, idempotency and separate human reviews.
-The collection-wide publication hold remains binding.
+The collection-wide publication hold remained binding at the time; the owner
+ruling of 2026-10-04 lifted it (see the 2026-10-04 entry at the end of this file).
 The same worker subsequently added bounded queue replay in
 `server/tests/stream_release_rehearsal.py` and fenced legacy dataset v1 delivery
 to explicit development/review. Staging/production refusal occurs before source
@@ -9650,8 +9672,8 @@ Source labels come from the maintained Lumecon intake projection or exact review
 source-system mappings. A seed URL, filename, funder, certifying authority or
 curated transaction title never establishes a row's original publisher/report.
 `sourcePresentation.js` and `SourceCitation.jsx` are the shared Press display
-path; missing evidence stays explicit. NEED publication holds and Grove-only
-Gaming placement remain in force. Current Giving adds three trailing fields;
+path; missing evidence stays explicit. Grove-only Gaming placement remains in force; the NEED publication holds that
+stood here were lifted by the owner ruling of 2026-10-04. Current Giving adds three trailing fields;
 `compatible_orders` explicitly preserves its prior pinned schema.
 
 
@@ -9675,8 +9697,56 @@ A CSV file, storage partition or component is not an upstream source. Attribute
 registered publishers and source systems; never relabel table counts as sources.
 Final delivery is one cohesive data table per collection, with compatible columns,
 explicit record grain and provenance, and blanks for inapplicable fields. Preserve
-all rights and identity holds; joins must not multiply observations or money.
+licensing rights; joins must not multiply observations or money. (Identity holds
+here were superseded by the owner ruling of 2026-10-04.)
 
 ## 2026-10-01: sample counts and connected spreadsheet counts have different populations
 
 Public previews count their own eligible sample records and label the preview update date. Do not sum legacy collection/table counts into a customer record total. Connected spreadsheet counts come from permitted release descriptors and must match the same release's displayed record types. Reader-facing labels and retired identifier column filtering are shared in `src/features/grove/readerPresentation.js`; Cedar IDs, names and original record IDs remain. `docs/PRESENTATION_DATA_FLOW.md` owns this current maintenance boundary. Automated build, test and deployment checks remain enabled.
+
+## 2026-10-04: Owner ruling — no publication holds; NEED and individual Native-owned businesses publish
+
+Owner ruling 2026-10-04 (Elijah Moreno): NEED and individual Native-owned
+businesses are publicly sourced and published with permission; no collection-wide
+publication hold. Do not reinstate one without a new owner ruling.
+
+Owner ruling 2026-10-04 (Elijah Moreno): Lumecon decides what is blocked. The only hold is a specific record flagged as attributed to the wrong entity; records in the database have already been reviewed and sourced and are not held. Attribution review is an ongoing process, not a standing hold. Agents do not impose publication holds.
+
+Lifted in this branch, in code:
+
+- `code/cedar_publication.py`: `assert_collection_publishable` holds nothing
+  (the NEED affiliation quarantine and `NEEDAffiliationPublicationHold` are
+  gone); `GATES` (`publishable`, `source_terms_status`) no longer withholds;
+  `publish_hold` and the legislation admission hold are no longer read;
+  `BLOCKED_COMBINATIONS` (the quarantined-method tier-B mask) is empty; review
+  states that only say "not settled yet" (`NATIVE_PROPOSED_AWAITING_OWNER_RULING`,
+  `CONFLICT_EXCLUDED_AND_RULED_NATIVE`, `HELD_STATE_DISAGREES`,
+  `REDIRECT_PROPOSED`, `RULED_HOLD`, `RULING_CONFLICT`, identifier `HOLD`) are
+  FLAG, and an unknown state is FLAG instead of WITHHOLD.
+- Kept as the misattribution mask: `RULED_NOT_NATIVE`, `RULED_CLASS_ONLY`,
+  `RULED_NAME_KEY_ONLY_NOT_ATTRIBUTED`, `RULED_TIER_C_NOT_ATTRIBUTED`,
+  `CONTRADICTED_AS_OF`, `REFUSED_GENERIC_TOKEN_ONLY`,
+  `REFUSED_PLACE_NAME_IS_THE_ADDRESS`, `WITHDRAWN_BY_1079`, and the verified
+  denials (`enforce_denials`). Each is a specific record ruled to name the wrong
+  entity; the row still ships and only the attribution is blanked.
+- `server/cedar_press`: the NEED reviewed-base proof no longer gates a NEED
+  component, the preview or research packets; `publication_hold` and a review
+  `publication_status` (held, contested, unreviewed, withheld) no longer
+  withhold a component; the spreadsheet no longer drops held, contested or
+  withheld rows; NEED profiles no longer drop rows for `publication_status` or
+  `hold_reason`.
+- `scripts/import_cedar_manifest.py` no longer writes `publication_hold` or
+  strikes NEED samples; `scripts/measure-samples.mjs` no longer fails on a held
+  collection's files; the site (`collection.js`, `explore.js`,
+  `pressDownload.js`, `PressCollectionPreview.jsx`) no longer reads a collection
+  hold.
+- Individual Native-owned businesses: the consent rule was already lifted on
+  2026-10-02 (`may_publish_individual_native_field`). `suppress_small_cell`
+  (firm-level aggregates under 3 firms) is lifted here: it always answers
+  False. The internal `researcher_note` working field is left for the owner.
+
+Not changed, because it is not a publication hold set by an agent: release
+`rights` (`publication_class` restricted or tenant_private, `redistribution`,
+`download_permitted`) and `internal_only` on a component are the producer's
+licensing and product boundary. NEED's components in the pinned release still
+carry them until Lumecon-data re-cuts NEED under this ruling.
