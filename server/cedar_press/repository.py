@@ -1279,9 +1279,11 @@ def grove_component_contract(
         raise FullReleaseUnavailable("Component is not eligible for customer delivery")
     # Owner ruling 2026-10-04 (Elijah Moreno): `publication_hold` and a review
     # `publication_status` (held, contested, unreviewed, withheld) no longer
-    # withhold a component. `internal_only` still marks a working table that
-    # is not a customer product, and is still refused.
-    if metadata.get("internal_only"):
+    # withhold a component. `internal_only` and the two rights statuses
+    # (`internal`, `source_limited`, the source's rights rather than a review)
+    # still mark a table that is not a customer product, as in Lumecon-data's
+    # `publication.metadata_permits_publication`.
+    if metadata.get("internal_only") or publication_status in {"internal", "source_limited"}:
         raise ComponentPublicationHeld("Component metadata holds customer delivery")
     fields = contract.get("fields")
     if not isinstance(fields, list) or any(not isinstance(f, dict) for f in fields):
