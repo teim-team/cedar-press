@@ -250,14 +250,15 @@ from prose that goes stale, and gives you `ondisk <term>`.
 |---|---|
 | **Team lead; Cedar Press and Cedar Grove, including their data** | Havala Hanson (@Havala-Hanson) |
 | The app users see: teim-app's interface, product behaviour and customer-facing copy | Kaylyn Lee (@kaylynhl) |
-| Backend and ML: servers, APIs, pipelines, dependencies | Ari (@ArihantSwainLumecon) |
-| Account access, payments, the database, Datadog | Brian Kim (@bkim28964) |
+| Backend and ML outside the existing teim-app: Cedar Grove's server side, data pipelines, ML | Ari (@ArihantSwainLumecon) |
+| The existing teim-app's backend: account access, payments, the database, dependencies, Datadog | Brian Kim (@bkim28964) |
 | Cedar, the AI economic analyst (the `cedar` service) | Francesca Agnes (@mafranagn) |
 | teim-engine | Isabella Agnes (@magnes1) |
 
 This repository is Havala's. A change to the web client's interface also goes
-to Kaylyn; a change to server code, the pipeline or dependencies goes to Ari; a
-change to the account, access or payment path is Brian's wherever it lands.
+to Kaylyn; a change to the pipeline or ML work goes to Ari; a change to the existing
+teim-app's backend (accounts, access, payments, database, dependencies) is
+Brian's wherever it lands.
 None of that displaces the self-verification rule in §6 — a reviewer is not a
 substitute for an independent re-execution.
 
