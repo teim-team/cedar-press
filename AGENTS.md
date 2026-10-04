@@ -9810,3 +9810,43 @@ authorization boundary), `internal_only` working tables, malformed rights, and
 the field map's own consistency checks. The licensed-identifier column drops
 (DUNS, Casino City) in `code/cedar_publication.py` are column rules, not status
 gates, and were not changed; the owner decides them.
+
+## 2026-10-04: Home community is an entity attribute made of public Census codes, never a place ID
+
+Owner intent 2026-10-04 (Elijah Moreno): know the home community an entity's
+activity benefits wherever a deal or contract happens. ANCs go to their ANCSA
+region; tribes to their reservation or AIAN land, or without land to their
+headquarters county, which is kept regardless. Where something happened stays
+the row's geocoded address or place of performance (ADR-015 rule 1), with no
+ID. There is no Cedar place ID; do not create one.
+
+The rules live in Lumecon-data `src/lumecon_data/home_community.py` (commit
+`53d45eca0be4d932370aef30ec776860a9949796`, docs `docs/home-community.md`):
+`home_aiannh_*`, `home_anrc_*`, `hq_county_*`, `home_community_basis`
+(`aiannh_land`, `anrc_region`, `hq_county_only`, `unknown`) and
+`home_community_source` on each `CE-` entity; `benefit_entity_id` and
+`benefit_link` (`entity_attributed`, `in_home_area`) on rows. `in_home_area`
+comes only from 873's exact point-in-polygon rows on legal federal land (class
+`D1`, `D2`, `D3`, `D5`, `D8`); OTSA, TDSA, SDTSA, ANVSA and ANRC areas never
+trigger it. A shared polygon gives one flagged link per entity, so summing over
+links double-counts: sum per entity only.
+
+`code/1190_build_home_community.py` gathers Cedar's inputs and calls that
+module; it re-implements no rule. Measured from Git alone (register plus the
+twelve regional corporations bound to their Census ANRC areas), 1,916
+entities: `aiannh_land` 0, `anrc_region` 12, `hq_county_only` 0, `unknown`
+1,904 (`docs/GEO_HOME_COMMUNITY_STATS.json`). `verify` re-measures,
+`selftest` proves verify and the binding check fire;
+`server/tests/test_home_community_build.py` runs both where the producer is
+installed and skips otherwise. Workstation command, after placing reviewed
+link files (none exist yet) in `data/clean/`:
+
+    pip install "git+https://github.com/teim-team/Lumecon-data@53d45eca0be4d932370aef30ec776860a9949796"
+    python3 code/873_build_aiannh_crosswalk.py && python3 code/873_build_aiannh_crosswalk.py verify
+    python3 code/1190_build_home_community.py build && python3 code/1190_build_home_community.py verify
+
+The 303-row `tribe_aiannh_crosswalk_master.csv` is a name match, off Git, and
+is not read: it becomes `data/clean/geo_entity_aiannh_links.csv` only once each
+row carries an exact reviewed `cedar_uid`. Headquarters counties and village
+ANRC links have no source file yet. The 13th Regional Corporation has no
+Census ANRC area and is not in the register.

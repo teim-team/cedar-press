@@ -34,13 +34,13 @@
   "docs/schema/**"
  ],
  "summary": {
-  "numbered_scripts": 620,
-  "pure_numeric_prefix": 603,
+  "numbered_scripts": 621,
+  "pure_numeric_prefix": 604,
   "letter_suffixed_prefix": 17,
-  "at_code_top_level": 602,
+  "at_code_top_level": 603,
   "in_code_archive": 18,
-  "referenced": 602,
-  "referenced_outside_journal": 599,
+  "referenced": 603,
+  "referenced_outside_journal": 600,
   "zero_references": 18,
   "archive_eligible_by_rule": [
    "1172_codebook_block_generator.py",
@@ -87,14 +87,14 @@
    "ci": 4,
    "package_json": 0,
    "script": 430,
-   "product_code": 108,
-   "documented": 579,
-   "journal": 239,
+   "product_code": 109,
+   "documented": 580,
+   "journal": 240,
    "data_or_config": 35,
    "stem_only": 58,
    "number_keyed": 245
   },
-  "text_files_scanned": 2177
+  "text_files_scanned": 2183
  },
  "scripts": {
   "00_run_all.py": {
@@ -6808,6 +6808,42 @@
      "_SOURCE_MANIFEST.csv",
      "_fetch_state.json",
      "gaming_ordinances.csv"
+    ]
+   },
+   "disposition": "referenced"
+  },
+  "1190_build_home_community.py": {
+   "location": "code/1190_build_home_community.py",
+   "number": "1190",
+   "references": {
+    "documented": [
+     "docs/GEO_HOME_COMMUNITY_STATS.json"
+    ],
+    "journal": [
+     "AGENTS.md"
+    ],
+    "product_code": [
+     "server/tests/test_home_community_build.py"
+    ]
+   },
+   "reference_count": 3,
+   "tracked_artifacts_named": [
+    "data/spine/cedar_identity_register.csv",
+    "docs/GEO_HOME_COMMUNITY_STATS.json"
+   ],
+   "tracked_artifacts_written": [],
+   "census": {
+    "present": true,
+    "maintenance_status": "REQUIRES-REVIEW",
+    "operational_role": "unresolved",
+    "never_run": false,
+    "in_a_contract": false,
+    "in_an_ordering": false,
+    "untracked_writes": [
+     "GEO_HOME_COMMUNITY_STATS.json",
+     "geo_benefit_links_in_home_area.csv",
+     "geo_entity_home_community.csv",
+     "stats.json"
     ]
    },
    "disposition": "referenced"

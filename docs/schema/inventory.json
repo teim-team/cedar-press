@@ -38574,6 +38574,153 @@
    "registration_status": "unresolved_not_authorized"
   },
   {
+   "script": "1190_build_home_community.py",
+   "dir": "",
+   "number": "1190",
+   "duplicate_number": false,
+   "kind": "both",
+   "evidence": [
+    "writes in 'w' mode or builds from data/raw",
+    "names itself an in-place enricher"
+   ],
+   "never_run": false,
+   "never_run_reason": "",
+   "writes": [
+    "GEO_HOME_COMMUNITY_STATS.json",
+    "geo_benefit_links_in_home_area.csv",
+    "geo_entity_home_community.csv",
+    "stats.json"
+   ],
+   "reads": [
+    "geo_aiannh_dim.csv",
+    "geo_entity_aiannh_links.csv",
+    "geo_entity_anrc_links.csv",
+    "geo_entity_hq_county.csv",
+    "geo_point_aiannh_assignment.csv"
+   ],
+   "in_a_contract": false,
+   "in_an_ordering": false,
+   "mentions": 3,
+   "mentioned_outside_history": 2,
+   "oneoff_shaped": false,
+   "has_run_receipt": false,
+   "last_modified": "2026-10-04",
+   "lines": 285,
+   "operational_role": "unresolved",
+   "collection_output_entrypoints": [],
+   "static_consumers": [
+    "server/tests/test_home_community_build.py"
+   ],
+   "runtime_consumer_candidates": [],
+   "operational_call_evidence": {
+    "publication_calls": [],
+    "validation_calls": [
+     "verify"
+    ]
+   },
+   "unknown_io_literals": [
+    "cedar_identity_register.csv"
+   ],
+   "embedded_test_functions": 1,
+   "standalone_test_evidence": {
+    "unittest_classes": [],
+    "pytest_import": false,
+    "filename_convention": false,
+    "assertion_nodes": 0,
+    "local_check_harness_calls": []
+   },
+   "writer_evidence": [
+    {
+     "line": 221,
+     "operation": "open",
+     "target": "<unresolved>",
+     "scope": "unresolved_target",
+     "table": null,
+     "signature": "9f57f7c9bef571e1a288fa40b2d21dc98c54e56da0036f7eeebe6a0212e1ee25"
+    },
+    {
+     "line": 227,
+     "operation": "open",
+     "target": "<unresolved>",
+     "scope": "unresolved_target",
+     "table": null,
+     "signature": "ccd2e7c3073bcf7b349787ee8a3a97592067f9eabdc190ab686f95f92a979c17"
+    },
+    {
+     "line": 235,
+     "operation": "open",
+     "target": "<unresolved>",
+     "scope": "unresolved_target",
+     "table": null,
+     "signature": "eaa45d7bd0559508525e3a019f7571ae64debd89159b088951c891f92246b46f"
+    },
+    {
+     "line": 265,
+     "operation": "open",
+     "target": "<unresolved>",
+     "scope": "unresolved_target",
+     "table": null,
+     "signature": "9623ae98895dfa77c688cefa830e3e7166ee348d94ce7ddacfc8d60f521562f4"
+    }
+   ],
+   "writer_analysis_error": null,
+   "writer_risk": "P2_unresolved_write_target",
+   "undeclared_governed_tables": [],
+   "source_sha256": "bacf98f8d3e0a7cfb296856f50adf96da6a426ff8bda43d44f1d53f1b28096cd",
+   "maintenance_status": "REQUIRES-REVIEW",
+   "maintenance_evidence": {
+    "reason": "writer targets/callers need runtime confirmation before ownership or retirement: <unresolved>",
+    "source_sha256": "bacf98f8d3e0a7cfb296856f50adf96da6a426ff8bda43d44f1d53f1b28096cd",
+    "identical_source_peers": [],
+    "ci_commands": [],
+    "documented_commands": [
+     "AGENTS.md"
+    ],
+    "active_runtime_callers": [],
+    "superseded_output_edges": [],
+    "historical_replay_evidence": [],
+    "output_authority_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "output_artifact_hashes": "NOT_MEASURED_BY_SCRIPT_CENSUS",
+    "retirement_authorized": false,
+    "review_owner": "Codex",
+    "review_priority": "P2_unresolved_write_target",
+    "review_write_sites": [
+     {
+      "line": 221,
+      "operation": "open",
+      "target": "<unresolved>",
+      "scope": "unresolved_target",
+      "table": null
+     },
+     {
+      "line": 227,
+      "operation": "open",
+      "target": "<unresolved>",
+      "scope": "unresolved_target",
+      "table": null
+     },
+     {
+      "line": 235,
+      "operation": "open",
+      "target": "<unresolved>",
+      "scope": "unresolved_target",
+      "table": null
+     },
+     {
+      "line": 265,
+      "operation": "open",
+      "target": "<unresolved>",
+      "scope": "unresolved_target",
+      "table": null
+     }
+    ],
+    "safe_delete_proof": "NOT_ESTABLISHED: external callers, unique output and recovery value are not exhausted by static scans",
+    "bounded_source_review": null,
+    "source_review_stale": false
+   },
+   "registration_status": "unresolved_not_authorized"
+  },
+  {
    "script": "119_build_digital_and_loyalty.py",
    "dir": "",
    "number": "119",
@@ -90583,7 +90730,9 @@
     "source_sha256": "88721e7523eb769a724c9a8ef5800205cc2d5214d0a02b513f3c46c2d9ca5c43",
     "identical_source_peers": [],
     "ci_commands": [],
-    "documented_commands": [],
+    "documented_commands": [
+     "AGENTS.md"
+    ],
     "active_runtime_callers": [],
     "superseded_output_edges": [],
     "historical_replay_evidence": [],
@@ -106782,14 +106931,14 @@
   "generated": "2026-10-04",
   "generator": "code/521_inventory.py scripts-only",
   "scope": "code/**/*.py; caller mentions restricted to Git-tracked project text",
-  "scripts": 690,
+  "scripts": 691,
   "operational_role_counts": {
    "active producer": 76,
    "active validator/migration/review": 13,
    "historical": 18,
    "product consumer/shared service": 8,
    "test/fixture": 8,
-   "unresolved": 567
+   "unresolved": 568
   },
   "maintenance_status_counts": {
    "ACTIVE": 167,
@@ -106797,7 +106946,7 @@
    "SUPERSEDED": 0,
    "HISTORICAL-RETAIN": 38,
    "SAFE-DELETE-CANDIDATE": 0,
-   "REQUIRES-REVIEW": 485
+   "REQUIRES-REVIEW": 486
   },
   "maintenance_scope": "Existing inventory evidence only; duplication does not authorize deletion and table retirement does not retire unrelated outputs.",
   "unresolved_writer_risk_counts": {
@@ -106805,15 +106954,15 @@
    "P1_protected_surface_write_candidate": 67,
    "P1_undeclared_governed_write_candidate": 38,
    "P2_declared_governed_write_candidate": 4,
-   "P2_unresolved_write_target": 415,
+   "P2_unresolved_write_target": 416,
    "P3_no_detected_write_not_readonly_certified": 30,
    "P3_other_literal_write_candidate": 7
   },
   "writer_risk_scope": "Potential AST write sites with conservative binding expansion, not executed writes. Existing unregistered edges remain pending; inventory receipt is not authorization. Imported custom writers, shell dispatch and dynamic output resolution require runtime review.",
   "operational_precedence": "Standalone test evidence; explicit historical directory; launch producer declaration; Python runtime-reference candidate plus operational call evidence; existing unreferenced archive candidate; unresolved",
   "reference_scope": "Static references retain tests, path literals and tracked configuration. Runtime candidates require Python imports or literal dispatch paths from non-test files; these are not verified reachability, external scheduler or runtime invocations. Dynamic targets and non-Python dispatch remain unresolved.",
-  "embedded_selftest_files": 127,
-  "unresolved_not_authorized": 576,
+  "embedded_selftest_files": 128,
+  "unresolved_not_authorized": 577,
   "table_snapshot_preserved_sha256": "c46a1097785af2a92ee0d50d35858f75f7c4f3cf1c40a0c31f3c96fcdb9e49ee",
   "data_generated_unchanged": "2026-09-02",
   "limitation": "Static census is not runtime write proof or authorization to run a producer."
