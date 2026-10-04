@@ -267,13 +267,8 @@ def collection_csv(collection_id: str) -> str | None:
     tables are not served from this repository; ``collection_tables`` carries
     what a serving layer needs to find them.
     """
-    if collection_id == "need":
-        preview = launch.collection_csv(collection_id)
-        if preview is None:
-            raise ComponentPublicationHeld(
-                "NEED preview requires its exact reviewed public-base proof"
-            )
-        return preview
+    # Owner ruling 2026-10-04 (Elijah Moreno): NEED's preview is served like
+    # any other collection's; it no longer needs the reviewed-base proof.
     assert_collection_publishable(collection_id)
     return launch.collection_csv(collection_id)
 
@@ -1249,16 +1244,15 @@ def grove_component_contract(
     contract = manifest["components"].get(component)
     if not isinstance(contract, dict):
         raise FullReleaseUnavailable("Component is not in the pinned release")
-    if collection_id == "need" and not need_publication.reviewed_base_permitted(
-        manifest, component, contract
-    ):
-        raise ComponentPublicationHeld("Only the evidence-pinned NEED reviewed base is public")
+    # Owner ruling 2026-10-04 (Elijah Moreno): no NEED publication hold. A NEED
+    # component is checked like any other collection's, below.
     metadata = contract.get("metadata", {})
     if not isinstance(metadata, dict):
         raise FullReleaseUnavailable("Malformed component metadata")
-    for flag in ("internal_only", "publication_hold"):
-        if flag in metadata and type(metadata[flag]) is not bool:
-            raise FullReleaseUnavailable("Malformed component publication flag")
+    # `publication_hold` is no longer read (owner ruling 2026-10-04), so its
+    # type is no longer checked either.
+    if "internal_only" in metadata and type(metadata["internal_only"]) is not bool:
+        raise FullReleaseUnavailable("Malformed component publication flag")
     publication_status = metadata.get("publication_status", "public")
     if not isinstance(publication_status, str) or not publication_status:
         raise FullReleaseUnavailable("Malformed component publication status")
@@ -1283,11 +1277,11 @@ def grove_component_contract(
         or contract.get("download_permitted") is not True
     ):
         raise FullReleaseUnavailable("Component is not eligible for customer delivery")
-    if (
-        metadata.get("internal_only")
-        or metadata.get("publication_hold")
-        or publication_status not in {"public", "publishable", "eligible"}
-    ):
+    # Owner ruling 2026-10-04 (Elijah Moreno): `publication_hold` and a review
+    # `publication_status` (held, contested, unreviewed, withheld) no longer
+    # withhold a component. `internal_only` still marks a working table that
+    # is not a customer product, and is still refused.
+    if metadata.get("internal_only"):
         raise ComponentPublicationHeld("Component metadata holds customer delivery")
     fields = contract.get("fields")
     if not isinstance(fields, list) or any(not isinstance(f, dict) for f in fields):
@@ -1513,8 +1507,7 @@ def grove_full_release(
         raise FullReleaseUnavailable("A Grove release names a well-formed component")
     if component not in grove_components(collection_id):
         raise FullReleaseUnavailable("Component is not offered for this collection")
-    if collection_id != "need" or component != need_publication.COMPONENT:
-        assert_collection_publishable(collection_id)
+    assert_collection_publishable(collection_id)
     try:
         pin = grove_release_pin(collection_id)
         release_id = pin["release_id"]
@@ -1545,8 +1538,7 @@ def grove_release_metadata(collection_id):
         {"kind": "full", "table_id": name, "status": "unavailable"} for name in components
     ]
     try:
-        if collection_id != "need" or not os.environ.get("CEDAR_PRESS_COMPONENT_RELEASE_PIN"):
-            assert_collection_publishable(collection_id)
+        assert_collection_publishable(collection_id)
         pin = grove_release_pin(collection_id)
         _grove_catalog(pin)
         manifest = _grove_manifest(pin)
@@ -1588,19 +1580,11 @@ def assert_collection_publishable(collection_id, *, manifest=None, component=Non
         policy = _publication_policy()
     except (OSError, ImportError, AttributeError) as error:
         raise FullReleaseUnavailable("Publication policy unavailable") from error
+    # Since the owner ruling of 2026-10-04 the policy holds no collection; a
+    # refusal it raises is still surfaced rather than ignored.
     try:
         policy.assert_collection_publishable(collection_id)
     except policy.FieldMapRefusal as error:
-        if (
-            collection_id == "need"
-            and isinstance(manifest, dict)
-            and component == need_publication.COMPONENT
-        ):
-            entry = manifest.get("components", {}).get(component)
-            if isinstance(entry, dict) and need_publication.reviewed_base_permitted(
-                manifest, component, entry
-            ):
-                return
         raise FullReleaseUnavailable("Collection publication is held") from error
 
 

@@ -1,5 +1,8 @@
 # Owner decision queue — everything waiting on Elijah, one page
 
+> **Owner ruling 2026-10-04 (Elijah Moreno): Lumecon decides what is blocked. The only hold is a specific record flagged as attributed to the wrong entity; records in the database have already been reviewed and sourced and are not held. Attribution review is an ongoing process, not a standing hold. Agents do not impose publication holds.** Where this document says to hold, withhold, quarantine or not publish a record or collection for any other reason, that instruction is superseded (see `AGENTS.md`, 2026-10-04).
+
+
 *Consolidated 2026-08-30 by the integrator. Each item states the decision, the
 evidence already gathered, and what happens on each answer — so a ruling takes
 a minute, not an investigation. Newest evidence first. Items are removed when

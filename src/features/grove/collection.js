@@ -155,8 +155,7 @@ function unpublishedReason(table) {
 }
 
 /** A collection's sample, or the same entry marked unpublished with a reason. */
-function withPublication(sample, hold = null) {
-  if (hold) return { ...(sample ?? {}), path: null, unavailable_because: hold.message };
+function withPublication(sample) {
   if (!sample?.path || !UNPUBLISHED.has(sample.path)) return sample;
   const { path, ...rest } = sample;
   return { ...rest, path: null, unpublished_path: path,
@@ -164,29 +163,22 @@ function withPublication(sample, hold = null) {
 }
 
 /** A table entry, or the same entry with its sample marked unpublished. */
-function tableWithPublication(table, hold = null) {
-  if (hold) return { ...table, sample_path: null, sample_withheld_why: hold.message };
+function tableWithPublication(table) {
   if (!table.sample_path || !UNPUBLISHED.has(table.sample_path)) return table;
   return { ...table, sample_path: null, sample_unpublished: table.sample_path };
 }
 
-const PUBLICATION_HOLDS = deepFreeze(Object.fromEntries(
-  manifest.collections.filter((entry) => entry.publication_hold)
-    .map((entry) => [entry.id, entry.publication_hold]),
-));
-
-export function collectionPublicationHold(datasetId) {
-  return PUBLICATION_HOLDS[datasetId] ?? null;
-}
+// Owner ruling 2026-10-04 (Elijah Moreno): Lumecon decides what is blocked.
+// No collection-wide publication hold stands, so the site applies none.
 
 const SAMPLES = deepFreeze(
   Object.fromEntries(
-    manifest.collections.map((entry) => [entry.id, withPublication(entry.sample, entry.publication_hold)]),
+    manifest.collections.map((entry) => [entry.id, withPublication(entry.sample)]),
   ),
 );
 const TABLES = deepFreeze(
   Object.fromEntries(
-    manifest.collections.map((entry) => [entry.id, entry.tables.map((table) => tableWithPublication(table, entry.publication_hold))]),
+    manifest.collections.map((entry) => [entry.id, entry.tables.map((table) => tableWithPublication(table))]),
   ),
 );
 
@@ -251,7 +243,6 @@ export function collectionDeclaredSample(datasetId) {
  * instead of reporting the collection missing.
  */
 export function sampleUnavailableReason(datasetId) {
-  if (collectionPublicationHold(datasetId)) return collectionPublicationHold(datasetId).message;
   return SAMPLES[datasetId]?.unavailable_because ?? null;
 }
 
@@ -574,7 +565,6 @@ export function collectionCitation(datasetId, accessedOn = null) {
  * page for a button most readers never press.
  */
 export function collectionCsv(datasetId, sampleText) {
-  if (collectionPublicationHold(datasetId)) return null;
   const sample = SAMPLES[datasetId];
   if (!sample?.path || sampleText == null) return null;
   const { columns, rows } = parseCsv(sampleText);
@@ -605,12 +595,12 @@ export function collectionCsv(datasetId, sampleText) {
  * this answers from the manifest alone.
  */
 export function hasSample(datasetId) {
-  return !collectionPublicationHold(datasetId) && Boolean(SAMPLES[datasetId]?.path);
+  return Boolean(SAMPLES[datasetId]?.path);
 }
 
 /** Where the browser fetches a collection's preview file, or `null`. */
 export function samplePath(datasetId) {
-  return collectionPublicationHold(datasetId) ? null : SAMPLES[datasetId]?.path ?? null;
+  return SAMPLES[datasetId]?.path ?? null;
 }
 
 /**
@@ -645,9 +635,13 @@ export async function reviewedPreviewTextMatches(sampleText, sample, proof) {
   }
 }
 
-/** Exact-byte verification is required for NEED's reviewed public component. */
+/**
+ * Exact-byte verification where a sample carries a reviewed-preview proof.
+ * A NEED sample without one publishes like any other collection's (owner
+ * ruling 2026-10-04: no NEED publication hold).
+ */
 export async function sampleTextMatchesRelease(datasetId, sampleText) {
-  if (datasetId !== "need") return true;
   const proof = manifest.collections.find((entry) => entry.id === datasetId)?.verified_preview;
+  if (datasetId !== "need" || !proof) return true;
   return reviewedPreviewTextMatches(sampleText, SAMPLES[datasetId], proof);
 }

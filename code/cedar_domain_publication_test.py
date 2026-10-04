@@ -103,27 +103,20 @@ class WhatStillFailsClosed(unittest.TestCase):
         self.assertTrue(RULE("  canonical_name "))
 
 
-class SmallCellSuppressionIsUnchanged(unittest.TestCase):
-    def test_threshold_is_three_firms(self):
+class SmallCellSuppressionIsLifted(unittest.TestCase):
+    """Owner ruling 2026-10-04: no cell of the class is suppressed."""
+
+    def test_threshold_constant_is_kept_for_callers(self):
         self.assertEqual(D.INDIVIDUAL_NATIVE_MIN_CELL_FIRMS, 3)
 
-    def test_fewer_than_three_firms_is_suppressed_and_three_is_not(self):
-        self.assertTrue(D.suppress_small_cell(0))
-        self.assertTrue(D.suppress_small_cell(1))
-        self.assertTrue(D.suppress_small_cell(2))
-        self.assertTrue(D.suppress_small_cell("2"))
-        self.assertFalse(D.suppress_small_cell(3))
-        self.assertFalse(D.suppress_small_cell("45"))
+    def test_no_cell_is_suppressed(self):
+        for n in (0, 1, 2, "2", 3, "45", None, "", "n/a"):
+            self.assertFalse(D.suppress_small_cell(n), n)
 
-    def test_an_unparseable_count_is_suppressed(self):
-        self.assertTrue(D.suppress_small_cell(None))
-        self.assertTrue(D.suppress_small_cell(""))
-        self.assertTrue(D.suppress_small_cell("n/a"))
-
-    def test_the_aggregate_rule_does_not_read_the_field_rule(self):
-        # The ruling publishes the name; it does not make a 1-firm cell publishable.
+    def test_names_and_one_firm_cells_both_publish(self):
+        # 2026-10-02 published the name; 2026-10-04 publishes the 1-firm cell.
         self.assertTrue(RULE("canonical_name"))
-        self.assertTrue(D.suppress_small_cell(1))
+        self.assertFalse(D.suppress_small_cell(1))
         self.assertTrue(RULE("n_firms"))
         self.assertTrue(RULE("value_suppressed_small_cell"))
 

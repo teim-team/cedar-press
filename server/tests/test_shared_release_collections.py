@@ -187,38 +187,26 @@ class SharedCollectionReleaseTest(unittest.TestCase):
             self.assertTrue(all(row["status"] == "unavailable" for row in changed))
             self.assertEqual(fetch.call_count, 3)
 
-    def test_held_discovery_does_not_read_pins_or_sources(self):
+    def test_need_discovery_is_not_held_before_the_pin(self):
+        # Owner ruling 2026-10-04: NEED is not held, so discovery reaches the
+        # release pin like any other collection.
         with patch.object(
-            repository, "grove_release_pin", side_effect=AssertionError("No pin lookup")
-        ):
-            self.assertTrue(
-                all(
-                    row["status"] == "unavailable"
-                    for row in repository.grove_release_metadata("need")
-                )
-            )
+            repository, "grove_release_pin", side_effect=repository.GroveReleaseNotPinned("x")
+        ) as pin:
+            repository.grove_release_metadata("need")
+        pin.assert_called_once_with("need")
 
-    def test_legacy_need_preview_obeys_collection_hold_before_reading_rows(self):
+    def test_need_preview_downloads_without_a_reviewed_base_proof(self):
+        # Owner ruling 2026-10-04 (Elijah Moreno): the NEED preview publishes
+        # like any other collection's; the reviewed-base proof is not consulted.
         self.session("press_pro")
-        # The reviewed-base proof is checked by the real preview reader.
-        # Replacing that reader would replace the very guard this test exercises.
-        with (
-            patch(
-                "cedar_press.need_preview.current_need_preview_permitted",
-                return_value=False,
-            ) as proof,
-            patch.object(
-                repository.launch,
-                "_SAMPLE",
-                {"need": {"path": "/data/cedar/samples/need/stale.csv"}},
-            ),
-            patch.object(repository.launch, "_SAMPLE_ROOT") as sample_root,
+        with patch(
+            "cedar_press.need_preview.current_need_preview_permitted",
+            side_effect=AssertionError("proof must not gate the preview"),
         ):
             response = self.client.get("/press/collections/need/download")
-            self.assertEqual(response.status_code, 503)
-            self.assertEqual(response.json()["code"], "COLLECTION_HELD")
-            proof.assert_called_once_with(repository.launch._REPO)
-            sample_root.__truediv__.assert_not_called()
+        self.assertEqual(response.status_code, 200, response.text)
+        self.assertIn("cite_as", response.text.splitlines()[0])
 
     def test_sixteen_targets_preserve_tiers_and_never_invent_samples(self):
         with (
@@ -349,14 +337,10 @@ class SharedCollectionReleaseTest(unittest.TestCase):
         manifest, pin, _ = self.fixture()
         contract = manifest["components"]["environmental_events"]
         self.session("press_pro")
-        holds = (
-            {"internal_only": True},
-            {"publication_hold": True},
-            {"publication_status": "held"},
-            {"publication_status": "contested"},
-            {"publication_status": "withheld"},
-            {"publication_status": "unreviewed"},
-        )
+        # Owner ruling 2026-10-04: only `internal_only` still refuses; a
+        # publication_hold flag or a review status no longer does (see
+        # test_review_states_no_longer_hold_a_component).
+        holds = ({"internal_only": True},)
         with (
             patch.object(repository, "_grove_manifest", return_value=manifest),
             patch.object(repository, "_release_response") as rows,
@@ -378,6 +362,20 @@ class SharedCollectionReleaseTest(unittest.TestCase):
                         self.assertEqual(response.status_code, 503)
                     rows.assert_not_called()
 
+    def test_review_states_no_longer_hold_a_component(self):
+        manifest, _, _ = self.fixture()
+        contract = manifest["components"]["environmental_events"]
+        for metadata in (
+            {"publication_hold": True},
+            {"publication_status": "held"},
+            {"publication_status": "contested"},
+            {"publication_status": "withheld"},
+            {"publication_status": "unreviewed"},
+        ):
+            with self.subTest(metadata=metadata):
+                contract["metadata"] = metadata
+                repository.grove_component_contract(manifest, "plot", "environmental_events")
+
     def test_malformed_component_metadata_fails_closed_in_both_download_routes(self):
         manifest, pin, _ = self.fixture()
         contract = manifest["components"]["environmental_events"]
@@ -388,7 +386,6 @@ class SharedCollectionReleaseTest(unittest.TestCase):
             "",
             True,
             {"internal_only": "false"},
-            {"publication_hold": 0},
             {"publication_status": []},
             {"publication_status": ""},
         )
@@ -562,18 +559,10 @@ class SharedCollectionReleaseTest(unittest.TestCase):
                 {},
             ):
                 with self.subTest(collection=collection, rights=rights):
-                    # NEED refuses this unreviewed component before field presentation
-                    # can imply that it has passed its narrower publication proof.
-                    refusal = (
-                        repository.ComponentPublicationHeld
-                        if collection == "need"
-                        else repository.FullReleaseUnavailable
-                    )
-                    reason = (
-                        "^Only the evidence-pinned NEED reviewed base is public$"
-                        if collection == "need"
-                        else "incomplete|held or unknown"
-                    )
+                    # NEED is checked like every other collection (owner
+                    # ruling 2026-10-04: no NEED publication hold).
+                    refusal = repository.FullReleaseUnavailable
+                    reason = "incomplete|held or unknown"
                     entry = {
                         "collection": collection,
                         "order": ["id", "secret"],

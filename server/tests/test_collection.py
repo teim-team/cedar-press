@@ -808,84 +808,46 @@ class TestGeneratorAndManifestAgree(unittest.TestCase):
                     self.script.unpublish(root, [{"path": bad}])
             self.assertEqual(outside.read_text(encoding="utf-8"), "retained\n")
 
-    def test_canonical_need_policy_refuses_stale_manifest_sample_paths(self) -> None:
-        manifest = {
-            "collections": [
-                {
-                    "id": "need",
-                    "cedar": {"cedar_id": "need"},
-                    "sample": {"path": "/data/cedar/samples/need/restored.csv"},
-                    "tables": [
-                        {
-                            "table": "restored.csv",
-                            "sample_path": "/data/cedar/samples/need/restored.csv",
-                        }
-                    ],
-                }
-            ]
-        }
-        with self.assertRaisesRegex(ValueError, "publication-held"):
-            self.script.copy_samples(_REPO, manifest)
-        struck = self.script.withhold_samples(
-            manifest, lambda *_: self.fail("Held files must never be read"), frozenset()
-        )
-        self.assertEqual(len(struck), 1)
-        self.assertIsNone(manifest["collections"][0]["tables"][0]["sample_path"])
-        self.assertEqual(manifest["collections"][0]["cedar"]["status"], "BLOCKED")
-
-    def test_manifest_collection_holds_match_canonical_policy(self) -> None:
-        for collection in self.manifest["collections"]:
-            identifier = collection.get("cedar", {}).get("cedar_id", collection["id"])
-            try:
-                self.script._COLLECTION_RULE.assert_collection_publishable(identifier)
-            except self.script._COLLECTION_RULE.FieldMapRefusal:
-                if identifier == "need" and collection.get("sample", {}).get("path"):
-                    from cedar_press.need_preview import need_preview_permitted
-
-                    advertised = [
-                        table for table in collection["tables"] if table.get("sample_path")
-                    ]
-                    self.assertEqual(
-                        len(advertised), 1, "Only the reviewed NEED base may have a preview"
-                    )
-                    self.assertTrue(need_preview_permitted(_REPO, collection, advertised[0]))
-                    self.assertNotIn("publication_hold", collection)
-                else:
-                    self.assertTrue(collection.get("publication_hold"), identifier)
-                    self.assertFalse(any(t.get("sample_path") for t in collection["tables"]))
-
-    def test_audit_persists_policy_even_without_sample_paths(self) -> None:
+    def test_owner_ruling_need_sample_is_not_struck(self) -> None:
+        # Owner ruling 2026-10-04 (Elijah Moreno): NEED publishes like any
+        # other collection; a NEED sample is no longer struck by a policy hold.
         import tempfile
-        from unittest.mock import patch
 
         with tempfile.TemporaryDirectory() as folder:
-            root = Path(folder)
-            path = root / "data/cedar/collections.manifest.json"
-            path.parent.mkdir(parents=True)
-            path.write_text(
-                json.dumps(
+            sample = Path(folder) / "restored.csv"
+            sample.write_text("enterprise_id,enterprise_name\nCEDAR-NEST-1,Example Enterprise\n",
+                              encoding="utf-8")
+            manifest = {
+                "collections": [
                     {
-                        "collections": [
+                        "id": "need",
+                        "cedar": {"cedar_id": "need", "status": "READY"},
+                        "publication_hold": {"code": "COLLECTION_PUBLICATION_HOLD", "message": "x"},
+                        "sample": {"path": "/data/cedar/samples/need/restored.csv"},
+                        "tables": [
                             {
-                                "id": "need",
-                                "cedar": {"cedar_id": "need", "status": "READY"},
-                                "sample": {"path": None},
-                                "tables": [{"sample_path": None}],
+                                "table": "restored.csv",
+                                "sample_path": "/data/cedar/samples/need/restored.csv",
                             }
-                        ]
+                        ],
                     }
-                ),
-                encoding="utf-8",
+                ]
+            }
+            struck = self.script.withhold_samples(
+                manifest, lambda *_: sample, frozenset(), frozenset()
             )
-            with patch.object(
-                self.script, "withheld_entities", return_value=(frozenset(), frozenset())
-            ):
-                self.assertEqual(self.script.audit(root), [])
-                updated = path.read_bytes()
-                status = json.loads(updated)["collections"][0]["cedar"]["status"]
-                self.assertEqual(status, "BLOCKED")
-                self.assertEqual(self.script.audit(root), [])
-                self.assertEqual(path.read_bytes(), updated)
+        self.assertEqual(struck, [])
+        collection = manifest["collections"][0]
+        self.assertNotIn("publication_hold", collection)
+        self.assertEqual(collection["tables"][0]["sample_path"],
+                         "/data/cedar/samples/need/restored.csv")
+        self.assertEqual(collection["cedar"]["status"], "READY")
+
+    def test_manifest_carries_no_collection_publication_hold(self) -> None:
+        for collection in self.manifest["collections"]:
+            identifier = collection.get("cedar", {}).get("cedar_id", collection["id"])
+            self.script._COLLECTION_RULE.assert_collection_publishable(identifier)
+            self.assertNotIn("publication_hold", collection, identifier)
 
     def test_a_local_path_never_reaches_a_served_sample(self) -> None:
         # Found 2026-09-27: need_enterprises__10.csv served "the owner's

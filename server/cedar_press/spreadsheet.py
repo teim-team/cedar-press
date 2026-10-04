@@ -142,12 +142,8 @@ def download(collection, release_id=None, *, metadata_only=False):
             with closing(part["content_file"]) as content:
                 for line in content:
                     row = json.loads(line)
-                    if row.get(contract.get("publication_status_field")) in {
-                        "held",
-                        "contested",
-                        "withheld",
-                    }:
-                        continue
+                    # Owner ruling 2026-10-04 (Elijah Moreno): a held,
+                    # contested or withheld status is shown, not dropped.
                     record = {target: row[source] for source, target in mappings[name].items()}
                     record.update(
                         record_type=name,

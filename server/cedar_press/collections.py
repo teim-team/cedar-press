@@ -651,11 +651,8 @@ def collection_csv(dataset_id: str) -> str | None:
     credit it; provenance that lives only in the UI is provenance the reader
     loses on save.
     """
-    if dataset_id == "need":
-        from cedar_press.need_preview import current_need_preview_permitted
-
-        if not current_need_preview_permitted(_REPO):
-            return None
+    # The NEED reviewed-base proof no longer gates the preview (owner ruling
+    # 2026-10-04: no NEED publication hold).
     sample = _SAMPLE.get(dataset_id)
     if sample is None or not sample.get("path"):
         return None

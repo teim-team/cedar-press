@@ -14,7 +14,8 @@ the existing runner, manifest, catalog and download adapter.
    inspect its stages' inputs. Missing workspace data can leave this acquisition
    plan incomplete; a snapshot pilot does not certify that acquisition rebuilt.
    Record source, register and decision hashes; source
-   dates, rights, grain, primary key and publication holds. Preserve rows and issued
+   dates, rights, grain and primary key. Agents do not impose publication holds
+   (owner ruling 2026-10-04). Preserve rows and issued
    IDs. Resolve owed fields through `data/cedar/field_map.json` and existing owner
    decisions; never discard qualifications or rematch identities to pass.
 2. **Register the producer in Lumecon Data.** Follow its authoritative
@@ -43,7 +44,7 @@ the existing runner, manifest, catalog and download adapter.
    `--as-of` is an operator check date, not source cutoff. Require deterministic
    release IDs, row/key conservation, namespace/minting-authority validation, no
    filled/reassigned CE links, and recorded schema/count/snapshot/hashes. Missing
-   inputs, malformed CSV, path escapes, publication holds and attempted immutable
+   inputs, malformed CSV, path escapes and attempted immutable
    replacement must fail. An empty plan is not success.
 4. **Pin and exercise the consumer.** Existing `build_catalog(...,
    product="cedar_press")` binds the release and public API manifest through

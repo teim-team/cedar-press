@@ -3,6 +3,21 @@
 *Written 2026-09-01. Live doc. Owner decision — this settles item 16.11 in the
 decision queue and sets the default for every dataset.*
 
+<!-- BEGIN OWNER-NO-HOLDS-2026-10-04 -->
+## Owner ruling, 2026-10-04: no publication holds
+
+**Owner ruling 2026-10-04 (Elijah Moreno): Lumecon decides what is blocked. The only hold is a specific record flagged as attributed to the wrong entity; records in the database have already been reviewed and sourced and are not held. Attribution review is an ongoing process, not a standing hold. Agents do not impose publication holds.**
+
+NEED records and individual Native-owned business records come from publicly
+available websites and Lumecon has permission to publish them; neither collection
+carries a collection-wide publication hold. This supersedes the NEED systemic stop
+in the 2026-09-23 ruling below and every other instruction in this file to hold,
+withhold or quarantine a collection or a set of records pending review. The
+affiliation *wording* rules of 2026-09-23 (affiliated with, not owned by, unless
+evidenced) still apply: they govern how a record is described, not whether it
+publishes.
+<!-- END OWNER-NO-HOLDS-2026-10-04 -->
+
 <!-- BEGIN OWNER-AFFILIATION-POLICY-2026-09-23 -->
 ## Owner ruling, 2026-09-23: source-attributed affiliation
 
@@ -16,8 +31,9 @@ connecting the organization to the named Native entity. Name similarity, shared
 words, geography, a model suggestion or an upstream crosswalk alone is insufficient.
 When evidence supports inclusion but not a specific entity link, preserve the valid
 source-identified record with an unresolved entity relationship; do not invent a hub.
-Where acceptable Native-inclusion evidence is absent, hold or exclude under the
-collection's existing inclusion contract, without pretending uncertainty is proof.
+Where acceptable Native-inclusion evidence is absent, describe the record as
+unresolved rather than pretending uncertainty is proof (the 2026-10-04 ruling
+removed "hold" as an option).
 
 Cedar verifies that the cited source reports the connection. Cedar does not thereby
 independently certify current ownership percentages, beneficial ownership, voting
@@ -47,16 +63,15 @@ Schools' location, BIE status, charter and operation are different facts.
 `enterprise_existing_cedar_uid` is INTERNAL_ONLY under its current ambiguous
 semantics. Preserve its values and evidence. A future same-legal-object link requires
 an explicitly named, evidence-gated predicate, not an ownership inference or an ID
-merge. The field-level ruling does not release the systemic affiliation hold below.
-The executable field map still retains its older stop until the replacement contract
-and independent hold are tested; do not remove it merely because this prose records
-the owner's decision.
+merge. (The systemic affiliation hold that this paragraph kept in force, and the
+field map's stop, were lifted by the owner ruling of 2026-10-04.)
 
 ### NEED systemic stop and review requirements
 
 The reviewed false pairings are not a completed 18-row adjudication exercise. Keep
-all stable enterprise IDs and validated migration work; quarantine the questionable
-affiliation path from publication. Trace exact source rows and transformations, audit
+all stable enterprise IDs and validated migration work. (The quarantine of the
+affiliation path from publication was lifted by the owner ruling of 2026-10-04;
+attribution review continues as an ongoing process.) Trace exact source rows and transformations, audit
 the full affected route population, and require negative controls plus a new
 stratified quality sample before proposing promotion. Do not regenerate the owner's
 active review queue while its decisions remain only in the browser.
@@ -68,7 +83,7 @@ must include original inclusion source and excerpt, URL/date, match method, full
 canonical target name/UID/class and aliases, competing candidates, organization type,
 precise proposed relationship and uncertainty. Ambiguous short labels are inadequate.
 
-This ruling does not authorize publication, taxonomy invention, retroactive ownership
+This ruling does not authorize taxonomy invention, retroactive ownership
 inference, register ID changes, or silently discarding source observations. A before/
 after report must identify affected rows, classes, relationship types, unresolved
 cases and any downstream output changes. Existing source/privacy restrictions remain.

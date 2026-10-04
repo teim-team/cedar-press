@@ -16,9 +16,10 @@ Registered Native entity profiles use the same pinned, verified collection relea
 downloads. NEED records remain named related records, without a separate public
 profile. Patent observations and ratings attach to the exact legal owner or issuer:
 a registered entity, its evidenced NEED counterpart, or a related enterprise.
-Showing a related record does not transfer its facts to the parent. The NEED collection
-publication hold currently returns an explicit empty state before release
-transport. Internal review candidates remain separate from customer eligibility.
+Showing a related record does not transfer its facts to the parent. NEED has no
+publication hold: NEED records come from publicly available websites and Lumecon has
+permission to publish them (owner ruling 2026-10-04), so the endpoint serves the
+pinned release.
 The authenticated evidence endpoint is
 `GET /press/entities/{cedar_uid}/need-evidence`. The entity register is internal
 infrastructure and is not an additional customer collection.
@@ -294,7 +295,7 @@ pinned rollback; undeclared extra columns still refuse delivery.
 
 Public labels and citations use the collection name and its recorded Updated date. Version labels and internal file/table counts are not product descriptions or source counts. The authenticated spreadsheet-download route returns one CSV per collection through the same pinned, rights-checked download verifier. Existing component routes remain internal compatibility interfaces. Compatible columns align; conflicting definitions or units stay separate until reviewed, and record type/key/grain prevent accidental aggregation across observations. Preview extracts remain explicitly labeled as samples.
 
-Rebuild and inspect the real collection exports in the data workspace before publication. Review conflicting column definitions, duplicate keys, missing values and original-source provenance; preserve publication holds. The code change itself does not rebuild the external data store or deploy the service.
+Rebuild and inspect the real collection exports in the data workspace before publication. Review conflicting column definitions, duplicate keys, missing values and original-source provenance. Agents do not impose publication holds (owner ruling 2026-10-04). The code change itself does not rebuild the external data store or deploy the service.
 
 ## Presentation maintenance
 

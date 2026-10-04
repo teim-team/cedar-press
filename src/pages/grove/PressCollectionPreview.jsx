@@ -22,7 +22,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { LAUNCH_COLLECTION, collectionPublicationHold } from "../../features/grove/collection";
+import { LAUNCH_COLLECTION } from "../../features/grove/collection";
 import { contractFor, exploreTables, parseCsv, universalRows } from "../../features/grove/explore.js";
 import { columnPlan } from "../../features/grove/recordColumns.js";
 import { tableLabel } from "../../features/grove/readerValues.js";
@@ -96,7 +96,6 @@ function usePreviewSample(collectionId) {
 }
 
 export default function CollectionPreview({ entry, tier, register }) {
-  const publicationHold = collectionPublicationHold(entry.id);
   const { status, table, parsed } = usePreviewSample(entry.id);
   // A phone gets the same list the product gives a phone, not a table of
   // the collection's own columns squeezed into 320px.
@@ -127,18 +126,13 @@ export default function CollectionPreview({ entry, tier, register }) {
           <h3 className="cp-pane__name"><TierName name={entry.name} /></h3>
         </div>
         <p className="cp-pane__facts">
-          {!publicationHold && coverage ? <span>{coverage}</span> : null}
-          {!publicationHold && fresh ? <span>Preview {fresh.charAt(0).toLowerCase() + fresh.slice(1)}</span> : null}
+          {coverage ? <span>{coverage}</span> : null}
+          {fresh ? <span>Preview {fresh.charAt(0).toLowerCase() + fresh.slice(1)}</span> : null}
         </p>
         <p className="cp-pane__blurb">{entry.blurb}</p>
       </div>
 
-      {publicationHold ? (
-        <div className="cp-pane__pending">
-          <span className="cp-pane__pendingcap">Preview unavailable</span>
-          <p>{publicationHold.message}</p>
-        </div>
-      ) : structure ? (
+      {structure ? (
         <>
           <RecordStructureCap collectionId={entry.id} />
           <div className="cp-pane__records">

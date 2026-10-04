@@ -11,7 +11,7 @@ Public Press previews read the committed, publication-eligible sample files.
 Their captions count those sample records. The snapshot's update date describes
 the preview. A sample is not a current full-dataset count, and counts across
 supporting tables or collections are not an unduplicated entity or event total.
-A publication hold still removes the preview.
+No collection carries a publication hold (owner ruling 2026-10-04), so no preview is removed for one.
 
 Signed-in examples use the release research API. The record count shown beside a
 spreadsheet comes from its verified release metadata and must match the permitted
