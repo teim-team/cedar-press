@@ -20,8 +20,10 @@ from the Cedar data workspace in ``code/``.
 
 from __future__ import annotations
 
+import csv
 import hashlib
 import importlib.util
+import io
 import json
 import math
 import os
@@ -270,7 +272,26 @@ def collection_csv(collection_id: str) -> str | None:
     # Owner ruling 2026-10-04 (Elijah Moreno): NEED's preview is served like
     # any other collection's; it no longer needs the reviewed-base proof.
     assert_collection_publishable(collection_id)
-    return launch.collection_csv(collection_id)
+    served = launch.collection_csv(collection_id)
+    if served is None:
+        return None
+    # The download is the customer table (owner rules 2026-10-04): one grain,
+    # Cedar IDs and public registry IDs only, public sources, no version labels.
+    from cedar_press import csv_safety
+    from cedar_press.spreadsheet import present_sample
+
+    rows = list(csv.reader(io.StringIO(served, newline="")))
+    citation = rows[1][-1] if len(rows) > 1 else ""
+    sample = io.StringIO(newline="")
+    csv.writer(sample, lineterminator="\n").writerows(row[:-1] for row in rows)
+    presented = list(csv.reader(io.StringIO(present_sample(collection_id, sample.getvalue()))))
+    table = [[*presented[0], "cite_as"], *[[*row, citation] for row in presented[1:]]]
+
+    def cell(value):
+        text = csv_safety.spreadsheet_safe(value)
+        return '"' + text.replace('"', '""') + '"' if any(c in text for c in '",\n\r') else text
+
+    return "\n".join(",".join(cell(value) for value in row) for row in table)
 
 
 def sample_unavailable_reason(collection_id: str) -> str | None:

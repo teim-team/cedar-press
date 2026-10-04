@@ -196,6 +196,8 @@ jobs:
           suite = unittest.defaultTestLoader.loadTestsFromNames([
               "tests.test_gaming_release",
               "tests.test_gaming_issuance",
+              # The vendored customer-table rules must be the installed producer's.
+              "tests.test_customer_sheet_policy",
           ])
           result = unittest.TextTestRunner(verbosity=2).run(suite)
           if result.skipped:

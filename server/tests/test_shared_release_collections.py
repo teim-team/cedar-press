@@ -437,8 +437,9 @@ class SharedCollectionReleaseTest(unittest.TestCase):
                 "/press/collections/plot/spreadsheet-download",
                 params={"release_id": pin["release_id"]},
             )
-        self.assertEqual(csv_response.status_code, 200)
-        self.assertEqual(csv_response.headers["x-cedar-rows"], "1")
+        # Environmental events are not PLOT's customer grain (owner rule 4,
+        # 2026-10-04): with no land observations there is no customer table.
+        self.assertEqual(csv_response.status_code, 503)
 
     def test_publication_fields_must_name_declared_columns(self):
         manifest, _, _ = self.fixture()

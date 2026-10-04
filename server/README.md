@@ -90,6 +90,23 @@ right for the tests, wrong for a deployment. An account record in
 one subscription's ledger.
 
 
+## The customer table (owner rulings 2026-10-04)
+
+Every spreadsheet and sample download is one flat table per collection, built
+by `cedar_press/customer_sheet.py` (vendored byte for byte from Lumecon-data
+`src/lumecon_data/customer_sheet.py`; `tests/test_customer_sheet_policy.py`
+compares the copies where the producer is installed). The only identifiers are
+Cedar IDs (`CE-`, `CB-`, `CEDAR-`) and the public registry identifiers listed in
+`PUBLIC_REGISTRY_ID_COLUMNS`, which await the owner's decision; DUNS never
+ships; a local source value (path, spreadsheet, terminal, desktop, manual entry)
+is traced to the release's recorded public source URL or left blank; version
+columns and labels stay internal. `spreadsheet.download` presents the pinned
+release this way after every byte check; `repository.collection_csv` presents
+the committed ten-row samples this way; `release_research` presents verified
+examples this way. Release bytes, hashes and the per-component JSONL routes are
+unchanged. The committed sample files and the Explore reader still use the
+earlier appended layout (Lumecon-data `docs/review-ledger.md`, 2026-10-04).
+
 ## Pinned governed release downloads
 
 The existing sample download remains a sample. The additive

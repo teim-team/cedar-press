@@ -1074,6 +1074,17 @@ if __name__ == "__main__":
 class PartitionedConsumerTest(_ServerCase):
     def setUp(self):
         super().setUp()
+        # These cases verify partitioned bytes, not Gaming's customer grain (one
+        # row per facility, owner rule 4, 2026-10-04): this fixture release has
+        # only the payments table, so its spreadsheet is declared as that table.
+        from cedar_press import customer_sheet
+
+        layouts = patch.dict(
+            customer_sheet.LAYOUTS,
+            {"gaming": {"grain": "One payment.", "main": [{"tables": ["gaming_payments"]}]}},
+        )
+        layouts.start()
+        self.addCleanup(layouts.stop)
         self.release_id = "c" * 64
         self.contents = {}
         components, parts = {}, []

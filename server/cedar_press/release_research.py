@@ -12,7 +12,7 @@ import os
 import re
 from pathlib import Path
 
-from cedar_press import repository, source_presentation
+from cedar_press import customer_sheet, repository, source_presentation
 
 MAX_PACKET_BYTES = 8 * 1024 * 1024
 PRIVATE_FIELDS = frozenset(
@@ -186,7 +186,7 @@ def packet(tier: str, collection: str, release_id: str, component: str | None = 
     names = {field["name"] for field in fields if field.get("permitted_review_preview")}
     if names != set(release["fields"]):
         raise repository.FullReleaseUnavailable("Research fields are held or undeclared")
-    rows = []
+    verified = []
     for selected in sample:
         row = selected.get("row")
         if not isinstance(row, dict) or set(row) != names:
@@ -195,6 +195,20 @@ def packet(tier: str, collection: str, release_id: str, component: str | None = 
             "selection_sha256"
         ):
             raise repository.FullReleaseUnavailable("Preview row checksum mismatch")
+        verified.append(row)
+    # Verified first, then presented under the owner's rules of 2026-10-04:
+    # Cedar IDs and listed public registry IDs only, public sources only, no
+    # version labels. The packet and its hashes are unchanged.
+    by_name = {field["name"]: field for field in fields}
+    header, presented, _report = customer_sheet.present_rows(
+        collection,
+        [{"name": name, "type": by_name.get(name, {}).get("type")} for name in release["fields"]],
+        verified,
+    )
+    renamed = {**customer_sheet.VERSION_RENAMES}
+    shown = set(header)
+    rows = []
+    for selected, row in zip(sample, presented, strict=True):
         public_row = _public_value(row)
         rows.append(
             {
@@ -215,19 +229,23 @@ def packet(tier: str, collection: str, release_id: str, component: str | None = 
         "sample_rows": len(rows),
         "rows": rows,
         "display_order": [
-            name
+            renamed.get(name, name)
             for name in declaration.get("display_order", release["fields"])
-            if name not in PRIVATE_FIELDS
+            if name not in PRIVATE_FIELDS and renamed.get(name, name) in shown
         ],
         "codebook": {
             "row_grain": codebook["row_grain"],
-            "primary_key": codebook["primary_key"],
+            "primary_key": [name for name in codebook["primary_key"] if name in shown],
             "fields": [
                 _public_value(
-                    {key: value for key, value in field.items() if key in CODEBOOK_FIELDS}
+                    {
+                        **{key: value for key, value in field.items() if key in CODEBOOK_FIELDS},
+                        "name": renamed.get(field["name"], field["name"]),
+                    }
                 )
                 for field in fields
                 if field["name"] not in PRIVATE_FIELDS
+                and renamed.get(field["name"], field["name"]) in shown
             ],
             "temporal_fields": _public_value(codebook.get("temporal_fields", {})),
             "aggregation_cautions": _public_value(codebook.get("aggregation_cautions", [])),
