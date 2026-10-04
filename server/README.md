@@ -271,6 +271,16 @@ Since projection rule `gaming-presented-rows-v3` (Lumecon-data
 `gaming.2026-10-04.2`) a Gaming row of any row-level rights class or publication
 status ships too, with both recorded, and every component, partitioned parts
 included, is downloadable; the columns did not change, so no declaration did.
+Since `gaming.2026-10-04.3` (owner ruling 2026-10-04) FAC single audits and
+bond disclosures (rating actions, fund holdings, MSRB EMMA) are tribal entity
+filings, not Gaming: `gaming_financial_disclosures` carries only SEC facility
+figures, management-contract terms and NIGC financing reviews, with the same
+columns, and Lumecon-data's `entity-filings` producer writes
+`tribal_entity_financial_filings.csv` for the entity layer keyed by Cedar ID.
+Since projection rule `gaming-public-sources-v4` (owner ruling 2026-10-04:
+"Casino City data is not published; Gaming publishes from public sources") a
+Gaming row of `rights_class` `internal_vendor`, or naming Casino City or
+4wheeler, is not published; columns are unchanged, so no declaration changed.
 Component rights, proposed-ID review restrictions and
 Grove-only entitlement remain runtime gates. Internal tables remain unavailable.
 The stream rehearsal now refuses to resume an old two-table receipt as evidence
