@@ -244,18 +244,22 @@ from prose that goes stale, and gives you `ondisk <term>`.
 
 ## 5. Who reviews what
 
+*Ownership as set by Elijah Moreno, 2026-10-04. It supersedes the earlier table, which routed frontend to Isabella and teim-engine to Francesca.*
+
 | Area | Owner |
 |---|---|
-| teim-engine, the Cedar service, data methods | Francesca Agnes (@mafranagn) |
-| Frontend | Isabella Agnes (@magnes1) |
-| Identity, entitlement, billing, infra | Brian Kim (@bkim28964) |
-| Product behaviour and customer-facing copy | Kaylyn Lee (@kaylynhl) |
-| **Cedar Grove and Cedar Press, including their data** | Havala Hanson (@Havala-Hanson) |
+| **Team lead; Cedar Press and Cedar Grove, including their data** | Havala Hanson (@Havala-Hanson) |
+| The app users see: teim-app's interface, product behaviour and customer-facing copy | Kaylyn Lee (@kaylynhl) |
+| Backend and ML: servers, APIs, pipelines, dependencies | Ari (@ArihantSwainLumecon) |
+| Account access, payments, the database, Datadog | Brian Kim (@bkim28964) |
+| Cedar, the AI economic analyst (the `cedar` service) | Francesca Agnes (@mafranagn) |
+| teim-engine | Isabella Agnes (@magnes1) |
 
-This repository is Havala's. The web client is still frontend, so a substantial
-change to it also goes to Isabella; a change to the entitlement or access path
-is Brian's wherever it lands. None of that displaces the self-verification rule
-in §6 — a reviewer is not a substitute for an independent re-execution.
+This repository is Havala's. A change to the web client's interface also goes
+to Kaylyn; a change to server code, the pipeline or dependencies goes to Ari; a
+change to the account, access or payment path is Brian's wherever it lands.
+None of that displaces the self-verification rule in §6 — a reviewer is not a
+substitute for an independent re-execution.
 
 ## 6. Invariants
 
