@@ -38244,16 +38244,17 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 1,
-   "mentioned_outside_history": 1,
+   "mentions": 2,
+   "mentioned_outside_history": 2,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-10-04",
-   "lines": 185,
+   "lines": 204,
    "operational_role": "active validator/migration/review",
    "collection_output_entrypoints": [],
    "static_consumers": [
-    "code/1151_customer_preview_ten.py"
+    "code/1151_customer_preview_ten.py",
+    "server/tests/test_need_attribution.py"
    ],
    "runtime_consumer_candidates": [
     "code/1151_customer_preview_ten.py"
@@ -38280,26 +38281,28 @@
    },
    "writer_evidence": [
     {
-     "line": 165,
+     "line": 184,
      "operation": "path.write_bytes",
      "target": "<unresolved>/<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "a033795efa1819d5a6d12069fe61db09db5662908db7fcd749378b2adfa0fe18"
+     "signature": "0e4c4958bbcc5ea83ae7f0a828e3dbe505b24e21993525de44130e9d72c4901f"
     }
    ],
    "writer_analysis_error": null,
    "writer_risk": "P2_unresolved_write_target",
    "undeclared_governed_tables": [],
-   "source_sha256": "092b5e2717def17a0f7f97034ed0707efa08dc953338e641d64bbc1cfb0e2c5f",
+   "source_sha256": "b4279bfa683ffb0f84e72057109fc84d1429755aa7c42fe0975d58d2072f5aee",
    "maintenance_status": "ACTIVE",
    "maintenance_evidence": {
     "reason": "declared operational role, CI invocation or reachable Python dependency",
-    "source_sha256": "092b5e2717def17a0f7f97034ed0707efa08dc953338e641d64bbc1cfb0e2c5f",
+    "source_sha256": "b4279bfa683ffb0f84e72057109fc84d1429755aa7c42fe0975d58d2072f5aee",
     "identical_source_peers": [],
     "ci_commands": [],
     "documented_commands": [],
-    "active_runtime_callers": [],
+    "active_runtime_callers": [
+     "code/1151_customer_preview_ten.py"
+    ],
     "superseded_output_edges": [],
     "historical_replay_evidence": [],
     "output_authority_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",

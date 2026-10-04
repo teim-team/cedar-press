@@ -130,16 +130,30 @@ def annotate(rows: list[dict], *, rulings=None, register=None) -> Counter:
 
 
 def _read(path: Path):
-    with path.open(encoding="utf-8", newline="") as fh:
-        rd = csv.DictReader(fh)
-        return list(rd.fieldnames or []), [dict(r) for r in rd]
+    """(header line, fields, [(raw record text, row)]) - raw text kept per record."""
+    text = path.read_text(encoding="utf-8")
+    lines = text.splitlines(keepends=True)
+    consumed: list[str] = []
+
+    def feed():
+        for line in lines:
+            consumed.append(line)
+            yield line
+
+    reader = csv.reader(feed())
+    fields = next(reader)
+    header = "".join(consumed)
+    records = []
+    for values in reader:
+        raw = "".join(consumed[len(header.splitlines(keepends=True)):])
+        consumed[len(header.splitlines(keepends=True)):] = []
+        records.append((raw, dict(zip(fields, values))))
+    return header, fields, records
 
 
-def _render(fields, rows) -> str:
+def _render_row(fields, row, newline: str) -> str:
     buf = io.StringIO()
-    w = csv.DictWriter(buf, fieldnames=fields, lineterminator="\r\n")
-    w.writeheader()
-    w.writerows(rows)
+    csv.DictWriter(buf, fieldnames=fields, lineterminator=newline).writerow(row)
     return buf.getvalue()
 
 
@@ -151,11 +165,16 @@ def run(mode: str) -> int:
         path = ROOT / rel
         if not path.exists():
             continue
-        fields, rows = _read(path)
+        header, fields, records = _read(path)
+        rows = [dict(row) for _raw, row in records]
         seen = annotate(rows, rulings=rulings, register=register)
         original = path.read_bytes()
         newline = "\r\n" if b"\r\n" in original else "\n"
-        rendered = _render(fields, rows).replace("\r\n", newline).encode("utf-8")
+        # A row the rulings leave alone keeps its exact bytes: only owner columns of
+        # decided rows change, never another writer's quoting.
+        out = [header] + [raw if row == orig else _render_row(fields, row, newline)
+                          for (raw, orig), row in zip(records, rows)]
+        rendered = "".join(out).encode("utf-8")
         changed = rendered != original
         print(f"  {rel:<58} {len(rows):>3} rows  {dict(sorted(seen.items()))}"
               f"{'  <- changes' if changed else ''}")

@@ -201,6 +201,26 @@ class Apply1189(unittest.TestCase):
         again = self.m.annotate(rows, rulings=rulings, register=REGISTER)
         self.assertEqual(dict(again), {na.STATUS_PUBLISHED: 3})
 
+    def test_apply_rewrites_only_decided_rows_and_keeps_other_bytes(self):
+        header = "enterprise_name,owner_hub_name,owner_class,cedar_uid\n"
+        kept = '"Akiak Technology Llc","Akiak",tribal_government,CE-00006-4P\n'
+        wrong = '"Arctic Catering, Inc",Arctic Village,tribal_government,CE-0000J-C2\n'
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "need.csv"
+            path.write_text(header + kept + wrong, encoding="utf-8")
+            root, targets = self.m.ROOT, self.m.TARGETS
+            self.m.ROOT, self.m.TARGETS = Path(tmp), ("need.csv",)
+            try:
+                with contextlib.redirect_stdout(io.StringIO()):
+                    self.assertEqual(self.m.run("verify"), 1)
+                    self.assertEqual(self.m.run("apply"), 0)
+                    self.assertEqual(self.m.run("verify"), 0)
+            finally:
+                self.m.ROOT, self.m.TARGETS = root, targets
+            lines = path.read_text(encoding="utf-8").splitlines(keepends=True)
+        self.assertEqual(lines[:2], [header, kept])
+        self.assertEqual(lines[2], '"Arctic Catering, Inc",,,\n')
+
     def test_the_committed_need_files_carry_the_rulings(self):
         with contextlib.redirect_stdout(io.StringIO()) as out:
             self.assertEqual(self.m.run("verify"), 0, out.getvalue())
