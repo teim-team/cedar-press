@@ -297,7 +297,7 @@
    "id": "GAP-21",
    "collection": "code/ / 618 numbered workspace scripts",
    "gate": "reference graph: Makefile, CI, package.json, other script, product code, document, journal, loader by stem or number",
-   "exists": "620 numbered scripts (603 numeric-prefixed, 17 letter-suffixed; the brief's 606 counted non-Python files with a numeric prefix). Referenced: 602 (599 outside AGENTS.md). Zero references: 18.",
+   "exists": "621 numbered scripts (604 numeric-prefixed, 17 letter-suffixed; the brief's 606 counted non-Python files with a numeric prefix). Referenced: 603 (600 outside AGENTS.md). Zero references: 18.",
    "served": "18 moved to code/archive/ (zero references, no tracked artifact written, not ACTIVE, not NEVER_RUN, in no contract or ordering), indexed in code/archive/INDEX.md; census refreshed (python3.12 code/521_inventory.py scripts-only).",
    "gate_location": "docs/CODE_REFERENCE_GRAPH_2026-10-02.json; server/tests/code_reference_graph.py; docs/schema/inventory.json script_census",
    "closing_condition": "Closed for this pass; the test module proves every archived script still has zero references in the tree.",
@@ -1200,13 +1200,13 @@
    ]
   },
   "graph": {
-   "numbered_scripts": 620,
-   "pure_numeric_prefix": 603,
+   "numbered_scripts": 621,
+   "pure_numeric_prefix": 604,
    "letter_suffixed_prefix": 17,
-   "at_code_top_level": 602,
+   "at_code_top_level": 603,
    "in_code_archive": 18,
-   "referenced": 602,
-   "referenced_outside_journal": 599,
+   "referenced": 603,
+   "referenced_outside_journal": 600,
    "zero_references": 18,
    "archive_eligible_by_rule": [
     "1172_codebook_block_generator.py",
@@ -1253,24 +1253,24 @@
     "ci": 4,
     "package_json": 0,
     "script": 430,
-    "product_code": 108,
-    "documented": 579,
-    "journal": 239,
+    "product_code": 109,
+    "documented": 580,
+    "journal": 240,
     "data_or_config": 35,
     "stem_only": 58,
     "number_keyed": 245
    },
-   "text_files_scanned": 2177
+   "text_files_scanned": 2183
   },
   "census": {
-   "scripts": 690,
+   "scripts": 691,
    "operational_role_counts": {
     "active producer": 76,
     "active validator/migration/review": 13,
     "historical": 18,
     "product consumer/shared service": 8,
     "test/fixture": 8,
-    "unresolved": 567
+    "unresolved": 568
    },
    "maintenance_status_counts": {
     "ACTIVE": 167,
@@ -1278,7 +1278,7 @@
     "SUPERSEDED": 0,
     "HISTORICAL-RETAIN": 38,
     "SAFE-DELETE-CANDIDATE": 0,
-    "REQUIRES-REVIEW": 485
+    "REQUIRES-REVIEW": 486
    }
   }
  }
