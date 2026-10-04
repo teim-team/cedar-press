@@ -122,7 +122,7 @@ jobs:
     permissions:
       contents: read
     env:
-      LUMECON_DATA_SHA: bb4da39383b75f5330ccc589d3d12f0fc8590c6a  # Producer PR #17: customer_sheet.py customer-sheet-2026-10-04.4 (owner ruling of 2026-10-04: only Cedar Entity, Cedar Business and each dataset's own event IDs are published; every CEDAR- namespace and NESTREL- removed; needs_cedar_id) and the native_identity_basis column
+      LUMECON_DATA_SHA: 2443a354c02a33d2222394b25a540babe51307b8  # Producer PR #17: customer_sheet.py customer-sheet-2026-10-04.5 (owner ruling of 2026-10-04: only Cedar Entity, Cedar Business and each dataset's own event IDs are published; every CEDAR- namespace and NESTREL- removed; needs_cedar_id; benefit_entity_id CE- only, home_community_source public URLs only), the native_identity_basis column, and home_community reading one 873 row per containing polygon
       CEDAR_REQUIRE_LUMECON_GAMING: "1"
     steps:
       - name: Require the Lumecon-data read token
@@ -198,6 +198,8 @@ jobs:
               "tests.test_gaming_issuance",
               # The vendored customer-table rules must be the installed producer's.
               "tests.test_customer_sheet_policy",
+              # 873's point rows read by the installed home_community consumer.
+              "tests.test_aiannh_crosswalk_873",
           ])
           result = unittest.TextTestRunner(verbosity=2).run(suite)
           if result.skipped:

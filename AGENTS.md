@@ -9850,3 +9850,44 @@ is not read: it becomes `data/clean/geo_entity_aiannh_links.csv` only once each
 row carries an exact reviewed `cedar_uid`. Headquarters counties and village
 ANRC links have no source file yet. The 13th Regional Corporation has no
 Census ANRC area and is not in the register.
+
+## 2026-10-04: The standalone download is the customer table; 873 writes one row per containing polygon
+
+Three follow-ups to the entries above, all on #132.
+
+**Standalone download.** Without an API (`VITE_API_URL` unset) the Press
+download used to hand over the raw committed preview
+(`public/data/cedar/samples/*/spreadsheet__10.csv`), which for NEED carries
+retired `CEDAR-NEST-` IDs; only the service path applied the customer-table
+rules. Now `scripts/render_sample_downloads.py` writes the service's own bytes
+(`repository.collection_csv`, i.e. the vendored `customer_sheet` rules plus
+`cite_as`) to `public/data/cedar/downloads/<id>.csv` and records each file's
+SHA-256, rows and columns in `data/cedar/sample_downloads.json`;
+`pressDownload.csvFor` fetches only that file and hands it over only when the
+digest matches. Re-run the script whenever a sample or `customer_sheet.py`
+changes: `server/tests/test_customer_sheet_policy.py` runs its `--check`, and
+fails if any served file, in either mode, carries `CEDAR-NEST-`,
+`CEDAR-PLACE-`, `NESTREL-`, `TRBF-`, `VP-`, `CEDAR-FAC-`, `CCP-` or a DUNS
+column. Regenerating the raw previews instead was rejected: the Explore reader
+is built on their layout and about 20 reader tests depend on it. **Still
+open:** the raw previews remain public static files and the Explore reader and
+its cut export read them (Lumecon-data review ledger, "re-stage previews").
+
+**873.** `code/873_build_aiannh_crosswalk.py` kept only the first polygon a
+point fell in (`hits[0]`), so a point on trust land inside an OTSA could be
+recorded under the OTSA alone and never raise `in_home_area`. It now writes
+one row per (point, containing area), in `aiannh_geoid` order, with
+`n_containing_areas`; a point inside none keeps one outside row. `verify`
+counts points, not rows, for I3 and adds I6 (no repeated pair, no outside
+point with another row, counts agree); `selftest` fires both new cases.
+`server/tests/test_aiannh_crosswalk_873.py` tests the overlap case with
+synthetic boxes (no shapely, no TIGER bytes); restoring `hits[0]` fails four of
+its tests. It also runs in the `gaming-release-consumer` job, where the
+producer is installed, so the consumer test cannot skip there. Not rebuilt
+here: the TIGER zip and `data/clean` are workstation files, so
+`docs/GEO_AIANNH_STATS.json` still holds the 2026-09-02 one-row-per-point
+figures until 873 is rerun on the workstation.
+
+**customer_sheet `customer-sheet-2026-10-04.5`**, vendored byte for byte:
+`benefit_entity_id` is a Cedar ID column holding `CE-` IDs only, and
+`home_community_source` a source column holding public http(s) URLs only.

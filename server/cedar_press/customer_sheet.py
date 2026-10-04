@@ -26,13 +26,16 @@ Owner rules, 2026-10-04 (Elijah Moreno), for every published collection:
    dataset's event IDs (``foreign_event_id``). A Cedar ID column whose value
    was an outdated scheme takes the Cedar Entity or Business ID an exact
    crosswalk binds it to, or is left blank and the row flagged
-   ``needs_cedar_id``; nothing is matched, minted or inferred. Nothing else is
+   ``needs_cedar_id``; nothing is matched, minted or inferred. A column that
+   names an entity (``CEDAR_ENTITY_ID_COLUMNS``, such as
+   ``benefit_entity_id``) holds the Cedar Entity ID only. Nothing else is
    removed on identifier grounds.
 2. Sources. A published source is a real public citation. A value that points
    at a local spreadsheet, path, terminal, desktop, workstation, dissertation
    workspace, notebook or "manual" entry is traced to the component's recorded
    public origin when one is recorded, and is otherwise left blank and counted.
-   Nothing is invented.
+   A column in ``URL_SOURCE_COLUMNS`` (``home_community_source``) keeps public
+   http(s) URLs only. Nothing is invented.
 3. No version labels. Release, contract, transform and schema version columns,
    batch labels and version-label values stay internal, as do internal
    checksums (row, record and decision content hashes) and dedup bases. A hash
@@ -59,7 +62,7 @@ from collections.abc import Callable, Generator, Iterable, Mapping
 from typing import Any
 
 #: Internal only; never written into customer data.
-POLICY = "customer-sheet-2026-10-04.4"
+POLICY = "customer-sheet-2026-10-04.5"
 
 Row = dict[str, Any]
 
@@ -70,6 +73,8 @@ Row = dict[str, Any]
 #: ID (``CB-0000001``), cedar-press docs/CEDAR_IDENTITY_SYSTEM_2026-09-13.md
 #: sections 1-2. Event IDs are each dataset's own (``EVENT_ID_COLUMNS``).
 CEDAR_ID = re.compile(r"^(?:CE-[0-9A-Z]{5}-[0-9A-Z]{2}|CB-[0-9]{7})$")
+#: The Cedar Entity ID alone, for columns that name an entity and never a business.
+CEDAR_ENTITY_ID = re.compile(r"^CE-[0-9A-Z]{5}-[0-9A-Z]{2}$")
 #: Casino City property keys (``CCP-`` Casino City Press property numbers,
 #: ``TPL-`` Casino City's Tribal Property List; ``gaming.facilities``) and any
 #: value naming Casino City. Casino City is proprietary and not published.
@@ -265,8 +270,14 @@ CEDAR_ID_COLUMNS = frozenset(
         "operator_entity_id",
         "payer_entity_id",
         "certifying_authority_entity_id",
+        "benefit_entity_id",
     }
 )
+#: Cedar ID columns that name an entity, so hold the Cedar Entity ID (``CE-``)
+#: only; a Cedar Business ID there is removed like any other non-entity value.
+#: ``benefit_entity_id`` is the entity a home-community benefit link names
+#: (``lumecon_data.home_community``).
+CEDAR_ENTITY_ID_COLUMNS = frozenset({"benefit_entity_id"})
 _CEDAR_NAME = re.compile(r"cedar_uids?$|cedar_business_uids?$|(?:^|_)business_uids?$")
 #: Internal checksums: a hash of Lumecon's own row, record, decision or
 #: manifest content. A hash that identifies a source document is kept.
@@ -312,8 +323,13 @@ SOURCE_COLUMNS = frozenset(
         "verification_source",
         "classification_source",
         "native_identity_source",
+        "home_community_source",
     }
 )
+#: Source columns that hold public web addresses only: any member that is not
+#: an http(s) URL is removed, not just local ones (``lumecon_data.home_community``
+#: refuses anything else at input; this keeps the table to the same rule).
+URL_SOURCE_COLUMNS = frozenset({"home_community_source"})
 _SOURCE_NAME = re.compile(r"(?:^|_)(?:url|urls|source_system|source_url)$")
 #: A whole column that only ever records a local location.
 _LOCAL_COLUMN = re.compile(r"(?:^|_)(?:path|paths|file|files|inbox)$")
@@ -803,6 +819,47 @@ def is_cedar_id(value: Any) -> bool:
     return isinstance(value, str) and CEDAR_ID.fullmatch(value) is not None
 
 
+def is_cedar_entity_id(value: Any) -> bool:
+    return isinstance(value, str) and CEDAR_ENTITY_ID.fullmatch(value) is not None
+
+
+def _entity_only(*names: Any) -> bool:
+    """Whether a Cedar ID column (by any of its names) holds ``CE-`` IDs only."""
+    return any(str(name or "").lower() in CEDAR_ENTITY_ID_COLUMNS for name in names)
+
+
+def _url_only(*names: Any) -> bool:
+    """Whether a source column (by any of its names) holds public URLs only."""
+    return any(str(name or "").lower() in URL_SOURCE_COLUMNS for name in names)
+
+
+#: Members of a URL-only source cell: ``"; "`` separates links and ``" | "``
+#: one link's several citations (``home_community.present_benefit_columns``).
+_URL_MEMBER_SEPARATOR = re.compile(r"\s*[;|]\s*")
+
+
+def present_url_source(value: Any, origin: str | None) -> tuple[Any, str]:
+    """A URL-only source cell: public http(s) URLs kept, every other member removed.
+
+    Status as ``present_source``: ``empty``, ``public``, ``partial``,
+    ``traced`` (nothing public left; the recorded public origin stands in) or
+    ``blanked``.
+    """
+    if _blank(value):
+        return None, "empty"
+    members = _urls(value)
+    if members is None:
+        members = _URL_MEMBER_SEPARATOR.split(str(value).strip())
+    members = [str(member).strip() for member in members if str(member).strip()]
+    if not members:
+        return None, "empty"
+    kept = [m for m in members if _URL.fullmatch(m) and not is_local_source(m)]
+    if kept:
+        status = "public" if len(kept) == len(members) else "partial"
+        return LIST_SEPARATOR.join(dict.fromkeys(kept)), status
+    return (origin, "traced") if origin else (None, "blanked")
+
+
 def is_local_source(value: str) -> bool:
     """A source value that names a local location rather than a public citation."""
     text = value.strip()
@@ -983,9 +1040,16 @@ def _without_foreign(value: Any, counts: dict[str, int], foreign: Foreign) -> An
 
 
 def _with_cedar_ids(
-    value: Any, crosswalk: Mapping[str, str], counts: dict[str, int]
+    value: Any,
+    crosswalk: Mapping[str, str],
+    counts: dict[str, int],
+    *,
+    entity_only: bool = False,
 ) -> tuple[Any, int]:
     """A Cedar ID cell holding only Cedar Entity and Business IDs.
+
+    With ``entity_only`` (``CEDAR_ENTITY_ID_COLUMNS``) the cell holds Cedar
+    Entity IDs only: a Cedar Business ID, or a binding to one, is not kept.
 
     Any other member (an outdated Cedar scheme such as ``CEDAR-NEST-`` or
     ``CEDAR-PLACE-``, or anything else that is not ``CE-``/``CB-``) becomes the
@@ -998,14 +1062,15 @@ def _with_cedar_ids(
         return value, 0
     found = _elements(value)
     items, rebuild = found if found is not None else ([value], lambda kept: kept[0])
+    valid = is_cedar_entity_id if entity_only else is_cedar_id
     out: list[Any] = []
     unmapped = 0
     for item in items:
-        if _blank(item) or not isinstance(item, str) or is_cedar_id(item.strip()):
+        if _blank(item) or not isinstance(item, str) or valid(item.strip()):
             out.append(item)
             continue
         bound = crosswalk.get(item.strip())
-        if is_cedar_id(bound):
+        if valid(bound):
             counts["cedar_ids_mapped"] += 1
             out.append(bound)
         else:
@@ -1303,7 +1368,12 @@ def flatten(
                     source = column["sources"].get(table)
                     value = row.get(source) if source else None
                     if column["class"] == "cedar_id":
-                        value, missed = _with_cedar_ids(value, bindings, counts)
+                        value, missed = _with_cedar_ids(
+                            value,
+                            bindings,
+                            counts,
+                            entity_only=_entity_only(target, column.get("field")),
+                        )
                         unmapped += missed
                     out[target] = _present(column, value, origin, counts, foreign)
                 for slot, item in enumerate(attachments):
@@ -1329,7 +1399,12 @@ def flatten(
                             [r.get(column["field"]) for r in related], column["aggregation"]
                         )
                         if column["class"] == "cedar_id":
-                            value, missed = _with_cedar_ids(value, bindings, counts)
+                            value, missed = _with_cedar_ids(
+                                value,
+                                bindings,
+                                counts,
+                                entity_only=_entity_only(target, column.get("field")),
+                            )
                             unmapped += missed
                         out[target] = _present(
                             column, value, origins.get(item["table"]), counts, foreign
@@ -1411,7 +1486,10 @@ def _present(
             value = origin or None
             counts["sources_" + ("traced" if origin else "blanked")] += 1
             return value
-        kept, status = present_source(value, origin)
+        if _url_only(column.get("field")):
+            kept, status = present_url_source(value, origin)
+        else:
+            kept, status = present_source(value, origin)
         if status != "empty":
             counts["sources_" + status] += 1
         return kept
@@ -1444,7 +1522,8 @@ def check_table(
 
     With ``collection``, another dataset's event IDs (columns and values) are
     problems too, and a Cedar ID column may hold only Cedar Entity and Business
-    IDs.
+    IDs (only Cedar Entity IDs in ``CEDAR_ENTITY_ID_COLUMNS``). A source column
+    in ``URL_SOURCE_COLUMNS`` may hold only public http(s) URLs.
     """
     problems = []
     names = list(header)
@@ -1461,10 +1540,21 @@ def check_table(
             kind = classes[name]
             if kind == "source" and is_local_source(str(value)):
                 problems.append(f"row {index} {name}: local source")
+            if (
+                kind == "source"
+                and _url_only(name)
+                and present_url_source(value, None)[1] != "public"
+            ):
+                problems.append(f"row {index} {name}: not a public URL")
             if collection and kind == "cedar_id":
                 found = _elements(value)
                 members = found[0] if found is not None else [value]
-                if any(not _blank(m) and not is_cedar_id(str(m).strip()) for m in members):
+                if _entity_only(name):
+                    if any(
+                        not _blank(m) and not is_cedar_entity_id(str(m).strip()) for m in members
+                    ):
+                        problems.append(f"row {index} {name}: not a Cedar Entity ID")
+                elif any(not _blank(m) and not is_cedar_id(str(m).strip()) for m in members):
                     problems.append(f"row {index} {name}: not a Cedar Entity or Business ID")
             if foreign is not None and isinstance(value, str) and foreign[1].search(value):
                 problems.append(f"row {index} {name}: another dataset's event ID")
