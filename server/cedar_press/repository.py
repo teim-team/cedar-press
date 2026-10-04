@@ -604,12 +604,10 @@ def _partitioned_release(catalog, collection_id, requested_release_id, metadata_
             raise FullReleaseUnavailable("Component artifact pin differs")
         if part.get("path") != prefix + "/components/" + name:
             raise FullReleaseUnavailable("Untrusted component route")
-        rights = entry["rights"]
-        if (
-            rights.get("publication_class") not in {"public", "publishable"}
-            or rights.get("redistribution") is not True
-            or entry.get("download_permitted") is not True
-        ):
+        # Owner ruling 2026-10-04 (Elijah Moreno): Lumecon transforms the data
+        # it publishes; source rights statuses are recorded as provenance and
+        # do not block publication. Tenant-private data is a customer's own.
+        if entry["rights"].get("publication_class") == "tenant_private":
             raise FullReleaseUnavailable("Component rights prohibit delivery")
         meta = entry["metadata"]
         ordinal = meta.get("ordinal")
@@ -900,8 +898,8 @@ def full_release(collection_id, requested_release_id=None, *, metadata_only=Fals
             type(manifest.get("schema_version")) is not int
             or manifest["schema_version"] != 1
             or manifest["synthetic"] is not False
-            or manifest["rights"]["publication_class"] not in {"public", "publishable"}
-            or manifest["rights"].get("redistribution") is not True
+            # Rights are provenance, not a gate (owner ruling 2026-10-04).
+            or manifest["rights"]["publication_class"] == "tenant_private"
         ):
             raise FullReleaseUnavailable("Release is not eligible for customer delivery")
         header = [field["name"] for field in manifest["fields"]]
@@ -1257,33 +1255,21 @@ def grove_component_contract(
     if not isinstance(publication_status, str) or not publication_status:
         raise FullReleaseUnavailable("Malformed component publication status")
     rights = contract.get("rights")
-    if (
-        isinstance(rights, dict)
-        and rights.get("publication_class")
-        in {"public", "publishable", "restricted", "tenant_private", "withheld"}
-        and type(rights.get("redistribution")) is bool
-        and type(contract.get("download_permitted")) is bool
-        and (
-            rights["publication_class"] in {"restricted", "tenant_private", "withheld"}
-            or rights["redistribution"] is False
-            or contract["download_permitted"] is False
-        )
-    ):
+    # Owner ruling 2026-10-04 (Elijah Moreno): Lumecon transforms the data it
+    # publishes; source rights statuses (publication class, redistribution,
+    # download permission) are recorded as provenance and do not block
+    # publication. Tenant-private data is a customer's own and stays out.
+    if not isinstance(rights, dict):
+        raise FullReleaseUnavailable("Malformed component rights")
+    if rights.get("publication_class") == "tenant_private":
         raise ComponentPublicationHeld("Component is not eligible for customer delivery")
-    if (
-        not isinstance(rights, dict)
-        or rights.get("publication_class") not in {"public", "publishable"}
-        or rights.get("redistribution") is not True
-        or contract.get("download_permitted") is not True
-    ):
-        raise FullReleaseUnavailable("Component is not eligible for customer delivery")
     # Owner ruling 2026-10-04 (Elijah Moreno): `publication_hold` and a review
     # `publication_status` (held, contested, unreviewed, withheld) no longer
     # withhold a component. `internal_only` and the two rights statuses
-    # (`internal`, `source_limited`, the source's rights rather than a review)
-    # still mark a table that is not a customer product, as in Lumecon-data's
-    # `publication.metadata_permits_publication`.
-    if metadata.get("internal_only") or publication_status in {"internal", "source_limited"}:
+    # (`internal`, `source_limited`) are provenance too. `internal_only` still
+    # marks a working table that is not a customer product, as in
+    # Lumecon-data's `publication.metadata_permits_publication`.
+    if metadata.get("internal_only"):
         raise ComponentPublicationHeld("Component metadata holds customer delivery")
     fields = contract.get("fields")
     if not isinstance(fields, list) or any(not isinstance(f, dict) for f in fields):
@@ -1320,8 +1306,9 @@ def grove_component_contract(
             "public_derived",
             "public_first_party",
         }
-        if any(value.lower() not in public_rights for value in declared_rights.values()):
-            raise FullReleaseUnavailable("Raw component includes a held or unknown field")
+        # Field rights classes are recorded as provenance (owner ruling
+        # 2026-10-04); a non-public class no longer refuses the component.
+        del public_rights
     declared_rights = declared_rights or {}
     for item in entry.get("fields", []):
         if (

@@ -112,8 +112,10 @@ class SourcePresentationTest(unittest.TestCase):
         self.assertTrue(value["publisher"].startswith("Bureau of Indian Affairs"))
         self.assertTrue(value["url"].startswith("https://www.federalregister.gov/"))
 
-    def test_held_rows_and_unknown_source_systems_are_not_promoted(self):
-        self.assertIsNone(
+    def test_held_rows_cite_their_source_and_unknown_systems_are_not_promoted(self):
+        # Owner ruling 2026-10-04: a held or rights-status row keeps its source
+        # citation; the status is provenance.
+        self.assertIsNotNone(
             present("gaming", {"publication_status": "held_identity"}, "gaming_compacts")
         )
         self.assertIsNone(

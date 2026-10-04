@@ -91,15 +91,19 @@ class InfrastructureReleaseTest(unittest.TestCase):
         with self.assertRaisesRegex(repository.FullReleaseUnavailable, "field map"):
             repository.grove_component_contract(changed, "infrastructure", "records")
 
-    def test_presentation_never_clears_restricted_components(self):
+    def test_owner_ruling_restricted_components_are_not_held_for_rights(self):
+        # Owner ruling 2026-10-04 (Elijah Moreno): Lumecon transforms the data
+        # it publishes; source rights statuses are provenance, not a gate.
         for component in ("profiles", "housing", "datacenters"):
-            with (
-                self.subTest(component=component),
-                self.assertRaises(repository.ComponentPublicationHeld),
-            ):
-                repository.grove_component_contract(
-                    self.manifest(component, False), "infrastructure", component
-                )
+            with self.subTest(component=component):
+                try:
+                    repository.grove_component_contract(
+                        self.manifest(component, False), "infrastructure", component
+                    )
+                except repository.ComponentPublicationHeld as error:
+                    self.fail(f"rights status held {component}: {error}")
+                except repository.FullReleaseUnavailable:
+                    pass  # other contract checks may still apply to the fixture
 
     def test_missing_component_refuses_without_substitute_rows(self):
         with self.assertRaisesRegex(repository.FullReleaseUnavailable, "not in the pinned release"):

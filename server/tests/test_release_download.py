@@ -356,11 +356,13 @@ class ReleaseDownloadTest(unittest.TestCase):
         )
         self.mock_fetch.assert_not_called()
 
-    def test_withheld_synthetic_and_schema_mismatch_refused(self):
+    def test_tenant_private_synthetic_and_schema_mismatch_refused(self):
+        # Owner ruling 2026-10-04: a "withheld" rights class is provenance and
+        # no longer refused; tenant-private data still is.
         baseline = copy.deepcopy(self.pin)
         for mutation in [
             {"synthetic": True},
-            {"rights": {"publication_class": "withheld", "redistribution": True}},
+            {"rights": {"publication_class": "tenant_private", "redistribution": True}},
             {"fields": [{"name": "internal_secret"}]},
         ]:
             self.pin = {**copy.deepcopy(baseline), **mutation}
@@ -468,8 +470,10 @@ class ReleaseDownloadTest(unittest.TestCase):
             self.assertEqual(response.status_code, status)
             self.assertNotIn("../outside", logs.output[0])
             self.assertNotIn("fictional@example.invalid", logs.output[0])
-        self.pin["rights"]["redistribution"] = False
-        self.manifest["rights"]["redistribution"] = False
+        # Owner ruling 2026-10-04: redistribution is provenance; tenant-private
+        # data is what is still refused (and audited).
+        self.pin["rights"]["publication_class"] = "tenant_private"
+        self.manifest["rights"]["publication_class"] = "tenant_private"
         self.approve_manifest_fixture()
         with self.assertLogs("cedar_press.download", level="INFO") as logs:
             response = self.client.get(url, params={"release_id": self.rid})

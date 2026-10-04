@@ -232,8 +232,12 @@ class PartitionedReleaseTest(unittest.TestCase):
                 self.approve()
                 self.assertEqual(self.request().status_code, 503)
 
-    def test_rights_refused(self):
+    def test_rights_status_does_not_refuse_but_tenant_private_does(self):
+        # Owner ruling 2026-10-04: a rights-status part publishes.
         self.manifest["components"]["part-2"]["rights"]["redistribution"] = False
+        self.approve()
+        self.assertEqual(self.request().status_code, 200)
+        self.manifest["components"]["part-2"]["rights"]["publication_class"] = "tenant_private"
         self.approve()
         self.assertEqual(self.request().status_code, 503)
 

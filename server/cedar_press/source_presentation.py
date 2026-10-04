@@ -73,10 +73,9 @@ def present(collection, row, component=None):
         if collection == "gaming"
         else SPEC["collections"].get(collection)
     )
-    if not spec or any(
-        re.match(r"^(held|withheld|contested|restricted|internal_)", str(row.get(k, "")), re.I)
-        for k in ("publication_status", "publication_rights_status", "rights_class")
-    ):
+    # Owner ruling 2026-10-04 (Elijah Moreno): a row's review or rights status is
+    # provenance; it no longer suppresses the row's source citation.
+    if not spec:
         return None
     family = SPEC["plot_sources"].get(row.get("source_id")) if collection == "plot" else None
     registered = REGISTERED.get(collection + "/" + str(row.get("source_id")), {})

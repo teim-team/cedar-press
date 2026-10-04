@@ -168,7 +168,6 @@ def packet(tier: str, collection: str, release_id: str, component: str | None = 
     declaration = candidates.get(logical)
     if (
         not isinstance(codebook, dict)
-        or not codebook.get("download_permitted")
         or not isinstance(declaration, dict)
         or declaration.get("order") != release["fields"]
         or preview.get("collection") != collection

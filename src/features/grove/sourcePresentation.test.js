@@ -88,10 +88,11 @@ test("private, credentialed and nonweb links are never public citations", () => 
   }
 });
 
-test("held facts and Grove-only Gaming never become Press source cards", () => {
+test("rights-status facts cite their source; Grove-only Gaming never becomes a Press card", () => {
   for (const collection of ["need", "gaming"]) assert.equal(sourcePresentation(collection, {}, null), null);
+  // Owner ruling 2026-10-04: a review or rights status is provenance, not a gate.
   for (const value of ["held", "internal_vendor", "withheld_unverified"]) {
-    assert.equal(sourcePresentation("deals", { rights_class: value }, null), null);
+    assert.notEqual(sourcePresentation("deals", { rights_class: value }, null), null);
   }
   const owned = sourcePresentation("owned", { certifying_authority_name: "Synthetic Nation", source_edition: "2025-Approved-Business-Licenses.pdf" }, null);
   assert.equal(owned.title, null);

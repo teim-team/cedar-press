@@ -324,11 +324,15 @@ class SharedCollectionReleaseTest(unittest.TestCase):
                 )
                 self.assertEqual(response.status_code, 403)
 
-    def test_only_explicit_component_rights_are_typed_as_publication_holds(self):
+    def test_only_tenant_private_rights_are_typed_as_publication_holds(self):
+        # Owner ruling 2026-10-04: restricted rights are provenance.
         manifest, _, _ = self.fixture(rights=False)
+        repository.grove_component_contract(manifest, "plot", "environmental_events")
+        rights = manifest["components"]["environmental_events"]["rights"]
+        rights["publication_class"] = "tenant_private"
         with self.assertRaises(repository.ComponentPublicationHeld):
             repository.grove_component_contract(manifest, "plot", "environmental_events")
-        manifest["components"]["environmental_events"]["rights"]["redistribution"] = "false"
+        manifest["components"]["environmental_events"]["rights"] = "malformed"
         with self.assertRaises(repository.FullReleaseUnavailable) as raised:
             repository.grove_component_contract(manifest, "plot", "environmental_events")
         self.assertNotIsInstance(raised.exception, repository.ComponentPublicationHeld)
@@ -340,11 +344,7 @@ class SharedCollectionReleaseTest(unittest.TestCase):
         # Owner ruling 2026-10-04: only `internal_only` still refuses; a
         # publication_hold flag or a review status no longer does (see
         # test_review_states_no_longer_hold_a_component).
-        holds = (
-            {"internal_only": True},
-            {"publication_status": "internal"},
-            {"publication_status": "source_limited"},
-        )
+        holds = ({"internal_only": True},)
         with (
             patch.object(repository, "_grove_manifest", return_value=manifest),
             patch.object(repository, "_release_response") as rows,
@@ -462,17 +462,19 @@ class SharedCollectionReleaseTest(unittest.TestCase):
         contract["status_value_fields"] = ["environmental_event_id"]
         repository.grove_component_contract(manifest, "plot", "environmental_events")
 
-    def test_giving_rights_hold_prevents_download_for_entitled_users(self):
-        self.fixture("foundation-corporate-giving", "reviewed_disclosures", rights=False)
+    def test_owner_ruling_giving_rights_status_downloads_for_entitled_users(self):
+        # Owner ruling 2026-10-04 (Elijah Moreno): Lumecon transforms the data
+        # it publishes; a rights-status component publishes.
+        _manifest, _pin, content = self.fixture(
+            "foundation-corporate-giving", "reviewed_disclosures", rights=False
+        )
         self.session("press")
-        with patch.object(
-            repository, "_release_response", side_effect=AssertionError("held fetch")
-        ):
-            response = self.client.get(
-                "/press/collections/foundation-corporate-giving/full-download",
-                params={"release_id": "c" * 64, "component": "reviewed_disclosures"},
-            )
-        self.assertEqual(response.status_code, 503)
+        response = self.client.get(
+            "/press/collections/foundation-corporate-giving/full-download",
+            params={"release_id": "c" * 64, "component": "reviewed_disclosures"},
+        )
+        self.assertEqual(response.status_code, 200, response.text)
+        self.assertEqual(response.content, content)
 
     def test_authorized_giving_preserves_exact_decimal_text_and_component_audit(self):
         _manifest, _pin, content = self.fixture(
@@ -566,7 +568,11 @@ class SharedCollectionReleaseTest(unittest.TestCase):
                     # NEED is checked like every other collection (owner
                     # ruling 2026-10-04: no NEED publication hold).
                     refusal = repository.FullReleaseUnavailable
-                    reason = "incomplete|held or unknown"
+                    # Owner ruling 2026-10-04: a non-public field rights class
+                    # is provenance, so a complete declaration passes the
+                    # rights step and stops later, on this fixture's missing
+                    # row identity; an incomplete declaration still refuses.
+                    reason = "incomplete|Missing declared row identity"
                     entry = {
                         "collection": collection,
                         "order": ["id", "secret"],

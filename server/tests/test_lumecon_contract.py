@@ -127,14 +127,18 @@ class LumeconContractTest(unittest.TestCase):
                     with self.assertRaises(repository.FullReleaseUnavailable):
                         self.consume(changed)
 
-    def test_malformed_pin_and_redistribution_denial_for_every_collection(self):
+    def test_malformed_pin_and_tenant_private_denial_for_every_collection(self):
         for entry in self.fixture["collections"]:
             with self.subTest(collection=entry["collection_id"]):
                 with self.assertRaises(repository.FullReleaseUnavailable):
                     self.consume(entry, "../outside")
                 changed = copy.deepcopy(entry)
-                changed["manifest"]["rights"]["redistribution"] = False
-                changed["catalog"]["collections"][0]["rights"]["redistribution"] = False
+                # Owner ruling 2026-10-04: redistribution is provenance; only
+                # tenant-private data is still refused.
+                changed["manifest"]["rights"]["publication_class"] = "tenant_private"
+                changed["catalog"]["collections"][0]["rights"]["publication_class"] = (
+                    "tenant_private"
+                )
                 self.repin_fixture_manifest(changed)
                 with self.assertRaises(repository.FullReleaseUnavailable):
                     self.consume(changed)

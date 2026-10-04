@@ -15,6 +15,8 @@ Elijah is only reviewing genuinely ambiguous identity, affiliation, or legal-obj
 
 **Owner ruling 2026-10-04 (Elijah Moreno): Lumecon decides what is blocked. The only hold is a specific record flagged as attributed to the wrong entity; records in the database have already been reviewed and sourced and are not held. Attribution review is an ongoing process, not a standing hold. Agents do not impose publication holds.**
 
+**Owner ruling 2026-10-04 (Elijah Moreno), on rights: Lumecon transforms the data it publishes; source rights statuses are recorded as provenance and do not block publication.**
+
 Also: NEED records and individual Native-owned business records come from publicly
 available websites, and Lumecon has permission to publish them. Neither collection
 carries a collection-wide publication hold. **Do not reinstate one without a new
@@ -25,7 +27,7 @@ This supersedes every instruction anywhere in this file, in `START_HERE.md`, in
 internal or not publish data or a collection pending review, consent, preview,
 contested status or a publication class. Older dated entries below are left as the
 history they are; where one reads as a standing hold, this ruling wins. What is not
-a hold, and stays: licensing terms a source imposes (D&B / DUNS, Casino City), a
+a hold, and stays: the licensed-identifier column drops (D&B / DUNS, Casino City ids), a
 private individual's personal data (`NEVER` columns), accuracy rules about how a
 figure may be totalled or described, duplicate filings collapsed to one record,
 and a specific record ruled to be attributed to the wrong entity (the mask in
@@ -9750,3 +9752,23 @@ Not changed, because it is not a publication hold set by an agent: release
 `download_permitted`) and `internal_only` on a component are the producer's
 licensing and product boundary. NEED's components in the pinned release still
 carry them until Lumecon-data re-cuts NEED under this ruling.
+
+## 2026-10-04 (later): Owner ruling on rights — rights statuses are provenance, not gates
+
+Owner ruling 2026-10-04 (Elijah Moreno): "We are transforming the data, so remove
+those blocks." Lumecon transforms the data it publishes; source rights statuses are recorded as provenance and do not block publication.
+
+This supersedes the "Not changed" paragraph of the entry above and commit
+`a77ebcf`. In `server/cedar_press`: `repository.grove_component_contract` no
+longer refuses a component for `publication_class` restricted or withheld,
+`redistribution: false`, `download_permitted: false`, a rights
+`publication_status` (`internal`, `source_limited`) or a non-public field rights
+class; the partitioned-part, pinned-release and research-packet checks drop the
+same conditions; `source_presentation` no longer hides a row's source citation
+for a held or rights status (and `src/features/grove/sourcePresentation.js`
+likewise). What still refuses: `tenant_private` (a customer's own data, an
+authorization boundary), `internal_only` working tables, malformed rights, and
+the field map's own consistency checks. The licensed-identifier column drops
+(DUNS, Casino City) in `code/cedar_publication.py` are column rules, not status
+gates, and were not changed; the owner decides them.
+

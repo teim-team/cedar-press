@@ -1245,7 +1245,11 @@ class PartitionedConsumerTest(_ServerCase):
         self.assertEqual(response.headers["x-cedar-rows"], "6")
 
     def test_unpublishable_or_missing_part_refused_before_bytes(self):
-        self.manifest["components"]["payments_part_5"]["download_permitted"] = False
+        # Owner ruling 2026-10-04: a download_permitted=False part is rights
+        # provenance and no longer refuses; tenant-private data still does.
+        self.manifest["components"]["payments_part_5"]["rights"]["publication_class"] = (
+            "tenant_private"
+        )
         response, _ = self.get("gaming_payments")
         self.assertEqual(response.status_code, 503)
         self.assertEqual(self.fetched, [])

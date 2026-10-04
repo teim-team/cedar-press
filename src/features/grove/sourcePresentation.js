@@ -36,8 +36,8 @@ function sourceTitle(value) {
 export function sourcePresentation(collection, row, recordUrl) {
   const spec = SPECS[collection];
   if (!spec || collection === "need" || collection === "gaming") return null;
-  if ([row.publication_status, row.publication_rights_status, row.rights_class].some((value) =>
-    /^(held|withheld|contested|restricted|internal_|withheld_)/i.test(value ?? ""))) return null;
+  // Owner ruling 2026-10-04 (Elijah Moreno): a row's review or rights status is
+  // provenance; it no longer suppresses the row's source citation.
   const family = collection === "plot" ? PLOT_SOURCES[text(row.source_id)] : null;
   const registered = registeredSources.sources[`${collection}/${text(row.source_id)}`];
   const identifiedPublisher = family?.[0] ?? registered?.publisher ?? spec.publisher ?? spec.systems?.[text(row.source_system)] ?? null;
