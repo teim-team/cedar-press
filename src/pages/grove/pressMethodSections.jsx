@@ -497,6 +497,7 @@ export function MethodsByCollection() {
             {entry.id === "need" ? (
               <div data-testid="need-enrichments">
                 <span className="cp-mbc__cap">Patents and credit ratings, where available</span>
+                <p>{NEED_ENRICHMENTS.ownership}</p>
                 <p>{NEED_ENRICHMENTS.patents} {NEED_ENRICHMENTS.ratings} {NEED_ENRICHMENTS.attachment}</p>
                 <p>
                   {NEED_ENRICHMENT_SOURCES.map((source) => `${source.name}, supported by ${source.supportedBy}`).join("; ")}.

@@ -50,7 +50,19 @@ export const NEED_ENRICHMENTS = Object.freeze({
     "Credit ratings, where records are available, keep their issuer, instrument, agency and date, so a historical rating reads as an observation on that date rather than as a current rating.",
   attachment:
     "Each patent and each rating stays attached to the Native entity or enterprise it concerns, so a subsidiary's record is never presented as its parent's.",
+  // The download's native_owner columns (server/cedar_press/collections.py,
+  // 2026-10-06).
+  ownership:
+    "Each NEED record names its ultimate Native owner, the nation, Alaska Native corporation or Native Hawaiian organization at the top of the ownership chain, where a recorded ownership ruling or register binding states it, with the basis and a public source in the download. Nothing is inferred from a company's name.",
 });
+
+/**
+ * What the home page's example records are (owner, 2026-10-06): a curated
+ * selection of real records (landingExamples.js), while the collections and
+ * every download carry the release itself.
+ */
+export const EXAMPLES_NOTE =
+  "The example records on the Cedar Press home page are a selection of real records chosen to show each collection clearly, and some come from beyond the current release. What you open in a collection and what you download is the release itself, record for record.";
 
 /**
  * The domains the collections are built out of. Each one has its own legal

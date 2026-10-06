@@ -171,3 +171,10 @@ test("public NEED describes its reviewed cohort while restricted enrichments ret
   assert.match(all, /never presented as its parent's/);
   assert.doesNotMatch(`${all} ${need.blurb}`, /[—&]|\bimpact\b/i);
 });
+
+test("the methods page says what the home page's examples are and how NEED names owners", async () => {
+  const { EXAMPLES_NOTE, NEED_ENRICHMENTS } = await import("./pressMethod.js");
+  assert.match(EXAMPLES_NOTE, /download is the release itself/);
+  assert.match(NEED_ENRICHMENTS.ownership, /ultimate Native owner/);
+  assert.match(NEED_ENRICHMENTS.ownership, /Nothing is inferred from a company's name/);
+});
