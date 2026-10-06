@@ -109,7 +109,7 @@ _CONSTRUCTION: dict[str, dict[str, Any]] = {
         ),
         "inclusion_rules": (
             "USAspending assistance records; the current fiscal year is partial "
-            "until the quarterly release lands and is labeled so wherever it appears."
+            "until it closes and is labeled so wherever it appears."
         ),
         "known_limitations": (
             "USAspending publication lag makes current-year figures partial; "
@@ -172,8 +172,8 @@ def _spreadsheet_construction(dataset_id: str) -> dict[str, Any] | None:
     )
     limits = (
         "Counts describe source observations, not unique entities or businesses. "
-        "Do not total overlapping record grains. Preview rows are a bounded "
-        "sample, not a representative census or a full factual verification."
+        "Do not total overlapping record grains. Example records are a bounded "
+        "selection, not a representative census or a full factual verification."
     )
     if dataset_id == "owned":
         unit = (

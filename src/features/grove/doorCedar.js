@@ -241,13 +241,13 @@ const GENERAL_INTENTS = [
       `resolved to the nations, corporations and organizations the records belong to.\n\n` +
       `A federal contract names the company that won it but not the nation that owns the company, so ` +
       `Cedar does the work between the record and the entity, publishes what it could not resolve, and keeps the ` +
-      `collections current as new material arrives. Alongside the data there are research briefs, a ` +
-      `release history and a methods reference.`,
+      `collections current as new material arrives. Alongside the data there is original research, ` +
+      `starting with a brief on individually owned Native businesses, a release history and a methods reference.`,
     expanded:
       `Going deeper: the collections are one product rather than ${COUNT} downloads. Every one keys to the ` +
       `same entity layer, so a nation's contracts, awards, deals, notices and subsidiaries read as one ` +
       `nation across all of them, and a figure you cite reproduces because the update history preserves changes.\n\n` +
-      `The briefs are written from the collections, the release history says what changed and when, and ` +
+      `Research briefs are written from the collections, the release history says what changed and when, and ` +
       `the methods page states the inclusion rules and the known gaps for each collection.`,
   },
   {
@@ -278,7 +278,8 @@ const GENERAL_INTENTS = [
       `Federal Register (Congress.gov, Voteview, federalregister.gov), lobbying disclosures filed under the ` +
       `Lobbying Disclosure Act, IRS filings (the Business Master File and ` +
       `Form 990), resource revenue reporting (ONRR, OSMRE, ANCSA 7(i) and 7(j) filings, the Osage Minerals ` +
-      `Council), and what nations and their enterprises publish about themselves.\n\n` +
+      `Council), NAGPRA notices and the National NAGPRA databases, parcel, tract and assessor records, ` +
+      `foundation and corporate giving disclosures, and what nations and their enterprises publish about themselves.\n\n` +
       `Where they are available, Cedar NEED can also add patent records, supported by company, tribal, SEC ` +
       `and court evidence, and rating-agency announcements, supported by issuer and tribal releases, filings, ` +
       `regulator records and labeled secondary sources. Each stays with the exact legal entity and date it ` +
@@ -344,7 +345,7 @@ const GENERAL_INTENTS = [
       `Each person keeps their own sign-in, and their conversations and activity stay private to them, so ` +
       `teammates do not see each other's conversations. Access comes through the organization's plan: someone ` +
       `removed from the organization loses that access at once and keeps anything they hold individually.\n\n` +
-      `To set one up, contact contact@lumecon.ai.`,
+      `Enrollment is not open yet. To ask about an institutional plan, contact contact@lumecon.ai.`,
     expanded:
       `Going deeper: the organization's plan is what opens the collections for its members, and the admin ` +
       `manages who is in it by email invitation. Collaborative analysis and shared projects are part of ` +
