@@ -1800,3 +1800,85 @@ and 6 dependency checks pass. Further NEED expansion is deferred under the
 publication hold while infrastructure becomes the primary review lane.
 
 <!-- END CODEX-NEED-AFFILIATION-ROUTE-AUDIT -->
+
+<!-- BEGIN NEED-CONFLICT-WRITER-RECOVERY-20260927 -->
+## 2026-09-27: conflict evidence must not inherit another enterprise's ruling
+
+The legacy `1102` builder unconditionally wrote the same Chugach-specific
+adjudication to every evidence-conflict row. The preserved candidate-d file
+contains unrelated owners, including Ahtna Builders. Those generated rulings
+cannot support publication or relationship corrections.
+The preserved 52-row conflict file contains 52 copies of this generated ruling;
+50 rows have non-Chugach owners. A separate corrected internal sidecar clears
+all 52 while retaining the original archive, source assertions, values and IDs.
+
+`1102` now preserves each row's original source assertions and recorded value,
+assigns no new ruling, and clears only the recognizable prior claim written by
+this script. Even a matching Chugach name remains unadjudicated: the former writer
+did not establish a row-specific evidence binding. Separately recorded reviews
+survive unchanged. The existing writer retains its pre-write backup and atomic
+finalization. Archived candidates are not rewritten by this correction.
+
+Focused regression command:
+`python -m unittest server/tests/test_need_legacy_adjudication.py -v`.
+Three tests exercise the actual synthetic builder with two distinct enterprises,
+clearance without source/ID mutation, repeated execution, and independent reviews.
+The whole-collection NEED publication hold continues to apply, including to
+previously accepted rows. This repair creates no customer-eligible subset.
+<!-- END NEED-CONFLICT-WRITER-RECOVERY-20260927 -->
+
+<!-- BEGIN NEED-ATTRIBUTION-CORRECTIONS-20261004 -->
+## 2026-10-04: wrong-entity links corrected, and the builders stop making them
+
+Owner ruling 2026-10-04 (Elijah Moreno): the only hold is a specific record
+attributed to the wrong entity; obvious cases are resolved with evidence, people
+get a short list. Acted on the Lumecon-data NEED linkage audit
+(`decisions/identity/need/README.md`, items 1-8).
+
+**Generators fixed, each test proven by mutation**
+(`server/tests/test_need_attribution.py`, `test_need_legacy_adjudication.py`):
+
+- `code/need_attribution.py` (new; mirrored byte for byte below its header by
+  Lumecon-data `lumecon_data.need.attribution`) holds the three documented guards
+  plus ruling application. `REFUSED_GENERIC_TOKEN_ONLY` is the gaming fix
+  (ENTITY_MATCH_RULES rule 1): an enterprise that shares only generic or weak
+  place words with its owner and carries none of its full names. Measured on the
+  committed preview it reproduces the audit's 31 shared-word rows plus the 9
+  withheld-name rows exactly. `REFUSED_VILLAGE_GOVERNMENT_ANCSA_CORPORATION` is
+  the village-government guard extended to every route (ANCSA_OWNERSHIP_RULING
+  rule 2): DECISION 5 in `1133` assumed `1072` held OWNERV6 rows on village
+  governments, but the guard fired only on `ANC_VILLAGE_*` hints, which OWNERV6
+  rows never carry. `REFUSED_HUB_IS_THE_ENTERPRISE` catches a government listed as
+  its own enterprise.
+- `1072` runs the guards after its repoints and FLAGS (`attribution_refusal`,
+  `attribution_refusal_basis` on edges and enterprises); it never drops or
+  repoints, so issued IDs are untouched. `cedar_publication.BLOCKED_STATES`
+  masks the owner link of a flagged row (MASK, the row ships).
+- `1072` `evidence_human_reviewed` is counted from observations that record a
+  review (`n_human_reviewed_observations` added). The `_edge` default was
+  `reviewed`, which is how 1,910 rows read Y against 481 recorded reviews.
+- `1130` route 3 now applies ENTITY_MATCH_RULES rule 7 (residue): the old
+  maximum-subset rule sent `Flandreau Santee Sioux Tribe` to Santee Sioux and
+  tied `Confederated Salish and Kootenai Tribes` with Kootenai. A live handle the
+  owner row's own name contradicts is now `UNRESOLVED_HANDLE_NAME_DISAGREES`
+  rather than taken. On every register canonical and legal name the new and old
+  routes agree (2,446 names, 0 differences).
+- `1102` restores the Chugach adjudication on the two rows it was written for
+  (`CEDAR-NEST-000473-WH`, `000479-07`, bound by ID and name); the 50 copies on
+  other owners stay cleared.
+
+**Corrections.** Each is a cedar_rulings row decided in Lumecon-data
+`decisions/identity/need/attribution-2026-10-04/` and vendored unchanged as
+`data/cedar/need_attribution_rulings.csv`. `code/1189` applies them (and the
+guards) to the NEED files this repository serves; `1151` applies them before it
+picks preview rows. `dist/preview/need.csv`: 5 re-attributed (Afognak Native
+Corporation family), 86 owner links rejected, 1 flagged for a person, 8 unchanged.
+Samples: Bowhead Marine Support Services -> Ukpeaġvik Iñupiat Corporation, Eagle
+Eye Electric -> Bering Straits Native Corporation, CP Marine -> Goldbelt, Broadleaf,
+Inc -> Arctic Slope Regional Corporation.
+
+**Not done here.** The full 5,820-row table is not in Git, so no `1072`/`1135`
+rebuild was run; the preview keeps its 100 rows and only their owner columns
+changed. Nine preview names that may be private individuals are unchanged (the
+personal-data rule is as it was; reported, not edited).
+<!-- END NEED-ATTRIBUTION-CORRECTIONS-20261004 -->

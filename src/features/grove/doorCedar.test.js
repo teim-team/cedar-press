@@ -236,7 +236,6 @@ test("every collection is reachable by its chip, its id and its extra words", ()
 
 import { AUDIENCE_JOBS, visibleAudiences } from "./pressJobs.js";
 import { PRESS_TIERS, spellCount } from "./pressCatalog.js";
-import { recordStructure } from "./pressRecordStructure.js";
 
 /** Every string a door answer can show a visitor. */
 const everything = () =>
@@ -329,18 +328,19 @@ test("no gaming collection or gaming source remains in any door answer", () => {
   assert.equal(answer("tell me about the gaming collection").id, DOOR_FALLBACK.id);
 });
 
-test("both new collections are described like the rest, with no figure and no 'not yet published'", () => {
+test("Giving and PLOT describe their installed observations and retain source qualifications", () => {
+  const manifest = JSON.parse(readFileSync(new URL("../../../data/cedar/collections.manifest.json", import.meta.url), "utf8"));
   for (const id of ["plot", "foundation-corporate-giving"]) {
     const intent = intentForCollection(id);
     const entry = STOREFRONT_CATALOG.find((item) => item.id === id);
     for (const text of [intent.answer, intent.expanded]) {
       assert.doesNotMatch(text, /not yet published|first release|pending|preparation/i, id);
-      assert.doesNotMatch(text, /\d/, `${id} states a figure`);
     }
     assert.ok(intent.answer.includes(entry.blurb), `${id}: what it contains`);
-    assert.ok(intent.answer.includes(recordStructure(id).summary), `${id}: what each record holds`);
-    // How it connects to the other collections, in the owner's Methods words.
-    assert.match(intent.answer, id === "plot" ? /Indian Country Deals links to the parcels PLOT follows/ : /beside federal funding and the Native Nonprofits roster/);
+    const published = manifest.collections.find((collection) => collection.id === id).sample.of;
+    assert.ok(Number.isSafeInteger(published) && published > 0, id);
+    assert.ok(intent.answer.includes(published.toLocaleString("en-US") + " observations"), `${id}: count follows the installed release`);
+    assert.match(intent.answer, id === "plot" ? /does not establish Native ownership/ : /disclosures|donation/i);
   }
   for (const text of everything()) assert.doesNotMatch(text, /not yet published|with (its|their) first release/i, text.slice(0, 80));
 });
@@ -369,7 +369,7 @@ test("who made it reads the same way everywhere the door says it", () => {
 
 test("maintenance and Cedar NEED's enrichments: door Cedar says weekly, and keeps each record with its entity", () => {
   const current = DOOR_INTENTS.find((intent) => intent.id === "current");
-  assert.match(current.answer, /maintains its datasets weekly with human review/);
+  assert.match(current.answer, /maintains its datasets on a weekly schedule with human review/);
   assert.match(current.expanded, /exceptionally useful, well-documented data and tools/);
   assert.equal(classify("do you have patents")?.id, "collection:need");
   assert.equal(classify("credit ratings for tribal enterprises")?.id, "collection:need");
@@ -404,7 +404,7 @@ test("institutional accounts: team and organization questions reach their own an
   assert.match(intent.answer, /own sign-in/);
   assert.match(intent.answer, /teammates do not see each other's conversations/);
   assert.match(intent.answer, /loses that access at once and keeps anything they hold individually/);
-  assert.match(intent.answer, /elijah\.moreno@lumecon\.ai/);
+  assert.match(intent.answer, /contact@lumecon\.ai/);
   for (const text of [intent.answer, intent.expanded]) {
     assert.doesNotMatch(text, /\bseats?\b|\$|\bprice|\bcost|per user|up to \d/i, text.slice(0, 60));
   }
@@ -416,8 +416,38 @@ test("institutional accounts: team and organization questions reach their own an
 // Cedar says so; it never tells a reader some of it is private.
 test("Cedar says the material is public and never that some of it is not", () => {
   const sources = DOOR_INTENTS.find((intent) => intent.id === "sources");
-  assert.match(sources.answer, /public material, drawn from more than 600 documented upstream sources/);
+  // The count is measured and carries its unit (2026-10-06); never "700".
+  assert.match(sources.answer, /public material, drawn from \d+ kinds of public source/);
+  assert.doesNotMatch(sources.answer, /700|documented upstream sources/);
+  // Lobbying is LDA filings only in this release; dockets and appeals are not sources.
+  assert.doesNotMatch(sources.answer, /FERC|IBIA|regulations\.gov/);
   // The whole module, so an answer defined outside DOOR_INTENTS is held too.
   const source = readFileSync(new URL("./doorCedar.js", import.meta.url), "utf8");
   assert.doesNotMatch(source, /not all of it is public|private record|source websites/i);
+});
+
+// Owner, 2026-10-06: "how can I use this data" answers with the home page's
+// own use cases, read from AUDIENCE_JOBS rather than typed into Cedar.
+test("how can I use this data answers with the home page's use cases", async () => {
+  const { answer, DOOR_CHIPS } = await import("./doorCedar.js");
+  const { visibleAudiences } = await import("./pressJobs.js");
+  const audiences = visibleAudiences();
+  for (const question of ["How can I use this data?", "what can I do with this", "give me an example", "how would I use Cedar Press"]) {
+    assert.equal(answer(question).id, "use", question);
+  }
+  const reply = answer("How can I use this data?");
+  for (const audience of audiences.slice(0, 4)) assert.ok(reply.answer.includes(audience.outcome), audience.audience);
+  for (const audience of audiences.slice(4)) assert.ok(reply.expanded.includes(audience.outcome), audience.audience);
+  assert.ok(DOOR_CHIPS.some((chip) => chip.id === "use"));
+  // "Who is it for" keeps its own answer.
+  assert.equal(answer("who is it for").id, "audiences");
+});
+
+test("a collection's deeper answer carries no preview, hold or ruling bookkeeping, and keeps acronyms", async () => {
+  const { DOOR_INTENTS } = await import("./doorCedar.js");
+  for (const intent of DOOR_INTENTS.filter((item) => item.id.startsWith("collection:"))) {
+    const text = `${intent.answer}\n${intent.expanded}`;
+    assert.doesNotMatch(text, /\b(this preview|public preview|publication hold|owner ruling)\b/i, intent.id);
+    assert.doesNotMatch(text, /\bnEED\b|\bpLOT\b/, intent.id);
+  }
 });

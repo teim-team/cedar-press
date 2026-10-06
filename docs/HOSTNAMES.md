@@ -41,9 +41,14 @@ either publish is made to wait on the other.
 
 ### Publishing by hand
 
-The workflow is the only automated path, and while the trust below is broken
-there is no automated path at all. With credentials for `teim-prod`, current
-`main` goes out in one paste:
+The workflow is the automated path. Its S3 publish succeeded in
+[run 36470140791](https://github.com/teim-team/cedar-press/actions/runs/36470140791):
+the credential exchange and S3 synchronization both passed. This was checked
+through GitHub on 2026-10-02; the September 21 failure below is historical.
+That successful static publish does not establish an API deployment or persistent
+subscriber storage. AWS access is currently paused at the owner's request.
+
+With authorized credentials for `teim-prod`, the manual equivalent is:
 
 ```
 npm ci && npm run build:site
@@ -60,7 +65,7 @@ in — the standalone preview account is how the only people outside the team wh
 have seen Cedar Press get through the door. Confirm afterwards against the build
 stamp in Settings, which carries the commit the running bundle was built from.
 
-### The S3 publish has never run
+### Historical OIDC failure, measured September 21
 
 Re-measured 2026-09-21 against the workflow's own run history, through run 113.
 The two AWS steps arrived with #87 (run 103, 20 September 04:19). Runs 103-108
@@ -80,16 +85,15 @@ Assuming role with OIDC          (x12, backing off over 2m06s)
 ##[error]Could not assume role with OIDC: Not authorized to perform sts:AssumeRoleWithWebIdentity
 ```
 
-So `aws s3 sync` has not executed once. Whatever `cedarpress.ai` serves today was
-put in the bucket by some other means, and every merge since 19 September has
-changed `main` without changing the site. The GitHub Pages job is no substitute:
+At that checkpoint, `aws s3 sync` had not executed. The site's bucket contents
+therefore came from another publication path, and those merges had changed
+`main` without updating the site through this workflow. The GitHub Pages job was no substitute:
 `public/CNAME` claims `cedarpress.ai`, but the apex now resolves to CloudFront,
 so the Pages copy is published where nobody reaches it — and until the job split
 above, it was not even being published, because the failure below skipped it.
 
-This is an AWS-side fix; nothing in this repository can make it pass. STS refuses
-the exchange before the role's permissions are consulted, which narrows it to two
-causes:
+That failure required an AWS-side fix. STS refused the exchange before the
+role's permissions were consulted, narrowing the investigation to two causes:
 
 1. Account `502309351676` has no IAM OIDC identity provider for
    `token.actions.githubusercontent.com` (thumbprint aside, the provider must
@@ -118,13 +122,35 @@ accepts exactly that, and nothing wider:
 }
 ```
 
-Whoever holds AWS access for `teim-prod` can confirm which of the two it is with
+If that exact error recurs, an operator with AWS access for `teim-prod` can inspect
 `aws iam list-open-id-connect-providers` and
-`aws iam get-role --role-name cedarpress-site-deploy`. Until then a merge to
-`main` is not a deploy, and the workflow will stay red at that step — correctly,
-because publication really is failing.
+`aws iam get-role --role-name cedarpress-site-deploy`. Use the current run's
+result to establish publication; a merge alone is not deployment evidence.
+
+## Workspace routing and API activation
+
+The tracked source for the existing `cedarpress-router` function is
+[`infrastructure/cedarpress-router.js`](../infrastructure/cedarpress-router.js).
+Its prepared change keeps the `www` redirect and public prerendered pages,
+preserves redirect query parameters, and serves registered app routes from the
+unprerendered build shell. It does not deploy an API or alter subscriber records.
+
+The live read on 2026-10-02 found one S3 origin, no additional cache behaviors,
+and GET/HEAD only. Before changing the public login destination, verify the app
+assets and existing login authority. Before enabling `VITE_API_URL`, deploy and
+test the persistent Press API: stable signing secret, PostgreSQL subscribers,
+exact credentialed CORS origins, and no cache for authenticated API responses.
+A separate `/api/*` behavior can use the existing app hostname only with a real
+API origin, method/cookie forwarding, disabled caching and one prefix removal
+before FastAPI. Changing a request URI alone does not change CloudFront's origin.
+
+Preserve the current LIVE function and distribution configuration for rollback.
+Publish the tested function through the existing AWS account with a fresh ETag
+after compatibility checks. Confirm apex → app sign-in, deep links, refresh,
+wrong-password feedback, and unchanged existing account credentials and tiers.
+A code change or static upload alone is not proof of persistent login.
 
 ## Open items
 
-- Point `app.cedarpress.ai` at the API host, and set `vars.VITE_API_URL`, once the subscriber API is deployed.
-- Fix the OIDC trust above. It blocks every publish to `cedarpress.ai`.
+- Activate `app.cedarpress.ai` as the workspace and set `vars.VITE_API_URL` only after the persistent subscriber API and existing-account compatibility are verified.
+- Verify the selected release's publish result and live build stamp when AWS work resumes. The historical OIDC failure is not a current blocker established by this review.

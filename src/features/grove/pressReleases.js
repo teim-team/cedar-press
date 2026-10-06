@@ -60,7 +60,8 @@
  * Cedar's cadence measurement has produced no vintage for any collection
  * (`UNMEASURED_FIELDS` in collection.js), so the cadence here is what Cedar
  * commits to maintain: weekly, with human review, for every collection
- * (owner, 2026-09-27). The sources still publish on their own clocks; the
+ * (owner, 2026-09-27). Reader wording says "schedule" so the commitment is
+ * never read as a measured update history (2026-10-06). The sources still publish on their own clocks; the
  * weekly pass is when their changes are reviewed in. A collection with no
  * declared cadence states none rather than borrowing one.
  */
@@ -79,7 +80,9 @@ import { LAUNCH_COLLECTION, hasSample } from "./collection.js";
  * collection.
  */
 export const CADENCE = Object.freeze({
-  WEEKLY: "Updated weekly",
+  // A commitment, not a measured history (2026-10-06): the wording says it
+  // is the schedule Cedar Press keeps, not how often the data has moved.
+  WEEKLY: "Reviewed on a weekly schedule",
 });
 
 /** A release changes the data, or it changes how the data is made. */
@@ -96,7 +99,22 @@ export const RELEASE_KIND = Object.freeze({
  */
 export const DECLARED_CADENCE = Object.freeze(
   Object.fromEntries(
-    ["funding", "federal-register", "legislation", "deals", "nagpra", "lobbying", "contractors", "subcontracting", "natural-resources", "owned", "nonprofits", "need"].map((id) => [id, CADENCE.WEEKLY]),
+    [
+  "funding",
+  "federal-register",
+  "legislation",
+  "deals",
+  "nagpra",
+  "lobbying",
+  "contractors",
+  "subcontracting",
+  "natural-resources",
+  "owned",
+  "nonprofits",
+  "need",
+  "foundation-corporate-giving",
+  "plot"
+].map((id) => [id, CADENCE.WEEKLY]),
   ),
 );
 
@@ -123,37 +141,34 @@ export function ledgerFor(id, source = ledger) {
 /**
  * What a recorded release shipped, said for a reader, from its facts alone.
  *
- * Only the CURRENT release's preview "downloads from the shelf". The importer
- * writes each sample to one unversioned path and the shelf serves whatever is
- * there, so an older release's preview is a fact about what shipped then, not
- * a file a reader can still take (Codex, PR #52).
+ * Only the CURRENT release's example records are available to download. The
+ * importer writes each sample to one unversioned path and the site serves
+ * whatever is there, so an older release's sample is a fact about what
+ * shipped then, not a file a reader can still take (Codex, PR #52).
+ *
+ * Reader wording (owner review, 2026-10-06): no "preview", "shelf",
+ * "manifest" or "readiness". The sample is "example records", the word the
+ * collection profile uses, and a release held back is "on hold" with the
+ * number of reasons the ledger recorded.
  */
 function describe(record, { isFirst, isCurrent, served }) {
-  const lead = isFirst ? "First release on Cedar Press" : "Release";
-  const tables = record.tables
-    ? `${record.tables} ${record.tables === 1 ? "table" : "tables"}, ${record.rowsLabel}`
-    : record.rowsLabel;
-  const changed = [`${lead}: ${tables}.`];
+  const lead = isFirst ? "First published on Cedar Press" : "Dataset updated";
+  const changed = [`${lead}: ${record.rowsLabel}.`];
   if (record.preview) {
-    const preview = `A ${record.preview.rows}-row preview of ${record.preview.table}, the collection's flagship table`;
-    // A current preview the repository does not hold yet (samples.published
-    // .json) is not on the shelf, and saying it is would be the 404 in prose.
-    changed.push(
-      isCurrent && served
-        ? `${preview}, downloads from the shelf.`
-        : isCurrent
-          ? `${preview}, was produced with this release and is not published on the shelf yet.`
-          : `${preview}, was published with this release; the shelf now serves the current release's preview.`,
-    );
+    const n = record.preview.rows;
+    const examples = `${n} example ${n === 1 ? "record" : "records"}`;
+    changed.push(isCurrent && served
+      ? `${examples} ${n === 1 ? "is" : "are"} available to download.`
+      : isCurrent
+        ? `${examples} ${n === 1 ? "is" : "are"} not available to download yet.`
+        : `${examples} accompanied this update; the current update's examples have replaced ${n === 1 ? "it" : "them"}.`);
   } else {
-    changed.push(
-      "No preview file yet: the collection's flagship table is unsettled, and no sample is published until it is.",
-    );
+    changed.push("No example records are available yet.");
   }
   const blockers = Array.isArray(record.blockers) ? record.blockers.length : 0;
   if (blockers) {
     changed.push(
-      `Readiness is blocked, with ${blockers} named ${blockers === 1 ? "blocker" : "blockers"} recorded in the manifest.`,
+      `This update is on hold, for ${blockers} recorded ${blockers === 1 ? "reason" : "reasons"}.`,
     );
   }
   return changed;
@@ -198,6 +213,8 @@ export function buildReleases(source, launch) {
       name: dataset.name,
       version: dataset.version,
       updated: dataset.updated,
+      // The producer refresh the data came from, not the release date.
+      refreshed: dataset.refreshed ?? null,
       cadence: DECLARED_CADENCE[dataset.id] ?? null,
       retired: false,
       history: Object.freeze(historyOf(dataset.id, dataset.version, source)),
@@ -221,13 +238,13 @@ export function buildReleases(source, launch) {
 export const PRESS_RELEASES = buildReleases(ledger, LAUNCH_COLLECTION);
 
 /** The release record for a collection, or null when it has none. */
-export function releaseFor(id) {
-  return PRESS_RELEASES[id] ?? null;
+export function releaseFor(id, releases = PRESS_RELEASES) {
+  return releases[id] ?? null;
 }
 
 /** The most recent release entry, which is what a collection page leads with. */
-export function latestRelease(id) {
-  return releaseFor(id)?.history?.[0] ?? null;
+export function latestRelease(id, releases = PRESS_RELEASES) {
+  return releaseFor(id, releases)?.history?.[0] ?? null;
 }
 
 /** The abbreviated months the feed spells dates with; the priorities page reads them too. */
@@ -243,16 +260,23 @@ export function formatUpdated(iso) {
   return `${MONTHS[month - 1]} ${day}, ${year}`;
 }
 
-/** The short form for a metadata rail: `Updated Aug. 6 · weekly`. */
+/**
+ * The short form for a metadata rail: `Data as of Oct. 1 · weekly review
+ * schedule`.
+ *
+ * The date is the DATA refresh, not the release date (2026-10-06): every
+ * collection was re-released on Oct. 6 without new data, and "Updated Oct.
+ * 6" read as a refresh that did not happen. A collection with no recorded
+ * refresh states no date rather than borrowing the release's.
+ */
 export function freshnessLine(id) {
   const release = releaseFor(id);
-  if (!release?.updated) return "";
-  const [, month, day] = release.updated.split("-").map(Number);
-  // No version number: collections update continuously, and a vX.X on a
-  // continuously maintained series read as clutter. The date is the fact.
+  if (!release?.refreshed) return "";
+  const [, month, day] = release.refreshed.split("-").map(Number);
+  // No version number: a vX.X on a maintained series read as clutter.
   // No cadence where none is declared, rather than a plausible one.
-  const cadence = release.cadence ? ` · ${release.cadence.replace("Updated ", "")}` : "";
-  return `Updated ${MONTHS[month - 1]} ${day}${cadence}`;
+  const cadence = release.cadence === CADENCE.WEEKLY ? " · weekly review schedule" : "";
+  return `Data as of ${MONTHS[month - 1]} ${day}${cadence}`;
 }
 
 /** The release's stable anchor: cite `#funding-v0` and it stays citable. */
@@ -305,15 +329,15 @@ export const RELEASE_FEED = buildFeed(PRESS_RELEASES);
  * this month or the current filter, and each of those is a different claim.
  * `today` is injectable so tests do not depend on the wall clock.
  */
-export function recentActivity(days = 30, today = new Date()) {
+export function recentActivity(days = 30, today = new Date(), feed = RELEASE_FEED) {
   const cutoff = today.getTime() - days * 86400000;
-  const inWindow = RELEASE_FEED.filter((entry) => new Date(entry.date).getTime() >= cutoff);
+  const inWindow = feed.filter((entry) => entry.date && new Date(entry.date).getTime() >= cutoff && new Date(entry.date).getTime() <= today.getTime());
   return {
     days,
     releases: inWindow.length,
     collections: new Set(inWindow.map((entry) => entry.id)).size,
     methodology: inWindow.filter((entry) => entry.kind === RELEASE_KIND.METHOD).length,
-    latest: RELEASE_FEED[0]?.date ?? null,
+    latest: feed.find((entry) => entry.date && new Date(entry.date).getTime() <= today.getTime())?.date ?? null,
   };
 }
 
@@ -321,10 +345,50 @@ export function recentActivity(days = 30, today = new Date()) {
  * The collections that changed most recently, newest first. Drives the
  * "recently updated" rail on the reader, which is a reason to come back.
  */
-export function recentlyUpdated(limit = 3) {
-  return Object.entries(PRESS_RELEASES)
+export function recentlyUpdated(limit = 3, releases = PRESS_RELEASES) {
+  return Object.entries(releases)
     .filter(([, release]) => !release.retired)
     .map(([id, release]) => ({ id, ...release }))
     .sort((a, b) => (a.updated === b.updated ? orderOf(a.id) - orderOf(b.id) : a.updated < b.updated ? 1 : -1))
     .slice(0, limit);
+}
+
+
+/** Public preview history retains old citations without claiming current full-row totals. */
+const PREVIEW_RELEASES = Object.fromEntries(Object.entries(PRESS_RELEASES).map(([id, entry]) => [id, {
+  ...entry, history: entry.history.map((event) => ({ ...event, date_basis: "public_preview",
+    changed: ["Collection updated."], note: undefined })),
+}]));
+export function previewReleaseModel() {
+  return { source: "public_preview", historyComplete: false, releases: PREVIEW_RELEASES,
+    feed: buildFeed(PREVIEW_RELEASES), previewHistory: [] };
+}
+
+export function connectedReleaseModel(payload) {
+  if (payload?.source !== "verified_current" || payload.history_complete !== false
+      || !Array.isArray(payload.releases)) throw new Error("Invalid release feed");
+  const releases = {};
+  for (const entry of payload.releases) {
+    if (!entry || !Object.hasOwn(PRESS_CATALOG_BY_ID, entry.id) || Object.hasOwn(releases, entry.id)
+        || !/^[a-f0-9]{64}$/.test(entry.version ?? "")
+        || entry.updated !== null || entry.retired !== false
+        || !Array.isArray(entry.history) || entry.history.length !== 1) {
+      throw new Error("Invalid current collection release");
+    }
+    const event = entry.history[0];
+    if (event.version !== entry.version || event.date !== null || event.date_basis !== "not_recorded"
+        || event.kind !== RELEASE_KIND.DATA || !Array.isArray(event.changed) || !event.changed.length
+        || event.changed.some((line) => typeof line !== "string")) throw new Error("Invalid current release facts");
+    if (entry.record_count !== undefined && (!Number.isSafeInteger(entry.record_count) || entry.record_count < 0)) {
+      throw new Error("Invalid release count");
+    }
+    if (entry.preview_updated !== undefined && (!/^\d{4}-\d{2}-\d{2}$/.test(entry.preview_updated)
+        || !Number.isFinite(Date.parse(entry.preview_updated))
+        || new Date(entry.preview_updated).toISOString().slice(0, 10) !== entry.preview_updated)) {
+      throw new Error("Invalid preview date");
+    }
+    releases[entry.id] = entry;
+  }
+  return { source: "verified_current", historyComplete: false, releases,
+    feed: buildFeed(releases), previewHistory: buildFeed(PREVIEW_RELEASES) };
 }

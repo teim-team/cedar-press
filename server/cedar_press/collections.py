@@ -56,6 +56,7 @@ WHAT IS STILL NOT MEASURED, AND SAYS SO
 from __future__ import annotations
 
 import csv
+import io
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -63,12 +64,14 @@ from typing import Any
 
 # The storefront's own naming. `press_catalog` reads a committed snapshot and
 # imports nothing from this package, so it is a leaf and cannot close a cycle.
-from cedar_press import press_catalog
+from cedar_press import csv_safety, press_catalog
 from cedar_press.claims import CLAIM_CLASS
 
 __all__ = [
     "COLLECTION_FIGURES",
     "EXCLUDED_COLLECTIONS",
+    "GROVE_RELEASE_COLLECTIONS",
+    "GROVE_RELEASE_IDS",
     "LAUNCH_COLLECTION",
     "UNMEASURED_FIELDS",
     "CollectionDataset",
@@ -91,12 +94,25 @@ __all__ = [
 
 #: The repository root, from ``server/cedar_press/collections.py``. The
 #: manifest and the sample rows are repository data rather than package data:
-#: the browser bundle reads the same manifest and the built site serves the
-#: same sample files, and a second copy inside the package would be a second
-#: set of numbers to keep in agreement.
+#: the browser bundle reads the same manifest, and a second copy inside the
+#: package would be a second set of numbers to keep in agreement.
 _REPO = Path(__file__).resolve().parents[2]
 _MANIFEST_PATH = _REPO / "data" / "cedar" / "collections.manifest.json"
-_SAMPLE_ROOT = _REPO / "public"
+#: Where a manifest ``sample_path`` resolves: the repository root, so
+#: ``/data/cedar/samples/<c>/spreadsheet__10.csv`` is
+#: ``data/cedar/samples/<c>/spreadsheet__10.csv``. Until 2026-10-04 this was
+#: ``public/`` and the built site served those raw producer previews, retired
+#: ``CEDAR-NEST-`` IDs and all. They are now inputs only: the site serves the
+#: customer table rendered from them (``scripts/render_sample_downloads.py``).
+_SAMPLE_ROOT = _REPO
+
+
+def raw_preview_file(url: str) -> Path:
+    """The raw producer preview a manifest ``sample_path`` names, on disk.
+
+    Not served: the browser reads ``/data/cedar/downloads/<c>.csv`` instead.
+    """
+    return _SAMPLE_ROOT / str(url).lstrip("/")
 
 _MANIFEST: dict[str, Any] = json.loads(_MANIFEST_PATH.read_text(encoding="utf-8"))
 
@@ -109,6 +125,26 @@ UNMEASURED_FIELDS: dict[str, str] = dict(_MANIFEST["unmeasured_fields"])
 #: nobody can question.
 EXCLUDED_COLLECTIONS: tuple[dict[str, str], ...] = tuple(
     dict(entry) for entry in _MANIFEST["excluded"]
+)
+
+#: THE reviewed Cedar Grove release declaration: the one place that says which
+#: collections the full-download route may serve from a pinned ``cedar_grove``
+#: catalog. A declared id is served only while the manifest still places it on
+#: the ``grove`` shelf in ``excluded`` (the storefront neither sells nor
+#: previews it), so a collection that moves shelf stops being Grove-served
+#: rather than being served twice. WHICH release is served is not listed here:
+#: it is the one Lumecon-data collection release pinned in
+#: ``data/cedar/grove_release_pin.json`` (``repository.grove_release_pin``).
+#: Which COMPONENTS are offered is the collection's field-map presentation
+#: entries (``data/cedar/field_map.json`` keys ``<collection>/<component>``),
+#: each validated against that release's embedded component contract. Access
+#: reuses the existing tier model: a tier whose shelf reaches ``grove``
+#: (``grove``, ``tree``). No tier or route is added.
+GROVE_RELEASE_IDS: tuple[str, ...] = ("gaming", "infrastructure")
+GROVE_RELEASE_COLLECTIONS: tuple[dict[str, str], ...] = tuple(
+    entry
+    for entry in EXCLUDED_COLLECTIONS
+    if entry["id"] in GROVE_RELEASE_IDS and entry.get("shelf") == "grove"
 )
 
 
@@ -150,10 +186,62 @@ class CollectionDataset:
     #: client's catalog declares the same placement; this one is the control
     #: the routes enforce.
     shelf: str = "standard"
+    #: When the DATA was last refreshed from the producer, as distinct from
+    #: ``updated`` (the release date the ledger records). On 2026-10-06 every
+    #: collection was re-released at the owner's request without a producer
+    #: refresh, so the two dates differ. Read from the manifest provenance
+    #: (``_data_refreshed``); the client reads the same fields
+    #: (collection.js ``dataRefreshed``).
+    refreshed: str | None = None
+
+
+#: Collections whose observation count is not shown to readers (owner,
+#: 2026-10-06: NEED's published reviewed set (43) is a small part of the
+#: enterprise register, so no count is stated rather than a misleading one;
+#: Native Nonprofits' 89 ruled-in organizations is shown). The label
+#: reads empty, which every surface already treats as "no count". The client
+#: applies the same set (collection.js COUNT_NOT_SHOWN).
+COUNT_NOT_SHOWN: frozenset[str] = frozenset({"need"})
+
+
+#: What an abbreviated collection name stands for (owner, 2026-10-06: a
+#: paragraph describing NEED or PLOT says what the letters mean). NEED's
+#: descriptor name already spells it out; PLOT's description does not, so it
+#: is prefixed where it is read. The client applies the same text
+#: (pressCatalog.js blurbs).
+ACRONYM_LEADS: dict[str, str] = {
+    "plot": "PLOT (Parcel-Level Ownership and Transfers)",
+}
+
+
+def _descriptor_for_readers(descriptor: dict[str, Any]) -> dict[str, Any]:
+    out = dict(descriptor)
+    if out.get("id") in COUNT_NOT_SHOWN:
+        out["rows_label"] = ""
+    lead = ACRONYM_LEADS.get(out.get("id"))
+    if lead and lead not in (out.get("tracks") or ""):
+        out["tracks"] = f"{lead}: {out['tracks']}"
+    return out
+
+
+def _data_refreshed(collection_id: str) -> str | None:
+    """The producer refresh a collection was staged from, or ``None``.
+
+    ``provenance.selected_refreshes[id].updated`` where the collection was
+    refreshed on its own, else ``provenance.updated``, the producer pin every
+    other collection was staged from. Never the release date.
+    """
+    provenance = _MANIFEST.get("provenance") or {}
+    selected = (provenance.get("selected_refreshes") or {}).get(collection_id) or {}
+    return selected.get("updated") or provenance.get("updated") or None
 
 
 LAUNCH_COLLECTION: tuple[CollectionDataset, ...] = tuple(
-    CollectionDataset(**entry["descriptor"]) for entry in _MANIFEST["collections"]
+    CollectionDataset(
+        **_descriptor_for_readers(entry["descriptor"]),
+        refreshed=_data_refreshed(entry["descriptor"]["id"]),
+    )
+    for entry in _MANIFEST["collections"]
 )
 
 #: Cedar's own facts per dataset, keyed by product id: readiness status, the
@@ -170,9 +258,7 @@ _CEDAR: dict[str, dict[str, Any]] = {
 _PUBLISHED: dict[str, Any] = json.loads(
     (_MANIFEST_PATH.parent / "samples.published.json").read_text(encoding="utf-8")
 )
-_UNPUBLISHED: frozenset[str] = frozenset(
-    entry["path"] for entry in _PUBLISHED["unpublished"]
-)
+_UNPUBLISHED: frozenset[str] = frozenset(entry["path"] for entry in _PUBLISHED["unpublished"])
 
 
 def _with_publication(sample: dict[str, Any] | None) -> dict[str, Any] | None:
@@ -272,9 +358,8 @@ def collection_short(dataset: Any) -> str | None:
 
 def collection_context_line() -> str:
     """One line for the context strip: versions and the latest refresh date."""
-    versions = " · ".join(f"{collection_short(d)} {d.version}" for d in LAUNCH_COLLECTION)
     updated = sorted(d.updated for d in LAUNCH_COLLECTION)[-1]
-    return f"{versions} · all current as of {updated}"
+    return f"Updated {updated}"
 
 
 @dataclass(frozen=True)
@@ -301,6 +386,7 @@ class CollectionNeed:
 
     id: str
     text: str
+    demonstration: bool = False
 
 
 @dataclass(frozen=True)
@@ -313,6 +399,7 @@ class CollectionLead:
     need: int
     missing: tuple[str, ...]
     requires: tuple[str, ...]
+    demonstration: bool = True
 
 
 @dataclass(frozen=True)
@@ -342,8 +429,7 @@ def collection_findings() -> CollectionFindings:
     def basis(dataset_id: str, detail: str) -> str:
         dataset = _dataset_for(dataset_id)
         name = collection_short(dataset) if dataset else dataset_id
-        version = dataset.version if dataset else "v0"
-        return f"{name} {version}, {detail}"
+        return f"{name}, {detail}"
 
     supported = (
         CollectionSupported(
@@ -372,58 +458,81 @@ def collection_findings() -> CollectionFindings:
         ),
     )
 
+    availability_needs = []
+    for dataset in LAUNCH_COLLECTION:
+        facts = collection_cedar_facts(dataset.id) or {}
+        sample = collection_sample(dataset.id) or {}
+        missing = []
+        rows = facts.get("n_rows")
+        if type(rows) is not int or not 0 <= rows <= 2**53 - 1:
+            missing.append("The current release does not state a row count.")
+        if not sample.get("path"):
+            missing.append(
+                sample_unavailable_reason(dataset.id)
+                or "No preview file is published for the current release."
+            )
+        if missing:
+            availability_needs.append(
+                CollectionNeed(
+                    id=f"col-need-{dataset.id}-availability",
+                    text=f"{dataset.name}: {' '.join(missing)}",
+                )
+            )
+    without_vintage = [
+        dataset
+        for dataset in LAUNCH_COLLECTION
+        if not isinstance(dataset.vintage, str) or not dataset.vintage.strip()
+    ]
+    vintage_needs = []
+    if without_vintage:
+        vintage_text = (
+            "No collection states a vintage."
+            if len(without_vintage) == len(LAUNCH_COLLECTION)
+            else "A collection vintage is not stated for: "
+            + "; ".join(dataset.name for dataset in without_vintage)
+            + "."
+        )
+        vintage_needs.append(
+            CollectionNeed(
+                id="col-need-vintage",
+                text=vintage_text
+                + " An update date does not establish the periods covered by every source.",
+            )
+        )
+
     needs = (
         CollectionNeed(
             id="col-need-closing",
             text=(
-                "Three large announced deals await closing confirmation before they "
-                "enter totals (Deals, primary source pending)."
+                "Demonstration: Three large announced deals await closing confirmation "
+                "before they enter totals (Deals, primary source pending)."
             ),
+            demonstration=True,
         ),
         CollectionNeed(
             id="col-need-fy26",
             text=(
-                "FY2026 assistance figures are partial until the Q1 release lands "
-                "(Funding, USAspending publication lag)."
+                "Demonstration: FY2026 assistance figures are partial until the Q1 "
+                "release lands (Funding, USAspending publication lag)."
             ),
+            demonstration=True,
         ),
         CollectionNeed(
             id="col-need-matches",
             text=(
-                "Two parent-entity matches are provisional pending SAM "
+                "Demonstration: Two parent-entity matches are provisional pending SAM "
                 "re-registration (Contractors, entity resolution queue)."
             ),
+            demonstration=True,
         ),
-        CollectionNeed(
-            id="col-need-owned-terms",
-            text=(
-                "White Earth listings enter entity rows once the nation confirms "
-                "publication terms; aggregates only until then (Owned, consent pending)."
-            ),
-        ),
-        CollectionNeed(
-            id="col-need-owned-membership",
-            text=(
-                "Native-Owned Businesses publishes no row count and no preview file: "
-                "the table Cedar names as the collection's flagship is not one its "
-                "collection contract claims, and the two memberships have not been "
-                "reconciled (Owned, collection membership unresolved)."
-            ),
-        ),
-        CollectionNeed(
-            id="col-need-vintage",
-            text=(
-                "No collection states a vintage: Cedar's cadence measurement produced "
-                "no newest-held period for any of them, so the field is absent rather "
-                "than estimated."
-            ),
-        ),
+        *availability_needs,
+        *vintage_needs,
     )
 
     narratives = (
         CollectionLead(
             id="col-lead-energy",
-            name="Energy project financing expansion",
+            name="Demonstration: Energy project financing expansion",
             have=3,
             need=3,
             missing=(),
@@ -431,7 +540,7 @@ def collection_findings() -> CollectionFindings:
         ),
         CollectionLead(
             id="col-lead-8a",
-            name="8(a) participation and award growth",
+            name="Demonstration: 8(a) participation and award growth",
             have=3,
             need=3,
             missing=(),
@@ -439,7 +548,7 @@ def collection_findings() -> CollectionFindings:
         ),
         CollectionLead(
             id="col-lead-assist",
-            name="Assistance shifts under new appropriations",
+            name="Demonstration: Assistance shifts under new appropriations",
             have=2,
             need=3,
             missing=("Q1 release",),
@@ -482,7 +591,7 @@ class CollectionFigure:
 def _basis_for(dataset_id: str, fallback: str) -> str:
     """A figure's basis line, derived so it cannot name a stale version."""
     dataset = _dataset_for(dataset_id)
-    return f"{collection_short(dataset)} {dataset.version}" if dataset else fallback
+    return f"{collection_short(dataset)}, updated {dataset.updated}" if dataset else fallback
 
 
 COLLECTION_FIGURES: tuple[CollectionFigure, ...] = (
@@ -577,20 +686,88 @@ def collection_citation(dataset_id: str, accessed_on: str | None = None) -> str 
     dataset = _dataset_for(dataset_id)
     if dataset is None:
         return None
-    vintage = f", vintage {dataset.vintage}" if dataset.vintage else ""
+    updated = f" Updated {dataset.updated}." if dataset.updated else ""
     accessed = f" Accessed {accessed_on}." if accessed_on else ""
-    return (
-        f'Lumecon, "{dataset.name}" ({dataset.version}{vintage}), '
-        f"Cedar Press collection, cedarpress.ai.{accessed}"
-    )
+    return f'Lumecon, "{dataset.name}", Cedar Press collection, cedarpress.ai.{updated}{accessed}'
 
 
 def _csv_cell(value: object) -> str:
     """One CSV cell, quoted only when the value needs it."""
-    text = "" if value is None else str(value)
-    if any(ch in text for ch in ('"', ",", "\n")):
+    text = csv_safety.spreadsheet_safe("" if value is None else str(value))
+    if any(ch in text for ch in ('"', ",", "\n", "\r")):
         return '"' + text.replace('"', '""') + '"'
     return text
+
+
+#: NEED ownership chains, each with its evidence (``data/cedar/need_ownership_evidence.json``).
+_NEED_OWNERSHIP_PATH = _REPO / "data" / "cedar" / "need_ownership_evidence.json"
+#: The columns the NEED download adds after ``enterprise_name``. The reviewed
+#: NEED table records only the relationship each evidence page states
+#: directly (often the holding company one level up, or nothing); a reader
+#: needs the Native nation or corporation at the top of the chain. Every
+#: value comes from a recorded ownership ruling or register binding cited in
+#: ``native_owner_evidence``, never from a name.
+NATIVE_OWNER_COLUMNS = ("native_owner", "native_owner_cedar_uid", "native_owner_basis", "native_owner_source")
+
+#: Plain words for each kind of ownership evidence the file records.
+_EVIDENCE_WORDS = {
+    "owner_ruling": "ownership ruling recorded by Cedar",
+    "enterprise_register": "Cedar enterprise register binding",
+    "first_party_cage_list": "listed by the owner's federal contracting arm with its CAGE code",
+    "identifier_ledger": "federal identifier ledger ultimate-parent chain",
+    "derived_ranking": "Cedar contractor ranking attribution",
+    "producer_evidence_pin": "the owner's own published page",
+    "government_record": "federal procurement record",
+}
+
+
+def _need_ownership() -> list[dict[str, Any]]:
+    if not _NEED_OWNERSHIP_PATH.exists():
+        return []
+    return json.loads(_NEED_OWNERSHIP_PATH.read_text(encoding="utf-8")).get("records", [])
+
+
+def _public_url(urls: list[str]) -> str:
+    """The first page a reader can open: an owner's or agency's own page, never Cedar's private repository."""
+    return next((url for url in urls if url and "github.com/teim-team/" not in url), "")
+
+
+def with_native_owner(rows: list[list[str]]) -> list[list[str]]:
+    """NEED rows with their evidenced ultimate Native owner, matched by UEI, else exact name.
+
+    ``native_owner_source`` is a page the reader can open: the evidence's own
+    public page, else the row's first published source (the owner's page that
+    lists the enterprise). Rows with no recorded ruling stay blank.
+    """
+    header = rows[0]
+    if "enterprise_name" not in header or set(NATIVE_OWNER_COLUMNS) & set(header):
+        return rows
+    by_uei: dict[str, dict[str, Any]] = {}
+    by_name: dict[str, dict[str, Any]] = {}
+    for record in _need_ownership():
+        if not record.get("in_pinned_need_sample"):
+            continue
+        if record.get("uei"):
+            by_uei[record["uei"]] = record
+        if record.get("enterprise_name_as_recorded"):
+            by_name[record["enterprise_name_as_recorded"]] = record
+    col = {name: index for index, name in enumerate(header)}
+    at = col["enterprise_name"] + 1
+    out = [[*header[:at], *NATIVE_OWNER_COLUMNS, *header[at:]]]
+    for row in rows[1:]:
+        uei = row[col["uei"]] if "uei" in col else ""
+        record = (by_uei.get(uei) if uei else None) or by_name.get(row[col["enterprise_name"]])
+        if record is None:
+            added = ["", "", "", ""]
+        else:
+            evidence = record.get("evidence", [])
+            kinds = list(dict.fromkeys(_EVIDENCE_WORDS.get(e.get("kind"), "") for e in evidence))
+            basis = "; ".join(kind for kind in kinds if kind)
+            own_sources = row[col["source_urls"]].split(";") if "source_urls" in col else []
+            source = _public_url([e.get("url") or "" for e in evidence]) or _public_url([u.strip() for u in own_sources])
+            added = [record.get("ultimate_native_owner") or "", record.get("ultimate_native_owner_cedar_uid") or "", basis, source]
+        out.append([*row[:at], *added, *row[at:]])
+    return out
 
 
 def collection_csv(dataset_id: str) -> str | None:
@@ -605,25 +782,21 @@ def collection_csv(dataset_id: str) -> str | None:
     ``sample_unavailable_reason`` says why; handing over a metadata file in
     place of the rows a tile promises is the failure this avoids.
 
-    The last row is the citation. A downloaded file outlives the page it came
+    The citation is a column, never an extra observation. A downloaded file outlives the page it came
     from, so the file itself must say what it is, whose work it is and how to
     credit it; provenance that lives only in the UI is provenance the reader
     loses on save.
     """
+    # The NEED reviewed-base proof no longer gates the preview (owner ruling
+    # 2026-10-04: no NEED publication hold).
     sample = _SAMPLE.get(dataset_id)
     if sample is None or not sample.get("path"):
         return None
-    path = _SAMPLE_ROOT / str(sample["path"]).lstrip("/")
+    path = raw_preview_file(sample["path"])
     if not path.exists():
         return None
-    # Normalized to \n so the two implementations are byte-comparable and the
-    # trailing citation row is appended to a known shape.
     text = path.read_text(encoding="utf-8").replace("\r\n", "\n").rstrip("\n")
-    lines = text.split("\n")
-    width = len(next(csv.reader([lines[0]])))
-    citation = [
-        "cite_as",
-        collection_citation(dataset_id) or "",
-        *[""] * max(0, width - 2),
-    ]
-    return "\n".join([*lines, ",".join(_csv_cell(cell) for cell in citation)])
+    rows = list(csv.reader(io.StringIO(text)))
+    citation = collection_citation(dataset_id) or ""
+    result = [[*rows[0], "cite_as"], *[[*row, citation] for row in rows[1:]]]
+    return "\n".join(",".join(_csv_cell(value) for value in row) for row in result)

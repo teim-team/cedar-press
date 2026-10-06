@@ -1,3 +1,5 @@
+import { columnPlan as currentColumnPlan } from "./recordColumns.js";
+import { PRESENTATION_COLUMNS as currentPresentationColumns } from "./mixedSpreadsheet.js";
 // The Explore card's model, proven on the real samples and on planted rows.
 //
 // The contracts are derived, so the first thing to prove is that every table
@@ -10,17 +12,16 @@
 
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { readFileSync, readdirSync, statSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 
-import { SOURCE_BUILDERS, contractFor as deriveContract, validateContract } from "../../../scripts/derive-explore.mjs";
+import { SOURCE_BUILDERS, contractFor as deriveContract, unknownOverrideKeys, validateContract } from "../../../scripts/derive-explore.mjs";
 import { LAUNCH_COLLECTION, collectionTables } from "./collection.js";
 import { STOREFRONT_CATALOG } from "./pressCatalog.js";
 import { isInternalProvenanceColumn, namesInternalFile } from "./readerValues.js";
 import { columnPlan } from "./recordColumns.js";
 import {
-  CODEBOOK,
   CONTRACTS,
   EMPTY_CUT,
   SOURCE_BUILDER_KINDS,
@@ -29,7 +30,8 @@ import {
   WITHHELD_TEXT,
   buildRegister,
   codebookColumns,
-  contractFor,
+  codebookFor as currentCodebookFor,
+  contractFor as currentContractFor,
   csvCell,
   cutCsv,
   evaluableScope,
@@ -55,10 +57,10 @@ import {
   filterRows,
   flagshipKey,
   isNarrowed,
-  labelFor,
+  labelFor as currentLabelFor,
   listCell,
   rowUids,
-  meaningFor,
+  meaningFor as currentMeaningFor,
   observationOf,
   pageOf,
   parseCsv,
@@ -73,8 +75,11 @@ import {
   rowYear,
   sortRows,
   tableKey,
-  universalRows,
+  universalRows as currentUniversalRows,
 } from "./explore.js";
+import { loadCodebook } from "./codebook.js";
+// The codebook loads on demand in the browser (codebook.js).
+const CURRENT_CODEBOOK = await loadCodebook();
 
 const REPO = fileURLToPath(new URL("../../../", import.meta.url));
 const PUBLIC = `${REPO}public`;
@@ -89,22 +94,34 @@ const REGISTER = buildRegister(JSON.parse(readFileSync(`${PUBLIC}/data/cedar/reg
 const PRESS = { workspace_tier: "press" };
 const PRO = { workspace_tier: "press_pro" };
 
+// Legacy raw examples are private test inputs. Current release assertions
+// below still enumerate the actual published manifest and current contracts.
+const LEGACY = `${REPO}server/tests/fixtures/legacy-preview/`;
+const LEGACY_CONTRACTS = JSON.parse(readFileSync(`${LEGACY}explore.json`, "utf8")).tables;
+const LEGACY_CODEBOOK = JSON.parse(readFileSync(`${LEGACY}codebook.json`, "utf8")).tables;
+const LEGACY_MANIFEST = JSON.parse(readFileSync(`${LEGACY}collections.manifest.json`, "utf8")).collections;
+const LEGACY_UNPUBLISHED = new Set(JSON.parse(readFileSync(`${LEGACY}samples.published.json`, "utf8")).unpublished.map(t => t.path));
+const CODEBOOK = { ...LEGACY_CODEBOOK, ...CURRENT_CODEBOOK };
+const contractFor = (key) => currentContractFor(key) ?? LEGACY_CONTRACTS[key] ?? null;
+const labelFor = (key, column) => LEGACY_CODEBOOK[key]?.fields.find(f => f.column === column)?.label ?? currentLabelFor(key, column);
+const meaningFor = (key, column) => LEGACY_CODEBOOK[key]?.fields.find(f => f.column === column)?.meaning ?? currentMeaningFor(key, column);
+const universalRows = (key, rows, register) => currentUniversalRows(key, rows, register, contractFor(key));
+const legacyTables = (id) => (LEGACY_MANIFEST.find(c => c.id === id)?.tables ?? [])
+  .filter(t => t.sample_path && !LEGACY_UNPUBLISHED.has(t.sample_path))
+  .map(t => ({ ...t, key: tableKey(id, t.table), path: t.sample_path }));
+
 // The sample's path comes from the manifest, never from the key: the owned
 // collection's samples live under `native-owned-businesses/`, not `owned/`.
 const load = (key) => {
   const [collection] = key.split("/");
   const table = exploreTables(collection).find((t) => t.key === key);
-  assert.ok(table, `${key}: no explorable table`);
-  return parseCsv(readFileSync(`${PUBLIC}${table.path}`, "utf8"));
+  if (table) return parseCsv(readFileSync(`${PUBLIC}${table.path}`, "utf8"));
+  const historical = legacyTables(collection).find(t => t.key === key);
+  assert.ok(historical, `${key}: no current table or explicit legacy fixture`);
+  // The pinned historical fixture uses the producer collection id.
+  const relative = historical.path.replace(/^\/data\/cedar\/samples\//, "").replace(/^native-owned-businesses\//, "owned/");
+  return parseCsv(readFileSync(`${LEGACY}samples/${relative}`, "utf8"));
 };
-
-function* walk(dir) {
-  for (const name of readdirSync(dir)) {
-    const path = `${dir}/${name}`;
-    if (statSync(path).isDirectory()) yield* walk(path);
-    else if (name.endsWith(".csv")) yield path;
-  }
-}
 
 // ── The contracts ──────────────────────────────────────────────────────────
 
@@ -127,10 +144,18 @@ test("every published table has a contract and every contract names real columns
         if (contract[field]) assert.ok(columns.includes(contract[field]), `${key}.${field} = ${contract[field]} is not a column`);
       }
       for (const column of [...contract.observation, ...(contract.default_columns ?? [])]) {
-        assert.ok(columns.includes(column), `${key}: ${column} is not a column`);
+        assert.ok(columns.includes(column) || (contract.mapping_kind === "producer_spreadsheet" && Object.hasOwn(currentPresentationColumns, column)), `${key}: ${column} is not a column`);
       }
     }
   }
+});
+
+// Customer tables whose sample carries no unique record identifier, so a row
+// is addressed by its position. Each says why; a new entry needs a reason.
+const POSITIONAL = Object.freeze({
+  // Registry grain (customer_sheet: no events). Its Cedar Business ID is blank
+  // on every sample row, flagged needs_cedar_id, and nothing else is a record key.
+  need: "business_uid is blank on every sample row (needs_cedar_id)",
 });
 
 test("every flagship the shelf serves is declared reviewed, with its record id and its entity relationship", () => {
@@ -139,9 +164,9 @@ test("every flagship the shelf serves is declared reviewed, with its record id a
     if (!key) continue;
     const contract = contractFor(key);
     assert.equal(contract.reviewed, true, `${key} is not declared reviewed in explore.overrides.json`);
-    assert.ok(contract.record_id, `${key} has no record id`);
-    assert.ok(contract.entity_role, `${key} does not say how its entity relates to the record`);
-    assert.ok(contract.default_columns?.length >= 5, `${key} declares no default columns`);
+    assert.ok(contract.record_id || Object.hasOwn(POSITIONAL, dataset.id), `${key} has no record id`);
+    assert.ok(!contract.entity_uid || contract.entity_role || contract.entity_role_column, `${key} does not say how its entity relates to the record`);
+    assert.ok(currentColumnPlan(key, contract, load(key).columns).defaults.length >= 5, `${key} declares no default columns`);
     // A dated table says what its year means; a register says it has none.
     if (contract.year || contract.date) assert.ok(contract.year_basis, `${key} has a year and no year basis`);
     if (contract.amount) assert.ok(contract.amount_basis || contract.amount_label, `${key} has an amount and no basis`);
@@ -150,69 +175,99 @@ test("every flagship the shelf serves is declared reviewed, with its record id a
 
 test("the flagship comes first among a collection's tables and locked shelves stay listed with their reasons", () => {
   const tables = exploreTables("lobbying");
-  assert.ok(tables.length > 1);
+  assert.equal(tables.length, 1);
   assert.ok(tables[0].flagship);
-  assert.equal(tables[0].key, "lobbying/native_entity_lobbying_disclosures");
+  assert.equal(tables[0].key, "lobbying/lobbying");
   const standard = explorableCollections(PRESS);
   assert.equal(standard.length, 14);
   assert.ok(standard.some((c) => c.open) && standard.some((c) => !c.open), "a standard reader sees open and locked collections");
   // A collection whose flagship sample is not published says why rather
   // than silently contributing nothing.
   const owned = standard.find((c) => c.entry.id === "owned");
-  assert.equal(owned.flagship, null);
-  assert.match(owned.previewUnavailable, /not in the repository|withheld|no preview/i);
+  assert.equal(owned.flagship?.key, "owned/owned");
+  assert.equal(owned.previewUnavailable, null);
   // A collection presented by its record structure carries that structure,
   // and is not a collection missing its preview.
+  // Since 2026-10-04 each is one flat customer table: no record type to
+  // dispatch on, and its own source column (customerTables.js).
   for (const id of ["plot", "foundation-corporate-giving"]) {
     const described = standard.find((c) => c.entry.id === id);
-    assert.equal(described.flagship, null, id);
-    assert.deepEqual(described.tables, [], id);
+    assert.equal(described.flagship?.key, id + "/" + id, id);
+    assert.equal(described.tables.length, 1, id);
+    assert.equal(described.flagship.path, `/data/cedar/downloads/${id}.csv`, id);
+    assert.equal(contractFor(described.flagship.key).mapping_kind, "customer_table", id);
     assert.equal(described.previewUnavailable, null, id);
-    assert.ok(described.structure?.fields.length >= 5, id);
+    const { columns } = load(described.flagship.key);
+    const contract = contractFor(described.flagship.key);
+    assert.deepEqual(currentCodebookFor(described.flagship.key).fields.map((field) => field.column), columns, id);
+    assert.equal(contract.row_type_contracts ?? null, null, id);
+    assert.ok(!columns.includes("record_type"), id);
+    assert.ok(currentColumnPlan(described.flagship.key, contract, columns).defaults.includes(contract.source), id);
+  }
+  // Every collection's table is its customer table, never a raw preview.
+  for (const collection of standard) {
+    for (const table of collection.tables) {
+      assert.equal(table.path, `/data/cedar/downloads/${collection.entry.id}.csv`, table.key);
+      assert.match(table.sha256, /^[a-f0-9]{64}$/, table.key);
+    }
   }
 });
 
 // ── The publication rule ───────────────────────────────────────────────────
 
-const WITHHELD_UID = REGISTER.entities.find((e) => e.withheld).uid;
+const INDIVIDUAL_CLASS = "Individually Native-owned business";
 const NAMED = [...REGISTER.byUid.entries()].find(([, e]) => e.name);
 
-test("the register withholds exactly the names the publication rule withholds", () => {
+// The published register withholds no name since the owner ruling of
+// 2026-10-02 (an individually Native-owned firm is a business entity whatever
+// it is named after; code/cedar_domain.py may_publish_individual_native_field).
+// The viewer's masking path is kept for any future withholding, so it is
+// exercised on a copy of the register with one real uid's name set to null,
+// never on the published file, which has none.
+const MASKED = (() => {
+  const json = JSON.parse(readFileSync(`${PUBLIC}/data/cedar/register.json`, "utf8"));
+  const index = json.classes.findIndex((c) => c.code === INDIVIDUAL_CLASS);
+  const first = json.entities.find((e) => e[2] === index);
+  first[1] = null;
+  return { register: buildRegister(json), uid: first[0] };
+})();
+const WITHHELD_UID = MASKED.uid;
+
+test("the register publishes every individually owned firm's name (owner ruling 2026-10-02)", () => {
+  const json = JSON.parse(readFileSync(`${PUBLIC}/data/cedar/register.json`, "utf8"));
   const withheld = REGISTER.entities.filter((e) => e.withheld);
-  assert.equal(withheld.length, 45);
-  assert.ok(withheld.every((e) => e.type === "Individually Native-owned business" && e.name === null));
+  assert.equal(withheld.length, 0);
+  assert.equal(json.withheld_names, 0);
+  const firms = REGISTER.entities.filter((e) => e.type === INDIVIDUAL_CLASS);
+  assert.equal(firms.length, 45);
+  assert.ok(firms.every((e) => typeof e.name === "string" && e.name.trim()), "a firm of the class has no name");
   assert.equal(REGISTER.classes.length, 18);
   assert.equal(REGISTER.byUid.get("CE-00134-BX")?.name, "Cherokee Nation");
 });
 
-test("no served sample carries a withheld name in any cell", () => {
-  // The importer strikes such a sample before it is copied; this is the
-  // proof on the files public/ actually holds. On 2026-09-05 six did.
-  const names = new Set(
-    readFileSync(`${REPO}data/spine/cedar_entity_names.csv`, "utf8").split("\n").slice(1)
-      .map((line) => parseCsv(`a,b,c\n${line}`).rows[0]).filter(Boolean)
-      .filter((r) => r.c === "Individually Native-owned business").map((r) => r.b.trim().toLowerCase()),
-  );
-  assert.equal(names.size, 45);
-  for (const path of walk(`${PUBLIC}/data/cedar/samples`)) {
-    const { rows } = parseCsv(readFileSync(path, "utf8"));
-    for (const row of rows) {
-      for (const [column, value] of Object.entries(row)) {
-        assert.ok(!names.has(String(value).trim().toLowerCase()), `${path.slice(PUBLIC.length)} column ${column} carries a withheld name; run python scripts/import_cedar_manifest.py --audit`);
-      }
-    }
+test("the register's firm names are the spine's, name for name", () => {
+  // Until 2026-10-02 this test proved no served sample carried one of these
+  // names; the rule now publishes them, so the proof is that the register
+  // carries each spine name for the class unchanged.
+  const spine = readFileSync(`${REPO}data/spine/cedar_entity_names.csv`, "utf8").split("\n").slice(1)
+    .map((line) => parseCsv(`a,b,c\n${line}`).rows[0]).filter(Boolean)
+    .filter((r) => r.c === INDIVIDUAL_CLASS);
+  assert.equal(spine.length, 45);
+  for (const r of spine) {
+    assert.equal(REGISTER.byUid.get(r.a)?.name, r.b, `${r.a} is not published under its spine name`);
+    assert.equal(REGISTER.byUid.get(r.a)?.withheld, false);
   }
 });
 
 test("a withheld register name never falls back to the table's own name column", () => {
   const contract = { entity_uid: "cedar_uid", entity_name: "n", entity_type: "t" };
-  const entity = rowEntity({ cedar_uid: WITHHELD_UID, n: "Leaked Name LLC", t: "whatever" }, contract, REGISTER);
+  const entity = rowEntity({ cedar_uid: WITHHELD_UID, n: "Leaked Name LLC", t: "whatever" }, contract, MASKED.register);
   assert.equal(entity.name, null);
   assert.equal(entity.withheld, true);
-  assert.equal(entity.type, "Individually Native-owned business");
+  assert.equal(entity.type, INDIVIDUAL_CLASS);
   // And the masked row is what every other path reads: the table view, the
   // record, the search and the export.
-  const [item] = universalRows("lobbying/native_entity_lobbying_disclosures", [{ cedar_uid: WITHHELD_UID, canonical_name: "Leaked Name LLC", filing_year: "2020" }], REGISTER);
+  const [item] = universalRows("lobbying/native_entity_lobbying_disclosures", [{ cedar_uid: WITHHELD_UID, canonical_name: "Leaked Name LLC", filing_year: "2020" }], MASKED.register);
   assert.equal(item.row.canonical_name, WITHHELD_TEXT);
   assert.equal(filterRows([item], { ...EMPTY_CUT, q: "leaked" }).length, 0);
   assert.ok(!cutCsv([item], { view: "table", columns: ["cedar_uid", "canonical_name"] }).includes("Leaked"));
@@ -445,6 +500,42 @@ test("supersession is read from the table and the replacement's link follows the
   assert.equal(excludedBy(items, EMPTY_CUT).superseded, items.filter((i) => i.superseded).length);
 });
 
+test("the served lobbying contract reads the producer's replacement column, not the retired filing_uuid name", () => {
+  // The 2026-10-01 release renamed superseded_by_filing_uuid to
+  // superseded_by_record_id; until 2026-10-02 the rule knew only the old name,
+  // so the contract carried superseded_by: null and no superseded filing ever
+  // offered its replacement.
+  const key = "lobbying/lobbying";
+  const contract = currentContractFor(key);
+  const { columns } = load(key);
+  assert.ok(columns.includes("superseded_by_record_id"), "the served header carries the producer's column");
+  assert.equal(contract.superseded_by, "superseded_by_record_id");
+  assert.equal(contract.superseded, "is_superseded");
+  const replacement = rowReplacement({ superseded_by_record_id: "LDA-2", is_superseded: "1" }, contract);
+  assert.equal(replacement?.id, "LDA-2");
+  assert.equal(rowReplacement({ superseded_by_record_id: "" }, contract), null);
+  // The derived rule still reads the historical name where a legacy table carries it.
+  assert.equal(deriveContract(["superseded_by_filing_uuid", "cedar_uid"]).superseded_by, "superseded_by_filing_uuid");
+  assert.equal(deriveContract(["superseded_by_record_id", "cedar_uid"]).superseded_by, "superseded_by_record_id");
+});
+
+test("an override keyed to a table the manifest does not declare is refused, and the live file declares none", () => {
+  const manifest = JSON.parse(readFileSync(`${REPO}data/cedar/collections.manifest.json`, "utf8"));
+  const overrides = JSON.parse(readFileSync(`${REPO}data/cedar/explore.overrides.json`, "utf8"));
+  // Every 2026-09-05 key matched a 2026-09-02 table and nothing after the
+  // 2026-10-01 rename; they are retired under a `_` key, not matched.
+  assert.deepEqual(unknownOverrideKeys(overrides, manifest), []);
+  const retired = overrides["_retired_2026-10-02"].tables;
+  assert.equal(Object.keys(retired).length, 27);
+  assert.deepEqual(unknownOverrideKeys(retired, manifest), Object.keys(retired).sort());
+  assert.ok(Object.keys(retired).includes("lobbying/native_entity_lobbying_disclosures"));
+  // The guard names the stale key and leaves a current one and prose alone.
+  assert.deepEqual(
+    unknownOverrideKeys({ "lobbying/native_entity_lobbying_disclosures": {}, "lobbying/lobbying": {}, _note: "x" }, manifest),
+    ["lobbying/native_entity_lobbying_disclosures"],
+  );
+});
+
 test("the observation is values joined, pipes read as lists, and never runs past its limit", () => {
   const contract = { observation: ["a", "b", "c"] };
   assert.equal(observationOf({ a: "One", b: "", c: "X|Y" }, contract), "One · X, Y");
@@ -481,7 +572,7 @@ test("a cut round-trips through the URL, and a permalink of nothing is empty", (
   };
   const back = decodeCut(encodeCut(cut));
   assert.deepEqual(back, { ...cut, unknown: [], dropped: [] });
-  const single = { ...EMPTY_CUT, collections: ["lobbying"], table: "lobbying/native_entity_lobbying_disclosures" };
+  const single = { ...EMPTY_CUT, collections: ["lobbying"], table: flagshipKey("lobbying") };
   assert.deepEqual(decodeCut(`?${encodeCut(single)}`), { ...single, unknown: [], dropped: [] });
 });
 
@@ -596,8 +687,8 @@ test("the caption says the cut in words and never invents a filter", () => {
     { ...EMPTY_CUT, collections: ["lobbying"], entities: ["CE-00134-BX"], years: [2015, 2024], q: "water", history: true },
     { register: REGISTER, shown: 3, total: 10 },
   );
-  assert.equal(said, "Advocacy · Cherokee Nation · 2015–2024 · “water” · including superseded versions · 3 of 10 sample records");
-  assert.equal(describeCut({ ...EMPTY_CUT, entities: [WITHHELD_UID] }, { register: REGISTER }), `all collections · ${WITHHELD_UID} (name withheld)`);
+  assert.equal(said, "Advocacy · Cherokee Nation · 2015–2024 · “water” · including superseded versions · 3 of 10 example records");
+  assert.equal(describeCut({ ...EMPTY_CUT, entities: [WITHHELD_UID] }, { register: MASKED.register }), `all collections · ${WITHHELD_UID} (name withheld)`);
   // The question to Cedar asks about the collection, not about rows it has not seen.
   assert.match(questionFor({ ...EMPTY_CUT, collections: ["lobbying"] }, REGISTER), /What does this collection cover/);
 });
@@ -652,7 +743,12 @@ test("every flagship sample reads through its contract without a thrown row", ()
     const f = facets(items, REGISTER);
     if (contractFor(key).year_basis) assert.ok(f.dated > 0, `${key}: no row has a year`);
     assert.ok(items.every((item) => item.observation.length > 0), `${key}: a row has an empty observation`);
-    assert.ok(items.every((item) => item.recordId), `${key}: a row has no record id`);
+    if (Object.hasOwn(POSITIONAL, dataset.id)) {
+      assert.equal(contractFor(key).record_id, null, key);
+      assert.equal(new Set(items.map((item) => item.id)).size, items.length, `${key}: positional ids collide`);
+    } else {
+      assert.ok(items.every((item) => item.recordId), `${key}: a row has no record id`);
+    }
   }
   // A Cedar Press+ reader's plan reaches all fourteen and a Cedar Press
   // reader's seven, the two new collections included like any other on
@@ -672,7 +768,7 @@ test("a table with no identifier column has no record id, and its rows keep dist
   // Codex, PR #63: the first column is not an identifier, and a repeated
   // value there gave ten records one id.
   const key = "funding/federal_funding_rulings_from_dofile";
-  assert.equal(contractFor(key)?.record_id, null);
+  assert.equal(contractFor(key)?.record_id ?? null, null);
   const items = universalRows(key, [{ identifier_type: "x" }, { identifier_type: "x" }], REGISTER);
   assert.notEqual(items[0].id, items[1].id);
   assert.equal(items[0].recordId, null);
@@ -682,27 +778,28 @@ test("a table with no identifier column has no record id, and its rows keep dist
 });
 
 test("the codebook names real columns in every flagship, with a label and a meaning each, and its document is current", () => {
-  const script = fileURLToPath(new URL("../../../scripts/codebook-markdown.mjs", import.meta.url));
-  const run = spawnSync(process.execPath, [script, "--check"], { encoding: "utf8" });
+  const script = fileURLToPath(new URL("../../../scripts/docs-markdown.mjs", import.meta.url));
+  const run = spawnSync(process.execPath, [script, "--kind", "codebook", "--check"], { encoding: "utf8" });
   assert.equal(run.status, 0, run.stderr || run.stdout);
   for (const dataset of LAUNCH_COLLECTION) {
     const key = flagshipKey(dataset.id);
     if (!key) continue;
-    const book = CODEBOOK[key];
+    // The dictionary a reader sees is the customer table's own
+    // (explore.codebookFor): the producer preview's entry describes the raw
+    // multi-table layout, which is no longer served.
+    const book = currentCodebookFor(key);
     assert.ok(book, `${key} has no codebook entry`);
     assert.ok(book.row && book.where, `${key}: no row or where`);
+    assert.doesNotMatch(book.row, /record_type|record_grain/, `${key}: the row names the raw layout`);
     const { columns } = load(key);
     for (const field of book.fields) {
       assert.ok(field.label && field.meaning, `${key}.${field.column} lacks a label or meaning`);
-      if (!field.add) assert.ok(columns.includes(field.column), `${key}: codebook column ${field.column} is not in the sample`);
+      assert.ok(columns.includes(field.column), `${key}: codebook column ${field.column} is not in the sample`);
     }
-    // The identity block leads, in the register's order.
-    // (plural, and with the role in brackets, where a row names several)
-    const lead = book.fields.slice(0, 4).map((f) => f.label);
-    assert.match(lead[0], /^Cedar IDs?/, key);
-    assert.match(lead[1], /^Native entit/, key);
-    assert.match(lead[2], /^Entity types?/, key);
-    if (/^(cedar_)?entity_roles?$/.test(book.fields[3].column)) assert.match(lead[3], /^Entity roles?/, key);
+    for (const packaging of ["record_type", "record_key", "record_grain"]) {
+      assert.ok(!columns.includes(packaging), `${key}: the customer table carries ${packaging}`);
+    }
+    assert.deepEqual(book.fields.map(f => f.column), columns, `${key}: exact shipped dictionary`);
     // Every column the contract declares as a default is a column the codebook explains.
     const listed = new Set(book.fields.map((f) => f.column));
     for (const column of contractFor(key).default_columns ?? []) assert.ok(listed.has(column), `${key}: default column ${column} is not in the codebook`);
@@ -719,7 +816,10 @@ test("the codebook names real columns in every flagship, with a label and a mean
 
 test("CONTRACTS is the derived file, frozen, and the withheld tables are gone from it", () => {
   assert.ok(Object.isFrozen(CONTRACTS));
-  assert.ok(Object.keys(CONTRACTS).length > 100);
+  const published = LAUNCH_COLLECTION.flatMap(dataset =>
+    collectionTables(dataset.id).filter(t => t.sample_path).map(t => tableKey(dataset.id, t.table)));
+  assert.deepEqual(Object.keys(CONTRACTS).sort(), published.sort());
+  assert.equal(Object.keys(CONTRACTS).length, 14);
   assert.equal(CONTRACTS["owned/individual_native_firm_register"], undefined);
 });
 
@@ -730,17 +830,36 @@ const OPENING_PLURAL = FIELD_MAP_JSON.opening.plural;
 // Mirrors cedar_publication.PROHIBITED_PUBLIC_COLUMN: a competing entity
 // identifier or build bookkeeping never reaches an approved header.
 const PROHIBITED_PUBLIC_COLUMN = /duns|neid|cicd|casino[ _-]?city|tribe_id|_candidate|proposed|resolver|built_date|fetched_date|retrieved_date|promoted_date|artifact_mtime/i;
+// Columns the publish-time presentation layer ADDS to a flagship before the
+// field map projects it, so the map must decide them although the raw sample
+// (an excerpt of the canonical flagship) never carries them. Read from
+// cedar_publication.py itself, never restated: deals_public_view appends
+// DEALS_PRESENTATION_COLUMNS and the `research_note` target they qualify.
+const PUBLICATION_SOURCE = readFileSync(fileURLToPath(new URL("../../../code/cedar_publication.py", import.meta.url)), "utf8");
+const DEALS_PRESENTATION_COLUMNS = [...(/^DEALS_PRESENTATION_COLUMNS = \(([^)]*)\)/m.exec(PUBLICATION_SOURCE)?.[1] ?? "").matchAll(/"([^"]+)"/g)].map((m) => m[1]);
+const PUBLISH_TIME_COLUMNS = { deals: [...DEALS_PRESENTATION_COLUMNS, "research_note"] };
+
+test("the publish-time deals columns are read from cedar_publication.py, not guessed", () => {
+  assert.deepEqual(DEALS_PRESENTATION_COLUMNS, ["Caveat", "Candidate_Status"]);
+});
 
 test("the field map decides every column of every sampled flagship in the owner's exact order, retires every competing identifier, and the codebook lists exactly what ships", () => {
-  const script = fileURLToPath(new URL("../../../scripts/field-map-markdown.mjs", import.meta.url));
-  const run = spawnSync(process.execPath, [script, "--check"], { encoding: "utf8" });
+  const script = fileURLToPath(new URL("../../../scripts/docs-markdown.mjs", import.meta.url));
+  const run = spawnSync(process.execPath, [script, "--kind", "field-map", "--check"], { encoding: "utf8" });
   assert.equal(run.status, 0, run.stderr || run.stdout);
   assert.deepEqual(OPENING_SINGULAR, ["cedar_uid", "canonical_name", "entity_class", "cedar_entity_role"]);
   assert.deepEqual(OPENING_PLURAL, ["cedar_uids", "canonical_names", "entity_classes", "entity_roles", "entity_names_as_published"]);
-  // The owner's column counts, exactly; Funding is 39 because DUNS is retired.
-  const EXPECTED = { funding: 39, "federal-register": 33, legislation: 30, deals: 33, nagpra: 52, lobbying: 38, contractors: 49, subcontracting: 54, "natural-resources": 38, owned: 32, need: 30, nonprofits: 24 };
+  // The owner's column counts, exactly; Funding is 39 because DUNS is retired,
+  // and Federal Register is 34 because the producer now builds
+  // consultation_record_key at write time (field_map.json, 6f620ec).
+  const EXPECTED = { funding: 39, "federal-register": 34, legislation: 30, deals: 33, nagpra: 52, lobbying: 38, contractors: 49, subcontracting: 54, "natural-resources": 38, owned: 32, need: 30, nonprofits: 24 };
+  // This map records the original twelve curated schemas. Current producer
+  // spreadsheets are checked against their exact codebooks and type maps in
+  // currentProducerPresentation.test.js, including Giving and PLOT.
+  const historical = LAUNCH_COLLECTION.filter((dataset) => Object.hasOwn(EXPECTED, dataset.id));
+  assert.equal(historical.length, Object.keys(EXPECTED).length);
   let sampled = 0;
-  for (const dataset of LAUNCH_COLLECTION) {
+  for (const dataset of historical) {
     const map = Object.values(FIELD_MAP).find((t) => t.collection === dataset.id);
     assert.ok(map, `${dataset.id} has no field map`);
     assert.equal(map.order.length, EXPECTED[dataset.id], `${dataset.id}: column count`);
@@ -749,12 +868,29 @@ test("the field map decides every column of every sampled flagship in the owner'
     assert.deepEqual(map.order.slice(0, opening.length), opening, dataset.id);
     for (const name of map.order) assert.doesNotMatch(name, PROHIBITED_PUBLIC_COLUMN, `${dataset.id}: ${name} must not ship`);
     for (const c of map.default_viewer) assert.ok(map.order.includes(c), `${dataset.id}: default viewer column ${c} is not in the order`);
-    const key = flagshipKey(dataset.id);
-    if (!key) continue;
+    const key = Object.keys(FIELD_MAP).find(k => FIELD_MAP[k] === map);
+    if (!legacyTables(dataset.id).some(t => t.key === key)) continue;
     sampled += 1;
     const { columns } = load(key);
     const decided = map.fields.map((f) => f.column);
-    assert.deepEqual([...decided].sort(), [...columns].sort(), `${key}: the map and the sample header disagree`);
+    const publishTime = PUBLISH_TIME_COLUMNS[dataset.id] ?? [];
+    for (const name of publishTime) {
+      assert.ok(decided.includes(name), `${key}: publish-time column ${name} has no field-map decision`);
+      assert.ok(!columns.includes(name), `${key}: publish-time column ${name} appears in the raw sample`);
+    }
+    // A column the combine step synthesizes from a sibling table of the same
+    // collection (`<sibling>__<column>` or the count `n_<sibling>`) is decided
+    // by the map but is not a column of the flagship's raw sample. It may
+    // only be decided `internal`: a synthesized join never ships unreviewed.
+    const siblings = legacyTables(dataset.id).map((t) => t.key.split("/")[1]).filter((stem) => stem !== key.split("/")[1]);
+    const synthesized = (name) => siblings.some((stem) => name === `n_${stem}` || name.startsWith(`${stem}__`));
+    for (const f of map.fields) {
+      if (!columns.includes(f.column) && synthesized(f.column)) {
+        assert.equal(f.decision, "internal", `${key}.${f.column}: a synthesized join column must stay internal`);
+      }
+    }
+    const raw = decided.filter((name) => !publishTime.includes(name) && (columns.includes(name) || !synthesized(name)));
+    assert.deepEqual([...raw].sort(), [...columns].sort(), `${key}: the map and the sample header disagree`);
     assert.equal(new Set(decided).size, decided.length, `${key}: a column is decided twice`);
     for (const f of map.fields) {
       assert.ok(FIELD_MAP_DECISIONS.includes(f.decision), `${key}.${f.column}: unknown decision ${f.decision}`);
@@ -801,18 +937,26 @@ test("the field map decides every column of every sampled flagship in the owner'
     const lead = book.fields.slice(0, expectedLead.length).map((f) => f.label);
     assert.deepEqual(lead, expectedLead, key);
   }
-  assert.equal(sampled, 11);
-  // The unsampled flagship is decided from the builder's 53-field declaration.
+  assert.equal(sampled, 10);
+  assert.deepEqual(legacyTables("need"), []);
+  const reviewedNeed = currentContractFor(flagshipKey("need"));
+  // The customer table has no record key; NEED rows are addressed by position.
+  assert.equal(reviewedNeed.record_id, null);
+  assert.equal(reviewedNeed.entity_uid, null);
+  // The historical NEED graph was held; the current finite reviewed base is
+  // covered above. Owned's old unsampled flagship used a builder declaration.
   const owned = FIELD_MAP["owned/native_owned_businesses"];
   assert.equal(owned.columns_today, 53);
   assert.match(owned.header_source, /builder declaration/);
   assert.match(owned.entity_role, /certifying_authority/);
-  assert.ok(owned.fields.some((f) => f.column === "nation_id" && f.retire?.disposition === "adjudicate"));
+  // nation_id is source-association context, not the business's identity or
+  // its certifier (1ac3272): preserved internally, never shipped or equated.
+  assert.ok(owned.fields.some((f) => f.column === "nation_id" && f.decision === "internal" && f.retire?.disposition === "internal_crosswalk"));
 });
 
 test("a JSON-array cell reads as a list in the viewer, before and after the export changes shape", () => {
   const contract = contractFor("legislation/native_bills");
-  const register = REGISTER;
+  const register = MASKED.register;
   const pipe = { entity_cedar_uids: `${NAMED[0]}|${WITHHELD_UID}`, entity_names: "A|B" };
   const json = { entity_cedar_uids: JSON.stringify([NAMED[0], null, WITHHELD_UID]), entity_names: JSON.stringify(["A", null, "B"]) };
   assert.deepEqual(rowUids(pipe, contract), [NAMED[0], WITHHELD_UID]);
@@ -1048,18 +1192,20 @@ test("the contract guard fires on each violation it names, and passes a clean ov
 // ── The researcher guides ──────────────────────────────────────────────────
 
 test("every collection has a researcher guide with the sections the specification requires, and the guides are current", async () => {
-  const script = fileURLToPath(new URL("../../../scripts/guides-markdown.mjs", import.meta.url));
-  const run = spawnSync(process.execPath, [script, "--check"], { encoding: "utf8" });
+  const script = fileURLToPath(new URL("../../../scripts/docs-markdown.mjs", import.meta.url));
+  const run = spawnSync(process.execPath, [script, "--kind", "guides", "--check"], { encoding: "utf8" });
   assert.equal(run.status, 0, run.stderr || run.stdout);
-  const { SECTIONS } = await import("../../../scripts/guides-markdown.mjs");
+  const { SECTIONS } = await import("../../../scripts/docs-markdown.mjs");
   const dir = fileURLToPath(new URL("../../../docs/guides/", import.meta.url));
   const ids = LAUNCH_COLLECTION.map((d) => d.id);
-  assert.equal(ids.length, 12);
+  assert.equal(ids.length, 14);
   for (const id of ids) {
     const text = readFileSync(`${dir}${id}.md`, "utf8");
     for (const section of SECTIONS) assert.ok(text.includes(`\n## ${section}\n`), `${id}: no "${section}" section`);
     // The opening block is in every dictionary, and no retired identifier or metadata row is promised.
-    assert.match(text, /`cedar_uid`, `canonical_name`, `entity_class` and `cedar_entity_role`|`cedar_uids`, `canonical_names`, `entity_classes`, `entity_roles` and `entity_names_as_published`/, `${id}: opening block`);
+    for (const column of ["record_type", "record_key", "record_grain"]) {
+      assert.ok(text.includes("| `" + column + "`"), `${id}: missing producer grain column ${column}`);
+    }
     // Cedar's retired identity schemes never appear in a guide's text (§1);
     // the federal DUNS-to-UEI transition may be named because it explains why CAGE is kept.
     assert.doesNotMatch(text, /\bneid\b|\bcicd\b/i, `${id}: names a retired identifier`);
@@ -1067,8 +1213,8 @@ test("every collection has a researcher guide with the sections the specificatio
     // A sampled flagship's dictionary lists its whole approved header.
     const key = flagshipKey(id);
     if (key) {
-      const map = FIELD_MAP[key];
-      for (const column of map.order) assert.ok(text.includes(`| \`${column}\``), `${id}: dictionary lacks ${column}`);
+      const book = CURRENT_CODEBOOK[key];
+      for (const column of book.fields.map(f => f.column)) assert.ok(text.includes(`| \`${column}\``), `${id}: dictionary lacks ${column}`);
     }
   }
 });

@@ -26,6 +26,7 @@ convenient.
 
 from __future__ import annotations
 
+import hmac
 import json
 import os
 import re
@@ -40,7 +41,6 @@ from cedar_press import subscribers
 CODE_INVALID = "PRESS_CODE_INVALID"
 CODE_USED = "PRESS_CODE_USED"
 CODE_EXPIRED = "PRESS_CODE_EXPIRED"
-CODE_EMAIL_MISMATCH = "PRESS_CODE_EMAIL_MISMATCH"
 EMAIL_IN_USE = "EMAIL_IN_USE"
 
 _SEPARATORS = re.compile(r"[\s-]+")
@@ -139,10 +139,11 @@ def check(
     Returns ``(issued, None)`` when it may, and ``(None, error_code)`` when it
     may not.
 
-    The order is deliberate. "Not recognized" comes before every other
-    answer, so a code that was never issued cannot be told apart from one
-    issued to somebody else: the alternative leaks which codes exist to
-    anyone willing to guess.
+    The order is deliberate. "Not recognized" is the answer until the code
+    AND the address both match, so a code that was never issued cannot be
+    told apart from one issued, spent or expired for somebody else: the
+    alternative leaks which codes exist to anyone willing to guess. "Used"
+    and "expired" are said only to the address the code was issued to.
     """
     code = normalize(raw_code)
     if not is_plausible(code):
@@ -166,12 +167,19 @@ def check(
         tier=found.tier,
         expires=found.expires_on.isoformat() if found.expires_on else None,
     )
+    # The address before anything else about the code. "Used" and "expired"
+    # are facts about a code that exists, so telling them to a caller who
+    # does not also hold the address it was issued to would answer the
+    # question the first check refuses to: which codes are real. Only the
+    # code's owner learns its state.
+    if not hmac.compare_digest(
+        issued.email.encode("utf-8"), str(email or "").strip().lower().encode("utf-8")
+    ):
+        return None, CODE_INVALID
     if found.spent or code in _spent:
         return None, CODE_USED
     if issued.has_expired(today or date.today()):
         return None, CODE_EXPIRED
-    if issued.email != str(email or "").strip().lower():
-        return None, CODE_EMAIL_MISMATCH
     return issued, None
 
 

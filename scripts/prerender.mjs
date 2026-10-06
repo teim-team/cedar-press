@@ -45,12 +45,17 @@ async function main() {
     console.log("prerender: @playwright/test not installed; leaving the app shell as built");
     return;
   }
-  const server = spawn("npx", ["vite", "preview", "--port", String(PORT), "--strictPort"], { cwd: ROOT, stdio: "ignore" });
+  const server = spawn(process.execPath, [fileURLToPath(new URL("../node_modules/vite/bin/vite.js", import.meta.url)), "preview", "--port", String(PORT), "--strictPort"], {
+    cwd: ROOT, stdio: "ignore", windowsHide: true, shell: false,
+  });
+  let startError;
+  server.on("error", (error) => { startError = error; });
   try {
     await waitFor(`http://localhost:${PORT}/`);
+    if (startError) throw startError;
     let browser;
     try {
-      browser = await chromium.launch();
+      browser = await chromium.launch({ channel: process.env.CEDAR_BROWSER_CHANNEL || undefined });
     } catch (error) {
       console.log(`prerender: no browser available (${String(error).split("\n")[0]}); leaving the app shell as built`);
       return;

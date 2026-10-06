@@ -1,0 +1,2359 @@
+{
+  "schema_version": 1,
+  "evidence": {
+    "producer-financial-ce736a2": {
+      "repository": "producer",
+      "path": "src/lumecon_data/collections/financial.py",
+      "sha256": "dc5d6cea008915d714b77c7d6044b132defb82cac52d6b2cf91ba86cbfe0d1c1",
+      "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+    },
+    "producer-legislation-ce736a2": {
+      "repository": "producer",
+      "path": "src/lumecon_data/collections/legislation.py",
+      "sha256": "1e95dbc21a47b45c969cb42bed28da829efd2d6df20983027804363a4cff142e",
+      "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+    },
+    "producer-deals-ce736a2": {
+      "repository": "producer",
+      "path": "src/lumecon_data/collections/deals.py",
+      "sha256": "5e5cf3a4b182158427239203889b10c9fb6b765851e875e01bbeeb9ecf12bb5b",
+      "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+    },
+    "producer-press-candidates-ce736a2": {
+      "repository": "producer",
+      "path": "src/lumecon_data/collections/press_candidates.py",
+      "sha256": "b100caf0577f5457b82a580fa20308a4bc34097d5e8e8d97cbbc1bacdf8f2663",
+      "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+    },
+    "producer-nonprofits-ce736a2": {
+      "repository": "producer",
+      "path": "src/lumecon_data/collections/nonprofits.py",
+      "sha256": "f70b772dca1d1190389b0a011d4b6962cbb43d1e3634c512f03c056afd92397c",
+      "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+    },
+    "producer-natural-resources-ce736a2": {
+      "repository": "producer",
+      "path": "src/lumecon_data/collections/natural_resources.py",
+      "sha256": "94b24db110a39e68550741825504b096537c0eddae93b7edbd8cafb1c7c8df7a",
+      "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+    },
+    "press-field-map-d14e7dd": {
+      "repository": "press",
+      "path": "data/cedar/field_map.json",
+      "sha256": "9ef6fa78fc47c5c34fd48408e6b0cd09988c2533b2893fdf6cc23d74d1ff751b",
+      "revision": "d14e7dd71a380ea30a0310b4e200b17964d65dde"
+    },
+    "producer-federal-register-ce736a2": {
+      "repository": "producer",
+      "path": "src/lumecon_data/collections/federal_register.py",
+      "sha256": "a93464727632c038d50071735c4b5198ac548dcd585c5533f76cb6f0bc5001ea",
+      "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+    },
+    "producer-projection-ce736a2": {
+      "repository": "producer",
+      "path": "src/lumecon_data/collections/projection.py",
+      "sha256": "b8f23381ea261dfb23f1058a474052e818ddad029db2fe931d520a10ac50e6b7",
+      "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+    },
+    "owned-producer-projection": {
+      "repository": "producer",
+      "path": "src/lumecon_data/collections/press_candidates.py",
+      "sha256": "b100caf0577f5457b82a580fa20308a4bc34097d5e8e8d97cbbc1bacdf8f2663",
+      "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+    },
+    "owned-producer-field-projection": {
+      "repository": "producer",
+      "path": "src/lumecon_data/collections/projection.py",
+      "sha256": "b8f23381ea261dfb23f1058a474052e818ddad029db2fe931d520a10ac50e6b7",
+      "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+    },
+    "owned-producer-intake-contract": {
+      "repository": "producer",
+      "path": "intake/profiles/owned.json",
+      "sha256": "12f4eac165e235ded9ff67eb9481bd8349d5bd1175906539f57a559bf069d9bc",
+      "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+    },
+    "owned-press-field-map": {
+      "repository": "press",
+      "path": "data/cedar/field_map.json",
+      "sha256": "9ef6fa78fc47c5c34fd48408e6b0cd09988c2533b2893fdf6cc23d74d1ff751b",
+      "revision": "d14e7dd71a380ea30a0310b4e200b17964d65dde"
+    },
+    "owned-source-field-semantics": {
+      "repository": "press",
+      "path": "code/330_build_native_owned_businesses.py",
+      "sha256": "839806a0080241dc5368949a67d8c9fae4ceb3f1c3fa1e5beb4096b1e4d58301",
+      "revision": "d14e7dd71a380ea30a0310b4e200b17964d65dde"
+    },
+    "producer-federal-register-d780401": {
+      "repository": "producer",
+      "path": "src/lumecon_data/collections/federal_register.py",
+      "sha256": "5a7fc2511c0e955cd782ff5dbacdcfcc6db20a172a2bef1c256615ad1ff01790",
+      "revision": "d780401155ef30c1bd1b9af5f7119ea6020bad06"
+    },
+    "producer-legislation-d780401": {
+      "repository": "producer",
+      "path": "src/lumecon_data/collections/legislation.py",
+      "sha256": "1b826d0b124dcfe0513066261497f38606bab69620b3c387dbb673cf02dc7de5",
+      "revision": "d780401155ef30c1bd1b9af5f7119ea6020bad06"
+    },
+    "owned-source-field-semantics-3b175bc": {
+      "repository": "press",
+      "path": "code/330_build_native_owned_businesses.py",
+      "sha256": "05813cc0bf8b255398e1364811b7385e64009d170b2abc43d42e693839b96a1b",
+      "revision": "3b175bcdc9e885923e19729d08fa06857d95eac0"
+    }
+  },
+  "collections": {
+    "funding": {
+      "cedar_entity_role": {
+        "meaning": "Role of the linked Cedar entity in this assistance transaction: recipient when cedar_uid is present, otherwise blank. The role describes this row's recipient association, not the identity of every organization named in the award.",
+        "evidence": [
+          "producer-financial-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/financial.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        }
+      },
+      "entity_class": {
+        "meaning": "Entity class from the pinned Cedar register for cedar_uid. Blank when no Cedar entity reference is published; it does not classify the unlinked recipient or establish ownership.",
+        "evidence": [
+          "producer-financial-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/financial.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        }
+      },
+      "performance_geography_status": {
+        "meaning": "Availability of the source place-of-performance county assignment: placed when a county name or FIPS is present, placed_ambiguous when that assignment also has the source ambiguity flag, and unplaced when neither county field is present. This is a geography diagnostic, not verification of where services occurred.",
+        "evidence": [
+          "producer-financial-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/financial.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        }
+      },
+      "recipient_geography_status": {
+        "meaning": "Availability of the recipient's source county assignment: placed when a county name or FIPS is present, placed_ambiguous when the source ambiguity flag is set, and unplaced when neither is present. It describes recipient geography, separately from place of performance.",
+        "evidence": [
+          "producer-financial-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/financial.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        }
+      },
+      "recipient_type": {
+        "meaning": "Readable recipient categories decoded from the pinned assistance business-type code dictionary and reconciled with the source descriptions. Multiple categories are separated by semicolons; conflicting codes or descriptions are refused rather than silently preferred.",
+        "evidence": [
+          "producer-financial-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/financial.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        }
+      },
+      "research_note": {
+        "meaning": "Space for an additional factual qualification affecting interpretation of the transaction. The current funding projection writes this field blank; a blank is not an independent verification or a statement that the record has no limitations.",
+        "evidence": [
+          "producer-financial-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/financial.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        }
+      },
+      "source_system": {
+        "meaning": "Source-system label for the accepted assistance transaction lineage. The current projection writes usaspending after requiring a recognized USAspending bulk-download or award-archive source vintage.",
+        "evidence": [
+          "producer-financial-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/financial.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        }
+      },
+      "source_url": {
+        "meaning": "USAspending award-page URL constructed from the transaction's original assistance award unique key. It identifies the parent award page rather than a separate URL for each incremental transaction.",
+        "evidence": [
+          "producer-financial-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/financial.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        }
+      }
+    },
+    "legislation": {
+      "canonical_names": {
+        "meaning": "JSON array of names from the pinned Cedar register, in the same order as cedar_uids. These are canonical entity names, not transcriptions of names appearing in the bill.",
+        "evidence": [
+          "producer-legislation-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/legislation.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        }
+      },
+      "cedar_uids": {
+        "meaning": "JSON array of existing Cedar entity references carried by the bill's source entity list and validated against the pinned register. Positions align with the other entity arrays; collective topical scopes are represented separately and do not mint entity references.",
+        "evidence": [
+          "producer-legislation-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/legislation.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        }
+      },
+      "collective_scopes": {
+        "meaning": "JSON value describing collective topical coverage. A general bill carries scope objects with relationship general_subject and unknown as-of date; a tribe-specific bill carries an empty array; an unevaluated bill scope is blank (producer transform legislation-projection-v3; the earlier v2 wrote the text null). These objects do not establish legal applicability or population membership at a particular date.",
+        "evidence": [
+          "producer-legislation-d780401"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/legislation.py",
+          "revision": "d780401155ef30c1bd1b9af5f7119ea6020bad06"
+        }
+      },
+      "entity_classes": {
+        "meaning": "JSON array of registered entity classes aligned position by position with cedar_uids. It describes the linked entities, not a classification of all people or organizations potentially affected by the bill.",
+        "evidence": [
+          "producer-legislation-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/legislation.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        }
+      },
+      "entity_link_statuses": {
+        "meaning": "JSON array of source linkage tiers aligned with cedar_uids. Missing tiers are null and excess tiers are omitted to preserve array alignment; the labels are source assessments rather than new identity adjudications.",
+        "evidence": [
+          "producer-legislation-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/legislation.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        }
+      },
+      "entity_names_as_published": {
+        "meaning": "JSON array reserved for names as stated in the source, aligned with cedar_uids. The current projection writes null in each position because it does not extract those source-name strings; canonical_names must not be substituted as though quoted from the bill.",
+        "evidence": [
+          "producer-legislation-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/legislation.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        }
+      },
+      "entity_roles": {
+        "meaning": "JSON array aligned with cedar_uids; the current bill projection assigns named in the bill to each linked entity. This role does not assert that a bill applies to, benefits, or was sponsored by that entity.",
+        "evidence": [
+          "producer-legislation-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/legislation.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        }
+      },
+      "research_note": {
+        "meaning": "Additional factual qualification affecting interpretation of a bill record, when supplied by the declared public source fields. The current computed-field rule initializes it blank; blank does not certify source completeness or legal applicability.",
+        "evidence": [
+          "producer-legislation-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/legislation.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        }
+      },
+      "source_system": {
+        "meaning": "Source-system label for the bill record. The current projection writes congress.gov.",
+        "evidence": [
+          "producer-legislation-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/legislation.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        }
+      },
+      "source_url": {
+        "meaning": "Official Congress.gov bill-page URL constructed from the validated Congress number, bill type, and bill number. The coordinates must agree with bill_id; this is the bill's landing page, not a link to a particular action.",
+        "evidence": [
+          "producer-legislation-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/legislation.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        }
+      }
+    },
+    "deals": {
+      "additional_sources": {
+        "meaning": "JSON array containing the optional secondary source as an object with url and normalized source_type. An empty array means no secondary source was supplied; the primary source remains in the separate primary-source fields.",
+        "evidence": [
+          "producer-deals-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/deals.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        }
+      },
+      "cedar_entity_role": {
+        "meaning": "Reserved role of the linked Cedar entity in the transaction. The current deals projection deliberately leaves it blank because an entity association alone does not establish ownership or a particular party's role.",
+        "evidence": [
+          "producer-deals-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/deals.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        }
+      },
+      "deal_status": {
+        "meaning": "Controlled status taken from the source's normalized status or derived through the reviewed source-status crosswalk. UNCLASSIFIED preserves an unresolved status and must not be read as closed, completed, or financially realized.",
+        "evidence": [
+          "producer-deals-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/deals.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        }
+      },
+      "deal_type": {
+        "meaning": "Controlled transaction category taken from the source's transaction_type or derived through the reviewed Deal_Category crosswalk. Unresolved or unrecognized categories are held rather than assigned a guessed transaction type.",
+        "evidence": [
+          "producer-deals-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/deals.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        }
+      },
+      "entity_class": {
+        "meaning": "Entity class from the pinned Cedar register for the existing linked cedar_uid; blank when no entity reference is published. This class describes the associated entity and does not establish its ownership share or role in the transaction.",
+        "evidence": [
+          "producer-deals-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/deals.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        }
+      },
+      "research_note": {
+        "meaning": "Interpretive qualification assembled from substantive source notes, reviewed caveats, candidate and date-basis information, and source category/status context. It includes explicit cautions for overlapping project milestones or announcement rounds where applicable; it is not evidence that every reported amount is additive.",
+        "evidence": [
+          "producer-deals-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/deals.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        }
+      },
+      "transaction_structure": {
+        "meaning": "Source Event_Type text carried into the public transaction-structure field. It preserves the source's event characterization and is not an independently inferred legal, financing, or ownership structure.",
+        "evidence": [
+          "producer-deals-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/deals.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        }
+      }
+    },
+    "nagpra": {
+      "additional_institution_names": {
+        "meaning": "JSON array of institution names listed beyond the designated institution_name. Names are split from the source institution list, trimmed, and excluded when equal to the designated name; the array does not itself resolve those institutions to legal identities.",
+        "evidence": [
+          "producer-press-candidates-ce736a2",
+          "press-field-map-d14e7dd"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/press_candidates.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        }
+      },
+      "canonical_names": {
+        "meaning": "JSON array of pinned-register names aligned with the entity-role associations in cedar_uids. An entity appearing in more than one role can occur more than once; these names are not source quotations.",
+        "evidence": [
+          "producer-press-candidates-ce736a2",
+          "press-field-map-d14e7dd"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/press_candidates.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        }
+      },
+      "cedar_uids": {
+        "meaning": "JSON array of validated existing Cedar references, with one position per source entity-role association across the affiliated, consulted, disposition-priority, repatriation-recipient, letter-of-support, and aboriginal-land lists. Repeated entities in distinct roles retain distinct positions.",
+        "evidence": [
+          "producer-press-candidates-ce736a2",
+          "press-field-map-d14e7dd"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/press_candidates.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        }
+      },
+      "entity_classes": {
+        "meaning": "JSON array of pinned-register classes aligned with cedar_uids and entity_roles. Each value classifies the associated entity, not an institution or a new ownership finding.",
+        "evidence": [
+          "producer-press-candidates-ce736a2",
+          "press-field-map-d14e7dd"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/press_candidates.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        }
+      },
+      "entity_names_as_published": {
+        "meaning": "JSON array of source-reported names aligned with the entity-role positions when such a source array is supplied. Otherwise each position is null; a missing source-name string is not replaced by the canonical register name.",
+        "evidence": [
+          "producer-press-candidates-ce736a2",
+          "press-field-map-d14e7dd"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/press_candidates.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        }
+      },
+      "entity_roles": {
+        "meaning": "JSON array aligned with cedar_uids, recording the source role: affiliated, consulted, disposition priority, repatriation recipient, letter of support, or aboriginal land. The roles remain distinct and do not by themselves establish that a transfer has occurred.",
+        "evidence": [
+          "producer-press-candidates-ce736a2",
+          "press-field-map-d14e7dd"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/press_candidates.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        }
+      },
+      "research_note": {
+        "meaning": "Additional factual qualification affecting interpretation of the notice, retained when supplied to the declared field. The current default is blank; unresolved named entities and source limitations must still be read from the other notice fields.",
+        "evidence": [
+          "producer-press-candidates-ce736a2",
+          "press-field-map-d14e7dd"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/press_candidates.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        }
+      }
+    },
+    "lobbying": {
+      "activity_id": {
+        "meaning": "Source-based activity identifier formed as lda: followed by the filing UUID published as source_record_id. It identifies a filing record rather than a person, client, lobbying topic, or combined amendment history.",
+        "evidence": [
+          "producer-press-candidates-ce736a2",
+          "press-field-map-d14e7dd"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/press_candidates.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        }
+      },
+      "activity_type": {
+        "meaning": "Source-family label for the activity row. The current projection writes lda_filing; it does not imply that consultation, testimony, meeting, or other activity families are already included.",
+        "evidence": [
+          "producer-press-candidates-ce736a2",
+          "press-field-map-d14e7dd"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/press_candidates.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        }
+      },
+      "cedar_entity_role": {
+        "meaning": "Role of the linked Cedar entity in the LDA filing: client when a Cedar reference is published. The value is blank when the association is absent or withdrawn and does not classify the registrant as the same entity.",
+        "evidence": [
+          "producer-press-candidates-ce736a2",
+          "press-field-map-d14e7dd"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/press_candidates.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        }
+      },
+      "participant_name": {
+        "meaning": "Participant-name field reserved for activity families that report individual or organizational participation. It is blank by default for the current LDA filing rows and is not filled from the client or registrant name.",
+        "evidence": [
+          "producer-press-candidates-ce736a2",
+          "press-field-map-d14e7dd"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/press_candidates.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        }
+      },
+      "participant_role": {
+        "meaning": "Participant-role field reserved for source-reported participation in applicable activity families. It is blank by default for current LDA filing rows; the filing's client association is recorded separately in cedar_entity_role.",
+        "evidence": [
+          "producer-press-candidates-ce736a2",
+          "press-field-map-d14e7dd"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/press_candidates.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        }
+      },
+      "research_note": {
+        "meaning": "Additional factual qualification affecting interpretation of the filing or activity, retained when supplied to the declared field. The current default is blank and does not signify a new verification of lobbying statements or amounts.",
+        "evidence": [
+          "producer-press-candidates-ce736a2",
+          "press-field-map-d14e7dd"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/press_candidates.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        }
+      },
+      "source_system": {
+        "meaning": "Source-system label for the current filing rows: lda, referring to the federal Lobbying Disclosure Act filing system. The exact filing is identified by source_record_id and its filing source link.",
+        "evidence": [
+          "producer-press-candidates-ce736a2",
+          "press-field-map-d14e7dd"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/press_candidates.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        }
+      }
+    },
+    "contractors": {
+      "cedar_entity_role": {
+        "meaning": "Relationship of the linked Cedar entity to the contractor transaction: source-attributed affiliation of awardee when cedar_uid is published. It is not independently certified ownership; any separately supported ownership at the action date uses the dedicated dated-relationship fields.",
+        "evidence": [
+          "producer-financial-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/financial.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        }
+      },
+      "competition_type": {
+        "meaning": "Readable competition category normalized from the source extent_competed code through the pinned dictionary. Missing-source tokens map to NOT_REPORTED; unknown codes and conflicts with an existing normalized value are refused.",
+        "evidence": [
+          "producer-financial-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/financial.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        }
+      },
+      "entity_class": {
+        "meaning": "Entity class from the pinned Cedar register for cedar_uid, blank when no reference is published. It describes the source-associated entity and does not establish the awardee's legal identity or ownership at the action date.",
+        "evidence": [
+          "producer-financial-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/financial.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        }
+      },
+      "performance_geography_status": {
+        "meaning": "Availability of the source place-of-performance county assignment: placed when a county name or FIPS exists, placed_ambiguous when the source ambiguity flag is also set, and unplaced when neither exists. It is not verification of where the contract work occurred.",
+        "evidence": [
+          "producer-financial-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/financial.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        }
+      },
+      "recipient_geography_status": {
+        "meaning": "Availability of the award recipient's source county assignment: placed when a county name or FIPS exists, placed_ambiguous when the source ambiguity flag is set, and unplaced when neither exists. Recipient location and place of performance are separate concepts.",
+        "evidence": [
+          "producer-financial-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/financial.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        }
+      },
+      "research_note": {
+        "meaning": "Interpretive qualification stating that the amount is an incremental transaction obligation, cumulative award values are not additive, and the entity link is source-attributed affiliation. It retains the source relationship assessment and identifies publication masking where applied.",
+        "evidence": [
+          "producer-financial-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/financial.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        }
+      },
+      "sector": {
+        "meaning": "Readable sector decoded from the source sector and supersector through the pinned dictionary. It preserves the source code with its label, uses Not reported for the declared missing case, and explicitly identifies a sector whose group label was not reported rather than guessing one.",
+        "evidence": [
+          "producer-financial-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/financial.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        }
+      },
+      "source_system": {
+        "meaning": "Source-system label for the accepted prime-contract transaction lineage: usaspending_fpds, denoting FPDS contract information carried through USAspending. It does not indicate an independently collected new contract record.",
+        "evidence": [
+          "producer-financial-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/financial.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        }
+      },
+      "source_url": {
+        "meaning": "USAspending award-page URL constructed from the transaction's original contract award unique key. It points to the parent award page, which can contain multiple incremental actions.",
+        "evidence": [
+          "producer-financial-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/financial.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        }
+      }
+    },
+    "subcontracting": {
+      "canonical_name": {
+        "meaning": "Name from the pinned Cedar register for the published cedar_uid, blank when no reference is published. It names the associated Native entity rather than replacing either the prime contractor's or subcontractor's reported legal name.",
+        "evidence": [
+          "producer-press-candidates-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/press_candidates.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        }
+      },
+      "cedar_entity_role": {
+        "meaning": "Source-attributed affiliation located on the prime-contractor side, subcontractor side, both sides, or an unresolved party side, determined from the preserved party references. Blank means no published primary Cedar reference; the role does not establish ownership at the subaward action date.",
+        "evidence": [
+          "producer-press-candidates-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/press_candidates.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        }
+      },
+      "entity_class": {
+        "meaning": "Class from the pinned Cedar register for the published cedar_uid. It classifies the associated Native entity, not the prime contractor or subcontractor merely because that business appears in the same row.",
+        "evidence": [
+          "producer-press-candidates-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/press_candidates.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        }
+      },
+      "research_note": {
+        "meaning": "Source qualification plus an explicit warning that Native-entity links and direction are source-attributed associations, ownership at the action date is not established, and current affiliation must not be backdated to the reported subaward.",
+        "evidence": [
+          "producer-press-candidates-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/press_candidates.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        }
+      },
+      "subcontractor_geography_status": {
+        "meaning": "Availability of the subcontractor's own source county assignment: placed when a county name or FIPS is present, placed_ambiguous when the source ambiguity flag is set, and unplaced when neither is present. It is not the prime contractor's address or the award's place of performance.",
+        "evidence": [
+          "producer-press-candidates-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/press_candidates.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        }
+      }
+    },
+    "natural-resources": {
+      "canonical_name": {
+        "meaning": "Name from the pinned Cedar register for the existing, published recipient cedar_uid. Blank means no recipient identity is published; a source recipient label is not automatically promoted into a new Cedar identity.",
+        "evidence": [
+          "producer-natural-resources-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/natural_resources.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        }
+      },
+      "cedar_entity_role": {
+        "meaning": "Role of the registered Cedar entity in the resource record: recipient when a Cedar reference survives the source and publication checks, otherwise blank. This role does not establish that the reported measure was an actual payment.",
+        "evidence": [
+          "producer-natural-resources-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/natural_resources.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        }
+      },
+      "entity_class": {
+        "meaning": "Entity class from the pinned Cedar register for the published recipient cedar_uid. It describes the recipient entity and does not classify a payer, resource project, or revenue mechanism.",
+        "evidence": [
+          "producer-natural-resources-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/natural_resources.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        }
+      },
+      "research_note": {
+        "meaning": "Preserved or specifically reviewed qualification of the beneficiary, measurement basis, period, or source evidence. It includes distinctions between OSMRE allocations or appropriations and payments, and cautions about Osage headright rates and overlapping measures where applicable.",
+        "evidence": [
+          "producer-natural-resources-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/natural_resources.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        }
+      },
+      "amount_usd": {
+        "meaning": "The source-reported amount in US dollars. Read measurement_status and amount_sign_meaning with it: a revenue amount, appropriation, allocation, estimate or payment does not imply another of those measures.",
+        "evidence": [
+          "producer-natural-resources-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/natural_resources.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        },
+        "label": "Amount"
+      },
+      "measurement_status": {
+        "meaning": "The source or reviewed classification of the reported measure, including reported revenue, an appropriated amount, an allocation, estimate or actual payment. An appropriation or allocation is not evidence of a completed payment.",
+        "evidence": [
+          "producer-natural-resources-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/natural_resources.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        },
+        "label": "Measurement basis"
+      },
+      "recipient_name": {
+        "meaning": "The recipient name retained from the source, where one is provided. It is not automatically a canonical Cedar entity and a blank does not identify a tribal recipient.",
+        "evidence": [
+          "producer-natural-resources-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/natural_resources.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        },
+        "label": "Source recipient"
+      },
+      "resource_revenue_event_id": {
+        "meaning": "The existing identifier for this source revenue observation. It can identify an appropriation, allocation or reported revenue row; it does not itself establish a payment.",
+        "evidence": [
+          "producer-natural-resources-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/natural_resources.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        },
+        "label": "Observation ID"
+      },
+      "source_url": {
+        "meaning": "The cited source for this observation and its reported measure. A source link does not change the row into a payment or establish a different recipient.",
+        "evidence": [
+          "producer-natural-resources-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/natural_resources.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        },
+        "label": "Source"
+      },
+      "period_start": {
+        "meaning": "The beginning of the period covered by the reported observation, where stated. This is not necessarily a transaction or payment date.",
+        "evidence": [
+          "producer-natural-resources-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/natural_resources.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        },
+        "label": "Period start"
+      },
+      "period_type": {
+        "meaning": "The time basis used by the source observation, such as calendar year, fiscal year or month. Read alongside period_start, period_end and any separately reported payment_date.",
+        "evidence": [
+          "producer-natural-resources-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/natural_resources.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        },
+        "label": "Period covered"
+      },
+      "payer_name": {
+        "meaning": "The payer name retained from the source, where one is given. Its presence does not establish that an appropriated or allocated amount has been paid.",
+        "evidence": [
+          "producer-natural-resources-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/natural_resources.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        },
+        "label": "Source payer"
+      },
+      "beneficiary_name": {
+        "meaning": "The source-reported beneficiary, where one is given separately from the recipient. This field does not resolve or promote a canonical entity identity.",
+        "evidence": [
+          "producer-natural-resources-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/natural_resources.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        },
+        "label": "Source beneficiary"
+      },
+      "related_asset_ids": {
+        "meaning": "Source-linked identifiers for related wells, tracts, leases or other assets when provided. Empty values do not establish a missing payment or a new asset identity.",
+        "evidence": [
+          "producer-natural-resources-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/natural_resources.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        },
+        "label": "Related assets"
+      }
+    },
+    "nonprofits": {
+      "cedar_entity_role": {
+        "meaning": "Published role of the existing Cedar association: affiliated_with when cedar_uid is present, otherwise blank. The association does not make the IRS organization and the Native entity the same legal object or certify ownership.",
+        "evidence": [
+          "producer-nonprofits-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/nonprofits.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        }
+      },
+      "entity_link_status": {
+        "meaning": "Status of the published Cedar association: source-supported existing relationship when cedar_uid is present, or unlinked organization when it is absent. An unlinked organization can still qualify for the collection on separately supported Native-serving evidence.",
+        "evidence": [
+          "producer-nonprofits-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/nonprofits.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        }
+      },
+      "inclusion_category": {
+        "meaning": "Evidence-backed reason for including the IRS organization, such as Native-serving, source-identified Native organization, source-described control or tribal charter, intertribal organization, or tribal government. This category is supported by the reviewed source evidence and is separate from tax status, ownership certification, and Cedar identity linkage.",
+        "evidence": [
+          "producer-nonprofits-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/nonprofits.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        }
+      },
+      "research_note": {
+        "meaning": "Source-evidence qualification retaining the relationship, observation date, source URL, stated source date, and limitations. It distinguishes tax facts from Native affiliation and identifies filed-service evidence when used; it does not imply an ownership certification or an unrecorded human identity ruling.",
+        "evidence": [
+          "producer-nonprofits-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/nonprofits.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6"
+        }
+      }
+    },
+    "federal-register": {
+      "action": {
+        "label": "Agency action",
+        "meaning": "The action label supplied by the issuing agency for the Federal Register document, when reported; distinct from Cedar's source-text classification.",
+        "evidence": [
+          "producer-federal-register-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/federal_register.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6",
+          "symbol": "FederalDocumentProjector.project_row and DOCUMENT_DEFINITIONS"
+        }
+      },
+      "agency_names": {
+        "label": "Issuing agencies",
+        "meaning": "Issuing agency names from the Federal Register source agency array, separated by semicolons.",
+        "evidence": [
+          "producer-federal-register-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/federal_register.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6",
+          "symbol": "FederalDocumentProjector.project_row and DOCUMENT_DEFINITIONS"
+        }
+      },
+      "canonical_name": {
+        "label": "Registered participant name",
+        "meaning": "The pinned register's name for the participant's existing cedar_uid; blank when that row has no linked Cedar entity. The participant_name field preserves the published name.",
+        "evidence": [
+          "producer-federal-register-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/federal_register.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6",
+          "symbol": "build_federal_register_projection"
+        }
+      },
+      "cedar_entity_role": {
+        "label": "Cedar entity role",
+        "meaning": "participant when the participant row has a linked cedar_uid; otherwise blank. The separate participant_role field preserves whether the source describes consultation, invitation, nonparticipation or unenumerated participants.",
+        "evidence": [
+          "producer-federal-register-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/federal_register.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6",
+          "symbol": "build_federal_register_projection"
+        }
+      },
+      "cfr_references": {
+        "label": "CFR references",
+        "meaning": "Code of Federal Regulations references supplied for the source document, serialized as a JSON array when reported.",
+        "evidence": [
+          "producer-federal-register-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/federal_register.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6",
+          "symbol": "FederalDocumentProjector.project_row and DOCUMENT_DEFINITIONS"
+        }
+      },
+      "classification_rule": {
+        "label": "Text classification rule",
+        "meaning": "The maintained first matching source-text classifier rule; blank when the document is unclassified other. This is Cedar classification provenance, not an agency taxonomy or a Native-entity link.",
+        "evidence": [
+          "producer-federal-register-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/federal_register.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6",
+          "symbol": "FederalDocumentProjector.project_row and DOCUMENT_DEFINITIONS"
+        }
+      },
+      "classification_signal": {
+        "label": "Classification evidence text",
+        "meaning": "The source text matched by the classifier, limited to 160 characters, or the source document type used for a rulemaking classification.",
+        "evidence": [
+          "producer-federal-register-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/federal_register.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6",
+          "symbol": "FederalDocumentProjector.project_row and DOCUMENT_DEFINITIONS"
+        }
+      },
+      "classification_source_field": {
+        "label": "Classification source field",
+        "meaning": "The field supporting the classification: title, abstract or the source document type. It identifies the evidence location, not a source agency or entity.",
+        "evidence": [
+          "producer-federal-register-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/federal_register.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6",
+          "symbol": "FederalDocumentProjector.project_row and DOCUMENT_DEFINITIONS"
+        }
+      },
+      "collective_scopes": {
+        "label": "Collective scopes",
+        "meaning": "Blank for the consultation-participant projection because collective scope has not been evaluated for it (producer transform fr-participant-observations-v2 writes the empty cell; the earlier v1 wrote the text null, which is what a pinned sample built before it still shows). Blank does not mean an empty set, all tribes or an identified individual participant; an evaluated record would carry a JSON array, [] when it names no population.",
+        "evidence": [
+          "producer-federal-register-d780401"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/federal_register.py",
+          "revision": "d780401155ef30c1bd1b9af5f7119ea6020bad06",
+          "symbol": "build_federal_register_projection"
+        }
+      },
+      "consultation_participants__source_system": {
+        "label": "Participant observation source system",
+        "meaning": "The value federal_register assigned by the consultation-participant projector. This identifies the source system, not the agency, the entity or the ingestion filename.",
+        "evidence": [
+          "producer-federal-register-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/federal_register.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6",
+          "symbol": "build_federal_register_projection"
+        }
+      },
+      "consultation_participants__source_url": {
+        "label": "Participant observation source",
+        "meaning": "The original public source URL retained on the consultation-participant observation. It cites that observation's evidence and is distinct from the broad-document component's URL field.",
+        "evidence": [
+          "producer-federal-register-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/federal_register.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6",
+          "symbol": "build_federal_register_projection"
+        }
+      },
+      "consultation_record_key": {
+        "label": "Participant observation key",
+        "meaning": "A deterministic JSON array of the preserved consultation_event_id, participant name as published and participant_role. It identifies one participant-role observation, not a distinct event or an entity.",
+        "evidence": [
+          "producer-federal-register-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/federal_register.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6",
+          "symbol": "build_federal_register_projection"
+        }
+      },
+      "docket_ids": {
+        "label": "Docket IDs",
+        "meaning": "Docket identifiers supplied for the source document, serialized as a JSON array; these are source docket identifiers, not Cedar IDs.",
+        "evidence": [
+          "producer-federal-register-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/federal_register.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6",
+          "symbol": "FederalDocumentProjector.project_row and DOCUMENT_DEFINITIONS"
+        }
+      },
+      "document_number": {
+        "label": "Document number",
+        "meaning": "The source-issued Federal Register document number. It identifies one source document, not one tribe, consultation event or participant.",
+        "evidence": [
+          "producer-federal-register-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/federal_register.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6",
+          "symbol": "FederalDocumentProjector.project_row and DOCUMENT_DEFINITIONS"
+        }
+      },
+      "effective_on": {
+        "label": "Effective date",
+        "meaning": "The legal effective date reported by the source document, when present. It is separate from the publication date and may be later or in the future.",
+        "evidence": [
+          "producer-federal-register-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/federal_register.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6",
+          "symbol": "FederalDocumentProjector.project_row and DOCUMENT_DEFINITIONS"
+        }
+      },
+      "entity_class": {
+        "label": "Registered participant class",
+        "meaning": "The pinned register's entity class for the participant's existing cedar_uid; blank when no Cedar entity is linked to that participant row.",
+        "evidence": [
+          "producer-federal-register-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/federal_register.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6",
+          "symbol": "build_federal_register_projection"
+        }
+      },
+      "entity_link_status": {
+        "label": "Participant link status",
+        "meaning": "resolved when a registered cedar_uid is present; no_individual_named when the participant role is not_enumerated and no entity is linked; otherwise unresolved. An unresolved link does not establish that no Native entity participated.",
+        "evidence": [
+          "producer-federal-register-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/federal_register.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6",
+          "symbol": "build_federal_register_projection"
+        }
+      },
+      "event_date_precision": {
+        "label": "Event date precision",
+        "meaning": "Precision of the retained event_start_date: year, month or day for a valid date of that form, or unstated for a blank. The separate notice_date does not supply an event date.",
+        "evidence": [
+          "producer-federal-register-ce736a2",
+          "producer-projection-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/projection.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6",
+          "symbol": "date_precision"
+        }
+      },
+      "html_url": {
+        "label": "Document page",
+        "meaning": "The source-provided FederalRegister.gov page for the document; an informational rendition of the published document.",
+        "evidence": [
+          "producer-federal-register-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/federal_register.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6",
+          "symbol": "FederalDocumentProjector.project_row and DOCUMENT_DEFINITIONS"
+        }
+      },
+      "json_url": {
+        "label": "Document API URL",
+        "meaning": "The source-provided API URL for this Federal Register document number.",
+        "evidence": [
+          "producer-federal-register-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/federal_register.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6",
+          "symbol": "FederalDocumentProjector.project_row and DOCUMENT_DEFINITIONS"
+        }
+      },
+      "net_caught": {
+        "label": "Acquisition nets",
+        "meaning": "The agency or keyword acquisition nets recorded for this source document version. Being returned by a search net does not establish Native relevance or an entity relationship.",
+        "evidence": [
+          "producer-federal-register-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/federal_register.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6",
+          "symbol": "FederalDocumentProjector.project_row and DOCUMENT_DEFINITIONS"
+        }
+      },
+      "pdf_url": {
+        "label": "Document PDF",
+        "meaning": "The source-provided PDF link for the document. The official GovInfo edition is the source identified for legal reliance.",
+        "evidence": [
+          "producer-federal-register-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/federal_register.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6",
+          "symbol": "FederalDocumentProjector.project_row and DOCUMENT_DEFINITIONS"
+        }
+      },
+      "pre_2000_flag": {
+        "label": "Publication before 2000 flag",
+        "meaning": "The preserved source flag for publication before 2000: 1 or 0 where supplied, with blank allowed by the projector. Use publication_date for calendar-year selection.",
+        "evidence": [
+          "producer-federal-register-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/federal_register.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6",
+          "symbol": "FederalDocumentProjector.project_row and DOCUMENT_DEFINITIONS"
+        }
+      },
+      "publication_date": {
+        "label": "Publication date",
+        "meaning": "The calendar date the Federal Register document was published. It dates the document and its coverage window, not an event or consultation described in it.",
+        "evidence": [
+          "producer-federal-register-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/federal_register.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6",
+          "symbol": "FederalDocumentProjector.project_row and DOCUMENT_DEFINITIONS"
+        }
+      },
+      "regulation_id_numbers": {
+        "label": "Regulation IDs",
+        "meaning": "Regulation identifier numbers supplied by the source document, serialized as a JSON array when reported.",
+        "evidence": [
+          "producer-federal-register-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/federal_register.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6",
+          "symbol": "FederalDocumentProjector.project_row and DOCUMENT_DEFINITIONS"
+        }
+      },
+      "research_note": {
+        "label": "Participant research note",
+        "meaning": "Maintained qualifications for the participant observation: an invitation does not establish participation and collective scope has not been evaluated. The note can also retain event-date or location-basis qualifications.",
+        "evidence": [
+          "producer-federal-register-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/federal_register.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6",
+          "symbol": "build_federal_register_projection"
+        }
+      },
+      "scope_qualification": {
+        "label": "Document scope qualification",
+        "meaning": "The broad-document component's stated limitation: acquisition across agency and keyword nets is broad recall and does not establish Native relevance or a verified Native-entity relationship.",
+        "evidence": [
+          "producer-federal-register-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/federal_register.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6",
+          "symbol": "FederalDocumentProjector.project_row and DOCUMENT_DEFINITIONS"
+        }
+      },
+      "title": {
+        "label": "Document title",
+        "meaning": "The title reported by the Federal Register API for the source document. A title or keyword does not by itself assert a Cedar entity relationship.",
+        "evidence": [
+          "producer-federal-register-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/federal_register.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6",
+          "symbol": "FederalDocumentProjector.project_row and DOCUMENT_DEFINITIONS"
+        }
+      },
+      "title_abstract_term_hit": {
+        "label": "Acquisition keyword flag",
+        "meaning": "The preserved 1/0 acquisition flag for a keyword occurrence in the source title or abstract. It is a search-recall indicator, not verified Native relevance.",
+        "evidence": [
+          "producer-federal-register-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/federal_register.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6",
+          "symbol": "FederalDocumentProjector.project_row and DOCUMENT_DEFINITIONS"
+        }
+      },
+      "title_abstract_terms": {
+        "label": "Matched acquisition terms",
+        "meaning": "The acquisition keywords recorded as matching the source title or abstract. Their presence does not verify Native relevance or identity.",
+        "evidence": [
+          "producer-federal-register-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/federal_register.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6",
+          "symbol": "FederalDocumentProjector.project_row and DOCUMENT_DEFINITIONS"
+        }
+      },
+      "type": {
+        "label": "Document type",
+        "meaning": "The source document type: Notice, Rule, Proposed Rule or Presidential Document; separate from Cedar's source-text classification.",
+        "evidence": [
+          "producer-federal-register-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/federal_register.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6",
+          "symbol": "FederalDocumentProjector.project_row and DOCUMENT_DEFINITIONS"
+        }
+      },
+      "federal_actions__source_system": {
+        "label": "Document source system",
+        "meaning": "The value Federal Register assigned to the broad federal-action document component. It identifies the document source system, not the issuing agency, a Native entity or the source file name.",
+        "evidence": [
+          "producer-federal-register-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/federal_register.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6",
+          "symbol": "FederalDocumentProjector.project_row"
+        }
+      },
+      "federal_actions__source_url": {
+        "label": "Document source page",
+        "meaning": "The official Federal Register or GovInfo source URL preserved for the broad federal-action document record. This cites the document component and is separate from the consultation-participant component's source URL; it does not establish Native entity linkage.",
+        "evidence": [
+          "producer-federal-register-ce736a2"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "path": "src/lumecon_data/collections/federal_register.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6",
+          "symbol": "FederalDocumentProjector.project_row"
+        }
+      }
+    },
+    "owned": {
+      "assertion_class": {
+        "meaning": "The class of claim made by the listing authority: OWNERSHIP asserts who owns the firm; RELATIONSHIP asserts that the firm does business with the authority. This source assertion is not an independent Cedar ownership determination, and the two classes must not be counted as the same fact.",
+        "evidence": [
+          "owned-producer-projection",
+          "owned-producer-field-projection",
+          "owned-producer-intake-contract",
+          "owned-press-field-map",
+          "owned-source-field-semantics"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "repository": "teim-team/Lumecon-data",
+          "path": "src/lumecon_data/collections/press_candidates.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6",
+          "symbol": "build_press_candidate_projection",
+          "source_field": "assertion_class",
+          "line_ranges": [
+            [
+              303,
+              304
+            ],
+            [
+              334,
+              339
+            ]
+          ],
+          "semantic_basis": {
+            "evidence": "owned-source-field-semantics",
+            "symbol": "DESCRIPTIONS",
+            "line": 2662
+          }
+        }
+      },
+      "business_entity_id": {
+        "meaning": "An existing Cedar register identifier supplied for the listed business, translated through the pinned legacy crosswalk when necessary. A blank records no established register link. This field is separate from the certifying authority's cedar_uid; the projection does not mint a business identifier or substitute the authority's identity.",
+        "evidence": [
+          "owned-producer-projection",
+          "owned-producer-field-projection",
+          "owned-producer-intake-contract",
+          "owned-press-field-map",
+          "owned-source-field-semantics"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "repository": "teim-team/Lumecon-data",
+          "path": "src/lumecon_data/collections/press_candidates.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6",
+          "symbol": "build_press_candidate_projection",
+          "source_field": "business_entity_id",
+          "line_ranges": [
+            [
+              247,
+              249
+            ],
+            [
+              287,
+              292
+            ]
+          ],
+          "semantic_basis": {
+            "evidence": "owned-source-field-semantics",
+            "symbol": "DESCRIPTIONS",
+            "line": 2657
+          }
+        }
+      },
+      "business_license_number": {
+        "meaning": "The tribal business licence number reported in the source listing, where supplied. It identifies a licence in that authority's system, not a Cedar entity, a certification tier, or a federal business identifier.",
+        "evidence": [
+          "owned-producer-projection",
+          "owned-producer-field-projection",
+          "owned-producer-intake-contract",
+          "owned-press-field-map",
+          "owned-source-field-semantics"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "repository": "teim-team/Lumecon-data",
+          "path": "src/lumecon_data/collections/press_candidates.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6",
+          "symbol": "build_press_candidate_projection",
+          "source_field": "business_license_number",
+          "line_ranges": [
+            [
+              303,
+              304
+            ],
+            [
+              334,
+              339
+            ]
+          ],
+          "semantic_basis": {
+            "evidence": "owned-source-field-semantics",
+            "symbol": "DESCRIPTIONS",
+            "line": 2674
+          }
+        }
+      },
+      "business_name": {
+        "meaning": "The business name as printed in the source listing, projected from business_name_raw. Publication masks may leave it blank, including where the name identifies a natural person; a blank must not be restored from aliases or authority names.",
+        "evidence": [
+          "owned-producer-projection",
+          "owned-producer-field-projection",
+          "owned-producer-intake-contract",
+          "owned-press-field-map",
+          "owned-source-field-semantics"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "repository": "teim-team/Lumecon-data",
+          "path": "src/lumecon_data/collections/press_candidates.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6",
+          "symbol": "build_press_candidate_projection",
+          "source_field": "business_name_raw",
+          "line_ranges": [
+            [
+              303,
+              304
+            ],
+            [
+              334,
+              339
+            ]
+          ],
+          "semantic_basis": {
+            "evidence": "owned-source-field-semantics",
+            "symbol": "DESCRIPTIONS",
+            "line": 2654
+          }
+        }
+      },
+      "business_source_id": {
+        "meaning": "Identifier of one source listing, formed from the source namespace and that source's record key. The record key may be a certification number, source slug, or document position; cross-vintage stability depends on the source key. It is not a universal business identifier, and distinct certifications remain separate records.",
+        "evidence": [
+          "owned-producer-projection",
+          "owned-producer-field-projection",
+          "owned-producer-intake-contract",
+          "owned-press-field-map",
+          "owned-source-field-semantics"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "repository": "teim-team/Lumecon-data",
+          "path": "src/lumecon_data/collections/press_candidates.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6",
+          "symbol": "build_press_candidate_projection",
+          "source_field": "business_source_id",
+          "line_ranges": [
+            [
+              303,
+              304
+            ],
+            [
+              334,
+              339
+            ]
+          ],
+          "semantic_basis": {
+            "evidence": "owned-source-field-semantics",
+            "symbol": "DESCRIPTIONS",
+            "line": 2647
+          }
+        }
+      },
+      "canonical_name": {
+        "meaning": "The current pinned register name of the certifying authority identified by cedar_uid. It is looked up from the resolved register, not copied from the business listing, and does not name the listed business.",
+        "evidence": [
+          "owned-producer-projection",
+          "owned-producer-field-projection",
+          "owned-producer-intake-contract",
+          "owned-press-field-map"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "repository": "teim-team/Lumecon-data",
+          "path": "src/lumecon_data/collections/press_candidates.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6",
+          "symbol": "build_press_candidate_projection",
+          "source_field": null,
+          "line_ranges": [
+            [
+              327,
+              328
+            ]
+          ]
+        }
+      },
+      "cedar_entity_role": {
+        "meaning": "The role of the entity in the opening Cedar identity fields: certifying_authority. It describes the authority making the listing or certification claim, not an owner of the listed business. The producer clears this role when the opening Cedar identifier is blank.",
+        "evidence": [
+          "owned-producer-projection",
+          "owned-producer-field-projection",
+          "owned-producer-intake-contract",
+          "owned-press-field-map"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "repository": "teim-team/Lumecon-data",
+          "path": "src/lumecon_data/collections/press_candidates.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6",
+          "symbol": "_derive/build_press_candidate_projection",
+          "source_field": null,
+          "line_ranges": [
+            [
+              89,
+              104
+            ],
+            [
+              319,
+              331
+            ]
+          ]
+        }
+      },
+      "cedar_uid": {
+        "meaning": "The certifying authority's canonical Cedar entity identifier, derived from certifying_authority_entity_id after pinned crosswalk and register checks. It identifies the authority rather than the listed business; no business identity or ownership relationship is created by this derivation.",
+        "evidence": [
+          "owned-producer-projection",
+          "owned-producer-field-projection",
+          "owned-producer-intake-contract",
+          "owned-press-field-map"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "repository": "teim-team/Lumecon-data",
+          "path": "src/lumecon_data/collections/press_candidates.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6",
+          "symbol": "build_press_candidate_projection/_derive/_identity",
+          "source_field": null,
+          "line_ranges": [
+            [
+              198,
+              206
+            ],
+            [
+              283,
+              285
+            ],
+            [
+              303,
+              304
+            ]
+          ]
+        }
+      },
+      "certification_expiration": {
+        "meaning": "The source-reported end or renewal date associated with the listing. Depending on the program it can be a certification expiry, annual-update deadline, or business-licence expiry; Lummi's value is a licence expiry. Recognized dates retain their stated precision; unparseable source text is preserved rather than guessed.",
+        "evidence": [
+          "owned-producer-projection",
+          "owned-producer-field-projection",
+          "owned-producer-intake-contract",
+          "owned-press-field-map",
+          "owned-source-field-semantics"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "repository": "teim-team/Lumecon-data",
+          "path": "src/lumecon_data/collections/press_candidates.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6",
+          "symbol": "build_press_candidate_projection",
+          "source_field": "certification_expiration",
+          "line_ranges": [
+            [
+              303,
+              304
+            ],
+            [
+              334,
+              339
+            ]
+          ],
+          "semantic_basis": {
+            "evidence": "owned-source-field-semantics",
+            "symbol": "DESCRIPTIONS",
+            "line": 2673
+          }
+        }
+      },
+      "certification_number": {
+        "meaning": "The certification or vendor record number supplied by the authority. It can link the same source's records across vintages when that source preserves the number; it is not globally unique across authorities or a substitute for a Cedar business identifier.",
+        "evidence": [
+          "owned-producer-projection",
+          "owned-producer-field-projection",
+          "owned-producer-intake-contract",
+          "owned-press-field-map",
+          "owned-source-field-semantics"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "repository": "teim-team/Lumecon-data",
+          "path": "src/lumecon_data/collections/press_candidates.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6",
+          "symbol": "build_press_candidate_projection",
+          "source_field": "certification_number",
+          "line_ranges": [
+            [
+              303,
+              304
+            ],
+            [
+              334,
+              339
+            ]
+          ],
+          "semantic_basis": {
+            "evidence": "owned-source-field-semantics",
+            "symbol": "DESCRIPTIONS",
+            "line": 2670
+          }
+        }
+      },
+      "certification_start": {
+        "meaning": "Start-date value carried in the reviewed listing input. Most source parsers use a printed certification date, but the Oneida parser supplies its field named est; the current producer does not independently establish that field's event meaning. Upstream normalization preserves stated precision and unparseable text. Do not assume a uniform certification, business-formation, or ownership-start event across sources.",
+        "evidence": [
+          "owned-producer-projection",
+          "owned-producer-field-projection",
+          "owned-producer-intake-contract",
+          "owned-press-field-map",
+          "owned-source-field-semantics"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "repository": "teim-team/Lumecon-data",
+          "path": "src/lumecon_data/collections/press_candidates.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6",
+          "symbol": "build_press_candidate_projection",
+          "source_field": "certification_start",
+          "line_ranges": [
+            [
+              303,
+              304
+            ],
+            [
+              334,
+              339
+            ]
+          ],
+          "semantic_basis": {
+            "evidence": "owned-source-field-semantics",
+            "symbol": "DESCRIPTIONS",
+            "line": 2672
+          }
+        }
+      },
+      "certification_tier": {
+        "meaning": "The source's preference level, certification tier, or certification-status wording, such as a preference level, probationary status, or full certification. These source-specific categories are retained rather than collapsed into a common ownership threshold.",
+        "evidence": [
+          "owned-producer-projection",
+          "owned-producer-field-projection",
+          "owned-producer-intake-contract",
+          "owned-press-field-map",
+          "owned-source-field-semantics"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "repository": "teim-team/Lumecon-data",
+          "path": "src/lumecon_data/collections/press_candidates.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6",
+          "symbol": "build_press_candidate_projection",
+          "source_field": "certification_tier",
+          "line_ranges": [
+            [
+              303,
+              304
+            ],
+            [
+              334,
+              339
+            ]
+          ],
+          "semantic_basis": {
+            "evidence": "owned-source-field-semantics",
+            "symbol": "DESCRIPTIONS",
+            "line": 2671
+          }
+        }
+      },
+      "certifying_authority_entity_id": {
+        "meaning": "The registered Cedar entity reference for the government, corporation, or other listing authority making the assertion. The producer resolves the supplied authority reference against its pinned crosswalk and register and uses it for the opening cedar_uid. It never identifies the listed business merely because that business appears in the authority's directory.",
+        "evidence": [
+          "owned-producer-projection",
+          "owned-producer-field-projection",
+          "owned-producer-intake-contract",
+          "owned-press-field-map",
+          "owned-source-field-semantics"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "repository": "teim-team/Lumecon-data",
+          "path": "src/lumecon_data/collections/press_candidates.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6",
+          "symbol": "build_press_candidate_projection/_identity",
+          "source_field": "certifying_authority_entity_id",
+          "line_ranges": [
+            [
+              198,
+              206
+            ],
+            [
+              241,
+              249
+            ],
+            [
+              283,
+              285
+            ],
+            [
+              303,
+              304
+            ]
+          ],
+          "semantic_basis": {
+            "evidence": "owned-source-field-semantics",
+            "symbol": "DESCRIPTIONS",
+            "line": 2650
+          }
+        }
+      },
+      "certifying_authority_name": {
+        "meaning": "The authority name carried in the source configuration or reviewed input for this listing. It names the organization making the assertion, not the listed business, and is retained independently of the register-derived canonical_name.",
+        "evidence": [
+          "owned-producer-projection",
+          "owned-producer-field-projection",
+          "owned-producer-intake-contract",
+          "owned-press-field-map",
+          "owned-source-field-semantics"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "repository": "teim-team/Lumecon-data",
+          "path": "src/lumecon_data/collections/press_candidates.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6",
+          "symbol": "build_press_candidate_projection",
+          "source_field": "certifying_authority_name",
+          "line_ranges": [
+            [
+              303,
+              304
+            ],
+            [
+              334,
+              339
+            ]
+          ],
+          "semantic_basis": {
+            "evidence": "owned-source-field-semantics",
+            "symbol": "DESCRIPTIONS",
+            "line": 2651
+          }
+        }
+      },
+      "city": {
+        "meaning": "City recorded in the source's business address. The listing's reported location does not establish tribal jurisdiction, an owner's residence, or operating presence; publication masks continue to apply.",
+        "evidence": [
+          "owned-producer-projection",
+          "owned-producer-field-projection",
+          "owned-producer-intake-contract",
+          "owned-press-field-map",
+          "owned-source-field-semantics"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "repository": "teim-team/Lumecon-data",
+          "path": "src/lumecon_data/collections/press_candidates.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6",
+          "symbol": "build_press_candidate_projection",
+          "source_field": "city",
+          "line_ranges": [
+            [
+              303,
+              304
+            ],
+            [
+              334,
+              339
+            ]
+          ],
+          "semantic_basis": {
+            "evidence": "owned-source-field-semantics",
+            "symbol": "DESCRIPTIONS",
+            "line": 2678
+          }
+        }
+      },
+      "directory_type": {
+        "meaning": "The source register's type, such as TERO, Indian preference, business licensing, vendor listing, subsidiary directory, or shareholder vendor list. The register type provides source context and does not by itself establish the listed firm's ownership.",
+        "evidence": [
+          "owned-producer-projection",
+          "owned-producer-field-projection",
+          "owned-producer-intake-contract",
+          "owned-press-field-map",
+          "owned-source-field-semantics"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "repository": "teim-team/Lumecon-data",
+          "path": "src/lumecon_data/collections/press_candidates.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6",
+          "symbol": "build_press_candidate_projection",
+          "source_field": "directory_type",
+          "line_ranges": [
+            [
+              303,
+              304
+            ],
+            [
+              334,
+              339
+            ]
+          ],
+          "semantic_basis": {
+            "evidence": "owned-source-field-semantics",
+            "symbol": "DESCRIPTIONS",
+            "line": 2663
+          }
+        }
+      },
+      "entity_class": {
+        "meaning": "The pinned register classification of the certifying authority identified by cedar_uid. It is not the listed business's legal form, industry, ownership class, or certification status.",
+        "evidence": [
+          "owned-producer-projection",
+          "owned-producer-field-projection",
+          "owned-producer-intake-contract",
+          "owned-press-field-map"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "repository": "teim-team/Lumecon-data",
+          "path": "src/lumecon_data/collections/press_candidates.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6",
+          "symbol": "build_press_candidate_projection",
+          "source_field": null,
+          "line_ranges": [
+            [
+              327,
+              329
+            ]
+          ]
+        }
+      },
+      "first_seen": {
+        "meaning": "Stored date or timestamp of the first recorded harvest in which this listing appeared in its source. Initial records were seeded with the harvest date; this field does not establish earlier history, business formation, certification onset, or an ownership effective date.",
+        "evidence": [
+          "owned-producer-projection",
+          "owned-producer-field-projection",
+          "owned-producer-intake-contract",
+          "owned-press-field-map",
+          "owned-source-field-semantics"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "repository": "teim-team/Lumecon-data",
+          "path": "src/lumecon_data/collections/press_candidates.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6",
+          "symbol": "build_press_candidate_projection",
+          "source_field": "first_seen",
+          "line_ranges": [
+            [
+              303,
+              304
+            ],
+            [
+              334,
+              339
+            ]
+          ],
+          "semantic_basis": {
+            "evidence": "owned-source-field-semantics",
+            "symbol": "DESCRIPTIONS",
+            "line": 2687
+          }
+        }
+      },
+      "identity_claim_text": {
+        "meaning": "Source-derived claim wording explaining why the business is included in the directory or program. It may combine program-wide wording with a row-specific source statement, as the Oneida parser does for owner memberships. Read it with assertion_class and identity_scope; it is not an independent Cedar adjudication. Publication masking may withhold the text.",
+        "evidence": [
+          "owned-producer-projection",
+          "owned-producer-field-projection",
+          "owned-producer-intake-contract",
+          "owned-press-field-map",
+          "owned-source-field-semantics"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "repository": "teim-team/Lumecon-data",
+          "path": "src/lumecon_data/collections/press_candidates.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6",
+          "symbol": "build_press_candidate_projection",
+          "source_field": "identity_claim_text",
+          "line_ranges": [
+            [
+              303,
+              304
+            ],
+            [
+              334,
+              339
+            ]
+          ],
+          "semantic_basis": {
+            "evidence": "owned-source-field-semantics",
+            "symbol": "DESCRIPTIONS",
+            "line": 2665
+          }
+        }
+      },
+      "identity_scope": {
+        "meaning": "The population or relationship covered by the source's claim, at the source's stated level: for example enrolled-member ownership, broader Native ownership, a parent-asserted subsidiary, shareholder/descendant/spouse eligibility, or a vendor relationship. These scopes are not interchangeable evidence of Native ownership.",
+        "evidence": [
+          "owned-producer-projection",
+          "owned-producer-field-projection",
+          "owned-producer-intake-contract",
+          "owned-press-field-map",
+          "owned-source-field-semantics"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "repository": "teim-team/Lumecon-data",
+          "path": "src/lumecon_data/collections/press_candidates.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6",
+          "symbol": "build_press_candidate_projection",
+          "source_field": "identity_scope",
+          "line_ranges": [
+            [
+              303,
+              304
+            ],
+            [
+              334,
+              339
+            ]
+          ],
+          "semantic_basis": {
+            "evidence": "owned-source-field-semantics",
+            "symbol": "DESCRIPTIONS",
+            "line": 2664
+          }
+        }
+      },
+      "is_current": {
+        "meaning": "The input record's flag for presence in the latest retained retrieval of its source. It is a snapshot-presence flag, not assurance that the business is operating today, that a licence or certification remains valid, or that ownership has not changed.",
+        "evidence": [
+          "owned-producer-projection",
+          "owned-producer-field-projection",
+          "owned-producer-intake-contract",
+          "owned-press-field-map",
+          "owned-source-field-semantics"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "repository": "teim-team/Lumecon-data",
+          "path": "src/lumecon_data/collections/press_candidates.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6",
+          "symbol": "build_press_candidate_projection",
+          "source_field": "is_current",
+          "line_ranges": [
+            [
+              303,
+              304
+            ],
+            [
+              334,
+              339
+            ]
+          ],
+          "semantic_basis": {
+            "evidence": "owned-source-field-semantics",
+            "symbol": "DESCRIPTIONS",
+            "line": 2689
+          }
+        }
+      },
+      "last_seen": {
+        "meaning": "Stored date or timestamp of the most recent recorded harvest in which this listing appeared in its source. With first_seen and is_current it can describe observed listing persistence across retained vintages; it is not an ownership end date, certification expiry, or proof of coverage beyond those harvests.",
+        "evidence": [
+          "owned-producer-projection",
+          "owned-producer-field-projection",
+          "owned-producer-intake-contract",
+          "owned-press-field-map",
+          "owned-source-field-semantics"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "repository": "teim-team/Lumecon-data",
+          "path": "src/lumecon_data/collections/press_candidates.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6",
+          "symbol": "build_press_candidate_projection",
+          "source_field": "last_seen",
+          "line_ranges": [
+            [
+              303,
+              304
+            ],
+            [
+              334,
+              339
+            ]
+          ],
+          "semantic_basis": {
+            "evidence": "owned-source-field-semantics",
+            "symbol": "DESCRIPTIONS",
+            "line": 2688
+          }
+        }
+      },
+      "naics_code": {
+        "meaning": "NAICS industry code or codes explicitly supplied by the source, projected from naics. The projection does not infer a code from a business name or service description, and a missing value remains missing.",
+        "evidence": [
+          "owned-producer-projection",
+          "owned-producer-field-projection",
+          "owned-producer-intake-contract",
+          "owned-press-field-map",
+          "owned-source-field-semantics"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "repository": "teim-team/Lumecon-data",
+          "path": "src/lumecon_data/collections/press_candidates.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6",
+          "symbol": "build_press_candidate_projection",
+          "source_field": "naics",
+          "line_ranges": [
+            [
+              303,
+              304
+            ],
+            [
+              334,
+              339
+            ]
+          ],
+          "semantic_basis": {
+            "evidence": "owned-source-field-semantics",
+            "symbol": "DESCRIPTIONS",
+            "line": 2677
+          }
+        }
+      },
+      "ownership_percent": {
+        "meaning": "The ownership share the source prints for this business, on the certifier's own scope: the share owned by the certifying tribe's members, as the certifier reports it. It is not the Native ownership share overall, and it is not inferred from program membership or substituted with a program's minimum eligibility threshold. The Tulalip NAOB registry prints 'Tulalip Owned %' and certifies firms Native-owned through other tribes, so a row can read 0.0 beside an identity_claim_text such as 'Tribe: Snoqualmie; Tulalip Owned: 0%': that zero is the source's figure for the certifying tribe's share. identity_scope says whose Native identity the listing certifies. A blank means no record-level percentage was supplied, not zero ownership.",
+        "evidence": [
+          "owned-producer-projection",
+          "owned-producer-field-projection",
+          "owned-producer-intake-contract",
+          "owned-press-field-map",
+          "owned-source-field-semantics-3b175bc"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "repository": "teim-team/Lumecon-data",
+          "path": "src/lumecon_data/collections/press_candidates.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6",
+          "symbol": "build_press_candidate_projection",
+          "source_field": "ownership_percent",
+          "line_ranges": [
+            [
+              303,
+              304
+            ],
+            [
+              334,
+              339
+            ]
+          ],
+          "semantic_basis": {
+            "evidence": "owned-source-field-semantics-3b175bc",
+            "symbol": "DESCRIPTIONS",
+            "line": 2667
+          }
+        }
+      },
+      "ownership_threshold_min": {
+        "meaning": "The minimum ownership percentage required by the stated program, where supported by the program's published list, ordinance, or statute. It is an eligibility rule, not the observed ownership percentage of this business; a blank does not imply either zero or a standard 51-percent threshold.",
+        "evidence": [
+          "owned-producer-projection",
+          "owned-producer-field-projection",
+          "owned-producer-intake-contract",
+          "owned-press-field-map",
+          "owned-source-field-semantics"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "repository": "teim-team/Lumecon-data",
+          "path": "src/lumecon_data/collections/press_candidates.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6",
+          "symbol": "build_press_candidate_projection",
+          "source_field": "ownership_threshold_min",
+          "line_ranges": [
+            [
+              303,
+              304
+            ],
+            [
+              334,
+              339
+            ]
+          ],
+          "semantic_basis": {
+            "evidence": "owned-source-field-semantics",
+            "symbol": "DESCRIPTIONS",
+            "line": 2668
+          }
+        }
+      },
+      "program_name": {
+        "meaning": "The name of the authority's program or directory, projected from programme_name, such as its TERO, Indian Preference Office, or CESO program. The source's own program identity is retained rather than labeling every register as TERO.",
+        "evidence": [
+          "owned-producer-projection",
+          "owned-producer-field-projection",
+          "owned-producer-intake-contract",
+          "owned-press-field-map",
+          "owned-source-field-semantics"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "repository": "teim-team/Lumecon-data",
+          "path": "src/lumecon_data/collections/press_candidates.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6",
+          "symbol": "build_press_candidate_projection",
+          "source_field": "programme_name",
+          "line_ranges": [
+            [
+              303,
+              304
+            ],
+            [
+              334,
+              339
+            ]
+          ],
+          "semantic_basis": {
+            "evidence": "owned-source-field-semantics",
+            "symbol": "DESCRIPTIONS",
+            "line": 2653
+          }
+        }
+      },
+      "research_note": {
+        "meaning": "A concise factual qualification that changes interpretation. The current OWNED field map declares a blank-rule field; the producer's handler retains a supplied reviewed note when present and otherwise leaves it empty. It is not an automatically generated ownership or publication verdict.",
+        "evidence": [
+          "owned-producer-projection",
+          "owned-producer-field-projection",
+          "owned-producer-intake-contract",
+          "owned-press-field-map"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "repository": "teim-team/Lumecon-data",
+          "path": "src/lumecon_data/collections/press_candidates.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6",
+          "symbol": "_derive",
+          "source_field": null,
+          "line_ranges": [
+            [
+              89,
+              101
+            ]
+          ]
+        }
+      },
+      "service_category": {
+        "meaning": "The source's trade, service category, or business-line wording, projected from service_category_raw. It preserves the source category rather than asserting a harmonized industry classification or inferring a NAICS code.",
+        "evidence": [
+          "owned-producer-projection",
+          "owned-producer-field-projection",
+          "owned-producer-intake-contract",
+          "owned-press-field-map",
+          "owned-source-field-semantics"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "repository": "teim-team/Lumecon-data",
+          "path": "src/lumecon_data/collections/press_candidates.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6",
+          "symbol": "build_press_candidate_projection",
+          "source_field": "service_category_raw",
+          "line_ranges": [
+            [
+              303,
+              304
+            ],
+            [
+              334,
+              339
+            ]
+          ],
+          "semantic_basis": {
+            "evidence": "owned-source-field-semantics",
+            "symbol": "DESCRIPTIONS",
+            "line": 2676
+          }
+        }
+      },
+      "source_edition": {
+        "meaning": "The source publisher's edition marker, such as a dated filename, build stamp, or printed current-as-of label. It identifies the captured publication version; it is not the Cedar release version and does not establish continuous coverage between editions.",
+        "evidence": [
+          "owned-producer-projection",
+          "owned-producer-field-projection",
+          "owned-producer-intake-contract",
+          "owned-press-field-map",
+          "owned-source-field-semantics"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "repository": "teim-team/Lumecon-data",
+          "path": "src/lumecon_data/collections/press_candidates.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6",
+          "symbol": "build_press_candidate_projection",
+          "source_field": "source_edition",
+          "line_ranges": [
+            [
+              303,
+              304
+            ],
+            [
+              334,
+              339
+            ]
+          ],
+          "semantic_basis": {
+            "evidence": "owned-source-field-semantics",
+            "symbol": "DESCRIPTIONS",
+            "line": 2684
+          }
+        }
+      },
+      "source_last_updated": {
+        "meaning": "The update date explicitly stated by the source publisher. A blank means the source supplied no update date; Cedar's harvest date or the researcher spreadsheet's export date must not be substituted.",
+        "evidence": [
+          "owned-producer-projection",
+          "owned-producer-field-projection",
+          "owned-producer-intake-contract",
+          "owned-press-field-map",
+          "owned-source-field-semantics"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "repository": "teim-team/Lumecon-data",
+          "path": "src/lumecon_data/collections/press_candidates.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6",
+          "symbol": "build_press_candidate_projection",
+          "source_field": "source_last_updated",
+          "line_ranges": [
+            [
+              303,
+              304
+            ],
+            [
+              334,
+              339
+            ]
+          ],
+          "semantic_basis": {
+            "evidence": "owned-source-field-semantics",
+            "symbol": "DESCRIPTIONS",
+            "line": 2685
+          }
+        }
+      },
+      "state": {
+        "meaning": "State or province reported in the source's business address, projected from state_province. It is source location text, not a derived Native-entity affiliation, ownership jurisdiction, or inferred state code.",
+        "evidence": [
+          "owned-producer-projection",
+          "owned-producer-field-projection",
+          "owned-producer-intake-contract",
+          "owned-press-field-map",
+          "owned-source-field-semantics"
+        ],
+        "definition_source": {
+          "kind": "reviewed_transform_contract",
+          "repository": "teim-team/Lumecon-data",
+          "path": "src/lumecon_data/collections/press_candidates.py",
+          "revision": "ce736a2b6a133d2656969f5bb7e21ac696bb2cf6",
+          "symbol": "build_press_candidate_projection",
+          "source_field": "state_province",
+          "line_ranges": [
+            [
+              303,
+              304
+            ],
+            [
+              334,
+              339
+            ]
+          ],
+          "semantic_basis": {
+            "evidence": "owned-source-field-semantics",
+            "symbol": "DESCRIPTIONS",
+            "line": 2679
+          }
+        }
+      }
+    }
+  }
+}

@@ -59,7 +59,7 @@ import {
   freshMemory,
   resolveLocally,
 } from "./cedarConversation.js";
-import { LAUNCH_COLLECTION } from "./collection.js";
+import { LAUNCH_COLLECTION, countNote } from "./collection.js";
 import { coverageLabel } from "./pressAccess.js";
 import { PRESS_CATALOG_BY_ID, PRESS_TIERS, STOREFRONT_CATALOG, spellCount } from "./pressCatalog.js";
 import { visibleAudiences } from "./pressJobs.js";
@@ -67,6 +67,7 @@ import { ECOSYSTEM_EXAMPLES, MAINTENANCE, NEED_ENRICHMENTS } from "./pressMethod
 import { recordStructure } from "./pressRecordStructure.js";
 import { formatUpdated, freshnessLine, recentlyUpdated } from "./pressReleases.js";
 import { REGISTRY_PROGRAMS } from "./pressSources.js";
+import { SOURCE_REACH_FIGURE } from "./sourceRotation.js";
 
 const DESCRIPTOR = Object.fromEntries(LAUNCH_COLLECTION.map((entry) => [entry.id, entry]));
 const TIER_BY_SHELF = Object.fromEntries(PRESS_TIERS.map((tier) => [tier.shelf, tier]));
@@ -74,11 +75,14 @@ const TIER_BY_SHELF = Object.fromEntries(PRESS_TIERS.map((tier) => [tier.shelf, 
 /** Extra words that should reach a collection beyond its own name. */
 const COLLECTION_WORDS = Object.freeze({
   funding: ["grant", "grants", "assistance", "award", "awards", "usaspending", "federal money", "block grant", "federal funding"],
-  "federal-register": ["notice", "notices", "rule", "rulemaking", "comment period", "register"],
+  "federal-register": ["notice", "notices", "rule", "rulemaking", "comment period", "register", "consultation", "consultations"],
   legislation: ["bill", "bills", "congress", "vote", "votes", "roll call", "senate", "house", "law", "laws"],
   deals: ["deal", "acquisition", "acquisitions", "merger", "mergers", "bond", "bonds", "financing", "transaction", "transactions", "investment", "investments", "joint venture"],
   nagpra: ["repatriation", "remains", "graves", "inventory", "museum", "museums", "ancestors"],
-  lobbying: ["lobby", "lobbying", "advocacy", "consultation", "docket", "dockets", "ferc", "nrc", "testimony", "lda"],
+  // The Advocacy release holds Lobbying Disclosure Act filings only
+  // (2026-10-06), so dockets and testimony no longer route here, and a
+  // consultation reaches the Federal Register, which carries participants.
+  lobbying: ["lobby", "lobbying", "lobbyist", "lobbyists", "advocacy", "lda", "lobbying disclosure"],
   contractors: ["contract", "contracts", "contracting", "prime", "fpds", "8(a)", "set aside", "set-aside", "vendor", "vendors"],
   subcontracting: ["subaward", "subawards", "subcontract", "subcontracts", "subcontractor", "subcontractors", "fsrs"],
   owned: ["tero", "small business", "small businesses", "individually owned", "business directory", "certified", "native owned", "native-owned"],
@@ -128,13 +132,24 @@ function collectionAnswer(entry) {
   // Cedar NEED's enrichments, in the Methods wording.
   if (entry.id === "need") lines.push(`${NEED_ENRICHMENTS.patents} ${NEED_ENRICHMENTS.ratings} ${NEED_ENRICHMENTS.attachment}`);
   const facts = [`Coverage: ${coverageLabel(entry)}.`];
-  if (descriptor?.rowsLabel) facts.push(`${descriptor.rowsLabel} in the current release.`);
+  if (descriptor?.rowsLabel) facts.push(countNote(entry.id) ?? `${descriptor.rowsLabel} in the current release.`);
   if (fresh) facts.push(`${fresh}.`);
   lines.push(facts.join(" "));
   if (descriptor?.sources) lines.push(`Built from ${lowerFirst(descriptor.sources)}`);
   if (entry.linkage) lines.push(entry.linkage);
   if (tier) lines.push(`It is included in ${tier.name}.`);
   return lines.join("\n\n");
+}
+
+/**
+ * A method note without its bookkeeping sentences: about the preview or
+ * sample file, or about publication holds and owner rulings. Those are
+ * internal records of how a release was cleared, not how it was built.
+ */
+function withoutPreviewSentences(text) {
+  const kept = text.split(/(?<=[.!?])\s+/)
+    .filter((sentence) => !/\b(preview|sample|publication hold|owner ruling)\b/i.test(sentence));
+  return kept.length ? kept.join(" ") : text;
 }
 
 /** The deeper answer for a collection: how it is constructed, off its own method note. */
@@ -147,12 +162,16 @@ function collectionExpanded(entry) {
     ].join("\n\n");
   }
   const descriptor = DESCRIPTOR[entry.id];
-  const method = descriptor?.method ? leadSentences(descriptor.method, 2) : null;
+  // A method note can describe the public preview file ("This preview is
+  // ...", "The public preview is ten rows ..."): bookkeeping about the
+  // excerpt, not how the collection is built, and draft-sounding to a reader
+  // (owner, 2026-10-06). Those sentences are skipped.
+  const method = descriptor?.method ? leadSentences(withoutPreviewSentences(descriptor.method), 2) : null;
   const lines = [];
   if (method) lines.push(`Going deeper on how ${entry.short || entry.name} is built: ${lowerFirst(method)}`);
   else if (entry.linkage) lines.push(`Going deeper: ${lowerFirst(entry.linkage)}`);
   lines.push(
-    `Every release is dated and versioned, and the methods page states the inclusion rules and known gaps ` +
+    `Every release is maintained with dated updates, and the methods page states the inclusion rules and known gaps ` +
       `for this collection, which is what a citation needs.`,
   );
   return lines.join("\n\n");
@@ -160,6 +179,8 @@ function collectionExpanded(entry) {
 
 function lowerFirst(text) {
   const value = String(text ?? "");
+  // An acronym or a proper noun keeps its capitals: "NEED has", not "nEED has".
+  if (/^[A-Z]{2}/.test(value)) return value;
   return value ? value[0].toLowerCase() + value.slice(1) : value;
 }
 
@@ -214,10 +235,10 @@ const GENERAL_INTENTS = [
     id: "what",
     chip: "What is Cedar Press?",
     followUps: ["collections", "audiences", "plans"],
-    triggers: ["what is cedar press", "what is this", "what does cedar press do", "what is cedar", "about cedar press", "explain cedar press", "what do you do", "what is press", "cedar press", "what is it", "what are you"],
+    triggers: ["what is cedar press", "what is this", "what does cedar press do", "what is cedar", "about cedar press", "explain cedar press", "what do you do", "what is press", "cedar press", "what is it", "what are you", "what can cedar answer", "what can cedar press answer", "what can you answer", "what can i ask"],
     answer:
       `Cedar Press is a research and intelligence service about Indian Country's economy. ` +
-      `It publishes ${COUNT} maintained collections, built from public material drawn from more than 600 documented upstream sources, and ` +
+      `It publishes ${COUNT} maintained collections, built from ${SOURCE_REACH_FIGURE} kinds of public source and ` +
       `resolved to the nations, corporations and organizations the records belong to.\n\n` +
       `A federal contract names the company that won it but not the nation that owns the company, so ` +
       `Cedar does the work between the record and the entity, publishes what it could not resolve, and keeps the ` +
@@ -226,8 +247,7 @@ const GENERAL_INTENTS = [
     expanded:
       `Going deeper: the collections are one product rather than ${COUNT} downloads. Every one keys to the ` +
       `same entity layer, so a nation's contracts, awards, deals, notices and subsidiaries read as one ` +
-      `nation across all of them, and a figure you cite reproduces because every release is dated and ` +
-      `versioned.\n\n` +
+      `nation across all of them, and a figure you cite reproduces because the update history preserves changes.\n\n` +
       `The briefs are written from the collections, the release history says what changed and when, and ` +
       `the methods page states the inclusion rules and the known gaps for each collection.`,
   },
@@ -246,7 +266,7 @@ const GENERAL_INTENTS = [
       `${lowerFirst(PRESS?.promise ?? "")} The ${PRESS_PRO?.name} shelf is the structure behind it: ` +
       `who holds the contracts and subawards, who owns which enterprise and which parcels, where resource ` +
       `revenue goes, which businesses and nonprofits are Native-controlled.\n\n` +
-      `Each collection states its own coverage, row count and sources, and I can give you any of them by name.`,
+      `Each collection states its own coverage, observation count and sources, and I can give you any of them by name.`,
   },
   {
     id: "sources",
@@ -254,15 +274,16 @@ const GENERAL_INTENTS = [
     followUps: ["current", "entities", "limits"],
     triggers: ["where does the data come from", "what are the sources", "what sources", "source systems", "is this public data", "where do you get", "how do you get the data", "provenance", "the sources", "data sources", "where is it from", "where does it come from"],
     answer:
-      `Every collection is built from public material, drawn from more than 600 documented upstream sources. They include ` +
-      `federal spending and award systems (USAspending, FPDS, FSRS, SAM, FAADS), Congress and rulemaking ` +
-      `(Congress.gov, Voteview, the Federal Register, regulations.gov), lobbying disclosures and regulatory ` +
-      `dockets (FERC and NRC dockets, IBIA and IBLA appeals), IRS filings (the Business Master File and ` +
+      `Every collection is built from public material, drawn from ${SOURCE_REACH_FIGURE} kinds of public source. They include ` +
+      `federal spending and award systems (USAspending, FPDS, FSRS, SAM, FAADS), Congress and the ` +
+      `Federal Register (Congress.gov, Voteview, federalregister.gov), lobbying disclosures filed under the ` +
+      `Lobbying Disclosure Act, IRS filings (the Business Master File and ` +
       `Form 990), resource revenue reporting (ONRR, OSMRE, ANCSA 7(i) and 7(j) filings, the Osage Minerals ` +
       `Council), and what nations and their enterprises publish about themselves.\n\n` +
-      `Cedar NEED also draws on patent records, supported by company, tribal, SEC and court evidence, and ` +
-      `rating-agency announcements, supported by issuer and tribal releases, filings, regulator records ` +
-      `and labeled secondary sources.`,
+      `Where they are available, Cedar NEED can also add patent records, supported by company, tribal, SEC ` +
+      `and court evidence, and rating-agency announcements, supported by issuer and tribal releases, filings, ` +
+      `regulator records and labeled secondary sources. Each stays with the exact legal entity and date it ` +
+      `concerns, and they are not on every record.`,
     expanded:
       `Going deeper: the tribal business directories are one source family with a registry of ` +
       `${REGISTRY_PROGRAMS} programs behind it: nations' own TERO lists, member-owned directories, state ` +
@@ -296,14 +317,16 @@ const GENERAL_INTENTS = [
     triggers: ["how current", "how often updated", "how fresh", "update", "updated", "cadence", "how often", "is it current", "snapshot", "how recent", "up to date", "latest release", "last updated"],
     answer:
       NEWEST
-        ? `${MAINTENANCE.sentence} The most recent release was ${formatUpdated(NEWEST.updated)}.\n\n` +
-          `Every release is dated and versioned, and the release history records what changed, so a figure ` +
+        ? `${MAINTENANCE.sentence} The most recent release was ${formatUpdated(NEWEST.updated)}` +
+          (NEWEST.refreshed ? `, and its data was last refreshed ${formatUpdated(NEWEST.refreshed)}.\n\n` : `.\n\n`) +
+          `Every release is maintained with dated updates, and the release history records what changed, so a figure ` +
           `you cited last quarter still reproduces.`
-        : `${MAINTENANCE.sentence} Every release is dated and versioned so a figure you cited last ` +
+        : `${MAINTENANCE.sentence} Every release is maintained with dated updates so a figure you cited last ` +
           `quarter still reproduces.`,
     expanded:
-      `Going deeper: the sources publish on their own clocks, and each week a person reviews what they ` +
-      `published into the collection. A roster collection states the date it was captured rather than a span, ` +
+      `Going deeper: the sources publish on their own clocks, and on the weekly review schedule a person ` +
+      `reviews what they published before it enters the collection. Each collection shows the date its data ` +
+      `was refreshed and the period its records cover, apart from the date of a release. A roster collection states the date it was captured rather than a span, ` +
       `because its sources archive nothing. ${MAINTENANCE.goal}` +
       (recentLine ? `\n\nThe latest releases: ${recentLine}.` : ""),
   },
@@ -322,22 +345,22 @@ const GENERAL_INTENTS = [
       `Each person keeps their own sign-in, and their conversations and activity stay private to them, so ` +
       `teammates do not see each other's conversations. Access comes through the organization's plan: someone ` +
       `removed from the organization loses that access at once and keeps anything they hold individually.\n\n` +
-      `To set one up, contact elijah.moreno@lumecon.ai.`,
+      `To set one up, contact contact@lumecon.ai.`,
     expanded:
       `Going deeper: the organization's plan is what opens the collections for its members, and the admin ` +
       `manages who is in it by email invitation. Collaborative analysis and shared projects are part of ` +
-      `Cedar Grove rather than Cedar Press.\n\nTo set up an institutional plan, contact elijah.moreno@lumecon.ai.`,
+      `Cedar Grove rather than Cedar Press.\n\nTo set up an institutional plan, contact contact@lumecon.ai.`,
   },
   {
     id: "collaboration",
     chip: "Can we work on analysis together?",
     followUps: ["institutional", "plans", "who"],
-    triggers: ["collaborate", "collaboration", "collaborative", "collaborative analysis", "shared project", "shared projects", "work together", "shared workspace", "team workspace", "co-author", "coauthor"],
+    triggers: ["collaborate", "collaboration", "collaborative", "collaborative analysis", "analysis together", "work on analysis", "shared project", "shared projects", "work together", "shared workspace", "team workspace", "co-author", "coauthor"],
     answer:
       `Collaborative analysis and shared projects are part of Cedar Grove, not Cedar Press. In Cedar Press ` +
       `each person's conversations and activity stay private to them; on the institutional plan, members ` +
       `share the organization's details and its Cedar context.\n\nTo ask about either, contact ` +
-      `elijah.moreno@lumecon.ai.`,
+      `contact@lumecon.ai.`,
     expanded:
       `Going deeper: Cedar Press is where the collections are read, cited and downloaded, one person at a ` +
       `time or through an organization's institutional plan. Work that a team builds together belongs in ` +
@@ -349,8 +372,9 @@ const GENERAL_INTENTS = [
     followUps: ["tribal", "research", "collections"],
     triggers: ["how do i get", "how much", "price", "pricing", "cost", "subscribe", "subscription", "plans", "buy", "sign up", "membership", "tiers", "difference between", "get access", "access", "how do i read", "log in", "login"],
     answer:
-      `Cedar Press is available exclusively through a Tribal Business News membership, which handles ` +
-      `payment, renewals and upgrades.\n\n` +
+      `Cedar Press will be available exclusively through a Tribal Business News membership, which will ` +
+      `handle payment, renewals and upgrades. Enrollment is not open yet: early access is available soon, ` +
+      `and you can request it at contact@lumecon.ai. If you already have an account, log in.\n\n` +
       `${PRESS?.name} opens ${STANDARD.length} collections, ` +
       `${lowerFirst(PRESS?.question ?? "")}\n` +
       `${PRESS_PRO?.name} adds the other ${PRO.length}, ` +
@@ -393,10 +417,10 @@ const GENERAL_INTENTS = [
       `Research access covers one or two collections for a defined project, for researchers, journalists, ` +
       `students, nonprofits and public-interest work. It needs no subscription.\n\n` +
       `If you are going to cite a figure, read the methods page first: it states inclusion rules, known ` +
-      `gaps and how each collection is versioned, which is what a citation needs.`,
+      `gaps and when each collection was updated, which is what a citation needs.`,
     expanded:
-      `Going deeper: every CSV cites itself, with the collection name and the release version written into ` +
-      `the file, so a figure in a story or a paper points at the exact release it came from.\n\n` +
+      `Going deeper: every CSV cites itself, with the collection name and the update date written into ` +
+      `the file, so a figure in a story or a paper points at the dataset it came from.\n\n` +
       `The research access page asks for the project and the collections it needs; a person reads it and ` +
       `replies.`,
     links: ["research", "methods"],
@@ -542,6 +566,38 @@ const AUDIENCES_INTENT = {
 };
 
 /**
+ * "How can I use this data?" (owner, 2026-10-06): answered with the home
+ * page's own use cases, so Cedar and the use-case band say the same thing.
+ * Every line is read from AUDIENCE_JOBS (pressJobs.js) via visibleAudiences,
+ * never typed here, so a change to a use case changes this answer too.
+ */
+const USE_LEAD = 4;
+const useLine = (audience) =>
+  `${audience.audience}: ${audience.outcome} ${audience.explanation} ` +
+  `(${audienceCollections(audience)})`;
+const USE_INTENT = {
+  id: "use",
+  chip: "How can I use this data?",
+  followUps: ["audiences", "collections", "plans"],
+  triggers: [
+    "how can i use", "how do i use", "how would i use", "how could i use", "how can we use", "how do we use",
+    "how can i use this data", "how can i use cedar press", "use this data", "use the data",
+    "what can i do with", "what can i do with this", "what can i use it for", "what is it good for",
+    "ways to use", "examples of use", "give me an example", "give me examples", "show me an example",
+    "real world example", "what would i use it for",
+  ],
+  answer:
+    `Here is how people use it, from the use cases on this page:\n\n` +
+    AUDIENCES.slice(0, USE_LEAD).map(useLine).join("\n\n") +
+    `\n\nTell me what you do and I will walk through the collections that carry that work.`,
+  expanded:
+    `More ways people use it:\n\n` +
+    AUDIENCES.slice(USE_LEAD).map(useLine).join("\n\n") +
+    `\n\nEvery record carries the source it came from, so whatever you build can be checked and cited.`,
+  links: ["plans"],
+};
+
+/**
  * Conversational filler. None of these is a topic: "thanks" then "tell me
  * more" still drills into the topic before the thanks. Their variants
  * rotate on repeats so two hellos in a row never read identically.
@@ -604,6 +660,7 @@ const FILLER_INTENTS = [
  */
 export const DOOR_INTENTS = Object.freeze([
   ...GENERAL_INTENTS,
+  USE_INTENT,
   AUDIENCES_INTENT,
   ...COLLECTION_INTENTS,
   ...AUDIENCE_INTENTS,
@@ -625,6 +682,7 @@ export const DOOR_STARTERS = Object.freeze([
   "tribal",
   "research",
   "who",
+  "use",
   "audiences",
 ]);
 

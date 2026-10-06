@@ -64,3 +64,7 @@ ignore = ["B008"]
 # relaxed; the ones that catch bugs stay on.
 "**/claims.py" = ["E501"]
 "**/collections.py" = ["E501"]
+# The release-gap register's rows are prose (what exists, what is served, the
+# gate, its closing condition, the evidence), rendered into docs/ by the module
+# itself; a wrapped sentence there is a sentence to re-read, not a bug caught.
+"tests/release_gap_register.py" = ["E501"]

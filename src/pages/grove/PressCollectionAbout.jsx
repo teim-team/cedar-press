@@ -26,21 +26,43 @@ import { Link } from "react-router";
 
 import {
   LAUNCH_COLLECTION,
-  collectionCedarFacts,
-  collectionTables,
 } from "../../features/grove/collection.js";
 import { codebookFor } from "../../features/grove/explore.js";
 import { coverageLabel } from "../../features/grove/pressAccess.js";
+import { sampleRecordCount } from "../../features/grove/readerPresentation.js";
 import { articleHref, articlesDrawingOn } from "../../features/grove/pressArticles.js";
 import { PRESS_CATALOG_BY_ID } from "../../features/grove/pressCatalog.js";
 import { collectionQuestions } from "../../features/grove/pressJobs.js";
 import { MAINTENANCE, NEED_ENRICHMENTS } from "../../features/grove/pressMethod.js";
 import { formatUpdated, ledgerFor } from "../../features/grove/pressReleases.js";
-import { tableLabel } from "../../features/grove/readerValues.js";
 import { PRESS_METHODS_PATH, PRESS_WHATS_NEW_PATH } from "../../features/grove/pressRoutes.js";
 import { COLLECTION_ICONS } from "./pressCollectionIcons";
+import { focusWasWithin, keepTabInside, rememberFocus } from "../../features/grove/focusReturn.js";
 
 /** A section, rendered only when it has something to say. */
+/**
+ * The grain sentence, read as the end of "One row is ...".
+ *
+ * The grain comes from the codebook or the generated download record, and
+ * both write it as a sentence of its own ("One source transaction."). After
+ * the bold "One row is" that read "One row is One source transaction", so the
+ * first word is lower-cased when it is an ordinary capitalised word (an
+ * acronym such as "EIN" is left alone).
+ *
+ * The download record for transaction tables also carries a producer's note,
+ * "; part boundaries have no economic meaning", which is about how the file
+ * is split for building and tells a reader nothing. The record is generated
+ * upstream, so the clause is dropped here, at display, rather than by
+ * hand-editing generated JSON.
+ */
+function grainSentence(row) {
+  let text = String(row ?? "").trim();
+  if (!text) return "";
+  text = text.replace(/;\s*part boundaries[^.;]*/i, "");
+  if (/^[A-Z](?:[a-z]|\s)/.test(text)) text = text.charAt(0).toLowerCase() + text.slice(1);
+  return text;
+}
+
 function Block({ title, children }) {
   if (!children) return null;
   return (
@@ -51,17 +73,31 @@ function Block({ title, children }) {
   );
 }
 
-export default function PressCollectionAbout({ entry, flagship, onClose }) {
-  const written = articlesDrawingOn(entry.id);
+export default function PressCollectionAbout({ entry, flagship, onClose, articles = [] }) {
+  const written = articlesDrawingOn(entry?.id, articles);
   const panelRef = useRef(null);
   const closeRef = useRef(null);
 
   // Escape closes, and focus lands inside the panel when it opens: it is a
   // sheet over the table, and a reader who tabs off the end of it should not
   // find themselves in the rows behind it.
+  //
+  // That last clause was the intent and not the behaviour until 2026-10-04:
+  // Tab ran off the end of the sheet into the rail and the rows, and closing
+  // left focus on <body>. Tab now wraps inside the sheet, and closing returns
+  // focus to the control that opened it (`focusReturn.js`).
+  const restoreRef = useRef(null);
+  useEffect(() => {
+    restoreRef.current = rememberFocus();
+    const panel = panelRef.current;
+    return () => {
+      if (focusWasWithin(panel)) restoreRef.current?.();
+    };
+  }, []);
   useEffect(() => {
     const onKey = (event) => {
       if (event.key === "Escape") onClose();
+      else keepTabInside(event, panelRef.current);
     };
     document.addEventListener("keydown", onKey);
     const frame = requestAnimationFrame(() => closeRef.current?.focus());
@@ -74,15 +110,14 @@ export default function PressCollectionAbout({ entry, flagship, onClose }) {
   if (!entry) return null;
   const launch = LAUNCH_COLLECTION.find((item) => item.id === entry.id) ?? {};
   const catalog = PRESS_CATALOG_BY_ID[entry.id] ?? entry;
-  const facts = collectionCedarFacts(entry.id);
-  const tables = collectionTables(entry.id);
   const book = flagship ? codebookFor(flagship.key) : null;
   const releases = ledgerFor(entry.id) ?? [];
-  const latest = releases[0] ?? null;
+  const latest = releases.at(-1) ?? null;
   const questions = collectionQuestions(entry.id);
+  const sampleRows = sampleRecordCount(flagship?.sampleRows);
 
   return (
-    <div className="cp-ab" role="dialog" aria-label={`About ${entry.name}`} ref={panelRef}>
+    <div className="cp-ab" role="dialog" aria-modal="true" aria-label={`About ${entry.name}`} ref={panelRef}>
       <header className="cp-ab__head">
         <p className="cp-ab__cap">Collection profile</p>
         <h2 className="cp-ab__name">
@@ -98,11 +133,13 @@ export default function PressCollectionAbout({ entry, flagship, onClose }) {
         {/* The header's facts, as fields. A reader checking a figure wants
             the release and the coverage before they want the prose. */}
         <dl className="cp-ab__facts">
-          {launch.version ? (<div><dt>Release</dt><dd>{launch.version}</dd></div>) : null}
-          {launch.updated ? (<div><dt>Updated</dt><dd>{formatUpdated(launch.updated)}</dd></div>) : null}
+          {/* Two dates, kept apart (2026-10-06): when the data was last
+              refreshed from the producer, and when this release was issued.
+              Coverage, beside them, is the period the records span. */}
+          {launch.refreshed ? (<div><dt>Data as of</dt><dd>{formatUpdated(launch.refreshed)}</dd></div>) : null}
+          {launch.updated ? (<div><dt>Released</dt><dd>{formatUpdated(launch.updated)}</dd></div>) : null}
           {coverageLabel(catalog) ? (<div><dt>Coverage</dt><dd>{coverageLabel(catalog)}</dd></div>) : null}
-          {launch.rowsLabel ? (<div><dt>Records</dt><dd>{launch.rowsLabel}</dd></div>) : null}
-          {Number.isInteger(facts?.n_tables) ? (<div><dt>Tables</dt><dd>{facts.n_tables}</dd></div>) : null}
+          {sampleRows !== null ? (<div><dt>Example records</dt><dd>{sampleRows.toLocaleString("en-US")}</dd></div>) : null}
           <div><dt>Maintained</dt><dd>{MAINTENANCE.label}</dd></div>
         </dl>
 
@@ -122,7 +159,7 @@ export default function PressCollectionAbout({ entry, flagship, onClose }) {
                   count, and it was not on this surface anywhere. */}
               {book?.row ? (
                 <p className="cp-ab__unit">
-                  <b>One row is</b> {book.row}
+                  <b>One row is</b> {grainSentence(book.row)}
                 </p>
               ) : null}
             </>
@@ -168,9 +205,9 @@ export default function PressCollectionAbout({ entry, flagship, onClose }) {
         <Block title="What is not in it">
           <>
             <p>
-              This viewer reads the published preview: up to ten sample rows per table. A search
+              This viewer reads the published preview: up to ten sample rows of the collection's one flat table. A search
               that returns nothing may mean the collection holds nothing, or that the sampled rows
-              did not include it. The release is the whole table.
+              did not include it. The downloadable dataset contains the permitted observations.
             </p>
             {catalog?.limits ? <p>{catalog.limits}</p> : null}
           </>
@@ -179,7 +216,7 @@ export default function PressCollectionAbout({ entry, flagship, onClose }) {
         <Block title="Fields and definitions">
           {book?.fields?.length ? (
             <details className="cp-ab__fields">
-              <summary>{book.fields.length} fields in {flagship?.label ?? "the flagship table"}</summary>
+              <summary>{book.fields.length} fields in {flagship?.label ?? "the dataset"}</summary>
               <dl>
                 {book.fields.map((field) => (
                   <div key={field.column}>
@@ -195,30 +232,18 @@ export default function PressCollectionAbout({ entry, flagship, onClose }) {
           ) : null}
         </Block>
 
-        <Block title="Tables in this release">
-          {tables.length ? (
-            <ul className="cp-ab__tables">
-              {tables.map((table) => (
-                /* The table's name for a reader, not its file name: the
-                   manifest's title where it has one, else the stem in words
-                   (readerValues.js). The file keeps its own name in the
-                   download, where a reader handling files needs it. */
-                <li key={table.table ?? table.key}>{tableLabel(table)}</li>
-              ))}
-            </ul>
-          ) : null}
-        </Block>
 
-        <Block title="Changes in this release">
+        <Block title="Latest update">
           {latest ? (
             <>
               <p className="cp-ab__rel">
-                <b>{latest.version}</b>
+                <b>Released</b>
                 {latest.date ? ` · ${formatUpdated(latest.date)}` : ""}
+                {launch.refreshed ? ` · data as of ${formatUpdated(launch.refreshed)}` : ""}
               </p>
               {latest.note ? <p>{latest.note}</p> : null}
               <Link className="cp-ab__link" to={`${PRESS_WHATS_NEW_PATH}#${entry.id}-${String(latest.version).replace(/\./g, "-")}`}>
-                This release in the change ledger <span aria-hidden="true">&#8594;</span>
+                See what changed <span aria-hidden="true">&#8594;</span>
               </Link>
             </>
           ) : null}

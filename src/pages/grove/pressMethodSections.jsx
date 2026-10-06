@@ -324,8 +324,8 @@ export function IdentityPair() {
           </ul>
           {identifier.live ? null : (
             <p className="cp-idp__pending">
-              <span className="cp-idp__pendingtag">In progress</span>
-              <span>The register is being minted. The form and its rules are settled.</span>
+              <span className="cp-idp__pendingtag">Not issued yet</span>
+              <span>The form and its rules are settled. No published record carries this identifier yet.</span>
             </p>
           )}
           <details className="cp-idp__tech">
@@ -468,7 +468,7 @@ export function MethodsByCollection() {
                   line is left out rather than left empty. */}
               {release || coverageLabel(entry) ? (
                 <p className="cp-mbc__meta">
-                  {[release?.version, coverageLabel(entry), release?.cadence].filter(Boolean).join(" · ")}
+                  {[release?.refreshed ? `Data as of ${release.refreshed}` : "", release?.updated ? `released ${release.updated}` : "", coverageLabel(entry), release?.cadence].filter(Boolean).join(" · ")}
                 </p>
               ) : null}
             </div>
@@ -496,7 +496,7 @@ export function MethodsByCollection() {
                 records are available, each kept with its own entity. */}
             {entry.id === "need" ? (
               <div data-testid="need-enrichments">
-                <span className="cp-mbc__cap">Patents and credit ratings</span>
+                <span className="cp-mbc__cap">Patents and credit ratings, where available</span>
                 <p>{NEED_ENRICHMENTS.patents} {NEED_ENRICHMENTS.ratings} {NEED_ENRICHMENTS.attachment}</p>
                 <p>
                   {NEED_ENRICHMENT_SOURCES.map((source) => `${source.name}, supported by ${source.supportedBy}`).join("; ")}.
@@ -552,7 +552,7 @@ export function WhyBoth() {
           <h3 className="cp-wb__name">{WHY_BOTH.business.name}</h3>
           <p className="cp-wb__role">{WHY_BOTH.business.role}</p>
           {WHY_BOTH.business.pending ? (
-            <p className="cp-wb__prov">The form, not this enterprise&rsquo;s identifier. The business register is being minted.</p>
+            <p className="cp-wb__prov">An example of the form, not this enterprise&rsquo;s identifier. Business ids are not issued yet.</p>
           ) : null}
         </article>
       </div>

@@ -42,6 +42,7 @@ import { useScrollToTop } from "../../features/grove/useScrollToTop";
 import { COLLECTION_ICONS } from "./pressCollectionIcons";
 import { PressCedarFab } from "./PressCedarFab";
 import { PressFoot, PressMast } from "./PressChrome";
+import NeedEntityEvidence from "./NeedEntityEvidence";
 import PressGate from "./PressGate";
 
 /** Where an entity action goes: the table, narrowed and ordered for it. */
@@ -75,7 +76,7 @@ export default function CedarPressEntity() {
   );
   const locked = collections.filter((c) => !c.open).length;
   const opened = useMemo(() => new Set(collections.filter((c) => c.open).map((c) => c.entry.id)), [collections]);
-  const { rows, missing, loading: samplesLoading } = useSampleRows(tables, register);
+  const { rows, missing, loading: samplesLoading, retry: retrySamples } = useSampleRows(tables, register);
 
   const entity = register.byUid.get(uid) ?? null;
   // The register has loaded and this id is not in it. The page then has no
@@ -110,16 +111,8 @@ export default function CedarPressEntity() {
 
   // Grouped by collection, in the catalog's order, so the profile reads as
   // the shelf does.
-  // What the rows on this screen add up to, where they carry money at all.
-  // `count` travels with it so the label can never be read as a total for
-  // the entity: it is a sum of a preview, and the preview is ten rows a
-  // table.
-  const shown = useMemo(() => {
-    const amounts = mine.filter((item) => typeof item.amount === "number");
-    return amounts.length
-      ? { total: amounts.reduce((sum, item) => sum + item.amount, 0), count: amounts.length }
-      : { total: null, count: 0 };
-  }, [mine]);
+  // Amounts remain on their source rows. Obligations, payments, deal values,
+  // ceilings and overlapping awards do not form one entity-wide sum.
   const groups = useMemo(() => {
     const byCollection = new Map();
     for (const item of mine) {
@@ -145,7 +138,7 @@ export default function CedarPressEntity() {
   const name = entity?.withheld ? WITHHELD_TEXT : entity?.name ?? null;
 
   /**
-   * FOUR DERIVED FIGURES, AND WHERE THEY GO ON A PHONE.
+   * DERIVED FIGURES, AND WHERE THEY GO ON A PHONE.
    *
    * They are a summary OF the records, and on a 390x664 screen they stood
    * 125px tall between the reader and the first one — two-column stacks of
@@ -175,16 +168,6 @@ export default function CedarPressEntity() {
         <div>
           <dt>Visible span</dt>
           <dd>{dates[0] === dates[dates.length - 1] ? dates[0] : `${dates[0]} to ${dates[dates.length - 1]}`}</dd>
-        </div>
-      ) : null}
-      {/* Only where the rows carry money. A sum of what is on the screen,
-          labelled as that and nothing wider: the preview is ten rows a table,
-          so this is never a total for the entity and the label may not let
-          anybody read it as one. */}
-      {shown.total != null ? (
-        <div>
-          <dt>{shown.count === 1 ? "On this row" : `On these ${shown.count} rows`}</dt>
-          <dd>{money.format(shown.total)}</dd>
         </div>
       ) : null}
     </dl>
@@ -302,9 +285,16 @@ export default function CedarPressEntity() {
           ) : (
             <p className="cp-rec__fine cp-ent__notice">{notice}</p>
           )}
+          {/* Always present, so the failure is announced when it arrives; the
+              visible line below is inserted with it and would not be. Out of
+              flow (sr-only is absolute), so it takes no cell in the header. */}
+          <span className="sr-only" role="status">
+            {missing.length ? `Not reachable right now: ${missing.map((key) => PRESS_CATALOG_BY_ID[key.split("/")[0]]?.short ?? key).join(", ")}.` : ""}
+          </span>
           {missing.length ? (
             <p className="cp-rec__fine">
-              Not reachable right now: {missing.map((key) => PRESS_CATALOG_BY_ID[key.split("/")[0]]?.short ?? key).join(", ")}.
+              Not reachable right now: {missing.map((key) => PRESS_CATALOG_BY_ID[key.split("/")[0]]?.short ?? key).join(", ")}.{" "}
+              <button type="button" className="cp-retry" onClick={retrySamples}>Retry</button>
             </p>
           ) : null}
         </header>
@@ -338,7 +328,7 @@ export default function CedarPressEntity() {
                       {/* A ledger row, not a card: date, what, amount, in
                           the same columns down the page, so a reader can
                           read an entity's activity by scanning one edge. */}
-                      <Link className="cp-ent__row" to={recordHref({ key: item.key, recordId: item.recordId, index: item.index })}>
+                      <Link className="cp-ent__row" to={recordHref({ key: item.key, recordId: item.recordId, recordType: item.recordType, index: item.index })}>
                         <span className="cp-ent__rowdate">{item.date ?? "undated"}</span>
                         <span className="cp-ent__rowwhat">
                           {item.observation || "—"}
@@ -369,6 +359,8 @@ export default function CedarPressEntity() {
             reads those.
           </p>
         )}
+
+        {entity && !entity.withheld && opened.has("need") ? <NeedEntityEvidence cedarUid={uid} /> : null}
 
         {/* The glance, on a phone: after the ledger, for the reason above it
             in `glance`. On a wide screen this renders nothing, because the

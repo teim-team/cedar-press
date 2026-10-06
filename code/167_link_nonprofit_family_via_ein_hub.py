@@ -211,6 +211,14 @@ def coarse(entity_class):
 
 # ---------------------------------------------------------------- resolver --
 
+def load_ruling_gate():
+    spec = importlib.util.spec_from_file_location(
+        "nonprofit_ruling_gate", CEDAR / "code" / "174_apply_rulings_to_source_tables.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
 def load_m33():
     spec = importlib.util.spec_from_file_location(
         "m33", CEDAR / "code" / "33_apply_party_rulings.py")
@@ -368,13 +376,20 @@ def deterministic_name_match(name, state=""):
 
 # ============================================================== the hub ======
 
-def build_hub(spine_by_id):
+def build_hub(spine_by_id, decisions=None, ruling_gate=None):
     """ein -> list of candidate dicts, one per source."""
+    ruling_gate = ruling_gate or load_ruling_gate()
+    if decisions is None:
+        decisions = ruling_gate.build_decisions(rd(CLEAN / "cedar_ruling_ledger_consolidated.csv"))
     cand = defaultdict(list)
 
     def add(ein, tid, tier, src, basis, method=""):
         e = dig(ein)
         if not (e and tid):
+            return
+        hold = ruling_gate.nonprofit_identity_hold(ein, decisions, tid)
+        if hold:
+            SKIPPED[f"{src}: identity_hold:{hold}"] += 1
             return
         if tid not in spine_by_id:
             SKIPPED[f"{src}: entity_id not in spine"] += 1
@@ -468,6 +483,80 @@ NP_ORGS = []
 LEDGER = []
 
 
+def link_cols(prefix):
+    # `spine_entity_id`, not `entity_id`. The spine's OWN `cedar_entity_id`
+    # column is a different identifier system entirely - a short public
+    # code (T-, A-, N-, E-, I-, NP-) - and reusing that name for a
+    # `tribe_id` would invite a join between two things that are not the
+    # same key. Same reason `link_tier` is not `entity_tier`: np_orgs
+    # already carries `entity_tier` from script 70.
+    return [f"{prefix}spine_entity_id", f"{prefix}spine_canonical_name",
+            f"{prefix}spine_entity_class", f"{prefix}native_entity_class",
+            f"{prefix}link_tier", f"{prefix}link_basis",
+            f"{prefix}link_key", f"{prefix}link_sources"]
+
+def apply_nonprofit_link(row, prefix, ein, namecol=None, statecol=None, dataset="",
+                         *, hub, excl, ruling_gate, decisions, org_identity=False):
+    """EIN first. Name only where the EIN missed. Returns 'ein'/'name'/''."""
+    for c in link_cols(prefix):
+        row.setdefault(c, "")
+    e = dig(ein)
+    hold = ruling_gate.nonprofit_identity_hold(ein, decisions)
+    if hold:
+        ruling_gate.clear_nonprofit_identity(row, prefix, org_identity=org_identity)
+        row[f"{prefix}link_basis"] = "identity_hold:" + hold
+        return "identity_held"
+    if e and e in hub:
+        h = hub[e]
+        target_hold = ruling_gate.nonprofit_identity_hold(ein, decisions, h["entity_id"])
+        if target_hold:
+            ruling_gate.clear_nonprofit_identity(row, prefix, org_identity=org_identity)
+            row[f"{prefix}link_basis"] = "identity_hold:" + target_hold
+            return "identity_held"
+        row[f"{prefix}spine_entity_id"] = h["entity_id"]
+        row[f"{prefix}spine_canonical_name"] = h["entity_canonical_name"]
+        row[f"{prefix}spine_entity_class"] = h["entity_class"]
+        row[f"{prefix}native_entity_class"] = h["native_entity_class"]
+        row[f"{prefix}link_tier"] = h["link_tier"]
+        row[f"{prefix}link_basis"] = h["link_basis"]
+        row[f"{prefix}link_key"] = f"EIN {e}"
+        row[f"{prefix}link_sources"] = h["link_sources"]
+        return "ein"
+    if e and e in excl:
+        row[f"{prefix}link_basis"] = "REFUSED: " + excl[e][:200]
+        row[f"{prefix}link_tier"] = "X"
+        return "excluded"
+    if not namecol:
+        return ""
+    nm = (row.get(namecol) or "").strip()
+    if not nm:
+        return ""
+    st = (row.get(statecol) or "") if statecol else ""
+    tid, canon, how = deterministic_name_match(nm, st)
+    if tid:
+        target_hold = ruling_gate.nonprofit_identity_hold(ein, decisions, tid)
+        if target_hold:
+            ruling_gate.clear_nonprofit_identity(row, prefix, org_identity=org_identity)
+            row[f"{prefix}link_basis"] = "identity_hold:" + target_hold
+            return "identity_held"
+        srow = SPINE_BY_ID[tid]
+        row[f"{prefix}spine_entity_id"] = tid
+        row[f"{prefix}spine_canonical_name"] = canon
+        row[f"{prefix}spine_entity_class"] = srow["entity_class"]
+        row[f"{prefix}native_entity_class"] = coarse(srow["entity_class"])
+        # A name match is a name match. It never reaches A here.
+        row[f"{prefix}link_tier"] = "B"
+        row[f"{prefix}link_basis"] = (
+            f"deterministic name match ({how}) via "
+            f"33_apply_party_rulings.resolve_entity; no EIN in the hub")
+        row[f"{prefix}link_key"] = f"NAME {nm}"
+        row[f"{prefix}link_sources"] = "resolve_entity"
+        NAME_HITS[(dataset, nm, tid, canon, how)] += 1
+        return "name"
+    NAME_MISS[(dataset, nm, str(how))] += 1
+    return ""
+
+
 def main():
     global SPINE_ROWS_T, SPINE_BY_ID, NP_ORGS, LEDGER
     check = "--check" in sys.argv
@@ -507,7 +596,9 @@ def main():
 
     # ---------------------------------------------------- the hub --------
     say("\n[1] building the EIN hub")
-    cand = build_hub(SPINE_BY_ID)
+    ruling_gate = load_ruling_gate()
+    decisions = ruling_gate.build_decisions(rd(CLEAN / "cedar_ruling_ledger_consolidated.csv"))
+    cand = build_hub(SPINE_BY_ID, decisions, ruling_gate)
     say(f"    candidate EINs from all sources: {len(cand):,}")
     for k, v in sorted(Counter(c["source"] for cs in cand.values()
                                for c in cs).items()):
@@ -662,62 +753,8 @@ def main():
     summary = []
     name_cands = []
 
-    def link_cols(prefix):
-        # `spine_entity_id`, not `entity_id`. The spine's OWN `cedar_entity_id`
-        # column is a different identifier system entirely - a short public
-        # code (T-, A-, N-, E-, I-, NP-) - and reusing that name for a
-        # `tribe_id` would invite a join between two things that are not the
-        # same key. Same reason `link_tier` is not `entity_tier`: np_orgs
-        # already carries `entity_tier` from script 70.
-        return [f"{prefix}spine_entity_id", f"{prefix}spine_canonical_name",
-                f"{prefix}spine_entity_class", f"{prefix}native_entity_class",
-                f"{prefix}link_tier", f"{prefix}link_basis",
-                f"{prefix}link_key", f"{prefix}link_sources"]
-
-    def apply_link(row, prefix, ein, namecol=None, statecol=None, dataset=""):
-        """EIN first. Name only where the EIN missed. Returns 'ein'/'name'/''."""
-        for c in link_cols(prefix):
-            row.setdefault(c, "")
-        e = dig(ein)
-        if e and e in hub:
-            h = hub[e]
-            row[f"{prefix}spine_entity_id"] = h["entity_id"]
-            row[f"{prefix}spine_canonical_name"] = h["entity_canonical_name"]
-            row[f"{prefix}spine_entity_class"] = h["entity_class"]
-            row[f"{prefix}native_entity_class"] = h["native_entity_class"]
-            row[f"{prefix}link_tier"] = h["link_tier"]
-            row[f"{prefix}link_basis"] = h["link_basis"]
-            row[f"{prefix}link_key"] = f"EIN {e}"
-            row[f"{prefix}link_sources"] = h["link_sources"]
-            return "ein"
-        if e and e in excl:
-            row[f"{prefix}link_basis"] = "REFUSED: " + excl[e][:200]
-            row[f"{prefix}link_tier"] = "X"
-            return "excluded"
-        if not namecol:
-            return ""
-        nm = (row.get(namecol) or "").strip()
-        if not nm:
-            return ""
-        st = (row.get(statecol) or "") if statecol else ""
-        tid, canon, how = deterministic_name_match(nm, st)
-        if tid:
-            srow = SPINE_BY_ID[tid]
-            row[f"{prefix}spine_entity_id"] = tid
-            row[f"{prefix}spine_canonical_name"] = canon
-            row[f"{prefix}spine_entity_class"] = srow["entity_class"]
-            row[f"{prefix}native_entity_class"] = coarse(srow["entity_class"])
-            # A name match is a name match. It never reaches A here.
-            row[f"{prefix}link_tier"] = "B"
-            row[f"{prefix}link_basis"] = (
-                f"deterministic name match ({how}) via "
-                f"33_apply_party_rulings.resolve_entity; no EIN in the hub")
-            row[f"{prefix}link_key"] = f"NAME {nm}"
-            row[f"{prefix}link_sources"] = "resolve_entity"
-            NAME_HITS[(dataset, nm, tid, canon, how)] += 1
-            return "name"
-        NAME_MISS[(dataset, nm, str(how))] += 1
-        return ""
+    apply_link = functools.partial(apply_nonprofit_link, hub=hub, excl=excl,
+                                   ruling_gate=ruling_gate, decisions=decisions)
 
     # ---- np_orgs -------------------------------------------------------
     rows = NP_ORGS
@@ -725,7 +762,7 @@ def main():
     st = Counter()
     filled_entity_id = 0
     for r in rows:
-        st[apply_link(r, "cedar_", r.get("EIN"))] += 1
+        st[apply_link(r, "cedar_", r.get("EIN"), org_identity=True)] += 1
         # `entity_id` is the PUBLISHABLE key and script 70's rule is that it is
         # set only at tier A. Fill it where it is blank and the hub tier is A -
         # additively, never overwriting a value script 70 already wrote.

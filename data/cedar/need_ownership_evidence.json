@@ -1,0 +1,415 @@
+{
+  "schema_version": 1,
+  "generated": "2026-10-06",
+  "purpose": "Ownership-chain evidence for the NEED examples the viewer shows (src/features/grove/exampleEnrichment.js): the ten pinned rows and the five added records. Display evidence only; it binds nothing and changes no pinned byte.",
+  "why_this_file": "No maintained producer input carries an ownership CHAIN. data/cedar/need_attribution_rulings.csv is vendored byte for byte from Lumecon-data (decisions/identity/need/attribution-2026-10-04/rulings.csv, 're-vendor, never edit') and its cedar_rulings columns hold one parent_native_entity, no immediate parent. The ultimate-owner half of each record is ALSO filed as a pending item in the producer's adjudication_triage input format: review/attribution_pending_items_2026-10-06.json.",
+  "how_built": "Only from records already in Git at cedar-press 2f08aa3ae00d1e25fdbbd2017fc8b2c4607af274 (owner rulings in code/55, the pinned samples, the enterprise register sample, docs that quote first-party pages). No external page could be fetched in this session: SAM.gov, USAspending, chickasaw.net, choctawnation.com, akima.com, koniag.com and asrcfederal.com were all denied by the egress proxy on 2026-10-06. Nothing here is inferred from a name.",
+  "register_name_notes": {
+    "CE-0007G-30": "register name is 'NANA (NANA Regional Corporation, Inc.)'; the viewer writes 'NANA Regional Corporation, Inc.'",
+    "CE-00076-76": "register name is 'Ahtna Incorporated'; the viewer writes 'Ahtna, Incorporated'"
+  },
+  "records": [
+    {
+      "enterprise_name_as_recorded": "Cni Advantage, Llc",
+      "legal_name_verified": false,
+      "uei": "P4U6EJ3PYRJ5",
+      "cage_code": "52D75",
+      "immediate_parent": null,
+      "relationship_to_immediate_parent": null,
+      "ultimate_native_owner": "The Chickasaw Nation",
+      "ultimate_native_owner_cedar_uid": "CE-00135-HP",
+      "in_pinned_need_sample": false,
+      "evidence": [
+        {
+          "kind": "owner_ruling",
+          "capture": "repository_record",
+          "url": "https://github.com/teim-team/cedar-press/blob/2f08aa3ae00d1e25fdbbd2017fc8b2c4607af274/code/55_stage_anc_subsidiary_rulings.py#L99",
+          "quote": "(\"P4U6EJ3PYRJ5\", \"52D75\", \"Cni Advantage, Llc\", \"Yes - The Chickasaw Nation\"),",
+          "states": "ultimate owner",
+          "dated": "2026-08-05 (owner ruling batch, per the script's own docstring)",
+          "retrieved": "2026-10-06"
+        },
+        {
+          "kind": "government_record",
+          "capture": "repository_record",
+          "url": "https://github.com/teim-team/cedar-press/blob/2f08aa3ae00d1e25fdbbd2017fc8b2c4607af274/data/cedar/samples/contractors/spreadsheet__10.csv#L3",
+          "quote": "awardee_name CNI ADVANTAGE, LLC; awardee_uei P4U6EJ3PYRJ5; cage_code 52D75; parent_name CHICKASAW NATION; parent_uei KS8HLVMJEMW9; cedar_uid CE-00135-HP; affiliation_attribution_status CONFIRMED_AS_OF",
+          "states": "FPDS declared parent (pinned Prime Contracting example row)",
+          "retrieved": "2026-10-06"
+        }
+      ],
+      "open": [
+        "FPDS names the Chickasaw Nation itself as parent; nothing in Git states that Chickasaw Nation Industries, Inc. is the immediate parent, which is what the viewer currently shows. Leave immediate_parent blank until a CNI page is captured.",
+        "Candidate first-party page, not retrieved 2026-10-06: the session's egress proxy denied this host: the Chickasaw Nation Industries site (company list)."
+      ]
+    },
+    {
+      "enterprise_name_as_recorded": "Chickasaw Nation Industries, I",
+      "legal_name_verified": false,
+      "uei": "VTW2SUMKNAA5",
+      "cage_code": "1LKY0",
+      "immediate_parent": "The Chickasaw Nation",
+      "relationship_to_immediate_parent": "owned_by",
+      "ultimate_native_owner": "The Chickasaw Nation",
+      "ultimate_native_owner_cedar_uid": "CE-00135-HP",
+      "in_pinned_need_sample": false,
+      "evidence": [
+        {
+          "kind": "owner_ruling",
+          "capture": "repository_record",
+          "url": "https://github.com/teim-team/cedar-press/blob/2f08aa3ae00d1e25fdbbd2017fc8b2c4607af274/code/55_stage_anc_subsidiary_rulings.py#L123",
+          "quote": "(\"VTW2SUMKNAA5\", \"1LKY0\", \"Chickasaw Nation Industries, I\", \"Yes - The Chickasaw Nation\"),",
+          "states": "ultimate owner",
+          "dated": "2026-08-05 (owner ruling batch, per the script's own docstring)",
+          "retrieved": "2026-10-06"
+        }
+      ],
+      "open": [
+        "The owner ruling names the owner, not the extent; 'wholly_owned' (shown by the viewer) has no source in Git.",
+        "SAM legal-name truncation 'Chickasaw Nation Industries, I' is as recorded; the full legal name 'Chickasaw Nation Industries, Inc.' was not verified here (not retrieved 2026-10-06: the session's egress proxy denied this host)."
+      ]
+    },
+    {
+      "enterprise_name_as_recorded": "Choctaw Manufacturing Defense Contractors",
+      "legal_name_verified": false,
+      "uei": "TJV3WEKNCAJ5",
+      "cage_code": "4D3B0",
+      "immediate_parent": "The Choctaw Nation of Oklahoma",
+      "relationship_to_immediate_parent": "owned_by",
+      "ultimate_native_owner": "The Choctaw Nation of Oklahoma",
+      "ultimate_native_owner_cedar_uid": "CE-0013Y-77",
+      "in_pinned_need_sample": false,
+      "evidence": [
+        {
+          "kind": "owner_ruling",
+          "capture": "repository_record",
+          "url": "https://github.com/teim-team/cedar-press/blob/2f08aa3ae00d1e25fdbbd2017fc8b2c4607af274/code/55_stage_anc_subsidiary_rulings.py#L117",
+          "quote": "(\"TJV3WEKNCAJ5\", \"4D3B0\", \"Choctaw Manufacturing Defense Contractors\", \"Yes - The Choctaw Nation of Oklahoma\"),",
+          "states": "ultimate owner",
+          "dated": "2026-08-05 (owner ruling batch, per the script's own docstring)",
+          "retrieved": "2026-10-06"
+        }
+      ],
+      "open": [
+        "The viewer renames the firm 'Choctaw Defense Manufacturing Group' and says 'the company states it is owned by the Choctaw Nation of Oklahoma'. Neither the trade name nor that statement is in Git; show the name as recorded and cite the owner ruling only, until the company page is captured (not retrieved 2026-10-06: the session's egress proxy denied this host)."
+      ]
+    },
+    {
+      "enterprise_name_as_recorded": "Akima Global Services, Llc",
+      "legal_name_verified": false,
+      "uei": "LUDNH5K4XQU9",
+      "cage_code": "5UVQ9",
+      "immediate_parent": null,
+      "relationship_to_immediate_parent": null,
+      "ultimate_native_owner": "NANA (NANA Regional Corporation, Inc.)",
+      "ultimate_native_owner_cedar_uid": "CE-0007G-30",
+      "in_pinned_need_sample": false,
+      "evidence": [
+        {
+          "kind": "owner_ruling",
+          "capture": "repository_record",
+          "url": "https://github.com/teim-team/cedar-press/blob/2f08aa3ae00d1e25fdbbd2017fc8b2c4607af274/code/55_stage_anc_subsidiary_rulings.py#L90",
+          "quote": "(\"LUDNH5K4XQU9\", \"5UVQ9\", \"Akima Global Services, Llc\", \"Yes - NANA Regional Corporation, Incorporated\"),",
+          "states": "ultimate owner",
+          "dated": "2026-08-05 (owner ruling batch, per the script's own docstring)",
+          "retrieved": "2026-10-06"
+        }
+      ],
+      "open": [
+        "Immediate parent 'Akima, LLC' (shown by the viewer) has no source in Git.",
+        "A web-search summary (not a captured page) described Akima Global Services as owned jointly by NANA and The Aleut Corporation (CE-00077-DZ). Unverified, but if true the sole-owner attribution is wrong. Do not publish a sole owner until akima.com or an annual report is captured; route to SOURCES_CONFLICT if confirmed."
+      ]
+    },
+    {
+      "enterprise_name_as_recorded": "Koniag Services Inc",
+      "legal_name_verified": false,
+      "uei": "KYN9K7FSCVN4",
+      "cage_code": "3CX44",
+      "immediate_parent": null,
+      "relationship_to_immediate_parent": null,
+      "ultimate_native_owner": "Koniag, Incorporated",
+      "ultimate_native_owner_cedar_uid": "CE-0007F-X7",
+      "in_pinned_need_sample": false,
+      "evidence": [
+        {
+          "kind": "owner_ruling",
+          "capture": "repository_record",
+          "url": "https://github.com/teim-team/cedar-press/blob/2f08aa3ae00d1e25fdbbd2017fc8b2c4607af274/code/55_stage_anc_subsidiary_rulings.py#L86",
+          "quote": "(\"KYN9K7FSCVN4\", \"3CX44\", \"Koniag Services Inc\", \"Yes - Koniag, Incorporated\"),",
+          "states": "ultimate owner",
+          "dated": "2026-08-05 (owner ruling batch, per the script's own docstring)",
+          "retrieved": "2026-10-06"
+        }
+      ],
+      "open": [
+        "The viewer shows the immediate parent as Koniag, Incorporated. A web-search summary (not a captured page) described Koniag Services, Inc. as a wholly owned subsidiary of Koniag Government Services, LLC, itself a Koniag, Inc. subsidiary. Unverified; the ultimate owner is unaffected, the immediate parent likely is. Capture the KGS company page (not retrieved 2026-10-06: the session's egress proxy denied this host)."
+      ]
+    },
+    {
+      "enterprise_name_as_recorded": "ASRC Federal Research & Technology Solutions",
+      "legal_name_verified": false,
+      "uei": "VF2ANJQHJ1N7",
+      "cage_code": "49J93",
+      "immediate_parent": "ASRC Federal Holding Company, LLC",
+      "relationship_to_immediate_parent": "subsidiary_of",
+      "ultimate_native_owner": "Arctic Slope Regional Corporation",
+      "ultimate_native_owner_cedar_uid": "CE-00078-KR",
+      "in_pinned_need_sample": true,
+      "evidence": [
+        {
+          "kind": "owner_ruling",
+          "capture": "repository_record",
+          "url": "https://github.com/teim-team/cedar-press/blob/2f08aa3ae00d1e25fdbbd2017fc8b2c4607af274/code/55_stage_anc_subsidiary_rulings.py#L120",
+          "quote": "(\"VF2ANJQHJ1N7\", \"49J93\", \"Asrc Research And Technology Solutions LLC\", \"Yes - Arctic Slope Regional Corporation\"),",
+          "states": "ultimate owner",
+          "dated": "2026-08-05 (owner ruling batch, per the script's own docstring)",
+          "retrieved": "2026-10-06"
+        },
+        {
+          "kind": "enterprise_register",
+          "capture": "repository_record",
+          "url": "https://github.com/teim-team/cedar-press/blob/2f08aa3ae00d1e25fdbbd2017fc8b2c4607af274/dist/review/samples/need/need_enterprises__10.csv",
+          "quote": "CEDAR-NEST-000146-02,ASRC Federal Data Networx,...,CE-00078-KR,CE-00078-KR,Arctic Slope Regional Corporation,...,CEDAR-NEST-000153-AH,\"ASRC Federal Holding Company, LLC\"",
+          "states": "the register places ASRC Federal Holding Company, LLC (CEDAR-NEST-000153-AH) under owner hub CE-00078-KR",
+          "retrieved": "2026-10-06"
+        }
+      ],
+      "open": []
+    },
+    {
+      "enterprise_name_as_recorded": "ASRC Federal InuTeq",
+      "legal_name_verified": false,
+      "uei": "NBEWZB8LQ8Z5",
+      "cage_code": "5NTT4",
+      "immediate_parent": null,
+      "relationship_to_immediate_parent": null,
+      "ultimate_native_owner": "Arctic Slope Regional Corporation",
+      "ultimate_native_owner_cedar_uid": "CE-00078-KR",
+      "in_pinned_need_sample": true,
+      "evidence": [
+        {
+          "kind": "owner_ruling",
+          "capture": "repository_record",
+          "url": "https://github.com/teim-team/cedar-press/blob/2f08aa3ae00d1e25fdbbd2017fc8b2c4607af274/code/55_stage_anc_subsidiary_rulings.py#L95",
+          "quote": "(\"NBEWZB8LQ8Z5\", \"5NTT4\", \"Inuteq, Llc\", \"Yes - Arctic Slope Regional Corporation\"),",
+          "states": "ultimate owner",
+          "dated": "2026-08-05 (owner ruling batch, per the script's own docstring)",
+          "retrieved": "2026-10-06"
+        },
+        {
+          "kind": "first_party_cage_list",
+          "capture": "repository_record",
+          "url": "https://github.com/teim-team/cedar-press/blob/2f08aa3ae00d1e25fdbbd2017fc8b2c4607af274/docs/ANC_SUBSIDIARY_SPIDERWEB_SHARD_E.md#L122",
+          "quote": "| ASRC Federal InuTeq | 5NTT4 | **INUTEQ, LLC** | NBEWZB8LQ8Z5 |",
+          "states": "ASRC Federal's own companies page (https://www.asrcfederal.com/companies/) lists the CAGE",
+          "retrieved": "2026-10-06"
+        }
+      ],
+      "open": [
+        "Immediate parent not stated in Git; the viewer's 'ASRC Federal family of companies, part_of' is a grouping, not a legal parent."
+      ]
+    },
+    {
+      "enterprise_name_as_recorded": "ASRC Federal DNC",
+      "legal_name_verified": false,
+      "uei": "GNXNRGLSNML9",
+      "cage_code": "03EV6",
+      "immediate_parent": null,
+      "relationship_to_immediate_parent": null,
+      "ultimate_native_owner": "Arctic Slope Regional Corporation",
+      "ultimate_native_owner_cedar_uid": "CE-00078-KR",
+      "in_pinned_need_sample": true,
+      "evidence": [
+        {
+          "kind": "first_party_cage_list",
+          "capture": "repository_record",
+          "url": "https://github.com/teim-team/cedar-press/blob/2f08aa3ae00d1e25fdbbd2017fc8b2c4607af274/docs/ANC_SUBSIDIARY_SPIDERWEB_SHARD_E.md#L121",
+          "quote": "| ASRC Federal DNC | 03EV6 | **DATA NETWORKS, INC** | GNXNRGLSNML9 |",
+          "states": "listed with its CAGE on ASRC Federal's own companies page",
+          "retrieved": "2026-10-06"
+        }
+      ],
+      "open": [
+        "Ultimate owner rests on the ASRC Federal company listing plus the register's ASRC Federal -> CE-00078-KR binding; no owner ruling for this UEI in Git."
+      ]
+    },
+    {
+      "enterprise_name_as_recorded": "ASRC Federal NetCentric",
+      "legal_name_verified": false,
+      "uei": "T65LCYKJCW58",
+      "cage_code": "1R5E0",
+      "immediate_parent": "ASRC Federal Holding Company, LLC",
+      "relationship_to_immediate_parent": "subsidiary_of",
+      "ultimate_native_owner": "Arctic Slope Regional Corporation",
+      "ultimate_native_owner_cedar_uid": "CE-00078-KR",
+      "in_pinned_need_sample": true,
+      "evidence": [
+        {
+          "kind": "first_party_cage_list",
+          "capture": "repository_record",
+          "url": "https://github.com/teim-team/cedar-press/blob/2f08aa3ae00d1e25fdbbd2017fc8b2c4607af274/docs/ANC_SUBSIDIARY_SPIDERWEB_SHARD_E.md#L125",
+          "quote": "| ASRC Federal NetCentric | 1R5E0 | **NETCENTRIC TECHNOLOGY, LLC** | T65LCYKJCW58 |",
+          "states": "listed with its CAGE on ASRC Federal's own companies page",
+          "retrieved": "2026-10-06"
+        },
+        {
+          "kind": "enterprise_register",
+          "capture": "repository_record",
+          "url": "https://github.com/teim-team/cedar-press/blob/2f08aa3ae00d1e25fdbbd2017fc8b2c4607af274/dist/review/samples/need/need_enterprises__10.csv",
+          "quote": "ASRC Federal Holding Company, LLC (CEDAR-NEST-000153-AH) under owner hub CE-00078-KR",
+          "states": "holding company binding",
+          "retrieved": "2026-10-06"
+        }
+      ],
+      "open": []
+    },
+    {
+      "enterprise_name_as_recorded": "ASRC Federal Technology Solutions",
+      "legal_name_verified": false,
+      "uei": "CA11RWJPADV6",
+      "cage_code": "1SG36",
+      "immediate_parent": "ASRC Federal Holding Company, LLC",
+      "relationship_to_immediate_parent": "subsidiary_of",
+      "ultimate_native_owner": "Arctic Slope Regional Corporation",
+      "ultimate_native_owner_cedar_uid": "CE-00078-KR",
+      "in_pinned_need_sample": true,
+      "evidence": [
+        {
+          "kind": "identifier_ledger",
+          "capture": "repository_record",
+          "url": "https://github.com/teim-team/cedar-press/blob/2f08aa3ae00d1e25fdbbd2017fc8b2c4607af274/docs/TEMPORAL_MODEL.md#L208",
+          "quote": "TECHNOLOGY ASSOCIATES INTERNATIONAL CA11RWJPADV6 -> ultimate_parent VISTRONIX XPRKVQ956WB4 -> ARCTIC SLOPE REGIONAL CORPORATION CY16XXPHX213 -> cedar_uid CE-00078-KR",
+          "states": "FPDS ultimate_parent chain; ownership changed in 2016 (ASRC acquired Vistronix), so pre-2016 rows are not ASRC's",
+          "retrieved": "2026-10-06"
+        }
+      ],
+      "open": [
+        "Time-varying: per docs/TEMPORAL_MODEL.md the UEI's FY2014-FY2015 ultimate parent was Vistronix before ASRC's 2016-08-16 acquisition. State the as-of date with the owner."
+      ]
+    },
+    {
+      "enterprise_name_as_recorded": "ASRC Federal System Solutions, LLC",
+      "legal_name_verified": false,
+      "uei": "FD7JDCJ4AMF9",
+      "cage_code": "7G0F7",
+      "immediate_parent": null,
+      "relationship_to_immediate_parent": null,
+      "ultimate_native_owner": "Arctic Slope Regional Corporation",
+      "ultimate_native_owner_cedar_uid": "CE-00078-KR",
+      "in_pinned_need_sample": true,
+      "evidence": [
+        {
+          "kind": "derived_ranking",
+          "capture": "repository_record",
+          "url": "https://github.com/teim-team/cedar-press/blob/2f08aa3ae00d1e25fdbbd2017fc8b2c4607af274/server/tests/fixtures/legacy-preview/samples/contractors/contractor_ranking__10.csv#L2",
+          "quote": "1,CE-00078-KR,Arctic Slope Regional Corporation,ANC_REGIONAL,...,ASRC FEDERAL SYSTEM SOLUTIONS LLC,FD7JDCJ4AMF9",
+          "states": "Cedar's identifier ledger attributes the UEI to CE-00078-KR (derived, inherits the ledger's tier)",
+          "retrieved": "2026-10-06"
+        }
+      ],
+      "open": [
+        "Derived evidence only; capture the ASRC Federal companies page row for CAGE 7G0F7."
+      ]
+    },
+    {
+      "enterprise_name_as_recorded": "ASRC Federal Advanced Research, LLC",
+      "legal_name_verified": false,
+      "uei": "HQ6BEJMMEYJ3",
+      "cage_code": "8EWY6",
+      "immediate_parent": null,
+      "relationship_to_immediate_parent": null,
+      "ultimate_native_owner": "Arctic Slope Regional Corporation",
+      "ultimate_native_owner_cedar_uid": "CE-00078-KR",
+      "in_pinned_need_sample": true,
+      "evidence": [
+        {
+          "kind": "producer_evidence_pin",
+          "capture": "pin_only",
+          "url": "https://www.asrcfederal.com/advanced-research-oasis-plus-8a/",
+          "quote": null,
+          "pin_sha256": "8e6acf8c5389ad2b0368094a0f1e02ac3327ea1a0370ef9cda4fa334ccb95a13",
+          "states": "the pinned row's pin supports identity, uei and cage_code only (not ownership)",
+          "retrieved": null
+        }
+      ],
+      "open": [
+        "WEAKEST of the ten: no ownership statement in Git. The ultimate owner rests on the page being on asrcfederal.com. Hold the native_owner value or capture an ownership statement."
+      ]
+    },
+    {
+      "enterprise_name_as_recorded": "Ahtna Builders, LLC",
+      "legal_name_verified": false,
+      "uei": null,
+      "cage_code": null,
+      "immediate_parent": "Ahtna Diversified Holdings, LLC",
+      "relationship_to_immediate_parent": "owned_by",
+      "ultimate_native_owner": "Ahtna Incorporated",
+      "ultimate_native_owner_cedar_uid": "CE-00076-76",
+      "in_pinned_need_sample": true,
+      "evidence": [
+        {
+          "kind": "producer_evidence_pin",
+          "capture": "pin_only",
+          "url": "https://www.ahtna.com/company/ahtna-builders-llc/",
+          "quote": null,
+          "pin_sha256": "cdffdb0aef1916bb3f29bb1dfbc1e37e4b9c6296cd7687b878511e996c9d3cbb",
+          "states": "pin supports identity and ownership (immediate parent, wholly owned)",
+          "retrieved": null
+        }
+      ],
+      "open": [
+        "Ahtna Diversified Holdings -> Ahtna Incorporated is not stated by any record in Git; it rests on the pages being on ahtna.com. Capture an Ahtna page stating it."
+      ]
+    },
+    {
+      "enterprise_name_as_recorded": "Ahtna Commercial Services, LLC",
+      "legal_name_verified": false,
+      "uei": "Y1WNAYBJH9Z6",
+      "cage_code": "9QZX3",
+      "immediate_parent": "Ahtna Diversified Holdings, LLC",
+      "relationship_to_immediate_parent": "subsidiary_of",
+      "ultimate_native_owner": "Ahtna Incorporated",
+      "ultimate_native_owner_cedar_uid": "CE-00076-76",
+      "in_pinned_need_sample": true,
+      "evidence": [
+        {
+          "kind": "producer_evidence_pin",
+          "capture": "pin_only",
+          "url": "https://www.ahtna.com/about/subsidiary-presidents/",
+          "quote": null,
+          "pin_sha256": "17742fdedd567eecd995689a360103367402d2b9d3a16401c2495b9324655ea0",
+          "states": "pin supports subsidiary",
+          "retrieved": null
+        }
+      ],
+      "open": [
+        "Same Ahtna Diversified Holdings -> Ahtna Incorporated gap as Ahtna Builders."
+      ]
+    },
+    {
+      "enterprise_name_as_recorded": "Ahtna Solutions, LLC",
+      "legal_name_verified": false,
+      "uei": "QN4GQPHMH3Q6",
+      "cage_code": null,
+      "immediate_parent": "Ahtna Diversified Holdings, LLC",
+      "relationship_to_immediate_parent": "subsidiary_of",
+      "ultimate_native_owner": "Ahtna Incorporated",
+      "ultimate_native_owner_cedar_uid": "CE-00076-76",
+      "in_pinned_need_sample": true,
+      "evidence": [
+        {
+          "kind": "producer_evidence_pin",
+          "capture": "pin_only",
+          "url": "https://www.ahtna.com/about/subsidiary-presidents/",
+          "quote": null,
+          "pin_sha256": "17742fdedd567eecd995689a360103367402d2b9d3a16401c2495b9324655ea0",
+          "states": "pin supports subsidiary",
+          "retrieved": null
+        }
+      ],
+      "open": [
+        "Same Ahtna Diversified Holdings -> Ahtna Incorporated gap as Ahtna Builders."
+      ]
+    }
+  ]
+}

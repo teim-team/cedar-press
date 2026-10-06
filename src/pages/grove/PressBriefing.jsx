@@ -20,27 +20,30 @@
 // is the only way a briefing survives contact with a release schedule.
 import { Link } from "react-router";
 
-import { LAUNCH_COLLECTION } from "../../features/grove/collection";
-import { ARTICLE_IMAGE, PRESS_ARTICLES, articleHref } from "../../features/grove/pressArticles";
+import { ARTICLE_IMAGE, articleHref } from "../../features/grove/pressArticles";
+import { useAuth } from "../../context/useAuth";
+import { useProtectedArticles } from "../../features/grove/useProtectedArticles.js";
 import { PRESS_CATALOG_BY_ID } from "../../features/grove/pressCatalog";
 import { anchorOf, formatUpdated, latestRelease, recentlyUpdated } from "../../features/grove/pressReleases";
 import { PRESS_DATA_PATH, PRESS_WHATS_NEW_PATH } from "../../features/grove/pressRoutes";
 import { COLLECTION_ICONS } from "./pressCollectionIcons";
 
 /** The collection a reader should look at today: the one that just moved. */
-function leadCollection() {
-  const [recent] = recentlyUpdated(1);
+function leadCollection(releases) {
+  const [recent] = recentlyUpdated(1, releases);
   const id = recent?.id;
   if (!id) return null;
   const entry = PRESS_CATALOG_BY_ID[id];
-  const launch = LAUNCH_COLLECTION.find((c) => c.id === id);
-  return entry ? { id, entry, launch } : null;
+  return entry ? { id, entry, count: recent.record_count } : null;
 }
 
-export default function PressBriefing() {
-  const [lead] = PRESS_ARTICLES;
-  const signals = recentlyUpdated(3);
-  const collection = leadCollection();
+export default function PressBriefing({ releaseState }) {
+  const releases = releaseState?.data?.releases ?? {};
+  const { user, loading } = useAuth();
+  const articleState = useProtectedArticles(loading ? null : user);
+  const [lead] = articleState.data?.articles ?? [];
+  const signals = recentlyUpdated(3, releases);
+  const collection = leadCollection(releases);
   const away = lead && !lead.hosted;
 
   return (
@@ -49,7 +52,7 @@ export default function PressBriefing() {
           size of a lead — not a card in a grid of six. */}
       {lead ? (
         <article className="cp-brief__lead">
-          <span className="cp-brief__cap">The latest research</span>
+          <span className="cp-brief__cap">{lead.demonstration ? "Demonstration" : lead.earlyAccess ? "Early access" : "The latest research"}</span>
           {/* THE LEAD HAS A PICTURE ON /articles AND HAD NONE HERE.
               The briefing brief is "one lead development", which is about how
               MANY things the page carries, not about stripping the one it
@@ -95,16 +98,25 @@ export default function PressBriefing() {
             {away ? " · on Tribal Business News" : null}
           </p>
         </article>
-      ) : null}
+      ) : (
+        <div className="cp-brief__lead" data-testid="brief-article-unavailable">
+          <p role="status">
+            {articleState.status === "loading"
+              ? "Loading research articles…"
+              : "Research articles are unavailable on this connection. Your collections and account are still available."}
+          </p>
+        </div>
+      )}
 
       <div className="cp-brief__side">
         {/* THREE SIGNALS. Releases, newest first, each one a link to exactly
             what changed rather than to the feed's top. */}
         <div className="cp-brief__block">
-          <span className="cp-brief__cap">What changed</span>
+          <span className="cp-brief__cap">{releaseState?.data?.source === "verified_current" ? "Available now" : "Updates"}</span>
+          {!releaseState?.data ? <p role="status">{releaseState?.status === "loading" ? "Loading collection updates…" : "Collection updates are unavailable."}</p> : null}
           <ul className="cp-brief__signals">
             {signals.map((release) => {
-              const latest = latestRelease(release.id);
+              const latest = latestRelease(release.id, releases);
               const to = latest
                 ? `${PRESS_WHATS_NEW_PATH}#${anchorOf({ id: release.id, version: latest.version })}`
                 : PRESS_WHATS_NEW_PATH;
@@ -115,8 +127,7 @@ export default function PressBriefing() {
                       {PRESS_CATALOG_BY_ID[release.id]?.name ?? release.id}
                     </span>
                     <span className="cp-brief__sigwhen">
-                      {latest?.version ? `${latest.version} · ` : ""}
-                      {formatUpdated(release.updated)}
+                      {release.updated ? formatUpdated(release.updated) : "Current verified data"}
                     </span>
                   </Link>
                 </li>
@@ -124,7 +135,7 @@ export default function PressBriefing() {
             })}
           </ul>
           <Link className="cp-brief__more" to={PRESS_WHATS_NEW_PATH}>
-            Every release <span aria-hidden="true">&#8594;</span>
+            Collection updates <span aria-hidden="true">&#8594;</span>
           </Link>
         </div>
 
@@ -140,8 +151,8 @@ export default function PressBriefing() {
               </span>
               <span>
                 <b>{collection.entry.name}</b>
-                {collection.launch?.rowsLabel ? (
-                  <small>{collection.launch.rowsLabel}</small>
+                {Number.isSafeInteger(collection.count) ? (
+                  <small>{collection.count.toLocaleString()} available observations</small>
                 ) : null}
               </span>
             </Link>

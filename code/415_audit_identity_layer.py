@@ -166,7 +166,7 @@ def main():
     classes = Counter(g(r, "entity_class") for r in spine)
     A["entity_class_counts"] = dict(classes.most_common())
     A["entity_classes_with_no_declared_prefix"] = sorted(
-        k for k in classes if IDS.class_prefix(k) is None)
+        k for k in classes if IDS.historical_class_prefix(k) is None)
 
     # blank cedar_entity_id by class
     A["legacy_register_id_coverage_by_class"] = {

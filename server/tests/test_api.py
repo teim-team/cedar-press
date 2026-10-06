@@ -21,10 +21,14 @@ os.environ["CEDAR_PRESS_ACCOUNTS"] = json.dumps(
         "pro@example.org": {"password": "correct-horse", "tier": "press_pro"},
         # Two seats of one subscription: the organization earns once.
         "one@bank.example": {
-            "password": "correct-horse", "tier": "press_pro", "account": "acct-bank"
+            "password": "correct-horse",
+            "tier": "press_pro",
+            "account": "acct-bank",
         },
         "two@bank.example": {
-            "password": "correct-horse", "tier": "press_pro", "account": "acct-bank"
+            "password": "correct-horse",
+            "tier": "press_pro",
+            "account": "acct-bank",
         },
     }
 )
@@ -49,6 +53,7 @@ from cedar_press import (
     codes,  # noqa: E402
     press_catalog,  # noqa: E402
     ratelimit,  # noqa: E402
+    repository,  # noqa: E402
 )
 from cedar_press import collections as launch  # noqa: E402
 from cedar_press import session as session_module  # noqa: E402
@@ -219,16 +224,24 @@ class TestCatalog(unittest.TestCase):
         )
         self.assertEqual(response.status_code, 200)
         payload = response.json()
-        self.assertIn("resolved", payload["answer"])
+        self.assertIn("source-declared role", payload["answer"])
+        self.assertIn(
+            "does not establish ownership at a historical transaction date", payload["answer"]
+        )
         self.assertIn("Deals", payload["basis"])
 
-    def test_cedar_flags_demonstration_statistics(self) -> None:
+    def test_cedar_never_quotes_demonstration_statistics(self) -> None:
+        # Owner, 2026-10-06: nothing a reader sees is a draft or a mock-up, so
+        # a demonstration figure series is never quoted; Cedar says the
+        # collection has no published figures and states what it holds.
         response = client.post(
             "/cedar/ask",
             json={"question": "What are the headline figures?", "collectionId": "deals"},
         )
         self.assertEqual(response.status_code, 200)
-        self.assertIn("demonstration", response.json()["answer"])
+        answer = response.json()["answer"]
+        self.assertNotIn("demonstration", answer)
+        self.assertIn("has no published figures yet", answer)
 
     def test_cedar_labels_real_statistics_with_their_source(self) -> None:
         # As Cedar Press+, because `owned` is on the `pro` shelf and
@@ -255,15 +268,19 @@ class TestCatalog(unittest.TestCase):
             json={"question": "How many records are in this collection?", "collectionId": "deals"},
         )
         self.assertEqual(response.status_code, 200)
-        self.assertIn("currently holds", response.json()["answer"])
+        answer = response.json()["answer"]
+        self.assertIn("978 observations", answer)
+        self.assertNotIn("demonstration", answer)
 
-    def test_a_two_series_figure_answers_with_both_series(self) -> None:
+    def test_a_demonstration_two_series_figure_is_not_quoted(self) -> None:
+        # Funding's two-series figure is demonstration data, so neither series
+        # is quoted (owner, 2026-10-06).
         response = client.post(
             "/cedar/ask",
             json={"question": "What are the headline figures?", "collectionId": "funding"},
         )
         self.assertEqual(response.status_code, 200)
-        self.assertIn("comparison", response.json()["answer"])
+        self.assertNotIn("comparison", response.json()["answer"])
 
     def test_cedar_still_refuses_what_it_cannot_support(self) -> None:
         # An unscoped "what?" used to land here too, and it is a different
@@ -337,7 +354,7 @@ class TestCatalog(unittest.TestCase):
         # 2026-09-04 and this pinned assertion failed - which is the wrong
         # signal entirely, because what it is really testing is that the basis
         # cites the measured descriptor rather than the catalog.
-        self.assertRegex(payload["basis"], r"v\d+")
+        self.assertRegex(payload["basis"], r"updated \d{4}-\d{2}-\d{2}")
         self.assertNotIn("vintage", payload["basis"])
 
     def test_coverage_is_the_same_sentence_for_every_tier(self) -> None:
@@ -425,9 +442,10 @@ class TestCatalog(unittest.TestCase):
         )
         self.assertEqual(response.status_code, 200)
         answer = response.json()["answer"]
-        self.assertIn(dataset.version, answer)
+        self.assertNotIn(dataset.version, answer)
+        self.assertIn(dataset.updated, answer)
         self.assertIn(dataset.rows_label, answer)
-        self.assertIn(f"{launch.collection_cedar_facts('funding')['n_tables']} tables", answer)
+        self.assertNotIn(" tables", answer)
         self.assertNotIn("demonstration", answer)
 
     def test_a_change_question_without_a_version_gets_the_latest(self) -> None:
@@ -438,30 +456,23 @@ class TestCatalog(unittest.TestCase):
         )
         self.assertEqual(response.status_code, 200)
         answer = response.json()["answer"]
-        self.assertIn(f"Indian Country Deals {dataset.version} ({dataset.updated}", answer)
+        self.assertIn(f"Indian Country Deals, updated {dataset.updated}", answer)
 
-    def test_every_storefront_collection_has_a_release_the_feed_serves(self) -> None:
-        # The feed covered ten collections while the storefront sold twelve;
-        # derived from the manifest, it covers exactly the storefront.
-        response = client.get("/press/releases")
+    def test_release_feed_uses_current_permitted_metadata(self) -> None:
+        payload = {"source": "verified_current", "history_complete": False, "releases": []}
+        with mock.patch.object(repository, "releases", return_value=payload) as service:
+            response = client.get("/press/releases")
         self.assertEqual(response.status_code, 200)
-        served = {row["id"]: row for row in response.json()["releases"]}
-        self.assertEqual(set(served), {d.id for d in launch.LAUNCH_COLLECTION})
-        for dataset in launch.LAUNCH_COLLECTION:
-            with self.subTest(collection=dataset.id):
-                self.assertEqual(served[dataset.id]["version"], dataset.version)
-                self.assertEqual(served[dataset.id]["updated"], dataset.updated)
-                self.assertTrue(served[dataset.id]["history"])
+        self.assertEqual(response.json(), payload)
+        self.assertEqual(response.headers["cache-control"], "private, no-store")
+        self.assertIn(service.call_args.args[0], ("press", "press_pro"))
 
-    def test_releases_are_served_from_the_dumped_history(self) -> None:
-        response = client.get("/press/releases")
+    def test_missing_live_metadata_does_not_return_the_dumped_history(self) -> None:
+        with mock.patch.object(repository, "release_targets_for", return_value={"collections": []}):
+            response = client.get("/press/releases")
         self.assertEqual(response.status_code, 200)
-        rows = response.json()["releases"]
-        self.assertTrue(rows)
-        # Most recently updated first, and each row names its collection.
-        dates = [row["updated"] for row in rows]
-        self.assertEqual(dates, sorted(dates, reverse=True))
-        self.assertIn("funding", {row["id"] for row in rows})
+        self.assertEqual(response.json()["releases"], [])
+        self.assertIs(response.json()["history_complete"], False)
 
     def test_a_catalog_only_collection_profile_is_served(self) -> None:
         # A collection the catalog carries and the storefront does not sell
@@ -506,8 +517,10 @@ class TestEntitlement(unittest.TestCase):
         sign_in(email)
         return client.post(
             "/cedar/ask",
-            json={"question": question or "What does this collection cover?",
-                  "collectionId": collection_id},
+            json={
+                "question": question or "What does this collection cover?",
+                "collectionId": collection_id,
+            },
         )
 
     def test_a_standard_reader_is_not_answered_over_a_plus_collection(self) -> None:
@@ -536,8 +549,14 @@ class TestEntitlement(unittest.TestCase):
     def test_a_standard_reader_keeps_every_standard_collection(self) -> None:
         # The gate must bite on the `pro` shelf and nowhere else, or it is a
         # regression wearing a security fix's name.
-        for collection_id in ("funding", "legislation", "deals", "nagpra",
-                              "lobbying", "federal-register"):
+        for collection_id in (
+            "funding",
+            "legislation",
+            "deals",
+            "nagpra",
+            "lobbying",
+            "federal-register",
+        ):
             with self.subTest(collection=collection_id):
                 body = self._ask("reader@example.org", collection_id).json()
                 self.assertIsNone(body.get("access"), collection_id)
@@ -566,8 +585,10 @@ class TestEntitlement(unittest.TestCase):
         # ever called with a collection this plan cannot open, Cedar has been
         # handed a scope under a contract that says entitlement was already
         # checked.
-        with mock.patch.object(cedar_service, "available", return_value=True), \
-                mock.patch.object(cedar_service, "ask") as asked:
+        with (
+            mock.patch.object(cedar_service, "available", return_value=True),
+            mock.patch.object(cedar_service, "ask") as asked,
+        ):
             body = self._ask(
                 "reader@example.org", "need", "What should I conclude from this?"
             ).json()
@@ -576,8 +597,10 @@ class TestEntitlement(unittest.TestCase):
 
         # And the same question on a collection the plan does reach still gets
         # there, so the test above is not passing because the hop is dead.
-        with mock.patch.object(cedar_service, "available", return_value=True), \
-                mock.patch.object(cedar_service, "ask") as asked:
+        with (
+            mock.patch.object(cedar_service, "available", return_value=True),
+            mock.patch.object(cedar_service, "ask") as asked,
+        ):
             asked.return_value = cedar_service.CedarReply(
                 answer="composed", thread_id="t-1", unavailable=False
             )
@@ -585,9 +608,7 @@ class TestEntitlement(unittest.TestCase):
             # thing left that could answer it. "What does this collection
             # cover?" is answered off the release and never reaches Cedar,
             # which would make this control pass for the wrong reason.
-            self._ask(
-                "reader@example.org", "lobbying", "What should I conclude from this?"
-            )
+            self._ask("reader@example.org", "lobbying", "What should I conclude from this?")
         self.assertEqual(asked.call_count, 1)
         self.assertEqual(asked.call_args.kwargs["collection_id"], "lobbying")
 
@@ -610,10 +631,19 @@ class TestCedarConversation(unittest.TestCase):
             body["collectionId"] = collection_id
         return client.post("/cedar/ask", json=body)
 
+    def test_a_question_has_a_length_limit(self) -> None:
+        from cedar_press.app import MAX_QUESTION
+
+        over = self._ask("reader@example.org", "q" * (MAX_QUESTION + 1), "deals")
+        self.assertEqual(over.status_code, 422)
+        # No collection: answered with a question back, never sent to Cedar.
+        at_limit = self._ask("reader@example.org", "q" * MAX_QUESTION)
+        self.assertEqual(at_limit.status_code, 200, at_limit.text)
+
     def test_an_answer_a_reader_can_open_says_its_records_are_reachable(self) -> None:
-        basis = self._ask(
-            "reader@example.org", "What does this collection cover?", "deals"
-        ).json()["answerBasis"]
+        basis = self._ask("reader@example.org", "What does this collection cover?", "deals").json()[
+            "answerBasis"
+        ]
         self.assertEqual(basis["kind"], "release")
         self.assertIs(basis["opened"], True)
         self.assertEqual(basis["collectionId"], "deals")
@@ -627,17 +657,17 @@ class TestCedarConversation(unittest.TestCase):
         # used to offer them unconditionally: "View supporting records", one
         # sentence under an answer that had just said they open with Cedar
         # Press+.
-        basis = self._ask(
-            "reader@example.org", "What does this collection cover?", "need"
-        ).json()["answerBasis"]
+        basis = self._ask("reader@example.org", "What does this collection cover?", "need").json()[
+            "answerBasis"
+        ]
         self.assertEqual(basis["kind"], "release")
         self.assertIs(basis["opened"], False)
         self.assertEqual(basis["collectionId"], "need")
         # And the same collection on a plan that includes it, so the field is
         # tracking the entitlement and not the collection.
-        plus = self._ask(
-            "pro@example.org", "What does this collection cover?", "need"
-        ).json()["answerBasis"]
+        plus = self._ask("pro@example.org", "What does this collection cover?", "need").json()[
+            "answerBasis"
+        ]
         self.assertIs(plus["opened"], True)
 
     def test_a_question_with_no_collection_gets_one_question_back(self) -> None:
@@ -757,7 +787,36 @@ class TestActivation(unittest.TestCase):
             "/press/activation/validate",
             json={"code": "TBN4-9K2M-X7QD", "email": "someone@example.org"},
         )
-        self.assertEqual(response.json()["code"], "PRESS_CODE_EMAIL_MISMATCH")
+        self.assertEqual(response.json()["code"], "PRESS_CODE_INVALID")
+
+    def test_a_real_code_with_the_wrong_address_reads_as_an_unissued_one(self) -> None:
+        # The endpoint must not be an oracle for which codes exist: issued to
+        # someone else, spent by someone else, expired for someone else and
+        # never issued at all are one answer, byte for byte, until the code
+        # AND the address match.
+        def ask(code: str, email: str):
+            return client.post(
+                "/press/activation/validate", json={"code": code, "email": email}
+            )
+
+        unissued = ask("TBN4-0000-0000", "guess@example.org")
+        self.assertEqual(unissued.status_code, 400)
+        client.post(
+            "/press/activation",
+            json={
+                "code": "TBN4-9K2M-X7QD",
+                "email": "new@example.org",
+                "password": "a-long-enough-password",
+            },
+        )
+        client.cookies.clear()
+        for code in ("TBN4-9K2M-X7QE", "TBN4-0000-EXPD", "TBN4-9K2M-X7QD"):
+            with self.subTest(code=code):
+                response = ask(code, "guess@example.org")
+                self.assertEqual(response.status_code, unissued.status_code)
+                self.assertEqual(response.json(), unissued.json())
+        # The owner of a spent code is still told it was used.
+        self.assertEqual(ask("TBN4-9K2M-X7QD", "new@example.org").json()["code"], "PRESS_CODE_USED")
 
     def test_an_expired_code_says_so(self) -> None:
         response = client.post(
@@ -928,6 +987,49 @@ class TestRateLimiting(unittest.TestCase):
             )
         self.assertIn(429, seen)
 
+    def test_a_forwarded_header_cannot_reset_the_allowance_behind_a_proxy(self) -> None:
+        # Behind CloudFront the caller writes the left of X-Forwarded-For and
+        # CloudFront appends the address it saw. Varying the caller's part on
+        # every attempt must not mint a fresh allowance.
+        with mock.patch.dict(os.environ, {"CEDAR_PRESS_TRUST_PROXY": "1"}):
+            seen = []
+            for i in range(30):
+                seen.append(
+                    client.post(
+                        "/auth/login",
+                        json={"email": "reader@example.org", "password": "wrong"},
+                        headers={"X-Forwarded-For": f"10.0.{i}.{i}, 198.51.100.7"},
+                    ).status_code
+                )
+        self.assertIn(429, seen)
+        self.assertEqual(seen.index(429), ratelimit.LOGIN_ATTEMPTS)
+
+    def test_subscribers_behind_the_proxy_keep_their_own_allowances(self) -> None:
+        # The other half: trusting no header at all behind a proxy would key
+        # everyone to the proxy's address, and one stranger's typos would lock
+        # out every subscriber.
+        with mock.patch.dict(os.environ, {"CEDAR_PRESS_TRUST_PROXY": "1"}):
+            for _ in range(ratelimit.LOGIN_ATTEMPTS + 2):
+                client.post(
+                    "/auth/login",
+                    json={"email": "reader@example.org", "password": "wrong"},
+                    headers={"X-Forwarded-For": "198.51.100.7"},
+                )
+            other = client.post(
+                "/auth/login",
+                json={"email": "reader@example.org", "password": "correct-horse"},
+                headers={"X-Forwarded-For": "198.51.100.8"},
+            )
+        self.assertEqual(other.status_code, 200)
+
+    def test_unreadable_proxy_settings_refuse_sign_in_rather_than_guess(self) -> None:
+        with mock.patch.dict(
+            os.environ, {"CEDAR_PRESS_TRUST_PROXY": "1", "CEDAR_PRESS_PROXY_HOPS": "zero"}
+        ):
+            response = sign_in()
+        self.assertEqual(response.status_code, 503)
+        self.assertEqual(response.json()["code"], "AUTH_CONFIGURATION_REQUIRED")
+
     def test_reading_is_not_rate_limited(self) -> None:
         # The limit is on guessing a secret, not on using the service.
         ratelimit.reset_for_tests()
@@ -1011,8 +1113,12 @@ class TestShapeTheResearch(unittest.TestCase):
         self.assertEqual(hits[0]["id"], "ds-enterprise-ownership")
         sent = c.post(
             "/press/requests",
-            json={"text": text, "use_case": "credit analysis", "priority_id": hits[0]["id"],
-                  "support_points": 1},
+            json={
+                "text": text,
+                "use_case": "credit analysis",
+                "priority_id": hits[0]["id"],
+                "support_points": 1,
+            },
         )
         self.assertEqual(sent.status_code, 201, sent.text)
         self.assertEqual(sent.json()["status"], "associated")
@@ -1020,3 +1126,17 @@ class TestShapeTheResearch(unittest.TestCase):
         card = c.get("/press/influence").json()
         self.assertEqual(card["requests"][0]["title"], hits[0]["title"])
         self.assertEqual(c.post("/press/requests", json={"text": "short"}).status_code, 400)
+
+    def test_a_request_has_a_length_limit(self) -> None:
+        from cedar_press.app import MAX_REQUEST_TEXT, MAX_USE_CASE
+
+        c = self._sign_in("reader@example.org")
+        at_limit = c.post("/press/requests", json={"text": "x" * MAX_REQUEST_TEXT})
+        self.assertEqual(at_limit.status_code, 201, at_limit.text)
+        over = c.post("/press/requests", json={"text": "x" * (MAX_REQUEST_TEXT + 1)})
+        self.assertEqual(over.status_code, 422)
+        long_use = c.post(
+            "/press/requests",
+            json={"text": "a request long enough", "use_case": "u" * (MAX_USE_CASE + 1)},
+        )
+        self.assertEqual(long_use.status_code, 422)

@@ -1079,6 +1079,7 @@ BIA_REGION = {"AK": "Alaska", "CA": "Pacific"}
 
 
 def phase_promote(apply_it):
+    raise SystemExit("Retired SGVF- issuance is disabled; mint CE- through 503_identity after review")
     idx = SpineIndex()
     m503 = load_503()
     ex, gov, state_of = m503.build_index()

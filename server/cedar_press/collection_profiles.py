@@ -44,6 +44,7 @@ from cedar_press import press_catalog
 from cedar_press.collections import (
     COLLECTION_FIGURES,
     LAUNCH_COLLECTION,
+    collection_tables,
 )
 
 #: Construction facts per collection, from the methods documentation. These
@@ -86,8 +87,8 @@ _CONSTRUCTION: dict[str, dict[str, Any]] = {
         ),
         "inclusion_rules": (
             "Tribally owned firms, ANC and NHO subsidiaries and 8(a) "
-            "participants, collected weekly from SAM, SBA, FPDS and "
-            "USAspending, reconciled and versioned quarterly."
+            "participants, drawn from SAM, SBA, FPDS and USAspending and "
+            "reconciled against one another."
         ),
         "known_limitations": (
             "Parent-entity matches can be provisional pending SAM "
@@ -141,6 +142,93 @@ _CONSTRUCTION: dict[str, dict[str, Any]] = {
         ),
     },
 }
+
+
+def _spreadsheet_construction(dataset_id: str) -> dict[str, Any] | None:
+    """Describe the current producer's declared observations, not a legacy grain."""
+    tables = [
+        table
+        for table in collection_tables(dataset_id)
+        if isinstance(table.get("record_types"), dict) and table["record_types"]
+    ]
+    if not tables:
+        return None
+    kinds: dict[str, int] = {}
+    for table in tables:
+        for kind, count in table["record_types"].items():
+            if (
+                not isinstance(kind, str)
+                or not kind
+                or isinstance(count, bool)
+                or not isinstance(count, int)
+                or count < 0
+            ):
+                raise ValueError("Invalid producer record-type count")
+            kinds[kind] = kinds.get(kind, 0) + count
+    detail = "; ".join(f"{kind}: {count:,}" for kind, count in sorted(kinds.items()))
+    unit = (
+        "One permitted source observation at its declared record_type and "
+        f"record_grain. Declared record types and counts: {detail}."
+    )
+    limits = (
+        "Counts describe source observations, not unique entities or businesses. "
+        "Do not total overlapping record grains. Preview rows are a bounded "
+        "sample, not a representative census or a full factual verification."
+    )
+    if dataset_id == "owned":
+        unit = (
+            "One business certification or directory listing; several listings "
+            "may refer to the same business. " + unit
+        )
+        limits += (
+            " Certification validity is not a legal-identity effective date, "
+            "and a certifying authority is not the business's identity."
+        )
+    if dataset_id == "need":
+        if set(kinds) != {"reviewed_public_base"}:
+            raise ValueError("NEED profile must describe only the reviewed public base")
+        limits += (
+            " Only the evidence-pinned reviewed base is public. The original "
+            "internal components and unresolved ownership or rights claims "
+            "remain outside this public spreadsheet."
+        )
+    if dataset_id == "natural-resources":
+        limits += (
+            " Preserve measurement_status: an appropriation or allocation "
+            "is not evidence that a payment occurred."
+        )
+    if dataset_id == "foundation-corporate-giving":
+        limits += (
+            " A disclosure is not necessarily a distinct award or payment. "
+            "Keep commitments, payments, unpaid balances, ranges and aggregate "
+            "program totals separate. The reported recipient may be an "
+            "intermediary or program; no ownership or donation relationship "
+            "is inferred from a shared identifier."
+        )
+    if dataset_id == "plot":
+        limits += (
+            " A mapped tract can contain several parcels. Assessor owner "
+            "labels are source observations, not title certification or "
+            "verified Native ownership. Permits are not unique projects, "
+            "and permit valuation is not expenditure. Regulatory dates and "
+            "source snapshots are not acquisition dates."
+        )
+    return {
+        "unit_of_observation": unit,
+        "entity_resolution_method": (
+            "Read each association with its source-declared role and evidence. "
+            "A CE association, business identity and source record key are "
+            "different identifiers. A parent or certifier association does "
+            "not identify the business, and current affiliation does not "
+            "establish ownership at a historical transaction date."
+        ),
+        "inclusion_rules": (
+            "The public spreadsheet contains only the components, rows and "
+            "fields admitted by the pinned producer release's publication gates."
+        ),
+        "known_limitations": limits,
+    }
+
 
 def _figure_for(dataset_id: str):
     return next((f for f in COLLECTION_FIGURES if f.id == dataset_id), None)
@@ -199,7 +287,7 @@ def profile_for(dataset_id: str) -> dict[str, Any] | None:
         # The pilot's four datasets carry releases; the rest of the ladder
         # answers from its catalog entry.
         return _catalog_profile(dataset_id)
-    construction = _CONSTRUCTION.get(dataset_id, {})
+    construction = _spreadsheet_construction(dataset_id) or _CONSTRUCTION.get(dataset_id, {})
     # The eight collections that joined the shelf with Cedar's real descriptors
     # have no construction entry: `_CONSTRUCTION` is hand-written methods copy
     # and nothing measured it. Coverage and linkage are the exception, because
@@ -214,8 +302,7 @@ def profile_for(dataset_id: str) -> dict[str, Any] | None:
             "title": figure.title,
             "basis": figure.basis,
             "points": [
-                {"label": p.label, "value": p.value, "compare": p.compare}
-                for p in figure.points
+                {"label": p.label, "value": p.value, "compare": p.compare} for p in figure.points
             ],
         }
         if figure
@@ -286,7 +373,10 @@ def _fmt(value: Any) -> str:
 
 def _stats_sentence(profile: dict[str, Any]) -> str | None:
     headline = profile.get("headline_statistics")
-    if not headline:
+    # Demonstration figures are never quoted to a reader (owner, 2026-10-06:
+    # nothing on the product reads as a draft or a mock-up). The caller then
+    # says the collection has no published figures, which is true.
+    if not headline or profile["demonstration"]:
         return None
     # A two-series figure answers with both series: the card draws value and
     # comparison together, and an answer that silently drops the gray line is
@@ -296,34 +386,53 @@ def _stats_sentence(profile: dict[str, Any]) -> str | None:
         + (f" (comparison {_fmt(p['compare'])})" if p.get("compare") is not None else "")
         for p in headline["points"]
     )
-    # Every statistics answer carries its standing: demonstration figures say
-    # so, and real figures say where they came from.
-    caveat = (
-        " These figures are demonstration data, standing in until the first real release."
-        if profile["demonstration"]
-        else f" Source: {profile['primary_sources']}."
-    )
-    return (
+    # Real figures say where they came from.
+    caveat = f" Source: {profile['primary_sources']}."
+    holds = (
         f"{profile['collection_name']} currently holds {profile['record_count_label']}. "
-        f"{headline['title']} ({headline['basis']}): {points}.{caveat}"
+        if profile.get("record_count_label")
+        else ""
     )
+    return f"{holds}{headline['title']} ({headline['basis']}): {points}.{caveat}"
 
 
 # Change words are checked first: "what changed in v4.2" is a question about
 # a release, and the What's New page hands Cedar exactly that phrasing.
 _CHANGE_WORDS = (
-    "changed", "change", "release", "updated", "update", "latest", "what's new", "whats new",
+    "changed",
+    "change",
+    "release",
+    "updated",
+    "update",
+    "latest",
+    "what's new",
+    "whats new",
 )
 # Statistics words are checked before construction words: "how many records"
 # is a quantity question, and a bare "how " here once swallowed it into the
 # entity-resolution answer.
 _CONSTRUCT_WORDS = (
-    "construct", "built", "build", "method", "resolve", "resolution",
-    "how was", "how is", "how are", "how does",
+    "construct",
+    "built",
+    "build",
+    "method",
+    "resolve",
+    "resolution",
+    "how was",
+    "how is",
+    "how are",
+    "how does",
 )
 _CONTENT_WORDS = ("cover", "contain", "what is", "what does", "include", "track", "field", "source")
 _STATS_WORDS = (
-    "headline", "figure", "statistic", "largest", "how many", "count", "record", "number",
+    "headline",
+    "figure",
+    "statistic",
+    "largest",
+    "how many",
+    "count",
+    "record",
+    "number",
 )
 
 
@@ -345,13 +454,13 @@ def _changes_sentence(profile: dict[str, Any], asked: str) -> str:
         )
     history = release["history"]
     entry = next(
-        (item for item in history if item["version"].lower() in asked),
+        (item for item in history if item["version"].lower() in asked or item["date"] in asked),
         history[0],
     )
     kind = "methodology release" if entry.get("kind") == "methodology" else "data release"
     note = f" Note: {entry['note']}" if entry.get("note") else ""
     changes = " ".join(entry["changed"])
-    return f"{name} {entry['version']} ({entry['date']}, {kind}): {changes}{note}"
+    return f"{name}, updated {entry['date']} ({kind}): {changes}{note}"
 
 
 def _coverage_sentence(profile: dict[str, Any]) -> str | None:
@@ -438,7 +547,7 @@ def answer_from_profile(question: str, dataset_id: str) -> dict[str, str] | None
     # printed -- a basis line naming a measurement that does not exist.
     if profile.get("version"):
         vintage = f", vintage {profile['vintage']}" if profile.get("vintage") else ""
-        basis = f"{profile['collection_name']} {profile['version']}{vintage}"
+        basis = f"{profile['collection_name']}, updated {profile['last_updated']}{vintage}"
     else:
         basis = f"{profile['collection_name']}, Cedar Press catalog entry"
 
@@ -458,10 +567,10 @@ def answer_from_profile(question: str, dataset_id: str) -> dict[str, str] | None
         # with no release says it is in preparation.
         if profile.get("version"):
             held = (
-                f" Its current release is {profile['version']}"
+                " The dataset was updated"
                 f" ({profile['last_updated']}), holding {profile['record_count_label']}."
                 if profile.get("record_count_label")
-                else f" Its current release is {profile['version']} ({profile['last_updated']})."
+                else f" The dataset was updated {profile['last_updated']}."
             )
             return {
                 "answer": (

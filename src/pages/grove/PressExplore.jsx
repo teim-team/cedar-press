@@ -68,7 +68,7 @@ import { recordHref, rememberReturn, takeReturn } from "../../features/grove/pre
 import { PRESS_METHODS_PATH } from "../../features/grove/pressRoutes.js";
 import { LAUNCH_COLLECTION } from "../../features/grove/collection.js";
 import { formatUpdated } from "../../features/grove/pressReleases.js";
-import { downloadCsv, hasReleaseFile, saveZip } from "../../features/grove/pressDownload.js";
+import { downloadCsv, hasReleaseFile, sampleLabel, saveZip } from "../../features/grove/pressDownload.js";
 import { PRESS_CATALOG_BY_ID } from "../../features/grove/pressCatalog.js";
 
 /** What Collections opens on when the URL does not say. */
@@ -77,14 +77,18 @@ import { Cards, Human, Rows } from "./PressRecordTable.jsx";
 import { columnPlan, short } from "../../features/grove/recordColumns.js";
 import { coverageLabel, upgradeFor } from "../../features/grove/pressAccess.js";
 import { RecordStructureCap, RecordStructureTable } from "./PressRecordStructure.jsx";
-import { TBN_PLANS_URL, articleHref, articlesDrawingOn } from "../../features/grove/pressArticles.js";
+import { articleHref, articlesDrawingOn } from "../../features/grove/pressArticles.js";
+import { EARLY_ACCESS_HREF } from "../../features/grove/appLink.js";
+import { useProtectedArticles } from "../../features/grove/useProtectedArticles.js";
 import { EVENT, track } from "../../features/grove/telemetry.js";
 import { useNarrow } from "../../features/grove/useNarrow.js";
 import PressCollectionRail from "./PressCollectionRail.jsx";
 import { COLLECTION_ICONS } from "./pressCollectionIcons";
 import PressCollectionAbout from "./PressCollectionAbout.jsx";
 import Explain from "./Explain";
+import { useDismissable } from "./useDismissable.jsx";
 import { TierName } from "./TierName";
+import PressReadingKey from "./PressReadingKey.jsx";
 
 /** Row counts as the launch descriptors state them, keyed by collection. */
 const ROWS_BY_ID = Object.fromEntries(LAUNCH_COLLECTION.map((e) => [e.id, e.rowsLabel]));
@@ -177,7 +181,10 @@ function Picker({ label, value, children, testId }) {
       node.open = false;
       if (refocus) node.querySelector("summary")?.focus();
     };
-    const onKey = (event) => { if (event.key === "Escape") { event.stopPropagation(); close(true); } };
+    // Only an open picker claims Escape. It stopped propagation even when
+    // closed, so Escape on a picker's own button could not close the Filters
+    // panel around it.
+    const onKey = (event) => { if (event.key === "Escape" && node.open) { event.stopPropagation(); close(true); } };
     const onPointer = (event) => { if (!node.contains(event.target)) close(false); };
     node.addEventListener("keydown", onKey);
     document.addEventListener("pointerdown", onPointer);
@@ -471,8 +478,8 @@ function YearRange({ cut, bounds, basis, onChange }) {
  * piece that runs on Tribal Business News opens there and says so; one
  * hosted here opens here.
  */
-function WrittenFrom({ collectionId, onMore }) {
-  const pieces = articlesDrawingOn(collectionId);
+function WrittenFrom({ collectionId, onMore, articles }) {
+  const pieces = articlesDrawingOn(collectionId, articles);
   if (!pieces.length) return null;
   // ONE, NOT ALL OF THEM. Two headlines in this row pushed it onto a second
   // line, which on a page whose whole point is the records is a row of
@@ -558,7 +565,7 @@ function CollectionAtlas({ collections, query, onSelect }) {
               <th scope="col" className="cp-ex__c-text">Collection</th>
               <th scope="col" className="cp-ex__c-text">Coverage</th>
               <th scope="col" className="cp-ex__c-amount">Records</th>
-              <th scope="col" className="cp-ex__c-text">Release</th>
+              <th scope="col" className="cp-ex__c-text">Data as of</th>
               <th scope="col" className="cp-ex__c-text">Access</th>
             </tr>
           </thead>
@@ -574,7 +581,8 @@ function CollectionAtlas({ collections, query, onSelect }) {
               // the cell is left empty rather than holding a placeholder.
               const coverage = coverageLabel(entry);
               const rows = ROWS_BY_ID[entry.id] ?? (structure ? "" : "—");
-              const version = release?.version ?? (structure ? "" : "—");
+              // The data refresh, not the release date (2026-10-06).
+              const updated = release?.refreshed ? formatUpdated(release.refreshed) : "";
               const access = (compact = false) => {
                 if (unavailable) return <span className={compact ? "cp-atlas__mobileaccess is-pending" : "cp-atlas__pending"} title={previewUnavailable}>Preview pending</span>;
                 if (open) return <span className={compact ? "cp-atlas__mobileaccess is-included" : "cp-atlas__included"}>Included</span>;
@@ -597,15 +605,14 @@ function CollectionAtlas({ collections, query, onSelect }) {
                     <small className="cp-atlas__mobilemeta">
                       {coverage ? <span>{coverage}</span> : null}
                       {rows ? <span>{rows}</span> : null}
-                      {version ? <span>{version}</span> : null}
+                      {updated ? <span>Data as of {updated}</span> : null}
                       {access(true)}
                     </small>
                   </td>
                   <td>{coverage}</td>
                   <td className="cp-ex__amount" data-testid="atlas-rows">{rows}</td>
                   <td>
-                    {version}
-                    {release?.updated ? <small className="cp-ex__uid">updated {formatUpdated(release.updated)}</small> : null}
+                    {updated}
                   </td>
                   <td>{access()}</td>
                 </tr>
@@ -654,7 +661,7 @@ function LockedCollection({ collection, onAbout }) {
   // the locked frame, where another names its release's default columns.
   const columns = structure
     ? structure.fields.slice(0, 6).map((field) => field.name)
-    : (contract?.default_columns ?? []).slice(0, 6);
+    : (contract?.default_columns ?? []).slice(0, contract?.mapping_kind === "producer_spreadsheet" ? 8 : 6);
   const columnLabel = (column) => (structure ? column.replace(/_/g, " ") : labelFor(flagship.key, column));
   const rows = ROWS_BY_ID[entry.id];
 
@@ -695,16 +702,15 @@ function LockedCollection({ collection, onAbout }) {
           <p className="cp-ex__caption">
             {entry.name}
             {rows ? ` · ${rows}` : ""}
-            {release?.version ? ` · ${release.version}` : ""}
-            {release?.updated ? ` · updated ${formatUpdated(release.updated)}` : ""}
+            {release?.refreshed ? ` · data as of ${formatUpdated(release.refreshed)}` : ""}
           </p>
           <p className="cp-lock__say">
             Available with <TierName name={upgrade.name} />.{" "}
             {structure
               ? "It opens on what each record holds and how the collection connects to the others."
               : "The published preview, filters, and sample export are included together."}{" "}
-            <a href={TBN_PLANS_URL} target="_blank" rel="noreferrer">
-              See <TierName name={upgrade.name} /> <span aria-hidden="true">&#8594;</span>
+            <a href={EARLY_ACCESS_HREF}>
+              Request early access to <TierName name={upgrade.name} /> <span aria-hidden="true">&#8594;</span>
             </a>
           </p>
         </div>
@@ -728,7 +734,6 @@ function UnavailableCollection({ collection, onAbout }) {
           <h2>Preview unavailable</h2>
           <dl className="cp-lock__status">
             <div><dt>Access</dt><dd>Not available for self-service browsing</dd></div>
-            {release?.version ? <div><dt>Release</dt><dd>{release.version}</dd></div> : null}
           </dl>
           <p>{reason}</p>
         </div>
@@ -736,8 +741,7 @@ function UnavailableCollection({ collection, onAbout }) {
           <p className="cp-ex__caption">
             {entry.name}
             {rows ? ` · ${rows}` : ""}
-            {release?.version ? ` · ${release.version}` : ""}
-            {release?.updated ? ` · updated ${formatUpdated(release.updated)}` : ""}
+            {release?.refreshed ? ` · data as of ${formatUpdated(release.refreshed)}` : ""}
           </p>
           <p className="cp-lock__say">
             This collection is listed for transparency. The current release does not offer a public preview or self-service table access.
@@ -776,7 +780,7 @@ function StructureCollection({ collection, onAbout }) {
   );
 }
 
-/** The selected collection's ten-row sample, with its citation in the file. */
+/** The selected collection's sample customer table, labelled with its real row count, with its citation in the file. */
 function SampleDownload({ entry }) {
   const [refusal, setRefusal] = useState(null);
   return (
@@ -799,7 +803,7 @@ function SampleDownload({ entry }) {
                 full-screen page the name is what the button gives back so
                 the collection's own heading is not the thing that
                 truncates; everywhere else it reads in full. */}
-            Ten-row sample<span className="cp-ex__samplefor"> of {entry.short || entry.name}</span>
+            {sampleLabel(entry.id) ?? "Sample"}<span className="cp-ex__samplefor"> of {entry.short || entry.name}</span>
           </>
         ) : (
           "Collection description (sample pending)"
@@ -811,6 +815,8 @@ function SampleDownload({ entry }) {
 }
 
 export default function PressExplore({ user, pick = null, onActive = () => {}, onSelected = () => {} }) {
+  const articleState = useProtectedArticles(user);
+  const articles = articleState.data?.articles ?? [];
   const [params, setParams] = useSearchParams();
   const navigate = useNavigate();
   const cut = useMemo(() => decodeCut(params.toString()), [params]);
@@ -886,7 +892,7 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
   ), [collections, selectedKey, tableKey]);
   const noPreview = collections.filter((c) => selected.includes(c.entry.id) && !c.flagship && !c.structure);
 
-  const { rows, missing, columns, loading } = useSampleRows(tables, register);
+  const { rows, missing, columns, loading, retry: retrySamples } = useSampleRows(tables, register);
   const facets = useMemo(() => facetsOf(rows, register), [rows, register]);
   const filtered = useMemo(() => sortRows(filterRows(rows, cut, register), cut.sort), [rows, cut, register]);
   const excluded = useMemo(() => excludedBy(rows, cut, register), [rows, cut, register]);
@@ -953,6 +959,8 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
 
   const [saved, setSaved] = useState(() => (typeof window === "undefined" ? [] : readSaved()));
   const [naming, setNaming] = useState(false);
+  const filtersRef = useDismissable();
+  const moreRef = useDismissable();
   const [name, setName] = useState("");
   const [copied, setCopied] = useState(false);
   const [showAll, setShowAll] = useState(false);
@@ -971,7 +979,8 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
   // The column order is `columnPlan`, shared with the door so the public
   // preview and the product are literally the same table. What used to be
   // thirty lines of role-first reasoning here is that function's docstring.
-  const { defaults, all: allColumns } = columnPlan(table?.key ?? null, contract, tableColumns);
+  const tableRows = table ? rows.filter((item) => item.key === table.key).map((item) => item.row) : [];
+  const { defaults, all: allColumns } = columnPlan(table?.key ?? null, contract, tableColumns, tableRows);
   const shownColumns = table ? (showAll || !defaults.length ? allColumns : defaults) : [];
   const yearBasis = table
     ? contract?.year_basis
@@ -993,6 +1002,7 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
   openRecord.href = (item) => recordHref({
     key: item.key,
     recordId: item.recordId,
+    recordType: item.recordType,
     index: item.index ?? null,
     from: params.toString(),
   });
@@ -1109,6 +1119,7 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
           the whole screen on a phone. */}
       {cut.about && (single || lockedSingle) ? (
         <PressCollectionAbout
+          articles={articles}
           entry={(single ?? lockedSingle).entry}
           flagship={(single ?? lockedSingle).flagship}
           onClose={() => write({ about: false })}
@@ -1175,7 +1186,7 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
               were three controls wide enough to need their own row; behind a
               disclosure they cost one button, and the button says when they
               are doing something. */}
-          <details className="cp-ex__filters">
+          <details className="cp-ex__filters" ref={filtersRef}>
             <summary className="cp-ex__act">Filters{recordFiltersActive ? " \u00b7 on" : ""}</summary>
             <div className="cp-ex__filtersin">{filters}</div>
           </details>
@@ -1188,10 +1199,10 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
                 It used to be a button of its own beside the heading. It is
                 not the same file as Download — that one hands over the
                 current CUT as a ZIP with its README, and this is the
-                collection's own ten-row sample CSV carrying `cite_as` in the
+                collection's own sample CSV (its customer table) carrying `cite_as` in the
                 rows — so it keeps its own entry, in the menu where the other
                 downloads are. */}
-            <details className="cp-ex__more">
+            <details className="cp-ex__more" ref={moreRef}>
               <summary className="cp-ex__act" aria-label="More actions">More</summary>
               <div className="cp-ex__morein">
                 {!atlas && single ? <SampleDownload entry={single.entry} /> : null}
@@ -1218,7 +1229,7 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
                 {saved.map((s) => (
                   <li key={s.id}>
                     <button type="button" className="cp-ex__link" onClick={() => setParams(s.cut, { replace: false })}>{s.name}</button>
-                    <span className="cp-ex__fine"> · {s.releases.join(", ")} · {s.savedAt.slice(0, 10)}</span>
+                    <span className="cp-ex__fine"> · {s.savedAt.slice(0, 10)}</span>
                     <button type="button" className="cp-ex__clear" onClick={() => forget(s.id)}>Remove</button>
                   </li>
                 ))}
@@ -1248,12 +1259,17 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
               />
             )
           ) : (
-            <p className="cp-ex__empty">
+            <p className="cp-ex__empty" role="status">
               {loading
                 ? "Loading the preview records…"
                 : selected.length === 0
                   ? "No collection is selected. Choose one above, or all of them."
-                  : "No matching records in this preview. This does not establish whether the full dataset contains matching records. Widen a filter, or clear them."}
+                  : missing.length && !rows.length
+                    // Nothing arrived: that is a failed read, not an empty
+                    // result, and "widen a filter" would send the reader
+                    // after the wrong cause.
+                    ? <>The preview records could not be loaded. Check the connection and try again. <button type="button" className="cp-retry" onClick={retrySamples}>Retry</button></>
+                    : "No matching records in this preview. This does not establish whether the full dataset contains matching records. Widen a filter, or clear them."}
             </p>
           )}
 
@@ -1275,18 +1291,17 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
             {/* What a "sample record" is, which the caption counts and cannot
                 explain. The commonest wrong reading of this page is that an
                 entity absent from a result is absent from the collection. */}
-            {!atlas ? <Explain label="what these sample records are">
+            {!atlas ? <Explain label="what these example records are">
               <p>
-                <span className="cp-ex1__cap">This is a preview</span>
-                Each published table ships up to ten sample rows, and this viewer reads those.
-                Some ship fewer. A search that returns nothing may mean the collection holds
-                nothing, or that the handful of rows sampled from a million-row table did not
-                include it.
+                <span className="cp-ex1__cap">Example records</span>
+                Each collection shows up to ten example records from its dataset, and this
+                viewer reads those. A search that returns nothing may mean the collection holds
+                nothing, or that the ten records shown here do not include it.
                 </p>
               <p>
-                <span className="cp-ex1__cap">The release is the whole table</span>
-                Counts here are counts of sample records, never of the release. Every download
-                says so in its README, and the release itself carries the full table.
+                <span className="cp-ex1__cap">The dataset is the whole table</span>
+                Counts here are counts of the example records shown, never of the dataset. The
+                full dataset carries every observation.
                 </p>
             </Explain> : null}
             {!atlas && loading ? " · loading" : ""}
@@ -1321,6 +1336,7 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
               <button type="button" className="cp-ex__clear" onClick={() => write({ history: false })}>Hide superseded versions</button>
             ) : null}
             {registerStatus === "failed" ? <button type="button" className="cp-ex__clear" onClick={retryRegister}>Retry the register</button> : null}
+            {missing.length && rows.length ? <button type="button" className="cp-ex__clear" onClick={retrySamples}>Retry the unreachable previews</button> : null}
             </p>
             {/* HOW TO READ THE NUMBERS.
                 Three declarations the collection itself makes — what an
@@ -1345,6 +1361,7 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
                 {contract?.superseded ? <span><b>Versions</b> superseded ones are not shown</span> : null}
               </Legend>
             ) : null}
+            {single ? <PressReadingKey collectionId={single.entry.id} /> : null}
             <button
               type="button"
               className="cp-read__cedar"
@@ -1355,7 +1372,7 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
             >
               Ask Cedar <span aria-hidden="true">&#8594;</span>
             </button>
-            {single ? <WrittenFrom collectionId={single.entry.id} onMore={() => write({ about: true })} /> : null}
+            {single ? <WrittenFrom collectionId={single.entry.id} onMore={() => write({ about: true })} articles={articles} /> : null}
             {!atlas ? <span className="cp-ex__pages" title={`${PAGE_SIZE} records a page`}>
               <button type="button" className="cp-ex__clear" disabled={paged.page <= 1} onClick={() => write({ page: paged.page - 1 })} aria-label="Previous page">&#8249;</button>
               {/* Short, because this sits in a status bar that has to hold

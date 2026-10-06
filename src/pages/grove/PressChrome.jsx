@@ -5,13 +5,14 @@
 // three copies of a footer drift three ways — which is exactly what had
 // happened: every page carried its own two-link version, so where the footer
 // took you depended on where you already were.
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { Link, NavLink } from "react-router";
 
 import { useAuth } from "../../context/useAuth";
-import { contactHref } from "../../features/grove/appLink.js";
+import { CONTACT_EMAIL, contactHref } from "../../features/grove/appLink.js";
 import { useNarrow } from "../../features/grove/useNarrow.js";
 import { canReadCedarPress } from "../../features/grove/pressAccess";
+import { useDismissable } from "./useDismissable.jsx";
 
 /**
  * The reader's initials, from the address. Two letters where the address
@@ -71,36 +72,6 @@ const NAV = [
  * all open onto a paywall reads as a broken site rather than a map. The
  * wordmark still leads home.
  */
-/**
- * A disclosure that closes on Escape and on a click outside it.
- *
- * Both menus in the masthead are native `<details>`: they work with no state,
- * a keyboard reaches them, and a screen reader announces them. What details
- * does not do on its own is close when the reader looks elsewhere, which is
- * what a menu in a header has to do.
- */
-function useDismissable() {
-  const ref = useRef(null);
-  useEffect(() => {
-    const node = ref.current;
-    if (!node) return undefined;
-    const close = (refocus) => {
-      if (!node.open) return;
-      node.open = false;
-      if (refocus) node.querySelector("summary")?.focus();
-    };
-    const onKey = (event) => { if (event.key === "Escape") close(true); };
-    const onDown = (event) => { if (!node.contains(event.target)) close(false); };
-    node.addEventListener("keydown", onKey);
-    document.addEventListener("pointerdown", onDown);
-    return () => {
-      node.removeEventListener("keydown", onKey);
-      document.removeEventListener("pointerdown", onDown);
-    };
-  }, []);
-  return ref;
-}
-
 /**
  * Who is signed in, as one control on the masthead's own row.
  *
@@ -168,10 +139,12 @@ function SectionMenu({ section }) {
   );
 }
 
+// New wording again (owner, 2026-10-06), so a new key: a reader who closed
+// the earlier note sees this one once.
 // A new key for new wording (owner, 2026-09-27): a reader who closed the old
 // "Private preview" note sees the early-access one once. The old key,
 // "cedar-press-private-preview-notice", is no longer read.
-export const PREVIEW_NOTICE_KEY = "cedar-press-early-access-notice";
+export const PREVIEW_NOTICE_KEY = "cedar-press-early-access-soon-notice";
 
 function previewNoticeIsDismissed() {
   try {
@@ -216,9 +189,10 @@ export function PressPreviewNotice() {
   return (
     <aside className="cp-preview" data-testid="press-preview-note" aria-label="Early access">
       <p className="cp-preview__copy">
-        <b>Early access.</b> Cedar Press is open early to attendees of the Great Lakes Tribal
-        Economic Summit ahead of its public launch. Need a login?{" "}
-        <a href="mailto:elijah.moreno@lumecon.ai?subject=Cedar%20Press%20preview%20access">elijah.moreno@lumecon.ai</a>
+        {/* Owner copy, 2026-10-06: the team address, not a person's. */}
+        <b>Early access</b> is available soon for attendees of the Great Lakes Tribal Economic
+        Summit. Questions?{" "}
+        <a href={contactHref("Cedar Press early access")}>{CONTACT_EMAIL}</a>
       </p>
       {/* A CLOSE CONTROL THAT LOOKS LIKE ONE.
           This was a pill reading "Continue →", which is the language of a

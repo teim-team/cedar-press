@@ -149,12 +149,19 @@ def fnum(v):
         return 0.0
 
 
-def qc(amt: float, pamt: float):
-    """The dollar rule, applied identically everywhere. Returns (ratio_str, flag)."""
-    if pamt > 0:
-        ratio = amt / pamt
-        return f"{ratio:.4f}", ("yes" if amt > pamt else "")
-    return "", ""
+def qc(amt, pamt):
+    """The dollar rule, applied identically everywhere. Returns (ratio_str, flag).
+
+    Delegates to `41_match_subawards_to_ledger.subaward_money_fence`, the one
+    place the rule is written (and the rule Lumecon-data's release projection
+    applies): yes/no whenever both amounts are reported, ratio to four
+    decimals when the prime is positive, blank ratio under a non-positive
+    prime, and both blank only when an amount is not reported. Pass the raw
+    reported values, not `fnum()` output: `fnum` turns a blank into 0.0, which
+    would read an unreported prime as a reported zero.
+    """
+    flag, ratio, _note = m41.subaward_money_fence(amt, pamt)
+    return ratio, flag
 
 
 def make_row(r: dict, kind: str, chunk: str, by_uei: dict,
@@ -170,9 +177,7 @@ def make_row(r: dict, kind: str, chunk: str, by_uei: dict,
 
     direction = DIR_BOTH if (pl and sl) else (DIR_B if sl else DIR_A)
     fy = (r.get("subaward_action_date_fiscal_year") or "").strip()
-    amt = fnum(r.get("subaward_amount"))
-    pamt = fnum(r.get("prime_award_amount"))
-    ratio, exceeds = qc(amt, pamt)
+    ratio, exceeds = qc(r.get("subaward_amount"), r.get("prime_award_amount"))
     # FSRS did not exist before FFATA (2010). Rows dated earlier were all FILED in 2010+,
     # so the ACTION DATE is a filer typo, not early reporting. Flagged, never deleted.
     pre_ffata = "yes" if (fy.isdigit() and int(fy) < 2010) else ""

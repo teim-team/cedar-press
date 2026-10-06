@@ -79,6 +79,7 @@ import { COLLECTION_ICONS } from "./pressCollectionIcons";
 import { PressCedarFab } from "./PressCedarFab";
 import { PressFoot, PressMast } from "./PressChrome";
 import PressGate from "./PressGate";
+import SourceCitation from "./SourceCitation.jsx";
 
 const money = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
 
@@ -208,7 +209,7 @@ function CopyButton({ text, label, done = "Copied", className = "cp-rec__copy" }
 /** Previous and next in the reader's own ordering, and where they are in it. */
 function Walk({ place, from, className }) {
   if (place.at < 0) return null;
-  const href = (item) => recordHref({ key: item.key, recordId: item.recordId, index: item.index, from });
+  const href = (item) => recordHref({ key: item.key, recordId: item.recordId, recordType: item.recordType, index: item.index, from });
   return (
     <nav className={className} aria-label="Records in this result">
       {place.previous ? (
@@ -249,7 +250,7 @@ export default function CedarPressRecord() {
   const table = collection?.tables.find((t) => t.key === asked.key) ?? null;
   const open = collection ? collection.open : false;
   const tables = useMemo(() => (table && open ? [table] : []), [table, open]);
-  const { rows, missing, loading: samplesLoading } = useSampleRows(tables, register);
+  const { rows, missing, loading: samplesLoading, retry: retrySamples } = useSampleRows(tables, register);
 
   // The reader's own ordering: the cut they came from, applied to this
   // table's rows. A cut naming other collections narrows nothing here — the
@@ -386,9 +387,11 @@ export default function CedarPressRecord() {
             <h1 className="cp-rec__name">
               {samplesLoading || (!rows.length && !missing.length && open && table)
                 ? "Opening the record…"
-                : "That record is not in this preview."}
+                : missing.length
+                  ? "The published sample could not be loaded."
+                  : "That record is not in this preview."}
             </h1>
-            <p>
+            <p role="status">
               {!asked.key || !collection
                 ? "This link does not name a collection Cedar Press carries."
                 : !open
@@ -397,7 +400,9 @@ export default function CedarPressRecord() {
                     ? "This link names a table that has no published preview."
                     : samplesLoading
                       ? "Reading the published sample."
-                      : "Each published table ships up to ten sample rows, and this viewer reads those. A record that is in the release may not be in the sample."}
+                      : missing.length
+                        ? <>Check the connection and try again. <button type="button" className="cp-retry" onClick={retrySamples}>Retry</button></>
+                        : "Each published table ships up to ten sample rows, and this viewer reads those. A record that is in the release may not be in the sample."}
             </p>
           </section>
         ) : (
@@ -581,23 +586,15 @@ export default function CedarPressRecord() {
               <div className="cp-rec__blockhead"><h2>Source and evidence</h2></div>
               <div className="cp-rec__provgrid">
                 <div>
-                  <span className="cp-rec__cap">The document</span>
-                  {item.source ? (
-                    <a href={item.source} target="_blank" rel="noreferrer">Open the source record <span aria-hidden="true">&#8599;</span></a>
-                  ) : (
-                    <span className="cp-rec__fine" data-testid="record-no-link">
-                      {/* A table that names a source column, or builds its
-                          link from the row's identifiers, does carry
-                          per-record links; this row simply has none. */}
-                      {declaresSource(contract)
-                        ? "No link was recorded for this row."
-                        : <>This row&rsquo;s table carries no per-record link.</>}
-                    </span>
-                  )}
+                  <span className="cp-rec__cap">Publisher and source record</span>
+                  <SourceCitation source={item.sourceDetails} />
+                  {!item.source && <span className="cp-rec__fine" data-testid="record-no-link">
+                    {declaresSource(contract) ? "No link was recorded for this row." : <>This row&rsquo;s table carries no per-record link.</>}
+                  </span>}
                   <span className="cp-rec__fine">
                     {entry?.short ?? collectionId}
-                    {/* `cadence` is already a sentence ("Updated weekly"). */}
-                    {release ? ` · release ${release.version} · ${release.cadence.toLowerCase()}` : ""}
+                    {/* `cadence` is already a sentence ("Reviewed on a weekly schedule"). */}
+                    {release ? ` · updated ${release.updated} · ${release.cadence.toLowerCase()}` : ""}
                   </span>
                 </div>
                 <div>

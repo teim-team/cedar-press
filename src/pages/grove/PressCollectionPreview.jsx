@@ -6,8 +6,8 @@
 // THE RECORDS ARE THE PICTURE
 // A marketing page stages a screenshot of the product beside its promise.
 // Cedar Press has something better than a screenshot: the product is rows,
-// and ten real rows of every flagship table already ship with the site
-// (public/data/cedar/samples/*__10.csv), public by design — see
+// and the real sample rows of every collection's table already ship with the site
+// (public/data/cedar/downloads/<id>.csv, the customer tables), public by design — see
 // pressDemoGate.js: nothing in the bundle is confidential, and the samples
 // are the whole of what a visitor can reach. So the pane shows six of them,
 // through the same contracts and the same row shape the viewer on /data
@@ -20,21 +20,26 @@
 // it is given. The action names the way in at Tribal Business News for the
 // shelf the collection sits on, never a route past the paywall.
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { LAUNCH_COLLECTION } from "../../features/grove/collection";
+import { LAUNCH_COLLECTION, collectionCedarFacts, countNote } from "../../features/grove/collection";
+import { codebookLoaded, loadCodebook } from "../../features/grove/codebook.js";
+import { fetchSampleText, onBackOnline } from "../../features/grove/sampleFetch.js";
 import { contractFor, exploreTables, parseCsv, universalRows } from "../../features/grove/explore.js";
 import { columnPlan } from "../../features/grove/recordColumns.js";
-import { tableLabel } from "../../features/grove/readerValues.js";
+import { showcaseItems } from "../../features/grove/showcase.js";
+import { enrichSample } from "../../features/grove/exampleEnrichment.js";
+import { LANDING_EXAMPLES, landingSample } from "../../features/grove/landingExamples.js";
 import { Cards, Rows } from "./PressRecordTable.jsx";
 import { useNarrow } from "../../features/grove/useNarrow.js";
 import { coverageLabel } from "../../features/grove/pressAccess";
-import { TBN_PLANS_URL } from "../../features/grove/pressArticles";
+import { EARLY_ACCESS_HREF } from "../../features/grove/appLink.js";
 import { freshnessLine } from "../../features/grove/pressReleases";
 import { recordStructure } from "../../features/grove/pressRecordStructure.js";
 import { EVENT, track } from "../../features/grove/telemetry.js";
 import { RecordStructureCap, RecordStructureTable } from "./PressRecordStructure.jsx";
 import { TierName } from "./TierName";
+import PressReadingKey from "./PressReadingKey.jsx";
 
 /**
  * How many of the ten sample records the pane shows.
@@ -46,7 +51,17 @@ import { TierName } from "./TierName";
  */
 const PANE_ROWS = 10;
 
-const ROWS_LABEL = Object.fromEntries(LAUNCH_COLLECTION.map((entry) => [entry.id, entry.rowsLabel]));
+/** Records shown on a phone before "Show more examples". */
+const PHONE_ROWS = 3;
+
+/** Observations in each collection's dataset, by id. A collection whose count
+ * is not shown (COUNT_NOT_SHOWN, collection.js) has an empty label and no
+ * entry here, so its caption counts only the example records. */
+const DATASET_ROWS = Object.fromEntries(
+  LAUNCH_COLLECTION.filter((entry) => entry.rowsLabel)
+    .map((entry) => [entry.id, collectionCedarFacts(entry.id)?.n_rows ?? null]),
+);
+
 const SOURCES = Object.fromEntries(LAUNCH_COLLECTION.map((entry) => [entry.id, entry.sources]));
 
 /**
@@ -79,31 +94,47 @@ function usePreviewSample(collectionId) {
     // preview is pending and show what the release holds.
     return tables.find((t) => contractFor(t.key)?.entity_name || contractFor(t.key)?.entity_uid) ?? null;
   }, [collectionId]);
+  // ONLY WHAT ARRIVED IS KEPT. A failure (an error, a non-200, no answer
+  // within the sample deadline, or the codebook the table's labels come
+  // from not loading) is shown with a Retry and cleared when the browser
+  // says it is back online; it used to be kept like a success, so one
+  // dropped request left the pane failed until a reload (sampleFetch.js).
+  const [failed, setFailed] = useState(() => new Set());
   useEffect(() => {
-    if (!table || loaded.has(table.path) || pending.current.has(table.path)) return;
+    if (!table || loaded.has(table.path) || failed.has(table.path) || pending.current.has(table.path)) return;
     pending.current.add(table.path);
-    fetch(table.path)
-      .then(async (r) => (r.ok ? parseCsv(await r.text()) : null))
-      .catch(() => null)
-      .then((parsed) => {
+    // The rows are drawn by the product's own table, which reads the
+    // codebook's labels; the two arrive together.
+    Promise.all([fetchSampleText(table.path, { sha256: table.sha256 }).then((text) => enrichSample(collectionId, landingSample(collectionId, parseCsv(text)))), loadCodebook()]).then(
+      ([parsed]) => {
         pending.current.delete(table.path);
         setLoaded((prev) => (prev.has(table.path) ? prev : new Map(prev).set(table.path, parsed)));
-      });
-  }, [table, loaded]);
-  if (!table) return { status: "none", table: null, parsed: null };
-  if (!loaded.has(table.path)) return { status: "loading", table, parsed: null };
-  const parsed = loaded.get(table.path);
-  return { status: parsed ? "ok" : "failed", table, parsed };
+      },
+      () => {
+        pending.current.delete(table.path);
+        setFailed((prev) => (prev.has(table.path) ? prev : new Set(prev).add(table.path)));
+      },
+    );
+  }, [table, loaded, failed, collectionId]);
+  const retry = useCallback(() => setFailed((prev) => (prev.size ? new Set() : prev)), []);
+  useEffect(() => onBackOnline(retry), [retry]);
+  if (!table) return { status: "none", table: null, parsed: null, retry };
+  if (failed.has(table.path)) return { status: "failed", table, parsed: null, retry };
+  if (!loaded.has(table.path) || !codebookLoaded()) return { status: "loading", table, parsed: null, retry };
+  return { status: "ok", table, parsed: loaded.get(table.path), retry };
 }
 
 export default function CollectionPreview({ entry, tier, register }) {
-  const { status, table, parsed } = usePreviewSample(entry.id);
+  const { status, table, parsed, retry } = usePreviewSample(entry.id);
   // A phone gets the same list the product gives a phone, not a table of
   // the collection's own columns squeezed into 320px.
   const narrow = useNarrow();
+  // On a phone the pane opens on a few records and offers the rest: all of
+  // them stood ~1,700px tall at 390px, burying everything under the hero.
+  const [expanded, setExpanded] = useState(false);
   const items = useMemo(
-    () => (parsed ? universalRows(table.key, parsed.rows, register).slice(0, PANE_ROWS) : []),
-    [parsed, table, register],
+    () => (parsed ? showcaseItems(entry.id, universalRows(table.key, parsed.rows, register)).slice(0, PANE_ROWS) : []),
+    [parsed, table, register, entry.id],
   );
   const showAmount = items.some((item) => item.amount != null);
   // The columns the product would open this collection on, off the same
@@ -111,9 +142,15 @@ export default function CollectionPreview({ entry, tier, register }) {
   // universe here, exactly as the release's is on /data.
   const contract = table ? contractFor(table.key) : null;
   const entityColumn = contract ? (contract.entity_name ?? contract.entity_uid ?? null) : null;
-  const { defaults, all } = columnPlan(table?.key ?? null, contract, parsed?.columns ?? []);
-  const shownColumns = defaults.length ? defaults : all;
-  const rowsLabel = ROWS_LABEL[entry.id];
+  // Planned once the sample is in hand: the plan reads the codebook, which
+  // arrives with it (usePreviewSample).
+  const { defaults, all } = status === "ok"
+    ? columnPlan(table?.key ?? null, contract, parsed?.columns ?? [], parsed?.rows ?? [])
+    : { defaults: [], all: [] };
+  // A curated landing set may name the columns it is shown on
+  // (landingExamples.js), where the collection's own opening view leaves out
+  // who the record is about.
+  const shownColumns = LANDING_EXAMPLES[entry.id]?.columns ?? (defaults.length ? defaults : all);
   const fresh = freshnessLine(entry.id);
   // Presented by its record structure (Foundation & Corporate Giving, PLOT):
   // the frame shows what each record holds, where another collection shows
@@ -125,14 +162,13 @@ export default function CollectionPreview({ entry, tier, register }) {
       <div className="cp-pane__head">
         <div className="cp-pane__id">
           <span className="cp-pane__cap">Included in <TierName name={tier.name} /></span>
-          <h3 className="cp-pane__name"><TierName name={entry.name} /></h3>
+          <h2 className="cp-pane__name"><TierName name={entry.name} /></h2>
         </div>
         <p className="cp-pane__facts">
           {coverage ? <span>{coverage}</span> : null}
-          {rowsLabel ? <span>{rowsLabel}</span> : null}
           {fresh ? <span>{fresh}</span> : null}
         </p>
-        <p className="cp-pane__blurb">{entry.blurb}</p>
+        <p className="cp-pane__blurb" title={entry.blurb}>{entry.blurb}</p>
       </div>
 
       {structure ? (
@@ -145,15 +181,23 @@ export default function CollectionPreview({ entry, tier, register }) {
       ) : status === "ok" && items.length ? (
         <>
           <p className="cp-pane__tablecap">
+            {/* One clean dataset (owner, 2026-10-06): no table name, just
+                what the rows are and how many observations the dataset
+                holds, where a count is shown for it. */}
+            <span>Example records</span>
             <span>
-              {tableLabel(table)}
-              {table.flagship ? null : <em> · supporting table</em>}
-            </span>
-            <span>
-              {items.length} of {parsed.rows.length} sample records
-              {table.rows ? ` · ${table.rows.toLocaleString("en-US")} in the release` : ""}
+              {DATASET_ROWS[entry.id]
+                ? `${items.length} of ${DATASET_ROWS[entry.id].toLocaleString("en-US")} observations`
+                : `${items.length} example records`}
             </span>
           </p>
+          {/* A count made of several record kinds says which (2026-10-06):
+              PLOT's examples are tracts and parcels while its count also
+              holds permits; the Federal Register mixes documents and
+              participants. From the manifest's record types, never typed. */}
+          {DATASET_ROWS[entry.id] && countNote(entry.id) ? (
+            <p className="cp-pane__countnote" data-testid="pane-count-note" style={{ margin: 0, padding: "0.45rem 1.4rem", fontSize: "0.8rem", lineHeight: 1.45, color: "var(--door-ink-3)" }}>{countNote(entry.id)}</p>
+          ) : null}
           {/* THE SAME TABLE, NOT A TABLE THAT LOOKS LIKE IT.
               This pane drew four columns of its own naming — Entity, Date,
               Record, Amount — while the product opened on the collection's
@@ -163,7 +207,22 @@ export default function CollectionPreview({ entry, tier, register }) {
               same `columnPlan`, the same cell rules, read-only. */}
           <div className="cp-pane__records">
             {narrow ? (
-              <Cards readOnly items={items} onActive={() => {}} openRecord={null} />
+              <div className="cp-pane__cardlist">
+                <div id={`cp-pane-records-${entry.id}`}>
+                  <Cards readOnly items={expanded ? items : items.slice(0, PHONE_ROWS)} onActive={() => {}} openRecord={null} />
+                </div>
+                {items.length > PHONE_ROWS ? (
+                  <button
+                    type="button"
+                    className="cp-pane__more"
+                    aria-expanded={expanded}
+                    aria-controls={`cp-pane-records-${entry.id}`}
+                    onClick={() => setExpanded((open) => !open)}
+                  >
+                    {expanded ? "Show fewer examples" : `Show more examples (${items.length - PHONE_ROWS})`}
+                  </button>
+                ) : null}
+              </div>
             ) : (
             <Rows
               readOnly
@@ -182,20 +241,24 @@ export default function CollectionPreview({ entry, tier, register }) {
           </div>
         </>
       ) : status === "loading" ? (
-        <p className="cp-pane__empty" aria-busy="true">Reading the sample…</p>
+        // One live region across loading and failure: React keeps this
+        // element and swaps its class and content, so a screen reader hears
+        // "could not be read" when the read fails rather than nothing.
+        <div className="cp-pane__empty" role="status" aria-busy="true">Reading the sample…</div>
       ) : (
-        <div className="cp-pane__pending">
+        <div className="cp-pane__pending" role="status">
           <span className="cp-pane__pendingcap">
-            {status === "none" ? "Preview pending" : "The sample could not be read"}
+            {status === "none" ? "Records coming soon" : "The records could not be loaded"}
           </span>
           {status === "none" ? (
             <p>
-              The ten-row sample of this collection&rsquo;s main table was produced with the
-              current release and is not on the site yet, so there is nothing here to show you
-              that would be real. The release itself ships {rowsLabel ? <b>{rowsLabel}</b> : "in full"}.
+              A public sample is not available for this collection yet.
             </p>
           ) : (
-            <p>The sample file did not load. The release is unaffected.</p>
+            <p>
+              The records could not be loaded. Check the connection and try again.{" "}
+              <button type="button" className="cp-retry" onClick={retry}>Retry</button>
+            </p>
           )}
           {SOURCES[entry.id] ? (
             <p className="cp-pane__sources">
@@ -210,20 +273,20 @@ export default function CollectionPreview({ entry, tier, register }) {
           off the door on 2026-09-04, and it still lives on /data. */}
       {!structure && status === "ok" && table && !table.flagship ? (
         <p className="cp-pane__note">
-          This collection&rsquo;s main table ships with the release; its sample is not published
-          on the site yet, so the preview shows a supporting table from the same release.
+          This preview uses a supporting table. Its records may have a different grain from
+          the collection&rsquo;s main table.
         </p>
       ) : null}
+      {status === "ok" ? <PressReadingKey collectionId={entry.id} /> : null}
       <div className="cp-pane__foot">
         <p className="cp-pane__acts">
           <a
             className="cp-pane__act"
-            href={TBN_PLANS_URL}
-            target="_blank"
-            rel="noreferrer"
+            href={EARLY_ACCESS_HREF}
             onClick={() => track(EVENT.upgradeOpened, { collection: entry.id, shelf: entry.shelf })}
           >
-            Get <TierName name={tier.name} /> <span aria-hidden="true">&#8594;</span>
+            {/* Enrollment is not open yet (2026-10-06): early access, not a purchase. */}
+            Request early access to <TierName name={tier.name} /> <span aria-hidden="true">&#8594;</span>
           </a>
           <button
             type="button"

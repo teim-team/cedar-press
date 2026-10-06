@@ -17,7 +17,7 @@ test", and there was no parity test either.
 
 This is the check, in the same shape as ``test_collection.py``: it executes
 BOTH implementations -- Python in-process, JavaScript through
-``scripts/dump-access.mjs`` -- and compares what they answer.
+``scripts/dump.mjs --kind access`` -- and compares what they answer.
 
 TWO QUESTIONS, COMPARED SEPARATELY
     "Is this plan sold the Cedar Press page?" and "which collections does this
@@ -52,7 +52,7 @@ from cedar_press import collections as launch
 from cedar_press import press_catalog, repository
 
 _REPO = Path(__file__).resolve().parents[2]
-_DUMP = _REPO / "scripts" / "dump-access.mjs"
+_DUMP = _REPO / "scripts" / "dump.mjs"
 
 
 def _javascript() -> dict:
@@ -61,7 +61,7 @@ def _javascript() -> dict:
     if node is None:
         raise AssertionError("node is not on PATH")
     result = subprocess.run(  # noqa: S603
-        [node, str(_DUMP)],
+        [node, str(_DUMP), "--kind", "access"],
         capture_output=True,
         text=True,
         encoding="utf-8",
@@ -70,7 +70,7 @@ def _javascript() -> dict:
     )
     if result.returncode != 0:
         raise AssertionError(
-            f"scripts/dump-access.mjs exited {result.returncode}:\n{result.stderr}"
+            f"scripts/dump.mjs --kind access exited {result.returncode}:\n{result.stderr}"
         )
     return json.loads(result.stdout)
 
@@ -340,15 +340,13 @@ class TestGroveDivergence(unittest.TestCase):
         cls.js = _javascript()
 
     def test_the_customer_shelves_are_the_launch_collection(self) -> None:
-        # Six and six, the twelve the owner ruled on 2026-09-02. Stated as the
-        # two shelves rather than as a total, because the total is what a
-        # Grove-shelf collection would silently join.
+        # Giving and PLOT complete the two seven-collection Press shelves.
         by_shelf: dict[str, list[str]] = {}
         for dataset in launch.LAUNCH_COLLECTION:
             by_shelf.setdefault(dataset.shelf, []).append(dataset.id)
         self.assertEqual(set(by_shelf), {"standard", "pro"})
-        self.assertEqual(len(by_shelf["standard"]), 6)
-        self.assertEqual(len(by_shelf["pro"]), 6)
+        self.assertEqual(len(by_shelf["standard"]), 7)
+        self.assertEqual(len(by_shelf["pro"]), 7)
 
     def test_the_catalog_is_exactly_the_storefront(self) -> None:
         # Fourteen in the catalog, seven and seven, all on the storefront. The
@@ -365,7 +363,7 @@ class TestGroveDivergence(unittest.TestCase):
         storefront = sorted(catalog["standard"] + catalog["pro"])
         self.assertEqual(len(storefront), 14)
         released = sorted(d.id for d in launch.LAUNCH_COLLECTION)
-        self.assertEqual(self.js["structureOnly"], ["foundation-corporate-giving", "plot"])
+        self.assertEqual(self.js["structureOnly"], [])
         self.assertEqual(sorted(set(storefront) - set(released)), self.js["structureOnly"])
         self.assertEqual(sorted(set(storefront) - set(self.js["structureOnly"])), released)
 
@@ -385,7 +383,7 @@ class TestGroveDivergence(unittest.TestCase):
             for entry in launch.EXCLUDED_COLLECTIONS
             if entry["shelf"] == "grove"
         }
-        self.assertEqual(workspace_grove, {"gaming"})
+        self.assertEqual(workspace_grove, {"gaming", "infrastructure"})
         for entry in launch.EXCLUDED_COLLECTIONS:
             with self.subTest(excluded=entry["id"]):
                 self.assertNotIn(entry["id"], in_catalog)
@@ -404,7 +402,9 @@ class TestGroveDivergence(unittest.TestCase):
         # collection and collapsing them would make the Press/Grove boundary
         # unreadable.
         excluded = {entry["id"]: entry for entry in launch.EXCLUDED_COLLECTIONS}
-        self.assertEqual(set(excluded), {"newsletters", "gaming", "_entity_layer"})
+        self.assertEqual(
+            set(excluded), {"newsletters", "gaming", "_entity_layer", "infrastructure"}
+        )
         self.assertEqual(
             {entry["shelf"] for entry in excluded.values()},
             {"standard", "grove", "infrastructure"},
@@ -412,11 +412,11 @@ class TestGroveDivergence(unittest.TestCase):
         for entry in excluded.values():
             with self.subTest(collection=entry["id"]):
                 self.assertTrue(entry["reason"].strip())
-        # Only one of the three is a Grove divergence. The other two are not
+        # Gaming and Native Infrastructure belong to Grove. The other two are not
         # in Cedar Grove's favour and must not be counted as though they were.
         self.assertEqual(
             [e["id"] for e in excluded.values() if e["shelf"] == "grove"],
-            ["gaming"],
+            ["gaming", "infrastructure"],
         )
 
     def test_the_two_implementations_agree_on_what_is_excluded(self) -> None:

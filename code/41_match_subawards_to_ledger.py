@@ -43,6 +43,7 @@ import sys
 import zipfile
 from collections import Counter, defaultdict
 from datetime import datetime, timezone
+from decimal import ROUND_HALF_EVEN, Decimal, InvalidOperation
 
 csv.field_size_limit(1 << 27)
 
@@ -194,7 +195,78 @@ OUT_COLS = [
     "prime_native_tribe_id", "prime_native_tier", "prime_native_entity_class",
     "sub_native_tribe_id", "sub_native_tier", "sub_native_entity_class",
     "population", "usaspending_permalink", "source_file", "fetched_date",
+    "research_note",
 ]
+
+# ---------------------------------------------------------- money fence
+# The one place the subaward-versus-prime rule is written. 45_promote_subawards
+# and 94_match_raw_subawards call it through `m41`, and Lumecon-data's release
+# projection (`press_candidates._subaward_money_fence`, branch
+# codex/convergence-packet-guard-20260928) applies the identical rule, so the
+# staged value and the released value agree cell for cell.
+#
+# Until 2026-10-02 this wrote `yes` only where the prime was positive AND
+# exceeded, and blank for every other case, although the dictionary defines the
+# flag as yes/no; a prime reported as 0.00 left the flag AND the ratio blank, so
+# a $3,299,182.00 subaward under a $0.00 prime (000375DB-0EC4-4293-B372-
+# 61CB6E8F9B8D) sat in the money fence unflagged. Blank now means exactly one
+# thing: an amount was not reported, and the note says which.
+RATIO_PLACES = Decimal("0.0001")
+
+
+def reported_amount(value):
+    """The exact reported dollar amount as a Decimal, or None when not reported.
+
+    Blank, None and non-numeric text are all 'not reported'; the caller's note
+    says so. A float is accepted (45/94 historically parsed amounts with
+    `float()`) through its shortest repr, so 0.1 stays 0.1, not 0.1000000000000000055.
+    """
+    if value is None:
+        return None
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, (int, float, Decimal)):
+        text = repr(value) if isinstance(value, float) else str(value)
+    else:
+        text = str(value).strip()
+    if not text:
+        return None
+    try:
+        amount = Decimal(text)
+    except InvalidOperation:
+        return None
+    return amount if amount.is_finite() else None
+
+
+def subaward_money_fence(subaward_amount, prime_award_amount):
+    """Return (exceeds_flag, ratio, note) from the row's own two reported amounts.
+
+    - both reported: flag is `yes` when subaward > prime, else `no`; ratio is
+      subaward / prime to four decimal places (ROUND_HALF_EVEN, as the release
+      projection quantizes it) when prime > 0, else blank (undefined, not
+      zero) with the reason in the note. A positive subaward over a prime
+      reported as 0.00 is therefore `yes` with a blank ratio.
+    - either not reported: flag and ratio blank, note names the missing amount.
+    The note is appended to the staged row's `research_note`.
+    """
+    sub = reported_amount(subaward_amount)
+    prime = reported_amount(prime_award_amount)
+    if sub is None or prime is None:
+        missing = [name for name, amount in (("subaward_amount", sub),
+                                             ("prime_award_amount", prime))
+                   if amount is None]
+        note = ("Subaward money fence not computable: " + " and ".join(missing)
+                + " not reported; subaward_exceeds_prime_flag and "
+                  "subaward_to_prime_ratio are left blank.")
+        return "", "", note
+    flag = "yes" if sub > prime else "no"
+    if prime > 0:
+        return flag, str((sub / prime).quantize(RATIO_PLACES, rounding=ROUND_HALF_EVEN)), ""
+    note = (f"Prime award amount is reported as {prime}; subaward_to_prime_ratio is "
+            "undefined and subaward_exceeds_prime_flag is " + flag
+            + (" because a positive subaward exceeds a non-positive reported prime."
+               if flag == "yes" else " because the reported subaward does not exceed it."))
+    return flag, "", note
 
 
 def get(r, *keys):
@@ -299,16 +371,12 @@ def main():
         # subcontracting-out league table on a single row. A subaward cannot exceed its
         # prime; ratio > 1 is a source defect. Flagged, never deleted, never silently
         # summed.
-        try:
-            pamt = float(r.get("prime_award_amount") or 0)
-        except (TypeError, ValueError):
-            pamt = 0.0
-        ratio = (amt / pamt) if pamt > 0 else ""
-        exceeds = "yes" if (pamt > 0 and amt > pamt) else ""
-        if exceeds:
+        exceeds, ratio, fence_note = subaward_money_fence(
+            r.get("subaward_amount"), r.get("prime_award_amount"))
+        if exceeds == "yes":
             qc_exceeds["n"] += 1
             qc_exceeds["usd"] += amt
-            if ratio != "" and ratio >= 10:
+            if ratio != "" and Decimal(ratio) >= 10:
                 qc_exceeds["n_ratio_ge_10"] += 1
 
         pm = by_uei.get(puei) if puei else None
@@ -387,8 +455,9 @@ def main():
                 "action_date_precedes_ffata_flag": "yes" if (fy and fy.isdigit()
                                                              and int(fy) < 2010) else "",
                 "prime_award_amount": r.get("prime_award_amount", ""),
-                "subaward_to_prime_ratio": (f"{ratio:.4f}" if ratio != "" else ""),
+                "subaward_to_prime_ratio": ratio,
                 "subaward_exceeds_prime_flag": exceeds,
+                "research_note": fence_note,
                 "prime_native_tribe_id": pm.get("tribe_id", "") if p_link else "",
                 "prime_native_tier": p_tier if p_link else "",
                 "prime_native_entity_class": pm.get("entity_class", "") if p_link else "",

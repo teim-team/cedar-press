@@ -140,7 +140,8 @@ import { STOREFRONT_CATALOG } from "./pressCatalog.js";
 import { DECLARED_CADENCE } from "./pressReleases.js";
 
 test("the maintenance story says weekly, human review, wider coverage and new collections", () => {
-  assert.match(MAINTENANCE.sentence, /weekly with human review/);
+  // A schedule, not a measured history (2026-10-06).
+  assert.match(MAINTENANCE.sentence, /on a weekly schedule with human review/);
   assert.match(MAINTENANCE.sentence, /expands their source coverage and useful fields over time/);
   assert.match(MAINTENANCE.sentence, /develops new collections/);
   assert.match(MAINTENANCE.goal, /exceptionally useful, well-documented data and tools for Indian Country/);
@@ -148,17 +149,20 @@ test("the maintenance story says weekly, human review, wider coverage and new co
     assert.doesNotMatch(line, /[—&]|\bimpact\b/i, line);
   }
   // No surface promises a different cadence.
-  for (const [id, cadence] of Object.entries(DECLARED_CADENCE)) assert.equal(cadence, "Updated weekly", id);
+  for (const [id, cadence] of Object.entries(DECLARED_CADENCE)) assert.equal(cadence, "Reviewed on a weekly schedule", id);
 });
 
-test("patents and credit ratings are enrichments within Cedar NEED, never collections of their own", () => {
+test("public NEED describes its reviewed cohort while restricted enrichments retain their subject and date", () => {
   assert.equal(STOREFRONT_CATALOG.length, 14);
   assert.ok(!STOREFRONT_CATALOG.some((entry) => /patent|rating/i.test(`${entry.id} ${entry.name}`)), "no standalone collection");
   const need = STOREFRONT_CATALOG.find((entry) => entry.id === "need");
-  assert.match(need.blurb, /Where records are available/);
-  assert.match(need.blurb, /patents, assigned or later acquired/);
-  assert.match(need.blurb, /dated credit ratings/);
-  assert.match(need.blurb, /each kept with the entity it concerns/);
+  // Owner, 2026-10-06: the paragraph says what NEED stands for and carries no
+  // draft wording; it still never claims the register is complete.
+  assert.match(need.blurb, /Native Entity Enterprise Dataset \(NEED\)/);
+  assert.doesNotMatch(need.blurb, /under review|cohort|preview|pending/i);
+  assert.doesNotMatch(need.blurb, /complete enterprise register|all enterprises verified/i);
+  const plot = STOREFRONT_CATALOG.find((entry) => entry.id === "plot");
+  assert.match(plot.blurb, /PLOT \(Parcel-Level Ownership and Transfers\)/);
   const all = Object.values(NEED_ENRICHMENTS).join(" ");
   assert.match(all, /where records are available/i);
   assert.match(all, /acquired patent is shown as acquired rather than as the entity's own invention/);

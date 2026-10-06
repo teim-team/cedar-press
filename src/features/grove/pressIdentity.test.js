@@ -76,20 +76,25 @@ test("the renaming targets are the ones the specification names", () => {
   assert.match(doc, /cedar_uid/, "the identifier standard no longer documents cedar_uid");
 });
 
-test("the withheld class is really withheld in the published register", () => {
+test("the individually owned class publishes by name in the published register (owner ruling 2026-10-02)", () => {
+  // Until 2026-10-02 every row of this class carried a null name and
+  // withheld_names counted them. The owner ruled that a firm is a business
+  // entity whatever it is named after, so the register now carries the name
+  // and the count reads 0; the count must still agree with the rows.
   const index = register.classes.findIndex((entry) => entry.code === WITHHELD_CLASS);
   assert.ok(index >= 0, `the register no longer holds the class "${WITHHELD_CLASS}"`);
   const rows = register.entities.filter((entity) => entity[2] === index);
   assert.ok(rows.length > 0, `the register holds no ${WITHHELD_CLASS} rows`);
   for (const [uid, name] of rows) {
-    assert.equal(name, null, `${uid} publishes a name the withholding rule says it should not`);
+    assert.ok(typeof name === "string" && name.trim(), `${uid} has no published name; the rule publishes this class`);
     assert.match(uid, /^CE-[0-9A-Z]{5}-[0-9A-Z]{2}$/, `${uid} is not a well-formed cedar_uid`);
   }
   assert.equal(
-    rows.length,
+    register.entities.filter((entity) => entity[1] === null).length,
     register.withheld_names,
-    "the register's withheld_names count disagrees with its own withheld rows",
+    "the register's withheld_names count disagrees with its own null-name rows",
   );
+  assert.equal(register.withheld_names, 0);
 });
 
 test("the shapes are the standard's, and the entity sample is a real uid", () => {
@@ -173,13 +178,15 @@ test("the coverage figures are the generated file's, to the digit", () => {
   assert.ok(pcts.length >= 10, `expected the per-dataset table, found ${pcts.length} rows`);
   assert.equal(Math.max(...pcts).toFixed(2) + "%", LINKAGE_COVERAGE.best.pct);
   assert.equal(Math.min(...pcts).toFixed(2) + "%", LINKAGE_COVERAGE.worst.pct);
-  // And the note the page renders has to carry both, not just the flattering
-  // one. Prose writes 100% where the table writes 100.00%, so compare values.
-  const inNote = new Set(
-    [...LINKAGE_COVERAGE.note.matchAll(/([\d.]+)%/g)].map((m) => Number(m[1])),
-  );
-  assert.ok(inNote.has(Number(LINKAGE_COVERAGE.best.pct.replace("%", ""))), "the note hides the best figure");
-  assert.ok(inNote.has(Number(LINKAGE_COVERAGE.worst.pct.replace("%", ""))), "the note hides the worst figure");
+  // The page no longer prints these figures (owner review, 2026-10-06: they
+  // were measured on thirteen collections and the shelf carries fourteen).
+  // It still has to name the spread rather than one flattering end: both the
+  // best-covered and the worst-covered collection stay in the note by name.
+  assert.match(LINKAGE_COVERAGE.note, /varies by collection/);
+  assert.ok(LINKAGE_COVERAGE.note.includes(LINKAGE_COVERAGE.worst.label), "the note hides the worst-covered collection");
+  assert.ok(!/\d/.test(LINKAGE_COVERAGE.note), "the note prints a dated figure again");
+  assert.ok(!/\d/.test(LINKAGE_COVERAGE.caveat), "the caveat prints a dated figure again");
+  assert.ok(!/thirteen|fourteen|built collections/i.test(LINKAGE_COVERAGE.note + LINKAGE_COVERAGE.caveat));
 });
 
 test("the business card states the exception rather than overclaiming", () => {
@@ -290,22 +297,12 @@ test("the unlinked split is derived from the generated table, not asserted", () 
     LINKAGE_COVERAGE.unresolved > LINKAGE_COVERAGE.structural,
     "most unlinked rows are now structural; the note says the opposite",
   );
-  // Every figure the note prints is one of these, and the remainder is named
-  // rather than absorbed — the whole point of the correction.
-  const comma = (n) => n.toLocaleString("en-US");
-  for (const key of ["unlinked", "measuredUnlinked", "structural", "unresolved", "unmeasured"]) {
-    assert.ok(
-      LINKAGE_COVERAGE.note.includes(comma(LINKAGE_COVERAGE[key])),
-      `the note does not print ${key}`,
-    );
-  }
-  assert.ok(
-    !LINKAGE_COVERAGE.note.includes(comma(unlinked - structural)),
-    "the note still prints the cross-product figure",
-  );
+  // The note prints none of these figures now, but it keeps the point the
+  // split proved: one low share means two different things. Both collections
+  // are named, and the page never calls the unlinked records deliberate.
   assert.ok(!/mostly deliberate|mostly intentional/i.test(LINKAGE_COVERAGE.note));
-  assert.ok(LINKAGE_COVERAGE.note.includes(LINKAGE_COVERAGE.mostlyStructural.share));
-  assert.ok(LINKAGE_COVERAGE.note.includes(LINKAGE_COVERAGE.mostlyUnresolved.share));
+  assert.ok(LINKAGE_COVERAGE.note.includes(LINKAGE_COVERAGE.mostlyStructural.label));
+  assert.ok(LINKAGE_COVERAGE.note.includes(LINKAGE_COVERAGE.mostlyUnresolved.label));
 });
 
 test("the prose keeps the brand lock", () => {

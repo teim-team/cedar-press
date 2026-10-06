@@ -28,13 +28,14 @@ import { contactHref } from "./appLink.js";
  * surface takes the sentence, the goal or the short label it needs.
  */
 export const MAINTENANCE = Object.freeze({
-  /** The whole commitment, in one sentence. */
+  /** The whole commitment, in one sentence. A schedule Cedar Press keeps,
+   *  not a measured update history (2026-10-06). */
   sentence:
-    "Cedar Press maintains its datasets weekly with human review, expands their source coverage and useful fields over time and develops new collections.",
+    "Cedar Press maintains its datasets on a weekly schedule with human review, expands their source coverage and useful fields over time and develops new collections.",
   /** Why: the goal the maintenance serves. */
   goal: "The aim is exceptionally useful, well-documented data and tools for Indian Country, well beyond filling in missing records.",
   /** The short form for a fact line. */
-  label: "Weekly, with human review",
+  label: "Weekly review schedule, with human review",
 });
 
 /**
@@ -62,7 +63,7 @@ export const EXPERTISE_DOMAINS = Object.freeze([
   "Federal funding, grants, loans and direct spending",
   "Natural resources",
   "Congressional legislation and voting",
-  "Federal advocacy, from lobbying disclosure to consultation and testimony",
+  "Registered federal lobbying disclosure",
   "Federal Register actions",
   "Tribal recognition",
   "NAGPRA",
@@ -107,7 +108,7 @@ export const EXPERTISE_STRIP = Object.freeze([
     label: "Policy and regulation",
     covers: Object.freeze([
       "Congressional legislation and voting",
-      "Federal advocacy, from lobbying disclosure to consultation and testimony",
+      "Registered federal lobbying disclosure",
       "Federal Register actions",
       "Tribal recognition",
       "NAGPRA",
@@ -239,12 +240,12 @@ export const BUILD_NEXT_STEPS = Object.freeze([
   Object.freeze({
     id: "release",
     label: "Release",
-    note: "Published with a version, a coverage span, its sources and what it does not contain.",
+    note: "Published with an update date, a coverage span, its sources and what it does not contain.",
   }),
   Object.freeze({
     id: "maintain",
     label: "Maintenance",
-    note: "Reviewed weekly by a person as sources update, organizations change and corrections arrive, with each change logged against a release and source coverage and useful fields added over time.",
+    note: "Reviewed by a person on a weekly schedule as sources update, organizations change and corrections arrive, with each change logged against a release and source coverage and useful fields added over time.",
   }),
 ]);
 
@@ -284,7 +285,7 @@ export const MAINTENANCE_TRACKED = Object.freeze([
 export const ECOSYSTEM_EXAMPLES = Object.freeze([
   "A transaction in Indian Country Deals can reveal a new owner, subsidiary or renamed enterprise, which corrects the enterprise structure, contracting and nonprofit records.",
   "A Federal Register notice can validate a recognition event, a regulatory action or a land-related development.",
-  "Advocacy records, from lobbying filings to consultations, docket comments and testimony, connect organizations to legislation, and bill histories and votes show what followed.",
+  "Lobbying disclosure filings connect organizations to the issues and bills they lobbied on, and bill histories and votes show what followed.",
   "A nation's own enterprise register or audited filing names the subsidiaries the federal record files under unrelated names.",
   "Patent records and rating-agency announcements add to an enterprise's Cedar NEED profile where records are available, each kept with the specific entity it concerns and its date.",
   "Federal funding and contracting records add economic activity to an entity profile.",

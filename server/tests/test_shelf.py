@@ -415,7 +415,7 @@ class TestUnsupportedTiersReachNothing(unittest.TestCase):
         Codex, PR #41. The
         client's half is
         ``test_access.py::TestNothingTheClientOpensIsRefused``, which runs
-        ``canOpenDataset`` through ``scripts/dump-access.mjs`` and holds both
+        ``canOpenDataset`` through ``scripts/dump.mjs --kind access`` and holds both
         directions of the same rule. Neither half subsumes the other: this one
         needs no ``node`` and covers the tiers ``shelf.py`` accepts; that one
         covers the collection this page cannot show.
@@ -452,10 +452,13 @@ class TestTheShelfStatesCoverage(unittest.TestCase):
                 with self.subTest(dataset=entry.id):
                     if coverage["kind"] == "series":
                         self.assertEqual(entry.coverage, f"{coverage['from']} to present")
-                    else:
+                    elif coverage["kind"] == "roster":
                         self.assertEqual(
                             entry.coverage, f"Current roster, captured {coverage['captured']}"
                         )
+                    else:
+                        self.assertEqual(coverage["kind"], "observations")
+                        self.assertEqual(entry.coverage, "Source-dated observations")
                     self.assertNotEqual(entry.coverage, "Coverage varies")
 
     def test_each_storefront_band_reaches_back_to_its_deepest_series(self) -> None:

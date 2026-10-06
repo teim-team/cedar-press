@@ -172,13 +172,17 @@ NEVER = ("owner_name_raw", "email", "phone", "home_address", "personal_email",
 # their parents. EMMA/MSRB - the third-party licensor the ruling explicitly
 # does not reach - has no rows anywhere in data/clean, and must not acquire any
 # through this list.
-GATES = {"publishable": {"Y", "y", "1", "true", "TRUE", ""},
-         "source_terms_status": {"SILENT", "TERMS_STATED_NO_REUSE_RESTRICTION",
-                                 # released 2026-09-02, see above
-                                 "TERMS_STATED_RESTRICTIVE",
-                                 "NO_TERMS_PAGE_SERVED",
-                                 "TERMS_STATED_COPYRIGHT_ONLY",
-                                 ""}}
+# OWNER RULING 2026-10-04 (Elijah Moreno): Lumecon decides what is blocked.
+# The only hold is a specific record flagged as attributed to the wrong
+# entity; records in the database have already been reviewed and sourced and
+# are not held. Attribution review is an ongoing process, not a standing hold.
+# Agents do not impose publication holds.
+#
+# `publishable` (a permission/consent flag) and `source_terms_status` were row
+# gates here until this ruling. Neither is a misattribution flag, so neither
+# withholds a row any more. The mapping stays (empty) because 770's `keep()`
+# and `row_ok()` iterate it.
+GATES: dict = {}
 
 # ---------------------------------------------------------------------------
 # ADJUDICATION STATES - THE DENY-BY-DEFAULT PUBLICATION POLICY  (CP-002)
@@ -237,8 +241,9 @@ BLOCKED_STATES = {
     # openly-labelled candidate - and a candidate that says it is a candidate
     # is a finding, not a leak.
     "disposition": {
-        "NATIVE_PROPOSED_AWAITING_OWNER_RULING": WITHHOLD,
-        "CONFLICT_EXCLUDED_AND_RULED_NATIVE": WITHHOLD,
+        # Owner ruling 2026-10-04: pending review and contested are not holds.
+        "NATIVE_PROPOSED_AWAITING_OWNER_RULING": FLAG,
+        "CONFLICT_EXCLUDED_AND_RULED_NATIVE": FLAG,
         "NATIVE_VERIFIED_STRICT": PUBLISH,
         "NATIVE_RULED_VERIFIED": PUBLISH,
         "EXCLUDED_PRIOR_RULING": FLAG,
@@ -265,8 +270,11 @@ BLOCKED_STATES = {
     # otherwise WITHHOLD 297 real filings instead of masking their keys.
     "key_review_disposition": {
         "SUPPORTED": PUBLISH,
-        "HELD_STATE_DISAGREES": MASK,
-        "REDIRECT_PROPOSED": MASK,
+        # Owner ruling 2026-10-04: a held or proposed key is not a hold; the
+        # two REFUSED_* values are keys ruled to be the wrong entity, so they
+        # remain the misattribution mask.
+        "HELD_STATE_DISAGREES": FLAG,
+        "REDIRECT_PROPOSED": FLAG,
         "REFUSED_GENERIC_TOKEN_ONLY": MASK,
         "REFUSED_PLACE_NAME_IS_THE_ADDRESS": MASK,
     },
@@ -302,9 +310,9 @@ BLOCKED_STATES = {
         "RULED_TIER_UNSTATED": FLAG,
         "RULED_NOT_NATIVE": MASK,
         "RULED_CLASS_ONLY": MASK,
-        "RULED_HOLD": MASK,
+        "RULED_HOLD": FLAG,              # owner ruling 2026-10-04: no holds
         "RULED_NAME_KEY_ONLY_NOT_ATTRIBUTED": MASK,
-        "RULING_CONFLICT": MASK,
+        "RULING_CONFLICT": FLAG,         # contested is not a hold (2026-10-04)
         "RULED_OWNER_NOT_IN_SPINE": FLAG,
         "RULED_TIER_C_NOT_ATTRIBUTED": MASK,
     },
@@ -324,8 +332,21 @@ BLOCKED_STATES = {
     "identifier_ruling_review": {
         "KEEP": PUBLISH,
         "REPOINTED_BY_1079": PUBLISH,
-        "HOLD": MASK,
+        "HOLD": FLAG,                    # owner ruling 2026-10-04: no holds
         "WITHDRAWN_BY_1079": MASK,
+    },
+    # -- need -----------------------------------------------------------------
+    # The owner's one legitimate hold (2026-10-04): a specific record whose owner
+    # link is attributed to the wrong entity. `code/1072` writes the guard code
+    # (`code/need_attribution.py`); the enterprise is real and ships, the owner
+    # link does not. A ruled correction or rejection reaches the same column
+    # through `code/1189` (the cedar_rulings file in Lumecon-data).
+    "attribution_refusal": {
+        "REFUSED_GENERIC_TOKEN_ONLY": MASK,
+        "REFUSED_VILLAGE_GOVERNMENT_ANCSA_CORPORATION": MASK,
+        "REFUSED_HUB_IS_THE_ENTERPRISE": MASK,
+        "REJECTED_BY_RULING": MASK,
+        "MISATTRIBUTION_FLAGGED": MASK,
     },
     # -- lobbying -----------------------------------------------------------
     # KEPT AND FLAGGED, every value. A superseded LDA filing is a real filed
@@ -384,12 +405,11 @@ BLOCKED_STATES = {
 # is tier A today, so the two are the same set right now. They stop being the
 # same set the moment an owner rules on one of these identifiers, and at that
 # moment this rule must let go of it by itself. Read the SIGN, not the batch.
-BLOCKED_COMBINATIONS = (
-    {"reason": "quarantined_method_not_ruled_tier_A",
-     "when": {"identifier_ruling_quarantined": {"Y"}},
-     "unless": {"identifier_ruling_tier": {"A"}},
-     "disposition": MASK},
-)
+# LIFTED by the owner ruling of 2026-10-04: a batch-level quarantine masks a
+# whole set, not a specific record flagged as wrongly attributed, and records
+# in the database have already been reviewed. The tuple stays so the
+# mechanism can carry a future owner-ordered rule.
+BLOCKED_COMBINATIONS: tuple = ()
 
 # What a MASK blanks, per state column. Named per column rather than globally
 # because `cedar_uid` is the only name these tables share and the rest differ:
@@ -405,6 +425,11 @@ MASK_COLS = {
     "key_review_disposition": ("cedar_uid", "tribe_id", "tribe_canonical_name",
                                "cedar_spine_entity_id",
                                "cedar_spine_canonical_name", "cedar_link_key"),
+    "attribution_refusal": ("cedar_uid", "owner_hub_cedar_uid", "owner_hub_handle",
+                            "owner_hub_name", "owner_hub_entity_class",
+                            "owner_class", "owner_hub_state",
+                            "parent_enterprise_id", "parent_name",
+                            "parent_is_hub"),
 }
 
 # A boolean that ASSERTS the attribution. When a mask fires it must be set to
@@ -449,6 +474,37 @@ def lobbying_row_counts(row) -> bool:
 # every entry here must be lower case or it can never match.
 DROP_COLS = ("casino_city_id", "duns", "duns_number", "dnb_duns",
              "ultimate_duns", "parent_duns")
+
+# ANY column whose name CONTAINS one of these drops, not only an exact
+# DROP_COLS entry. FOUND 2026-10-04 (895854c): `recipient_duns` shipped in four
+# funding samples while docs/PUBLICATION_POLICY.md (2026-09-02) says D-U-N-S
+# "never ship, in any dataset, at any tier" and data/cedar/field_map.json
+# records DUNS as internal. The rule was reverted with the publication holds in
+# 341f950; it is not a hold but a licensing and identifier rule, and the owner
+# reaffirmed it on 2026-10-04, so it is restored. A coverage statistic named
+# for DUNS (`pct_with_duns`) carries no identifier and stays (owner,
+# 2026-10-04): `DUNS_STATISTIC` exempts it.
+DROP_SUBSTRINGS = ("duns",)
+DUNS_STATISTIC = re.compile(r"^(?:pct|share|n|count|rate)_|_(?:pct|share|count|rate)$")
+
+# A DUNS carried as a VALUE: the subject of a row in an identifier graph, or
+# a `DUNS:<nine digits>` node key. The row is withheld (`row_ok`), because
+# the identifier is what the row is about and masking it leaves nothing.
+DUNS_VALUE = re.compile(r"(?i)\bduns\W{0,3}\d{9}\b")
+DUNS_TYPE_SUFFIXES = ("identifier_type", "id_type")
+
+
+def is_proprietary_column(name: str) -> bool:
+    """Does this column NAME carry a licensed identifier (DROP_COLS)?
+
+    Exact DROP_COLS entries, case-insensitively, plus any name containing a
+    `DROP_SUBSTRINGS` entry other than a coverage statistic. Every consumer
+    that used `c.lower() in DROP_COLS` calls this instead.
+    """
+    n = (name or "").lower()
+    if n in DROP_COLS:
+        return True
+    return any(s in n for s in DROP_SUBSTRINGS) and not DUNS_STATISTIC.search(n)
 
 # RETIRED IDENTITY SCHEME - the CICD NEID. Dropped as COLUMNS, like DROP_COLS.
 #
@@ -617,6 +673,24 @@ def neid_map():
             _NEID_MAP[neid] = uid
             del _NEID_AMBIGUOUS[neid]
     return _NEID_MAP
+
+
+def resolve_retired_entity_handle(handle: str) -> str:
+    """Read-only compatibility lookup; never mints or guesses a cedar_uid.
+
+    Only an exact historical crosswalk member with one reviewed binding can
+    resolve. Unknown and contested values require identity review.
+    """
+    if not isinstance(handle, str) or not handle or handle != handle.strip():
+        raise ValueError("retired handle must be an exact nonblank string")
+    mapping = neid_map()
+    if handle in _NEID_AMBIGUOUS:
+        raise ValueError("retired handle has conflicting identity bindings")
+    uid = mapping.get(handle)
+    from cedar_ids import _entity_validator
+    if not uid or not _UID.fullmatch(uid) or not _entity_validator().valid(uid):
+        raise ValueError("retired handle has no valid registered cedar_uid")
+    return uid
 
 
 def _embedded_neid_re():
@@ -875,6 +949,7 @@ PROHIBITED_PUBLIC_COLUMN = re.compile(
     r"duns|neid|cicd|casino[ _-]?city|tribe_id|_candidate|proposed|resolver|"
     r"built_date|fetched_date|retrieved_date|promoted_date|artifact_mtime", re.I)
 _FIELD_MAP: dict = {}
+_FIELD_MAP_ENTRIES: dict = {}
 _REGISTER: dict = {}
 _UID = re.compile(r"^CE-[0-9A-Z]{5}-[0-9A-Z]{2}$")
 
@@ -887,26 +962,17 @@ class FieldMapRefusal(SystemExit):
         super().__init__(f"{collection}: {message}")
 
 
-class NEEDAffiliationPublicationHold(FieldMapRefusal):
-    """Owner-directed route quarantine, independent of the identity cross-reference."""
-    def __init__(self):
-        super().__init__("need", ["cedar_uid", "owner_hub_cedar_uid", "need_enterprise_relations"],
-                         "NEED affiliation publication is quarantined pending the route audit, "
-                         "regression tests and stratified source-evidence review. Changing or "
-                         "removing enterprise_existing_cedar_uid does not release this hold. "
-                         "No customer export is authorized by a field-level ruling alone.")
-
-
 def assert_collection_publishable(collection: str) -> None:
     """Enforce collection-level holds before any public schema transformation.
 
-    The September 23 owner directive quarantines NEED affiliation derivation,
-    including previously accepted links. No environment flag, blank field or
-    metadata-only edit can lift it; release requires a reviewed policy change
-    supported by the route audit and evidence checks.
+    The September 23 NEED affiliation quarantine is superseded by the owner
+    ruling of 2026-10-04: Lumecon decides what is blocked, and no collection-
+    wide hold stands. Kept as a no-op so every caller keeps working.
     """
-    if collection == "need":
-        raise NEEDAffiliationPublicationHold()
+    # LIFTED, owner ruling 2026-10-04 (Elijah Moreno): NEED records come from
+    # publicly available websites and Lumecon has permission to publish them.
+    # No collection-wide hold stands; this function holds nothing.
+    return None
 
 
 class UndecidedColumns(FieldMapRefusal):
@@ -1080,6 +1146,24 @@ def owed_derivations(entry: dict, rename: dict, built_cols: list, rows: list):
         yield f, target, stuck
 
 
+def retired_identifier_in_value(collection: str, column: str, value: str) -> bool:
+    """Distinguish a researched instrument homonym from Cedar identity leakage.
+
+    NOIRLab identifies NEID as an astronomical spectrograph:
+    https://noirlab.edu/public/programs/kitt-peak-national-observatory/wiyn-35m-telescope/neid/
+    The subaward description for ASST_NON_80NSSC25K0179_080 discusses its
+    observations and stellar characterization. Only that scientific phrase is
+    ignored by the token check; source text is never edited, and every other
+    identifier token in the same value still fails closed.
+    """
+    inspected = value
+    if collection == "subcontracting" and column == "description" and re.search(
+            r"\bstellar characterization\b", value, re.I):
+        inspected = re.sub(r"\bNEID\s+observations\b", "instrument observations", value,
+                           flags=re.I)
+    return bool(RETIRED_TOKEN.search(inspected))
+
+
 class RetiredIdentifierPresent(FieldMapRefusal):
     def __init__(self, collection: str, where: str, n: int, example: str):
         super().__init__(collection, [where],
@@ -1088,18 +1172,72 @@ class RetiredIdentifierPresent(FieldMapRefusal):
                          f"recode the vocabulary before this ships")
 
 
-def field_map() -> dict:
-    """collection id -> the map's table entry (with its key)."""
-    global _FIELD_MAP
-    if _FIELD_MAP:
-        return _FIELD_MAP
+def field_map_entries() -> dict:
+    """(collection id, table) -> the map's table entry (with its key).
+
+    The map is keyed `<collection>/<table>`, and `table` here is that part
+    after the slash (the public file's stem). A Press collection has one
+    entry; a Cedar Grove collection may have several governed component
+    entries (Gaming: one per released component table), each with its own
+    grain, key, rights and approved header. Keyed by the pair so a second
+    component can never silently overwrite the first, which a collection-keyed
+    dict did.
+    """
+    global _FIELD_MAP_ENTRIES
+    if _FIELD_MAP_ENTRIES:
+        return _FIELD_MAP_ENTRIES
     if not FIELD_MAP_PATH.exists():
         raise SystemExit(f"cedar_publication: {FIELD_MAP_PATH} is absent - the "
                          f"customer files are generated from it and there is "
                          f"nothing to generate them from")
     data = json.loads(FIELD_MAP_PATH.read_text(encoding="utf-8"))
-    _FIELD_MAP = {t["collection"]: dict(t, key=key)
-                  for key, t in data["tables"].items()}
+    entries = {}
+    for key, t in data["tables"].items():
+        collection, _, table = key.partition("/")
+        if collection != t["collection"] or not table or "/" in table:
+            raise SystemExit(f"cedar_publication: field-map key {key!r} is not "
+                             f"<collection>/<table> for collection {t['collection']!r}")
+        entries[(collection, table)] = dict(t, key=key)
+    _FIELD_MAP_ENTRIES = entries
+    return _FIELD_MAP_ENTRIES
+
+
+def field_map_entry(collection: str, table=None):
+    """One collection's entry, or None when the map does not know it.
+
+    `table` (a stem or a filename) selects a component exactly. Without it the
+    collection must have at most one entry: a multi-component collection is
+    REFUSED rather than resolved to one of its components, so no single-table
+    caller can project a component through another component's header.
+    """
+    if table is not None:
+        return field_map_entries().get((collection, Path(str(table)).stem))
+    found = [e for (c, _), e in field_map_entries().items() if c == collection]
+    if len(found) > 1:
+        raise FieldMapRefusal(collection, [e["key"] for e in found],
+                              f"{len(found)} component entries in the field map; "
+                              f"name the component table")
+    return found[0] if found else None
+
+
+def field_map() -> dict:
+    """collection id -> the map's table entry (with its key).
+
+    Compatibility view for the single-table callers (770, 1135, the tests).
+    Identical to the old map for every collection with one entry. A
+    collection with several component entries maps to its FIRST declared
+    entry (its landing component) so a caller asking "is this collection
+    mapped?" still hears yes; `apply_field_map` refuses to project such a
+    collection unless the caller names the component, so this value is never
+    used to shape one. Component-aware callers use `field_map_entry`.
+    """
+    global _FIELD_MAP
+    if _FIELD_MAP:
+        return _FIELD_MAP
+    out: dict = {}
+    for (collection, _), entry in field_map_entries().items():
+        out.setdefault(collection, entry)
+    _FIELD_MAP = out
     return _FIELD_MAP
 
 
@@ -1116,12 +1254,20 @@ def register() -> dict:
     path = ROOT / "data" / "spine" / "cedar_entity_names.csv"
     if not path.exists():
         return _REGISTER
-    # A canonical name the publication rule withholds (an individually
-    # Native-owned firm without recorded consent) is blank here, so nothing
-    # downstream can fall back to it: the class still ships, the name does
-    # not. The rule is code/cedar_domain.py's, imported rather than copied.
+    # A canonical name the publication rule withholds is blank here, so
+    # nothing downstream can fall back to it: the class still ships, the
+    # name does not. The rule is code/cedar_domain.py's, imported rather
+    # than copied and asked live. Until 2026-10-02 it withheld every
+    # individually Native-owned firm's name absent recorded consent; the
+    # owner ruling of that date publishes the name (a firm is a business
+    # entity whatever it is named after), so this blanks nothing today and
+    # would blank again if the rule ever withheld the name.
     import cedar_domain  # noqa: PLC0415
-    withheld_class = cedar_domain.INDIVIDUAL_NATIVE_CLASS
+    withheld_class = (
+        cedar_domain.INDIVIDUAL_NATIVE_CLASS
+        if not cedar_domain.may_publish_individual_native_field("canonical_name")
+        else None
+    )
     out: dict = {}
     with path.open(encoding="utf-8-sig", errors="replace", newline="") as fh:
         for row in csv.DictReader(fh):
@@ -1149,7 +1295,8 @@ def _ordinal(n: int) -> str:
 _BILL_TYPES = {"hr": "house-bill", "s": "senate-bill", "hjres": "house-joint-resolution",
                "sjres": "senate-joint-resolution", "hconres": "house-concurrent-resolution",
                "sconres": "senate-concurrent-resolution", "hres": "house-resolution",
-               "sres": "senate-resolution"}
+               "sres": "senate-resolution",
+               "hre": "house-resolution", "hjr": "house-joint-resolution"}
 
 
 def _geography_status(row: dict, prefix: str) -> str:
@@ -1302,7 +1449,7 @@ def _rule(entry: dict, spec: str, row: dict, source_of: dict) -> str | None:
 
 
 def apply_field_map(collection: str, header: list, rows: list,
-                    own_cols=None) -> dict:
+                    own_cols=None, *, table=None) -> dict:
     """Rewrite `header` and every row in `rows` IN PLACE to the approved list.
 
     Returns what it did, for the build log, the manifest and the retirement
@@ -1314,9 +1461,17 @@ def apply_field_map(collection: str, header: list, rows: list,
     `own_cols` is the flagship's own header. Columns outside it were
     synthesised by the build (joins and counts); these must be approved targets
     in the same map or the dataset is refused before export.
+
+    `table` names a component of a multi-component (Cedar Grove) collection;
+    see `field_map_entry`. Omitted, a single-entry collection behaves exactly
+    as before and a multi-component collection is refused.
     """
     assert_collection_publishable(collection)
-    entry = field_map().get(collection)
+    if table is None:
+        field_map_entry(collection)        # refuses a multi-component collection by name
+        entry = field_map().get(collection)
+    else:
+        entry = field_map_entry(collection, table)
     if not entry or not entry.get("fields"):
         return {"mapped": False}
     own = set(own_cols if own_cols is not None else header)
@@ -1332,7 +1487,13 @@ def apply_field_map(collection: str, header: list, rows: list,
     # A column outside the flagship that IS an approved target (a supplied
     # research_note, names as published from the bridge) is the terminal
     # delivering an owed derivation, and is welcome.
-    joined = [c for c in header if c not in own and c not in entry["order"]]
+    # An explicitly internal joined input has a reviewed destination: it is
+    # removed by the same projection as internal flagship fields. It must not
+    # be added to the public order just to make the schema check accept it.
+    # No inferred dispositions: unknown joins and undeclared public targets
+    # still refuse before any row is changed.
+    joined = [c for c in header if c not in own and c not in entry["order"]
+              and decision.get(c, {}).get("decision") != "internal"]
     if joined:
         raise UndecidedColumns(collection, joined)
     uid_col = entry["entity_uid"]
@@ -1383,6 +1544,7 @@ def apply_field_map(collection: str, header: list, rows: list,
     rename = {f["column"]: f["to"] for f in entry["fields"] if f["decision"] == "rename"}
     source_of = {to: c for c, to in rename.items()}
     built_cols = []
+    external_rule_targets = set()
     per_row = [dict() for _ in rows]
     for n in entry.get("new", []):
         src = n.get("from", "")
@@ -1406,6 +1568,10 @@ def apply_field_map(collection: str, header: list, rows: list,
                 continue
             for b, row in zip(per_row, rows, strict=True):
                 v = _rule(entry, src, row, source_of)
+                if v is None:
+                    # A named Lumecon rule is not an implementation here.
+                    # Require its supplied result before retiring source cells.
+                    external_rule_targets.add(target)
                 b[target] = (row.get(target) or "") if v is None else v
             built_cols.append(target)
     if plural:
@@ -1431,7 +1597,8 @@ def apply_field_map(collection: str, header: list, rows: list,
     # terminal delivers the target; the refusal names both columns and the
     # rows that would have lost something. A source that is blank on every
     # row loses nothing and may go.
-    for f, target, stuck in owed_derivations(entry, rename, built_cols, rows):
+    for f, target, stuck in owed_derivations(
+            entry, rename, [c for c in built_cols if c not in external_rule_targets], rows):
         if stuck:
             raise OwedDerivation(collection, f["column"], target, stuck)
     # A combine whose target carries one of its own sources' names (contractors'
@@ -1463,14 +1630,22 @@ def apply_field_map(collection: str, header: list, rows: list,
         role_src = None            # owed: absent until supplied, never a placeholder
     withdrawn = entry.get("withdrawn_flag")
     # The per-field publication rule for an individually Native-owned firm
-    # (cedar_domain.may_publish_individual_native_field): the columns the map
-    # marks `withhold` are masked upstream, where the consent evidence lives
-    # (241, 242), and the register blanks the canonical name. This is the
-    # last check before emission, and it fails closed: a row whose entity the
-    # register classes as individually Native-owned carries no consent here,
-    # so its withheld fields leave blank (Codex, PR #66).
-    withhold_cols = [f["column"] for f in entry["fields"] if f["decision"] == "withhold"]
+    # (cedar_domain.may_publish_individual_native_field): a column the map
+    # marks `withhold` is "masked where the carve-out applies", and the
+    # carve-out is that function's answer for the column. Until 2026-10-02 it
+    # withheld the name and identifiers absent consent, so this last check
+    # before emission blanked them on every row of the class (Codex, PR #66).
+    # Owner ruling 2026-10-02: a firm is a business entity whatever it is
+    # named after, and its name, UEI and CAGE are public business records, so
+    # the rule now publishes them and this check blanks nothing for them. The
+    # map's decision is kept and read live; a column the rule withholds (an
+    # unknown or internal field) is still blanked on the class's rows.
     import cedar_domain  # noqa: PLC0415
+    withhold_cols = [
+        f["column"] for f in entry["fields"]
+        if f["decision"] == "withhold"
+        and not cedar_domain.may_publish_individual_native_field(f["column"])
+    ]
     withheld_class = cedar_domain.INDIVIDUAL_NATIVE_CLASS if withhold_cols else None
     for row, b in zip(rows, per_row, strict=True):
         if "cedar_uid" in b:
@@ -1531,11 +1706,11 @@ def apply_field_map(collection: str, header: list, rows: list,
         for row in rows:
             scope_elements(row.get("collective_scopes"), collection, "collective_scopes")
     # The link-status vocabulary, where the map declares the column as that
-    # vocabulary (the Federal Register's owed column names the four values);
+    # vocabulary (the Federal Register contract owns these link statuses);
     # nonprofits' column of the same name is a combine of link tiers with a
     # vocabulary of its own, and is not held to this one.
-    declared = any(n["column"] == "entity_link_status" and "no_individual_named" in n.get("from", "")
-                   for n in entry.get("new", []))
+    declared = collection == "federal-register" and any(
+        n["column"] == "entity_link_status" for n in entry.get("new", []))
     if "entity_link_status" in header and declared:
         allowed = set(scopes()["link_statuses"])
         bad = [row["entity_link_status"] for row in rows
@@ -1558,7 +1733,7 @@ def apply_field_map(collection: str, header: list, rows: list,
         raise RetiredIdentifierPresent(collection, "the header", len(bad_names),
                                        ", ".join(bad_names))
     for c in header:
-        hits = [row[c] for row in rows if RETIRED_TOKEN.search(row.get(c) or "")]
+        hits = [row[c] for row in rows if retired_identifier_in_value(collection, c, row.get(c) or "")]
         if hits:
             raise RetiredIdentifierPresent(collection, c, len(hits), hits[0][:60])
     return {"mapped": True, "renamed": rename, "dropped": drop,
@@ -1779,14 +1954,24 @@ def row_ok(r: dict) -> tuple[bool, str]:
     for col in NEVER:
         if col in r and (r.get(col) or "").strip():
             return False, "personal:" + col
+    # A DUNS as the row's subject (see DUNS_VALUE). Column drops cannot reach
+    # it: the identifier sits under a generic name like `identifier`.
+    for col, value in r.items():
+        v = (value or "").strip() if isinstance(value, str) else ""
+        if not v:
+            continue
+        if (col or "").lower().endswith(DUNS_TYPE_SUFFIXES) and v.lower() == "duns":
+            return False, "proprietary:duns"
+        if DUNS_VALUE.search(v):
+            return False, "proprietary:duns"
     return True, ""
 
 
 def adjudication(r) -> tuple[str, str]:
     """(disposition, reason) for one row against `BLOCKED_STATES`.
 
-    Deny-by-default: a value this policy has never seen WITHHOLDS and names
-    itself, so a new vocabulary entry upstream is loud instead of silent.
+    A value this policy has never seen is FLAGGED and names itself (owner
+    ruling 2026-10-04: no holds other than a specific misattribution).
 
     The strongest disposition on the row wins - WITHHOLD over MASK over FLAG -
     because a row can trip two policies at once (a contractors row is commonly
@@ -1808,7 +1993,12 @@ def adjudication(r) -> tuple[str, str]:
             d = next((x for k, x in vocab.items() if k.lower() == v.lower()),
                      None)
         if d is None:
-            return WITHHOLD, f"unknown_state:{col}={v}"
+            # Owner ruling 2026-10-04: an unrecognised state is surfaced, not
+            # held. Only a specific misattribution flag masks.
+            d = FLAG
+            if rank[d] > rank[best]:
+                best, why = d, f"unknown_state:{col}={v}"
+            continue
         if rank[d] > rank[best]:
             best, why = d, f"{col}={v}"
     # Conjunctions last: they outrank a single-column PUBLISH or FLAG, because
@@ -1883,12 +2073,16 @@ DATASET_DEFINITION = {
     # attending a federal consultation is exercising a government-to-government
     # relationship, not lobbying under the LDA, and the old name misdescribed
     # its posture. `activity_type` now carries the distinction per row.
+    # NARROWED 2026-10-06: the released spreadsheet holds Lobbying Disclosure
+    # Act filings only (every sampled row has activity_type `lda_filing`, and
+    # the release count is the LDA filing count). Agency meetings,
+    # consultations, comments, testimony and nonprofit lobbying disclosures
+    # are not in this release, so the definition no longer names them.
     "lobbying": (
-        "Documented federal advocacy and engagement involving Native nations "
-        "and organizations, including registered lobbying, agency meetings, "
-        "tribal consultations, regulatory comments, congressional testimony "
-        "and nonprofit lobbying disclosures. Each row represents one "
-        "entity-linked activity or source record."
+        "Registered federal lobbying by and for Native nations and "
+        "organizations, from disclosures filed under the Lobbying Disclosure "
+        "Act. Each row is one lobbying disclosure filing, with its registrant, "
+        "client, issues, the government bodies lobbied and reported amounts."
     ),
 }
 
@@ -2045,6 +2239,36 @@ def recompute_derived(collection: str, header, rows) -> dict:
     caller can report it rather than assert silently.
     """
     changed = {}
+    if str(collection).strip().lower() == "contractors":
+        from cedar_extent_competed import normalize, UNDEFINED
+        prepared = []
+        for row in rows:
+            label, _ = normalize(row.get("extent_competed", ""))
+            previous = row.get("extent_competed_normalized", "").strip()
+            if label == UNDEFINED or (previous and previous != label):
+                raise FieldMapRefusal(collection, ["extent_competed", "extent_competed_normalized"],
+                                      "Competition dictionary is undefined or disagrees with the stored normalization")
+            if row.get("competition_type") and row["competition_type"] != label:
+                raise FieldMapRefusal(collection, ["competition_type"], "Conflicting competition projection")
+            prepared.append(label)
+        if "competition_type" not in header:
+            header.append("competition_type")
+        for row, label in zip(rows, prepared):
+            row["competition_type"] = label
+        return {"competition_type": len(prepared)}
+    if str(collection).strip().lower() == "natural-resources":
+        # Historical diagnostic compatibility only. Production builds moved to
+        # Lumecon; no independently maintained qualification logic remains here.
+        from lumecon_data.collections.natural_resources import qualify_rows
+        prepared = qualify_rows(rows)
+        changes = sum(old.get("research_note") != new.get("research_note")
+                      for old, new in zip(rows, prepared))
+        if "research_note" not in header:
+            header.append("research_note")
+        for old, new in zip(rows, prepared):
+            old.clear()
+            old.update(new)
+        return {"research_note": changes} if changes else {}
     if str(collection).strip().lower() != "deals":
         return changed
     have_month = {"day", "month"}
@@ -2117,16 +2341,49 @@ def deals_public_view(header, rows) -> dict:
     describe the row is not applied), and the presentation counts. A refused
     correction is reported, never silently skipped; the caller prints it.
     """
-    out = {"corrections": 0, "refused": [], "caveats": 0, "unmapped": {}}
+    out = {"corrections": 0, "refused": [], "caveats": 0, "unmapped": {},
+           "purchase_allocation_corrections": []}
     fact = _script("1185", "deals_fact_check_2025_2026")
     log, skipped, _n13, _n14 = fact.apply_all(rows)
     out["corrections"] = len(log)
     out["refused"] = [(f, d, why) for f, d, why in skipped
                       if why != "row not found"]
+    # Reuse the canonical taxonomy's bounded accounting correction before
+    # deriving caveats. Otherwise a purchase-price allocation invents a public
+    # award and its misleading recipient-level aggregation warning. This only
+    # changes derived publication-copy fields; canonical source rows stay put.
+    taxonomy = _script("88", "build_deals_taxonomy")
+    for row in rows:
+        if (row.get("Deal_Category") == "Acquisition"
+                and row.get("record_class") == "PUBLIC_AWARD"
+                and row.get("transaction_type") == "Grant / Public Award"
+                and taxonomy.purchase_allocation_context(row)
+                and taxonomy.classify_record(row) == "TRANSACTION"):
+            row["record_class"] = "TRANSACTION"
+            row["transaction_type"] = taxonomy.classify(
+                row["Deal_Category"], taxonomy.TXN_TYPE)
+            out["purchase_allocation_corrections"].append(row.get("Deal_ID", ""))
     present = _script("1184", "deals_public_presentation")
     unmapped, stats = present.transform(rows)
     out["unmapped"] = unmapped
     out["caveats"] = stats.get("caveats", 0)
+    for row in rows:
+        # A short derived caveat cannot stand in for the owed editorial pass
+        # on substantive Notes. Leave its target absent so that gate still
+        # refuses. Once supplied, retain it and both factual qualifications.
+        note = row.get("research_note") or ""
+        if row.get("Notes") and not note:
+            continue
+        additions = [row.get("Caveat") or ""]
+        if row.get("Candidate_Status"):
+            additions.append("Candidate status: " + row["Candidate_Status"])
+        for qualification in additions:
+            if qualification and qualification not in note:
+                note = (note + " " + qualification).strip()
+        if note:
+            row["research_note"] = note
+            if "research_note" not in header:
+                header.append("research_note")
     for col in DEALS_PRESENTATION_COLUMNS + ("Source_1_Type_detail",
                                              "Source_2_Type_detail"):
         if col not in header:
@@ -2213,6 +2470,224 @@ def reset_denials() -> None:
     """Forget the cached ledger. For fixtures that point `RULING_LEDGER` elsewhere."""
     global _DENIED_UEIS
     _DENIED_UEIS = None
+
+
+# ---------------------------------------------------------------------------
+# RECIPIENT HOLDS - a per-UEI hold or rebind that is NOT a not_native denial.
+#
+# Added 2026-10-02 for the Siletz repair (docs/REVIEW_STATUS.md, "Source-side
+# fixes, 2026-10-02"): two Federal Funding transactions under recipient UEI
+# GJV4PJ8M5PC7 project to the tribal government while the recipient is the
+# Siletz Tribal Arts and Heritage Society, a separate Native nonprofit. The
+# only withholding mechanism this module honoured was `denied_ueis()`, whose
+# vocabulary is `not_native`; recording a Native nonprofit there would be a
+# false statement made to make the withholding fire. This is the policy input
+# the consumer reads instead: the fact it states is "distinct legal entity
+# from the bound uid", with the exact UEI, the exact award keys, the uid the
+# projection currently carries, and the evidence quoted.
+#
+# NOTHING APPLIES AN ENTRY YET. `recipient_holds()` validates and returns the
+# entries; the step that blanks or rebinds an attribution (the funding
+# candidate rebuild in Lumecon-data, then a new pin) consumes `ready` entries
+# and is not written here. The committed file carries zero entries until the
+# bound uid is read off the two transactions, which are not in Git.
+#
+# The validator FAILS CLOSED, the way `denied_ueis()` does: a malformed file
+# raises `RecipientHoldInvalid` rather than reading as "no holds".
+# ---------------------------------------------------------------------------
+
+RECIPIENT_HOLDS = ROOT / "data" / "cedar" / "recipient_holds.json"
+RECIPIENT_HOLDS_SCHEMA_VERSION = 1
+
+#: What a hold states about the recipient. None of these is `not_native`, by
+#: construction: a hold never says the recipient is not Native.
+RECIPIENT_HOLD_KINDS = {
+    "distinct_recipient": (
+        "The recipient behind this UEI is a legal entity distinct from the "
+        "Cedar entity the projection binds it to; the binding is withdrawn."
+    ),
+    "rebind_to_entity": (
+        "The recipient behind this UEI is a different registered Cedar entity, "
+        "named in correct_recipient.cedar_uid; the binding moves, no id is minted."
+    ),
+}
+RECIPIENT_HOLD_ACTIONS = {
+    "withhold": "blank the Cedar attribution on the scoped transactions and write the hold status",
+    "rebind": "replace the bound uid with correct_recipient.cedar_uid on the scoped transactions",
+}
+RECIPIENT_HOLD_STATUSES = ("evidence_incomplete", "ready", "applied")
+#: The controlled `attribution_status` an applied `withhold` writes; distinct
+#: from DENIED_STATUS so a consumer never reads a hold as a denial.
+RECIPIENT_HOLD_STATUS = "withheld_distinct_recipient"
+
+_UEI = re.compile(r"^[A-HJ-NP-Z0-9]{12}$")   # SAM UEI: 12 characters, no I or O
+_HOLD_ID = re.compile(r"^RH-\d{4}-\d{4}$")
+_DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+_FORBIDDEN_RULING = re.compile(r"not[ _-]?(a[ _-])?native", re.I)   # not_native, not native, not a Native entity
+
+
+class RecipientHoldInvalid(RuntimeError):
+    """The recipient-hold file cannot be read as policy. Callers stop."""
+
+
+def _hold_problem(entry: dict, index: int, register_uids: set, seen: dict) -> list:
+    where = f"entries[{index}]"
+    problems: list = []
+
+    def need(key, kind=None):
+        if key not in entry:
+            problems.append(f"{where}: missing {key}")
+            return None
+        value = entry[key]
+        if kind is not None and not isinstance(value, kind):
+            problems.append(f"{where}: {key} must be {kind.__name__}")
+            return None
+        return value
+
+    hold_id = need("hold_id", str)
+    if hold_id is not None and not _HOLD_ID.match(hold_id):
+        problems.append(f"{where}: hold_id {hold_id!r} is not RH-YYYY-NNNN (a hold is a record, never a CE-/CB- id)")
+    collection = need("collection", str)
+    uei = need("recipient_uei", str)
+    if uei is not None and not _UEI.match(uei):
+        problems.append(f"{where}: recipient_uei {uei!r} is not a 12-character SAM UEI")
+    awards = need("award_ids", list)
+    if awards is not None:
+        if not awards or any(not isinstance(a, str) or not a.strip() for a in awards):
+            problems.append(f"{where}: award_ids must name at least one exact award key")
+        elif len(set(awards)) != len(awards):
+            problems.append(f"{where}: award_ids repeats a key")
+        elif uei is not None:
+            for award in awards:
+                prior = seen.setdefault((uei, award), hold_id)
+                if prior != hold_id:
+                    problems.append(f"{where}: ({uei}, {award}) is already scoped by {prior}")
+    kind = need("hold_kind", str)
+    if kind is not None and kind not in RECIPIENT_HOLD_KINDS:
+        problems.append(f"{where}: hold_kind {kind!r} not in {sorted(RECIPIENT_HOLD_KINDS)}")
+    action = need("action", str)
+    if action is not None and action not in RECIPIENT_HOLD_ACTIONS:
+        problems.append(f"{where}: action {action!r} not in {sorted(RECIPIENT_HOLD_ACTIONS)}")
+    if kind == "distinct_recipient" and action == "rebind":
+        problems.append(f"{where}: a distinct_recipient hold withholds; rebind needs hold_kind rebind_to_entity")
+    if kind == "rebind_to_entity" and action == "withhold":
+        problems.append(f"{where}: rebind_to_entity rebinds; withhold needs hold_kind distinct_recipient")
+    status = need("status", str)
+    if status is not None and status not in RECIPIENT_HOLD_STATUSES:
+        problems.append(f"{where}: status {status!r} not in {RECIPIENT_HOLD_STATUSES}")
+    bound = need("bound_cedar_uid")
+    if bound is not None:
+        if not _UID.match(bound):
+            problems.append(f"{where}: bound_cedar_uid {bound!r} is not a CE-XXXXX-XX uid")
+        elif register_uids and bound not in register_uids:
+            problems.append(f"{where}: bound_cedar_uid {bound} is not in the register")
+    elif "bound_cedar_uid" in entry and status in ("ready", "applied"):
+        problems.append(f"{where}: status {status} requires the uid the projection currently carries")
+    correct = need("correct_recipient", dict)
+    if correct is not None:
+        name = correct.get("name")
+        if not isinstance(name, str) or not name.strip():
+            problems.append(f"{where}: correct_recipient.name is required")
+        cuid = correct.get("cedar_uid")
+        if action == "rebind":
+            if not isinstance(cuid, str) or not _UID.match(cuid):
+                problems.append(f"{where}: rebind requires correct_recipient.cedar_uid as a CE-XXXXX-XX uid")
+            elif register_uids and cuid not in register_uids:
+                problems.append(f"{where}: correct_recipient.cedar_uid {cuid} is not in the register; a hold never mints")
+            elif cuid == bound:
+                problems.append(f"{where}: correct_recipient.cedar_uid equals bound_cedar_uid; nothing to rebind")
+        elif cuid is not None:
+            problems.append(f"{where}: a withhold carries correct_recipient.cedar_uid null (not in the register, or not asserted)")
+        if correct.get("register_status") not in ("not_in_register", "in_register"):
+            problems.append(f"{where}: correct_recipient.register_status must be not_in_register or in_register")
+        if correct.get("register_status") == "in_register" and (not isinstance(cuid, str) or not cuid):
+            problems.append(f"{where}: register_status in_register requires correct_recipient.cedar_uid")
+        if correct.get("register_status") == "not_in_register" and cuid is not None:
+            problems.append(f"{where}: register_status not_in_register contradicts a cedar_uid")
+    ruling = need("ruling", str)
+    if ruling is not None:
+        if not ruling.strip():
+            problems.append(f"{where}: ruling must state the fact")
+        if _FORBIDDEN_RULING.search(ruling):
+            problems.append(f"{where}: ruling may not say not_native; a hold is not a denial (use the ruling ledger for that)")
+    evidence = need("evidence", list)
+    if evidence is not None:
+        if not evidence:
+            problems.append(f"{where}: evidence must quote at least one source")
+        for j, item in enumerate(evidence):
+            if not isinstance(item, dict):
+                problems.append(f"{where}.evidence[{j}]: must be an object")
+                continue
+            url = item.get("url")
+            if not isinstance(url, str) or not url.startswith("https://"):
+                problems.append(f"{where}.evidence[{j}]: url must be https")
+            if not isinstance(item.get("quoted"), str) or not item["quoted"].strip():
+                problems.append(f"{where}.evidence[{j}]: quoted text is required (a URL alone is not evidence)")
+            if not isinstance(item.get("checked_on"), str) or not _DATE.match(item["checked_on"]):
+                problems.append(f"{where}.evidence[{j}]: checked_on must be YYYY-MM-DD")
+    for key in ("recorded_on",):
+        value = need(key, str)
+        if value is not None and not _DATE.match(value):
+            problems.append(f"{where}: {key} must be YYYY-MM-DD")
+    need("recorded_by", str)
+    need("owner_review", str)
+    if collection is not None and not collection.strip():
+        problems.append(f"{where}: collection is required")
+    return problems
+
+
+def validate_recipient_holds(doc, register_uids=None) -> list:
+    """Every problem with a recipient-hold document, as sentences; [] when valid.
+
+    `register_uids` is the set of uids the register holds; when given, every
+    uid an entry names must be in it (a hold never mints or guesses a uid).
+    """
+    if not isinstance(doc, dict):
+        return ["document must be an object"]
+    problems: list = []
+    if doc.get("schema_version") != RECIPIENT_HOLDS_SCHEMA_VERSION:
+        problems.append(f"schema_version must be {RECIPIENT_HOLDS_SCHEMA_VERSION}")
+    if doc.get("policy") != "recipient_hold":
+        problems.append("policy must be 'recipient_hold'")
+    entries = doc.get("entries")
+    if not isinstance(entries, list):
+        return problems + ["entries must be a list (empty until an entry lands)"]
+    register_uids = set(register_uids or ())
+    seen: dict = {}
+    ids: set = set()
+    for index, entry in enumerate(entries):
+        if not isinstance(entry, dict):
+            problems.append(f"entries[{index}]: must be an object")
+            continue
+        hold_id = entry.get("hold_id")
+        if hold_id in ids:
+            problems.append(f"entries[{index}]: duplicate hold_id {hold_id}")
+        ids.add(hold_id)
+        problems.extend(_hold_problem(entry, index, register_uids, seen))
+    return problems
+
+
+def recipient_holds(path=None, register_uids=None) -> list:
+    """The validated recipient-hold entries, or raise `RecipientHoldInvalid`.
+
+    An absent file is absent policy and raises too: the consumer that reads
+    this must know whether the policy was read, the same reason
+    `denied_ueis()` refuses an absent ledger. Nothing applies the entries
+    yet (see the section comment).
+    """
+    path = Path(path) if path is not None else RECIPIENT_HOLDS
+    if not path.exists():
+        raise RecipientHoldInvalid(f"recipient holds cannot be read: {path} is absent")
+    try:
+        doc = json.loads(path.read_text(encoding="utf-8-sig"))
+    except (OSError, ValueError) as exc:
+        raise RecipientHoldInvalid(f"{path.name} is not readable JSON: {exc}") from exc
+    if register_uids is None:
+        register_uids = set(register().keys())
+    problems = validate_recipient_holds(doc, register_uids)
+    if problems:
+        raise RecipientHoldInvalid(f"{path.name}: " + "; ".join(problems))
+    return list(doc["entries"])
 
 
 #: The column that names EACH PARTY'S OWN identifier, per side of a row, and
@@ -2332,6 +2807,11 @@ def mask_attribution(r, state_reason: str) -> int:
     return cleared
 
 
+# Collection-specific inclusion and qualification rules are owned by
+# lumecon_data.collections. Legacy diagnostics delegate; supported producer
+# commands for migrated collections refuse before writing Cedar artifacts.
+
+
 def is_publication_eligible(r) -> tuple[bool, str, str]:
     """THE gate. (eligible, reason, disposition).
 
@@ -2346,6 +2826,8 @@ def is_publication_eligible(r) -> tuple[bool, str, str]:
     strictly safer than the old behaviour but is not the policy - so 1137 and
     1135 both apply it, and `verify` checks they do.
     """
+    # `publish_hold` and the legislation admission hold were checked here
+    # until the owner ruling of 2026-10-04; neither is a misattribution flag.
     ok, why = row_ok(r)
     if not ok:
         return False, why, WITHHOLD
@@ -2563,7 +3045,8 @@ def publishable_columns(header) -> list:
     lower_drop |= {c.lower() for c in DEALS_INTERNAL}
     never = set(NEVER)
     return [c for c in (header or [])
-            if c.lower() not in lower_drop and c not in never
+            if c.lower() not in lower_drop and not is_proprietary_column(c)
+            and c not in never
             and not is_lineage_column(c)]
 
 

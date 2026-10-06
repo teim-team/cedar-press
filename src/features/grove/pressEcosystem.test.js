@@ -126,7 +126,7 @@ test("sibling sources are distinct points, spread about their collection's spoke
 test("long names break onto two balanced lines and short ones stay whole", () => {
   assert.deepEqual(labelLines("Deals"), ["Deals"]);
   assert.deepEqual(labelLines("Subcontracting"), ["Subcontracting"]);
-  assert.deepEqual(labelLines("Native-Owned Businesses"), ["Native-Owned", "Businesses"]);
+  assert.deepEqual(labelLines("Individual Native-Owned"), ["Individual", "Native-Owned"]);
   assert.deepEqual(labelLines("Prime Contracting"), ["Prime", "Contracting"]);
   for (const name of RING) {
     const lines = labelLines(name);

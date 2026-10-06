@@ -690,6 +690,47 @@ ANCSA_BRAND_WEAK = {
 }
 
 
+def flag_attribution(kept, hub_rows):
+    """Set `attribution_refusal`(_basis) on every kept edge; -> Counter of codes.
+
+    Flags, never drops and never repoints: the enterprise keeps its key and id.
+    """
+    na = need_attribution()
+    register = na.Register(hub_rows)
+    pseudo = [{"enterprise_name": e["child_name_raw"],
+               "enterprise_name_normalized": norm(e["child_name_raw"]),
+               "owner_hub_cedar_uid": e["hub_cedar_uid"],
+               "evidence_class": e.get("evidence_class", ""),
+               "hub_resolution_method": e.get("hub_resolution_method", "")}
+              for e in kept]
+    ctx = na.TableContext(register, pseudo)
+    refused = Counter()
+    for e, p in zip(kept, pseudo):
+        g = na.guard(p, ctx)
+        e["attribution_refusal"] = g[0] if g else ""
+        e["attribution_refusal_basis"] = g[1] if g else ""
+        if g:
+            refused[g[0]] += 1
+    return refused
+
+
+def review_summary(es):
+    """(evidence_human_reviewed, n_human_reviewed_observations): counted, never defaulted."""
+    n = sum(1 for x in es if x.get("source_review_status") == "reviewed")
+    return ("Y" if n else "N"), n
+
+
+def need_attribution():
+    """`code/need_attribution.py`, loaded by path so importers of 1072 need no sys.path."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "need_attribution", Path(__file__).resolve().parent / "need_attribution.py")
+    mod = importlib.util.module_from_spec(spec)
+    sys.modules.setdefault("need_attribution", mod)
+    spec.loader.exec_module(mod)
+    return mod
+
+
 def _brand_toks(s):
     return [t for t in norm(s).split() if t not in ANCSA_BRAND_STOP]
 
@@ -833,7 +874,13 @@ def _edge(**kw):
         evidence_class="", source_id="", source_url="", source_document="",
         source_fy="", source_edition_date="", quote="", depth_hint=1,
         identity_scope="tribally_owned_entity", retrieved_date=BUILT,
-        source_terms_status="SILENT", source_review_status="reviewed",
+        # NOT `reviewed`. Until 2026-10-04 every source that did not say otherwise
+        # was recorded as human-reviewed, so `evidence_human_reviewed` read Y on
+        # 1,910 enterprises while 481 OWNERV6 edges carried a recorded review
+        # (Lumecon-data HANDOFF 2026-10-03). A source that records no review has
+        # none recorded; a source that does (1133 hand/web_verified, the 1070
+        # sweep) passes `reviewed` explicitly.
+        source_terms_status="SILENT", source_review_status="not_recorded",
     )
     base.update(kw)
     return base
@@ -1371,6 +1418,18 @@ def stage_assemble(argv) -> int:
         e["hub_resolution_note"] = "; ".join(x for x in (vg_note, child_hub_note) if x)
         e["enterprise_existing_cedar_uid"] = child_hub_uid
         kept.append(e)
+
+    # --- the attribution guards, over the whole kept population ------------
+    # ported from the gaming fix and the village-government guard, and shared
+    # with the Lumecon-data producer through `code/need_attribution.py`. They
+    # run AFTER the repoints above (a repointed hub is protected) and FLAG an
+    # edge rather than drop it: the enterprise keeps its issued id and
+    # publishes, only its owner link is masked. The NEED linkage audit of
+    # 2026-10-04 measured what the absence of these guards cost: 92 of the 100
+    # public preview rows matched one of the three patterns.
+    refused = flag_attribution(kept, hubs.rows)
+    print(f"  attribution guards refused {sum(refused.values())} owner links "
+          f"(rows kept, link masked at publication): {dict(refused)}")
 
     with EDGES_STAGED.open("w", encoding="utf-8") as fh:
         for e in kept:
@@ -2012,10 +2071,10 @@ def stage_build(argv) -> int:
             # actually looked at, rather than discovering the distinction in
             # a build log. Y here means at least one observation behind this
             # enterprise was human-reviewed.
-            "evidence_human_reviewed": (
-                "Y" if any(x.get("source_review_status", "reviewed")
-                           != "auto_ruled_not_human_reviewed" for x in es)
-                else "N"),
+            # COUNTED, not inferred: how many observations behind this row
+            # record that a person reviewed them.
+            "evidence_human_reviewed": review_summary(es)[0],
+            "n_human_reviewed_observations": review_summary(es)[1],
             "n_auto_ruled_observations": sum(
                 1 for x in es if x.get("source_review_status", "")
                 == "auto_ruled_not_human_reviewed"),
@@ -2038,6 +2097,18 @@ def stage_build(argv) -> int:
             "source_edition_date": best.get("source_edition_date", ""),
             "hub_resolution_method": best.get("hub_resolution_method", ""),
             "hub_resolution_note": best.get("hub_resolution_note", ""),
+            # A SPECIFIC MISATTRIBUTION, the owner's one legitimate hold
+            # (2026-10-04): every observation behind this row fails a
+            # documented attribution guard, so the owner link is masked at
+            # publication (`cedar_publication.BLOCKED_STATES`) while the
+            # enterprise itself publishes. One observation that passes keeps
+            # the link.
+            "attribution_refusal": (
+                es[0].get("attribution_refusal", "")
+                if all(x.get("attribution_refusal") for x in es) else ""),
+            "attribution_refusal_basis": (
+                es[0].get("attribution_refusal_basis", "")
+                if all(x.get("attribution_refusal") for x in es) else ""),
             "record_scope": "BUSINESS",
             "population_basis": "cedar_spine_native_entities_publishing_ownership",
             "publishable": "Y",
@@ -2074,7 +2145,9 @@ def stage_build(argv) -> int:
                 "depth_as_recorded": x.get("depth_hint", 1),
                 "ownership_percent_stated": x.get("ownership_percent", ""),
                 "evidence_class": x["evidence_class"],
-                "source_review_status": x.get("source_review_status", "reviewed"),
+                "source_review_status": x.get("source_review_status", "not_recorded"),
+                "attribution_refusal": x.get("attribution_refusal", ""),
+                "attribution_refusal_basis": x.get("attribution_refusal_basis", ""),
                 "source_id": x["source_id"],
                 "source_url": x["source_url"],
                 "source_document": x.get("source_document", ""),
@@ -2694,10 +2767,19 @@ CB_DESC = {
     "constellation_note": "Why the constellation edge is a corroboration "
         "rather than the same fact twice.",
     "evidence_human_reviewed": "Y where at least one assertion behind this "
-        "row was human-reviewed; N where every one is `AUTO_RULED_NOT_HUMAN_"
-        "REVIEWED`. The 1070 ANC/NHO sweep staged its rows auto-ruled and said "
-        "so, and that distinction belongs on the row rather than in a build "
-        "log - filter on it to get the evidence a person has looked at.",
+        "row RECORDS a human review (`source_review_status = reviewed`: the "
+        "owner's hand/web_verified v6 rows, reviewed 1070 sweep rows); N "
+        "otherwise, including every source that records no review at all. "
+        "Counted from the observations, never defaulted (corrected 2026-10-04: "
+        "the old default read Y on 1,910 rows against 481 recorded reviews).",
+    "n_human_reviewed_observations": "How many of this row's assertions "
+        "record a human review; the count behind evidence_human_reviewed.",
+    "attribution_refusal": "A documented attribution guard every observation "
+        "behind this row fails: REFUSED_GENERIC_TOKEN_ONLY, "
+        "REFUSED_VILLAGE_GOVERNMENT_ANCSA_CORPORATION or "
+        "REFUSED_HUB_IS_THE_ENTERPRISE. A specific misattribution: the owner "
+        "link is masked at publication, the row publishes.",
+    "attribution_refusal_basis": "Why the guard refused the owner link.",
     "n_auto_ruled_observations": "How many of this row's assertions are "
         "machine-accepted and unreviewed.",
     "source_review_status": "Whether this single assertion was human-reviewed "

@@ -85,6 +85,25 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
 
+
+#: The workspace's publication gate, loaded by path: the D-U-N-S rule lives in
+#: ``code/cedar_publication.py`` (``is_proprietary_column``, ``row_ok``), and the
+#: copy a visitor downloads must apply the same rules as the writer that
+#: produced it. Missing module -> refuse (fail closed).
+def _publication_gate():
+    import importlib.util
+
+    source = REPO / "code" / "cedar_publication.py"
+    spec = importlib.util.spec_from_file_location("cedar_publication", source)
+    if spec is None or spec.loader is None:
+        raise SystemExit(f"publication gate not found at {source}; refusing to import samples")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+_GATE = _publication_gate()
+
 #: The manifest 1135 writes and this script reads. Its presence is what says a
 #: directory IS a Cedar data workspace, rather than a directory next to one.
 WORKSPACE_MARKER = Path("dist") / "review" / "MANIFEST.csv"
@@ -136,6 +155,8 @@ STOREFRONT: tuple[str, ...] = (
     "need",
     "natural-resources",
     "nonprofits",
+    "foundation-corporate-giving",
+    "plot",
 )
 
 #: Measured by Cedar, deliberately not on the storefront. Kept by name and
@@ -155,6 +176,10 @@ EXCLUDED: dict[str, str] = {
     "_entity_layer": (
         "Shelf 'infrastructure': the identity spine every other collection "
         "keys to, not a collection sold on its own."
+    ),
+    "infrastructure": (
+        "A separate Cedar Grove dataset. Records retain source-specific periods, "
+        "grains and publication permissions."
     ),
 }
 
@@ -210,11 +235,15 @@ def _flagship_map(workspace: Path) -> dict[str, str]:
     text = source.read_text(encoding="utf-8", errors="replace")
     start = text.find("FLAGSHIP = {")
     if start == -1:
-        raise SystemExit(f"{source}: no FLAGSHIP dict -- refusing to guess a flagship table")
+        raise SystemExit(
+            f"{source}: no FLAGSHIP dict -- refusing to guess a flagship table"
+        )
     body = text[start + len("FLAGSHIP = {") : text.find("\n}", start)]
     found = dict(re.findall(r'"([^"]+)"\s*:\s*"([^"]+)"', body))
     if not found:
-        raise SystemExit(f"{source}: FLAGSHIP parsed empty -- refusing to guess a flagship table")
+        raise SystemExit(
+            f"{source}: FLAGSHIP parsed empty -- refusing to guess a flagship table"
+        )
     return found
 
 
@@ -230,14 +259,17 @@ def build(workspace: Path) -> dict:
         dist / "collection_descriptors.json", "py -3 code/760_collection_descriptors.py"
     )
     cedar_path = _require(
-        dist / "collection_descriptors.cedar.json", "py -3 code/760_collection_descriptors.py"
+        dist / "collection_descriptors.cedar.json",
+        "py -3 code/760_collection_descriptors.py",
     )
     review_path = _require(
         dist / "review" / "MANIFEST.csv",
         "py -3 code/1135_full_dataset_review_bundle.py samples",
     )
 
-    descriptors = {d["id"]: d for d in json.loads(descriptors_path.read_text(encoding="utf-8"))}
+    descriptors = {
+        d["id"]: d for d in json.loads(descriptors_path.read_text(encoding="utf-8"))
+    }
     cedar = json.loads(cedar_path.read_text(encoding="utf-8"))
     flagship = _flagship_map(workspace)
 
@@ -303,7 +335,9 @@ def build(workspace: Path) -> dict:
 
         flagship_table = flagship.get(cedar_id)
         if flagship_table is None:
-            raise SystemExit(f"{cid}: 770 names no flagship table -- refusing to pick one")
+            raise SystemExit(
+                f"{cid}: 770 names no flagship table -- refusing to pick one"
+            )
         sample = next((t for t in tables if t["table"] == flagship_table), None)
         if sample is None:
             # `owned` is the live case and the reason this is a branch rather
@@ -412,27 +446,38 @@ def _float(value: str) -> float | None:
 #: class, the per-field lists and the predicate. Loaded by path so this script
 #: cannot drift from the rule it enforces; if the module is missing the
 #: importer refuses rather than guessing (fail closed).
-def _publication_rule():
+def _publication_rule(module_name="cedar_domain"):
     import importlib.util
-    source = REPO / "code" / "cedar_domain.py"
-    spec = importlib.util.spec_from_file_location("cedar_domain", source)
+
+    source = REPO / "code" / f"{module_name}.py"
+    spec = importlib.util.spec_from_file_location(module_name, source)
     if spec is None or spec.loader is None:
-        raise SystemExit(f"publication rule not found at {source}; refusing to import samples")
+        raise SystemExit(
+            f"publication rule not found at {source}; refusing to import samples"
+        )
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
 
 
 _RULE = _publication_rule()
+_COLLECTION_RULE = _publication_rule("cedar_publication")
 WITHHELD_CLASS = _RULE.INDIVIDUAL_NATIVE_CLASS
 WITHHELD_FIELDS = frozenset(_RULE.INDIVIDUAL_NATIVE_WITHHELD_FIELDS)
 may_publish_individual_native_field = _RULE.may_publish_individual_native_field
 
 WITHHELD_WHY = (
     "The sample carries a field the publication rule withholds for an individually "
-    "Native-owned firm without recorded consent (may_publish_individual_native_field), "
+    "Native-owned firm (may_publish_individual_native_field), "
     "so the file is not published. The table is still in the release."
 )
+# Owner ruling 2026-10-02: a firm is a business entity regardless of what it
+# is named after, and its name, identifiers and business address are public
+# business records, so may_publish_individual_native_field now publishes every
+# field it used to withhold absent consent. The gate below is unchanged in
+# shape and asks the rule for every cell, so it strikes nothing for those
+# fields now and would strike again if the rule ever withheld one. The name
+# backstop asks the rule for `canonical_name` rather than reading consent.
 
 
 def withheld_entities(spine_names: Path) -> tuple[frozenset[str], frozenset[str]]:
@@ -453,23 +498,29 @@ def withheld_names(spine_names: Path) -> frozenset[str]:
     return withheld_entities(spine_names)[0]
 
 
-def sample_violations(sample: Path, names: frozenset[str], uids: frozenset[str]) -> list[str]:
+def sample_violations(
+    sample: Path, names: frozenset[str], uids: frozenset[str]
+) -> list[str]:
     """The columns of a sample that publish what the rule withholds.
 
     Field-level, the way the rule is written (Codex, PR #63): a row is an
     individual-business row when any cell is one of the class's uids or
     names or its ``entity_class`` is the class; on such a row every non-empty
-    column in the withheld-field list is a violation unless
+    column in the rule's field list is a violation unless
     ``may_publish_individual_native_field`` releases it for that row's
     ``consent_status`` and ``firm_legal_name_is_person``. A cell equal to a
-    withheld name under ANY column is a violation as well (the backstop for a
-    name carried under a header the list does not know), again unless the
-    row records consent.
+    class name under ANY column is a violation as well (the backstop for a
+    name carried under a header the list does not know) unless the rule
+    releases ``canonical_name`` for that row. Since the owner ruling of
+    2026-10-02 the rule releases every such field, so nothing is struck; the
+    machinery stays so a future withholding is enforced here again.
     """
     hit: list[str] = []
     with sample.open(encoding="utf-8", newline="") as handle:
         for row in csv.DictReader(handle):
-            cells = {column: (value or "").strip() for column, value in row.items() if column}
+            cells = {
+                column: (value or "").strip() for column, value in row.items() if column
+            }
             individual = (
                 cells.get("entity_class") == WITHHELD_CLASS
                 or any(value in uids for value in cells.values())
@@ -482,10 +533,15 @@ def sample_violations(sample: Path, names: frozenset[str], uids: frozenset[str])
             for column, value in cells.items():
                 if not value:
                     continue
-                withheld_field = column in WITHHELD_FIELDS and not may_publish_individual_native_field(
-                    column, name_is_person=person, consent_status=consent
+                withheld_field = (
+                    column in WITHHELD_FIELDS
+                    and not may_publish_individual_native_field(
+                        column, name_is_person=person, consent_status=consent
+                    )
                 )
-                named = value.lower() in names and consent.upper() != "OPTED_IN"
+                named = value.lower() in names and not may_publish_individual_native_field(
+                    "canonical_name", name_is_person=person, consent_status=consent
+                )
                 if (withheld_field or named) and column not in hit:
                     hit.append(column)
     return hit
@@ -498,24 +554,74 @@ def sample_carries_withheld_name(sample: Path, names: frozenset[str]) -> list[st
 
 def review_sample(workspace: Path):
     """Where the importer reads a table's sample: the review bundle's layout."""
+
     def locate(collection: dict, table: dict) -> Path:
         cedar_id = collection["cedar"]["cedar_id"]
-        return workspace / "dist" / "review" / "samples" / cedar_id / f"{Path(table['table']).stem}__10.csv"
+        return review_sample_path(workspace, cedar_id, table["table"])
+
     return locate
 
 
-def public_sample(repo: Path):
-    """Where the site serves a table's sample: the manifest's own path under public/."""
+def review_sample_path(workspace: Path, cedar_id: str, table: str) -> Path:
+    """Read only a declared review sample inside the supplied review bundle."""
+    if not cedar_id or cedar_id in (".", "..") or any(c in cedar_id for c in "/\\:"):
+        raise ValueError("Invalid sample collection identifier")
+    root = (workspace / "dist" / "review" / "samples").resolve()
+    source = (root / cedar_id / f"{Path(table).stem}__10.csv").resolve()
+    if not source.is_relative_to(root):
+        raise ValueError("Sample source escapes review bundle")
+    return source
+
+
+#: Where the raw producer previews live, repository-relative. A manifest
+#: ``sample_path`` (``/data/cedar/samples/<c>/<t>__10.csv``) is a path under
+#: the repository root, not a URL: until 2026-10-04 these files sat under
+#: ``public/`` and the built site served them, multi-table layout and retired
+#: ``CEDAR-NEST-`` IDs and all. The site now serves only the customer table
+#: rendered from them (``scripts/render_sample_downloads.py``).
+SAMPLE_DIR = ("data", "cedar", "samples")
+
+
+def sample_file_path(repo: Path, url: str) -> Path:
+    """Resolve a manifest sample path inside data/cedar/samples; refuse traversal and external links."""
+    if not isinstance(url, str) or not url.startswith("/") or url.startswith("//"):
+        raise ValueError("Sample must use a local repository path")
+    if "\\" in url or ":" in url or "?" in url or "#" in url or "%" in url:
+        raise ValueError("Invalid sample path")
+    relative = Path(url[1:])
+    if ".." in relative.parts:
+        raise ValueError("Sample path traversal")
+    repository = repo.resolve()
+    root = repository.joinpath(*SAMPLE_DIR).resolve()
+    if not root.is_relative_to(repository):
+        raise ValueError("Sample directory escapes repository")
+    target = (repository / relative).resolve()
+    if not target.is_relative_to(root) or target == root:
+        raise ValueError("Sample path escapes data/cedar/samples")
+    return target
+
+
+def sample_file(repo: Path):
+    """Where a table's raw preview is kept: the manifest's own path under the repository."""
+
     def locate(collection: dict, table: dict) -> Path:
-        return repo / "public" / table["sample_path"].lstrip("/")
+        return sample_file_path(repo, table["sample_path"])
+
     return locate
 
 
-def withhold_samples(manifest: dict, locate, names: frozenset[str], uids: frozenset[str] = frozenset()) -> list[dict]:
+def withhold_samples(
+    manifest: dict,
+    locate,
+    names: frozenset[str],
+    uids: frozenset[str] = frozenset(),
+    *,
+    repo: Path = REPO,
+) -> list[dict]:
     """Strike every declared sample that publishes what the rule withholds.
 
     ``locate(collection, table)`` says where the file is: the review bundle's
-    layout on an import, ``public/`` on an audit (Codex, PR #63: the manifest
+    layout on an import, ``data/cedar/samples/`` on an audit (Codex, PR #63: the manifest
     path is a URL, not the bundle's layout, and joining it to the bundle found
     nothing and struck nothing). Applied to the manifest in place: the table
     keeps its row counts and its release facts and loses its ``sample_path``,
@@ -528,6 +634,11 @@ def withhold_samples(manifest: dict, locate, names: frozenset[str], uids: frozen
     struck: list[dict] = []
     for collection in manifest["collections"]:
         flagship = collection.get("sample") or {}
+        # Owner ruling 2026-10-04 (Elijah Moreno): Lumecon decides what is
+        # blocked; no collection-wide publication hold stands. The NEED
+        # reviewed-preview proof and the collection-policy hold that used to
+        # strike whole collections here are gone; any stale hold is cleared.
+        collection.pop("publication_hold", None)
         for table in collection["tables"]:
             path = table.get("sample_path")
             if not path:
@@ -539,10 +650,17 @@ def withhold_samples(manifest: dict, locate, names: frozenset[str], uids: frozen
             if not columns:
                 continue
             table["sample_path"] = None
+            table["sample_withheld_path"] = path
             table["sample_withheld_why"] = WITHHELD_WHY
             table["sample_withheld_columns"] = columns
-            struck.append({"collection": collection["id"], "table": table["table"],
-                           "path": path, "columns": columns})
+            struck.append(
+                {
+                    "collection": collection["id"],
+                    "table": table["table"],
+                    "path": path,
+                    "columns": columns,
+                }
+            )
             if flagship.get("path") == path:
                 collection["sample"] = {
                     "table": flagship.get("table"),
@@ -554,17 +672,17 @@ def withhold_samples(manifest: dict, locate, names: frozenset[str], uids: frozen
 
 def unpublish(repo: Path, struck: list[dict]) -> None:
     """Delete the served copy of every struck sample, if an earlier import published one."""
-    for entry in struck:
-        served = repo / "public" / entry["path"].lstrip("/")
+    paths = [sample_file_path(repo, entry["path"]) for entry in struck]
+    for served in paths:
         if served.exists():
             served.unlink()
 
 
 def audit(repo: Path = REPO) -> list[dict]:
-    """Apply the withholding rule to the committed manifest and public/ files.
+    """Apply the withholding rule to the committed manifest and data/cedar/samples/ files.
 
     ``python scripts/import_cedar_manifest.py --audit``. Rewrites the manifest,
-    deletes each struck file under public/, removes local filesystem paths
+    deletes each struck file under data/cedar/samples/, removes local filesystem paths
     from the samples still served (``scrub_local_paths``), and prints what it
     struck and what it scrubbed. The
     caller re-runs measure-samples and derive-explore (the test suites name
@@ -572,13 +690,16 @@ def audit(repo: Path = REPO) -> list[dict]:
     """
     manifest_path = repo / "data" / "cedar" / "collections.manifest.json"
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    original = json.dumps(manifest, sort_keys=True)
     names, uids = withheld_entities(repo / "data" / "spine" / "cedar_entity_names.csv")
-    struck = withhold_samples(manifest, public_sample(repo), names, uids)
+    struck = withhold_samples(manifest, sample_file(repo), names, uids, repo=repo)
     unpublish(repo, struck)
-    # And the local-path rule, on what is already served.
-    for sample in scrub_public_samples(repo):
-        print(f"  scrubbed  local path(s) from {sample.relative_to(repo)}")
-    if struck:
+    # And the text rules (local paths, D-U-N-S), on what is already served.
+    for sample in scrub_samples(repo):
+        print(f"  scrubbed  {sample.relative_to(repo)}")
+    for path, was, now in sync_column_counts(manifest, repo):
+        print(f"  columns   {path}: {was} -> {now}")
+    if json.dumps(manifest, sort_keys=True) != original:
         manifest_path.write_text(
             json.dumps(manifest, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
         )
@@ -619,10 +740,52 @@ def scrub_local_paths(text: str) -> str:
     return LOCAL_PATH.sub(LOCAL_PATH_REMOVED, text)
 
 
+def drop_proprietary(text: str) -> tuple[str, list[str], int]:
+    """The CSV text without D-U-N-S: columns and rows whose subject is one.
+
+    docs/PUBLICATION_POLICY.md (2026-09-02): D-U-N-S is licensed to Cedar for
+    internal use and never ships, in any dataset, at any tier (reaffirmed by
+    the owner 2026-10-04). ``cedar_publication.is_proprietary_column`` drops a
+    column by name (a coverage statistic such as ``pct_with_duns`` stays);
+    ``cedar_publication.row_ok`` withholds a row whose subject is a DUNS
+    (an identifier-graph node keyed ``DUNS:<nine digits>``). Rewritten with the
+    csv module only when something goes, keeping the line terminator.
+    Returns (text, dropped columns, withheld rows).
+    """
+    import io
+
+    lines = text.splitlines(keepends=True)
+    if not lines:
+        return text, [], 0
+    header = next(csv.reader([lines[0]]))
+    dropped = [c for c in header if _GATE.is_proprietary_column(c)]
+    rows = list(csv.reader(io.StringIO(text, newline="")))[1:]
+    keep_rows = [
+        row
+        for row in rows
+        if _GATE.row_ok(dict(zip(header, row)))[1] != "proprietary:duns"
+    ]
+    if not dropped and len(keep_rows) == len(rows):
+        return text, [], 0
+    terminator = "\r\n" if lines[0].endswith("\r\n") else "\n"
+    keep = [i for i, c in enumerate(header) if c not in dropped]
+    out = io.StringIO()
+    writer = csv.writer(out, lineterminator=terminator)
+    for row in [header, *keep_rows]:
+        writer.writerow([row[i] for i in keep if i < len(row)])
+    return out.getvalue(), dropped, len(rows) - len(keep_rows)
+
+
+def clean_sample_text(raw: str) -> str:
+    """Every text rule a served sample passes: local paths, then D-U-N-S."""
+    return drop_proprietary(scrub_local_paths(raw))[0]
+
+
 def publish_sample(source: Path, target: Path) -> bool:
-    """Write ``source`` to ``target`` without local paths; True if any were removed."""
+    """Write ``source`` to ``target`` through ``clean_sample_text``; True if
+    anything was removed."""
     raw = source.read_text(encoding="utf-8")
-    clean = scrub_local_paths(raw)
+    clean = clean_sample_text(raw)
     target.parent.mkdir(parents=True, exist_ok=True)
     # newline="" so a CRLF in the source stays CRLF: the bytes are 1135's.
     with target.open("w", encoding="utf-8", newline="") as handle:
@@ -630,13 +793,38 @@ def publish_sample(source: Path, target: Path) -> bool:
     return clean != raw
 
 
-def scrub_public_samples(repo: Path = REPO) -> list[Path]:
-    """Rewrite every served sample under ``public/`` that carries a local path."""
+def sync_column_counts(manifest: dict, repo: Path = REPO) -> list[tuple[str, int, int]]:
+    """Make the manifest's column counts match the served sample headers.
+
+    A column the text rules drop from a served copy is a column the table no
+    longer publishes. Returns ``(path, was, now)`` for each count changed.
+    """
+    changed: list[tuple[str, int, int]] = []
+    for collection in manifest["collections"]:
+        for table in collection["tables"]:
+            path = table.get("sample_path")
+            served = repo / (path or "").lstrip("/")
+            if not path or not served.exists():
+                continue
+            with served.open(encoding="utf-8", newline="") as handle:
+                width = len(next(csv.reader(handle), []))
+            if table.get("columns_published") != width:
+                changed.append((path, table.get("columns_published"), width))
+                table["columns_published"] = width
+            flagship = collection.get("sample") or {}
+            if flagship.get("path") == path and flagship.get("columns") != width:
+                flagship["columns"] = width
+    return changed
+
+
+def scrub_samples(repo: Path = REPO) -> list[Path]:
+    """Rewrite every kept preview under ``data/cedar/samples/<c>/`` that
+    ``clean_sample_text`` would change: a local path or D-U-N-S."""
     rewritten: list[Path] = []
-    root = repo / "public" / "data" / "cedar" / "samples"
-    for sample in sorted(root.rglob("*.csv")):
+    root = repo.joinpath(*SAMPLE_DIR)
+    for sample in sorted(root.glob("*/*.csv")):
         raw = sample.read_text(encoding="utf-8")
-        if scrub_local_paths(raw) != raw:
+        if clean_sample_text(raw) != raw:
             publish_sample(sample, sample)
             rewritten.append(sample)
     return rewritten
@@ -645,24 +833,22 @@ def scrub_public_samples(repo: Path = REPO) -> list[Path]:
 def copy_samples(workspace: Path, manifest: dict) -> int:
     """The ten-row samples the manifest points at, and nothing else.
 
-    Copied under ``public/`` so the built site serves them at the same URL the
-    manifest states, and so the Python side and the browser read one set of
-    bytes rather than two copies that can disagree -- bar one deliberate
-    difference: a local filesystem path in the review bundle never reaches the
-    served copy (``scrub_local_paths``).
+    Copied under ``data/cedar/samples/`` at the path the manifest states. They
+    are inputs, not served files: the API and
+    ``scripts/render_sample_downloads.py`` render each one as the customer
+    table, and that is what the site serves. A local filesystem path in the
+    review bundle never reaches the kept copy (``scrub_local_paths``).
     """
-    source_root = workspace / "dist" / "review" / "samples"
     written = 0
     for collection in manifest["collections"]:
         cedar_id = collection["cedar"]["cedar_id"]
         for table in collection["tables"]:
             if not table.get("sample_path"):
                 continue  # struck by withhold_samples: never copied
-            name = f"{Path(table['table']).stem}__10.csv"
-            source = source_root / cedar_id / name
+            source = review_sample_path(workspace, cedar_id, table["table"])
             if not source.exists():
                 raise SystemExit(f"missing sample: {source}")
-            target = REPO / "public" / table["sample_path"].lstrip("/")
+            target = sample_file_path(REPO, table["sample_path"])
             if publish_sample(source, target):
                 print(f"  scrubbed  local path(s) from {target.relative_to(REPO)}")
             written += 1
@@ -673,9 +859,10 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--workspace", type=Path, default=DEFAULT_WORKSPACE)
     parser.add_argument(
-        "--audit", action="store_true",
-        help="apply the publication rule to the committed manifest and public/ "
-             "samples instead of importing; strikes and deletes what it withholds",
+        "--audit",
+        action="store_true",
+        help="apply the publication rule to the committed manifest and data/cedar/samples/ "
+        "samples instead of importing; strikes and deletes what it withholds",
     )
     args = parser.parse_args()
     if args.audit:
@@ -688,7 +875,9 @@ def main() -> int:
     # The publication rule, before a file becomes a public asset: a sample
     # that names an individually Native-owned firm without consent is struck
     # from the manifest here and never copied below.
-    names, uids = withheld_entities(workspace / "data" / "spine" / "cedar_entity_names.csv")
+    names, uids = withheld_entities(
+        workspace / "data" / "spine" / "cedar_entity_names.csv"
+    )
     struck = withhold_samples(manifest, review_sample(workspace), names, uids)
     # And the copy an earlier import may have published: skipping the new
     # copy alone would leave the old file served (Codex, PR #63).
@@ -697,23 +886,35 @@ def main() -> int:
         print(f"  withheld  {entry['path']}  ({', '.join(entry['columns'])})")
     out = REPO / "data" / "cedar" / "collections.manifest.json"
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    out.write_text(
+        json.dumps(manifest, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+    )
     written = copy_samples(workspace, manifest)
+    if sync_column_counts(manifest, REPO):
+        out.write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     # The record of which declared samples the repository holds follows every
     # import; the tests refuse a stale one. On the importer's machine every
     # sample was just copied, so the record says none is missing -- until the
     # files are committed elsewhere, which is exactly what it exists to show.
-    measured = subprocess.run(  # noqa: S603
+    measured = subprocess.run(
         ["node", str(REPO / "scripts" / "measure-samples.mjs")],
-        capture_output=True, text=True, check=False,
+        capture_output=True,
+        text=True,
+        check=False,
+        creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+        timeout=120,
     )
     if measured.returncode != 0:
         raise SystemExit(f"measure-samples failed:\n{measured.stderr}")
     # The Explore card's per-table contracts are read off the sample headers
     # just copied, so they follow every import for the same reason.
-    derived = subprocess.run(  # noqa: S603
+    derived = subprocess.run(
         ["node", str(REPO / "scripts" / "derive-explore.mjs")],
-        capture_output=True, text=True, check=False,
+        capture_output=True,
+        text=True,
+        check=False,
+        creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+        timeout=120,
     )
     if derived.returncode != 0:
         raise SystemExit(f"derive-explore failed:\n{derived.stderr}")
@@ -721,7 +922,7 @@ def main() -> int:
     print(f"  manifest  {out.relative_to(REPO)}")
     print(f"  storefront {len(manifest['collections'])} collections")
     print(f"  excluded   {', '.join(e['id'] for e in manifest['excluded'])}")
-    print(f"  samples    {written} files copied under public/data/cedar/samples/")
+    print(f"  samples    {written} files copied under data/cedar/samples/")
     for collection in manifest["collections"]:
         cedar = collection["cedar"]
         flag = "BLOCKED" if cedar["blockers"] else "        "

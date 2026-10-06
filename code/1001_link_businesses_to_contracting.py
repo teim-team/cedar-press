@@ -94,6 +94,16 @@ CEDAR = Path(__file__).resolve().parent.parent
 CLEAN = CEDAR / "data" / "clean"
 REVIEW = CEDAR / "review"
 
+
+def _cedar_domain():
+    """The live publication rule, loaded by path like the other scripts do."""
+    import importlib.util  # noqa: PLC0415
+    spec = importlib.util.spec_from_file_location(
+        "cedar_domain_1001", CEDAR / "code" / "cedar_domain.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
 DIRECTORY = CLEAN / "native_owned_businesses.csv"
 LINKS = CLEAN / "native_business_contract_links.csv"
 CROSSWALK = CLEAN / "native_business_identifier_crosswalk.csv"
@@ -656,24 +666,29 @@ def read_self_published_identifiers():
 
 
 def gate_for(name_is_person):
-    """cedar_domain.may_publish_individual_native_field, inlined and named.
+    """cedar_domain.may_publish_individual_native_field, named per row.
 
-    THE TENSION, STATED RATHER THAN RESOLVED HERE. The owner's rule is that a
-    firm's NAME is not PII even when the firm is named after its owner. Cedar's
-    coded policy is narrower and is about the IDENTIFIER, not the name: SAM's
-    public entity search resolves a UEI to a name and a street address, so for
-    a firm whose legal name is a person's the UEI is a pointer to that
-    person's front door. Both can be true. This script therefore writes the
-    identifier in every case and marks the gate, so the row is a finding the
-    owner can rule on rather than a deletion nobody can see.
+    THE TENSION, RESOLVED 2026-10-02. This gate used to state a tension
+    rather than resolve it: the owner's rule that a firm's NAME is not PII
+    even when the firm is named after its owner, against Cedar's coded
+    policy that withheld the IDENTIFIER of such a firm because SAM's public
+    entity search resolves a UEI to a name and a street address. The owner
+    ruled on 2026-10-02: a firm is a business entity regardless of what it
+    is named after, and its UEI/CAGE is a public business registration, so
+    the identifier publishes whatever `name_is_person` says. The value is
+    still recorded in the basis so it stays visible per row.
     """
     v = str(name_is_person).strip().upper()
+    publishes = _cedar_domain().may_publish_individual_native_field(
+        "awardee_uei", name_is_person)
+    if not publishes:
+        return "WITHHOLD_PENDING_RULING", \
+            "cedar_domain.may_publish_individual_native_field::awardee_uei"
     if v in {"0", "FALSE", "NO"}:
         return "PUBLISH", "firm_name_is_not_a_person_name"
     if v in {"1", "TRUE", "YES"}:
-        return "WITHHOLD_PENDING_RULING", \
-            "cedar_domain.INDIVIDUAL_NATIVE_WITHHELD_FIELDS::awardee_uei"
-    return "WITHHOLD_PENDING_RULING", "name_is_person_name_UNKNOWN_fails_closed"
+        return "PUBLISH", "owner_ruling_2026-10-02_business_entity_whatever_its_name"
+    return "PUBLISH", "owner_ruling_2026-10-02_business_entity_name_is_person_UNKNOWN"
 
 
 def build(argv):

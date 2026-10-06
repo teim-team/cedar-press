@@ -358,7 +358,7 @@ excluded_not_native 0.3% · lineageA 0.01%.**
 
 ## SESSION RESUMED 2026-08-28 — WORK RESTARTED
 
-**The product repo is now cloned locally** at `C:\Users\esm247\Desktop\cedar-press-repo`
+**The product repo is now cloned locally** at `<cedar-press checkout>`
 (branch `white-earth-ingest-and-encoding-fix`, pushed). It is a **PUBLIC** repo —
 `teim-team/cedar-press`, verified by anonymous API call. **Nothing with named
 individuals' personal contact detail goes in it.**

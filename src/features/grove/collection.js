@@ -56,8 +56,10 @@
  * drawn.
  */
 
+import { parseCsv, csvCell } from "./csv.js";
 import manifest from "../../../data/cedar/collections.manifest.json" with { type: "json" };
 import published from "../../../data/cedar/samples.published.json" with { type: "json" };
+import { codebookTables } from "./codebook.js";
 
 import { CLAIM_CLASS } from "./claims.js";
 // The storefront's own naming. `pressCatalog.js` imports nothing, so this is
@@ -105,6 +107,47 @@ export const EXCLUDED_COLLECTIONS = deepFreeze(manifest.excluded);
  * transformation this file performs: the JavaScript surface was camelCase
  * before the manifest existed and renaming it would touch every consumer.
  */
+/**
+ * Collections whose observation count is not shown to readers (owner,
+ * 2026-10-06): NEED's published reviewed set (43) is a small part of the
+ * enterprise register, so no count is stated rather than a misleading one;
+ * Native Nonprofits' 89 ruled-in organizations is shown. An empty
+ * label is what every surface already reads as "no count". The service
+ * applies the same set (collections.py COUNT_NOT_SHOWN).
+ */
+export const COUNT_NOT_SHOWN = Object.freeze(new Set(["need"]));
+
+/**
+ * What an abbreviated collection name stands for, prefixed to its description
+ * where the descriptor does not spell it out (owner, 2026-10-06). The service
+ * applies the same text (collections.py ACRONYM_LEADS).
+ */
+const ACRONYM_LEADS = Object.freeze({ plot: "PLOT (Parcel-Level Ownership and Transfers)" });
+const tracksForReaders = (descriptor) => {
+  const lead = ACRONYM_LEADS[descriptor.id];
+  return lead && !(descriptor.tracks ?? "").includes(lead) ? `${lead}: ${descriptor.tracks}` : descriptor.tracks;
+};
+
+/**
+ * When each collection's DATA was last refreshed from the producer, which is
+ * not the same date as `updated`.
+ *
+ * `updated` is the release date the ledger records (data/cedar/releases.json).
+ * On 2026-10-06 every collection was re-released with that date at the
+ * owner's request, without a producer data refresh: the rows, samples and
+ * release ids did not change. A reader needs three dates kept apart: when
+ * the page was revised, when the data was refreshed, and what period the
+ * records cover. This is the second, read from the manifest's provenance:
+ * the producer refresh a collection was staged from
+ * (`provenance.selected_refreshes[id].updated`), else the producer pin every
+ * other collection was staged from (`provenance.updated`). Never typed. The
+ * service reads the same fields (collections.py `_data_refreshed`).
+ */
+function dataRefreshed(id) {
+  const provenance = manifest.provenance ?? {};
+  return provenance.selected_refreshes?.[id]?.updated ?? provenance.updated ?? null;
+}
+
 export const LAUNCH_COLLECTION = deepFreeze(
   manifest.collections.map((entry) => ({
     id: entry.descriptor.id,
@@ -113,16 +156,84 @@ export const LAUNCH_COLLECTION = deepFreeze(
     name: entry.descriptor.name,
     shortName: entry.descriptor.short_name,
     shelf: entry.descriptor.shelf,
-    tracks: entry.descriptor.tracks,
-    rowsLabel: entry.descriptor.rows_label,
+    tracks: tracksForReaders(entry.descriptor),
+    rowsLabel: COUNT_NOT_SHOWN.has(entry.descriptor.id) ? "" : entry.descriptor.rows_label,
     downloads: entry.descriptor.downloads,
     vintage: entry.descriptor.vintage,
     version: entry.descriptor.version,
     updated: entry.descriptor.updated,
+    refreshed: dataRefreshed(entry.descriptor.id),
     sources: entry.descriptor.sources,
     method: entry.descriptor.method,
   })),
 );
+
+/**
+ * What the headline observation count is, said wherever the total is shown
+ * (2026-10-06). The total adds rows across collections whose rows are
+ * different things, so it is a count of records, not of organizations and
+ * not of dollars.
+ */
+export const OBSERVATIONS_NOTE =
+  "Observations are rows across collections of different kinds, such as filings, awards, parcels and documents. They are not unique entities or an additive dollar total.";
+
+/**
+ * Plain names for the record types a collection's count is made of. A type
+ * without a name here falls back to its own words, never to a guess.
+ */
+const RECORD_TYPE_NAMES = Object.freeze({
+  tract_observations: "BIA tract observations",
+  ownership_observations: "assessor parcel ownership observations",
+  environmental_events: "EPA environmental events",
+  environmental_permits: "EPA environmental permits",
+  permit_events: "permit events",
+  permits: "local permits",
+  federal_actions: "Federal Register documents",
+  consultation_participants: "consultation participant records",
+  policy_eligible_disclosures: "policy-eligible disclosures",
+  reviewed_disclosures: "reviewed disclosures",
+});
+
+/** What the examples shown for a mixed collection are, where they are one kind. */
+const EXAMPLE_KIND = Object.freeze({
+  plot: "The example records shown are BIA tracts and assessor parcels; the count also covers permits and environmental records.",
+  "federal-register": "A participant record is one named participant in one document, so participants are not additional documents.",
+  "foundation-corporate-giving": "Each is one source disclosure, not an additive award total.",
+});
+
+const countWords = (n) => n.toLocaleString("en-US");
+const KIND_WORDS = Object.freeze({ 2: "two", 3: "three", 4: "four", 5: "five", 6: "six", 7: "seven", 8: "eight", 9: "nine" });
+const listWords = (items) =>
+  items.length < 3 ? items.join(" and ") : `${items.slice(0, -1).join(", ")} and ${items.at(-1)}`;
+
+/**
+ * For a collection whose count mixes record types, what the count is made
+ * of, from the manifest's own `record_types` per table. Null for a
+ * single-kind collection and for a collection whose count is not shown.
+ */
+export const COUNT_NOTES = deepFreeze(
+  Object.fromEntries(
+    manifest.collections
+      .filter((entry) => !COUNT_NOT_SHOWN.has(entry.id))
+      .map((entry) => {
+        const kinds = {};
+        for (const table of entry.tables ?? []) {
+          for (const [kind, n] of Object.entries(table.record_types ?? {})) kinds[kind] = (kinds[kind] ?? 0) + n;
+        }
+        const parts = Object.entries(kinds).sort((a, b) => b[1] - a[1]);
+        if (parts.length < 2) return [entry.id, null];
+        const total = parts.reduce((sum, [, n]) => sum + n, 0);
+        const named = parts.map(([kind, n]) => `${countWords(n)} ${RECORD_TYPE_NAMES[kind] ?? kind.replace(/_/g, " ")}`);
+        const lead = `${countWords(total)} observations of ${KIND_WORDS[parts.length] ?? parts.length} kinds: ${listWords(named)}.`;
+        return [entry.id, EXAMPLE_KIND[entry.id] ? `${lead} ${EXAMPLE_KIND[entry.id]}` : lead];
+      }),
+  ),
+);
+
+/** The count note for a collection, or null. */
+export function countNote(id) {
+  return COUNT_NOTES[id] ?? null;
+}
 
 const CEDAR = deepFreeze(
   Object.fromEntries(manifest.collections.map((entry) => [entry.id, entry.cedar])),
@@ -166,6 +277,9 @@ function tableWithPublication(table) {
   return { ...table, sample_path: null, sample_unpublished: table.sample_path };
 }
 
+// Owner ruling 2026-10-04 (Elijah Moreno): Lumecon decides what is blocked.
+// No collection-wide publication hold stands, so the site applies none.
+
 const SAMPLES = deepFreeze(
   Object.fromEntries(
     manifest.collections.map((entry) => [entry.id, withPublication(entry.sample)]),
@@ -173,7 +287,7 @@ const SAMPLES = deepFreeze(
 );
 const TABLES = deepFreeze(
   Object.fromEntries(
-    manifest.collections.map((entry) => [entry.id, entry.tables.map(tableWithPublication)]),
+    manifest.collections.map((entry) => [entry.id, entry.tables.map((table) => tableWithPublication(table))]),
   ),
 );
 
@@ -269,9 +383,8 @@ export function collectionShort(dataset) {
 
 /** One line for the context strip: versions and the latest refresh date. */
 export function collectionContextLine() {
-  const versions = LAUNCH_COLLECTION.map((d) => `${collectionShort(d)} ${d.version}`).join(" · ");
   const updated = LAUNCH_COLLECTION.map((d) => d.updated).sort().slice(-1)[0];
-  return `${versions} · all current as of ${updated}`;
+  return `Updated ${updated}`;
 }
 
 /**
@@ -294,7 +407,7 @@ export function collectionContextLine() {
 export function collectionFindings() {
   const basis = (datasetId, detail) => {
     const dataset = LAUNCH_COLLECTION.find((item) => item.id === datasetId);
-    return `${collectionShort(dataset) ?? datasetId} ${dataset?.version ?? "v0"}, ${detail}`;
+    return `${collectionShort(dataset) ?? datasetId}, ${detail}`;
   };
 
   const supported = [
@@ -330,37 +443,59 @@ export function collectionFindings() {
     },
   ];
 
+  const availabilityNeeds = LAUNCH_COLLECTION.flatMap((dataset) => {
+    const facts = collectionCedarFacts(dataset.id);
+    const sample = collectionSample(dataset.id);
+    const missing = [];
+    if (!Number.isSafeInteger(facts?.n_rows) || facts.n_rows < 0) {
+      missing.push("The current release does not state a row count.");
+    }
+    if (!sample?.path) {
+      missing.push(sampleUnavailableReason(dataset.id) || "No preview file is published for the current release.");
+    }
+    return missing.length ? [{
+      id: `col-need-${dataset.id}-availability`,
+      text: `${dataset.name}: ${missing.join(" ")}`,
+      demonstration: false,
+    }] : [];
+  });
+  const withoutVintage = LAUNCH_COLLECTION.filter(
+    (dataset) => typeof dataset.vintage !== "string" || !dataset.vintage.trim(),
+  );
+  const vintageNeeds = withoutVintage.length ? [{
+    id: "col-need-vintage",
+    text: (withoutVintage.length === LAUNCH_COLLECTION.length
+      ? "No collection states a vintage."
+      : `A collection vintage is not stated for: ${withoutVintage.map((dataset) => dataset.name).join("; ")}.`)
+      + " An update date does not establish the periods covered by every source.",
+    demonstration: false,
+  }] : [];
+
   const needs = [
     {
       id: "col-need-closing",
-      text: "Three large announced deals await closing confirmation before they enter totals (Deals, primary source pending).",
+      text: "Demonstration: Three large announced deals await closing confirmation before they enter totals (Deals, primary source pending).",
+      demonstration: true,
     },
     {
       id: "col-need-fy26",
-      text: "FY2026 assistance figures are partial until the Q1 release lands (Funding, USAspending publication lag).",
+      text: "Demonstration: FY2026 assistance figures are partial until the Q1 release lands (Funding, USAspending publication lag).",
+      demonstration: true,
     },
     {
       id: "col-need-matches",
-      text: "Two parent-entity matches are provisional pending SAM re-registration (Contractors, entity resolution queue).",
+      text: "Demonstration: Two parent-entity matches are provisional pending SAM re-registration (Contractors, entity resolution queue).",
+      demonstration: true,
     },
-    {
-      id: "col-need-owned-terms",
-      text: "White Earth listings enter entity rows once the nation confirms publication terms; aggregates only until then (Owned, consent pending).",
-    },
-    {
-      id: "col-need-owned-membership",
-      text: "Native-Owned Businesses publishes no row count and no preview file: the table Cedar names as the collection's flagship is not one its collection contract claims, and the two memberships have not been reconciled (Owned, collection membership unresolved).",
-    },
-    {
-      id: "col-need-vintage",
-      text: "No collection states a vintage: Cedar's cadence measurement produced no newest-held period for any of them, so the field is absent rather than estimated.",
-    },
+    ...availabilityNeeds,
+    ...vintageNeeds,
   ];
 
   const narratives = [
     {
       id: "col-lead-energy",
-      name: "Energy project financing expansion",
+      name: "Demonstration: Energy project financing expansion",
+      demonstration: true,
       have: 3,
       need: 3,
       missing: [],
@@ -368,7 +503,8 @@ export function collectionFindings() {
     },
     {
       id: "col-lead-8a",
-      name: "8(a) participation and award growth",
+      name: "Demonstration: 8(a) participation and award growth",
+      demonstration: true,
       have: 3,
       need: 3,
       missing: [],
@@ -376,7 +512,8 @@ export function collectionFindings() {
     },
     {
       id: "col-lead-assist",
-      name: "Assistance shifts under new appropriations",
+      name: "Demonstration: Assistance shifts under new appropriations",
+      demonstration: true,
       have: 2,
       need: 3,
       missing: ["Q1 release"],
@@ -390,7 +527,7 @@ export function collectionFindings() {
 /** A figure's basis line, derived so it cannot name a stale version. */
 function basisFor(datasetId, fallback) {
   const dataset = LAUNCH_COLLECTION.find((item) => item.id === datasetId);
-  return dataset ? `${collectionShort(dataset)} ${dataset.version}` : fallback;
+  return dataset ? `${collectionShort(dataset)}, updated ${dataset.updated}` : fallback;
 }
 
 /**
@@ -505,35 +642,12 @@ export function figuresInShelfOrder() {
 export function collectionCitation(datasetId, accessedOn = null) {
   const dataset = LAUNCH_COLLECTION.find((item) => item.id === datasetId);
   if (!dataset) return null;
-  const vintage = dataset.vintage ? `, vintage ${dataset.vintage}` : "";
+  const updated = dataset.updated ? ` Updated ${dataset.updated}.` : "";
   const accessed = accessedOn ? ` Accessed ${accessedOn}.` : "";
   return (
-    `Lumecon, "${dataset.name}" (${dataset.version}${vintage}), ` +
-    `Cedar Press collection, cedarpress.ai.${accessed}`
+    `Lumecon, "${dataset.name}", ` +
+    `Cedar Press collection, cedarpress.ai.${updated}${accessed}`
   );
-}
-
-// One CSV cell, quoted only when the value needs it, so ordinary cells stay
-// byte-identical to what they were before quoting existed.
-function csvCell(value) {
-  const text = String(value ?? "");
-  return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
-}
-
-/**
- * The number of columns in a CSV header line, respecting quoted cells.
- *
- * A header like `a,"b,c",d` is three columns, not four, and the citation row
- * has to be padded to the real width or the file is ragged.
- */
-function columnCount(headerLine) {
-  let count = 1;
-  let quoted = false;
-  for (const character of headerLine) {
-    if (character === '"') quoted = !quoted;
-    else if (character === "," && !quoted) count += 1;
-  }
-  return count;
 }
 
 /**
@@ -549,7 +663,7 @@ function columnCount(headerLine) {
  * the rows a tile promises is the failure this avoids, and `hasReleaseFile` in
  * pressDownload.js reads this to keep the tile honest.
  *
- * The last row is the citation. A downloaded file outlives the page it came
+ * The citation is a column on each observation, never an extra data row. A downloaded file outlives the page it came
  * from, so the file itself must say what it is, whose work it is and how to
  * credit it; provenance that lives only in the UI is provenance the reader
  * loses on save.
@@ -558,14 +672,32 @@ function columnCount(headerLine) {
  * Node reads from disk. The bytes are not bundled: the twelve collections
  * carry 169 sample files and inlining them would put 1.4 MB of CSV into the
  * page for a button most readers never press.
+ *
+ * A current-release spreadsheet sample is checked against the codebook's
+ * columns, so the caller awaits `loadCodebook()` (codebook.js) first;
+ * `csvFor` in pressDownload.js does.
  */
 export function collectionCsv(datasetId, sampleText) {
   const sample = SAMPLES[datasetId];
   if (!sample?.path || sampleText == null) return null;
-  const lines = sampleText.replace(/\r\n/g, "\n").replace(/\n+$/, "").split("\n");
-  const width = columnCount(lines[0]);
-  const citation = ["cite_as", collectionCitation(datasetId) ?? "", ...Array(Math.max(0, width - 2)).fill("")];
-  return [...lines, citation.map(csvCell).join(",")].join("\n");
+  const { columns, rows } = parseCsv(sampleText);
+  if (sample.path.endsWith("/spreadsheet__10.csv")) {
+    // The current release replaces historical previews. A cached response
+    // with the old schema must not acquire a citation for the new release.
+    const table = sample.table;
+    const key = typeof table === "string" && table.endsWith(".csv")
+      ? `${datasetId}/${table.slice(0, -4)}` : null;
+    const expected = codebookTables()[key]?.fields?.map((field) => field.column);
+    if (!expected || columns.length !== expected.length
+        || expected.length !== sample.columns
+        || columns.some((column, index) => column !== expected[index])
+        || rows.length !== sample.rows) return null;
+  }
+  const citation = collectionCitation(datasetId) ?? "";
+  return [
+    [...columns, "cite_as"],
+    ...rows.map((row) => [...columns.map((name) => row[name]), citation]),
+  ].map((row) => row.map(csvCell).join(",")).join("\n");
 }
 
 /**
@@ -582,4 +714,47 @@ export function hasSample(datasetId) {
 /** Where the browser fetches a collection's preview file, or `null`. */
 export function samplePath(datasetId) {
   return SAMPLES[datasetId]?.path ?? null;
+}
+
+/**
+ * Validate the public manifest binding for NEED's reviewed finite component,
+ * then compare the fetched CSV bytes. The private proof envelope stays off
+ * the client; staging verifies it before publishing this digest.
+ */
+export async function reviewedPreviewTextMatches(sampleText, sample, proof) {
+  const sha256 = (value) => typeof value === "string" && /^[a-f0-9]{64}$/.test(value);
+  if (typeof sampleText !== "string"
+      || sample?.table !== "need.csv"
+      || sample?.path !== "/data/cedar/samples/need/spreadsheet__10.csv"
+      || proof?.component !== "reviewed_public_base"
+      || proof?.envelope !== "data/cedar/need-reviewed-preview.json"
+      || !sha256(proof?.envelope_sha256)
+      || !sha256(proof?.sample_sha256)
+      || !sha256(sample?.release_id) || sample.release_id !== proof?.release_id
+      || !sha256(sample?.manifest_sha256) || sample.manifest_sha256 !== proof?.manifest_sha256
+      || !Number.isSafeInteger(proof?.public_records) || proof.public_records <= 0
+      || proof.public_records !== sample?.of
+      || !Number.isSafeInteger(sample?.rows) || sample.rows <= 0 || sample.rows > sample.of
+      || !Number.isSafeInteger(sample?.columns) || sample.columns <= 0) return false;
+  try {
+    const subtle = globalThis.crypto?.subtle;
+    if (!subtle) return false;
+    const bytes = new TextEncoder().encode(sampleText);
+    const digest = await subtle.digest("SHA-256", bytes);
+    const actual = Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
+    return actual === proof.sample_sha256;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Exact-byte verification where a sample carries a reviewed-preview proof.
+ * A NEED sample without one publishes like any other collection's (owner
+ * ruling 2026-10-04: no NEED publication hold).
+ */
+export async function sampleTextMatchesRelease(datasetId, sampleText) {
+  const proof = manifest.collections.find((entry) => entry.id === datasetId)?.verified_preview;
+  if (datasetId !== "need" || !proof) return true;
+  return reviewedPreviewTextMatches(sampleText, SAMPLES[datasetId], proof);
 }

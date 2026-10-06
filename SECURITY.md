@@ -76,21 +76,19 @@ Out of scope:
 - Third-party destinations we link to, including Tribal Business News, the
   partner that handles Cedar Press subscriber plans.
 - The sibling Lumecon repositories, each separate scope with its own policy
-  (*as of 2026-09-23*):
+  (*as of 2026-10-03*):
   - `teim-app`, the Lumecon platform (Cedar Impact, Cedar Commons and Cedar
     Grove): <https://github.com/teim-team/teim-app/blob/main/SECURITY.md>.
   - `cedar`, Cedar, Lumecon's AI economic analyst:
     <https://github.com/teim-team/cedar/blob/develop/SECURITY.md> (`develop`
     is that repository's default branch).
   - `teim-engine`, the internal model engine:
-    <https://github.com/teim-team/teim-engine/blob/main/SECURITY.md>. That
-    file is not on `main` yet; it lands with
-    [teim-engine #20](https://github.com/teim-team/teim-engine/pull/20).
+    <https://github.com/teim-team/teim-engine/blob/main/SECURITY.md>.
   - `lumecon-website`, the public site `lumecon.ai`, which holds Lumecon's
     canonical policy:
     <https://github.com/teim-team/lumecon-website/blob/main/SECURITY.md>.
-  - [`Lumecon-data`](https://github.com/teim-team/Lumecon-data), the shared
-    data foundation. It has no root `SECURITY.md` on `main` yet.
+  - `Lumecon-data`, the shared data foundation:
+    <https://github.com/teim-team/Lumecon-data/blob/main/SECURITY.md>.
 
   Reports for any of them still reach contact@lumecon.ai; naming the
   repository in the subject line routes it faster.
@@ -125,6 +123,28 @@ Out of scope:
 - **Storage.** Browser storage holds session and preference state only, and
   every access is guarded so a storage-denying policy degrades rather than
   breaks the page.
+- **Guessing is bounded.** Sign-in and access-code activation are rate
+  limited per client address (`server/cedar_press/ratelimit.py`). Behind a
+  proxy the address is the one the outermost trusted proxy appended to
+  `X-Forwarded-For`, counted `CEDAR_PRESS_PROXY_HOPS` entries from the right
+  when `CEDAR_PRESS_TRUST_PROXY=1`; whatever a caller writes to the left of
+  it is ignored, so the header cannot mint a fresh allowance. Staging and
+  production refuse to authenticate until `CEDAR_PRESS_TRUST_PROXY` is set
+  explicitly, so a deployment behind CloudFront cannot quietly key every
+  subscriber to one address. IPv6 callers are limited per /64. The limiter is
+  per process and in memory; a distributed guess from many addresses is the
+  edge's to stop.
+- **Activation reveals nothing to a stranger.** The activation routes answer
+  "not recognized" until the code and the email address it was issued to both
+  match. Whether a code was used or has expired is said only to that address.
+- **Spreadsheet-safe downloads.** Every CSV the API or the client writes
+  prefixes a cell a spreadsheet would run as a formula (a leading `=`, `+`,
+  `@`, tab or carriage return, or a `-` that does not begin a number) with an
+  apostrophe. One rule, `server/cedar_press/csv_safety.py` on the server and
+  its mirror `csv.js` in the client, held to one shared table of cases.
+- **Bounded input.** Free text a subscriber sends is length limited before it
+  reaches a store or Cedar: research requests 4,000 characters, their use
+  case 500, a question to Cedar 1,000. Longer is refused with 422.
 - **Entitlements.** The client decides what renders; a subscriber's
   entitlement is authoritative on the server, and the two are expected to
   answer identically. Access-control findings should be reported against the

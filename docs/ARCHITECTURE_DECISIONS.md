@@ -3943,4 +3943,105 @@ identity specification, 1133 source admission and 1072 legacy consumer hold;
 These changes preserve issued IDs. No new ID allocator, event registry, promoted
 relationship, or review queue is authorized by technical test success. Current
 NEED human review remains pinned; returned decisions require validated receipts.
+The continuation owns code/build.py, server/cedar_press/repository.py and app.py,
+server/README.md, the two release-download test/rehearsal files, and focused lint
+corrections in the existing field-map/review-import tests. It consumes the existing
+Lumecon HTTP and catalog contracts; no identity allocator or release format is copied.
+All candidates remain isolated and unpromoted. The original checkpoint branch is
+preserved; continuation starts from upstream 6d445f4 on codex/legislation-release-consumer.
+
+Release closure ownership (2026-09-24): the integrator owns cedar_publication.py,
+test_field_map.py and canonical review/runbook updates. The Legislation worker
+owns 1137 plus dependency wiring in 1135 and test_candidate_review.py. The
+infrastructure worker owns build.py and test_pipeline_registration.py. Source
+research is read-only. These workers return changes to the integrator; only the
+integrator commits. Local commits and draft-branch pushes are now authorized by
+Elijah; production publication, identity promotion and Claude frontend edits
+remain prohibited. Original canonical data and active review artifacts stay pinned.
+
 <!-- END CODEX-EARLY-ACCESS-TAKEOVER -->
+
+<!-- BEGIN CEDAR-CONVERGENCE-20260926 -->
+Coordinator owns this isolated integration worktree and the common release consumers, entitlement registration, producer pins, generated inventory and convergence handoff. Existing sources and active identity review stay preserved. The user authorized commits, review-branch pushes and draft PRs for this recovery; no production release or identity issuance.
+2026-09-27 continuation: the coordinator also owns the NEED evidence
+adapter on registered Native entity profiles. PR #131 is merged upstream; PR #133's product
+work is incorporated at its tested head without writing that branch. Exact
+enterprise IDs are preserved under the September 23 identity contract, including
+CEDAR-NEST and NESTREL. NEED is the collection name. Publication review is enforced
+before pin or source access. A public profile requires membership in the existing
+Cedar entity register; NEED membership creates no duplicate profile. Registered
+entities can also be enterprises and appear in NEED. Patents and ratings name
+their exact legal subject, which can be the registered entity, its evidenced NEED
+counterpart, or a clearly attributed related enterprise. A parent entity never
+inherits a subsidiary's facts. The internal entity register is not a sixteenth
+collection. Profile preview amounts are no longer summed across collections because
+their financial measures and overlapping grains differ.
+<!-- END CEDAR-CONVERGENCE-20260926 -->
+
+<!-- BEGIN CEDAR-GIVING-PLOT-CONSUMER-20260926 -->
+The coordinator subsequently assigned the same worker the NEED `1102` legacy
+conflict-writer correction and its focused regressions. No shared publication or
+identity gate is changed. The preserved candidate archives are read-only evidence.
+The Giving/PLOT consumer worker owns only the isolated
+`codex/giving-plot-consumer-20260926` worktree from `ee79d67`: additive server
+release target declarations, component consumption and focused tests. The
+coordinator owns integration and exact cross-repository pins. PR #131 owns
+frontend presentation. Giving is standard Press with inherited Grove access;
+PLOT is Press+ with inherited Grove access; Gaming remains Grove exclusive.
+Existing full-release verification and subscriber authority remain canonical.
+<!-- END CEDAR-GIVING-PLOT-CONSUMER-20260926 -->
+
+<!-- BEGIN PRESS-PRESENTATION-20261001 -->
+### Press presentation maintenance, 2026-10-01
+
+The Grove merge audit worker owns the focused Press presentation changes for this pass; the coordinator applies and verifies them. Public samples retain existing eligibility. Connected counts derive from verified release metadata. The shared reader presentation helper owns retired identifier column filtering and record labels. The producer retains canonical data and public codebook ownership. Current maintenance instructions live in `docs/PRESENTATION_DATA_FLOW.md`; historical measurements are not current product counts.
+<!-- END PRESS-PRESENTATION-20261001 -->
+
+<!-- BEGIN DEALS-PUBLIC-PREVIEW-2026-10-01 -->
+## Public Deals preview keeps its ten-row boundary
+
+The Deals public sample now contains ten primary-source-reviewed events with existing CEV and CE identifiers. Its 40-column consumer schema is unchanged. Source and method descriptions identify the selected preview scope, date precision and unlike monetary measures. Four newly evidenced source categories are credited; no site-wide source total is invented. This workstream owns only its Deals sample, Deals descriptor prose, corresponding generated guide and source-category additions. No protected release, collection row count or subscriber entitlement changed. The full governed multi-party consumer remains a separate integration.
+<!-- END DEALS-PUBLIC-PREVIEW-2026-10-01 -->
+
+<!-- BEGIN PRESS-LIVE-WIRING-20261003 -->
+## Press live services, 2026-10-03
+
+The root coordinator owns the points request lifecycle, its hook/callers and
+API cancellation, preserving the existing server ledger and earning rules.
+The Press live-wiring agent supplies reviewed release-feed patches; the root
+applies and validates them without overwriting other publication work.
+Points, voting and research briefs belong to Press. Grove includes every Cedar
+Press and Press Plus dataset, including future additions, plus Grove-only data.
+The reverse does not apply: a Press plan does not grant Grove-only data access.
+Press earns one point per active month and Press Plus earns two, once per
+subscription. Grove has no earning rule. Three institutional points remain a
+proposal, not an implemented rate. Existing twelve-month expiry is unchanged.
+
+Account changes immediately hide private balances and dispose outstanding reads
+and writes. The request form is scoped to its account and plan. Request creation
+and optional support now share one store transaction, so an insufficient balance
+cannot leave a request the API reported as failed. Mutations are never retried
+automatically. Local verification passed 30 ledger tests across SQLite and an
+isolated PostgreSQL schema, including concurrent spending, 16 client/session
+tests, 78 API tests, lint and the Vite build. Intentional old-owner and split-
+transaction mutations each failed their regression test before restoration.
+This does not establish that the running deployment is configured with Postgres.
+
+What’s New, the overview update rail and briefing now share the authenticated
+release service through `useReleaseFeed`. The API projects current verified,
+tier-permitted releases; missing service data cannot fall back to a bundled
+snapshot. Available spreadsheet observations are counted once, without adding
+overlapping component totals. A preview date is displayed only when both the
+release and manifest hashes match its recorded descriptor. Publication dates are
+left unknown because the current producer contract does not record them.
+Historical public preview anchors remain separately labeled and expose no old
+full-release totals as current facts. A complete publication timeline still
+requires immutable events recorded when an approved serving pin changes.
+
+Feed validation: 109 focused API/shared-consumer tests, 21 release/lifecycle tests,
+the frontend coverage gate, lint, Ruff and Vite build passed locally. A synthetic
+connected browser check exercised late permalink expansion, historical preview
+anchors, one shared landing/briefing request and unavailable-service behavior.
+Desktop and mobile screenshots were inspected. These fixtures do not certify
+the deployed service or completed data publication.
+<!-- END PRESS-LIVE-WIRING-20261003 -->

@@ -1,14 +1,23 @@
 {
   "provenance": {
-    "generator": "scripts/import_cedar_manifest.py",
-    "workspace_inputs": {
-      "descriptors": "dist/collection_descriptors.json (code/760_collection_descriptors.py)",
-      "cedar_facts": "dist/collection_descriptors.cedar.json (same script)",
-      "review_manifest": "dist/review/MANIFEST.csv (code/1135_full_dataset_review_bundle.py)",
-      "samples": "dist/review/samples/<collection>/<table>__10.csv (same script)",
-      "flagship_tables": "code/770_sample_extracts.py FLAGSHIP, read by text"
-    },
-    "note": "Every value in this file is copied from those inputs. Nothing is typed here, and a field Cedar does not measure is null and named in unmeasured_fields."
+    "generator": "scripts/stage_verified_previews.py",
+    "producer_commit": "cf29ec3100a9e7762d46280d3a7b1d6074437329",
+    "updated": "2026-10-01",
+    "note": "Counts and samples derive from verified permitted spreadsheets, not legacy source previews. No production pin changes.",
+    "preview_receipts": "data/cedar/verified-preview-releases.json",
+    "selected_refreshes": {
+      "need": {
+        "generator": "scripts/stage_verified_previews.py --refresh-existing",
+        "producer_commit": "9f61569378a615e1142df69dd19665015506a48c",
+        "updated": "2026-10-01",
+        "release_id": "428d11048f12cd819f7cf95dccdbbe4c1ea20a8c81c635a7e985fbc17b1b983b",
+        "manifest_sha256": "038be840a58f812192ffc72eaedc7512ddcd5f1a8c2a66a033c64e202d702c17",
+        "replaces": {
+          "release_id": "dc105294abc2ba5d0a3819afbfe32f81b3e8ef41f3ba8c1c13c8ce320010d035",
+          "manifest_sha256": "380ff64aa5af720e7337dfe20cb8d9cc73f76bcd508276a9e9f23f85689cdc9d"
+        }
+      }
+    }
   },
   "unmeasured_fields": {
     "vintage": "760 emits an empty vintage for every collection: the cadence measurement it derives the newest held period from produced nothing for any of the fifteen. No period is stated rather than a plausible one being chosen.",
@@ -29,6 +38,12 @@
       "id": "_entity_layer",
       "shelf": "infrastructure",
       "reason": "Shelf 'infrastructure': the identity spine every other collection keys to, not a collection sold on its own."
+    },
+    {
+      "id": "infrastructure",
+      "name": "Native Infrastructure",
+      "shelf": "grove",
+      "reason": "A separate Cedar Grove dataset. Records retain source-specific periods, grains and publication permissions."
     }
   ],
   "collections": [
@@ -39,10 +54,10 @@
         "shelf": "standard",
         "level": "entity",
         "origin": "lumecon",
-        "rows_label": "3,646,750 rows",
+        "rows_label": "640,942 observations",
         "vintage": null,
-        "version": "v2",
-        "updated": "2026-09-26",
+        "version": "v4",
+        "updated": "2026-10-06",
         "downloads": null,
         "name": "Federal Funding to Indian Country",
         "short_name": "Funding",
@@ -54,341 +69,47 @@
         "cedar_id": "funding",
         "status": "READY",
         "blockers": [],
-        "n_rows": 3646750,
-        "n_tables": 14
+        "n_rows": 640942,
+        "n_tables": 1,
+        "n_record_types": 1,
+        "count_basis": "Permitted rows in the exact producer spreadsheet; mixed grains are not totals.",
+        "release_id": "6ba2dd2144d0a7cad1a0e8b57e801f170cbd47c4c5464d38c42b97999c0a837c",
+        "manifest_sha256": "b8cb82e73c18f082967cd80a28261e5a2eb7c4ff9de69dd898dd53ee2e7dae51",
+        "readiness_scope": "Verified local preview; production approval and endpoint pins are separate."
       },
       "sample": {
-        "table": "federal_funding_transactions.csv",
-        "path": "/data/cedar/samples/funding/federal_funding_transactions__10.csv",
+        "table": "funding.csv",
+        "path": "/data/cedar/samples/funding/spreadsheet__10.csv",
         "rows": 10,
-        "of": 701955,
-        "columns": 63
+        "of": 640942,
+        "columns": 42,
+        "release_id": "6ba2dd2144d0a7cad1a0e8b57e801f170cbd47c4c5464d38c42b97999c0a837c",
+        "manifest_sha256": "b8cb82e73c18f082967cd80a28261e5a2eb7c4ff9de69dd898dd53ee2e7dae51"
       },
       "tables": [
         {
-          "table": "bie_uio_dollars_by_entity.csv",
-          "sample_path": "/data/cedar/samples/funding/bie_uio_dollars_by_entity__10.csv",
-          "rows_in": 114,
-          "rows_published": 114,
+          "table": "funding.csv",
+          "sample_path": "/data/cedar/samples/funding/spreadsheet__10.csv",
+          "rows_in": 640942,
+          "rows_published": 640942,
           "rows_withheld": 0,
           "withheld_why": null,
-          "columns_published": 14,
+          "columns_published": 42,
           "sample_rows": 10,
+          "record_types": {
+            "federal_funding_transactions": 640942
+          },
           "full_file": {
             "shippable": true,
             "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "bie_uio_identifier_links.csv",
-          "sample_path": "/data/cedar/samples/funding/bie_uio_identifier_links__10.csv",
-          "rows_in": 302,
-          "rows_published": 302,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 18,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": false,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "faads_attribution_audit_sample.csv",
-          "sample_path": "/data/cedar/samples/funding/faads_attribution_audit_sample__10.csv",
-          "rows_in": 2287,
-          "rows_published": 2287,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 12,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": false,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "faads_entity_attribution.csv",
-          "sample_path": "/data/cedar/samples/funding/faads_entity_attribution__10.csv",
-          "rows_in": 29594,
-          "rows_published": 29594,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 30,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "faads_identifier_coverage_by_agency_year.csv",
-          "sample_path": "/data/cedar/samples/funding/faads_identifier_coverage_by_agency_year__10.csv",
-          "rows_in": 77,
-          "rows_published": 77,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 11,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": false,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "faads_transactions.csv",
-          "sample_path": "/data/cedar/samples/funding/faads_transactions__10.csv",
-          "rows_in": 60661,
-          "rows_published": 60661,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 25,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "faads_transactions_all_agencies.csv",
-          "sample_path": "/data/cedar/samples/funding/faads_transactions_all_agencies__10.csv",
-          "rows_in": 2769748,
-          "rows_published": 2769748,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 40,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "federal_funding_rulings_from_dofile.csv",
-          "sample_path": "/data/cedar/samples/funding/federal_funding_rulings_from_dofile__10.csv",
-          "rows_in": 3789,
-          "rows_published": 3789,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 7,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": false,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "federal_funding_transactions.csv",
-          "sample_path": "/data/cedar/samples/funding/federal_funding_transactions__10.csv",
-          "rows_in": 701955,
-          "rows_published": 701955,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 63,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "federal_funding_tribe_year_panel.csv",
-          "sample_path": "/data/cedar/samples/funding/federal_funding_tribe_year_panel__10.csv",
-          "rows_in": 5496,
-          "rows_published": 5496,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 14,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "federal_funding_year_comparison_2026-08-05.csv",
-          "sample_path": "/data/cedar/samples/funding/federal_funding_year_comparison_2026-08-05__10.csv",
-          "rows_in": 26,
-          "rows_published": 26,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 10,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": false,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "funding_identifier_harvest.csv",
-          "sample_path": "/data/cedar/samples/funding/funding_identifier_harvest__10.csv",
-          "rows_in": 37704,
-          "rows_published": 37704,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 15,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": false,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "funding_identifier_netnew_ueis.csv",
-          "sample_path": "/data/cedar/samples/funding/funding_identifier_netnew_ueis__10.csv",
-          "rows_in": 4249,
-          "rows_published": 4249,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 1,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "inflation_deflator.csv",
-          "sample_path": "/data/cedar/samples/funding/inflation_deflator__10.csv",
-          "rows_in": 27,
-          "rows_published": 27,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 6,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "native_passthrough.csv",
-          "sample_path": "/data/cedar/samples/funding/native_passthrough__10.csv",
-          "rows_in": 1733,
-          "rows_published": 1481,
-          "rows_withheld": 252,
-          "withheld_why": "duplicate_status=exact_repeat_within_source=87; duplicate_status=superseded_by_primary_source=165",
-          "columns_published": 22,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "native_passthrough_pairs.csv",
-          "sample_path": "/data/cedar/samples/funding/native_passthrough_pairs__10.csv",
-          "rows_in": 323,
-          "rows_published": 323,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 10,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "usac_erate_tribal_commitments.csv",
-          "sample_path": "/data/cedar/samples/funding/usac_erate_tribal_commitments__10.csv",
-          "rows_in": 53847,
-          "rows_published": 53847,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 75,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "usac_erate_tribal_entities.csv",
-          "sample_path": "/data/cedar/samples/funding/usac_erate_tribal_entities__10.csv",
-          "rows_in": 2752,
-          "rows_published": 2752,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 26,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "usac_rhc_hcp_directory.csv",
-          "sample_path": "/data/cedar/samples/funding/usac_rhc_hcp_directory__10.csv",
-          "rows_in": 11142,
-          "rows_published": 11142,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 20,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "usac_rhc_native_candidate_lines.csv",
-          "sample_path": "/data/cedar/samples/funding/usac_rhc_native_candidate_lines__10.csv",
-          "rows_in": 5109,
-          "rows_published": 5109,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 63,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
+            "files": 1,
+            "largest_file_mb": 491.576202
           }
         }
       ],
       "full_files": {
         "served": false,
-        "note": "The full spreadsheets are built by code/1135_full_dataset_review_bundle.py and are not in this repository: the set measures 6.2 GB and single tables exceed GitHub's 100 MB limit. Each table above carries the split and file count a serving layer needs to locate it."
+        "note": "The local spreadsheet was verified. These staged previews do not approve or configure a production download."
       }
     },
     {
@@ -398,10 +119,10 @@
         "shelf": "standard",
         "level": "entity_and_geography",
         "origin": "lumecon",
-        "rows_label": "502,483 rows",
+        "rows_label": "21,258 observations",
         "vintage": null,
-        "version": "v2",
-        "updated": "2026-09-26",
+        "version": "v4",
+        "updated": "2026-10-06",
         "downloads": null,
         "name": "Federal Register — Indian Affairs",
         "short_name": "Fed Register",
@@ -413,485 +134,48 @@
         "cedar_id": "federal-register",
         "status": "READY",
         "blockers": [],
-        "n_rows": 502483,
-        "n_tables": 23
+        "n_rows": 21258,
+        "n_tables": 1,
+        "n_record_types": 2,
+        "count_basis": "Permitted rows in the exact producer spreadsheet; mixed grains are not totals.",
+        "release_id": "c28a84fb4e008363499eb23dbac5030ba2f279f90924ded090ddc6e251b711c2",
+        "manifest_sha256": "630ae48a8f548cd86c3ddc19935a7b1221ce6fa081e99521d2d23bcbd92ee8fa",
+        "readiness_scope": "Verified local preview; production approval and endpoint pins are separate."
       },
       "sample": {
-        "table": "consultation_events.csv",
-        "path": "/data/cedar/samples/federal-register/consultation_events__10.csv",
+        "table": "federal-register.csv",
+        "path": "/data/cedar/samples/federal-register/spreadsheet__10.csv",
         "rows": 10,
-        "of": 11402,
-        "columns": 39
+        "of": 21258,
+        "columns": 61,
+        "release_id": "c28a84fb4e008363499eb23dbac5030ba2f279f90924ded090ddc6e251b711c2",
+        "manifest_sha256": "630ae48a8f548cd86c3ddc19935a7b1221ce6fa081e99521d2d23bcbd92ee8fa"
       },
       "tables": [
         {
-          "table": "consultation_agency_coverage.csv",
-          "sample_path": "/data/cedar/samples/federal-register/consultation_agency_coverage__10.csv",
-          "rows_in": 66,
-          "rows_published": 66,
+          "table": "federal-register.csv",
+          "sample_path": "/data/cedar/samples/federal-register/spreadsheet__10.csv",
+          "rows_in": 21258,
+          "rows_published": 21258,
           "rows_withheld": 0,
           "withheld_why": null,
-          "columns_published": 25,
+          "columns_published": 61,
           "sample_rows": 10,
-          "full_file": {
-            "shippable": false,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "consultation_events.csv",
-          "sample_path": "/data/cedar/samples/federal-register/consultation_events__10.csv",
-          "rows_in": 11402,
-          "rows_published": 11402,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 39,
-          "sample_rows": 10,
+          "record_types": {
+            "consultation_participants": 11402,
+            "federal_actions": 9856
+          },
           "full_file": {
             "shippable": true,
             "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "consultation_source_probe.csv",
-          "sample_path": "/data/cedar/samples/federal-register/consultation_source_probe__10.csv",
-          "rows_in": 5,
-          "rows_published": 5,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 12,
-          "sample_rows": 5,
-          "full_file": {
-            "shippable": false,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "correspondence_foia_source_coverage.csv",
-          "sample_path": "/data/cedar/samples/federal-register/correspondence_foia_source_coverage__10.csv",
-          "rows_in": 124,
-          "rows_published": 124,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 8,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "dear_tribal_leader_letters.csv",
-          "sample_path": "/data/cedar/samples/federal-register/dear_tribal_leader_letters__10.csv",
-          "rows_in": 807,
-          "rows_published": 807,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 26,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "dtll_source_coverage.csv",
-          "sample_path": "/data/cedar/samples/federal-register/dtll_source_coverage__10.csv",
-          "rows_in": 35,
-          "rows_published": 35,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 13,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": false,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "federal_actions.csv",
-          "sample_path": "/data/cedar/samples/federal-register/federal_actions__10.csv",
-          "rows_in": 156897,
-          "rows_published": 156897,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 32,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "federal_actions_entity_bridge.csv",
-          "sample_path": "/data/cedar/samples/federal-register/federal_actions_entity_bridge__10.csv",
-          "rows_in": 5786,
-          "rows_published": 5786,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 13,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "federal_actions_raw.csv",
-          "sample_path": "/data/cedar/samples/federal-register/federal_actions_raw__10.csv",
-          "rows_in": 156897,
-          "rows_published": 156897,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 25,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "fr_abstract_availability_year.csv",
-          "sample_path": "/data/cedar/samples/federal-register/fr_abstract_availability_year__10.csv",
-          "rows_in": 33,
-          "rows_published": 33,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 4,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "fr_consultation_by_agency.csv",
-          "sample_path": "/data/cedar/samples/federal-register/fr_consultation_by_agency__10.csv",
-          "rows_in": 21,
-          "rows_published": 21,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 3,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "fr_consultation_notices.csv",
-          "sample_path": "/data/cedar/samples/federal-register/fr_consultation_notices__10.csv",
-          "rows_in": 485,
-          "rows_published": 485,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 11,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "fr_consultation_referenced.csv",
-          "sample_path": "/data/cedar/samples/federal-register/fr_consultation_referenced__10.csv",
-          "rows_in": 1829,
-          "rows_published": 1829,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 5,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "fr_consultation_year.csv",
-          "sample_path": "/data/cedar/samples/federal-register/fr_consultation_year__10.csv",
-          "rows_in": 33,
-          "rows_published": 33,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 3,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "fr_content_classification.csv",
-          "sample_path": "/data/cedar/samples/federal-register/fr_content_classification__10.csv",
-          "rows_in": 156897,
-          "rows_published": 156897,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 13,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "fr_ex_parte_notices.csv",
-          "sample_path": "/data/cedar/samples/federal-register/fr_ex_parte_notices__10.csv",
-          "rows_in": 7828,
-          "rows_published": 7828,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 26,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "fr_ex_parte_parties.csv",
-          "sample_path": "/data/cedar/samples/federal-register/fr_ex_parte_parties__10.csv",
-          "rows_in": 116,
-          "rows_published": 116,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 28,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "fr_ex_parte_party_entity_links.csv",
-          "sample_path": "/data/cedar/samples/federal-register/fr_ex_parte_party_entity_links__10.csv",
-          "rows_in": 9,
-          "rows_published": 9,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 12,
-          "sample_rows": 9,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "fr_recognized_entities.csv",
-          "sample_path": "/data/cedar/samples/federal-register/fr_recognized_entities__10.csv",
-          "rows_in": 575,
-          "rows_published": 575,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 7,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": false,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "fr_relevance_stratum_audit.csv",
-          "sample_path": "/data/cedar/samples/federal-register/fr_relevance_stratum_audit__10.csv",
-          "rows_in": 4,
-          "rows_published": 4,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 5,
-          "sample_rows": 4,
-          "full_file": {
-            "shippable": false,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "fr_relevance_tier_year.csv",
-          "sample_path": "/data/cedar/samples/federal-register/fr_relevance_tier_year__10.csv",
-          "rows_in": 132,
-          "rows_published": 132,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 3,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "fr_theme_year.csv",
-          "sample_path": "/data/cedar/samples/federal-register/fr_theme_year__10.csv",
-          "rows_in": 627,
-          "rows_published": 627,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 5,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "nepa_administrative_record_parties.csv",
-          "sample_path": "/data/cedar/samples/federal-register/nepa_administrative_record_parties__10.csv",
-          "rows_in": 36,
-          "rows_published": 36,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 22,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "nepa_eplanning_projects.csv",
-          "sample_path": "/data/cedar/samples/federal-register/nepa_eplanning_projects__10.csv",
-          "rows_in": 312,
-          "rows_published": 312,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 26,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "nepa_project_documents.csv",
-          "sample_path": "/data/cedar/samples/federal-register/nepa_project_documents__10.csv",
-          "rows_in": 789,
-          "rows_published": 789,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 20,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "nepa_source_coverage.csv",
-          "sample_path": "/data/cedar/samples/federal-register/nepa_source_coverage__10.csv",
-          "rows_in": 5,
-          "rows_published": 5,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 7,
-          "sample_rows": 5,
-          "full_file": {
-            "shippable": false,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "section_106_consultation_events.csv",
-          "sample_path": "/data/cedar/samples/federal-register/section_106_consultation_events__10.csv",
-          "rows_in": 1367,
-          "rows_published": 1367,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 41,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "section_106_project_parties.csv",
-          "sample_path": "/data/cedar/samples/federal-register/section_106_project_parties__10.csv",
-          "rows_in": 51,
-          "rows_published": 51,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 24,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "section_106_source_coverage.csv",
-          "sample_path": "/data/cedar/samples/federal-register/section_106_source_coverage__10.csv",
-          "rows_in": 5,
-          "rows_published": 5,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 9,
-          "sample_rows": 5,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
+            "files": 1,
+            "largest_file_mb": 31.750119
           }
         }
       ],
       "full_files": {
         "served": false,
-        "note": "The full spreadsheets are built by code/1135_full_dataset_review_bundle.py and are not in this repository: the set measures 6.2 GB and single tables exceed GitHub's 100 MB limit. Each table above carries the split and file count a serving layer needs to locate it."
+        "note": "The local spreadsheet was verified. These staged previews do not approve or configure a production download."
       }
     },
     {
@@ -901,10 +185,10 @@
         "shelf": "standard",
         "level": "geography",
         "origin": "lumecon",
-        "rows_label": "206,354 rows",
+        "rows_label": "3,064 observations",
         "vintage": null,
-        "version": "v2",
-        "updated": "2026-09-26",
+        "version": "v4",
+        "updated": "2026-10-06",
         "downloads": null,
         "name": "Native Legislation and Votes",
         "short_name": "Legislation",
@@ -916,293 +200,47 @@
         "cedar_id": "legislation",
         "status": "READY",
         "blockers": [],
-        "n_rows": 206354,
-        "n_tables": 15
+        "n_rows": 3064,
+        "n_tables": 1,
+        "n_record_types": 1,
+        "count_basis": "Permitted rows in the exact producer spreadsheet; mixed grains are not totals.",
+        "release_id": "8b4569e17831f4a0dfc7a6df8f03e39191f79637f714fe76bd9ba0991e56f2f3",
+        "manifest_sha256": "4a9ad97b72620923cb12b53fd691b64c75ec74f4fd0a386e3d6c1780df01fb4d",
+        "readiness_scope": "Verified local preview; production approval and endpoint pins are separate."
       },
       "sample": {
-        "table": "native_bills.csv",
-        "path": "/data/cedar/samples/legislation/native_bills__10.csv",
+        "table": "legislation.csv",
+        "path": "/data/cedar/samples/legislation/spreadsheet__10.csv",
         "rows": 10,
-        "of": 3069,
-        "columns": 37
+        "of": 3064,
+        "columns": 33,
+        "release_id": "8b4569e17831f4a0dfc7a6df8f03e39191f79637f714fe76bd9ba0991e56f2f3",
+        "manifest_sha256": "4a9ad97b72620923cb12b53fd691b64c75ec74f4fd0a386e3d6c1780df01fb4d"
       },
       "tables": [
         {
-          "table": "bill_votes.csv",
-          "sample_path": "/data/cedar/samples/legislation/bill_votes__10.csv",
-          "rows_in": 423,
-          "rows_published": 423,
+          "table": "legislation.csv",
+          "sample_path": "/data/cedar/samples/legislation/spreadsheet__10.csv",
+          "rows_in": 3064,
+          "rows_published": 3064,
           "rows_withheld": 0,
           "withheld_why": null,
-          "columns_published": 71,
+          "columns_published": 33,
           "sample_rows": 10,
+          "record_types": {
+            "records": 3064
+          },
           "full_file": {
             "shippable": true,
             "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "bill_votes_entity_bridge.csv",
-          "sample_path": "/data/cedar/samples/legislation/bill_votes_entity_bridge__10.csv",
-          "rows_in": 75,
-          "rows_published": 75,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 10,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "bill_votes_official_verification.csv",
-          "sample_path": "/data/cedar/samples/legislation/bill_votes_official_verification__10.csv",
-          "rows_in": 305,
-          "rows_published": 305,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 26,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "congressional_correspondence_log.csv",
-          "sample_path": "/data/cedar/samples/legislation/congressional_correspondence_log__10.csv",
-          "rows_in": 0,
-          "rows_published": 0,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 24,
-          "sample_rows": 0,
-          "full_file": {
-            "shippable": false,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "congressional_correspondence_systems.csv",
-          "sample_path": "/data/cedar/samples/legislation/congressional_correspondence_systems__10.csv",
-          "rows_in": 257,
-          "rows_published": 257,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 18,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "member_positions.csv",
-          "sample_path": "/data/cedar/samples/legislation/member_positions__10.csv",
-          "rows_in": 136119,
-          "rows_published": 136119,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 17,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "native_bill_action_coverage.csv",
-          "sample_path": "/data/cedar/samples/legislation/native_bill_action_coverage__10.csv",
-          "rows_in": 3069,
-          "rows_published": 3069,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 14,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "native_bill_actions.csv",
-          "sample_path": "/data/cedar/samples/legislation/native_bill_actions__10.csv",
-          "rows_in": 31936,
-          "rows_published": 31936,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 19,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "native_bill_cosponsor_coverage.csv",
-          "sample_path": "/data/cedar/samples/legislation/native_bill_cosponsor_coverage__10.csv",
-          "rows_in": 3069,
-          "rows_published": 3069,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 13,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "native_bill_cosponsors.csv",
-          "sample_path": "/data/cedar/samples/legislation/native_bill_cosponsors__10.csv",
-          "rows_in": 18987,
-          "rows_published": 18987,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 16,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "native_bill_outcomes.csv",
-          "sample_path": "/data/cedar/samples/legislation/native_bill_outcomes__10.csv",
-          "rows_in": 3069,
-          "rows_published": 0,
-          "rows_withheld": 3069,
-          "withheld_why": "unknown_state:disposition=committee-acted-never-reported=273; unknown_state:disposition=enacted=283; unknown_state:disposition=floor-vote-failed=11; unknown_state:disposition=floor-vote-held-outcome-unresolved=9; unknown_state:disposition=no-action-record=8; unknown_state:disposition=passed-one-chamber=421; unknown_state:disposition=pending-in-committee=125; unknown_state:disposition=placed-on-calendar-never-voted=282; unknown_state:disposition=referred-and-died-in-committee=1558; unknown_state:disposition=reported-from-committee-never-voted=76; unknown_state:disposition=superseded-by-another-measure=15; unknown_state:disposition=vetoed=8",
-          "columns_published": 25,
-          "sample_rows": 0,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "native_bills.csv",
-          "sample_path": "/data/cedar/samples/legislation/native_bills__10.csv",
-          "rows_in": 3069,
-          "rows_published": 3069,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 37,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "native_bills_entity_bridge.csv",
-          "sample_path": "/data/cedar/samples/legislation/native_bills_entity_bridge__10.csv",
-          "rows_in": 676,
-          "rows_published": 676,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 12,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "native_bills_entity_class.csv",
-          "sample_path": "/data/cedar/samples/legislation/native_bills_entity_class__10.csv",
-          "rows_in": 2694,
-          "rows_published": 2694,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 13,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "native_bills_subject_sweep.csv",
-          "sample_path": "/data/cedar/samples/legislation/native_bills_subject_sweep__10.csv",
-          "rows_in": 2409,
-          "rows_published": 2409,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 21,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "native_issue_litigation_coverage.csv",
-          "sample_path": "/data/cedar/samples/legislation/native_issue_litigation_coverage__10.csv",
-          "rows_in": 8,
-          "rows_published": 8,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 8,
-          "sample_rows": 8,
-          "full_file": {
-            "shippable": false,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "native_issue_litigation_positions.csv",
-          "sample_path": "/data/cedar/samples/legislation/native_issue_litigation_positions__10.csv",
-          "rows_in": 197,
-          "rows_published": 197,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 38,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
+            "files": 1,
+            "largest_file_mb": 2.094957
           }
         }
       ],
       "full_files": {
         "served": false,
-        "note": "The full spreadsheets are built by code/1135_full_dataset_review_bundle.py and are not in this repository: the set measures 6.2 GB and single tables exceed GitHub's 100 MB limit. Each table above carries the split and file count a serving layer needs to locate it."
+        "note": "The local spreadsheet was verified. These staged previews do not approve or configure a production download."
       }
     },
     {
@@ -1212,356 +250,62 @@
         "shelf": "standard",
         "level": "entity",
         "origin": "lumecon",
-        "rows_label": "2,662 rows",
+        "rows_label": "978 observations",
         "vintage": null,
-        "version": "v2",
-        "updated": "2026-09-26",
+        "version": "v4",
+        "updated": "2026-10-06",
         "downloads": null,
         "name": "Indian Country Deals",
         "short_name": "Deals",
         "tracks": "Material transactions and capital commitments involving Native nations, organizations and enterprises, including acquisitions, divestitures, property purchases, investments, financing agreements, bond issuances, joint ventures and major capital projects. Track who participated, the Native entity involved, announced value, status and timing, and compare activity across periods.",
-        "sources": "Tribal newsletters and tribal press; trade and journalist coverage; ANCSA shareholder filings; and Cedar's own federal contracting record, cited as a source where a transaction is visible only there.",
-        "method": "This is the one Cedar dataset that does not exist elsewhere, so every row carries a source link. Announced and closed are labelled separately and a transaction enters totals only when its status is confirmed. Where an ownership change is visible in federal contracting but was never publicly announced, Cedar reports it and cites the contracting record with the identifier and years so a reader can re-run the check — and a change of reporting parent within one tribal corporate family is not treated as a transaction."
+        "sources": "Tribal newsletters and tribal press; tribal enterprise announcements; lender transaction announcements; transaction counsel announcements; government land-transfer releases; trade and journalist coverage; ANCSA shareholder filings; and cited federal contracting records where ownership events are independently established.",
+        "method": "One row describes a distinct transaction or project milestone and links to its supporting source. The public preview is ten rows excerpted from the verified producer spreadsheet: six 2020 tribal acquisitions and four 2012 to 2015 Alaska Native regional corporation acquisitions, each carrying its own verification_status and source_url. It is not the full collection or a representative statistical sample. A separate ten-event primary-source review dated October 1, 2026 (docs/DEALS_PUBLIC_PREVIEW_REVIEW_2026-10-01.md) is retained as a regression fixture and reaches the served preview only through a producer release. The Native entity is identified separately from a subsidiary, borrower or acquisition vehicle. Notes distinguish announcement, closing and opening dates and preserve incomplete date precision. Loan principal, financing commitments, equity investments and project budgets are different measures; they must not be summed together. Undisclosed amounts remain blank. Follow-up reporting, multiple participants and financing instruments do not create additional additive transactions. A change of reporting parent alone is not proof of an ownership transaction."
       },
       "cedar": {
         "cedar_id": "deals",
         "status": "READY",
         "blockers": [],
-        "n_rows": 2662,
-        "n_tables": 15
+        "n_rows": 978,
+        "n_tables": 1,
+        "n_record_types": 1,
+        "count_basis": "Permitted rows in the exact producer spreadsheet; mixed grains are not totals.",
+        "release_id": "f9f50ccadc3bfe10089e47a0c8710a3ac382651703571f38ed6a2d57ba47623b",
+        "manifest_sha256": "4b0d66e63056992c7f5fe11dbe681131f46993822eea760ab568116b7ff10d7d",
+        "readiness_scope": "Verified local preview; production approval and endpoint pins are separate."
       },
       "sample": {
-        "table": "deals_classified.csv",
-        "path": "/data/cedar/samples/deals/deals_classified__10.csv",
+        "table": "deals.csv",
+        "path": "/data/cedar/samples/deals/spreadsheet__10.csv",
         "rows": 10,
-        "of": 1073,
-        "columns": 40
+        "of": 978,
+        "columns": 36,
+        "release_id": "f9f50ccadc3bfe10089e47a0c8710a3ac382651703571f38ed6a2d57ba47623b",
+        "manifest_sha256": "4b0d66e63056992c7f5fe11dbe681131f46993822eea760ab568116b7ff10d7d"
       },
       "tables": [
         {
-          "table": "deals_2000_2019_additions.csv",
-          "sample_path": "/data/cedar/samples/deals/deals_2000_2019_additions__10.csv",
-          "rows_in": 40,
-          "rows_published": 40,
+          "table": "deals.csv",
+          "sample_path": "/data/cedar/samples/deals/spreadsheet__10.csv",
+          "rows_in": 978,
+          "rows_published": 978,
           "rows_withheld": 0,
           "withheld_why": null,
-          "columns_published": 29,
+          "columns_published": 36,
           "sample_rows": 10,
+          "record_types": {
+            "records": 978
+          },
           "full_file": {
             "shippable": true,
             "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "deals_2026_ytd_additions.csv",
-          "sample_path": "/data/cedar/samples/deals/deals_2026_ytd_additions__10.csv",
-          "rows_in": 0,
-          "rows_published": 0,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 28,
-          "sample_rows": 0,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "deals_anc_reports_additions.csv",
-          "sample_path": "/data/cedar/samples/deals/deals_anc_reports_additions__10.csv",
-          "rows_in": 28,
-          "rows_published": 28,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 29,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "deals_ancsa_portal_additions.csv",
-          "sample_path": "/data/cedar/samples/deals/deals_ancsa_portal_additions__10.csv",
-          "rows_in": 34,
-          "rows_published": 34,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 29,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "deals_ancsa_portal_v2_additions.csv",
-          "sample_path": "/data/cedar/samples/deals/deals_ancsa_portal_v2_additions__10.csv",
-          "rows_in": 42,
-          "rows_published": 42,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 29,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "deals_classified.csv",
-          "sample_path": "/data/cedar/samples/deals/deals_classified__10.csv",
-          "rows_in": 1073,
-          "rows_published": 1073,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 40,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "deals_federal_awards_additions.csv",
-          "sample_path": "/data/cedar/samples/deals/deals_federal_awards_additions__10.csv",
-          "rows_in": 594,
-          "rows_published": 594,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 29,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "deals_historical_additions.csv",
-          "sample_path": "/data/cedar/samples/deals/deals_historical_additions__10.csv",
-          "rows_in": 30,
-          "rows_published": 30,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 29,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "deals_party_attribution.csv",
-          "sample_path": "/data/cedar/samples/deals/deals_party_attribution__10.csv",
-          "rows_in": 56,
-          "rows_published": 56,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 13,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": false,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "deals_party_attribution_agent.csv",
-          "sample_path": "/data/cedar/samples/deals/deals_party_attribution_agent__10.csv",
-          "rows_in": 530,
-          "rows_published": 530,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 18,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": false,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "deals_party_autoresolved.csv",
-          "sample_path": "/data/cedar/samples/deals/deals_party_autoresolved__10.csv",
-          "rows_in": 502,
-          "rows_published": 502,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 11,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": false,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "deals_party_matches.csv",
-          "sample_path": "/data/cedar/samples/deals/deals_party_matches__10.csv",
-          "rows_in": 481,
-          "rows_published": 481,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 6,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": false,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "deals_press_edgar_ancsa_additions.csv",
-          "sample_path": "/data/cedar/samples/deals/deals_press_edgar_ancsa_additions__10.csv",
-          "rows_in": 138,
-          "rows_published": 138,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 29,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "deals_sec_2010_2017_additions.csv",
-          "sample_path": "/data/cedar/samples/deals/deals_sec_2010_2017_additions__10.csv",
-          "rows_in": 16,
-          "rows_published": 16,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 29,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "deals_source_index.csv",
-          "sample_path": "/data/cedar/samples/deals/deals_source_index__10.csv",
-          "rows_in": 533,
-          "rows_published": 533,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 10,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "deals_taxonomy.csv",
-          "sample_path": "/data/cedar/samples/deals/deals_taxonomy__10.csv",
-          "rows_in": 48,
-          "rows_published": 48,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 4,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": false,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "deals_tribal_debt_additions.csv",
-          "sample_path": "/data/cedar/samples/deals/deals_tribal_debt_additions__10.csv",
-          "rows_in": 6,
-          "rows_published": 6,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 29,
-          "sample_rows": 6,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "ownership_events.csv",
-          "sample_path": "/data/cedar/samples/deals/ownership_events__10.csv",
-          "rows_in": 98,
-          "rows_published": 98,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 30,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "seminole_bond_disclosures.csv",
-          "sample_path": "/data/cedar/samples/deals/seminole_bond_disclosures__10.csv",
-          "rows_in": 29,
-          "rows_published": 29,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 35,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "tribal_resolution_financings.csv",
-          "sample_path": "/data/cedar/samples/deals/tribal_resolution_financings__10.csv",
-          "rows_in": 1,
-          "rows_published": 1,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 33,
-          "sample_rows": 1,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
+            "files": 1,
+            "largest_file_mb": 1.650731
           }
         }
       ],
       "full_files": {
         "served": false,
-        "note": "The full spreadsheets are built by code/1135_full_dataset_review_bundle.py and are not in this repository: the set measures 6.2 GB and single tables exceed GitHub's 100 MB limit. Each table above carries the split and file count a serving layer needs to locate it."
+        "note": "The local spreadsheet was verified. These staged previews do not approve or configure a production download."
       }
     },
     {
@@ -1571,10 +315,10 @@
         "shelf": "standard",
         "level": "entity",
         "origin": "lumecon",
-        "rows_label": "100,786 rows",
+        "rows_label": "6,792 observations",
         "vintage": null,
-        "version": "v2",
-        "updated": "2026-09-26",
+        "version": "v4",
+        "updated": "2026-10-06",
         "downloads": null,
         "name": "NAGPRA Notices",
         "short_name": "NAGPRA",
@@ -1586,213 +330,47 @@
         "cedar_id": "nagpra",
         "status": "READY",
         "blockers": [],
-        "n_rows": 100786,
-        "n_tables": 12
+        "n_rows": 6792,
+        "n_tables": 1,
+        "n_record_types": 1,
+        "count_basis": "Permitted rows in the exact producer spreadsheet; mixed grains are not totals.",
+        "release_id": "b45822cd045724582cee3e2be0e87008fc61569d82cf2fa53fe2e2c309eb3c0d",
+        "manifest_sha256": "0d202a7aae98efb176337654e78fd4551594347e764c98dc28632b3f9dcbca13",
+        "readiness_scope": "Verified local preview; production approval and endpoint pins are separate."
       },
       "sample": {
-        "table": "nagpra_notices.csv",
-        "path": "/data/cedar/samples/nagpra/nagpra_notices__10.csv",
+        "table": "nagpra.csv",
+        "path": "/data/cedar/samples/nagpra/spreadsheet__10.csv",
         "rows": 10,
         "of": 6792,
-        "columns": 69
+        "columns": 55,
+        "release_id": "b45822cd045724582cee3e2be0e87008fc61569d82cf2fa53fe2e2c309eb3c0d",
+        "manifest_sha256": "0d202a7aae98efb176337654e78fd4551594347e764c98dc28632b3f9dcbca13"
       },
       "tables": [
         {
-          "table": "fr_nagpra_title_index.csv",
-          "sample_path": "/data/cedar/samples/nagpra/fr_nagpra_title_index__10.csv",
-          "rows_in": 6664,
-          "rows_published": 6664,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 10,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "fr_nagpra_title_index_year.csv",
-          "sample_path": "/data/cedar/samples/nagpra/fr_nagpra_title_index_year__10.csv",
-          "rows_in": 33,
-          "rows_published": 33,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 4,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "nagpra_notice_entity_bridge.csv",
-          "sample_path": "/data/cedar/samples/nagpra/nagpra_notice_entity_bridge__10.csv",
-          "rows_in": 51579,
-          "rows_published": 51579,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 14,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "nagpra_notice_institutions.csv",
-          "sample_path": "/data/cedar/samples/nagpra/nagpra_notice_institutions__10.csv",
-          "rows_in": 7219,
-          "rows_published": 7219,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 16,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "nagpra_notice_source_corroboration.csv",
-          "sample_path": "/data/cedar/samples/nagpra/nagpra_notice_source_corroboration__10.csv",
-          "rows_in": 6841,
-          "rows_published": 6841,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 12,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "nagpra_notices.csv",
-          "sample_path": "/data/cedar/samples/nagpra/nagpra_notices__10.csv",
+          "table": "nagpra.csv",
+          "sample_path": "/data/cedar/samples/nagpra/spreadsheet__10.csv",
           "rows_in": 6792,
           "rows_published": 6792,
           "rows_withheld": 0,
           "withheld_why": null,
-          "columns_published": 69,
+          "columns_published": 55,
           "sample_rows": 10,
+          "record_types": {
+            "records": 6792
+          },
           "full_file": {
             "shippable": true,
             "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "nagpra_nps_grant_awards.csv",
-          "sample_path": "/data/cedar/samples/nagpra/nagpra_nps_grant_awards__10.csv",
-          "rows_in": 1221,
-          "rows_published": 1221,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 13,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "nagpra_nps_intended_dispositions.csv",
-          "sample_path": "/data/cedar/samples/nagpra/nagpra_nps_intended_dispositions__10.csv",
-          "rows_in": 253,
-          "rows_published": 253,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 10,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "nagpra_nps_inventories.csv",
-          "sample_path": "/data/cedar/samples/nagpra/nagpra_nps_inventories__10.csv",
-          "rows_in": 11811,
-          "rows_published": 11811,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 14,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "nagpra_nps_notice_index.csv",
-          "sample_path": "/data/cedar/samples/nagpra/nagpra_nps_notice_index__10.csv",
-          "rows_in": 6818,
-          "rows_published": 6818,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 22,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "nagpra_nps_summaries.csv",
-          "sample_path": "/data/cedar/samples/nagpra/nagpra_nps_summaries__10.csv",
-          "rows_in": 1540,
-          "rows_published": 1540,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 11,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "nagpra_nps_unclaimed_remains.csv",
-          "sample_path": "/data/cedar/samples/nagpra/nagpra_nps_unclaimed_remains__10.csv",
-          "rows_in": 15,
-          "rows_published": 15,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 16,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
+            "files": 1,
+            "largest_file_mb": 12.684163
           }
         }
       ],
       "full_files": {
         "served": false,
-        "note": "The full spreadsheets are built by code/1135_full_dataset_review_bundle.py and are not in this repository: the set measures 6.2 GB and single tables exceed GitHub's 100 MB limit. Each table above carries the split and file count a serving layer needs to locate it."
+        "note": "The local spreadsheet was verified. These staged previews do not approve or configure a production download."
       }
     },
     {
@@ -1802,660 +380,62 @@
         "shelf": "standard",
         "level": "entity_and_geography",
         "origin": "lumecon",
-        "rows_label": "264,478 rows",
+        "rows_label": "27,825 observations",
         "vintage": null,
-        "version": "v2",
-        "updated": "2026-09-26",
+        "version": "v4",
+        "updated": "2026-10-06",
         "downloads": null,
         "name": "Native Federal Advocacy and Engagement",
         "short_name": "Advocacy",
-        "tracks": "Documented federal advocacy and engagement involving Native nations and organizations, including registered lobbying, agency meetings, tribal consultations, regulatory comments, congressional testimony and nonprofit lobbying disclosures. Each row represents one entity-linked activity or source record.",
-        "sources": "Senate and House lobbying disclosure; Federal Register consultation and ex parte notices; FERC and NRC dockets; IBIA and IBLA appeals; regulations.gov; IRS Form 990 Schedule C.",
-        "method": "Built on the premise that the Lobbying Disclosure Act sees only a fraction of tribal advocacy: 300 entities appear in LDA filings, 669 appear in a non-LDA channel, and only 4 are visible to the LDA and nowhere else. Each channel is kept as its own record type rather than merged into a single misleading total, and organisations acting on behalf of many tribes are scoped as such rather than attributed to one."
+        "tracks": "Registered federal lobbying by and for Native nations and organizations, from disclosures filed under the Lobbying Disclosure Act. Each row is one lobbying disclosure filing, with its registrant, client, issues, the government bodies lobbied and reported amounts.",
+        "sources": "Lobbying disclosure filings made to the Senate and House under the Lobbying Disclosure Act (lda.gov).",
+        "method": "Each row is one filing as disclosed under the Lobbying Disclosure Act, linked to the Native nation or organization behind it where the filing supports the link. Registrant and client are kept as filed, amended and superseded filings are marked rather than removed, and organisations acting on behalf of many tribes are scoped as such rather than attributed to one. Agency meetings, consultations, regulatory comments, testimony and nonprofit lobbying disclosures are not part of this release."
       },
       "cedar": {
         "cedar_id": "lobbying",
         "status": "READY",
         "blockers": [],
-        "n_rows": 264478,
-        "n_tables": 35
+        "n_rows": 27825,
+        "n_tables": 1,
+        "n_record_types": 1,
+        "count_basis": "Permitted rows in the exact producer spreadsheet; mixed grains are not totals.",
+        "release_id": "c37e800572a0b108d27eca98248f51d0a1d9bb7335c1340abdf96540efc79cc5",
+        "manifest_sha256": "c0214ce61dfe1c5923f66abc4bca214aeb61f70324e95e883985c849425732ce",
+        "readiness_scope": "Verified local preview; production approval and endpoint pins are separate."
       },
       "sample": {
-        "table": "native_entity_lobbying_disclosures.csv",
-        "path": "/data/cedar/samples/lobbying/native_entity_lobbying_disclosures__10.csv",
+        "table": "lobbying.csv",
+        "path": "/data/cedar/samples/lobbying/spreadsheet__10.csv",
         "rows": 10,
         "of": 27825,
-        "columns": 43
+        "columns": 41,
+        "release_id": "c37e800572a0b108d27eca98248f51d0a1d9bb7335c1340abdf96540efc79cc5",
+        "manifest_sha256": "c0214ce61dfe1c5923f66abc4bca214aeb61f70324e95e883985c849425732ce"
       },
       "tables": [
         {
-          "table": "admin_appeal_decisions.csv",
-          "sample_path": "/data/cedar/samples/lobbying/admin_appeal_decisions__10.csv",
-          "rows_in": 15613,
-          "rows_published": 15613,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 50,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "admin_appeal_parties.csv",
-          "sample_path": "/data/cedar/samples/lobbying/admin_appeal_parties__10.csv",
-          "rows_in": 20027,
-          "rows_published": 20027,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 32,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "admin_appeal_positions.csv",
-          "sample_path": "/data/cedar/samples/lobbying/admin_appeal_positions__10.csv",
-          "rows_in": 8,
-          "rows_published": 8,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 24,
-          "sample_rows": 8,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "advocacy_passthrough.csv",
-          "sample_path": "/data/cedar/samples/lobbying/advocacy_passthrough__10.csv",
-          "rows_in": 1620,
-          "rows_published": 1620,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 28,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "advocacy_passthrough_2026-08-07.csv",
-          "sample_path": "/data/cedar/samples/lobbying/advocacy_passthrough_2026-08-07__10.csv",
-          "rows_in": 1620,
-          "rows_published": 1620,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 28,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": false,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "agency_attention_vs_advocacy.csv",
-          "sample_path": "/data/cedar/samples/lobbying/agency_attention_vs_advocacy__10.csv",
-          "rows_in": 22,
-          "rows_published": 22,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 11,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "agency_attention_vs_advocacy_year.csv",
-          "sample_path": "/data/cedar/samples/lobbying/agency_attention_vs_advocacy_year__10.csv",
-          "rows_in": 698,
-          "rows_published": 698,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 4,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "earmarks.csv",
-          "sample_path": "/data/cedar/samples/lobbying/earmarks__10.csv",
-          "rows_in": 1002,
-          "rows_published": 1002,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 23,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "ferc_docket_filings.csv",
-          "sample_path": "/data/cedar/samples/lobbying/ferc_docket_filings__10.csv",
-          "rows_in": 102615,
-          "rows_published": 102615,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 38,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "ferc_docket_parties.csv",
-          "sample_path": "/data/cedar/samples/lobbying/ferc_docket_parties__10.csv",
-          "rows_in": 11563,
-          "rows_published": 11563,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 17,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "ferc_ex_parte_communications.csv",
-          "sample_path": "/data/cedar/samples/lobbying/ferc_ex_parte_communications__10.csv",
-          "rows_in": 713,
-          "rows_published": 713,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 33,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "ferc_ex_parte_parties.csv",
-          "sample_path": "/data/cedar/samples/lobbying/ferc_ex_parte_parties__10.csv",
-          "rows_in": 4246,
-          "rows_published": 4246,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 43,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "ferc_source_coverage.csv",
-          "sample_path": "/data/cedar/samples/lobbying/ferc_source_coverage__10.csv",
-          "rows_in": 9,
-          "rows_published": 9,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 7,
-          "sample_rows": 9,
-          "full_file": {
-            "shippable": false,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "ferc_tribal_dockets.csv",
-          "sample_path": "/data/cedar/samples/lobbying/ferc_tribal_dockets__10.csv",
-          "rows_in": 307,
-          "rows_published": 307,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 28,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "fr_ex_parte_notices.csv",
-          "sample_path": "/data/cedar/samples/lobbying/fr_ex_parte_notices__10.csv",
-          "rows_in": 7828,
-          "rows_published": 7828,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 26,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "fr_ex_parte_parties.csv",
-          "sample_path": "/data/cedar/samples/lobbying/fr_ex_parte_parties__10.csv",
-          "rows_in": 116,
-          "rows_published": 116,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 28,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "fr_ex_parte_party_entity_links.csv",
-          "sample_path": "/data/cedar/samples/lobbying/fr_ex_parte_party_entity_links__10.csv",
-          "rows_in": 9,
-          "rows_published": 9,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 12,
-          "sample_rows": 9,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "hearing_appearances.csv",
-          "sample_path": "/data/cedar/samples/lobbying/hearing_appearances__10.csv",
-          "rows_in": 2674,
-          "rows_published": 2674,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 25,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "hearing_bill_links.csv",
-          "sample_path": "/data/cedar/samples/lobbying/hearing_bill_links__10.csv",
-          "rows_in": 464,
-          "rows_published": 464,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 16,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "lobbying_client_attribution.csv",
-          "sample_path": "/data/cedar/samples/lobbying/lobbying_client_attribution__10.csv",
-          "rows_in": 458,
-          "rows_published": 458,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 11,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": false,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "lobbying_disclosure_verbosity_year.csv",
-          "sample_path": "/data/cedar/samples/lobbying/lobbying_disclosure_verbosity_year__10.csv",
-          "rows_in": 27,
-          "rows_published": 27,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 4,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "lobbying_issue_families_filing.csv",
-          "sample_path": "/data/cedar/samples/lobbying/lobbying_issue_families_filing__10.csv",
-          "rows_in": 27796,
-          "rows_published": 27796,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 18,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "lobbying_issue_family_year.csv",
-          "sample_path": "/data/cedar/samples/lobbying/lobbying_issue_family_year__10.csv",
-          "rows_in": 476,
-          "rows_published": 476,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 9,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "lobbying_registrant_client_relationships.csv",
-          "sample_path": "/data/cedar/samples/lobbying/lobbying_registrant_client_relationships__10.csv",
-          "rows_in": 1309,
-          "rows_published": 1309,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 38,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "lobbying_registrant_concentration.csv",
-          "sample_path": "/data/cedar/samples/lobbying/lobbying_registrant_concentration__10.csv",
-          "rows_in": 36,
-          "rows_published": 36,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 28,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "lobbying_registrant_identifiers.csv",
-          "sample_path": "/data/cedar/samples/lobbying/lobbying_registrant_identifiers__10.csv",
-          "rows_in": 525,
-          "rows_published": 525,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 46,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "lobbying_registrant_native_ownership_evidence.csv",
-          "sample_path": "/data/cedar/samples/lobbying/lobbying_registrant_native_ownership_evidence__10.csv",
-          "rows_in": 27,
-          "rows_published": 27,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 24,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "lobbying_registrants.csv",
-          "sample_path": "/data/cedar/samples/lobbying/lobbying_registrants__10.csv",
-          "rows_in": 653,
-          "rows_published": 653,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 51,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "lobbying_target_entities.csv",
-          "sample_path": "/data/cedar/samples/lobbying/lobbying_target_entities__10.csv",
-          "rows_in": 116,
-          "rows_published": 116,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 3,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "lobbying_unmatched_clients.csv",
-          "sample_path": "/data/cedar/samples/lobbying/lobbying_unmatched_clients__10.csv",
-          "rows_in": 515,
-          "rows_published": 515,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 13,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": false,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "native_entity_lobbying_disclosures.csv",
-          "sample_path": "/data/cedar/samples/lobbying/native_entity_lobbying_disclosures__10.csv",
+          "table": "lobbying.csv",
+          "sample_path": "/data/cedar/samples/lobbying/spreadsheet__10.csv",
           "rows_in": 27825,
           "rows_published": 27825,
           "rows_withheld": 0,
           "withheld_why": null,
-          "columns_published": 43,
+          "columns_published": 41,
           "sample_rows": 10,
+          "record_types": {
+            "records": 27825
+          },
           "full_file": {
             "shippable": true,
             "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "nonprofit_schedule_c_coverage.csv",
-          "sample_path": "/data/cedar/samples/lobbying/nonprofit_schedule_c_coverage__10.csv",
-          "rows_in": 10,
-          "rows_published": 10,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 13,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "nonprofit_schedule_c_lobbying.csv",
-          "sample_path": "/data/cedar/samples/lobbying/nonprofit_schedule_c_lobbying__10.csv",
-          "rows_in": 29149,
-          "rows_published": 29149,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 54,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "nrc_meeting_participants.csv",
-          "sample_path": "/data/cedar/samples/lobbying/nrc_meeting_participants__10.csv",
-          "rows_in": 407,
-          "rows_published": 407,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 32,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "nrc_public_meetings.csv",
-          "sample_path": "/data/cedar/samples/lobbying/nrc_public_meetings__10.csv",
-          "rows_in": 251,
-          "rows_published": 251,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 34,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "oira_federal_action_links.csv",
-          "sample_path": "/data/cedar/samples/lobbying/oira_federal_action_links__10.csv",
-          "rows_in": 145,
-          "rows_published": 145,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 10,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "oira_meeting_participants.csv",
-          "sample_path": "/data/cedar/samples/lobbying/oira_meeting_participants__10.csv",
-          "rows_in": 1128,
-          "rows_published": 1128,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 20,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "oira_meetings.csv",
-          "sample_path": "/data/cedar/samples/lobbying/oira_meetings__10.csv",
-          "rows_in": 72,
-          "rows_published": 72,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 22,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "tribe_year_lobbying_panel.csv",
-          "sample_path": "/data/cedar/samples/lobbying/tribe_year_lobbying_panel__10.csv",
-          "rows_in": 5001,
-          "rows_published": 5001,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 14,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
+            "files": 1,
+            "largest_file_mb": 22.356937
           }
         }
       ],
       "full_files": {
         "served": false,
-        "note": "The full spreadsheets are built by code/1135_full_dataset_review_bundle.py and are not in this repository: the set measures 6.2 GB and single tables exceed GitHub's 100 MB limit. Each table above carries the split and file count a serving layer needs to locate it."
+        "note": "The local spreadsheet was verified. These staged previews do not approve or configure a production download."
       }
     },
     {
@@ -2465,10 +445,10 @@
         "shelf": "pro",
         "level": "entity",
         "origin": "lumecon",
-        "rows_label": "3,345,971 rows",
+        "rows_label": "841,002 observations",
         "vintage": null,
-        "version": "v2",
-        "updated": "2026-09-26",
+        "version": "v4",
+        "updated": "2026-10-06",
         "downloads": null,
         "name": "Native Federal Contractors",
         "short_name": "Contractors",
@@ -2480,197 +460,47 @@
         "cedar_id": "contractors",
         "status": "READY",
         "blockers": [],
-        "n_rows": 3345971,
-        "n_tables": 10
+        "n_rows": 841002,
+        "n_tables": 1,
+        "n_record_types": 1,
+        "count_basis": "Permitted rows in the exact producer spreadsheet; mixed grains are not totals.",
+        "release_id": "4df9d034a1bbb9b788ba63b5106a37e2da48cecb1c5ffdb2345a03e01456c7e3",
+        "manifest_sha256": "af58f9e60ac426b7ecac4f47dcf756bf1d48fa3282875ca8774587d6345fedb9",
+        "readiness_scope": "Verified local preview; production approval and endpoint pins are separate."
       },
       "sample": {
-        "table": "prime_contracts.csv",
-        "path": "/data/cedar/samples/contractors/prime_contracts__10.csv",
+        "table": "contractors.csv",
+        "path": "/data/cedar/samples/contractors/spreadsheet__10.csv",
         "rows": 10,
-        "of": 1217768,
-        "columns": 72
+        "of": 841002,
+        "columns": 52,
+        "release_id": "4df9d034a1bbb9b788ba63b5106a37e2da48cecb1c5ffdb2345a03e01456c7e3",
+        "manifest_sha256": "af58f9e60ac426b7ecac4f47dcf756bf1d48fa3282875ca8774587d6345fedb9"
       },
       "tables": [
         {
-          "table": "contractor_ranking.csv",
-          "sample_path": "/data/cedar/samples/contractors/contractor_ranking__10.csv",
-          "rows_in": 1429,
-          "rows_published": 1429,
+          "table": "contractors.csv",
+          "sample_path": "/data/cedar/samples/contractors/spreadsheet__10.csv",
+          "rows_in": 841002,
+          "rows_published": 841002,
           "rows_withheld": 0,
           "withheld_why": null,
-          "columns_published": 44,
+          "columns_published": 52,
           "sample_rows": 10,
+          "record_types": {
+            "prime_contracts": 841002
+          },
           "full_file": {
             "shippable": true,
             "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "fpds_uei_cage_map.csv",
-          "sample_path": "/data/cedar/samples/contractors/fpds_uei_cage_map__10.csv",
-          "rows_in": 34601,
-          "rows_published": 34601,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 6,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "fpds_uei_edges.csv",
-          "sample_path": "/data/cedar/samples/contractors/fpds_uei_edges__10.csv",
-          "rows_in": 5167,
-          "rows_published": 5167,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 11,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "prime_contracts.csv",
-          "sample_path": "/data/cedar/samples/contractors/prime_contracts__10.csv",
-          "rows_in": 1217768,
-          "rows_published": 1217768,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 72,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "prime_contracts_archive_backfill.csv",
-          "sample_path": "/data/cedar/samples/contractors/prime_contracts_archive_backfill__10.csv",
-          "rows_in": 631507,
-          "rows_published": 631507,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 38,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "prime_contracts_awards.csv",
-          "sample_path": "/data/cedar/samples/contractors/prime_contracts_awards__10.csv",
-          "rows_in": 455080,
-          "rows_published": 455080,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 30,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "prime_contracts_entity_year.csv",
-          "sample_path": "/data/cedar/samples/contractors/prime_contracts_entity_year__10.csv",
-          "rows_in": 6715,
-          "rows_published": 6715,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 16,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "prime_contracts_published.csv",
-          "sample_path": "/data/cedar/samples/contractors/prime_contracts_published__10.csv",
-          "rows_in": 455080,
-          "rows_published": 455080,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 24,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "sam_prime_contracts_fy2000_2007.csv",
-          "sample_path": "/data/cedar/samples/contractors/sam_prime_contracts_fy2000_2007__10.csv",
-          "rows_in": 269312,
-          "rows_published": 269312,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 89,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "sam_prime_contracts_fy2000_2007_PUBLISHABLE.csv",
-          "sample_path": "/data/cedar/samples/contractors/sam_prime_contracts_fy2000_2007_PUBLISHABLE__10.csv",
-          "rows_in": 269312,
-          "rows_published": 269312,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 79,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "sam_prime_contracts_fy2000_2007_reconciliation.csv",
-          "sample_path": "/data/cedar/samples/contractors/sam_prime_contracts_fy2000_2007_reconciliation__10.csv",
-          "rows_in": 6,
-          "rows_published": 6,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 13,
-          "sample_rows": 6,
-          "full_file": {
-            "shippable": false,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
+            "files": 1,
+            "largest_file_mb": 990.147521
           }
         }
       ],
       "full_files": {
         "served": false,
-        "note": "The full spreadsheets are built by code/1135_full_dataset_review_bundle.py and are not in this repository: the set measures 6.2 GB and single tables exceed GitHub's 100 MB limit. Each table above carries the split and file count a serving layer needs to locate it."
+        "note": "The local spreadsheet was verified. These staged previews do not approve or configure a production download."
       }
     },
     {
@@ -2680,10 +510,10 @@
         "shelf": "pro",
         "level": "entity",
         "origin": "lumecon",
-        "rows_label": "90,479 rows",
+        "rows_label": "70,054 observations",
         "vintage": null,
-        "version": "v2",
-        "updated": "2026-09-26",
+        "version": "v4",
+        "updated": "2026-10-06",
         "downloads": null,
         "name": "Native Federal Subcontracting",
         "short_name": "Subcontracting",
@@ -2695,101 +525,47 @@
         "cedar_id": "subcontracting",
         "status": "READY",
         "blockers": [],
-        "n_rows": 90479,
-        "n_tables": 3
+        "n_rows": 70054,
+        "n_tables": 1,
+        "n_record_types": 1,
+        "count_basis": "Permitted rows in the exact producer spreadsheet; mixed grains are not totals.",
+        "release_id": "126230dd07419a9d1f57c1342fb5e11aae31ffea2fe846d3ea95c9b9934bfc06",
+        "manifest_sha256": "51d86a40d2187ff670e39c5ce30bc6d50c4c7fccb837481800d94cc3224b94d7",
+        "readiness_scope": "Verified local preview; production approval and endpoint pins are separate."
       },
       "sample": {
-        "table": "subawards.csv",
-        "path": "/data/cedar/samples/subcontracting/subawards__10.csv",
+        "table": "subcontracting.csv",
+        "path": "/data/cedar/samples/subcontracting/spreadsheet__10.csv",
         "rows": 10,
-        "of": 89809,
-        "columns": 78
+        "of": 70054,
+        "columns": 57,
+        "release_id": "126230dd07419a9d1f57c1342fb5e11aae31ffea2fe846d3ea95c9b9934bfc06",
+        "manifest_sha256": "51d86a40d2187ff670e39c5ce30bc6d50c4c7fccb837481800d94cc3224b94d7"
       },
       "tables": [
         {
-          "table": "prime_sub_network.csv",
-          "sample_path": "/data/cedar/samples/subcontracting/prime_sub_network__10.csv",
-          "rows_in": 220,
-          "rows_published": 220,
+          "table": "subcontracting.csv",
+          "sample_path": "/data/cedar/samples/subcontracting/spreadsheet__10.csv",
+          "rows_in": 70054,
+          "rows_published": 70054,
           "rows_withheld": 0,
           "withheld_why": null,
-          "columns_published": 11,
+          "columns_published": 57,
           "sample_rows": 10,
+          "record_types": {
+            "records": 70054
+          },
           "full_file": {
             "shippable": true,
             "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "subaward_entity_rollup.csv",
-          "sample_path": "/data/cedar/samples/subcontracting/subaward_entity_rollup__10.csv",
-          "rows_in": 450,
-          "rows_published": 450,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 9,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "subaward_identifier_harvest.csv",
-          "sample_path": "/data/cedar/samples/subcontracting/subaward_identifier_harvest__10.csv",
-          "rows_in": 304,
-          "rows_published": 304,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 14,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": false,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "subaward_identifier_netnew.csv",
-          "sample_path": "/data/cedar/samples/subcontracting/subaward_identifier_netnew__10.csv",
-          "rows_in": 210,
-          "rows_published": 210,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 19,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": false,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "subawards.csv",
-          "sample_path": "/data/cedar/samples/subcontracting/subawards__10.csv",
-          "rows_in": 89809,
-          "rows_published": 70597,
-          "rows_withheld": 19212,
-          "withheld_why": "duplicate_status=exact_repeat_within_source=18366; duplicate_status=superseded_by_primary_source=846",
-          "columns_published": 78,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
+            "files": 1,
+            "largest_file_mb": 83.69323
           }
         }
       ],
       "full_files": {
         "served": false,
-        "note": "The full spreadsheets are built by code/1135_full_dataset_review_bundle.py and are not in this repository: the set measures 6.2 GB and single tables exceed GitHub's 100 MB limit. Each table above carries the split and file count a serving layer needs to locate it."
+        "note": "The local spreadsheet was verified. These staged previews do not approve or configure a production download."
       }
     },
     {
@@ -2799,12 +575,12 @@
         "shelf": "pro",
         "level": "entity",
         "origin": "lumecon",
-        "rows_label": "5,930 rows",
+        "rows_label": "3,725 observations",
         "vintage": null,
-        "version": "v2",
-        "updated": "2026-09-26",
+        "version": "v5",
+        "updated": "2026-10-06",
         "downloads": null,
-        "name": "Native-Owned Businesses",
+        "name": "Individual Native-Owned Businesses",
         "short_name": "Businesses",
         "tracks": "Firms certified or listed as Native-owned by a tribal certifying authority — TERO vendor lists, Indian preference registers, tribal business licences and tribal enterprise registers — harmonised across nations into one schema.",
         "sources": "Tribal TERO offices, business licensing departments and enterprise registers, harvested from each nation's own publication. Contributing authorities are acknowledged in every release.",
@@ -2814,175 +590,47 @@
         "cedar_id": "native-owned-businesses",
         "status": "READY",
         "blockers": [],
-        "n_rows": 5930,
-        "n_tables": 7
+        "n_rows": 3725,
+        "n_tables": 1,
+        "n_record_types": 1,
+        "count_basis": "Permitted rows in the exact producer spreadsheet; mixed grains are not totals.",
+        "release_id": "f298b01f29651ab652e2d8f221d061504b8de035c18ae9e10cf84a3daf777ed9",
+        "manifest_sha256": "abd0ee5d477facd6abd6d25a39a5e29d7c83c6600c0558b1f3891f72488619e9",
+        "readiness_scope": "Verified local preview; production approval and endpoint pins are separate."
       },
       "sample": {
-        "table": "native_owned_businesses.csv",
-        "path": "/data/cedar/samples/native-owned-businesses/native_owned_businesses__10.csv",
+        "table": "owned.csv",
+        "path": "/data/cedar/samples/owned/spreadsheet__10.csv",
         "rows": 10,
-        "of": 4273,
-        "columns": 69
+        "of": 3725,
+        "columns": 35,
+        "release_id": "f298b01f29651ab652e2d8f221d061504b8de035c18ae9e10cf84a3daf777ed9",
+        "manifest_sha256": "abd0ee5d477facd6abd6d25a39a5e29d7c83c6600c0558b1f3891f72488619e9"
       },
       "tables": [
         {
-          "table": "individual_native_exclusion_pairs.csv",
-          "sample_path": null,
-          "rows_in": 5,
-          "rows_published": 5,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 17,
-          "sample_rows": 5,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          },
-          "sample_withheld_why": "The sample carries the name of an individually Native-owned firm without recorded consent; may_publish_individual_native_field withholds it, so the file is not published. The table is still in the release.",
-          "sample_withheld_columns": [
-            "identifier",
-            "firm_name_norm"
-          ]
-        },
-        {
-          "table": "individual_native_firm_contracts.csv",
-          "sample_path": null,
-          "rows_in": 324,
-          "rows_published": 324,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 28,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          },
-          "sample_withheld_why": "The sample carries the name of an individually Native-owned firm without recorded consent; may_publish_individual_native_field withholds it, so the file is not published. The table is still in the release.",
-          "sample_withheld_columns": [
-            "canonical_name"
-          ]
-        },
-        {
-          "table": "individual_native_firm_contracts_published.csv",
-          "sample_path": "/data/cedar/samples/native-owned-businesses/individual_native_firm_contracts_published__10.csv",
-          "rows_in": 613,
-          "rows_published": 613,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 11,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "individual_native_firm_register.csv",
-          "sample_path": null,
-          "rows_in": 45,
-          "rows_published": 45,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 54,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          },
-          "sample_withheld_why": "The sample carries the name of an individually Native-owned firm without recorded consent; may_publish_individual_native_field withholds it, so the file is not published. The table is still in the release.",
-          "sample_withheld_columns": [
-            "canonical_name"
-          ]
-        },
-        {
-          "table": "individual_native_ownership_verification.csv",
-          "sample_path": null,
-          "rows_in": 335,
-          "rows_published": 335,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 61,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          },
-          "sample_withheld_why": "The sample carries the name of an individually Native-owned firm without recorded consent; may_publish_individual_native_field withholds it, so the file is not published. The table is still in the release.",
-          "sample_withheld_columns": [
-            "awardee_name_modal"
-          ]
-        },
-        {
-          "table": "individual_native_prior_rulings.csv",
-          "sample_path": null,
-          "rows_in": 45,
-          "rows_published": 45,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 12,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": false,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          },
-          "sample_withheld_why": "The sample carries the name of an individually Native-owned firm without recorded consent; may_publish_individual_native_field withholds it, so the file is not published. The table is still in the release.",
-          "sample_withheld_columns": [
-            "entity_name"
-          ]
-        },
-        {
-          "table": "individual_native_verification_candidates.csv",
-          "sample_path": null,
-          "rows_in": 335,
-          "rows_published": 335,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 41,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          },
-          "sample_withheld_why": "The sample carries the name of an individually Native-owned firm without recorded consent; may_publish_individual_native_field withholds it, so the file is not published. The table is still in the release.",
-          "sample_withheld_columns": [
-            "awardee_name_modal",
-            "awardee_name_variants"
-          ]
-        },
-        {
-          "table": "native_owned_businesses.csv",
-          "sample_path": "/data/cedar/samples/native-owned-businesses/native_owned_businesses__10.csv",
-          "rows_in": 4273,
+          "table": "owned.csv",
+          "sample_path": "/data/cedar/samples/owned/spreadsheet__10.csv",
+          "rows_in": 3725,
           "rows_published": 3725,
-          "rows_withheld": 548,
-          "withheld_why": "publishable=548",
-          "columns_published": 69,
+          "rows_withheld": 0,
+          "withheld_why": null,
+          "columns_published": 35,
           "sample_rows": 10,
+          "record_types": {
+            "records": 3725
+          },
           "full_file": {
             "shippable": true,
             "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
+            "files": 1,
+            "largest_file_mb": 3.070806
           }
         }
       ],
       "full_files": {
         "served": false,
-        "note": "The full spreadsheets are built by code/1135_full_dataset_review_bundle.py and are not in this repository: the set measures 6.2 GB and single tables exceed GitHub's 100 MB limit. Each table above carries the split and file count a serving layer needs to locate it."
+        "note": "The local spreadsheet was verified. These staged previews do not approve or configure a production download."
       }
     },
     {
@@ -2992,84 +640,95 @@
         "shelf": "pro",
         "level": "entity",
         "origin": "lumecon",
-        "rows_label": "14,868 rows",
+        "rows_label": "43 observations",
         "vintage": null,
-        "version": "v2",
-        "updated": "2026-09-26",
+        "version": "v6",
+        "updated": "2026-10-06",
         "downloads": null,
         "name": "Cedar Native Entity Enterprise Dataset (NEED)",
         "short_name": "NEED",
         "tracks": "Enterprise ownership and affiliation across tribes, Alaska Native corporations, Native Hawaiian organizations, and state-recognized Native entities — the parent, the holding company and the operating company, kept as a chain rather than a flat list.",
         "sources": "What each owner publishes about itself: audited annual reports filed by ANCSA corporations with the Alaska Division of Banking and Securities under Alaska Statute 45.55.139, whose Principles of Consolidation note enumerates the subsidiaries by legal name; nations' own “Our Companies” and enterprise registers; ANC and NHO subsidiary directories. Publishers whose terms forbid reuse are excluded by every route and named as excluded.",
-        "method": "Two relations, declared per row and never conflated: a STRUCTURE is ownership — nation, holding company, operating company — and a TIE is a published relationship that is not ownership, such as a joint venture, which genuinely has two parents. Ownership is only ever recorded where a source asserted it; a shared name or a shared address is not evidence and does not create a row. An external identifier appears only where the owner published it, so the register is not padded with plausible matches. Where no external identifier exists the enterprise still gets a permanent, check-digited Cedar identifier and is carried as a sub-hub of its nation, which is what makes visible the enterprises federal contracting never sees."
+        "method": "This preview is the evidence-pinned reviewed public base. NEED has no publication hold (owner ruling 2026-10-04): its records come from publicly available websites and Lumecon has permission to publish them, and source rights are recorded as provenance. Existing enterprise IDs and source evidence are preserved. Each row lists its verified claims; identity, identifiers and relationships are separate assertions. Blank unclaimed fields are not negative findings. This reviewed cohort is not the full enterprise register or a deduplicated entity count."
       },
       "cedar": {
         "cedar_id": "need",
-        "status": "READY",
+        "status": "REVIEWED_PUBLIC_BASE",
         "blockers": [],
-        "n_rows": 14868,
-        "n_tables": 3
+        "n_rows": 43,
+        "n_tables": 1,
+        "n_record_types": 1,
+        "count_basis": "Permitted rows in the exact producer spreadsheet; mixed grains are not totals.",
+        "release_id": "428d11048f12cd819f7cf95dccdbbe4c1ea20a8c81c635a7e985fbc17b1b983b",
+        "manifest_sha256": "038be840a58f812192ffc72eaedc7512ddcd5f1a8c2a66a033c64e202d702c17",
+        "readiness_scope": "Verified local preview; production approval and endpoint pins are separate."
       },
       "sample": {
-        "table": "need_enterprises.csv",
-        "path": "/data/cedar/samples/need/need_enterprises__10.csv",
+        "table": "need.csv",
+        "path": "/data/cedar/samples/need/spreadsheet__10.csv",
         "rows": 10,
-        "of": 5820,
-        "columns": 65
+        "of": 43,
+        "columns": 23,
+        "release_id": "428d11048f12cd819f7cf95dccdbbe4c1ea20a8c81c635a7e985fbc17b1b983b",
+        "manifest_sha256": "038be840a58f812192ffc72eaedc7512ddcd5f1a8c2a66a033c64e202d702c17"
       },
       "tables": [
         {
-          "table": "need_enterprise_relations.csv",
-          "sample_path": "/data/cedar/samples/need/need_enterprise_relations__10.csv",
-          "rows_in": 8690,
-          "rows_published": 8690,
+          "table": "need.csv",
+          "sample_path": "/data/cedar/samples/need/spreadsheet__10.csv",
+          "rows_in": 43,
+          "rows_published": 43,
           "rows_withheld": 0,
           "withheld_why": null,
           "columns_published": 23,
           "sample_rows": 10,
+          "record_types": {
+            "reviewed_public_base": 43
+          },
+          "record_type_fields": {
+            "reviewed_public_base": {
+              "enterprise_id": "enterprise_id",
+              "enterprise_name": "enterprise_name",
+              "source_reported_name": "source_reported_name",
+              "uei": "uei",
+              "cage_code": "cage_code",
+              "cage_evidence_scope": "cage_evidence_scope",
+              "owner_name": "owner_name",
+              "owner_scope": "owner_scope",
+              "relationship_type": "relationship_type",
+              "ownership_extent": "ownership_extent",
+              "reviewed_on": "reviewed_on",
+              "review_reason": "review_reason",
+              "source_release_id": "source_release_id",
+              "source_row_sha256": "source_row_sha256",
+              "decision_sha256": "decision_sha256",
+              "evidence_pins": "evidence_pins",
+              "publication_status": "publication_status",
+              "related_entity_name": "related_entity_name",
+              "verified_claims": "verified_claims",
+              "subject_binding": "subject_binding"
+            }
+          },
           "full_file": {
             "shippable": true,
             "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "need_enterprises.csv",
-          "sample_path": "/data/cedar/samples/need/need_enterprises__10.csv",
-          "rows_in": 5820,
-          "rows_published": 5820,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 65,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "need_entity_dual_role.csv",
-          "sample_path": "/data/cedar/samples/need/need_entity_dual_role__10.csv",
-          "rows_in": 358,
-          "rows_published": 358,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 23,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
+            "files": 1,
+            "largest_file_mb": 0.059691
           }
         }
       ],
       "full_files": {
         "served": false,
-        "note": "The full spreadsheets are built by code/1135_full_dataset_review_bundle.py and are not in this repository: the set measures 6.2 GB and single tables exceed GitHub's 100 MB limit. Each table above carries the split and file count a serving layer needs to locate it."
+        "note": "The local spreadsheet was verified. These staged previews do not approve or configure a production download."
+      },
+      "verified_preview": {
+        "component": "reviewed_public_base",
+        "envelope": "data/cedar/need-reviewed-preview.json",
+        "envelope_sha256": "ea75a9c107ac355afe5bdc81d0f972334f835eed323b56d19ddc5f393f0f2d19",
+        "release_id": "428d11048f12cd819f7cf95dccdbbe4c1ea20a8c81c635a7e985fbc17b1b983b",
+        "manifest_sha256": "038be840a58f812192ffc72eaedc7512ddcd5f1a8c2a66a033c64e202d702c17",
+        "sample_sha256": "0a14877e682bd79edfb9221db1fd1c98e4c1d7068983e59e799446efe7b14320",
+        "public_records": 43
       }
     },
     {
@@ -3079,10 +738,10 @@
         "shelf": "pro",
         "level": "entity",
         "origin": "lumecon",
-        "rows_label": "283,716 rows",
+        "rows_label": "11,120 observations",
         "vintage": null,
-        "version": "v2",
-        "updated": "2026-09-26",
+        "version": "v4",
+        "updated": "2026-10-06",
         "downloads": null,
         "name": "Tribal Natural Resource Revenue",
         "short_name": "Resources",
@@ -3094,181 +753,47 @@
         "cedar_id": "natural-resources",
         "status": "READY",
         "blockers": [],
-        "n_rows": 283716,
-        "n_tables": 9
+        "n_rows": 11120,
+        "n_tables": 1,
+        "n_record_types": 1,
+        "count_basis": "Permitted rows in the exact producer spreadsheet; mixed grains are not totals.",
+        "release_id": "f65f92d809d91fa07c977f37ff2a4c3830ca014eccb728daaaf43ebfaa61e7e5",
+        "manifest_sha256": "aefc98bded744a63714b4ac57683b6f1c2a34bf1b4f71e2f619277a559443e47",
+        "readiness_scope": "Verified local preview; production approval and endpoint pins are separate."
       },
       "sample": {
-        "table": "resource_revenue.csv",
-        "path": "/data/cedar/samples/natural-resources/resource_revenue__10.csv",
+        "table": "natural-resources.csv",
+        "path": "/data/cedar/samples/natural-resources/spreadsheet__10.csv",
         "rows": 10,
-        "of": 11305,
-        "columns": 45
+        "of": 11120,
+        "columns": 41,
+        "release_id": "f65f92d809d91fa07c977f37ff2a4c3830ca014eccb728daaaf43ebfaa61e7e5",
+        "manifest_sha256": "aefc98bded744a63714b4ac57683b6f1c2a34bf1b4f71e2f619277a559443e47"
       },
       "tables": [
         {
-          "table": "anc_ceiling_roster.csv",
-          "sample_path": "/data/cedar/samples/natural-resources/anc_ceiling_roster__10.csv",
-          "rows_in": 196,
-          "rows_published": 196,
+          "table": "natural-resources.csv",
+          "sample_path": "/data/cedar/samples/natural-resources/spreadsheet__10.csv",
+          "rows_in": 11120,
+          "rows_published": 11120,
           "rows_withheld": 0,
           "withheld_why": null,
-          "columns_published": 19,
+          "columns_published": 41,
           "sample_rows": 10,
+          "record_types": {
+            "records": 11120
+          },
           "full_file": {
             "shippable": true,
             "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "ancsa_filings_index.csv",
-          "sample_path": "/data/cedar/samples/natural-resources/ancsa_filings_index__10.csv",
-          "rows_in": 19269,
-          "rows_published": 19269,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 19,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "nd_severance_allocation.csv",
-          "sample_path": "/data/cedar/samples/natural-resources/nd_severance_allocation__10.csv",
-          "rows_in": 7,
-          "rows_published": 7,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 17,
-          "sample_rows": 7,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "resource_asset_source_coverage.csv",
-          "sample_path": "/data/cedar/samples/natural-resources/resource_asset_source_coverage__10.csv",
-          "rows_in": 18,
-          "rows_published": 18,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 8,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": false,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "resource_assets.csv",
-          "sample_path": "/data/cedar/samples/natural-resources/resource_assets__10.csv",
-          "rows_in": 35,
-          "rows_published": 35,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 46,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "resource_bia_mineral_acreage_tracts.csv",
-          "sample_path": "/data/cedar/samples/natural-resources/resource_bia_mineral_acreage_tracts__10.csv",
-          "rows_in": 249165,
-          "rows_published": 249165,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 19,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "resource_parties.csv",
-          "sample_path": "/data/cedar/samples/natural-resources/resource_parties__10.csv",
-          "rows_in": 1998,
-          "rows_published": 1998,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 16,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "resource_revenue.csv",
-          "sample_path": "/data/cedar/samples/natural-resources/resource_revenue__10.csv",
-          "rows_in": 11305,
-          "rows_published": 11305,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 45,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "tribal_bond_issuances.csv",
-          "sample_path": "/data/cedar/samples/natural-resources/tribal_bond_issuances__10.csv",
-          "rows_in": 29,
-          "rows_published": 29,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 19,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "tribal_tax_bases.csv",
-          "sample_path": "/data/cedar/samples/natural-resources/tribal_tax_bases__10.csv",
-          "rows_in": 1712,
-          "rows_published": 1712,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 22,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
+            "files": 1,
+            "largest_file_mb": 12.69576
           }
         }
       ],
       "full_files": {
         "served": false,
-        "note": "The full spreadsheets are built by code/1135_full_dataset_review_bundle.py and are not in this repository: the set measures 6.2 GB and single tables exceed GitHub's 100 MB limit. Each table above carries the split and file count a serving layer needs to locate it."
+        "note": "The local spreadsheet was verified. These staged previews do not approve or configure a production download."
       }
     },
     {
@@ -3278,10 +803,10 @@
         "shelf": "pro",
         "level": "entity_and_geography",
         "origin": "lumecon",
-        "rows_label": "131,090 rows",
+        "rows_label": "89 observations",
         "vintage": null,
-        "version": "v2",
-        "updated": "2026-09-26",
+        "version": "v4",
+        "updated": "2026-10-06",
         "downloads": null,
         "name": "Native Nonprofits",
         "short_name": "Nonprofits",
@@ -3293,245 +818,402 @@
         "cedar_id": "nonprofits",
         "status": "READY",
         "blockers": [],
-        "n_rows": 131090,
-        "n_tables": 12
+        "n_rows": 89,
+        "n_tables": 1,
+        "n_record_types": 1,
+        "count_basis": "Permitted rows in the exact producer spreadsheet; mixed grains are not totals.",
+        "release_id": "bb679c5bb80b210fc42ab22a5241941220c1fc823e85dcda5d6a11e0045a24a6",
+        "manifest_sha256": "dd33230d147bd1b81ae0db619ef8c9bfa03cf147cec6b1a70df0b5a800e20c32",
+        "readiness_scope": "Verified local preview; production approval and endpoint pins are separate."
       },
       "sample": {
-        "table": "np_orgs.csv",
-        "path": "/data/cedar/samples/nonprofits/np_orgs__10.csv",
+        "table": "nonprofits.csv",
+        "path": "/data/cedar/samples/nonprofits/spreadsheet__10.csv",
         "rows": 10,
-        "of": 12764,
-        "columns": 67
+        "of": 89,
+        "columns": 27,
+        "release_id": "bb679c5bb80b210fc42ab22a5241941220c1fc823e85dcda5d6a11e0045a24a6",
+        "manifest_sha256": "dd33230d147bd1b81ae0db619ef8c9bfa03cf147cec6b1a70df0b5a800e20c32"
       },
       "tables": [
         {
-          "table": "fac_native_nontribal_sefa_programs.csv",
-          "sample_path": "/data/cedar/samples/nonprofits/fac_native_nontribal_sefa_programs__10.csv",
-          "rows_in": 7252,
-          "rows_published": 7252,
+          "table": "nonprofits.csv",
+          "sample_path": "/data/cedar/samples/nonprofits/spreadsheet__10.csv",
+          "rows_in": 89,
+          "rows_published": 89,
           "rows_withheld": 0,
           "withheld_why": null,
-          "columns_published": 25,
+          "columns_published": 27,
           "sample_rows": 10,
+          "record_types": {
+            "records": 89
+          },
           "full_file": {
             "shippable": true,
             "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "fac_native_nontribal_single_audits.csv",
-          "sample_path": "/data/cedar/samples/nonprofits/fac_native_nontribal_single_audits__10.csv",
-          "rows_in": 545,
-          "rows_published": 545,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 40,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "fac_tribal_single_audits.csv",
-          "sample_path": "/data/cedar/samples/nonprofits/fac_tribal_single_audits__10.csv",
-          "rows_in": 6780,
-          "rows_published": 6780,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 36,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "grantmaker_funding_coverage.csv",
-          "sample_path": "/data/cedar/samples/nonprofits/grantmaker_funding_coverage__10.csv",
-          "rows_in": 27,
-          "rows_published": 27,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 14,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": false,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "grantmaker_funding_flows.csv",
-          "sample_path": "/data/cedar/samples/nonprofits/grantmaker_funding_flows__10.csv",
-          "rows_in": 18656,
-          "rows_published": 18656,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 59,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "grantmaker_funding_overlap.csv",
-          "sample_path": "/data/cedar/samples/nonprofits/grantmaker_funding_overlap__10.csv",
-          "rows_in": 69,
-          "rows_published": 69,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 19,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "np_ein_entity_hub.csv",
-          "sample_path": "/data/cedar/samples/nonprofits/np_ein_entity_hub__10.csv",
-          "rows_in": 2303,
-          "rows_published": 2303,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 17,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "np_ein_uei_bridge.csv",
-          "sample_path": "/data/cedar/samples/nonprofits/np_ein_uei_bridge__10.csv",
-          "rows_in": 28,
-          "rows_published": 28,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 15,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": false,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "np_financials.csv",
-          "sample_path": "/data/cedar/samples/nonprofits/np_financials__10.csv",
-          "rows_in": 8507,
-          "rows_published": 8507,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 77,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "np_grantee_financials.csv",
-          "sample_path": "/data/cedar/samples/nonprofits/np_grantee_financials__10.csv",
-          "rows_in": 4058,
-          "rows_published": 4058,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 19,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "np_org_scale.csv",
-          "sample_path": "/data/cedar/samples/nonprofits/np_org_scale__10.csv",
-          "rows_in": 1157,
-          "rows_published": 1157,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 30,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "np_orgs.csv",
-          "sample_path": "/data/cedar/samples/nonprofits/np_orgs__10.csv",
-          "rows_in": 12764,
-          "rows_published": 12689,
-          "rows_withheld": 75,
-          "withheld_why": "disposition=CONFLICT_EXCLUDED_AND_RULED_NATIVE=2; disposition=NATIVE_PROPOSED_AWAITING_OWNER_RULING=73",
-          "columns_published": 67,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "np_schedule_i_filers.csv",
-          "sample_path": "/data/cedar/samples/nonprofits/np_schedule_i_filers__10.csv",
-          "rows_in": 10314,
-          "rows_published": 10314,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 39,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
-          }
-        },
-        {
-          "table": "np_schedule_i_grants.csv",
-          "sample_path": "/data/cedar/samples/nonprofits/np_schedule_i_grants__10.csv",
-          "rows_in": 58685,
-          "rows_published": 58685,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 65,
-          "sample_rows": 10,
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 0,
-            "largest_file_mb": 0.0
+            "files": 1,
+            "largest_file_mb": 0.085378
           }
         }
       ],
       "full_files": {
         "served": false,
-        "note": "The full spreadsheets are built by code/1135_full_dataset_review_bundle.py and are not in this repository: the set measures 6.2 GB and single tables exceed GitHub's 100 MB limit. Each table above carries the split and file count a serving layer needs to locate it."
+        "note": "The local spreadsheet was verified. These staged previews do not approve or configure a production download."
+      }
+    },
+    {
+      "id": "foundation-corporate-giving",
+      "descriptor": {
+        "id": "foundation-corporate-giving",
+        "shelf": "standard",
+        "level": "record",
+        "origin": "lumecon",
+        "rows_label": "193 observations",
+        "vintage": null,
+        "version": "v4",
+        "updated": "2026-10-06",
+        "downloads": null,
+        "name": "Foundation & Corporate Giving",
+        "short_name": "Giving",
+        "tracks": "Publicly disclosed giving facts, with each source disclosure and financial status preserved.",
+        "sources": "Cited first-party donation reports and public foundation, corporate and bank disclosures admitted by the producer rights contract.",
+        "method": "One permitted source disclosure, not one distinct award or payment. Reported recipient names may identify a program or intermediary. Commitments, payments, unpaid balances, exact amounts, ranges and aggregate program totals remain distinct and nonadditive. Only reviewed recipient bindings are carried; no ownership or Native identity is inferred from names. Restricted source prose and other withheld material remain excluded under field-level publication rights."
+      },
+      "cedar": {
+        "cedar_id": "foundation-corporate-giving",
+        "status": "READY",
+        "blockers": [],
+        "n_rows": 193,
+        "n_tables": 1,
+        "n_record_types": 2,
+        "count_basis": "Permitted rows in the exact producer spreadsheet; mixed grains are not totals.",
+        "release_id": "4de9e836933499c5cb083599f2623fa99c99a6d14cfa65b7256a569750a902ec",
+        "manifest_sha256": "8a5b510263dea665941119e508b1e9218513c980f936397dcdf7f2c1c3c2f1a1",
+        "readiness_scope": "Verified local preview; production approval and endpoint pins are separate."
+      },
+      "sample": {
+        "table": "foundation-corporate-giving.csv",
+        "path": "/data/cedar/samples/foundation-corporate-giving/spreadsheet__10.csv",
+        "rows": 10,
+        "of": 193,
+        "columns": 66,
+        "release_id": "4de9e836933499c5cb083599f2623fa99c99a6d14cfa65b7256a569750a902ec",
+        "manifest_sha256": "8a5b510263dea665941119e508b1e9218513c980f936397dcdf7f2c1c3c2f1a1"
+      },
+      "tables": [
+        {
+          "table": "foundation-corporate-giving.csv",
+          "sample_path": "/data/cedar/samples/foundation-corporate-giving/spreadsheet__10.csv",
+          "rows_in": 193,
+          "rows_published": 193,
+          "rows_withheld": 0,
+          "withheld_why": null,
+          "columns_published": 66,
+          "sample_rows": 10,
+          "record_types": {
+            "policy_eligible_disclosures": 155,
+            "reviewed_disclosures": 38
+          },
+          "record_type_fields": {
+            "policy_eligible_disclosures": {
+              "addability_status": "addability_status",
+              "amount_class": "amount_class",
+              "amount_exact_usd": "amount_exact_usd",
+              "amount_lower_usd": "amount_lower_usd",
+              "amount_upper_usd": "amount_upper_usd",
+              "disclosure_id": "disclosure_id",
+              "financial_status": "financial_status",
+              "overlap_status": "overlap_status",
+              "partition": "partition",
+              "recipient_role": "recipient_role",
+              "record_kind": "record_kind",
+              "review_action": "review_action",
+              "rights_classification": "rights_classification",
+              "source_document_sha256": "source_document_sha256",
+              "source_id": "source_id",
+              "source_url": "source_url",
+              "version_kind": "version_kind",
+              "funder_name": "funder_name",
+              "funder_class": "funder_class",
+              "funder_ein": "funder_ein",
+              "recipient_name_reported": "recipient_name_reported",
+              "recipient_ein": "recipient_ein",
+              "recipient_city": "recipient_city",
+              "recipient_state": "recipient_state",
+              "recipient_country": "recipient_country",
+              "amount_basis": "amount_basis",
+              "currency": "currency",
+              "transfer_kind": "transfer_kind",
+              "report_year": "report_year",
+              "report_year_basis": "report_year_basis",
+              "approval_date": "approval_date",
+              "payment_date": "payment_date",
+              "term_start": "term_start",
+              "term_end": "term_end",
+              "term_start_precision": "term_start_precision",
+              "term_end_precision": "term_end_precision",
+              "event_type": "event_type",
+              "source_record_id": "source_record_id",
+              "award_family_source": "award_family_source",
+              "fiscal_sponsor_name": "fiscal_sponsor_name",
+              "beneficiary_name": "beneficiary_name",
+              "source_locator": "source_locator",
+              "publication_status": "publication_status",
+              "source_policy_eligibility": "source_policy_eligibility",
+              "aggregation_status": "aggregation_status",
+              "hold_reason": "hold_reason",
+              "temporal_caveat": "temporal_caveat",
+              "source_observation_status": "source_observation_status",
+              "source_qa_flags": "source_qa_flags"
+            },
+            "reviewed_disclosures": {
+              "disclosure_id": "disclosure_id",
+              "award_id": "award_id",
+              "version_kind": "version_kind",
+              "funder_name": "funder_name",
+              "recipient_name": "recipient_name",
+              "cedar_uid": "cedar_uid",
+              "recipient_entity_type": "recipient_entity_type",
+              "recipient_affiliation": "recipient_affiliation",
+              "purpose": "purpose",
+              "amount_exact_usd": "amount_exact_usd",
+              "amount_lower_usd": "amount_lower_usd",
+              "amount_upper_usd": "amount_upper_usd",
+              "amount_aggregate_usd": "amount_aggregate_usd",
+              "financial_status": "financial_status",
+              "announcement_date": "announcement_date",
+              "report_year": "report_year",
+              "award_period_text": "award_period_text",
+              "project_geography": "project_geography",
+              "source_url": "source_url",
+              "source_document_sha256": "source_document_sha256",
+              "source_retrieved_date": "source_retrieved_date",
+              "source_class": "source_class",
+              "source_id": "source_id",
+              "publication_rights_status": "publication_rights_status",
+              "overlap_status": "overlap_status",
+              "addability_status": "addability_status",
+              "observation": "observation",
+              "recipient_state": "recipient_state",
+              "source_locator": "source_locator",
+              "award_family_source": "award_family_source"
+            }
+          },
+          "full_file": {
+            "shippable": true,
+            "split": "",
+            "files": 1,
+            "largest_file_mb": 0.158533
+          }
+        }
+      ],
+      "full_files": {
+        "served": false,
+        "note": "The local spreadsheet was verified. These staged previews do not approve or configure a production download."
+      }
+    },
+    {
+      "id": "plot",
+      "descriptor": {
+        "id": "plot",
+        "shelf": "pro",
+        "level": "record",
+        "origin": "lumecon",
+        "rows_label": "151,715 observations",
+        "vintage": null,
+        "version": "v4",
+        "updated": "2026-10-06",
+        "downloads": null,
+        "name": "PLOT",
+        "short_name": "PLOT",
+        "tracks": "Public tract, assessor parcel, permit and environmental observations at their declared source grain.",
+        "sources": "Cited BIA mapped tract, Wisconsin V12 assessor parcel, local permit and EPA regulatory sources admitted by the producer rights contract.",
+        "method": "One permitted source observation at its declared record type. A BIA tract can contain several parcels; an assessor owner label is not title certification, beneficial ownership or verified Native ownership. A permit is not necessarily a unique project, and regulatory lifecycle events remain separate observations. Source snapshots, issued dates and event dates retain their own meanings. No ownership, financial transaction or canonical entity binding is inferred across components."
+      },
+      "cedar": {
+        "cedar_id": "plot",
+        "status": "READY",
+        "blockers": [],
+        "n_rows": 151715,
+        "n_tables": 1,
+        "n_record_types": 6,
+        "count_basis": "Permitted rows in the exact producer spreadsheet; mixed grains are not totals.",
+        "release_id": "a450bd56cdcafd2f7ff1d8191f141b025ad384eeb5a3d676fc96a6598c4d182b",
+        "manifest_sha256": "bd9c27c687ab072204d0ac74dbc624311b989abe18ab91350b29493941244888",
+        "readiness_scope": "Verified local preview; production approval and endpoint pins are separate."
+      },
+      "sample": {
+        "table": "plot.csv",
+        "path": "/data/cedar/samples/plot/spreadsheet__10.csv",
+        "rows": 10,
+        "of": 151715,
+        "columns": 106,
+        "release_id": "a450bd56cdcafd2f7ff1d8191f141b025ad384eeb5a3d676fc96a6598c4d182b",
+        "manifest_sha256": "bd9c27c687ab072204d0ac74dbc624311b989abe18ab91350b29493941244888"
+      },
+      "tables": [
+        {
+          "table": "plot.csv",
+          "sample_path": "/data/cedar/samples/plot/spreadsheet__10.csv",
+          "rows_in": 151715,
+          "rows_published": 151715,
+          "rows_withheld": 0,
+          "withheld_why": null,
+          "columns_published": 106,
+          "sample_rows": 10,
+          "record_types": {
+            "environmental_events": 3210,
+            "environmental_permits": 1242,
+            "ownership_observations": 4991,
+            "permit_events": 599,
+            "permits": 122,
+            "tract_observations": 141551
+          },
+          "record_type_fields": {
+            "environmental_events": {
+              "environmental_event_id": "environmental_event_id",
+              "environmental_record_id": "environmental_events__environmental_record_id",
+              "event_date": "environmental_events__event_date",
+              "event_type": "environmental_events__event_type",
+              "event_date_precision": "environmental_events__event_date_precision",
+              "event_interpretation": "event_interpretation",
+              "future_relative_to_capture": "future_relative_to_capture",
+              "source_field": "source_field",
+              "source_id": "environmental_events__source_id",
+              "source_url": "environmental_events__source_url"
+            },
+            "environmental_permits": {
+              "environmental_record_id": "environmental_permits__environmental_record_id",
+              "source_permit_id": "environmental_permits__source_permit_id",
+              "facility_registry_id": "facility_registry_id",
+              "facility_name_raw": "facility_name_raw",
+              "state": "environmental_permits__state",
+              "program": "environmental_permits__program",
+              "status_raw": "environmental_permits__status_raw",
+              "latitude": "latitude",
+              "longitude": "longitude",
+              "submitted_date": "submitted_date",
+              "issued_date": "environmental_permits__issued_date",
+              "effective_date": "effective_date",
+              "expiration_date": "environmental_permits__expiration_date",
+              "terminated_date": "terminated_date",
+              "source_snapshot_date": "environmental_permits__source_snapshot_date",
+              "native_ownership_supported": "native_ownership_supported",
+              "research_scope": "research_scope",
+              "source_record_url": "environmental_permits__source_record_url",
+              "source_id": "environmental_permits__source_id",
+              "source_url": "environmental_permits__source_url"
+            },
+            "ownership_observations": {
+              "plot_record_id": "plot_record_id",
+              "source_id": "ownership_observations__source_id",
+              "source_object_id": "source_object_id",
+              "source_parcel_id": "source_parcel_id",
+              "record_grain": "ownership_observations__record_grain",
+              "record_role": "record_role",
+              "source_ownership_code": "source_ownership_code",
+              "owner_name_raw": "owner_name_raw",
+              "estate_type": "estate_type",
+              "trust_status": "trust_status",
+              "recorded_acres": "recorded_acres",
+              "recorded_acres_measure": "recorded_acres_measure",
+              "tax_amount": "tax_amount",
+              "tax_year": "tax_year",
+              "tax_measure": "tax_measure",
+              "tax_amount_observed": "tax_amount_observed",
+              "source_tax_aggregation_eligible": "source_tax_aggregation_eligible",
+              "tax_aggregation_status": "tax_aggregation_status",
+              "tax_comparison_group": "tax_comparison_group",
+              "tax_cross_county_pooling_status": "tax_cross_county_pooling_status",
+              "state": "ownership_observations__state",
+              "county_fips": "ownership_observations__county_fips",
+              "ownership_observation_date": "ownership_observation_date",
+              "ownership_time_basis": "ownership_time_basis",
+              "source_snapshot_date": "ownership_observations__source_snapshot_date",
+              "source_vintage": "source_vintage",
+              "source_url": "ownership_observations__source_url",
+              "source_record_url": "ownership_observations__source_record_url",
+              "default_map_visible": "default_map_visible",
+              "geometry_display_scope": "geometry_display_scope",
+              "whole_footprint_ownership_claim": "whole_footprint_ownership_claim",
+              "geometry_wkb_hex": "geometry_wkb_hex"
+            },
+            "permit_events": {
+              "permit_event_id": "permit_event_id",
+              "permit_id": "permit_events__permit_id",
+              "source_id": "permit_events__source_id",
+              "event_date": "permit_events__event_date",
+              "event_date_precision": "permit_events__event_date_precision",
+              "event_type": "permit_events__event_type",
+              "scheduled_only": "scheduled_only",
+              "date_source_field": "date_source_field",
+              "source_url": "permit_events__source_url",
+              "state": "permit_events__state"
+            },
+            "permits": {
+              "permit_id": "permits__permit_id",
+              "source_id": "permits__source_id",
+              "source_permit_id": "permits__source_permit_id",
+              "permit_number": "permit_number",
+              "application_number": "application_number",
+              "record_kind": "record_kind",
+              "authority_name": "authority_name",
+              "state": "permits__state",
+              "county_fips": "permits__county_fips",
+              "municipality": "municipality",
+              "permit_type_raw": "permit_type_raw",
+              "program": "permits__program",
+              "status_raw": "permits__status_raw",
+              "application_date": "application_date",
+              "approved_date": "approved_date",
+              "issued_date": "permits__issued_date",
+              "completion_date": "completion_date",
+              "expiration_date": "permits__expiration_date",
+              "reported_value": "reported_value",
+              "value_currency": "value_currency",
+              "value_measure": "value_measure",
+              "source_snapshot_date": "permits__source_snapshot_date",
+              "source_url": "permits__source_url",
+              "source_record_url": "permits__source_record_url"
+            },
+            "tract_observations": {
+              "plot_record_id": "plot_record_id",
+              "source_id": "tract_observations__source_id",
+              "source_object_id": "source_object_id",
+              "source_parcel_id": "source_parcel_id",
+              "record_grain": "tract_observations__record_grain",
+              "record_role": "record_role",
+              "source_ownership_code": "source_ownership_code",
+              "owner_name_raw": "owner_name_raw",
+              "estate_type": "estate_type",
+              "trust_status": "trust_status",
+              "recorded_acres": "recorded_acres",
+              "recorded_acres_measure": "recorded_acres_measure",
+              "state": "tract_observations__state",
+              "county_fips": "tract_observations__county_fips",
+              "ownership_observation_date": "ownership_observation_date",
+              "ownership_time_basis": "ownership_time_basis",
+              "source_snapshot_date": "tract_observations__source_snapshot_date",
+              "source_vintage": "source_vintage",
+              "source_url": "tract_observations__source_url",
+              "source_record_url": "tract_observations__source_record_url",
+              "default_map_visible": "default_map_visible",
+              "geometry_display_scope": "geometry_display_scope",
+              "whole_footprint_ownership_claim": "whole_footprint_ownership_claim",
+              "geometry_wkb_hex": "geometry_wkb_hex"
+            }
+          },
+          "full_file": {
+            "shippable": true,
+            "split": "",
+            "files": 1,
+            "largest_file_mb": 210.436698
+          }
+        }
+      ],
+      "full_files": {
+        "served": false,
+        "note": "The local spreadsheet was verified. These staged previews do not approve or configure a production download."
       }
     }
   ]

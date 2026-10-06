@@ -196,18 +196,13 @@ test("the upgrade prompt names the product that actually opens the shelf", () =>
 // catalog entry with no release is allowed only with `coverage: STRUCTURE`,
 // so no span or count can ever be stated for it, and a release landing for
 // one fails this until its coverage is measured.
-test("the catalog is the shipping collection plus the two presented by their record structure", () => {
-  const shipping = new Set(LAUNCH_COLLECTION.map((dataset) => dataset.id));
-  for (const dataset of LAUNCH_COLLECTION) {
-    assert.ok(PRESS_CATALOG_BY_ID[dataset.id], `${dataset.id} is not in the catalog`);
-  }
-  const described = PRESS_CATALOG.filter((entry) => !shipping.has(entry.id));
-  assert.deepEqual(described.map((entry) => entry.id).sort(), ["foundation-corporate-giving", "plot"]);
-  assert.deepEqual([...STRUCTURE_ONLY].sort(), ["foundation-corporate-giving", "plot"]);
-  for (const entry of PRESS_CATALOG) {
-    assert.equal(entry.coverage.kind === "structure", !shipping.has(entry.id), `${entry.id}: structure exactly when it has no release`);
-  }
-  assert.equal(PRESS_CATALOG.length, LAUNCH_COLLECTION.length + 2);
+test("all fourteen Press collections have measured previews and Gaming remains excluded", () => {
+  const shipping = LAUNCH_COLLECTION.map(dataset => dataset.id).sort();
+  assert.deepEqual(shipping, PRESS_CATALOG.map(entry => entry.id).sort());
+  assert.equal(shipping.length, 14);
+  assert.ok(!shipping.includes("gaming"));
+  assert.deepEqual([...STRUCTURE_ONLY], []);
+  for (const dataset of LAUNCH_COLLECTION) assert.equal(dataset.shelf, PRESS_CATALOG_BY_ID[dataset.id].shelf);
 });
 
 // The shelf is the same one on both sides: a collection the workspace put on
@@ -251,7 +246,7 @@ test("no collection states coverage that depends on a tier", () => {
   for (const entry of PRESS_CATALOG) {
     assert.ok(entry.coverage, `${entry.id} states no coverage`);
     assert.ok(
-      ["series", "roster", "structure"].includes(entry.coverage.kind),
+      ["series", "roster", "structure", "observations"].includes(entry.coverage.kind),
       `${entry.id} coverage kind ${entry.coverage.kind}`,
     );
     // The retired pair, gone rather than aliased. A `standardFrom` equal to
@@ -273,7 +268,7 @@ test("every series states a plausible year and every roster a capture date", () 
       assert.ok(from >= 1800, `${entry.id}: ${from}`);
       assert.ok(from <= thisYear, `${entry.id}: ${from}`);
       assert.equal(captured, undefined, `${entry.id} is a series with a capture date`);
-    } else if (kind === "structure") {
+    } else if (kind === "structure" || kind === "observations") {
       // Nothing measured: neither a year nor a capture date.
       assert.equal(from, undefined, `${entry.id} states a from year with no measurement`);
       assert.equal(captured, undefined, `${entry.id} states a capture date with no measurement`);
@@ -318,13 +313,13 @@ test("a collection outside the reader's shelf still states its coverage", () => 
 // Foundation & Corporate Giving and PLOT are live on their plans like any
 // other collection on their shelf (owner, 2026-09-27), state no span and no
 // count, and never produce a year for a rollup to reach back to.
-test("the two presented by their record structure open by plan and state no span", () => {
+test("released mixed observations open by plan without inventing a continuous span", () => {
   const reach = { press: ["standard"], press_pro: ["standard", "pro"], grove: ["standard", "pro"], tree: ["standard", "pro"] };
   for (const id of ["plot", "foundation-corporate-giving"]) {
     const entry = PRESS_CATALOG_BY_ID[id];
-    assert.equal(entry.coverage.kind, "structure", id);
+    assert.equal(entry.coverage.kind, "observations", id);
     assert.equal(coverageFrom(entry), null, id);
-    assert.equal(coverageLabel(entry), null, `${id} states a span`);
+    assert.equal(coverageLabel(entry), "Source-dated observations", `${id} states a span`);
     for (const [tier, shelves] of Object.entries(reach)) {
       assert.equal(canOpenDataset({ workspace_tier: tier }, entry), shelves.includes(entry.shelf), `${id} for ${tier}`);
     }

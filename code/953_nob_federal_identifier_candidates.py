@@ -429,6 +429,50 @@ def verify(path: Path | None = None, skip_rederive: bool = False) -> int:
 
 
 def selftest() -> int:
+    """Exercise identifier gates with isolated synthetic inputs, never live data."""
+    import tempfile
+    global ROOT, CLEAN, TABLE, MANIFEST, XWALK, SOURCES
+    original = ROOT, CLEAN, TABLE, MANIFEST, XWALK, SOURCES
+    try:
+        with tempfile.TemporaryDirectory(prefix="cedar953-") as tmp:
+            ROOT = Path(tmp)
+            CLEAN = ROOT / "data" / "clean"
+            CLEAN.mkdir(parents=True)
+            TABLE = CLEAN / "native_owned_businesses.csv"
+            MANIFEST = ROOT / "manifest.json"
+            XWALK = CLEAN / "native_business_identifier_crosswalk.csv"
+            universe = CLEAN / "fpds_uei_cage_map.csv"
+            SOURCES = [(universe, "legal_business_name", "uei")]
+            with universe.open("w", encoding="utf-8", newline="") as fh:
+                writer = csv.writer(fh)
+                writer.writerow(["legal_business_name", "uei", "cage_code"])
+                writer.writerow(["Fixture Unique Services", "SYNTHETIC001", "TEST1"])
+            base = ["business_source_id", "business_name_raw", "source_terms_status",
+                    "business_name_is_person_name", "certification_expiration"]
+            fixtures = [
+                ["fixture-restricted", "Fixture Restricted Services", RESTRICTIVE,
+                 "0", ""],
+                ["fixture-unique", "Fixture Unique Services", "", "0", "2027-04-16"],
+                ["fixture-missing", "Fixture Unmatched Services", "", "0", ""],
+            ]
+            uni, cage, _ = build_universe()
+            digest = hashlib.md5()
+            digest.update(_b(base))
+            with TABLE.open("w", encoding="utf-8", newline="") as fh:
+                writer = csv.writer(fh)
+                writer.writerow([*base, *NEW])
+                for values in fixtures:
+                    digest.update(_b(values))
+                    writer.writerow([*values, *resolve(dict(zip(base, values)), uni, cage)])
+            MANIFEST.write_text(json.dumps({"rows": len(fixtures),
+                                           "md5_base_fields": digest.hexdigest()}),
+                                encoding="utf-8")
+            return _selftest_cases()
+    finally:
+        ROOT, CLEAN, TABLE, MANIFEST, XWALK, SOURCES = original
+
+
+def _selftest_cases() -> int:
     import contextlib
     if not MANIFEST.exists():
         print("  [953] selftest: run the enricher first")

@@ -94,6 +94,7 @@ sampled_from: dict = {}
 
 from cedar_publication import (          # noqa: E402
     STOREFRONT_SHELVES, BUILD_SHELVES, shelves, publishable_columns,
+    assert_collection_publishable, FieldMapRefusal,
 )
 
 #: Curated, per dataset, in reading order. The Cedar id goes LAST.
@@ -186,6 +187,16 @@ DIVERSITY: dict[str, str] = {
 DULL = ("source_file", "build_date", "_basis", "_flag", "inflation_base_year",
         "deflator_factor", "pre_2000", "attribution_", "duplicate_",
         "n_capacity", "vintage")
+
+
+def _1189():
+    """`code/1189_need_attribution_rulings.py`, loaded by path."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "need_attribution_rulings_1189", ROOT / "code" / "1189_need_attribution_rulings.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
 
 
 def score_fallback(hdr, rows):
@@ -315,6 +326,11 @@ def run(write: bool) -> int:
     OUT.mkdir(parents=True, exist_ok=True)
     man = []
     for coll in datasets():
+        try:
+            assert_collection_publishable(coll)
+        except FieldMapRefusal:
+            man.append({"dataset": coll, "note": "Collection publication held"})
+            continue
         f = SRC / f"{coll}.csv"
         if not f.exists():
             man.append({"dataset": coll, "note": "delivered file absent"})
@@ -351,6 +367,13 @@ def run(write: bool) -> int:
                         if j < POOL:
                             rows[j] = row
                 sampled_from[coll] = n_seen
+        if coll == "need":
+            # THE OWNER LINK IS CORRECTED BEFORE THE ROWS ARE CHOSEN (2026-10-04).
+            # 92 of the 100 NEED preview rows sat under the wrong owner; `1189`
+            # applies the attribution rulings and guards (re-attribute, or blank
+            # the owner of a specific misattribution - the row still ships), and
+            # doing it first lets `pick()` prefer rows whose owner stands.
+            _1189().annotate(rows)
         curated = PREVIEW.get(coll)
         if curated:
             cols = [c for c in curated if c in hdr]

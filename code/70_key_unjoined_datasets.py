@@ -133,6 +133,14 @@ except Exception:
 # ---------------------------------------------------------------- resolver ---
 
 
+def load_ruling_gate():
+    spec = importlib.util.spec_from_file_location(
+        "nonprofit_ruling_gate", CEDAR / "code" / "174_apply_rulings_to_source_tables.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
 def load_m33():
     """Standing rule 8: ONE resolver. Import it; never re-implement matching."""
     spec = importlib.util.spec_from_file_location(
@@ -798,6 +806,8 @@ def do_np_orgs():
     rows = rd(p)
     stat = Counter()
     seen_B, seen_ref = defaultdict(int), defaultdict(int)
+    ruling_gate = load_ruling_gate()
+    decisions = ruling_gate.build_decisions(rd(CLEAN / "cedar_ruling_ledger_consolidated.csv"))
     neg_ein = ledger_negative_ein_rulings()
     print(f"    ledger negative EIN rulings loaded: {len(neg_ein):,}")
 
@@ -805,6 +815,8 @@ def do_np_orgs():
         nm = (r.get("org_name") or "").strip()
         tid = canon = method = tier = basis = ""
         ein = re.sub(r"\D", "", r.get("EIN") or "")
+
+        identity_hold = ruling_gate.nonprofit_identity_hold(r.get("EIN"), decisions)
 
         # An exclusion ruling blocks unconditionally.
         if ein and ein in neg_ein:
@@ -817,10 +829,20 @@ def do_np_orgs():
             tier, basis = "X", ("excluded_by_prior_ruling:"
                                 + (r.get("exclusion_reason") or "prior ruling"))
             stat["excluded"] += 1
+        elif identity_hold:
+            ruling_gate.clear_nonprofit_identity(r, org_identity=True)
+            basis = "identity_hold:" + identity_hold
+            method = "ruled_identity_unresolved"
+            stat["identity held by consolidated ruling"] += 1
         else:
             res = key_name(nm, "np_orgs", r.get("state"))
             tid, canon = res["tribe_id"], res["canonical_name"]
             method, tier, basis = res["method"], res["tier"], res["basis"]
+            target_hold = ruling_gate.nonprofit_identity_hold(r.get("EIN"), decisions, tid)
+            if tid and target_hold:
+                ruling_gate.clear_nonprofit_identity(r, org_identity=True)
+                tid = canon = tier = ""
+                method, basis = "ruled_identity_unresolved", "identity_hold:" + target_hold
             if tid:
                 # TRAP 6. `verified_strict` is a strict NAME match, not
                 # verified Native status. So an exact/alias hit is NOT enough

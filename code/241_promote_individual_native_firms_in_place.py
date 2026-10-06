@@ -148,27 +148,34 @@ documented blind spot, recorded beside the verdict and never folded into it.
 Absence is `NO_CLAIM_FOUND`. **There is no `NOT_NATIVE` value in this schema**
 and `assert_no_forbidden_absence_value()` refuses to write one.
 
-PRIVACY - A SECOND RESTRICTION, INDEPENDENT OF D&B
----------------------------------------------------
-It survives any answer to the licensing question. A sole proprietorship's legal
-name is frequently a private person's name; **even in the TRIBAL extract, 8 of
-402 UEIs are unambiguous personal names** with street addresses.
+PUBLICATION - OWNER RULING 2026-10-02
+-------------------------------------
+A firm is a business entity regardless of what it is named after. Its name,
+DBA, UEI, CAGE, city and business address are public business records - SAM
+and USAspending publish exactly these for every federal awardee - not personal
+identifying information, so consent is not required and every row writes
+`publish_name = 1`, `publish_federal_identifier = 1`,
+`publish_surrogate_id_only = 0`. The rule itself lives in
+`cedar_domain.may_publish_individual_native_field`; this script records its
+answer, never restates it.
 
-    MAY publish      contract facts, class totals, distributions
-    MAY NOT publish  legal/DBA/owner name, address, any person<->ancestry
-                     pairing, AND THE UEI where the name is a person's -
-                     SAM's public search resolves a UEI to that name, so
-                     publishing the UEI publishes the name by one hop
+    MAY publish      contract facts, class totals, distributions, AND the
+                     firm's name, DBA, UEI, CAGE, city and business address
+    NOT published    `researcher_note` - internal working text, not a fact
+                     about the firm (cedar_domain.INDIVIDUAL_NATIVE_INTERNAL_FIELDS)
 
-Cedar Press's existing written policy is INHERITED, not restated:
-`nrc_meeting_participants` records *"Cedar Press names an individual only where
-a public professional capacity is established"*; `ferc_ex_parte_parties`
-records *"Cedar Press does not publish datasets about private individuals."*
-Cells resolving to fewer than 3 firms are suppressed, and the suppression is
-reported rather than the row dropped (the CGCC precedent).
+Until 2026-10-02 this block withheld the name, address and - where the legal
+name read as a person's - the UEI unless `consent_status = OPTED_IN`, inheriting
+the `nrc_meeting_participants` / `ferc_ex_parte_parties` naming policy. The
+owner's ruling lifts that restriction for this class: those two policies
+concern natural persons appearing in a record, and a federal awardee is a
+business entity whatever its name. `consent_status`, `consent_date` and
+`consent_source` stay as recorded informational columns; `privacy_class` and
+`firm_legal_name_is_person` stay as measured facts; none of them gates a field.
 
-**A firm's own website statement is our EVIDENCE, never their PERMISSION to be
-named.** `consent_status = OPTED_IN` is the only thing that releases a name.
+Small-cell suppression is unrelated and unchanged: cells resolving to fewer
+than 3 firms are suppressed, and the suppression is reported rather than the
+row dropped (the CGCC precedent).
 
     py -3 code/241_promote_individual_native_firms_in_place.py --check  # no write
     py -3 code/241_promote_individual_native_firms_in_place.py          # apply
@@ -184,7 +191,6 @@ Writes  data/spine/cedar_entity_spine.csv
         data/clean/individual_native_firm_register.csv           (new)
         review/individual_native_promotion_refused_<date>.csv
         review/individual_native_ledger_repointed_<date>.csv
-        review/individual_native_canonical_name_privacy_<date>.csv
         logs/241_promote_individual_native_firms.log
 """
 
@@ -655,46 +661,33 @@ def main():
             stats["refused: no name"] += 1
             continue
 
-        # ---- privacy classification -------------------------------------
+        # ---- privacy classification, recorded not applied ----------------
         # Resolve the surrogate FIRST so a re-run reports the id the firm
         # actually holds rather than the placeholder this run would have
         # minted.
         sid_for_row = prior_sid.get((idtype, ident)) or surrogates[i]
         priv = (ver or {}).get("privacy_class", "") or "UNKNOWN"
-        pub_name = (ver or {}).get("publishable_entity_name", "") or "N"
-        # Deliberately over-inclusive, because the two errors do not cost the
-        # same: an unnecessary withholding costs a column, a wrong disclosure
-        # costs a person.
+        # `firm_legal_name_is_person` stays a measured fact about the name
+        # (deliberately over-inclusive: UNKNOWN where the heuristic cannot
+        # clear it). Since the owner ruling of 2026-10-02 it gates nothing: a
+        # firm is a business entity whatever it is named after, so the name
+        # and the federal identifier publish on every row. The answers below
+        # are cedar_domain.may_publish_individual_native_field's, read live,
+        # so this script cannot drift from the rule.
         if priv in {"POSSIBLE_PERSONAL_NAME", "NO_CORPORATE_FORM", "UNKNOWN"}:
             name_is_person = "UNKNOWN"
         else:
             name_is_person = "0"
-        if priv == "POSSIBLE_PERSONAL_NAME":
-            pub_name = "N"
-        publish_name = "1" if (pub_name == "Y" and name_is_person == "0") else "0"
-
-        if publish_name == "0":
-            # The ENTITY is still minted - withholding the entity would drop
-            # the owner's ruling, which is the defect this script exists to
-            # fix. Only the NAME is withheld, and the canonical-form question
-            # goes to a human. Cf. `163`'s N-0145 refusal, where the string
-            # itself contained a private person's name used as a postal
-            # care-of; here the string is a firm name a heuristic cannot clear.
-            name_privacy.append({
-                "surrogate_entity_id": sid_for_row,
-                "identifier_type": idtype, "identifier": ident,
-                "privacy_class": priv,
-                "firm_legal_name_is_person": name_is_person,
-                "question": "Is this legal name a private individual's name? "
-                            "The entity IS minted; only publication of the "
-                            "name is withheld pending this answer. Answer "
-                            "PERSON / FIRM. A FIRM answer sets "
-                            "firm_legal_name_is_person = 0 and releases the "
-                            "name and the UEI; a PERSON answer keeps both "
-                            "withheld permanently absent consent.",
-                "YOUR_RULING": "", "YOUR_NOTE": "",
-                "flagged_date": TODAY,
-            })
+        publish_name = "1" if D.may_publish_individual_native_field(
+            "canonical_name", name_is_person, "NOT_ASKED") else "0"
+        publish_identifier = "1" if D.may_publish_individual_native_field(
+            "awardee_uei", name_is_person, "NOT_ASKED") else "0"
+        if publish_name != "1" or publish_identifier != "1":
+            raise SystemExit(
+                f"ABORT: cedar_domain.may_publish_individual_native_field "
+                f"withheld a field for {sid_for_row} ({idtype} {ident}); the "
+                f"owner ruling of 2026-10-02 publishes every business-record "
+                f"field of this class. The rule and this script disagree.")
 
         # ---- the entity row (EXISTING spine columns only) -----------------
         # No new spine columns. The spine is a hot shared file, 20 extra
@@ -799,7 +792,7 @@ def main():
         register_rows.append({
             "surrogate_entity_id": tid,
             "entity_class": CLASS,
-            # -- identity, withheld per the privacy block ------------------
+            # -- identity, published per the owner ruling of 2026-10-02 ----
             "canonical_name": name,
             "identifier_type": idtype,
             "identifier": ident,
@@ -857,27 +850,30 @@ def main():
             # -- contract facts (measured here, prime_contracts NOT written)
             "n_contract_rows": rows_by_id.get(ident, 0),
             "total_obligations_usd": f"{usd_by_id.get(ident, 0.0):.2f}",
-            # -- privacy ---------------------------------------------------
+            # -- publication (owner ruling 2026-10-02) ----------------------
+            # privacy_class and firm_legal_name_is_person are measured facts
+            # about the name; consent_status/_date/_source are recorded
+            # informational columns. None of them gates a field any more.
             "privacy_class": priv,
             "firm_legal_name_is_person": name_is_person,
             "consent_status": "NOT_ASKED",
             "consent_date": "", "consent_source": "",
-            "publish_name": publish_name,
-            "publish_surrogate_id_only": "0" if publish_name == "1" else "1",
-            "publish_federal_identifier":
-                "1" if D.may_publish_individual_native_field(
-                    "awardee_uei", name_is_person, "NOT_ASKED") else "0",
+            "publish_name": publish_name,                        # "1" on every row
+            "publish_surrogate_id_only": "0",                    # the name publishes
+            "publish_federal_identifier": publish_identifier,    # "1" on every row
             "publish_contract_facts": "Y",
             "dnb_open_data_attaches": (ver or {}).get(
                 "dnb_open_data_attaches",
-                "NO - sourced from BGOV/USAspending, not a SAM entity extract. "
-                "The privacy restriction is INDEPENDENT of this answer and "
-                "survives it."),
+                "NO - sourced from BGOV/USAspending, not a SAM entity extract."),
             "publication_policy_inherited_from":
-                "nrc_meeting_participants ('Cedar Press names an individual "
-                "only where a public professional capacity is established'); "
-                "ferc_ex_parte_parties ('Cedar Press does not publish datasets "
-                "about private individuals.')",
+                "Inherited restriction LIFTED by owner ruling 2026-10-02 for "
+                "business entities: nrc_meeting_participants ('Cedar Press "
+                "names an individual only where a public professional capacity "
+                "is established') and ferc_ex_parte_parties ('Cedar Press does "
+                "not publish datasets about private individuals.') concern "
+                "natural persons appearing in a record; a federal awardee is a "
+                "business entity whatever it is named after, so its name, "
+                "identifiers and business address publish without consent.",
             "built_date": TODAY,
             "built_by": "code/241_promote_individual_native_firms_in_place.py",
         })
@@ -887,10 +883,8 @@ def main():
     for x in refused:
         log(f"      {x['identifier_type']} {x['identifier']}  "
             f"{x['reason'][:90]}")
-    log(f"  name withheld pending a human ruling : {len(name_privacy)}")
-    for x in name_privacy:
-        log(f"      {x['surrogate_entity_id']}  {x['identifier']}  "
-            f"({x['privacy_class']})")
+    log(f"  name withheld : {len(name_privacy)} (owner ruling 2026-10-02: "
+        f"business-record fields publish on every row; nothing is queued)")
 
     # ---- EXCLUSIONS, SCOPED TO A (IDENTIFIER, ENTITY) PAIR ----------------
     # A tier-X row is an exclusion, and the SCOPE of an exclusion matters. Read

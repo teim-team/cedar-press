@@ -1,3 +1,4 @@
+import { PRESENTATION_COLUMNS } from "../../features/grove/mixedSpreadsheet.js";
 // REVIEW OWNER: Havala
 //
 // The record table, and the list it becomes on a phone.
@@ -30,18 +31,51 @@ import {
   scopeName,
 } from "../../features/grove/explore.js";
 import { isBareScheme, isWellFormedUrl, readerText } from "../../features/grove/readerValues.js";
-import { money, short } from "../../features/grove/recordColumns.js";
+import { money, short, reportedAmountText } from "../../features/grove/recordColumns.js";
 import { scrollEdges } from "../../features/grove/scrollEdges.js";
+import SourceCitation from "./SourceCitation.jsx";
+import { safeSourceUrl } from "../../features/grove/sourcePresentation.js";
+import { readableCode, readerValueLabel, repairMojibake, unlinkedRecordSubject } from "../../features/grove/readerPresentation.js";
+import { COLUMN_FALLBACKS } from "../../features/grove/showcase.js";
 
 export function Human({ column, value, contract, item = null }) {
-  if (value === "" || value == null || isBareScheme(value)) return "—";
-  const raw = String(value);
-  // A link only where the whole cell is one address: "https://a | https://b"
-  // used as an href is neither, and is shown as the text it is.
-  if (isWellFormedUrl(raw)) return <a href={raw.trim()} target="_blank" rel="noreferrer">{raw.trim().replace(/^https?:\/\/(www\.)?/, "").slice(0, 80)}{raw.length > 88 ? "…" : ""}</a>;
-  // Cedar's own file and script names read as what they are, not as paths
-  // a reader could open (readerValues.js). The download keeps them verbatim.
-  const text = readerText(raw);
+  if (column === "__subject") return item?.entity?.withheld || item?.linkStatus === "withheld" ? WITHHELD_TEXT : item?.subject ?? item?.entity?.name ?? "Not provided";
+  if (column === "__observation") return item?.observation || "Not provided";
+  if (column === "__date") return item?.date ? <>{item.date}{item.dateBasis ? <small className="cp-ex__uid">{item.dateBasis}</small> : null}</> : "Not provided";
+  if (column === "__amount") {
+    const shown = reportedAmountText(item);
+    return shown ? <>{shown}{item.amountBasis ? <small className="cp-ex__uid">{item.amountBasis}</small> : null}</> : "Not provided";
+  }
+  if ((column === contract?.source || column === SOURCE_LINK_COLUMN) && item?.sourceDetails) return <SourceCitation source={item.sourceDetails} compact />;
+  if (["source_inbox", "source_files", "link_ledger_source_file", "source_dataset", "raw_path", "storage_path"].includes(column)) return "Retained in internal provenance";
+  // A blank column whose fact the record carries in its reported form (a
+  // gift's recipient as the source printed it) shows that form.
+  if (value === "" || value == null) {
+    const fallbacks = [COLUMN_FALLBACKS[item?.collection]?.[column] ?? []].flat();
+    const fallback = fallbacks.find((name) => String(item?.row?.[name] ?? "").trim());
+    if (fallback) value = item.row[fallback];
+  }
+  // The table's own entity columns read blank where the record names its
+  // Native party through another role (a subaward's subrecipient, a
+  // payment's beneficiary): the register's name for that party is shown
+  // rather than a blank beside its ID.
+  if ((value === "" || value == null) && item?.entity?.entities?.length) {
+    const first = item.entity.entities[0];
+    if (column === contract?.entity_name && first.name) return first.name;
+    if (column === contract?.entity_role_column && first.role) return readerValueLabel(item.collection, "cedar_entity_role", first.role);
+  }
+  if (value === "" || value == null || isBareScheme(value)) return "Not provided";
+  // FPDS's inherently-governmental-function marker is a code, not a
+  // description of the work.
+  if (/^IGF::[A-Z]{2}::IGF$/.test(String(value).trim())) return "Not provided";
+  const raw = repairMojibake(String(value));
+  if (column === "record_type" && contract?.row_type_contracts?.[raw]?.label) return contract.row_type_contracts[raw].label;
+  if (/^[A-Za-z]:[\\/]|^file:\/\/|^\\\\/.test(raw)) return "Retained in internal provenance";
+  if (isWellFormedUrl(raw)) {
+    const url = safeSourceUrl(raw.trim());
+    return url ? <a href={url} target="_blank" rel="noreferrer">{url.replace(/^https?:\/\/(www\.)?/, "").slice(0, 80)}{url.length > 88 ? "?" : ""}</a> : "Source link unavailable";
+  }
+  const text = readerText(readerValueLabel(item?.collection, column, raw));
   // Money wherever the column is money: the table's amount, or any column
   // named in dollars (`_usd`, `_amt`, `obligations`, `amount`, `value_usd`).
   if (contract?.amount === column || /(_usd|_amt|obligations|_amount|amount_usd)$/i.test(column) || /^(income|expenses|spend)_/i.test(column)) {
@@ -66,7 +100,7 @@ export function Human({ column, value, contract, item = null }) {
       // Not JSON: shown as it is.
     }
   }
-  return text;
+  return readableCode(text);
 }
 
 /** A scope element in words: the population and the relationship. */
@@ -75,11 +109,13 @@ function scopeLine(el) {
   return `${rel} ${scopeName(el.scope)}`;
 }
 
-export function EntityCell({ item }) {
+export function EntityCell({ item, subjectFirst = false }) {
   const { entities } = item.entity;
   const first = entities[0];
   const why = item.why ?? [];
+  const leadSubject = subjectFirst && !item.entity.withheld && item.linkStatus !== "withheld" ? item.subject : null;
   if (!first) {
+    const subject = unlinkedRecordSubject(item);
     // What the blank says is the table's own link status where it carries
     // one; a scope alone does not make a blank "no individual named", since
     // a notice can address a population AND name a party the register could
@@ -88,7 +124,7 @@ export function EntityCell({ item }) {
       ?? "not linked to an entity";
     return (
       <>
-        <em className="cp-ex__unkeyed">{blank}</em>
+        {subject ? <>{subject}<small className="cp-ex__uid">{blank}</small></> : <em className="cp-ex__unkeyed">{blank}</em>}
         {item.scopes?.length ? <small className="cp-ex__uid">{item.scopes.map(scopeLine).join("; ")}</small> : null}
         {why.length ? <small className="cp-ex__uid">Broad scope: {why.map(scopeLine).join("; ")}. The chosen entity is not individually named.</small> : null}
       </>
@@ -97,10 +133,15 @@ export function EntityCell({ item }) {
   return (
     <>
       {why.length ? <small className="cp-ex__uid">Broad scope: {why.map(scopeLine).join("; ")}. The chosen entity is not individually named.</small> : null}
-      {first.name ?? <em>{first.withheld ? WITHHELD_TEXT : first.uid}</em>}
+      {leadSubject ? <>{leadSubject}<small className="cp-ex__uid">{first.role ? readerValueLabel(item.collection, "cedar_entity_role", first.role) : item.collection === "need" ? "Ultimate parent" : "Associated entity"}: {first.name ?? first.uid}</small></> : <>
+        {first.name ?? <em>{first.withheld ? WITHHELD_TEXT : first.uid}</em>}
+        {first.role ? <small className="cp-ex__uid">Role: {readerValueLabel(item.collection, "cedar_entity_role", first.role)}</small> : null}
+      </>}
       {entities.length > 1 ? <small className="cp-ex__uid"> +{entities.length - 1} more</small> : null}
-      {first.uid ? <small className="cp-ex__uid">{item.entity.uids.join(" · ")}</small> : null}
-      {item.subject ? <small className="cp-ex__uid">record names: {item.subject}</small> : null}
+      {/* A NEED card states its owner once: the name line above. The owner's
+          Cedar ID repeated it, so it stays in the table and the record. */}
+      {first.uid && !(leadSubject && item.collection === "need") ? <small className="cp-ex__uid">{leadSubject ? "Associated entity ID: " : ""}{item.entity.uids.join(" · ")}</small> : null}
+      {item.subject && !leadSubject ? <small className="cp-ex__uid">record names: {item.subject}</small> : null}
     </>
   );
 }
@@ -144,7 +185,16 @@ export function Rows({ view, items, columns, sort, onSort, onActive, showAmount,
       wrap.toggleAttribute("data-start", start);
       wrap.toggleAttribute("data-end", end);
     };
+    // A cell cut short by its ellipsis keeps its full text as a tooltip, so
+    // truncation never costs a value its meaning.
+    const titleTruncated = () => {
+      for (const td of node.querySelectorAll("td")) {
+        if (td.scrollWidth > td.clientWidth + 1) td.title = td.innerText.trim();
+        else td.removeAttribute("title");
+      }
+    };
     const measure = () => {
+      titleTruncated();
       node.style.setProperty("--vw", `${node.clientWidth}px`);
       const more = node.querySelector("th.cp-ex__more");
       const uid = node.querySelector("th.cp-ex__pin--uid");
@@ -173,10 +223,11 @@ export function Rows({ view, items, columns, sort, onSort, onActive, showAmount,
     ...(showAmount ? [["amount", "Amount"]] : []),
     ["source", "Source"],
   ];
-  const pinned = (c) => c === entityColumn || c === contract?.entity_uid;
+  const primaryColumn = columns[0] === "__subject" ? "__subject" : contract?.subject && columns[0] === contract.subject ? contract.subject : entityColumn;
+  const pinned = (c) => c === primaryColumn || c === contract?.entity_uid;
   // The built source link has no column in the file, so no codebook label.
-  const headLabel = (c) => (c === SOURCE_LINK_COLUMN ? "Source record" : labelFor(items[0]?.key, c));
-  const heads = view === "table" ? columns.map((c) => [c, headLabel(c), pinned(c), c === contract?.entity_uid ? " cp-ex__pin--uid" : c === entityColumn && contract?.entity_uid && columns.includes(contract.entity_uid) ? " cp-ex__pin--name" : ""]) : universal;
+  const headLabel = (c) => PRESENTATION_COLUMNS[c] ?? labelFor(items[0]?.key, c);
+  const heads = view === "table" ? columns.map((c) => [c, headLabel(c), pinned(c), c === contract?.entity_uid ? " cp-ex__pin--uid" : c === primaryColumn && contract?.entity_uid && columns.includes(contract.entity_uid) ? " cp-ex__pin--name" : ""]) : universal;
   return (
     // The wrapper exists for the edge fade: every cell paints its own
     // background, so a gradient on the scroller itself is painted over by
@@ -233,7 +284,7 @@ export function Rows({ view, items, columns, sort, onSort, onActive, showAmount,
                 )}
                 {view === "table"
                   ? columns.map((column) => (
-                    <td key={column} className={`${pinned(column) ? "cp-ex__pin" : ""}${column === contract?.entity_uid ? " cp-ex__pin--uid" : column === entityColumn && contract?.entity_uid && columns.includes(contract.entity_uid) ? " cp-ex__pin--name" : ""}${column === contract?.amount ? " cp-ex__amount" : ""}`}>
+                    <td key={column} className={`${pinned(column) ? "cp-ex__pin" : ""}${column === contract?.entity_uid ? " cp-ex__pin--uid" : column === primaryColumn && contract?.entity_uid && columns.includes(contract.entity_uid) ? " cp-ex__pin--name" : ""}${column === contract?.amount ? " cp-ex__amount" : ""}`}>
                       {column === entityColumn && item.superseded ? <span className="cp-ex__badge">Superseded</span> : null}
                       {column === entityColumn && item.entity.withheld
                         ? <em>{WITHHELD_TEXT}</em>
@@ -254,14 +305,14 @@ export function Rows({ view, items, columns, sort, onSort, onActive, showAmount,
                         </button>
                       </td>
                       <td className="cp-ex__date">{item.date ?? "—"}</td>
-                      <td className="cp-ex__obs"><span className="cp-ex__clamp">{item.observation || "—"}</span></td>
+                      <td className="cp-ex__obs"><span className="cp-ex__clamp" title={item.observation || undefined}>{item.observation || "—"}</span></td>
                       {showAmount ? (
                         <td className="cp-ex__amount">
                           {item.amount == null ? "—" : money.format(item.amount)}
                           {item.amount != null && item.amountBasis ? <small className="cp-ex__uid">{item.amountBasis}</small> : null}
                         </td>
                       ) : null}
-                      <td>{item.source ? <a href={item.source} target="_blank" rel="noreferrer">Source <span aria-hidden="true">&#8599;</span></a> : <span className="cp-ex__fine">no link</span>}</td>
+                      <td><SourceCitation source={item.sourceDetails} compact /></td>
                     </>
                   )}
               </tr>,
@@ -279,14 +330,25 @@ export function Cards({ items, onActive, openRecord, readOnly = false }) {
   return (
     <ul className="cp-ex__cards">
       {items.map((item) => {
+        // NEED reads as a hierarchy: the enterprise, its ultimate parent, then
+        // the relationship one level up, before the date line.
+        const ownership = item.collection === "need";
+        const obs = (
+          <span className="cp-ex__cardobs cp-ex__clamp" title={item.observation || undefined}>{item.observation || "—"}</span>
+        );
         const inside = (
           <>
             <span className="cp-ex__cardwho">
               {item.superseded ? <span className="cp-ex__badge">Superseded</span> : null}
-              <EntityCell item={item} />
+              <EntityCell item={item} subjectFirst />
             </span>
-            <span className="cp-ex__cardmeta">{short(item.collection)} · {item.date ?? "undated"}{item.amount != null ? ` · ${money.format(item.amount)}` : ""}</span>
-            <span className="cp-ex__cardobs cp-ex__clamp">{item.observation || "—"}</span>
+            {ownership && item.observation ? obs : null}
+            <span className="cp-ex__cardmeta">
+              {short(item.collection)} · {item.date ?? "undated"}{reportedAmountText(item) ? ` · ${reportedAmountText(item)}` : ""}
+              {item.date && item.dateBasis ? <small className="cp-ex__uid">{item.dateBasis}</small> : null}
+              {reportedAmountText(item) && item.amountBasis ? <small className="cp-ex__uid">{item.amountBasis}</small> : null}
+            </span>
+            {ownership ? null : obs}
             {readOnly ? null : <span className="cp-ex__cardgo" aria-hidden="true">&#8594;</span>}
           </>
         );

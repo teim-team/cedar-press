@@ -12,7 +12,7 @@
 // KEYED BY CATALOG ID
 // The ring used to be a list of ten display names typed here, and it drifted
 // from the catalog twice: it carried Gaming after the storefront stopped
-// selling it, and never gained Subcontracting, Native-Owned Businesses or
+// selling it, and never gained Subcontracting, Individual Native-Owned Businesses or
 // NEED after they arrived. It is keyed by collection id now, the labels come
 // from the catalog's own short names, and a test requires every storefront
 // collection to be on the ring. The name-keyed RING, SOURCES and FEEDS the
@@ -42,14 +42,16 @@ export const ECOSYSTEM = Object.freeze({
   legislation: Object.freeze({
     sources: Object.freeze(["Congress.gov", "House and Senate roll calls"]),
     feeds: Object.freeze(["lobbying", "federal-register"]),
-    line: "A bill's subjects and sponsors meet the advocacy record working the same issue: filings, testimony and comments.",
+    line: "A bill's subjects and sponsors meet the lobbying disclosures that name the same issue.",
   }),
   // `lobbying` is the collection's id; the collection is Native Federal
-  // Advocacy & Engagement, of which registered lobbying is one channel.
+  // Advocacy and Engagement. The current release holds Lobbying Disclosure
+  // Act filings only (2026-10-06): consultations, dockets, testimony and
+  // Form 990 Schedule C are not in it, so they are not named here.
   lobbying: Object.freeze({
-    sources: Object.freeze(["Senate and House LDA filings", "Consultation notices", "FERC and NRC dockets", "IRS 990 Schedule C"]),
+    sources: Object.freeze(["Senate and House LDA filings"]),
     feeds: Object.freeze(["legislation", "federal-register", "funding"]),
-    line: "Registrations, consultations, docket filings and testimony link organizations to the policy they engage and the money that follows it.",
+    line: "Lobbying registrations and reports link organizations to the issues they lobbied on and the government bodies they contacted.",
   }),
   deals: Object.freeze({
     sources: Object.freeze(["Press and trade reporting", "SEC filings", "Municipal bond filings"]),

@@ -1,0 +1,135 @@
+{
+  "script": "1190_build_home_community.py",
+  "producer_policy": "home-community-2026-10-04",
+  "entities": 1916,
+  "home_community_basis": {
+    "aiannh_land": 0,
+    "anrc_region": 12,
+    "hq_county_only": 0,
+    "unknown": 1904
+  },
+  "by_entity_class": {
+    "ANCSA Group Corporation": {
+      "aiannh_land": 0,
+      "anrc_region": 0,
+      "hq_county_only": 0,
+      "unknown": 6
+    },
+    "Alaska Native Regional Corporation": {
+      "aiannh_land": 0,
+      "anrc_region": 12,
+      "hq_county_only": 0,
+      "unknown": 0
+    },
+    "Alaska Native Village Corporation": {
+      "aiannh_land": 0,
+      "anrc_region": 0,
+      "hq_county_only": 0,
+      "unknown": 173
+    },
+    "BIE School": {
+      "aiannh_land": 0,
+      "anrc_region": 0,
+      "hq_county_only": 0,
+      "unknown": 185
+    },
+    "Federal-level constituency entity": {
+      "aiannh_land": 0,
+      "anrc_region": 0,
+      "hq_county_only": 0,
+      "unknown": 22
+    },
+    "Federal-level self-governance consortium": {
+      "aiannh_land": 0,
+      "anrc_region": 0,
+      "hq_county_only": 0,
+      "unknown": 29
+    },
+    "Federally recognized Alaska Native Village": {
+      "aiannh_land": 0,
+      "anrc_region": 0,
+      "hq_county_only": 0,
+      "unknown": 228
+    },
+    "Federally recognized tribe": {
+      "aiannh_land": 0,
+      "anrc_region": 0,
+      "hq_county_only": 0,
+      "unknown": 349
+    },
+    "Individually Native-owned business": {
+      "aiannh_land": 0,
+      "anrc_region": 0,
+      "hq_county_only": 0,
+      "unknown": 45
+    },
+    "Intertribal Organization": {
+      "aiannh_land": 0,
+      "anrc_region": 0,
+      "hq_county_only": 0,
+      "unknown": 56
+    },
+    "Native Community Development Financial Institution": {
+      "aiannh_land": 0,
+      "anrc_region": 0,
+      "hq_county_only": 0,
+      "unknown": 64
+    },
+    "Native Financial Institution": {
+      "aiannh_land": 0,
+      "anrc_region": 0,
+      "hq_county_only": 0,
+      "unknown": 29
+    },
+    "Native Hawaiian Organization": {
+      "aiannh_land": 0,
+      "anrc_region": 0,
+      "hq_county_only": 0,
+      "unknown": 210
+    },
+    "Native nonprofit": {
+      "aiannh_land": 0,
+      "anrc_region": 0,
+      "hq_county_only": 0,
+      "unknown": 361
+    },
+    "State-level constituency entity": {
+      "aiannh_land": 0,
+      "anrc_region": 0,
+      "hq_county_only": 0,
+      "unknown": 3
+    },
+    "State-recognized tribe": {
+      "aiannh_land": 0,
+      "anrc_region": 0,
+      "hq_county_only": 0,
+      "unknown": 64
+    },
+    "Tribal College or University": {
+      "aiannh_land": 0,
+      "anrc_region": 0,
+      "hq_county_only": 0,
+      "unknown": 37
+    },
+    "Urban Indian Organization": {
+      "aiannh_land": 0,
+      "anrc_region": 0,
+      "hq_county_only": 0,
+      "unknown": 43
+    }
+  },
+  "in_home_area_links": 0,
+  "in_home_area_shared_area_links": 0,
+  "inputs": {
+    "register": {
+      "path": "data/spine/cedar_identity_register.csv",
+      "sha256": "7b91de259592c1c9a418377ed18fcfa4cc47f4227e9d66e48e5399a4123b1ad6"
+    },
+    "aiannh_dim": null,
+    "entity_aiannh_links": null,
+    "entity_hq_county": null,
+    "entity_anrc_links": null,
+    "point_aiannh_assignment": null
+  },
+  "note": "Counts are measured from the inputs listed; an absent workstation input leaves its entities at a weaker basis, never a guessed one. The 13th Regional Corporation is not in the register and has no Census ANRC area."
+}

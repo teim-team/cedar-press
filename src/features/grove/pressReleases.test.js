@@ -17,10 +17,13 @@ import {
   collectionCedarFacts,
   collectionDeclaredSample,
   collectionSample,
+  COUNT_NOT_SHOWN,
 } from "./collection.js";
 import { PRESS_CATALOG } from "./pressCatalog.js";
 import {
   CADENCE,
+  connectedReleaseModel,
+  previewReleaseModel,
   DECLARED_CADENCE,
   PRESS_RELEASES,
   RELEASE_FEED,
@@ -89,7 +92,9 @@ test("the ledger's entry for the current version is what the manifest measures",
       date: dataset.updated,
       name: dataset.name,
       tables: cedar.n_tables,
-      rowsLabel: dataset.rowsLabel,
+      // The ledger records the measured label even where the page shows none
+      // (COUNT_NOT_SHOWN, collection.js).
+      rowsLabel: COUNT_NOT_SHOWN.has(dataset.id) ? record.rowsLabel : dataset.rowsLabel,
       preview: sample?.path ? { table: sample.table, rows: sample.rows, of: sample.of } : null,
       // By name, not by count: a blocker that changed is a fact that changed.
       blockers: [...cedar.blockers],
@@ -151,8 +156,8 @@ test("a retired collection stays in the feed as read-only history", () => {
   assert.equal(retired.version, "v0");
   assert.equal(retired.cadence, null);
   assert.equal(retired.history.length, 1);
-  // Not the current release of anything: its preview is not on the shelf.
-  assert.ok(!retired.history[0].changed.some((line) => line.includes("downloads from the shelf")));
+  // Not the current release of anything: its sample is not downloadable.
+  assert.ok(!retired.history[0].changed.some((line) => line.includes("available to download")));
   const feed = buildFeed(releases);
   const entry = feed.find((item) => item.anchor === "retired-fixture-v0");
   assert.ok(entry, "the retired permalink no longer resolves");
@@ -168,7 +173,7 @@ test("a retired collection stays in the feed as read-only history", () => {
 // overwritten with the manifest's current releases alone.
 test("the ledger script refuses a file that is not a ledger", () => {
   // fileURLToPath, not .pathname. On Windows .pathname yields
-  // "/C:/Users/.../Cedar%20Press/..." - a leading slash Node cannot resolve
+  // "/C:/<home>/Cedar%20Press/..." - a leading slash Node cannot resolve
   // and a percent-encoded space - so this test failed on every Windows
   // checkout whose path contains a space, which is every checkout of this
   // repo. It passed in CI, so the breakage was invisible where it was run.
@@ -203,15 +208,21 @@ test("the ledger script refuses a file that is not a ledger", () => {
   assert.equal(current.status, 0, current.stderr);
 });
 
-// Only the current release's preview is a file on the shelf.
-test("only the current release says its preview downloads", () => {
+// Only the current release's sample is a file a reader can download.
+test("only the current release says its example records download", () => {
   for (const dataset of LAUNCH_COLLECTION) {
     const [current, ...older] = releaseFor(dataset.id).history;
     if (collectionSample(dataset.id)?.path) {
-      assert.ok(current.changed.some((line) => line.endsWith("downloads from the shelf.")), dataset.id);
+      assert.ok(current.changed.some((line) => line.endsWith("are available to download.")), dataset.id);
     }
     for (const entry of older) {
-      assert.ok(!entry.changed.some((line) => line.includes("downloads from the shelf")), `${dataset.id} ${entry.version}`);
+      assert.ok(!entry.changed.some((line) => / available to download\./.test(line)), `${dataset.id} ${entry.version}`);
+    }
+    // Reader wording: the feed never speaks the build's vocabulary.
+    for (const entry of [current, ...older]) {
+      for (const line of entry.changed) {
+        assert.ok(!/\b(preview|shelf|manifest|readiness)\b/i.test(line), `${dataset.id} ${entry.version}: ${line}`);
+      }
     }
   }
 });
@@ -244,9 +255,9 @@ test("the first release keeps its own facts, the latest matches the manifest", (
     const first = releaseFor(dataset.id).history.at(-1);
     assert.equal(first.kind, RELEASE_KIND.DATA);
     assert.ok(first.changed.length >= 2, dataset.id);
-    assert.match(first.changed[0], /^First release on Cedar Press: /);
+    assert.match(first.changed[0], /^First published on Cedar Press: /);
     // it states SOME measured row count - its own, not necessarily today's
-    assert.match(first.changed[0], /[\d,]+ rows|row count unresolved/,
+    assert.match(first.changed[0], /[\d,]+ (?:rows|observations)|row count unresolved/,
                  `${dataset.id}: ${first.changed[0]}`);
     // and the ledger's NEWEST release is the version the manifest is on.
     // (latestRelease returns a release - kind, changed, version - not the raw
@@ -256,11 +267,11 @@ test("the first release keeps its own facts, the latest matches the manifest", (
     assert.equal(latest.version, dataset.version,
                  `${dataset.id}: ledger's newest release is not the manifest's version`);
   }
-  // The collection that had no preview file said so rather than promising one.
+  // The collection that had no sample file said so rather than promising one.
   const owned = releaseFor("owned").history.at(-1);
-  assert.ok(owned.changed.some((line) => line.startsWith("No preview file yet")));
+  assert.ok(owned.changed.some((line) => line.startsWith("No example records are available yet")));
   const funding = releaseFor("funding").history.at(-1);
-  assert.ok(funding.changed.some((line) => /-row preview of /.test(line)));
+  assert.ok(funding.changed.some((line) => /^\d+ example records? /.test(line)));
 });
 
 // Editorial notes describe shipped releases: a note names a version the
@@ -324,9 +335,62 @@ test("dates are spelled one way everywhere", () => {
   // The SHAPE, not the day. Pinning this to "Sept. 2" made a routine data
   // refresh fail a formatting test, which teaches the next person to edit the
   // date rather than read the failure.
+  // The DATA refresh date, not the release date (2026-10-06), and the
+  // cadence worded as a schedule.
   assert.match(freshnessLine("funding"),
-               /^Updated [A-Z][a-z]+\.? \d{1,2} · weekly$/);
+               /^Data as of [A-Z][a-z]+\.? \d{1,2} · weekly review schedule$/);
+  assert.ok(releaseFor("funding").refreshed, "a sold collection carries its data refresh date");
+  assert.ok(releaseFor("funding").refreshed <= releaseFor("funding").updated,
+            "data cannot be refreshed after the release that carries it");
   assert.equal(freshnessLine("not-a-collection"), "");
   assert.equal(latestRelease("need").version, releaseFor("need").version);
   assert.equal(latestRelease("not-a-collection"), null);
+});
+
+
+function currentFixture() {
+  const version = "a".repeat(64);
+  return { source: "verified_current", history_complete: false, releases: [{
+    id: "funding", name: "Funding", version, updated: null, retired: false,
+    history: [{ version, date: null, date_basis: "not_recorded", kind: "data", changed: ["Available observations."] }],
+  }] };
+}
+
+test("current feed never borrows publication dates or aggregate totals from public previews", () => {
+  const model = connectedReleaseModel(currentFixture());
+  assert.equal(model.source, "verified_current");
+  assert.equal(model.historyComplete, false);
+  assert.equal(model.feed.length, 1);
+  assert.equal(model.feed[0].date, null);
+  assert.equal(model.feed[0].anchor, `funding-${"a".repeat(64)}`);
+  assert.ok(model.previewHistory.length);
+  assert.ok(model.previewHistory.every((event) => event.date_basis === "public_preview"));
+  assert.ok(model.previewHistory.every((event) => event.changed.join() === "Collection updated."));
+  const preview = previewReleaseModel();
+  assert.equal(preview.source, "public_preview");
+  assert.deepEqual(preview.feed.map((item) => item.anchor), RELEASE_FEED.map((item) => item.anchor));
+});
+
+test("invalid live response cannot masquerade as a release feed", () => {
+  const invalid = [null, { releases: [] }];
+  for (const mutate of [
+    (p) => p.releases.push(p.releases[0]),
+    (p) => { p.releases[0].id = "infrastructure"; },
+    (p) => { p.releases[0].id = "__proto__"; },
+    (p) => { p.releases[0].updated = "2026-10-03"; },
+    (p) => { p.releases[0].history[0].date = "2026-10-03"; },
+    (p) => { p.releases[0].version = "v3"; },
+    (p) => { p.releases[0].record_count = -1; },
+    (p) => { p.releases[0].preview_updated = "2026-02-30"; },
+  ]) { const fixture = currentFixture(); mutate(fixture); invalid.push(fixture); }
+  for (const value of invalid) assert.throws(() => connectedReleaseModel(value));
+});
+
+test("activity excludes undated current entries and future dates", () => {
+  const current = connectedReleaseModel(currentFixture()).feed[0];
+  const activity = recentActivity(30, new Date("2026-10-03T12:00:00Z"), [
+    { ...current, date: "2026-12-01" }, current, { ...current, date: "2026-10-01" },
+  ]);
+  assert.equal(activity.releases, 1);
+  assert.equal(activity.latest, "2026-10-01");
 });

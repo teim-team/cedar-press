@@ -32,8 +32,8 @@ a second row, which is the defect the "merged, not appended" design of
 `1072` exists to stop, and which already cost 25 duplicate rows and 25 lost
 corroborations (NEED_BUILD_LOG, UPDATE 2026-09-02 §3).
 
-`norm()` below is COPIED VERBATIM from `code/1072_tribally_owned_enterprises.py`
-and the copy is checked at run time: `verify` re-derives
+`norm()` below delegates to `code/1072_tribally_owned_enterprises.py`
+and the result is checked at run time: `verify` re-derives
 `enterprise_name_normalized` for all 1,610 live NEED rows and exits 1 if a
 single one disagrees.  Two normalisers that drift are two clusterings, and
 the whole comparison would be measuring the drift instead of the data.
@@ -65,6 +65,7 @@ WRITES
     data/clean/need_entity_dual_role.csv
 """
 import csv, os, re, sys, json, datetime, collections, unicodedata
+import importlib.util
 
 csv.field_size_limit(10 ** 8)
 
@@ -116,25 +117,15 @@ ALIAS_DEAD = {"DENIED", "CONTESTED", "EXPIRED", "SUPERSEDED", "RETIRED", "WITHDR
 
 
 # ---------------------------------------------------------------------------
-# NAME NORMALISATION - VERBATIM from 1072.  verify re-derives NEED's own
-# enterprise_name_normalized with it and exits 1 on a single disagreement.
+# NAME NORMALISATION - one implementation owned by the enterprise builder.
+# Keep the public norm callable for existing reconciliation consumers. Importing
+# 1072 defines helpers/constants only; its mutating CLI is main-guarded.
 # ---------------------------------------------------------------------------
-_SUFFIX = re.compile(
-    r"[ ,]+(?:l\.?l\.?c\.?|l\.?l\.?p\.?|pllc|inc\.?|incorporated|corp\.?|"
-    r"corporation|co\.?|company|ltd\.?|limited|lp|l\.p\.|plc)\.?$", re.I)
-
-
-def norm(s: str) -> str:
-    s = (s or "").strip().lower()
-    s = s.replace("\u2019", "'").replace("\u2018", "'")
-    s = re.sub(r"[^a-z0-9' ]+", " ", s)
-    s = re.sub(r"\s+", " ", s).strip()
-    for _ in range(3):
-        n = _SUFFIX.sub("", s).strip()
-        if n == s:
-            break
-        s = n
-    return re.sub(r"\s+", " ", s).strip()
+_norm_spec = importlib.util.spec_from_file_location(
+    "need1072_normalization", P("code", "1072_tribally_owned_enterprises.py"))
+_norm_builder = importlib.util.module_from_spec(_norm_spec)
+_norm_spec.loader.exec_module(_norm_builder)
+norm = _norm_builder.norm
 
 
 # Distinctive-token set for ENTITY_MATCH_RULES rule 1.  A name whose whole
@@ -477,6 +468,19 @@ def resolve_parent(tid, canon, by_handle, by_stem, reg, alias_idx=None):
         return resolve_intertribal(tid, canon, reg, alias_idx or {})
     if tid in by_handle:
         r = by_handle[tid]
+        # THE OWNER'S ROW NAMES ITS TRIBE TWICE, and a handle at an earlier vintage is
+        # only one of them. Accept the handle unless the row's own name is fully accounted
+        # for by exactly one OTHER register entity and not by the handle's: then the two
+        # halves of the owner's row disagree, and the crosswalk may not pick one
+        # (2026-10-04 NEED linkage audit: four owner hand rulings sat under a same-word
+        # sibling tribe; the owner's intent, not the mapping, decides).
+        other = _route3(canon, reg, PREFIX_CLASS.get(tid.split("-")[0], set()))[0]
+        if (other and other["cedar_uid"] != r["cedar_uid"]
+                and not _accounts_for(canon, r)):
+            return "", "UNRESOLVED_HANDLE_NAME_DISAGREES", (
+                "the owner's tribe_id %s is %s's handle, but the row's own name %r is "
+                "accounted for by %s and not by %s"
+                % (tid, r["cedar_uid"], canon, other["cedar_uid"], r["cedar_uid"]))
         return r["cedar_uid"], "handle_exact", (
             "the owner's tribe_id IS a live Cedar handle: %s" % tid)
 
@@ -494,47 +498,89 @@ def resolve_parent(tid, canon, by_handle, by_stem, reg, alias_idx=None):
                 "stem %s, and that stem is unique in position 2 of the live "
                 "register" % (tid, r.get("handle", ""), seg[1]))
 
-    # ROUTE 3 - maximal distinctive-token subset, class-gated, unique at the
-    # maximum.  ENTITY_MATCH_RULES rule 1 (no all-generic name), the class
-    # gate ("an entity class that cannot hold the thing cannot win"), and
-    # rule 13's uniqueness requirement.
+    # ROUTE 3 - distinctive-token subset, class-gated, residue-checked, unique.
     ot = dtoks(canon or "")
     if not ot:
         return "", "UNRESOLVED_NO_DISTINCTIVE_TOKENS", (
             "the parent's name %r has no distinctive token, so no name-only "
             "match may be made (ENTITY_MATCH_RULES rule 1)" % (canon or ""))
-    best, bestn = [], 0
+    hit, method, note = _route3(canon, reg, allowed)
+    if hit is None:
+        return "", method, note
+    return hit["cedar_uid"], method, note
+
+
+def _names_of(r):
+    out = [r.get("canonical_name") or "", r.get("federal_register_legal_name") or ""]
+    out += re.split(r"[|;]", r.get("former_names") or "")
+    return [n for n in out if n.strip()]
+
+
+def _accounts_for(canon, r):
+    """Every distinctive word of `canon` appears in one of r's own official names."""
+    union = set()
+    for nm in _names_of(r):
+        union |= dtoks(nm) | dtoks(re.sub(r"[()]", " ", nm))
+    return bool(dtoks(canon or "")) and dtoks(canon or "") <= union
+
+
+def _route3(canon, reg, allowed):
+    """-> (register row | None, method, note).
+
+    ENTITY_MATCH_RULES rule 1 (no all-generic name), the class gate ("an entity class
+    that cannot hold the thing cannot win"), rule 7 (an entity's own official name is
+    the arbiter of its boundary) and rule 13 (a name matching two entities resolves to
+    neither).
+
+    RULE 7 IS WHAT WAS MISSING. Until 2026-10-04 this took the candidate with the MOST
+    contained tokens, so `Flandreau Santee Sioux Tribe` went to `Santee Sioux` (two
+    tokens) over `Flandreau` (one) - a different tribe in a different state, and one of
+    the four owner hand rulings the NEED linkage audit found under a same-word sibling.
+    Now a candidate whose own names leave a distinctive word of the source unaccounted
+    for (the residue) loses to one that accounts for all of them; the old maximum is
+    only the fallback when no candidate accounts for the whole name.
+    """
+    ot = dtoks(canon or "")
+    if not ot:
+        return None, "UNRESOLVED_NO_DISTINCTIVE_TOKENS", ""
+    cands = {}
     for r in reg:
         if allowed and r.get("entity_class") not in allowed:
             continue
-        for nm in (r.get("canonical_name"),
-                   r.get("federal_register_legal_name")):
+        for nm in (r.get("canonical_name"), r.get("federal_register_legal_name")):
             t = dtoks(nm or "")
-            if not t or not t <= ot:
-                continue
-            if len(t) > bestn:
-                best, bestn = [(r, nm)], len(t)
-            elif len(t) == bestn and r["cedar_uid"] not in [
-                    x[0]["cedar_uid"] for x in best]:
-                best.append((r, nm))
-    if bestn == 0:
-        return "", "UNRESOLVED_NOT_IN_REGISTER", (
+            if t and t <= ot:
+                n = len(t)
+                if r["cedar_uid"] not in cands or n > cands[r["cedar_uid"]][1]:
+                    cands[r["cedar_uid"]] = (r, n, nm)
+    if not cands:
+        return None, "UNRESOLVED_NOT_IN_REGISTER", (
             "no register entity of class %s has a distinctive token set "
             "contained in %r" % (sorted(allowed) or "any", canon))
-    if len(best) > 1:
-        return "", "UNRESOLVED_AMBIGUOUS", (
+    full = [c for c in cands.values() if _accounts_for(canon, c[0])]
+    pool = full or list(cands.values())
+    best = max(c[1] for c in pool)
+    top = [c for c in pool if c[1] == best]
+    if len(top) > 1:
+        return None, "UNRESOLVED_AMBIGUOUS", (
             "%d register entities tie at %d matched distinctive tokens: %s. "
             "A name matching two spine entities resolves to neither "
             "(ENTITY_MATCH_RULES rule 13)."
-            % (len(best), bestn,
+            % (len(top), best,
                "; ".join("%s=%s" % (x[0].get("handle", ""), x[0]["canonical_name"])
-                         for x in best[:4])))
-    r, nm = best[0]
-    return r["cedar_uid"], "name_tokens_class_gated_unique", (
+                         for x in top[:4])))
+    r, n, nm = top[0]
+    if full:
+        return r, "name_tokens_class_gated_unique", (
+            "the owner's %r and Cedar's %r (%s, class %s) agree on all %d of "
+            "Cedar's distinctive tokens, and every distinctive word of the owner's name "
+            "is in that entity's own official names (rule 7), uniquely"
+            % (canon, nm, r.get("handle", ""), r.get("entity_class"), n))
+    return r, "name_tokens_class_gated_unique", (
         "the owner's %r and Cedar's %r (%s, class %s) agree on all %d of "
         "Cedar's distinctive tokens, uniquely at that maximum inside the "
-        "class the owner's handle prefix %s declares"
-        % (canon, nm, r.get("handle", ""), r.get("entity_class"), bestn, pfx))
+        "declared class; no candidate accounts for the whole name"
+        % (canon, nm, r.get("handle", ""), r.get("entity_class"), n))
 
 
 # ===========================================================================

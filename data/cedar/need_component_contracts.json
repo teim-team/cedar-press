@@ -1,0 +1,4733 @@
+{
+  "collection": "need",
+  "components": {
+    "credit_rating_actions": {
+      "collection": "need",
+      "display_order": [
+        "observation_id",
+        "source_record_id",
+        "source_id",
+        "source_url",
+        "issuer_id",
+        "issuer_name",
+        "agency",
+        "action_date",
+        "publication_date",
+        "observation_as_of",
+        "date_basis",
+        "date_precision",
+        "rating_scope",
+        "instrument",
+        "rating",
+        "prior_rating",
+        "action",
+        "outlook",
+        "watch",
+        "preliminary",
+        "expected",
+        "rating_finality",
+        "rating_type",
+        "historical_status",
+        "evidence_tier",
+        "review_note",
+        "enterprise_id",
+        "legal_subject_cedar_uid",
+        "subject_kind",
+        "source_asserted_cedar_uid",
+        "source_review_status",
+        "linkage_status",
+        "rights_status",
+        "publication_status",
+        "hold_reason"
+      ],
+      "fields": [
+        {
+          "column": "observation_id",
+          "decision": "keep",
+          "description": "Stable supplied rating key or deterministic patent-subject observation key; not canonical identity.",
+          "display_disposition": "keep",
+          "label": "observation id",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "issuer_id",
+          "decision": "keep",
+          "description": "Preserved source issuer id",
+          "display_disposition": "keep",
+          "label": "issuer id",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "issuer_name",
+          "decision": "keep",
+          "description": "Preserved source issuer name",
+          "display_disposition": "keep",
+          "label": "issuer name",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "agency",
+          "decision": "keep",
+          "description": "Preserved source agency",
+          "display_disposition": "keep",
+          "label": "agency",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "action_date",
+          "decision": "keep",
+          "description": "Explicit agency action date only; never filled from a filename, publication date or retrieval date.",
+          "display_disposition": "keep",
+          "label": "action date",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "publication_date",
+          "decision": "keep",
+          "description": "Source publication date; may differ from action date.",
+          "display_disposition": "keep",
+          "label": "publication date",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "observation_as_of",
+          "decision": "keep",
+          "description": "Source observation date, including holdings snapshots; not necessarily an agency action.",
+          "display_disposition": "keep",
+          "label": "observation as of",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "date_basis",
+          "decision": "keep",
+          "description": "Preserved source date basis",
+          "display_disposition": "keep",
+          "label": "date basis",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "date_precision",
+          "decision": "keep",
+          "description": "Precision of the reported date (day/month/year/unknown); blanks are not invented dates.",
+          "display_disposition": "keep",
+          "label": "date precision",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "rating_scope",
+          "decision": "keep",
+          "description": "Issuer, instrument, issue group, financial strength or other stated scope; never inherited across subjects.",
+          "display_disposition": "keep",
+          "label": "rating scope",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "instrument",
+          "decision": "keep",
+          "description": "Exact rated debt/security description; not a parent, conduit issuer or affiliate rating.",
+          "display_disposition": "keep",
+          "label": "instrument",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "rating",
+          "decision": "keep",
+          "description": "Exact source grade including case, punctuation and scale; never averaged or compared across agencies/scopes.",
+          "display_disposition": "keep",
+          "label": "rating",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "prior_rating",
+          "decision": "keep",
+          "description": "Exact previously reported grade where supplied; withdrawal is not default.",
+          "display_disposition": "keep",
+          "label": "prior rating",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "action",
+          "decision": "keep",
+          "description": "Preserved source action",
+          "display_disposition": "keep",
+          "label": "action",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "outlook",
+          "decision": "keep",
+          "description": "Preserved source outlook",
+          "display_disposition": "keep",
+          "label": "outlook",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "watch",
+          "decision": "keep",
+          "description": "Preserved source watch",
+          "display_disposition": "keep",
+          "label": "watch",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "preliminary",
+          "decision": "keep",
+          "description": "Source explicitly labels the rating preliminary; expected status is stored separately.",
+          "display_disposition": "keep",
+          "label": "preliminary",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "expected",
+          "decision": "keep",
+          "description": "Source labels rating expected/EXP; not evidence of a later final rating.",
+          "display_disposition": "keep",
+          "label": "expected",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "rating_finality",
+          "decision": "keep",
+          "description": "expected, preliminary, or not_explicitly_preliminary; the last does not certify final/current status.",
+          "display_disposition": "keep",
+          "label": "rating finality",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "rating_type",
+          "decision": "keep",
+          "description": "Preserved source rating type",
+          "display_disposition": "keep",
+          "label": "rating type",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "historical_status",
+          "decision": "keep",
+          "description": "historical_observation or withdrawn; neither establishes a current rating.",
+          "display_disposition": "keep",
+          "label": "historical status",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "evidence_tier",
+          "decision": "keep",
+          "description": "Preserved source evidence tier",
+          "display_disposition": "keep",
+          "label": "evidence tier",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "review_note",
+          "decision": "keep",
+          "description": "Preserved source review note",
+          "display_disposition": "keep",
+          "label": "review note",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "enterprise_id",
+          "decision": "keep",
+          "description": "Exact existing enterprise key from the pinned NEED table; blank when unbound. Never inherited from a tribe.",
+          "display_disposition": "keep",
+          "label": "enterprise id",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "legal_subject_cedar_uid",
+          "decision": "keep",
+          "description": "Exact separately reviewed registered Native legal subject, never inherited from its owner. Populated only for a reviewed direct legal subject.",
+          "display_disposition": "keep",
+          "label": "legal subject cedar uid",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "subject_kind",
+          "decision": "keep",
+          "description": "Exact issuer/assignee category, not a profile presentation relationship.",
+          "display_disposition": "keep",
+          "label": "subject kind",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_asserted_cedar_uid",
+          "decision": "keep",
+          "description": "Historical source register assertion preserved for review; not approved current identity binding.",
+          "display_disposition": "keep",
+          "label": "source asserted cedar uid",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_record_id",
+          "decision": "keep",
+          "description": "Preserved source observation/patent/availability key; not an issued Cedar identity.",
+          "display_disposition": "keep",
+          "label": "source record id",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_id",
+          "decision": "keep",
+          "description": "Preserved source source id",
+          "display_disposition": "keep",
+          "label": "source id",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_url",
+          "decision": "keep",
+          "description": "Exact evidence citation, not a download license.",
+          "display_disposition": "keep",
+          "label": "source url",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_review_status",
+          "decision": "keep",
+          "description": "Independent evidence review outcome, separate from rights and entity binding.",
+          "display_disposition": "keep",
+          "label": "source review status",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "linkage_status",
+          "decision": "keep",
+          "description": "Preserved source linkage status",
+          "display_disposition": "keep",
+          "label": "linkage status",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "rights_status",
+          "decision": "keep",
+          "description": "Source-family policy hold; public access does not establish database or redistribution rights.",
+          "display_disposition": "keep",
+          "label": "rights status",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "publication_status",
+          "decision": "keep",
+          "description": "held for all rows under NEED policy; this builder cannot authorize eligibility.",
+          "display_disposition": "keep",
+          "label": "publication status",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hold_reason",
+          "decision": "keep",
+          "description": "Semicolon-delimited collection, rights, research and linkage holds; not a single conflated approval.",
+          "display_disposition": "keep",
+          "label": "hold reason",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        }
+      ],
+      "order": [
+        "observation_id",
+        "issuer_id",
+        "issuer_name",
+        "agency",
+        "action_date",
+        "publication_date",
+        "observation_as_of",
+        "date_basis",
+        "date_precision",
+        "rating_scope",
+        "instrument",
+        "rating",
+        "prior_rating",
+        "action",
+        "outlook",
+        "watch",
+        "preliminary",
+        "expected",
+        "rating_finality",
+        "rating_type",
+        "historical_status",
+        "evidence_tier",
+        "review_note",
+        "enterprise_id",
+        "legal_subject_cedar_uid",
+        "subject_kind",
+        "source_asserted_cedar_uid",
+        "source_record_id",
+        "source_id",
+        "source_url",
+        "source_review_status",
+        "linkage_status",
+        "rights_status",
+        "publication_status",
+        "hold_reason"
+      ]
+    },
+    "duplicate_candidates": {
+      "collection": "need",
+      "display_order": [
+        "source_record_id",
+        "source_id",
+        "source_row_number",
+        "source_row_sha256",
+        "review_status",
+        "hold_codes",
+        "disposition",
+        "enterprise_id",
+        "enterprise_name",
+        "group_id",
+        "n_distinct_sources",
+        "n_source_observations",
+        "asserted_owner_hub_cedar_uid",
+        "owner_hub_name",
+        "parenthetical_stripped_name",
+        "relationship",
+        "variant_kind"
+      ],
+      "fields": [
+        {
+          "column": "source_record_id",
+          "decision": "keep",
+          "description": "Internal source assertion: source record id",
+          "display_disposition": "keep",
+          "label": "source record id",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_row_number",
+          "decision": "keep",
+          "description": "Internal source assertion: source row number",
+          "display_disposition": "keep",
+          "label": "source row number",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_row_sha256",
+          "decision": "keep",
+          "description": "Internal source assertion: source row sha256",
+          "display_disposition": "keep",
+          "label": "source row sha256",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "review_status",
+          "decision": "keep",
+          "description": "Internal source assertion: review status",
+          "display_disposition": "keep",
+          "label": "review status",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hold_codes",
+          "decision": "keep",
+          "description": "Internal source assertion: hold codes",
+          "display_disposition": "keep",
+          "label": "hold codes",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "disposition",
+          "decision": "keep",
+          "description": "Internal source assertion: disposition",
+          "display_disposition": "keep",
+          "label": "disposition",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "enterprise_id",
+          "decision": "keep",
+          "description": "Internal source assertion: enterprise id",
+          "display_disposition": "keep",
+          "label": "enterprise id",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "enterprise_name",
+          "decision": "keep",
+          "description": "Internal source assertion: enterprise name",
+          "display_disposition": "keep",
+          "label": "enterprise name",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "group_id",
+          "decision": "keep",
+          "description": "Internal source assertion: group id",
+          "display_disposition": "keep",
+          "label": "group id",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "n_distinct_sources",
+          "decision": "keep",
+          "description": "Internal source assertion: n distinct sources",
+          "display_disposition": "keep",
+          "label": "n distinct sources",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "n_source_observations",
+          "decision": "keep",
+          "description": "Internal source assertion: n source observations",
+          "display_disposition": "keep",
+          "label": "n source observations",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "asserted_owner_hub_cedar_uid",
+          "decision": "keep",
+          "description": "Preserved unverified identity assertion; not an approved join or ID issuance.",
+          "display_disposition": "keep",
+          "label": "asserted owner hub cedar uid",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "owner_hub_name",
+          "decision": "keep",
+          "description": "Internal source assertion: owner hub name",
+          "display_disposition": "keep",
+          "label": "owner hub name",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "parenthetical_stripped_name",
+          "decision": "keep",
+          "description": "Internal source assertion: parenthetical stripped name",
+          "display_disposition": "keep",
+          "label": "parenthetical stripped name",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "relationship",
+          "decision": "keep",
+          "description": "Internal source assertion: relationship",
+          "display_disposition": "keep",
+          "label": "relationship",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_id",
+          "decision": "keep",
+          "description": "Internal source assertion: source id",
+          "display_disposition": "keep",
+          "label": "source id",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "variant_kind",
+          "decision": "keep",
+          "description": "Internal source assertion: variant kind",
+          "display_disposition": "keep",
+          "label": "variant kind",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        }
+      ],
+      "order": [
+        "source_record_id",
+        "source_row_number",
+        "source_row_sha256",
+        "review_status",
+        "hold_codes",
+        "disposition",
+        "enterprise_id",
+        "enterprise_name",
+        "group_id",
+        "n_distinct_sources",
+        "n_source_observations",
+        "asserted_owner_hub_cedar_uid",
+        "owner_hub_name",
+        "parenthetical_stripped_name",
+        "relationship",
+        "source_id",
+        "variant_kind"
+      ]
+    },
+    "enrichment_bindings": {
+      "collection": "need",
+      "display_order": [
+        "binding_id",
+        "source_subject_id",
+        "source_name",
+        "source_external_id",
+        "enterprise_id",
+        "enterprise_name",
+        "enterprise_table_sha256",
+        "evidence_url",
+        "review_statement",
+        "legal_subject_cedar_uid",
+        "native_canonical_name",
+        "native_register_sha256",
+        "decision",
+        "publication_status",
+        "hold_reason"
+      ],
+      "fields": [
+        {
+          "column": "binding_id",
+          "decision": "keep",
+          "description": "Preserved source binding id",
+          "display_disposition": "keep",
+          "label": "binding id",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_subject_id",
+          "decision": "keep",
+          "description": "Preserved source source subject id",
+          "display_disposition": "keep",
+          "label": "source subject id",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_name",
+          "decision": "keep",
+          "description": "Preserved source source name",
+          "display_disposition": "keep",
+          "label": "source name",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_external_id",
+          "decision": "keep",
+          "description": "Preserved source source external id",
+          "display_disposition": "keep",
+          "label": "source external id",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "enterprise_id",
+          "decision": "keep",
+          "description": "Exact existing enterprise key from the pinned NEED table; blank when unbound. Never inherited from a tribe.",
+          "display_disposition": "keep",
+          "label": "enterprise id",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "enterprise_name",
+          "decision": "keep",
+          "description": "Preserved source enterprise name",
+          "display_disposition": "keep",
+          "label": "enterprise name",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "enterprise_table_sha256",
+          "decision": "keep",
+          "description": "Preserved source enterprise table sha256",
+          "display_disposition": "keep",
+          "label": "enterprise table sha256",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "evidence_url",
+          "decision": "keep",
+          "description": "Preserved source evidence url",
+          "display_disposition": "keep",
+          "label": "evidence url",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "review_statement",
+          "decision": "keep",
+          "description": "Preserved source review statement",
+          "display_disposition": "keep",
+          "label": "review statement",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "legal_subject_cedar_uid",
+          "decision": "keep",
+          "description": "Exact separately reviewed registered Native legal subject, never inherited from its owner. Populated only for a reviewed direct legal subject.",
+          "display_disposition": "keep",
+          "label": "legal subject cedar uid",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "native_canonical_name",
+          "decision": "keep",
+          "description": "Preserved source native canonical name",
+          "display_disposition": "keep",
+          "label": "native canonical name",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "native_register_sha256",
+          "decision": "keep",
+          "description": "Preserved source native register sha256",
+          "display_disposition": "keep",
+          "label": "native register sha256",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "decision",
+          "decision": "keep",
+          "description": "Preserved source decision",
+          "display_disposition": "keep",
+          "label": "decision",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "publication_status",
+          "decision": "keep",
+          "description": "held for all rows under NEED policy; this builder cannot authorize eligibility.",
+          "display_disposition": "keep",
+          "label": "publication status",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hold_reason",
+          "decision": "keep",
+          "description": "Semicolon-delimited collection, rights, research and linkage holds; not a single conflated approval.",
+          "display_disposition": "keep",
+          "label": "hold reason",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        }
+      ],
+      "order": [
+        "binding_id",
+        "source_subject_id",
+        "source_name",
+        "source_external_id",
+        "enterprise_id",
+        "enterprise_name",
+        "enterprise_table_sha256",
+        "evidence_url",
+        "review_statement",
+        "legal_subject_cedar_uid",
+        "native_canonical_name",
+        "native_register_sha256",
+        "decision",
+        "publication_status",
+        "hold_reason"
+      ]
+    },
+    "enrichment_sources": {
+      "collection": "need",
+      "display_order": [
+        "source_id",
+        "source_url",
+        "publisher",
+        "publication_date",
+        "retrieved_date",
+        "source_sha256_asserted",
+        "source_family",
+        "source_review_status",
+        "rights_status",
+        "rights_policy_url",
+        "source_reviewed_on",
+        "review_statement",
+        "publication_status",
+        "hold_reason"
+      ],
+      "fields": [
+        {
+          "column": "source_id",
+          "decision": "keep",
+          "description": "Preserved source source id",
+          "display_disposition": "keep",
+          "label": "source id",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_url",
+          "decision": "keep",
+          "description": "Exact evidence citation, not a download license.",
+          "display_disposition": "keep",
+          "label": "source url",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "publisher",
+          "decision": "keep",
+          "description": "Preserved source publisher",
+          "display_disposition": "keep",
+          "label": "publisher",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "publication_date",
+          "decision": "keep",
+          "description": "Source publication date; may differ from action date.",
+          "display_disposition": "keep",
+          "label": "publication date",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "retrieved_date",
+          "decision": "keep",
+          "description": "Preserved source retrieved date",
+          "display_disposition": "keep",
+          "label": "retrieved date",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_sha256_asserted",
+          "decision": "keep",
+          "description": "Hash asserted by supplied source registry; not proof retained raw bytes exist locally.",
+          "display_disposition": "keep",
+          "label": "source sha256 asserted",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_family",
+          "decision": "keep",
+          "description": "Preserved source source family",
+          "display_disposition": "keep",
+          "label": "source family",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_review_status",
+          "decision": "keep",
+          "description": "Independent evidence review outcome, separate from rights and entity binding.",
+          "display_disposition": "keep",
+          "label": "source review status",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "rights_status",
+          "decision": "keep",
+          "description": "Source-family policy hold; public access does not establish database or redistribution rights.",
+          "display_disposition": "keep",
+          "label": "rights status",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "rights_policy_url",
+          "decision": "keep",
+          "description": "Preserved source rights policy url",
+          "display_disposition": "keep",
+          "label": "rights policy url",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_reviewed_on",
+          "decision": "keep",
+          "description": "Preserved source source reviewed on",
+          "display_disposition": "keep",
+          "label": "source reviewed on",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "review_statement",
+          "decision": "keep",
+          "description": "Preserved source review statement",
+          "display_disposition": "keep",
+          "label": "review statement",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "publication_status",
+          "decision": "keep",
+          "description": "held for all rows under NEED policy; this builder cannot authorize eligibility.",
+          "display_disposition": "keep",
+          "label": "publication status",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hold_reason",
+          "decision": "keep",
+          "description": "Semicolon-delimited collection, rights, research and linkage holds; not a single conflated approval.",
+          "display_disposition": "keep",
+          "label": "hold reason",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        }
+      ],
+      "order": [
+        "source_id",
+        "source_url",
+        "publisher",
+        "publication_date",
+        "retrieved_date",
+        "source_sha256_asserted",
+        "source_family",
+        "source_review_status",
+        "rights_status",
+        "rights_policy_url",
+        "source_reviewed_on",
+        "review_statement",
+        "publication_status",
+        "hold_reason"
+      ]
+    },
+    "enterprise_register": {
+      "collection": "need",
+      "display_order": [
+        "source_record_id",
+        "source_row_number",
+        "source_row_sha256",
+        "review_status",
+        "hold_codes",
+        "registered_enterprise_id",
+        "enterprise_name_normalized",
+        "minted",
+        "minted_basis",
+        "minted_by",
+        "asserted_owner_hub_cedar_uid"
+      ],
+      "fields": [
+        {
+          "column": "source_record_id",
+          "decision": "keep",
+          "description": "Internal source assertion: source record id",
+          "display_disposition": "keep",
+          "label": "source record id",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_row_number",
+          "decision": "keep",
+          "description": "Internal source assertion: source row number",
+          "display_disposition": "keep",
+          "label": "source row number",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_row_sha256",
+          "decision": "keep",
+          "description": "Internal source assertion: source row sha256",
+          "display_disposition": "keep",
+          "label": "source row sha256",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "review_status",
+          "decision": "keep",
+          "description": "Internal source assertion: review status",
+          "display_disposition": "keep",
+          "label": "review status",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hold_codes",
+          "decision": "keep",
+          "description": "Internal source assertion: hold codes",
+          "display_disposition": "keep",
+          "label": "hold codes",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "registered_enterprise_id",
+          "decision": "keep",
+          "description": "Internal source assertion: registered enterprise id",
+          "display_disposition": "keep",
+          "label": "registered enterprise id",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "enterprise_name_normalized",
+          "decision": "keep",
+          "description": "Internal source assertion: enterprise name normalized",
+          "display_disposition": "keep",
+          "label": "enterprise name normalized",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "minted",
+          "decision": "keep",
+          "description": "Internal source assertion: minted",
+          "display_disposition": "keep",
+          "label": "minted",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "minted_basis",
+          "decision": "keep",
+          "description": "Internal source assertion: minted basis",
+          "display_disposition": "keep",
+          "label": "minted basis",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "minted_by",
+          "decision": "keep",
+          "description": "Internal source assertion: minted by",
+          "display_disposition": "keep",
+          "label": "minted by",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "asserted_owner_hub_cedar_uid",
+          "decision": "keep",
+          "description": "Preserved unverified identity assertion; not an approved join or ID issuance.",
+          "display_disposition": "keep",
+          "label": "asserted owner hub cedar uid",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        }
+      ],
+      "order": [
+        "source_record_id",
+        "source_row_number",
+        "source_row_sha256",
+        "review_status",
+        "hold_codes",
+        "registered_enterprise_id",
+        "enterprise_name_normalized",
+        "minted",
+        "minted_basis",
+        "minted_by",
+        "asserted_owner_hub_cedar_uid"
+      ]
+    },
+    "enterprises": {
+      "collection": "need",
+      "display_order": [
+        "enterprise_id",
+        "source_record_id",
+        "source_id",
+        "source_url",
+        "source_row_number",
+        "source_row_sha256",
+        "review_status",
+        "hold_codes",
+        "address_basis",
+        "address_is_publishable",
+        "assertion_class",
+        "built_by_script",
+        "built_date",
+        "cage_code",
+        "asserted_cedar_uid",
+        "city",
+        "constellation_edge_id",
+        "constellation_note",
+        "duplicate_name_variant_basis",
+        "duplicate_name_variant_group",
+        "asserted_enterprise_existing_cedar_uid",
+        "enterprise_name",
+        "enterprise_name_normalized",
+        "evidence_class",
+        "evidence_human_reviewed",
+        "first_observed_year",
+        "fpds_declared_parent_name",
+        "fpds_declared_parent_observations",
+        "fpds_declared_parent_uei",
+        "fpds_parent_corroboration",
+        "fpds_parent_corroboration_basis",
+        "fpds_parent_corroboration_route",
+        "fpds_parent_resolves_to",
+        "hierarchy_level",
+        "hub_resolution_method",
+        "hub_resolution_note",
+        "identifier_basis",
+        "identifier_status",
+        "identity_scope",
+        "in_federal_contracting",
+        "in_federal_contracting_basis",
+        "last_observed_year",
+        "n_auto_ruled_observations",
+        "n_distinct_sources",
+        "n_source_observations",
+        "name_variants_observed",
+        "owner_class",
+        "asserted_owner_hub_cedar_uid",
+        "owner_hub_entity_class",
+        "owner_hub_name",
+        "owner_hub_state",
+        "ownership_percent_stated",
+        "parent_enterprise_id",
+        "parent_is_hub",
+        "parent_name",
+        "population_basis",
+        "recorded_publishable",
+        "recorded_publishable_basis",
+        "record_scope",
+        "relation_class",
+        "relationship",
+        "relationship_as_recorded",
+        "retrieved_date",
+        "sector",
+        "source_document",
+        "source_edition_date",
+        "state_province",
+        "status",
+        "status_basis",
+        "uei",
+        "uei_candidate",
+        "uei_candidate_basis"
+      ],
+      "fields": [
+        {
+          "column": "source_record_id",
+          "decision": "keep",
+          "description": "Internal source assertion: source record id",
+          "display_disposition": "keep",
+          "label": "source record id",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_row_number",
+          "decision": "keep",
+          "description": "Internal source assertion: source row number",
+          "display_disposition": "keep",
+          "label": "source row number",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_row_sha256",
+          "decision": "keep",
+          "description": "Internal source assertion: source row sha256",
+          "display_disposition": "keep",
+          "label": "source row sha256",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "review_status",
+          "decision": "keep",
+          "description": "Internal source assertion: review status",
+          "display_disposition": "keep",
+          "label": "review status",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hold_codes",
+          "decision": "keep",
+          "description": "Internal source assertion: hold codes",
+          "display_disposition": "keep",
+          "label": "hold codes",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "address_basis",
+          "decision": "keep",
+          "description": "Internal source assertion: address basis",
+          "display_disposition": "keep",
+          "label": "address basis",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "address_is_publishable",
+          "decision": "keep",
+          "description": "Internal source assertion: address is publishable",
+          "display_disposition": "keep",
+          "label": "address is publishable",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "assertion_class",
+          "decision": "keep",
+          "description": "Internal source assertion: assertion class",
+          "display_disposition": "keep",
+          "label": "assertion class",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "built_by_script",
+          "decision": "keep",
+          "description": "Internal source assertion: built by script",
+          "display_disposition": "keep",
+          "label": "built by script",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "built_date",
+          "decision": "keep",
+          "description": "Historical producer date as recorded; not event time.",
+          "display_disposition": "keep",
+          "label": "built date",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "cage_code",
+          "decision": "keep",
+          "description": "Internal source assertion: cage code",
+          "display_disposition": "keep",
+          "label": "cage code",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "asserted_cedar_uid",
+          "decision": "keep",
+          "description": "Preserved unverified identity assertion; not an approved join or ID issuance.",
+          "display_disposition": "keep",
+          "label": "asserted cedar uid",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "city",
+          "decision": "keep",
+          "description": "Internal source assertion: city",
+          "display_disposition": "keep",
+          "label": "city",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "constellation_edge_id",
+          "decision": "keep",
+          "description": "Internal source assertion: constellation edge id",
+          "display_disposition": "keep",
+          "label": "constellation edge id",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "constellation_note",
+          "decision": "keep",
+          "description": "Internal source assertion: constellation note",
+          "display_disposition": "keep",
+          "label": "constellation note",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "duplicate_name_variant_basis",
+          "decision": "keep",
+          "description": "Internal source assertion: duplicate name variant basis",
+          "display_disposition": "keep",
+          "label": "duplicate name variant basis",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "duplicate_name_variant_group",
+          "decision": "keep",
+          "description": "Internal source assertion: duplicate name variant group",
+          "display_disposition": "keep",
+          "label": "duplicate name variant group",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "asserted_enterprise_existing_cedar_uid",
+          "decision": "keep",
+          "description": "Preserved unverified identity assertion; not an approved join or ID issuance.",
+          "display_disposition": "keep",
+          "label": "asserted enterprise existing cedar uid",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "enterprise_id",
+          "decision": "keep",
+          "description": "Internal source assertion: enterprise id",
+          "display_disposition": "keep",
+          "label": "enterprise id",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "enterprise_name",
+          "decision": "keep",
+          "description": "Internal source assertion: enterprise name",
+          "display_disposition": "keep",
+          "label": "enterprise name",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "enterprise_name_normalized",
+          "decision": "keep",
+          "description": "Internal source assertion: enterprise name normalized",
+          "display_disposition": "keep",
+          "label": "enterprise name normalized",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "evidence_class",
+          "decision": "keep",
+          "description": "Internal source assertion: evidence class",
+          "display_disposition": "keep",
+          "label": "evidence class",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "evidence_human_reviewed",
+          "decision": "keep",
+          "description": "Internal source assertion: evidence human reviewed",
+          "display_disposition": "keep",
+          "label": "evidence human reviewed",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "first_observed_year",
+          "decision": "keep",
+          "description": "Earliest source observation year; not necessarily founding year.",
+          "display_disposition": "keep",
+          "label": "first observed year",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "fpds_declared_parent_name",
+          "decision": "keep",
+          "description": "Internal source assertion: fpds declared parent name",
+          "display_disposition": "keep",
+          "label": "fpds declared parent name",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "fpds_declared_parent_observations",
+          "decision": "keep",
+          "description": "Internal source assertion: fpds declared parent observations",
+          "display_disposition": "keep",
+          "label": "fpds declared parent observations",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "fpds_declared_parent_uei",
+          "decision": "keep",
+          "description": "Internal source assertion: fpds declared parent uei",
+          "display_disposition": "keep",
+          "label": "fpds declared parent uei",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "fpds_parent_corroboration",
+          "decision": "keep",
+          "description": "Internal source assertion: fpds parent corroboration",
+          "display_disposition": "keep",
+          "label": "fpds parent corroboration",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "fpds_parent_corroboration_basis",
+          "decision": "keep",
+          "description": "Internal source assertion: fpds parent corroboration basis",
+          "display_disposition": "keep",
+          "label": "fpds parent corroboration basis",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "fpds_parent_corroboration_route",
+          "decision": "keep",
+          "description": "Internal source assertion: fpds parent corroboration route",
+          "display_disposition": "keep",
+          "label": "fpds parent corroboration route",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "fpds_parent_resolves_to",
+          "decision": "keep",
+          "description": "Internal source assertion: fpds parent resolves to",
+          "display_disposition": "keep",
+          "label": "fpds parent resolves to",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hierarchy_level",
+          "decision": "keep",
+          "description": "Internal source assertion: hierarchy level",
+          "display_disposition": "keep",
+          "label": "hierarchy level",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hub_resolution_method",
+          "decision": "keep",
+          "description": "Internal source assertion: hub resolution method",
+          "display_disposition": "keep",
+          "label": "hub resolution method",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hub_resolution_note",
+          "decision": "keep",
+          "description": "Internal source assertion: hub resolution note",
+          "display_disposition": "keep",
+          "label": "hub resolution note",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "identifier_basis",
+          "decision": "keep",
+          "description": "Internal source assertion: identifier basis",
+          "display_disposition": "keep",
+          "label": "identifier basis",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "identifier_status",
+          "decision": "keep",
+          "description": "Internal source assertion: identifier status",
+          "display_disposition": "keep",
+          "label": "identifier status",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "identity_scope",
+          "decision": "keep",
+          "description": "Internal source assertion: identity scope",
+          "display_disposition": "keep",
+          "label": "identity scope",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "in_federal_contracting",
+          "decision": "keep",
+          "description": "Internal source assertion: in federal contracting",
+          "display_disposition": "keep",
+          "label": "in federal contracting",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "in_federal_contracting_basis",
+          "decision": "keep",
+          "description": "Internal source assertion: in federal contracting basis",
+          "display_disposition": "keep",
+          "label": "in federal contracting basis",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "last_observed_year",
+          "decision": "keep",
+          "description": "Latest source observation year; not proof of continued operation.",
+          "display_disposition": "keep",
+          "label": "last observed year",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "n_auto_ruled_observations",
+          "decision": "keep",
+          "description": "Internal source assertion: n auto ruled observations",
+          "display_disposition": "keep",
+          "label": "n auto ruled observations",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "n_distinct_sources",
+          "decision": "keep",
+          "description": "Internal source assertion: n distinct sources",
+          "display_disposition": "keep",
+          "label": "n distinct sources",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "n_source_observations",
+          "decision": "keep",
+          "description": "Internal source assertion: n source observations",
+          "display_disposition": "keep",
+          "label": "n source observations",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "name_variants_observed",
+          "decision": "keep",
+          "description": "Internal source assertion: name variants observed",
+          "display_disposition": "keep",
+          "label": "name variants observed",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "owner_class",
+          "decision": "keep",
+          "description": "Internal source assertion: owner class",
+          "display_disposition": "keep",
+          "label": "owner class",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "asserted_owner_hub_cedar_uid",
+          "decision": "keep",
+          "description": "Preserved unverified identity assertion; not an approved join or ID issuance.",
+          "display_disposition": "keep",
+          "label": "asserted owner hub cedar uid",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "owner_hub_entity_class",
+          "decision": "keep",
+          "description": "Internal source assertion: owner hub entity class",
+          "display_disposition": "keep",
+          "label": "owner hub entity class",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "owner_hub_name",
+          "decision": "keep",
+          "description": "Internal source assertion: owner hub name",
+          "display_disposition": "keep",
+          "label": "owner hub name",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "owner_hub_state",
+          "decision": "keep",
+          "description": "Internal source assertion: owner hub state",
+          "display_disposition": "keep",
+          "label": "owner hub state",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "ownership_percent_stated",
+          "decision": "keep",
+          "description": "Internal source assertion: ownership percent stated",
+          "display_disposition": "keep",
+          "label": "ownership percent stated",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "parent_enterprise_id",
+          "decision": "keep",
+          "description": "Internal source assertion: parent enterprise id",
+          "display_disposition": "keep",
+          "label": "parent enterprise id",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "parent_is_hub",
+          "decision": "keep",
+          "description": "Internal source assertion: parent is hub",
+          "display_disposition": "keep",
+          "label": "parent is hub",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "parent_name",
+          "decision": "keep",
+          "description": "Internal source assertion: parent name",
+          "display_disposition": "keep",
+          "label": "parent name",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "population_basis",
+          "decision": "keep",
+          "description": "Internal source assertion: population basis",
+          "display_disposition": "keep",
+          "label": "population basis",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "recorded_publishable",
+          "decision": "keep",
+          "description": "Internal source assertion: recorded publishable",
+          "display_disposition": "keep",
+          "label": "recorded publishable",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "recorded_publishable_basis",
+          "decision": "keep",
+          "description": "Internal source assertion: recorded publishable basis",
+          "display_disposition": "keep",
+          "label": "recorded publishable basis",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "record_scope",
+          "decision": "keep",
+          "description": "Internal source assertion: record scope",
+          "display_disposition": "keep",
+          "label": "record scope",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "relation_class",
+          "decision": "keep",
+          "description": "Internal source assertion: relation class",
+          "display_disposition": "keep",
+          "label": "relation class",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "relationship",
+          "decision": "keep",
+          "description": "Internal source assertion: relationship",
+          "display_disposition": "keep",
+          "label": "relationship",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "relationship_as_recorded",
+          "decision": "keep",
+          "description": "Internal source assertion: relationship as recorded",
+          "display_disposition": "keep",
+          "label": "relationship as recorded",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "retrieved_date",
+          "decision": "keep",
+          "description": "Historical retrieval date as recorded; not event time.",
+          "display_disposition": "keep",
+          "label": "retrieved date",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "sector",
+          "decision": "keep",
+          "description": "Internal source assertion: sector",
+          "display_disposition": "keep",
+          "label": "sector",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_document",
+          "decision": "keep",
+          "description": "Internal source assertion: source document",
+          "display_disposition": "keep",
+          "label": "source document",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_edition_date",
+          "decision": "keep",
+          "description": "Source publication/edition date; not ownership effective date.",
+          "display_disposition": "keep",
+          "label": "source edition date",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_id",
+          "decision": "keep",
+          "description": "Internal source assertion: source id",
+          "display_disposition": "keep",
+          "label": "source id",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_url",
+          "decision": "keep",
+          "description": "Internal source assertion: source url",
+          "display_disposition": "keep",
+          "label": "source url",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "state_province",
+          "decision": "keep",
+          "description": "Internal source assertion: state province",
+          "display_disposition": "keep",
+          "label": "state province",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "status",
+          "decision": "keep",
+          "description": "Internal source assertion: status",
+          "display_disposition": "keep",
+          "label": "status",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "status_basis",
+          "decision": "keep",
+          "description": "Internal source assertion: status basis",
+          "display_disposition": "keep",
+          "label": "status basis",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "uei",
+          "decision": "keep",
+          "description": "Internal source assertion: uei",
+          "display_disposition": "keep",
+          "label": "uei",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "uei_candidate",
+          "decision": "keep",
+          "description": "Internal source assertion: uei candidate",
+          "display_disposition": "keep",
+          "label": "uei candidate",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "uei_candidate_basis",
+          "decision": "keep",
+          "description": "Internal source assertion: uei candidate basis",
+          "display_disposition": "keep",
+          "label": "uei candidate basis",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        }
+      ],
+      "order": [
+        "source_record_id",
+        "source_row_number",
+        "source_row_sha256",
+        "review_status",
+        "hold_codes",
+        "address_basis",
+        "address_is_publishable",
+        "assertion_class",
+        "built_by_script",
+        "built_date",
+        "cage_code",
+        "asserted_cedar_uid",
+        "city",
+        "constellation_edge_id",
+        "constellation_note",
+        "duplicate_name_variant_basis",
+        "duplicate_name_variant_group",
+        "asserted_enterprise_existing_cedar_uid",
+        "enterprise_id",
+        "enterprise_name",
+        "enterprise_name_normalized",
+        "evidence_class",
+        "evidence_human_reviewed",
+        "first_observed_year",
+        "fpds_declared_parent_name",
+        "fpds_declared_parent_observations",
+        "fpds_declared_parent_uei",
+        "fpds_parent_corroboration",
+        "fpds_parent_corroboration_basis",
+        "fpds_parent_corroboration_route",
+        "fpds_parent_resolves_to",
+        "hierarchy_level",
+        "hub_resolution_method",
+        "hub_resolution_note",
+        "identifier_basis",
+        "identifier_status",
+        "identity_scope",
+        "in_federal_contracting",
+        "in_federal_contracting_basis",
+        "last_observed_year",
+        "n_auto_ruled_observations",
+        "n_distinct_sources",
+        "n_source_observations",
+        "name_variants_observed",
+        "owner_class",
+        "asserted_owner_hub_cedar_uid",
+        "owner_hub_entity_class",
+        "owner_hub_name",
+        "owner_hub_state",
+        "ownership_percent_stated",
+        "parent_enterprise_id",
+        "parent_is_hub",
+        "parent_name",
+        "population_basis",
+        "recorded_publishable",
+        "recorded_publishable_basis",
+        "record_scope",
+        "relation_class",
+        "relationship",
+        "relationship_as_recorded",
+        "retrieved_date",
+        "sector",
+        "source_document",
+        "source_edition_date",
+        "source_id",
+        "source_url",
+        "state_province",
+        "status",
+        "status_basis",
+        "uei",
+        "uei_candidate",
+        "uei_candidate_basis"
+      ]
+    },
+    "evidence_conflicts": {
+      "collection": "need",
+      "display_order": [
+        "source_record_id",
+        "source_row_number",
+        "source_row_sha256",
+        "review_status",
+        "hold_codes",
+        "adjudicated_by",
+        "adjudicated_date",
+        "recorded_adjudication",
+        "audited_filing_says",
+        "built_by_script",
+        "conflict_kind",
+        "enterprise_id",
+        "enterprise_name",
+        "owner_hub_name",
+        "published_value",
+        "resolution",
+        "third_source",
+        "third_source_says",
+        "web_list_says"
+      ],
+      "fields": [
+        {
+          "column": "source_record_id",
+          "decision": "keep",
+          "description": "Internal source assertion: source record id",
+          "display_disposition": "keep",
+          "label": "source record id",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_row_number",
+          "decision": "keep",
+          "description": "Internal source assertion: source row number",
+          "display_disposition": "keep",
+          "label": "source row number",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_row_sha256",
+          "decision": "keep",
+          "description": "Internal source assertion: source row sha256",
+          "display_disposition": "keep",
+          "label": "source row sha256",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "review_status",
+          "decision": "keep",
+          "description": "Internal source assertion: review status",
+          "display_disposition": "keep",
+          "label": "review status",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hold_codes",
+          "decision": "keep",
+          "description": "Internal source assertion: hold codes",
+          "display_disposition": "keep",
+          "label": "hold codes",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "adjudicated_by",
+          "decision": "keep",
+          "description": "Internal source assertion: adjudicated by",
+          "display_disposition": "keep",
+          "label": "adjudicated by",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "adjudicated_date",
+          "decision": "keep",
+          "description": "Internal source assertion: adjudicated date",
+          "display_disposition": "keep",
+          "label": "adjudicated date",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "recorded_adjudication",
+          "decision": "keep",
+          "description": "Internal source assertion: recorded adjudication",
+          "display_disposition": "keep",
+          "label": "recorded adjudication",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "audited_filing_says",
+          "decision": "keep",
+          "description": "Internal source assertion: audited filing says",
+          "display_disposition": "keep",
+          "label": "audited filing says",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "built_by_script",
+          "decision": "keep",
+          "description": "Internal source assertion: built by script",
+          "display_disposition": "keep",
+          "label": "built by script",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "conflict_kind",
+          "decision": "keep",
+          "description": "Internal source assertion: conflict kind",
+          "display_disposition": "keep",
+          "label": "conflict kind",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "enterprise_id",
+          "decision": "keep",
+          "description": "Internal source assertion: enterprise id",
+          "display_disposition": "keep",
+          "label": "enterprise id",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "enterprise_name",
+          "decision": "keep",
+          "description": "Internal source assertion: enterprise name",
+          "display_disposition": "keep",
+          "label": "enterprise name",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "owner_hub_name",
+          "decision": "keep",
+          "description": "Internal source assertion: owner hub name",
+          "display_disposition": "keep",
+          "label": "owner hub name",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "published_value",
+          "decision": "keep",
+          "description": "Internal source assertion: published value",
+          "display_disposition": "keep",
+          "label": "published value",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "resolution",
+          "decision": "keep",
+          "description": "Internal source assertion: resolution",
+          "display_disposition": "keep",
+          "label": "resolution",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "third_source",
+          "decision": "keep",
+          "description": "Internal source assertion: third source",
+          "display_disposition": "keep",
+          "label": "third source",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "third_source_says",
+          "decision": "keep",
+          "description": "Internal source assertion: third source says",
+          "display_disposition": "keep",
+          "label": "third source says",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "web_list_says",
+          "decision": "keep",
+          "description": "Internal source assertion: web list says",
+          "display_disposition": "keep",
+          "label": "web list says",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        }
+      ],
+      "order": [
+        "source_record_id",
+        "source_row_number",
+        "source_row_sha256",
+        "review_status",
+        "hold_codes",
+        "adjudicated_by",
+        "adjudicated_date",
+        "recorded_adjudication",
+        "audited_filing_says",
+        "built_by_script",
+        "conflict_kind",
+        "enterprise_id",
+        "enterprise_name",
+        "owner_hub_name",
+        "published_value",
+        "resolution",
+        "third_source",
+        "third_source_says",
+        "web_list_says"
+      ]
+    },
+    "fpds_contradictions": {
+      "collection": "need",
+      "display_order": [
+        "source_record_id",
+        "source_row_number",
+        "source_row_sha256",
+        "review_status",
+        "hold_codes",
+        "disposition",
+        "enterprise_id",
+        "enterprise_name",
+        "fpds_declared_parent_name",
+        "fpds_declared_parent_observations",
+        "fpds_declared_parent_uei",
+        "ledger_resolves_parent_to",
+        "need_evidence_class",
+        "need_n_distinct_sources",
+        "asserted_need_owner_hub_cedar_uid",
+        "need_owner_hub_name",
+        "need_relationship",
+        "note",
+        "route"
+      ],
+      "fields": [
+        {
+          "column": "source_record_id",
+          "decision": "keep",
+          "description": "Internal source assertion: source record id",
+          "display_disposition": "keep",
+          "label": "source record id",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_row_number",
+          "decision": "keep",
+          "description": "Internal source assertion: source row number",
+          "display_disposition": "keep",
+          "label": "source row number",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_row_sha256",
+          "decision": "keep",
+          "description": "Internal source assertion: source row sha256",
+          "display_disposition": "keep",
+          "label": "source row sha256",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "review_status",
+          "decision": "keep",
+          "description": "Internal source assertion: review status",
+          "display_disposition": "keep",
+          "label": "review status",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hold_codes",
+          "decision": "keep",
+          "description": "Internal source assertion: hold codes",
+          "display_disposition": "keep",
+          "label": "hold codes",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "disposition",
+          "decision": "keep",
+          "description": "Internal source assertion: disposition",
+          "display_disposition": "keep",
+          "label": "disposition",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "enterprise_id",
+          "decision": "keep",
+          "description": "Internal source assertion: enterprise id",
+          "display_disposition": "keep",
+          "label": "enterprise id",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "enterprise_name",
+          "decision": "keep",
+          "description": "Internal source assertion: enterprise name",
+          "display_disposition": "keep",
+          "label": "enterprise name",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "fpds_declared_parent_name",
+          "decision": "keep",
+          "description": "Internal source assertion: fpds declared parent name",
+          "display_disposition": "keep",
+          "label": "fpds declared parent name",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "fpds_declared_parent_observations",
+          "decision": "keep",
+          "description": "Internal source assertion: fpds declared parent observations",
+          "display_disposition": "keep",
+          "label": "fpds declared parent observations",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "fpds_declared_parent_uei",
+          "decision": "keep",
+          "description": "Internal source assertion: fpds declared parent uei",
+          "display_disposition": "keep",
+          "label": "fpds declared parent uei",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "ledger_resolves_parent_to",
+          "decision": "keep",
+          "description": "Internal source assertion: ledger resolves parent to",
+          "display_disposition": "keep",
+          "label": "ledger resolves parent to",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "need_evidence_class",
+          "decision": "keep",
+          "description": "Internal source assertion: need evidence class",
+          "display_disposition": "keep",
+          "label": "need evidence class",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "need_n_distinct_sources",
+          "decision": "keep",
+          "description": "Internal source assertion: need n distinct sources",
+          "display_disposition": "keep",
+          "label": "need n distinct sources",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "asserted_need_owner_hub_cedar_uid",
+          "decision": "keep",
+          "description": "Preserved unverified identity assertion; not an approved join or ID issuance.",
+          "display_disposition": "keep",
+          "label": "asserted need owner hub cedar uid",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "need_owner_hub_name",
+          "decision": "keep",
+          "description": "Internal source assertion: need owner hub name",
+          "display_disposition": "keep",
+          "label": "need owner hub name",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "need_relationship",
+          "decision": "keep",
+          "description": "Internal source assertion: need relationship",
+          "display_disposition": "keep",
+          "label": "need relationship",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "note",
+          "decision": "keep",
+          "description": "Internal source assertion: note",
+          "display_disposition": "keep",
+          "label": "note",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "route",
+          "decision": "keep",
+          "description": "Internal source assertion: route",
+          "display_disposition": "keep",
+          "label": "route",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        }
+      ],
+      "order": [
+        "source_record_id",
+        "source_row_number",
+        "source_row_sha256",
+        "review_status",
+        "hold_codes",
+        "disposition",
+        "enterprise_id",
+        "enterprise_name",
+        "fpds_declared_parent_name",
+        "fpds_declared_parent_observations",
+        "fpds_declared_parent_uei",
+        "ledger_resolves_parent_to",
+        "need_evidence_class",
+        "need_n_distinct_sources",
+        "asserted_need_owner_hub_cedar_uid",
+        "need_owner_hub_name",
+        "need_relationship",
+        "note",
+        "route"
+      ]
+    },
+    "linkage_holds": {
+      "collection": "need",
+      "display_order": [
+        "hold_id",
+        "source_record_id",
+        "source_table",
+        "source_row_number",
+        "enterprise_id",
+        "hold_code",
+        "hold_category"
+      ],
+      "fields": [
+        {
+          "column": "hold_id",
+          "decision": "keep",
+          "description": "Internal source assertion: hold id",
+          "display_disposition": "keep",
+          "label": "hold id",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_record_id",
+          "decision": "keep",
+          "description": "Internal source assertion: source record id",
+          "display_disposition": "keep",
+          "label": "source record id",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_table",
+          "decision": "keep",
+          "description": "Internal source assertion: source table",
+          "display_disposition": "keep",
+          "label": "source table",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_row_number",
+          "decision": "keep",
+          "description": "Internal source assertion: source row number",
+          "display_disposition": "keep",
+          "label": "source row number",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "enterprise_id",
+          "decision": "keep",
+          "description": "Internal source assertion: enterprise id",
+          "display_disposition": "keep",
+          "label": "enterprise id",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hold_code",
+          "decision": "keep",
+          "description": "Internal source assertion: hold code",
+          "display_disposition": "keep",
+          "label": "hold code",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hold_category",
+          "decision": "keep",
+          "description": "Internal source assertion: hold category",
+          "display_disposition": "keep",
+          "label": "hold category",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        }
+      ],
+      "order": [
+        "hold_id",
+        "source_record_id",
+        "source_table",
+        "source_row_number",
+        "enterprise_id",
+        "hold_code",
+        "hold_category"
+      ]
+    },
+    "parent_crosswalk": {
+      "collection": "need",
+      "display_order": [
+        "source_record_id",
+        "source_row_number",
+        "source_row_sha256",
+        "review_status",
+        "hold_codes",
+        "built_by",
+        "built_date",
+        "cedar_canonical_name",
+        "cedar_entity_class",
+        "cedar_handle",
+        "asserted_cedar_uid",
+        "crosswalk_basis",
+        "crosswalk_method",
+        "crosswalk_status",
+        "owner_canonical_name",
+        "owner_rows",
+        "owner_tribe_id"
+      ],
+      "fields": [
+        {
+          "column": "source_record_id",
+          "decision": "keep",
+          "description": "Internal source assertion: source record id",
+          "display_disposition": "keep",
+          "label": "source record id",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_row_number",
+          "decision": "keep",
+          "description": "Internal source assertion: source row number",
+          "display_disposition": "keep",
+          "label": "source row number",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_row_sha256",
+          "decision": "keep",
+          "description": "Internal source assertion: source row sha256",
+          "display_disposition": "keep",
+          "label": "source row sha256",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "review_status",
+          "decision": "keep",
+          "description": "Internal source assertion: review status",
+          "display_disposition": "keep",
+          "label": "review status",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hold_codes",
+          "decision": "keep",
+          "description": "Internal source assertion: hold codes",
+          "display_disposition": "keep",
+          "label": "hold codes",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "built_by",
+          "decision": "keep",
+          "description": "Internal source assertion: built by",
+          "display_disposition": "keep",
+          "label": "built by",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "built_date",
+          "decision": "keep",
+          "description": "Historical producer date as recorded; not event time.",
+          "display_disposition": "keep",
+          "label": "built date",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "cedar_canonical_name",
+          "decision": "keep",
+          "description": "Internal source assertion: cedar canonical name",
+          "display_disposition": "keep",
+          "label": "cedar canonical name",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "cedar_entity_class",
+          "decision": "keep",
+          "description": "Internal source assertion: cedar entity class",
+          "display_disposition": "keep",
+          "label": "cedar entity class",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "cedar_handle",
+          "decision": "keep",
+          "description": "Internal source assertion: cedar handle",
+          "display_disposition": "keep",
+          "label": "cedar handle",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "asserted_cedar_uid",
+          "decision": "keep",
+          "description": "Preserved unverified identity assertion; not an approved join or ID issuance.",
+          "display_disposition": "keep",
+          "label": "asserted cedar uid",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "crosswalk_basis",
+          "decision": "keep",
+          "description": "Internal source assertion: crosswalk basis",
+          "display_disposition": "keep",
+          "label": "crosswalk basis",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "crosswalk_method",
+          "decision": "keep",
+          "description": "Internal source assertion: crosswalk method",
+          "display_disposition": "keep",
+          "label": "crosswalk method",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "crosswalk_status",
+          "decision": "keep",
+          "description": "Internal source assertion: crosswalk status",
+          "display_disposition": "keep",
+          "label": "crosswalk status",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "owner_canonical_name",
+          "decision": "keep",
+          "description": "Internal source assertion: owner canonical name",
+          "display_disposition": "keep",
+          "label": "owner canonical name",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "owner_rows",
+          "decision": "keep",
+          "description": "Internal source assertion: owner rows",
+          "display_disposition": "keep",
+          "label": "owner rows",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "owner_tribe_id",
+          "decision": "keep",
+          "description": "Internal source assertion: owner tribe id",
+          "display_disposition": "keep",
+          "label": "owner tribe id",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        }
+      ],
+      "order": [
+        "source_record_id",
+        "source_row_number",
+        "source_row_sha256",
+        "review_status",
+        "hold_codes",
+        "built_by",
+        "built_date",
+        "cedar_canonical_name",
+        "cedar_entity_class",
+        "cedar_handle",
+        "asserted_cedar_uid",
+        "crosswalk_basis",
+        "crosswalk_method",
+        "crosswalk_status",
+        "owner_canonical_name",
+        "owner_rows",
+        "owner_tribe_id"
+      ]
+    },
+    "patent_events": {
+      "collection": "need",
+      "display_order": [
+        "event_id",
+        "source_record_id",
+        "source_id",
+        "source_url",
+        "patent_number",
+        "publication_id",
+        "subject_name",
+        "event_type",
+        "effective_date",
+        "recordation_date",
+        "event_date_precision",
+        "from_party",
+        "to_party",
+        "title_transfer_asserted",
+        "review_note",
+        "enterprise_id",
+        "legal_subject_cedar_uid",
+        "subject_kind",
+        "source_asserted_cedar_uid",
+        "source_review_status",
+        "linkage_status",
+        "rights_status",
+        "publication_status",
+        "hold_reason"
+      ],
+      "fields": [
+        {
+          "column": "event_id",
+          "decision": "keep",
+          "description": "Preserved source event id",
+          "display_disposition": "keep",
+          "label": "event id",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "patent_number",
+          "decision": "keep",
+          "description": "One US grant identifier. Count distinct grants, not subject links or patent families.",
+          "display_disposition": "keep",
+          "label": "patent number",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "publication_id",
+          "decision": "keep",
+          "description": "Source publication identifier including kind code when supplied.",
+          "display_disposition": "keep",
+          "label": "publication id",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "subject_name",
+          "decision": "keep",
+          "description": "Preserved source subject name",
+          "display_disposition": "keep",
+          "label": "subject name",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "event_type",
+          "decision": "keep",
+          "description": "Assignment, name change, security interest, fee procedure or lapse remain distinct.",
+          "display_disposition": "keep",
+          "label": "event type",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "effective_date",
+          "decision": "keep",
+          "description": "Source effective date of this specific legal/record event; not recordation.",
+          "display_disposition": "keep",
+          "label": "effective date",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "recordation_date",
+          "decision": "keep",
+          "description": "Date the source records the event; a delayed filing is not a new acquisition.",
+          "display_disposition": "keep",
+          "label": "recordation date",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "event_date_precision",
+          "decision": "keep",
+          "description": "Preserved source event date precision",
+          "display_disposition": "keep",
+          "label": "event date precision",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "from_party",
+          "decision": "keep",
+          "description": "Preserved source from party",
+          "display_disposition": "keep",
+          "label": "from party",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "to_party",
+          "decision": "keep",
+          "description": "Preserved source to party",
+          "display_disposition": "keep",
+          "label": "to party",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "title_transfer_asserted",
+          "decision": "keep",
+          "description": "True only for an assignment assertion; securities, name changes and fee events never establish transfer.",
+          "display_disposition": "keep",
+          "label": "title transfer asserted",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "review_note",
+          "decision": "keep",
+          "description": "Preserved source review note",
+          "display_disposition": "keep",
+          "label": "review note",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "enterprise_id",
+          "decision": "keep",
+          "description": "Exact existing enterprise key from the pinned NEED table; blank when unbound. Never inherited from a tribe.",
+          "display_disposition": "keep",
+          "label": "enterprise id",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "legal_subject_cedar_uid",
+          "decision": "keep",
+          "description": "Exact separately reviewed registered Native legal subject, never inherited from its owner. Populated only for a reviewed direct legal subject.",
+          "display_disposition": "keep",
+          "label": "legal subject cedar uid",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "subject_kind",
+          "decision": "keep",
+          "description": "Exact issuer/assignee category, not a profile presentation relationship.",
+          "display_disposition": "keep",
+          "label": "subject kind",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_asserted_cedar_uid",
+          "decision": "keep",
+          "description": "Historical source register assertion preserved for review; not approved current identity binding.",
+          "display_disposition": "keep",
+          "label": "source asserted cedar uid",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_record_id",
+          "decision": "keep",
+          "description": "Preserved source observation/patent/availability key; not an issued Cedar identity.",
+          "display_disposition": "keep",
+          "label": "source record id",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_id",
+          "decision": "keep",
+          "description": "Preserved source source id",
+          "display_disposition": "keep",
+          "label": "source id",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_url",
+          "decision": "keep",
+          "description": "Exact evidence citation, not a download license.",
+          "display_disposition": "keep",
+          "label": "source url",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_review_status",
+          "decision": "keep",
+          "description": "Independent evidence review outcome, separate from rights and entity binding.",
+          "display_disposition": "keep",
+          "label": "source review status",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "linkage_status",
+          "decision": "keep",
+          "description": "Preserved source linkage status",
+          "display_disposition": "keep",
+          "label": "linkage status",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "rights_status",
+          "decision": "keep",
+          "description": "Source-family policy hold; public access does not establish database or redistribution rights.",
+          "display_disposition": "keep",
+          "label": "rights status",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "publication_status",
+          "decision": "keep",
+          "description": "held for all rows under NEED policy; this builder cannot authorize eligibility.",
+          "display_disposition": "keep",
+          "label": "publication status",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hold_reason",
+          "decision": "keep",
+          "description": "Semicolon-delimited collection, rights, research and linkage holds; not a single conflated approval.",
+          "display_disposition": "keep",
+          "label": "hold reason",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        }
+      ],
+      "order": [
+        "event_id",
+        "patent_number",
+        "publication_id",
+        "subject_name",
+        "event_type",
+        "effective_date",
+        "recordation_date",
+        "event_date_precision",
+        "from_party",
+        "to_party",
+        "title_transfer_asserted",
+        "review_note",
+        "enterprise_id",
+        "legal_subject_cedar_uid",
+        "subject_kind",
+        "source_asserted_cedar_uid",
+        "source_record_id",
+        "source_id",
+        "source_url",
+        "source_review_status",
+        "linkage_status",
+        "rights_status",
+        "publication_status",
+        "hold_reason"
+      ]
+    },
+    "patent_observations": {
+      "collection": "need",
+      "display_order": [
+        "observation_id",
+        "source_record_id",
+        "source_id",
+        "source_url",
+        "subject_name",
+        "patent_number",
+        "publication_id",
+        "title",
+        "family_id",
+        "relationship_type",
+        "filing_date",
+        "grant_date",
+        "original_assignee",
+        "subsequent_owner",
+        "assignment_date",
+        "acquisition_date",
+        "acquisition_source_url",
+        "date_precision",
+        "contractor_participation",
+        "contractor_evidence",
+        "current_owner_verified",
+        "source_reported_assignee",
+        "source_reported_status",
+        "review_note",
+        "enterprise_id",
+        "legal_subject_cedar_uid",
+        "subject_kind",
+        "source_asserted_cedar_uid",
+        "source_review_status",
+        "linkage_status",
+        "rights_status",
+        "publication_status",
+        "hold_reason"
+      ],
+      "fields": [
+        {
+          "column": "observation_id",
+          "decision": "keep",
+          "description": "Stable supplied rating key or deterministic patent-subject observation key; not canonical identity.",
+          "display_disposition": "keep",
+          "label": "observation id",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "subject_name",
+          "decision": "keep",
+          "description": "Preserved source subject name",
+          "display_disposition": "keep",
+          "label": "subject name",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "patent_number",
+          "decision": "keep",
+          "description": "One US grant identifier. Count distinct grants, not subject links or patent families.",
+          "display_disposition": "keep",
+          "label": "patent number",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "publication_id",
+          "decision": "keep",
+          "description": "Source publication identifier including kind code when supplied.",
+          "display_disposition": "keep",
+          "label": "publication id",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "title",
+          "decision": "keep",
+          "description": "Preserved source title",
+          "display_disposition": "keep",
+          "label": "title",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "family_id",
+          "decision": "keep",
+          "description": "Source-specific patent family identifier; multiple grants may share a family.",
+          "display_disposition": "keep",
+          "label": "family id",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "relationship_type",
+          "decision": "keep",
+          "description": "Source-supported role; contractor contribution is not title or ownership.",
+          "display_disposition": "keep",
+          "label": "relationship type",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "filing_date",
+          "decision": "keep",
+          "description": "Application filing date; not acquisition, assignment, grant or invention date.",
+          "display_disposition": "keep",
+          "label": "filing date",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "grant_date",
+          "decision": "keep",
+          "description": "Grant publication date; not a company acquisition date.",
+          "display_disposition": "keep",
+          "label": "grant date",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "original_assignee",
+          "decision": "keep",
+          "description": "Original grantee/assignee only when supported; not inferred from current mirror assignee.",
+          "display_disposition": "keep",
+          "label": "original assignee",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "subsequent_owner",
+          "decision": "keep",
+          "description": "Dated assignee assertion; not a current-title certification.",
+          "display_disposition": "keep",
+          "label": "subsequent owner",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "assignment_date",
+          "decision": "keep",
+          "description": "Effective assignment date only when explicitly supported; not recordation date.",
+          "display_disposition": "keep",
+          "label": "assignment date",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "acquisition_date",
+          "decision": "keep",
+          "description": "Company transaction date; not patent assignment or grant date.",
+          "display_disposition": "keep",
+          "label": "acquisition date",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "acquisition_source_url",
+          "decision": "keep",
+          "description": "Preserved source acquisition source url",
+          "display_disposition": "keep",
+          "label": "acquisition source url",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "date_precision",
+          "decision": "keep",
+          "description": "Precision of the reported date (day/month/year/unknown); blanks are not invented dates.",
+          "display_disposition": "keep",
+          "label": "date precision",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "contractor_participation",
+          "decision": "keep",
+          "description": "True only for contribution explicitly separated from retained title.",
+          "display_disposition": "keep",
+          "label": "contractor participation",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "contractor_evidence",
+          "decision": "keep",
+          "description": "Preserved source contractor evidence",
+          "display_disposition": "keep",
+          "label": "contractor evidence",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "current_owner_verified",
+          "decision": "keep",
+          "description": "Always false in this candidate; no current-title search certification.",
+          "display_disposition": "keep",
+          "label": "current owner verified",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_reported_assignee",
+          "decision": "keep",
+          "description": "Preserved source source reported assignee",
+          "display_disposition": "keep",
+          "label": "source reported assignee",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_reported_status",
+          "decision": "keep",
+          "description": "Preserved source source reported status",
+          "display_disposition": "keep",
+          "label": "source reported status",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "review_note",
+          "decision": "keep",
+          "description": "Preserved source review note",
+          "display_disposition": "keep",
+          "label": "review note",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "enterprise_id",
+          "decision": "keep",
+          "description": "Exact existing enterprise key from the pinned NEED table; blank when unbound. Never inherited from a tribe.",
+          "display_disposition": "keep",
+          "label": "enterprise id",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "legal_subject_cedar_uid",
+          "decision": "keep",
+          "description": "Exact separately reviewed registered Native legal subject, never inherited from its owner. Populated only for a reviewed direct legal subject.",
+          "display_disposition": "keep",
+          "label": "legal subject cedar uid",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "subject_kind",
+          "decision": "keep",
+          "description": "Exact issuer/assignee category, not a profile presentation relationship.",
+          "display_disposition": "keep",
+          "label": "subject kind",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_asserted_cedar_uid",
+          "decision": "keep",
+          "description": "Historical source register assertion preserved for review; not approved current identity binding.",
+          "display_disposition": "keep",
+          "label": "source asserted cedar uid",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_record_id",
+          "decision": "keep",
+          "description": "Preserved source observation/patent/availability key; not an issued Cedar identity.",
+          "display_disposition": "keep",
+          "label": "source record id",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_id",
+          "decision": "keep",
+          "description": "Preserved source source id",
+          "display_disposition": "keep",
+          "label": "source id",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_url",
+          "decision": "keep",
+          "description": "Exact evidence citation, not a download license.",
+          "display_disposition": "keep",
+          "label": "source url",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_review_status",
+          "decision": "keep",
+          "description": "Independent evidence review outcome, separate from rights and entity binding.",
+          "display_disposition": "keep",
+          "label": "source review status",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "linkage_status",
+          "decision": "keep",
+          "description": "Preserved source linkage status",
+          "display_disposition": "keep",
+          "label": "linkage status",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "rights_status",
+          "decision": "keep",
+          "description": "Source-family policy hold; public access does not establish database or redistribution rights.",
+          "display_disposition": "keep",
+          "label": "rights status",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "publication_status",
+          "decision": "keep",
+          "description": "held for all rows under NEED policy; this builder cannot authorize eligibility.",
+          "display_disposition": "keep",
+          "label": "publication status",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hold_reason",
+          "decision": "keep",
+          "description": "Semicolon-delimited collection, rights, research and linkage holds; not a single conflated approval.",
+          "display_disposition": "keep",
+          "label": "hold reason",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        }
+      ],
+      "order": [
+        "observation_id",
+        "subject_name",
+        "patent_number",
+        "publication_id",
+        "title",
+        "family_id",
+        "relationship_type",
+        "filing_date",
+        "grant_date",
+        "original_assignee",
+        "subsequent_owner",
+        "assignment_date",
+        "acquisition_date",
+        "acquisition_source_url",
+        "date_precision",
+        "contractor_participation",
+        "contractor_evidence",
+        "current_owner_verified",
+        "source_reported_assignee",
+        "source_reported_status",
+        "review_note",
+        "enterprise_id",
+        "legal_subject_cedar_uid",
+        "subject_kind",
+        "source_asserted_cedar_uid",
+        "source_record_id",
+        "source_id",
+        "source_url",
+        "source_review_status",
+        "linkage_status",
+        "rights_status",
+        "publication_status",
+        "hold_reason"
+      ]
+    },
+    "profile_links": {
+      "collection": "need",
+      "display_order": [
+        "profile_link_id",
+        "source_url",
+        "profile_cedar_uid",
+        "enterprise_id",
+        "enterprise_name",
+        "relationship_type",
+        "valid_from",
+        "valid_to",
+        "supporting_url",
+        "source_statement",
+        "evidence_review_status",
+        "publication_status",
+        "hold_reason"
+      ],
+      "fields": [
+        {
+          "column": "profile_link_id",
+          "decision": "keep",
+          "description": "profile link id",
+          "display_disposition": "keep",
+          "label": "profile link id",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "profile_cedar_uid",
+          "decision": "keep",
+          "description": "profile cedar uid",
+          "display_disposition": "keep",
+          "label": "profile cedar uid",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "enterprise_id",
+          "decision": "keep",
+          "description": "enterprise id",
+          "display_disposition": "keep",
+          "label": "enterprise id",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "enterprise_name",
+          "decision": "keep",
+          "description": "enterprise name",
+          "display_disposition": "keep",
+          "label": "enterprise name",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "relationship_type",
+          "decision": "keep",
+          "description": "relationship type",
+          "display_disposition": "keep",
+          "label": "relationship type",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "valid_from",
+          "decision": "keep",
+          "description": "Source-supported effective interval; blank means unknown, not current forever",
+          "display_disposition": "keep",
+          "label": "valid from",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "valid_to",
+          "decision": "keep",
+          "description": "Source-supported effective interval; blank means unknown, not current forever",
+          "display_disposition": "keep",
+          "label": "valid to",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_url",
+          "decision": "keep",
+          "description": "source url",
+          "display_disposition": "keep",
+          "label": "source url",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "supporting_url",
+          "decision": "keep",
+          "description": "supporting url",
+          "display_disposition": "keep",
+          "label": "supporting url",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_statement",
+          "decision": "keep",
+          "description": "source statement",
+          "display_disposition": "keep",
+          "label": "source statement",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "evidence_review_status",
+          "decision": "keep",
+          "description": "evidence review status",
+          "display_disposition": "keep",
+          "label": "evidence review status",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "publication_status",
+          "decision": "keep",
+          "description": "publication status",
+          "display_disposition": "keep",
+          "label": "publication status",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hold_reason",
+          "decision": "keep",
+          "description": "hold reason",
+          "display_disposition": "keep",
+          "label": "hold reason",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        }
+      ],
+      "order": [
+        "profile_link_id",
+        "profile_cedar_uid",
+        "enterprise_id",
+        "enterprise_name",
+        "relationship_type",
+        "valid_from",
+        "valid_to",
+        "source_url",
+        "supporting_url",
+        "source_statement",
+        "evidence_review_status",
+        "publication_status",
+        "hold_reason"
+      ]
+    },
+    "rating_availability": {
+      "collection": "need",
+      "display_order": [
+        "availability_id",
+        "source_record_id",
+        "source_id",
+        "source_url",
+        "subject_name",
+        "agency",
+        "availability_status",
+        "rating_scope",
+        "publication_period",
+        "publication_date",
+        "date_precision",
+        "observed_on",
+        "review_note",
+        "enterprise_id",
+        "legal_subject_cedar_uid",
+        "subject_kind",
+        "source_asserted_cedar_uid",
+        "source_review_status",
+        "linkage_status",
+        "rights_status",
+        "publication_status",
+        "hold_reason"
+      ],
+      "fields": [
+        {
+          "column": "availability_id",
+          "decision": "keep",
+          "description": "Preserved source availability id",
+          "display_disposition": "keep",
+          "label": "availability id",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "subject_name",
+          "decision": "keep",
+          "description": "Preserved source subject name",
+          "display_disposition": "keep",
+          "label": "subject name",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "agency",
+          "decision": "keep",
+          "description": "Preserved source agency",
+          "display_disposition": "keep",
+          "label": "agency",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "availability_status",
+          "decision": "keep",
+          "description": "Preserved source availability status",
+          "display_disposition": "keep",
+          "label": "availability status",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "rating_scope",
+          "decision": "keep",
+          "description": "Issuer, instrument, issue group, financial strength or other stated scope; never inherited across subjects.",
+          "display_disposition": "keep",
+          "label": "rating scope",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "publication_period",
+          "decision": "keep",
+          "description": "Preserved source publication period",
+          "display_disposition": "keep",
+          "label": "publication period",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "publication_date",
+          "decision": "keep",
+          "description": "Source publication date; may differ from action date.",
+          "display_disposition": "keep",
+          "label": "publication date",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "date_precision",
+          "decision": "keep",
+          "description": "Precision of the reported date (day/month/year/unknown); blanks are not invented dates.",
+          "display_disposition": "keep",
+          "label": "date precision",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "observed_on",
+          "decision": "keep",
+          "description": "Preserved source observed on",
+          "display_disposition": "keep",
+          "label": "observed on",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "review_note",
+          "decision": "keep",
+          "description": "Preserved source review note",
+          "display_disposition": "keep",
+          "label": "review note",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "enterprise_id",
+          "decision": "keep",
+          "description": "Exact existing enterprise key from the pinned NEED table; blank when unbound. Never inherited from a tribe.",
+          "display_disposition": "keep",
+          "label": "enterprise id",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "legal_subject_cedar_uid",
+          "decision": "keep",
+          "description": "Exact separately reviewed registered Native legal subject, never inherited from its owner. Populated only for a reviewed direct legal subject.",
+          "display_disposition": "keep",
+          "label": "legal subject cedar uid",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "subject_kind",
+          "decision": "keep",
+          "description": "Exact issuer/assignee category, not a profile presentation relationship.",
+          "display_disposition": "keep",
+          "label": "subject kind",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_asserted_cedar_uid",
+          "decision": "keep",
+          "description": "Historical source register assertion preserved for review; not approved current identity binding.",
+          "display_disposition": "keep",
+          "label": "source asserted cedar uid",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_record_id",
+          "decision": "keep",
+          "description": "Preserved source observation/patent/availability key; not an issued Cedar identity.",
+          "display_disposition": "keep",
+          "label": "source record id",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_id",
+          "decision": "keep",
+          "description": "Preserved source source id",
+          "display_disposition": "keep",
+          "label": "source id",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_url",
+          "decision": "keep",
+          "description": "Exact evidence citation, not a download license.",
+          "display_disposition": "keep",
+          "label": "source url",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_review_status",
+          "decision": "keep",
+          "description": "Independent evidence review outcome, separate from rights and entity binding.",
+          "display_disposition": "keep",
+          "label": "source review status",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "linkage_status",
+          "decision": "keep",
+          "description": "Preserved source linkage status",
+          "display_disposition": "keep",
+          "label": "linkage status",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "rights_status",
+          "decision": "keep",
+          "description": "Source-family policy hold; public access does not establish database or redistribution rights.",
+          "display_disposition": "keep",
+          "label": "rights status",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "publication_status",
+          "decision": "keep",
+          "description": "held for all rows under NEED policy; this builder cannot authorize eligibility.",
+          "display_disposition": "keep",
+          "label": "publication status",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hold_reason",
+          "decision": "keep",
+          "description": "Semicolon-delimited collection, rights, research and linkage holds; not a single conflated approval.",
+          "display_disposition": "keep",
+          "label": "hold reason",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        }
+      ],
+      "order": [
+        "availability_id",
+        "subject_name",
+        "agency",
+        "availability_status",
+        "rating_scope",
+        "publication_period",
+        "publication_date",
+        "date_precision",
+        "observed_on",
+        "review_note",
+        "enterprise_id",
+        "legal_subject_cedar_uid",
+        "subject_kind",
+        "source_asserted_cedar_uid",
+        "source_record_id",
+        "source_id",
+        "source_url",
+        "source_review_status",
+        "linkage_status",
+        "rights_status",
+        "publication_status",
+        "hold_reason"
+      ]
+    },
+    "reconciliation": {
+      "collection": "need",
+      "display_order": [
+        "source_record_id",
+        "source_row_number",
+        "source_row_sha256",
+        "review_status",
+        "hold_codes",
+        "built_by",
+        "built_date",
+        "asserted_cedar_uid",
+        "enterprise_name",
+        "enterprise_name_normalized",
+        "hub_disagreement_basis",
+        "hub_disagreement_class",
+        "matched_need_enterprise_id",
+        "matched_need_relation_class",
+        "matched_need_relationship",
+        "owner_attribution_methods",
+        "owner_cage",
+        "owner_data_sources",
+        "owner_ein",
+        "owner_evidence_families",
+        "owner_hq_city",
+        "owner_hq_state",
+        "owner_is_8a",
+        "owner_is_federal_contractor",
+        "owner_is_nonprofit",
+        "owner_rows_in_cluster",
+        "owner_uei",
+        "owner_verification_sources",
+        "owner_verified_date",
+        "ownership_claim_basis",
+        "ownership_claim_carried",
+        "reconciliation_basis",
+        "reconciliation_status",
+        "relation_class_basis",
+        "relation_class_proposed"
+      ],
+      "fields": [
+        {
+          "column": "source_record_id",
+          "decision": "keep",
+          "description": "Internal source assertion: source record id",
+          "display_disposition": "keep",
+          "label": "source record id",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_row_number",
+          "decision": "keep",
+          "description": "Internal source assertion: source row number",
+          "display_disposition": "keep",
+          "label": "source row number",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_row_sha256",
+          "decision": "keep",
+          "description": "Internal source assertion: source row sha256",
+          "display_disposition": "keep",
+          "label": "source row sha256",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "review_status",
+          "decision": "keep",
+          "description": "Internal source assertion: review status",
+          "display_disposition": "keep",
+          "label": "review status",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hold_codes",
+          "decision": "keep",
+          "description": "Internal source assertion: hold codes",
+          "display_disposition": "keep",
+          "label": "hold codes",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "built_by",
+          "decision": "keep",
+          "description": "Internal source assertion: built by",
+          "display_disposition": "keep",
+          "label": "built by",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "built_date",
+          "decision": "keep",
+          "description": "Historical producer date as recorded; not event time.",
+          "display_disposition": "keep",
+          "label": "built date",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "asserted_cedar_uid",
+          "decision": "keep",
+          "description": "Preserved unverified identity assertion; not an approved join or ID issuance.",
+          "display_disposition": "keep",
+          "label": "asserted cedar uid",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "enterprise_name",
+          "decision": "keep",
+          "description": "Internal source assertion: enterprise name",
+          "display_disposition": "keep",
+          "label": "enterprise name",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "enterprise_name_normalized",
+          "decision": "keep",
+          "description": "Internal source assertion: enterprise name normalized",
+          "display_disposition": "keep",
+          "label": "enterprise name normalized",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hub_disagreement_basis",
+          "decision": "keep",
+          "description": "Internal source assertion: hub disagreement basis",
+          "display_disposition": "keep",
+          "label": "hub disagreement basis",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hub_disagreement_class",
+          "decision": "keep",
+          "description": "Internal source assertion: hub disagreement class",
+          "display_disposition": "keep",
+          "label": "hub disagreement class",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "matched_need_enterprise_id",
+          "decision": "keep",
+          "description": "Internal source assertion: matched need enterprise id",
+          "display_disposition": "keep",
+          "label": "matched need enterprise id",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "matched_need_relation_class",
+          "decision": "keep",
+          "description": "Internal source assertion: matched need relation class",
+          "display_disposition": "keep",
+          "label": "matched need relation class",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "matched_need_relationship",
+          "decision": "keep",
+          "description": "Internal source assertion: matched need relationship",
+          "display_disposition": "keep",
+          "label": "matched need relationship",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "owner_attribution_methods",
+          "decision": "keep",
+          "description": "Internal source assertion: owner attribution methods",
+          "display_disposition": "keep",
+          "label": "owner attribution methods",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "owner_cage",
+          "decision": "keep",
+          "description": "Internal source assertion: owner cage",
+          "display_disposition": "keep",
+          "label": "owner cage",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "owner_data_sources",
+          "decision": "keep",
+          "description": "Internal source assertion: owner data sources",
+          "display_disposition": "keep",
+          "label": "owner data sources",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "owner_ein",
+          "decision": "keep",
+          "description": "Internal source assertion: owner ein",
+          "display_disposition": "keep",
+          "label": "owner ein",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "owner_evidence_families",
+          "decision": "keep",
+          "description": "Internal source assertion: owner evidence families",
+          "display_disposition": "keep",
+          "label": "owner evidence families",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "owner_hq_city",
+          "decision": "keep",
+          "description": "Internal source assertion: owner hq city",
+          "display_disposition": "keep",
+          "label": "owner hq city",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "owner_hq_state",
+          "decision": "keep",
+          "description": "Internal source assertion: owner hq state",
+          "display_disposition": "keep",
+          "label": "owner hq state",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "owner_is_8a",
+          "decision": "keep",
+          "description": "Internal source assertion: owner is 8a",
+          "display_disposition": "keep",
+          "label": "owner is 8a",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "owner_is_federal_contractor",
+          "decision": "keep",
+          "description": "Internal source assertion: owner is federal contractor",
+          "display_disposition": "keep",
+          "label": "owner is federal contractor",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "owner_is_nonprofit",
+          "decision": "keep",
+          "description": "Internal source assertion: owner is nonprofit",
+          "display_disposition": "keep",
+          "label": "owner is nonprofit",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "owner_rows_in_cluster",
+          "decision": "keep",
+          "description": "Internal source assertion: owner rows in cluster",
+          "display_disposition": "keep",
+          "label": "owner rows in cluster",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "owner_uei",
+          "decision": "keep",
+          "description": "Internal source assertion: owner uei",
+          "display_disposition": "keep",
+          "label": "owner uei",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "owner_verification_sources",
+          "decision": "keep",
+          "description": "Internal source assertion: owner verification sources",
+          "display_disposition": "keep",
+          "label": "owner verification sources",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "owner_verified_date",
+          "decision": "keep",
+          "description": "Internal source assertion: owner verified date",
+          "display_disposition": "keep",
+          "label": "owner verified date",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "ownership_claim_basis",
+          "decision": "keep",
+          "description": "Internal source assertion: ownership claim basis",
+          "display_disposition": "keep",
+          "label": "ownership claim basis",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "ownership_claim_carried",
+          "decision": "keep",
+          "description": "Internal source assertion: ownership claim carried",
+          "display_disposition": "keep",
+          "label": "ownership claim carried",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "reconciliation_basis",
+          "decision": "keep",
+          "description": "Internal source assertion: reconciliation basis",
+          "display_disposition": "keep",
+          "label": "reconciliation basis",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "reconciliation_status",
+          "decision": "keep",
+          "description": "Internal source assertion: reconciliation status",
+          "display_disposition": "keep",
+          "label": "reconciliation status",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "relation_class_basis",
+          "decision": "keep",
+          "description": "Internal source assertion: relation class basis",
+          "display_disposition": "keep",
+          "label": "relation class basis",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "relation_class_proposed",
+          "decision": "keep",
+          "description": "Internal source assertion: relation class proposed",
+          "display_disposition": "keep",
+          "label": "relation class proposed",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        }
+      ],
+      "order": [
+        "source_record_id",
+        "source_row_number",
+        "source_row_sha256",
+        "review_status",
+        "hold_codes",
+        "built_by",
+        "built_date",
+        "asserted_cedar_uid",
+        "enterprise_name",
+        "enterprise_name_normalized",
+        "hub_disagreement_basis",
+        "hub_disagreement_class",
+        "matched_need_enterprise_id",
+        "matched_need_relation_class",
+        "matched_need_relationship",
+        "owner_attribution_methods",
+        "owner_cage",
+        "owner_data_sources",
+        "owner_ein",
+        "owner_evidence_families",
+        "owner_hq_city",
+        "owner_hq_state",
+        "owner_is_8a",
+        "owner_is_federal_contractor",
+        "owner_is_nonprofit",
+        "owner_rows_in_cluster",
+        "owner_uei",
+        "owner_verification_sources",
+        "owner_verified_date",
+        "ownership_claim_basis",
+        "ownership_claim_carried",
+        "reconciliation_basis",
+        "reconciliation_status",
+        "relation_class_basis",
+        "relation_class_proposed"
+      ]
+    },
+    "relationship_observations": {
+      "collection": "need",
+      "display_order": [
+        "enterprise_edge_id",
+        "source_record_id",
+        "source_id",
+        "source_url",
+        "source_row_number",
+        "source_row_sha256",
+        "review_status",
+        "hold_codes",
+        "built_by_script",
+        "asserted_cedar_uid",
+        "child_name_as_recorded",
+        "depth_as_recorded",
+        "enterprise_id",
+        "evidence_class",
+        "hub_resolution_method",
+        "hub_resolution_note",
+        "asserted_owner_hub_cedar_uid",
+        "owner_hub_name",
+        "ownership_percent_stated",
+        "parent_name_as_recorded",
+        "quote",
+        "relation_class",
+        "relationship",
+        "relationship_as_recorded",
+        "retrieved_date",
+        "source_document",
+        "source_edition_date",
+        "source_fiscal_year",
+        "source_review_status"
+      ],
+      "fields": [
+        {
+          "column": "source_record_id",
+          "decision": "keep",
+          "description": "Internal source assertion: source record id",
+          "display_disposition": "keep",
+          "label": "source record id",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_row_number",
+          "decision": "keep",
+          "description": "Internal source assertion: source row number",
+          "display_disposition": "keep",
+          "label": "source row number",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_row_sha256",
+          "decision": "keep",
+          "description": "Internal source assertion: source row sha256",
+          "display_disposition": "keep",
+          "label": "source row sha256",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "review_status",
+          "decision": "keep",
+          "description": "Internal source assertion: review status",
+          "display_disposition": "keep",
+          "label": "review status",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hold_codes",
+          "decision": "keep",
+          "description": "Internal source assertion: hold codes",
+          "display_disposition": "keep",
+          "label": "hold codes",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "built_by_script",
+          "decision": "keep",
+          "description": "Internal source assertion: built by script",
+          "display_disposition": "keep",
+          "label": "built by script",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "asserted_cedar_uid",
+          "decision": "keep",
+          "description": "Preserved unverified identity assertion; not an approved join or ID issuance.",
+          "display_disposition": "keep",
+          "label": "asserted cedar uid",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "child_name_as_recorded",
+          "decision": "keep",
+          "description": "Internal source assertion: child name as recorded",
+          "display_disposition": "keep",
+          "label": "child name as recorded",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "depth_as_recorded",
+          "decision": "keep",
+          "description": "Internal source assertion: depth as recorded",
+          "display_disposition": "keep",
+          "label": "depth as recorded",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "enterprise_edge_id",
+          "decision": "keep",
+          "description": "Internal source assertion: enterprise edge id",
+          "display_disposition": "keep",
+          "label": "enterprise edge id",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "enterprise_id",
+          "decision": "keep",
+          "description": "Internal source assertion: enterprise id",
+          "display_disposition": "keep",
+          "label": "enterprise id",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "evidence_class",
+          "decision": "keep",
+          "description": "Internal source assertion: evidence class",
+          "display_disposition": "keep",
+          "label": "evidence class",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hub_resolution_method",
+          "decision": "keep",
+          "description": "Internal source assertion: hub resolution method",
+          "display_disposition": "keep",
+          "label": "hub resolution method",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hub_resolution_note",
+          "decision": "keep",
+          "description": "Internal source assertion: hub resolution note",
+          "display_disposition": "keep",
+          "label": "hub resolution note",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "asserted_owner_hub_cedar_uid",
+          "decision": "keep",
+          "description": "Preserved unverified identity assertion; not an approved join or ID issuance.",
+          "display_disposition": "keep",
+          "label": "asserted owner hub cedar uid",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "owner_hub_name",
+          "decision": "keep",
+          "description": "Internal source assertion: owner hub name",
+          "display_disposition": "keep",
+          "label": "owner hub name",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "ownership_percent_stated",
+          "decision": "keep",
+          "description": "Internal source assertion: ownership percent stated",
+          "display_disposition": "keep",
+          "label": "ownership percent stated",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "parent_name_as_recorded",
+          "decision": "keep",
+          "description": "Internal source assertion: parent name as recorded",
+          "display_disposition": "keep",
+          "label": "parent name as recorded",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "quote",
+          "decision": "keep",
+          "description": "Internal source assertion: quote",
+          "display_disposition": "keep",
+          "label": "quote",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "relation_class",
+          "decision": "keep",
+          "description": "Internal source assertion: relation class",
+          "display_disposition": "keep",
+          "label": "relation class",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "relationship",
+          "decision": "keep",
+          "description": "Internal source assertion: relationship",
+          "display_disposition": "keep",
+          "label": "relationship",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "relationship_as_recorded",
+          "decision": "keep",
+          "description": "Internal source assertion: relationship as recorded",
+          "display_disposition": "keep",
+          "label": "relationship as recorded",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "retrieved_date",
+          "decision": "keep",
+          "description": "Historical retrieval date as recorded; not event time.",
+          "display_disposition": "keep",
+          "label": "retrieved date",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_document",
+          "decision": "keep",
+          "description": "Internal source assertion: source document",
+          "display_disposition": "keep",
+          "label": "source document",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_edition_date",
+          "decision": "keep",
+          "description": "Source publication/edition date; not ownership effective date.",
+          "display_disposition": "keep",
+          "label": "source edition date",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_fiscal_year",
+          "decision": "keep",
+          "description": "Fiscal year of cited source; not a calendar event year.",
+          "display_disposition": "keep",
+          "label": "source fiscal year",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_id",
+          "decision": "keep",
+          "description": "Internal source assertion: source id",
+          "display_disposition": "keep",
+          "label": "source id",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_review_status",
+          "decision": "keep",
+          "description": "Internal source assertion: source review status",
+          "display_disposition": "keep",
+          "label": "source review status",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_url",
+          "decision": "keep",
+          "description": "Internal source assertion: source url",
+          "display_disposition": "keep",
+          "label": "source url",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        }
+      ],
+      "order": [
+        "source_record_id",
+        "source_row_number",
+        "source_row_sha256",
+        "review_status",
+        "hold_codes",
+        "built_by_script",
+        "asserted_cedar_uid",
+        "child_name_as_recorded",
+        "depth_as_recorded",
+        "enterprise_edge_id",
+        "enterprise_id",
+        "evidence_class",
+        "hub_resolution_method",
+        "hub_resolution_note",
+        "asserted_owner_hub_cedar_uid",
+        "owner_hub_name",
+        "ownership_percent_stated",
+        "parent_name_as_recorded",
+        "quote",
+        "relation_class",
+        "relationship",
+        "relationship_as_recorded",
+        "retrieved_date",
+        "source_document",
+        "source_edition_date",
+        "source_fiscal_year",
+        "source_id",
+        "source_review_status",
+        "source_url"
+      ]
+    },
+    "source_records": {
+      "collection": "need",
+      "display_order": [
+        "source_record_id",
+        "source_row_number",
+        "source_row_sha256",
+        "review_status",
+        "hold_codes",
+        "attribution_method",
+        "award_purpose_category",
+        "canonical_name",
+        "ceased_year",
+        "data_sources",
+        "enterprise_cage_code",
+        "enterprise_ein",
+        "enterprise_name",
+        "enterprise_uei",
+        "entity_type_normalized",
+        "founded_year",
+        "hq_address_line",
+        "hq_city",
+        "hq_county_geoid",
+        "hq_lat",
+        "hq_long",
+        "hq_place_geoid",
+        "hq_state",
+        "hq_zip",
+        "industry_sector",
+        "is_8a_certified",
+        "is_federal_contractor",
+        "is_nonprofit",
+        "ntee_code",
+        "parent_entity_type",
+        "sector_master_prime",
+        "supersector_master_prime",
+        "total_master_prime_dol_m",
+        "tribe_id",
+        "verification_source",
+        "verified_date"
+      ],
+      "fields": [
+        {
+          "column": "source_record_id",
+          "decision": "keep",
+          "description": "Internal source assertion: source record id",
+          "display_disposition": "keep",
+          "label": "source record id",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_row_number",
+          "decision": "keep",
+          "description": "Internal source assertion: source row number",
+          "display_disposition": "keep",
+          "label": "source row number",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_row_sha256",
+          "decision": "keep",
+          "description": "Internal source assertion: source row sha256",
+          "display_disposition": "keep",
+          "label": "source row sha256",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "review_status",
+          "decision": "keep",
+          "description": "Internal source assertion: review status",
+          "display_disposition": "keep",
+          "label": "review status",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hold_codes",
+          "decision": "keep",
+          "description": "Internal source assertion: hold codes",
+          "display_disposition": "keep",
+          "label": "hold codes",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "attribution_method",
+          "decision": "keep",
+          "description": "Internal source assertion: attribution method",
+          "display_disposition": "keep",
+          "label": "attribution method",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "award_purpose_category",
+          "decision": "keep",
+          "description": "Internal source assertion: award purpose category",
+          "display_disposition": "keep",
+          "label": "award purpose category",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "canonical_name",
+          "decision": "keep",
+          "description": "Internal source assertion: canonical name",
+          "display_disposition": "keep",
+          "label": "canonical name",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "ceased_year",
+          "decision": "keep",
+          "description": "Internal source assertion: ceased year",
+          "display_disposition": "keep",
+          "label": "ceased year",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "data_sources",
+          "decision": "keep",
+          "description": "Internal source assertion: data sources",
+          "display_disposition": "keep",
+          "label": "data sources",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "enterprise_cage_code",
+          "decision": "keep",
+          "description": "Internal source assertion: enterprise cage code",
+          "display_disposition": "keep",
+          "label": "enterprise cage code",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "enterprise_ein",
+          "decision": "keep",
+          "description": "Internal source assertion: enterprise ein",
+          "display_disposition": "keep",
+          "label": "enterprise ein",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "enterprise_name",
+          "decision": "keep",
+          "description": "Internal source assertion: enterprise name",
+          "display_disposition": "keep",
+          "label": "enterprise name",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "enterprise_uei",
+          "decision": "keep",
+          "description": "Internal source assertion: enterprise uei",
+          "display_disposition": "keep",
+          "label": "enterprise uei",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "entity_type_normalized",
+          "decision": "keep",
+          "description": "Internal source assertion: entity type normalized",
+          "display_disposition": "keep",
+          "label": "entity type normalized",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "founded_year",
+          "decision": "keep",
+          "description": "Internal source assertion: founded year",
+          "display_disposition": "keep",
+          "label": "founded year",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hq_address_line",
+          "decision": "keep",
+          "description": "Internal source assertion: hq address line",
+          "display_disposition": "keep",
+          "label": "hq address line",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hq_city",
+          "decision": "keep",
+          "description": "Internal source assertion: hq city",
+          "display_disposition": "keep",
+          "label": "hq city",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hq_county_geoid",
+          "decision": "keep",
+          "description": "Internal source assertion: hq county geoid",
+          "display_disposition": "keep",
+          "label": "hq county geoid",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hq_lat",
+          "decision": "keep",
+          "description": "Internal source assertion: hq lat",
+          "display_disposition": "keep",
+          "label": "hq lat",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hq_long",
+          "decision": "keep",
+          "description": "Internal source assertion: hq long",
+          "display_disposition": "keep",
+          "label": "hq long",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hq_place_geoid",
+          "decision": "keep",
+          "description": "Internal source assertion: hq place geoid",
+          "display_disposition": "keep",
+          "label": "hq place geoid",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hq_state",
+          "decision": "keep",
+          "description": "Internal source assertion: hq state",
+          "display_disposition": "keep",
+          "label": "hq state",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hq_zip",
+          "decision": "keep",
+          "description": "Internal source assertion: hq zip",
+          "display_disposition": "keep",
+          "label": "hq zip",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "industry_sector",
+          "decision": "keep",
+          "description": "Internal source assertion: industry sector",
+          "display_disposition": "keep",
+          "label": "industry sector",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "is_8a_certified",
+          "decision": "keep",
+          "description": "Internal source assertion: is 8a certified",
+          "display_disposition": "keep",
+          "label": "is 8a certified",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "is_federal_contractor",
+          "decision": "keep",
+          "description": "Internal source assertion: is federal contractor",
+          "display_disposition": "keep",
+          "label": "is federal contractor",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "is_nonprofit",
+          "decision": "keep",
+          "description": "Internal source assertion: is nonprofit",
+          "display_disposition": "keep",
+          "label": "is nonprofit",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "ntee_code",
+          "decision": "keep",
+          "description": "Internal source assertion: ntee code",
+          "display_disposition": "keep",
+          "label": "ntee code",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "parent_entity_type",
+          "decision": "keep",
+          "description": "Internal source assertion: parent entity type",
+          "display_disposition": "keep",
+          "label": "parent entity type",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "sector_master_prime",
+          "decision": "keep",
+          "description": "Internal source assertion: sector master prime",
+          "display_disposition": "keep",
+          "label": "sector master prime",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "supersector_master_prime",
+          "decision": "keep",
+          "description": "Internal source assertion: supersector master prime",
+          "display_disposition": "keep",
+          "label": "supersector master prime",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "total_master_prime_dol_m",
+          "decision": "keep",
+          "description": "Internal source assertion: total master prime dol m",
+          "display_disposition": "keep",
+          "label": "total master prime dol m",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "tribe_id",
+          "decision": "keep",
+          "description": "Internal source assertion: tribe id",
+          "display_disposition": "keep",
+          "label": "tribe id",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "verification_source",
+          "decision": "keep",
+          "description": "Internal source assertion: verification source",
+          "display_disposition": "keep",
+          "label": "verification source",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "verified_date",
+          "decision": "keep",
+          "description": "Source evidence verification date; not an event or operating year.",
+          "display_disposition": "keep",
+          "label": "verified date",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        }
+      ],
+      "order": [
+        "source_record_id",
+        "source_row_number",
+        "source_row_sha256",
+        "review_status",
+        "hold_codes",
+        "attribution_method",
+        "award_purpose_category",
+        "canonical_name",
+        "ceased_year",
+        "data_sources",
+        "enterprise_cage_code",
+        "enterprise_ein",
+        "enterprise_name",
+        "enterprise_uei",
+        "entity_type_normalized",
+        "founded_year",
+        "hq_address_line",
+        "hq_city",
+        "hq_county_geoid",
+        "hq_lat",
+        "hq_long",
+        "hq_place_geoid",
+        "hq_state",
+        "hq_zip",
+        "industry_sector",
+        "is_8a_certified",
+        "is_federal_contractor",
+        "is_nonprofit",
+        "ntee_code",
+        "parent_entity_type",
+        "sector_master_prime",
+        "supersector_master_prime",
+        "total_master_prime_dol_m",
+        "tribe_id",
+        "verification_source",
+        "verified_date"
+      ]
+    },
+    "staged_observations": {
+      "collection": "need",
+      "display_order": [
+        "source_record_id",
+        "source_id",
+        "source_url",
+        "source_row_number",
+        "source_row_sha256",
+        "review_status",
+        "hold_codes",
+        "child_cage",
+        "child_city",
+        "child_name_raw",
+        "child_state",
+        "child_uei",
+        "depth_hint",
+        "asserted_enterprise_existing_cedar_uid",
+        "evidence_class",
+        "asserted_hub_cedar_uid",
+        "hub_entity_class",
+        "hub_handle",
+        "hub_hint_name",
+        "hub_name",
+        "hub_resolution_method",
+        "hub_resolution_note",
+        "hub_state",
+        "identity_scope",
+        "owner_class_hint",
+        "ownership_percent",
+        "asserted_parent_cedar_uid",
+        "parent_handle",
+        "parent_name",
+        "quote",
+        "relationship",
+        "retrieved_date",
+        "sector",
+        "source_document",
+        "source_edition_date",
+        "source_fy",
+        "source_review_status",
+        "source_terms_status"
+      ],
+      "fields": [
+        {
+          "column": "source_record_id",
+          "decision": "keep",
+          "description": "Internal source assertion: source record id",
+          "display_disposition": "keep",
+          "label": "source record id",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_row_number",
+          "decision": "keep",
+          "description": "Internal source assertion: source row number",
+          "display_disposition": "keep",
+          "label": "source row number",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_row_sha256",
+          "decision": "keep",
+          "description": "Internal source assertion: source row sha256",
+          "display_disposition": "keep",
+          "label": "source row sha256",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "review_status",
+          "decision": "keep",
+          "description": "Internal source assertion: review status",
+          "display_disposition": "keep",
+          "label": "review status",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hold_codes",
+          "decision": "keep",
+          "description": "Internal source assertion: hold codes",
+          "display_disposition": "keep",
+          "label": "hold codes",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "child_cage",
+          "decision": "keep",
+          "description": "Internal source assertion: child cage",
+          "display_disposition": "keep",
+          "label": "child cage",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "child_city",
+          "decision": "keep",
+          "description": "Internal source assertion: child city",
+          "display_disposition": "keep",
+          "label": "child city",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "child_name_raw",
+          "decision": "keep",
+          "description": "Internal source assertion: child name raw",
+          "display_disposition": "keep",
+          "label": "child name raw",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "child_state",
+          "decision": "keep",
+          "description": "Internal source assertion: child state",
+          "display_disposition": "keep",
+          "label": "child state",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "child_uei",
+          "decision": "keep",
+          "description": "Internal source assertion: child uei",
+          "display_disposition": "keep",
+          "label": "child uei",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "depth_hint",
+          "decision": "keep",
+          "description": "Internal source assertion: depth hint",
+          "display_disposition": "keep",
+          "label": "depth hint",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "asserted_enterprise_existing_cedar_uid",
+          "decision": "keep",
+          "description": "Preserved unverified identity assertion; not an approved join or ID issuance.",
+          "display_disposition": "keep",
+          "label": "asserted enterprise existing cedar uid",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "evidence_class",
+          "decision": "keep",
+          "description": "Internal source assertion: evidence class",
+          "display_disposition": "keep",
+          "label": "evidence class",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "asserted_hub_cedar_uid",
+          "decision": "keep",
+          "description": "Preserved unverified identity assertion; not an approved join or ID issuance.",
+          "display_disposition": "keep",
+          "label": "asserted hub cedar uid",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hub_entity_class",
+          "decision": "keep",
+          "description": "Internal source assertion: hub entity class",
+          "display_disposition": "keep",
+          "label": "hub entity class",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hub_handle",
+          "decision": "keep",
+          "description": "Internal source assertion: hub handle",
+          "display_disposition": "keep",
+          "label": "hub handle",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hub_hint_name",
+          "decision": "keep",
+          "description": "Internal source assertion: hub hint name",
+          "display_disposition": "keep",
+          "label": "hub hint name",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hub_name",
+          "decision": "keep",
+          "description": "Internal source assertion: hub name",
+          "display_disposition": "keep",
+          "label": "hub name",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hub_resolution_method",
+          "decision": "keep",
+          "description": "Internal source assertion: hub resolution method",
+          "display_disposition": "keep",
+          "label": "hub resolution method",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hub_resolution_note",
+          "decision": "keep",
+          "description": "Internal source assertion: hub resolution note",
+          "display_disposition": "keep",
+          "label": "hub resolution note",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hub_state",
+          "decision": "keep",
+          "description": "Internal source assertion: hub state",
+          "display_disposition": "keep",
+          "label": "hub state",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "identity_scope",
+          "decision": "keep",
+          "description": "Internal source assertion: identity scope",
+          "display_disposition": "keep",
+          "label": "identity scope",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "owner_class_hint",
+          "decision": "keep",
+          "description": "Internal source assertion: owner class hint",
+          "display_disposition": "keep",
+          "label": "owner class hint",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "ownership_percent",
+          "decision": "keep",
+          "description": "Internal source assertion: ownership percent",
+          "display_disposition": "keep",
+          "label": "ownership percent",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "asserted_parent_cedar_uid",
+          "decision": "keep",
+          "description": "Preserved unverified identity assertion; not an approved join or ID issuance.",
+          "display_disposition": "keep",
+          "label": "asserted parent cedar uid",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "parent_handle",
+          "decision": "keep",
+          "description": "Internal source assertion: parent handle",
+          "display_disposition": "keep",
+          "label": "parent handle",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "parent_name",
+          "decision": "keep",
+          "description": "Internal source assertion: parent name",
+          "display_disposition": "keep",
+          "label": "parent name",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "quote",
+          "decision": "keep",
+          "description": "Internal source assertion: quote",
+          "display_disposition": "keep",
+          "label": "quote",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "relationship",
+          "decision": "keep",
+          "description": "Internal source assertion: relationship",
+          "display_disposition": "keep",
+          "label": "relationship",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "retrieved_date",
+          "decision": "keep",
+          "description": "Historical retrieval date as recorded; not event time.",
+          "display_disposition": "keep",
+          "label": "retrieved date",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "sector",
+          "decision": "keep",
+          "description": "Internal source assertion: sector",
+          "display_disposition": "keep",
+          "label": "sector",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_document",
+          "decision": "keep",
+          "description": "Internal source assertion: source document",
+          "display_disposition": "keep",
+          "label": "source document",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_edition_date",
+          "decision": "keep",
+          "description": "Source publication/edition date; not ownership effective date.",
+          "display_disposition": "keep",
+          "label": "source edition date",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_fy",
+          "decision": "keep",
+          "description": "Internal source assertion: source fy",
+          "display_disposition": "keep",
+          "label": "source fy",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_id",
+          "decision": "keep",
+          "description": "Internal source assertion: source id",
+          "display_disposition": "keep",
+          "label": "source id",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_review_status",
+          "decision": "keep",
+          "description": "Internal source assertion: source review status",
+          "display_disposition": "keep",
+          "label": "source review status",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_terms_status",
+          "decision": "keep",
+          "description": "Internal source assertion: source terms status",
+          "display_disposition": "keep",
+          "label": "source terms status",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_url",
+          "decision": "keep",
+          "description": "Internal source assertion: source url",
+          "display_disposition": "keep",
+          "label": "source url",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        }
+      ],
+      "order": [
+        "source_record_id",
+        "source_row_number",
+        "source_row_sha256",
+        "review_status",
+        "hold_codes",
+        "child_cage",
+        "child_city",
+        "child_name_raw",
+        "child_state",
+        "child_uei",
+        "depth_hint",
+        "asserted_enterprise_existing_cedar_uid",
+        "evidence_class",
+        "asserted_hub_cedar_uid",
+        "hub_entity_class",
+        "hub_handle",
+        "hub_hint_name",
+        "hub_name",
+        "hub_resolution_method",
+        "hub_resolution_note",
+        "hub_state",
+        "identity_scope",
+        "owner_class_hint",
+        "ownership_percent",
+        "asserted_parent_cedar_uid",
+        "parent_handle",
+        "parent_name",
+        "quote",
+        "relationship",
+        "retrieved_date",
+        "sector",
+        "source_document",
+        "source_edition_date",
+        "source_fy",
+        "source_id",
+        "source_review_status",
+        "source_terms_status",
+        "source_url"
+      ]
+    }
+  },
+  "release_class": "rehearsal",
+  "schema_version": 1,
+  "scope": "Presentation metadata; publication and entitlement gates remain authoritative.",
+  "source_consumer_manifest_sha256": "a94fbbc98ba0c1ddef9a1eaaee15d786b4b4d617a68333811f7a1f88899b9e58",
+  "source_manifest_file_sha256": "06671654cdbeea4741c23089a6d623cab80d0a5bb3650892b4c5dd1b35ef09fc",
+  "source_release_id": "ec053d80d6114823d657a8dead1b86c4f37bc90c3d37f9dfe37843456b1c3501"
+}

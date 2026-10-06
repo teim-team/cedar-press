@@ -25,9 +25,19 @@ TIGER/Line 2024 national AIANNH shapefile, 864 areas - was already on disk
 WHAT CAN AND CANNOT BE BUILT FROM WHAT IS ON DISK
 -------------------------------------------------
 CAN: an exact point-in-polygon assignment. Any Cedar row carrying a latitude
-and longitude gets the AIANNH area it falls inside, or nothing. That is a hard
+and longitude gets every AIANNH area it falls inside, or nothing. That is a hard
 geometric fact, not an inference, and it is the honest form of ADR-014's
 `located_within` tier.
+
+ONE ROW PER (POINT, CONTAINING AREA). AIANNH areas overlap: off-reservation
+trust land sits inside Oklahoma tribal statistical areas, and a reservation can
+lie inside another entity's statistical area. Until 2026-10-04 this script kept
+only the first polygon the spatial index returned (`hits[0]`), so a point on
+trust land inside an OTSA could be recorded under the OTSA alone and never
+raise Lumecon-data's `in_home_area` link, which only legal land triggers. Each
+containing area now gets its own row, in `aiannh_geoid` order, all carrying the
+same `point_id` and `n_containing_areas`; a point inside no area keeps its one
+outside row. Consumers key on (`point_id`, `aiannh_geoid`).
 
 CANNOT: a complete county <-> AIANNH overlap table. That needs county polygons
 to intersect against and TIGER county boundaries are NOT on disk. What this
@@ -67,14 +77,18 @@ INVARIANTS (verify exits 1 on any failure)
      zip failed to fully extract.
   I2 every `aiannh_geoid` on an assignment row or an overlap row exists in the
      dimension. A dangling geoid is a join that will silently drop.
-  I3 ROW CONSERVATION: for every source table, points_in == points_out. Every
-     geocoded point gets a row whether or not it landed inside an area; a point
-     outside every AIANNH area is a finding, not a row to drop.
+  I3 POINT CONSERVATION: for every source table, points_in == distinct points
+     out. Every geocoded point gets at least one row whether or not it landed
+     inside an area; a point outside every AIANNH area is a finding, not a row
+     to drop.
   I4 every `county_fips` is 5 digits.
   I5 BOUNDING-BOX RECHECK: every assigned point lies inside the bounding box of
      the area it was assigned to. This is an independent test of the
      point-in-polygon result -- it uses the shapefile's own bbox record rather
      than re-running the same geometry code that produced the answer.
+  I6 ONE ROW PER (POINT, AREA): no (`point_id`, `aiannh_geoid`) pair repeats; a
+     point outside every area has exactly one row and no inside row; and every
+     row of a point carries `n_containing_areas` equal to its inside rows.
 """
 
 import csv
@@ -123,7 +137,8 @@ PTS_FIELDS = ["point_id", "source_table", "source_row_id", "label",
               "latitude", "longitude",
               "aiannh_geoid", "aiannh_name", "aiannh_classfp", "aiannh_comptyp",
               "inside_flag", "assignment_basis",
-              "reported_county_fips", "geometry_source", "n_candidate_areas"]
+              "reported_county_fips", "geometry_source", "n_candidate_areas",
+              "n_containing_areas"]
 
 OVL_FIELDS = ["aiannh_geoid", "aiannh_name", "county_fips", "state_fips",
               "n_points", "sources", "basis", "coverage_note"]
@@ -131,6 +146,29 @@ OVL_FIELDS = ["aiannh_geoid", "aiannh_name", "county_fips", "state_fips",
 COVERAGE_NOTE = ("PARTIAL. Observed from Cedar geocoded points only; county "
                  "polygons are not on disk so this is not an exhaustive overlap. "
                  "Absence of a pair is not evidence the areas do not overlap.")
+
+
+def assignment_rows(pid, src, rid, label, la, lo, cfips, geomsrc, point, cand, geoms, meta):
+    """The assignment rows for one point: one per containing AIANNH area.
+
+    ``cand`` are the spatial-index candidates (bounding-box hits); each is kept
+    only if its polygon ``covers`` the point. Every containing area gets a row,
+    in ``aiannh_geoid`` order, so an area nested inside another is never
+    hidden behind it. A point inside none gets one outside row. Returns the
+    rows and the containing areas' ``meta`` entries. Pure: the geometry is
+    passed in, so this runs without shapely in a test.
+    """
+    hits = sorted({int(i) for i in cand if geoms[int(i)].covers(point)},
+                  key=lambda i: meta[i]["geoid"])
+    base = [pid, src, rid, label, f"{la:.6f}", f"{lo:.6f}"]
+    tail = [cfips, geomsrc, len(cand), len(hits)]
+    if not hits:
+        return [base + ["", "", "", "", "0", "point_outside_every_tiger2024_aiannh_area"]
+                + tail], []
+    rows = [base + [meta[i]["geoid"], meta[i]["name"], meta[i]["classfp"],
+                    meta[i]["comptyp"], "1", "point_in_polygon_tiger2024_aiannh"] + tail
+            for i in hits]
+    return rows, [meta[i] for i in hits]
 
 
 def extract_tiger():
@@ -203,36 +241,32 @@ def build():
     overlap = {}
     n_inside = 0
     n_out = 0
+    n_multi = 0
+    n_pairs = 0
     with open(OUT_PTS, "w", newline="", encoding="utf-8") as fh:
         w = csv.writer(fh)
         w.writerow(PTS_FIELDS)
 
         def emit(src, rid, label, la, lo, cfips, geomsrc):
-            nonlocal n_inside, n_out
+            nonlocal n_inside, n_out, n_multi, n_pairs
             pt = Point(lo, la)
-            cand = list(tree.query(pt))
-            hits = [i for i in cand if geoms[int(i)].covers(pt)]
-            pid = f"{src}:{rid}"
-            if hits:
-                i = int(hits[0])
-                m = meta[i]
-                n_inside += 1
-                w.writerow([pid, src, rid, label, f"{la:.6f}", f"{lo:.6f}",
-                            m["geoid"], m["name"], m["classfp"], m["comptyp"],
-                            "1", "point_in_polygon_tiger2024_aiannh",
-                            cfips, geomsrc, len(cand)])
+            rows, areas = assignment_rows(f"{src}:{rid}", src, rid, label, la, lo,
+                                          cfips, geomsrc, pt, list(tree.query(pt)),
+                                          geoms, meta)
+            w.writerows(rows)
+            if not areas:
+                n_out += 1
+                return
+            n_inside += 1
+            n_pairs += len(areas)
+            n_multi += len(areas) > 1
+            for m in areas:
                 if cfips:
                     k = (m["geoid"], cfips)
                     e = overlap.setdefault(k, {"n": 0, "src": set(),
                                                "name": m["name"]})
                     e["n"] += 1
                     e["src"].add(src)
-            else:
-                n_out += 1
-                w.writerow([pid, src, rid, label, f"{la:.6f}", f"{lo:.6f}",
-                            "", "", "", "", "0",
-                            "point_outside_every_tiger2024_aiannh_area",
-                            cfips, geomsrc, len(cand)])
 
         for tbl, idc, latc, lonc, cfc, labc in POINT_SOURCES:
             p = os.path.join(CLEAN, tbl)
@@ -269,6 +303,7 @@ def build():
     print(f"[873] wrote {os.path.relpath(OUT_PTS, ROOT)}")
     print(f"        inside an AIANNH area : {n_inside:,}")
     print(f"        outside every area    : {n_out:,}")
+    print(f"        inside 2+ areas       : {n_multi:,}  (point-area rows {n_pairs:,})")
 
     # ------------------------------------------------------------ overlap
     # Second basis: BIA compact properties already pair an aiannh_geoid the
@@ -317,6 +352,8 @@ def build():
         "aiannh_areas": len(meta),
         "points_inside": n_inside,
         "points_outside": n_out,
+        "points_in_several_areas": n_multi,
+        "point_area_rows": n_pairs,
         "point_sources": counts,
         "overlap_pairs": len(overlap),
         "overlap_areas_covered": len({g for g, _ in overlap}),
@@ -366,13 +403,26 @@ def verify(dim_path=None, pts_path=None, ovl_path=None, quiet=False):
     dangling = 0
     outside_bbox = 0
     n = 0
+    pairs = set()
+    repeated = 0
+    inside_of = {}
+    outside_of = {}
+    declared = {}
     with open(pts_path, newline="", encoding="utf-8") as fh:
         for row in csv.DictReader(fh):
             n += 1
-            per_src[row["source_table"]] = per_src.get(row["source_table"], 0) + 1
+            pid = row["point_id"]
+            if pid not in declared:
+                per_src[row["source_table"]] = per_src.get(row["source_table"], 0) + 1
+            declared.setdefault(pid, set()).add(row.get("n_containing_areas", ""))
             g = row["aiannh_geoid"]
+            if (pid, g) in pairs:
+                repeated += 1
+            pairs.add((pid, g))
             if not g:
+                outside_of[pid] = outside_of.get(pid, 0) + 1
                 continue
+            inside_of[pid] = inside_of.get(pid, 0) + 1
             if g not in dim:
                 dangling += 1
                 continue
@@ -394,8 +444,23 @@ def verify(dim_path=None, pts_path=None, ovl_path=None, quiet=False):
     if outside_bbox:
         fails.append(f"I5 assigned points fall outside the bounding box of their "
                      f"own area: {outside_bbox}")
+    mixed = sum(1 for pid in outside_of if pid in inside_of or outside_of[pid] > 1)
+    miscounted = sum(
+        1 for pid, values in declared.items()
+        if values != {str(inside_of.get(pid, 0))}
+    )
+    say(f"[873 verify] points {len(declared):,}  in 2+ areas "
+        f"{sum(1 for c in inside_of.values() if c > 1):,}  repeated pairs {repeated}"
+        f"  mixed inside/outside {mixed}  miscounted {miscounted}")
+    if repeated:
+        fails.append(f"I6 a (point_id, aiannh_geoid) pair repeats: {repeated}")
+    if mixed:
+        fails.append(f"I6 a point outside every area has another row: {mixed}")
+    if miscounted:
+        fails.append(f"I6 n_containing_areas disagrees with a point's inside rows: "
+                     f"{miscounted}")
 
-    # I3 row conservation against the live sources
+    # I3 point conservation against the live sources
     for tbl, idc, latc, lonc, _cfc, _labc in POINT_SOURCES:
         p = os.path.join(CLEAN, tbl)
         if not os.path.exists(p):
@@ -414,8 +479,8 @@ def verify(dim_path=None, pts_path=None, ovl_path=None, quiet=False):
         say(f"[873 verify]   {tbl:<36} geocoded {want:>6}  emitted {got:>6}"
             f"  {'ok' if want == got else 'MISMATCH'}")
         if want != got:
-            fails.append(f"I3 row conservation broken for {tbl}: "
-                         f"{want} geocoded points, {got} rows emitted")
+            fails.append(f"I3 point conservation broken for {tbl}: "
+                         f"{want} geocoded points, {got} points emitted")
 
     # I2 / I4 on the overlap
     m = 0
@@ -439,13 +504,16 @@ def verify(dim_path=None, pts_path=None, ovl_path=None, quiet=False):
         for f in fails:
             say("FAIL:", f)
         return 1
-    say("[873 verify] OK -- I1 I2 I3 I4 I5 all hold")
+    say("[873 verify] OK -- I1 I2 I3 I4 I5 I6 all hold")
     return 0
 
 
-def selftest():
+def selftest(dim_path=None, pts_path=None, ovl_path=None):
     import shutil
-    if not os.path.exists(OUT_DIM):
+    dim_path = dim_path or OUT_DIM
+    pts_path = pts_path or OUT_PTS
+    ovl_path = ovl_path or OUT_OVL
+    if not os.path.exists(dim_path):
         print("[873 selftest] build first")
         return 1
     tmp = tempfile.mkdtemp(prefix="873_selftest_")
@@ -455,9 +523,9 @@ def selftest():
     ok = True
 
     def reset():
-        shutil.copyfile(OUT_DIM, d)
-        shutil.copyfile(OUT_PTS, pt)
-        shutil.copyfile(OUT_OVL, ov)
+        shutil.copyfile(dim_path, d)
+        shutil.copyfile(pts_path, pt)
+        shutil.copyfile(ovl_path, ov)
 
     def rows(p):
         with open(p, newline="", encoding="utf-8") as fh:
@@ -514,6 +582,25 @@ def selftest():
                 break
         write(pt, rr)
 
+    def repeat_a_pair():
+        rr = rows(pt)
+        gi = rr[0].index("aiannh_geoid")
+        for r in rr[1:]:
+            if r[gi]:
+                rr.append(list(r))
+                break
+        write(pt, rr)
+
+    def outside_point_also_inside():
+        rr = rows(pt)
+        gi = rr[0].index("aiannh_geoid")
+        inside = next(r for r in rr[1:] if r[gi])
+        outside = next(r for r in rr[1:] if not r[gi])
+        extra = list(inside)
+        extra[0], extra[1] = outside[0], outside[1]
+        rr.append(extra)
+        write(pt, rr)
+
     def bad_county():
         rr = rows(ov)
         if len(rr) > 1:
@@ -526,6 +613,8 @@ def selftest():
     case("I3 one geocoded point silently dropped", drop_a_point)
     case("I5 assigned point moved outside its own area's bbox", move_a_point)
     case("I4 overlap county_fips loses its leading zero", bad_county)
+    case("I6 one (point, area) pair written twice", repeat_a_pair)
+    case("I6 a point outside every area also gets an inside row", outside_point_also_inside)
 
     shutil.rmtree(tmp, ignore_errors=True)
     print("[873 selftest] " + ("OK -- every invariant fired" if ok else "FAILED"))

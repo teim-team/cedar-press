@@ -86,12 +86,17 @@ D = load_module("cedar_domain", "cedar_domain.py")
 # Shared prose, written once. A description repeated by hand in three files is
 # three descriptions that will disagree.
 WITHHELD = ("WITHHELD from publication. ")
-UEI_NOTE = (WITHHELD + "SAM's public entity search resolves a UEI to a legal "
-            "name and a street address, so where the legal name is a private "
-            "person's name this identifier publishes the name by ONE HOP. "
-            "Released only where firm_legal_name_is_person = 0, or on recorded "
-            "consent. Independent of the D&B question and survives any answer "
-            "to it.")
+PUBLISHED_BY_RULING = (
+    "PUBLISHED since the owner ruling of 2026-10-02: a firm is a business "
+    "entity regardless of what it is named after, and its name, identifiers "
+    "and business address are public business records (SAM and USAspending "
+    "publish them for every federal awardee), not personal identifying "
+    "information. Consent is not required. ")
+UEI_NOTE = (PUBLISHED_BY_RULING + "Until 2026-10-02 this was withheld where "
+            "the legal name read as a private person's, because SAM's public "
+            "entity search resolves a UEI to a name and an address; the "
+            "ruling holds that hop resolves to a business registration. "
+            "Independent of the D&B question and survives any answer to it.")
 SELFCERT = ("SAM socio-economic self-certification as carried on the contract "
             "rows. A CHANNEL, NEVER A VERDICT: americanIndianOwned = YES on "
             "2,846 of 8,273 rows of the TRIBAL SAM extract, so the flag does "
@@ -121,18 +126,17 @@ REGISTER_SPEC = [
      "Always `Individually Native-owned business`. A firm owned by one private "
      "individual or a family, not by a nation, a corporation with shareholders "
      "by birthright, or a community. " + NEVER_SUM),
-    ("canonical_name", "text", "name", 0, "internal",
-     WITHHELD + "The firm's legal or modal awardee name. Cedar Press's "
-     "standing policy is inherited, not restated: `nrc_meeting_participants` - "
-     "\"Cedar Press names an individual only where a public professional "
-     "capacity is established\"; `ferc_ex_parte_parties` - \"Cedar Press does "
-     "not publish datasets about private individuals.\" Released only where "
-     "publish_name = 1."),
+    ("canonical_name", "text", "name", 1, "public",
+     PUBLISHED_BY_RULING + "The firm's legal or modal awardee name. The "
+     "`nrc_meeting_participants` / `ferc_ex_parte_parties` naming policy this "
+     "class inherited until 2026-10-02 concerns natural persons appearing in "
+     "a record; a federal awardee is a business entity whatever its name. "
+     "publish_name = 1 on every row."),
     ("identifier_type", "text", "category", 1, "public",
      "`UEI`, `CAGE`, or `NAME`. A `NAME` ruling binds NOTHING in the "
      "identifier ledger - a name is not an identifier - so those firms carry "
      "an entity and no contract rows rather than a guessed join."),
-    ("identifier", "text", "code", 0, "internal", UEI_NOTE),
+    ("identifier", "text", "code", 1, "public", UEI_NOTE),
     ("state", "text", "code", 0, "internal",
      WITHHELD + "for a single-firm row. State publishes only inside an "
      "aggregate of at least "
@@ -229,14 +233,15 @@ REGISTER_SPEC = [
      "`FEDERAL_SELF_CERT_ONLY`, `SELF_ASSERTION_ONLY`, "
      "`INDEPENDENT_CORROBORATION`, `INDEPENDENT_CONTRADICTION`. The column "
      "that decides whether anything was actually verified."),
-    ("owner_tribal_affiliation_named", "text", "text", 0, "internal",
-     WITHHELD + "The OWNER's self-stated tribal affiliation, as free text, "
-     "FOREVER. **This is an attribute of a PERSON, not an edge of the firm, "
-     "and it must never key a tribe_id.** \"Cherokee\" resolves to three "
+    ("owner_tribal_affiliation_named", "text", "text", 1, "public",
+     PUBLISHED_BY_RULING + "The OWNER's self-stated tribal affiliation, as free "
+     "text, FOREVER. **This is an attribute of a PERSON, not an edge of the "
+     "firm, and it must never key a tribe_id.** \"Cherokee\" resolves to three "
      "federally recognised tribes and a long tail of unrecognised groups, so "
-     "it does not resolve at all. Publishing it would pair a named firm with "
-     "an assertion about an identifiable person's ancestry - the one exposure "
-     "with no analogue on the tribal side."),
+     "it does not resolve at all. Published with the firm's own self-"
+     "description under the 2026-10-02 ruling (every field of "
+     "cedar_domain.INDIVIDUAL_NATIVE_WITHHELD_FIELDS publishes); until that "
+     "date it was withheld as a person-to-ancestry pairing."),
     ("owner_tribal_affiliation_source", "text", "path", 1, "public",
      "Where the affiliation statement came from."),
     ("owner_tribal_affiliation_basis", "text", "category", 1, "public",
@@ -289,33 +294,35 @@ REGISTER_SPEC = [
      "when it is not, because an unnecessary withholding costs a column and a "
      "wrong disclosure costs a person."),
     ("firm_legal_name_is_person", "text", "0/1/UNKNOWN", 1, "public",
-     "Whether the legal name is a private individual's name. UNKNOWN counts as "
-     "a person for every publication decision. Measured motivation: even in "
-     "the TRIBAL SAM extract - the ENTITY class, where this was not supposed "
-     "to appear - 8 of 402 distinct UEIs carry an unambiguous personal name, "
-     "each with a street address in the same row."),
+     "Whether the legal name reads as a private individual's name; a measured "
+     "fact about the name, over-inclusive (UNKNOWN where a heuristic cannot "
+     "clear it). Since the owner ruling of 2026-10-02 it drives no publication "
+     "decision: a firm is a business entity whatever it is named after. "
+     "Measured motivation for recording it: even in the TRIBAL SAM extract - "
+     "the ENTITY class, where this was not supposed to appear - 8 of 402 "
+     "distinct UEIs carry an unambiguous personal name."),
     ("consent_status", "text", "category", 1, "public",
-     "`OPTED_IN` / `NOT_ASKED` / `DECLINED` / `WITHDRAWN`. **A firm's own "
-     "website statement is our EVIDENCE, never their PERMISSION to be named.** "
-     "A firm writing \"Being Of Cherokee Indian descent...\" on its homepage "
-     "has consented to that sentence being on its homepage; it has not "
-     "consented to being enumerated, ranked by federal obligations and "
-     "distributed in a subscription dataset. Consent is per firm and "
-     "revocable; WITHDRAWN removes the name from the next build."),
+     "`OPTED_IN` / `NOT_ASKED` / `DECLINED` / `WITHDRAWN`. A recorded "
+     "informational column. Since the owner ruling of 2026-10-02 it gates "
+     "nothing: a firm's name, identifiers and business address are public "
+     "business records and publish without consent. Before that date a name "
+     "published only on OPTED_IN, and a firm's website statement was read as "
+     "evidence, never permission; that reading is reversed for this class."),
     ("consent_date", "date", "ISO date", 1, "public",
      "When consent was recorded. Blank while consent_status is NOT_ASKED."),
     ("consent_source", "text", "text", 1, "public",
      "How consent was recorded. Never inferred."),
     ("publish_name", "int", "0/1", 1, "public",
-     "1 only where the name may be published: a corporate form is present AND "
-     "firm_legal_name_is_person = 0, or consent_status = OPTED_IN."),
+     "1 on every row since the owner ruling of 2026-10-02: the firm's name is "
+     "a public business record and publishes without consent. Answered by "
+     "`cedar_domain.may_publish_individual_native_field()`, never here."),
     ("publish_surrogate_id_only", "int", "0/1", 1, "public",
-     "1 by default. The publishable view keys on surrogate_entity_id and the "
-     "surrogate-to-identifier crosswalk stays internal."),
+     "0 on every row since 2026-10-02: the name and identifier publish, so the "
+     "published view no longer keys on the surrogate alone."),
     ("publish_federal_identifier", "int", "0/1", 1, "public",
-     "Whether the UEI/CAGE may be published for this firm. Answered by "
+     "1 on every row since the owner ruling of 2026-10-02. Answered by "
      "`cedar_domain.may_publish_individual_native_field()`, never here. See "
-     "the one-hop rule on `identifier`."),
+     "`identifier`."),
     ("publish_contract_facts", "text", "Y/N", 1, "public",
      "`Y` throughout. A contract fact - PIID, date, obligation, agency, "
      "set-aside, competition - has no natural person in it and publishes."),
@@ -328,9 +335,10 @@ REGISTER_SPEC = [
      "in the privacy columns would change. Any future SAM-sourced row must "
      "carry its own answer rather than inheriting this one."),
     ("publication_policy_inherited_from", "text", "text", 1, "public",
-     "The Cedar Press datasets whose written naming policy this class "
-     "inherits: `nrc_meeting_participants` and `ferc_ex_parte_parties`. "
-     "Inherited, not restated, so one policy cannot drift into three."),
+     "Records that the restriction this class inherited from "
+     "`nrc_meeting_participants` and `ferc_ex_parte_parties` was LIFTED by "
+     "owner ruling 2026-10-02 for business entities: both cited policies "
+     "concern natural persons appearing in a record, which this class is not."),
     ("built_date", "date", "ISO date", 1, "public", "Build date."),
     ("built_by", "text", "path", 1, "public", "Producing script."),
 ]
@@ -342,12 +350,11 @@ CONTRACTS_SPEC = [
     ("entity_class", "text", "category", 1, "public",
      "Always `Individually Native-owned business`. " + NEVER_SUM),
     ("fiscal_year", "int", "fiscal year", 1, "public", "Federal fiscal year."),
-    ("canonical_name", "text", "name", 0, "internal",
-     WITHHELD + "Present so this table can be joined by hand; released only "
-     "where the register's publish_name = 1."),
+    ("canonical_name", "text", "name", 1, "public",
+     PUBLISHED_BY_RULING + "The register's publish_name = 1 on every row."),
     ("identifier_type", "text", "category", 1, "public",
      "`UEI` or `CAGE` - the key that matched prime_contracts.csv."),
-    ("identifier", "text", "code", 0, "internal", UEI_NOTE),
+    ("identifier", "text", "code", 1, "public", UEI_NOTE),
     ("recipient_states", "text", "list", 0, "internal",
      WITHHELD + "on a firm-level row; publishes only in a "
      f"{D.INDIVIDUAL_NATIVE_MIN_CELL_FIRMS}+-firm aggregate."),
@@ -383,11 +390,11 @@ CONTRACTS_SPEC = [
     ("evidence_grade", "text", "category", 1, "public", "`elijah_ruling`."),
     ("sam_self_certification", "text", "category", 1, "public", SELFCERT),
     ("firm_legal_name_is_person", "text", "0/1/UNKNOWN", 1, "public",
-     "Drives every name and identifier release decision on this row. UNKNOWN "
-     "counts as a person."),
-    ("publish_name", "int", "0/1", 1, "public", "See the register."),
+     "A measured fact about the name. Since the owner ruling of 2026-10-02 it "
+     "drives no release decision."),
+    ("publish_name", "int", "0/1", 1, "public", "See the register: 1 on every row."),
     ("publish_federal_identifier", "int", "0/1", 1, "public",
-     "See the one-hop rule on `identifier`."),
+     "See the register: 1 on every row."),
     ("publishable_contract_facts", "text", "Y/N", 1, "public", "`Y` throughout."),
     ("temporal_caveat", "text", "text", 1, "public", TEMPORAL),
     ("source_table", "text", "text", 1, "public",
@@ -436,18 +443,16 @@ EXCLUSION_SPEC = [
     ("identifier_type", "text", "category", 1, "public",
      "`UEI`, `CAGE` or `NAME` - the key the owner's refusal was recorded "
      "against."),
-    ("identifier", "text", "code", 0, "internal",
-     WITHHELD + "See the one-hop rule: SAM's public entity search resolves a "
-     "UEI to a legal name and a street address."),
+    ("identifier", "text", "code", 1, "public", UEI_NOTE),
     ("firm_surrogate_entity_id", "text", "code", 1, "public",
      "The firm's Cedar surrogate. **The firm IS in the spine** as an "
      "individually Native-owned business; this row refuses a TRIBAL link, not "
      "the firm."),
-    ("firm_name_norm", "text", "text", 0, "internal",
-     WITHHELD + "Normalised firm name, present so a NAME-based resolver can "
-     "honour the exclusion."),
-    ("firm_name_core", "text", "text", 0, "internal",
-     WITHHELD + "`core()` form of the firm name, same purpose."),
+    ("firm_name_norm", "text", "text", 1, "public",
+     PUBLISHED_BY_RULING + "Normalised firm name, present so a NAME-based "
+     "resolver can honour the exclusion."),
+    ("firm_name_core", "text", "text", 1, "public",
+     PUBLISHED_BY_RULING + "`core()` form of the firm name, same purpose."),
     ("excluded_entity_id", "text", "code", 1, "public",
      "The spine entity the ruling refuses. Blank where the refusal is against "
      "ANY tribal, ANC or NHO owner rather than a named one."),
@@ -564,16 +569,24 @@ def main():
                 f"documented-but-absent {extra}. Every column is described or "
                 f"the block does not ship.")
 
-        # The privacy rule lives in cedar_domain, not in this file. Any
+        # The publication rule lives in cedar_domain, not in this file. Any
         # `published = 1` that the rule would refuse is a drift between the
         # codebook and the rule, and it fails here rather than in production.
+        # Asked of the live function, so the owner ruling of 2026-10-02 (the
+        # formerly withheld business-record fields publish) is read from the
+        # rule and not restated here. Fields the rule does not know keep the
+        # status the spec gives them: the rule speaks only to the class's
+        # publishable, business-record and internal sets.
         for var, _t, _u, published, _at, _d in spec:
             if published != 1:
                 continue
-            if var in D.INDIVIDUAL_NATIVE_WITHHELD_FIELDS:
+            known = (var in D.INDIVIDUAL_NATIVE_WITHHELD_FIELDS
+                     or var in D.INDIVIDUAL_NATIVE_INTERNAL_FIELDS)
+            if known and not D.may_publish_individual_native_field(var):
                 raise SystemExit(
-                    f"ABORT {dataset}: {var!r} is marked published = 1 but is "
-                    f"in cedar_domain.INDIVIDUAL_NATIVE_WITHHELD_FIELDS.")
+                    f"ABORT {dataset}: {var!r} is marked published = 1 but "
+                    f"cedar_domain.may_publish_individual_native_field "
+                    f"withholds it.")
 
         n = len(rows)
         out = []
@@ -601,9 +614,12 @@ def main():
               f"({n:,} rows, {len(cols)} variables).", "",
               "**Publication is answered PER FIELD, never per dataset.** "
               f"`published = 0` on {sum(1 for s in spec if s[3] == 0)} of "
-              f"{len(spec)} variables here; every one of them is a name, an "
-              "address, an identifier that resolves to a name, or a sentence "
-              "that pairs a person with an assertion about their ancestry.", "",
+              f"{len(spec)} variables here. Since the owner ruling of "
+              "2026-10-02 the firm's name, identifiers and business address "
+              "publish (a firm is a business entity whatever it is named "
+              "after); what stays unpublished is a single-firm state cell "
+              "(small-cell suppression, an aggregate rule), the owner's notes "
+              "in their own words, and internal working text.", "",
               "| variable | type | units | filled | published | tier | "
               "description |",
               "|---|---|---|---:|---:|---|---|"]

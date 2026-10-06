@@ -15,7 +15,7 @@
  *
  * That is only defensible because nothing behind the gate is confidential.
  * The standalone bundle carries the catalog, the methods, the release history
- * and ten sampled rows per table (public/data/cedar/samples/*__10.csv). The
+ * and one sample customer table per collection (public/data/cedar/downloads/). The
  * collections themselves are not in it. If that ever stops being true, this
  * module stops being an acceptable answer and the deployment has to connect.
  *

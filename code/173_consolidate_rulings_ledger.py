@@ -179,6 +179,35 @@ TRIBE_ID_RE = re.compile(r"^(TRBF|TRBS|AKNF|ANRC|ANVC|CNSF|CNSS|SGVF|NHO|TCU|"
                          r"CDFI|BIE|UIO|ITO|NP|NAFI|UNK)[-_][A-Z0-9]+", re.I)
 
 
+#: The class payload a tribal-link refusal settles to. The token is already in
+#: CLASS_EXACT and in the GENERIC_CLASS set below, so it classifies without
+#: attributing a dollar and never manufactures a conflict with another class.
+INDIVIDUAL_NATIVE_PAYLOAD = "individual_native"
+
+
+def is_tribal_link_refusal(ruling) -> bool:
+    """True for "Not a Native entity - individually Native-owned firm".
+
+    The owner's sentence refuses the TRIBAL LINK and affirms Native ownership
+    (AGENTS.md, "THE INVERTED RULING"; cedar_domain.py). Its leading clause
+    is also a NEG_PREFIX, so without this check the grammar settled the
+    subject as NEGATIVE / not_native - the inversion that already bound CAGE
+    9DVK5 and 9H8M8 to tribes the ruling was refusing. Delegates to
+    cedar_domain.is_tribal_link_refusal_not_native_refusal where that module
+    imports; the fallback is the same sentence test, so the two cannot drift
+    in meaning, only in location.
+    """
+    text = (ruling or "").strip()
+    if not text:
+        return False
+    try:
+        import cedar_domain  # noqa: PLC0415 - sibling script, same directory
+        return bool(cedar_domain.is_tribal_link_refusal_not_native_refusal(None, text))
+    except ImportError:
+        t = text.lower()
+        return "individually native-owned" in t or "individually native owned" in t
+
+
 def classify(ruling):
     """Return (kind, payload). kind in ENTITY / CLASS / NEGATIVE / HOLD."""
     v = (ruling or "").strip()
@@ -190,6 +219,10 @@ def classify(ruling):
     low = v.lower()
     if not v:
         return None, None
+    # Before the negative grammar, on purpose: the refusal's first clause IS
+    # a negative prefix, and the second clause is what the owner decided.
+    if is_tribal_link_refusal(v):
+        return "CLASS", INDIVIDUAL_NATIVE_PAYLOAD
     if low in NEG_EXACT or low.startswith(NEG_PREFIX):
         return "NEGATIVE", v
     if low in HOLD_EXACT or low.startswith(HOLD_PREFIX):
