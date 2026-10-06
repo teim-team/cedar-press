@@ -63,6 +63,28 @@ To do, in Lumecon-data with the database:
 4. Pin the new release into cedar-press with `scripts/stage_verified_previews.py`
    (its docstring gives the queue format), then regenerate as in section 6.
 
+**Every NEED row must also name its top-level Native entity (owner,
+2026-10-06: "why don't the ANC examples have the ultimate ANC, like Arctic
+Slope or NANA or Koniag").** The reviewed customer table
+(`public/data/cedar/downloads/need.csv`, 21 columns) carries only the
+relationship each evidence page states directly: `related_entity_name` is the
+immediate parent (Ahtna Diversified Holdings, LLC; ASRC Federal Holding
+Company, LLC) and is blank on five of the ten example rows. There is no column
+for the Native entity at the top of the chain. The older enterprise register
+had it: `owner_hub_cedar_uid`, `owner_hub_name` and `owner_hub_entity_class`
+(see the `need/need_enterprises` table in `data/cedar/codebook.json`, where
+`owner_hub_name` is labelled "Native entity"). To do:
+
+- Carry the owner hub (Cedar ID, canonical name, entity class) onto every
+  reviewed NEED row, from the enterprise register's existing owner-hub binding
+  for that `enterprise_id`, with its evidence. Do **not** derive it from the
+  name ("ASRC Federal ..." is not by itself evidence for Arctic Slope Regional
+  Corporation); the register binding or a source that states the chain is.
+- Show it as the first column ("Native entity"), so a row reads ASRC Federal
+  InuTeq → ASRC Federal Holding Company → Arctic Slope Regional Corporation.
+- Where only the immediate parent is evidenced, keep the hub blank rather than
+  guessing; say so in `review_reason`.
+
 The NEED reading key (`src/features/grove/readingKeys.js`) names the values
 that appear today (Subsidiary of, Owned by, Affiliated with; Immediate,
 Ultimate). If the larger set introduces new relationship or extent values, add
