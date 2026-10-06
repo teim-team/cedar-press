@@ -230,7 +230,7 @@ test.describe("the gate", () => {
       "Cedar Press maintains its datasets on a weekly schedule with human review, expands their source coverage and useful fields over time and develops new collections.",
     );
     const panel = page.locator(".cp-hero3__proof");
-    for (const label of ["Patent publication and family records", "Historical S&P and Fitch ratings", "AM Best insurance financial-strength releases", "IRS Form 990-PF grant schedules", "Recorded deeds and land transfers"]) {
+    for (const label of ["Patent publication and family records", "Historical S&P and Fitch ratings", "AM Best insurance financial-strength releases", "IRS Form 990 returns and schedules", "Recorded deeds and land transfers"]) {
       await expect(panel).toContainText(label);
     }
     // Owner, 2026-10-06: no source count and no pause control on the band.
@@ -314,8 +314,11 @@ test.describe("the gate", () => {
     await runs.scrollIntoViewIfNeeded();
     await page.mouse.move(0, 0);
     expect((await states()).every((s) => s === "running")).toBe(true);
+    // Owner, 2026-10-06: the band never pauses, not on hover and not on a tap.
     await runs.hover();
-    expect((await states()).every((s) => s === "paused")).toBe(true);
+    expect((await states()).every((s) => s === "running")).toBe(true);
+    await runs.click({ force: true });
+    expect((await states()).every((s) => s === "running")).toBe(true);
     await page.mouse.move(0, 0);
     expect((await states()).every((s) => s === "running")).toBe(true);
     await expect(runs).toHaveCSS("user-select", "none");
