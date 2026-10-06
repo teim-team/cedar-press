@@ -23,6 +23,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { LAUNCH_COLLECTION } from "../../features/grove/collection";
+import { doorExample } from "../../features/grove/doorExamples.js";
+import { recordStructure } from "../../features/grove/pressRecordStructure.js";
+import { RecordStructureCap, RecordStructureTable } from "./PressRecordStructure.jsx";
 import { contractFor, exploreTables, parseCsv, universalRows } from "../../features/grove/explore.js";
 import { columnPlan } from "../../features/grove/recordColumns.js";
 import { Cards, Rows } from "./PressRecordTable.jsx";
@@ -30,9 +33,7 @@ import { useNarrow } from "../../features/grove/useNarrow.js";
 import { coverageLabel } from "../../features/grove/pressAccess";
 import { TBN_PLANS_URL } from "../../features/grove/pressArticles";
 import { freshnessLine } from "../../features/grove/pressReleases";
-import { recordStructure } from "../../features/grove/pressRecordStructure.js";
 import { EVENT, track } from "../../features/grove/telemetry.js";
-import { RecordStructureCap, RecordStructureTable } from "./PressRecordStructure.jsx";
 import { TierName } from "./TierName";
 
 /**
@@ -70,6 +71,8 @@ function usePreviewSample(collectionId) {
     const tables = exploreTables(collectionId);
     const flagship = tables.find((t) => t.flagship);
     if (flagship) return flagship;
+    const example = doorExample(collectionId);
+    if (example) return example;
     // A supporting table stands in only if its contract names the entity
     // each row belongs to. The Owned collection's published supporting
     // table declares no entity and no date, so standing it up here filled
@@ -111,13 +114,11 @@ export default function CollectionPreview({ entry, tier, register }) {
   const contract = table ? contractFor(table.key) : null;
   const entityColumn = contract ? (contract.entity_name ?? contract.entity_uid ?? null) : null;
   const { defaults, all } = columnPlan(table?.key ?? null, contract, parsed?.columns ?? []);
-  const shownColumns = defaults.length ? defaults : all;
+  const shownColumns = table?.example
+    ? table.columns.filter((column) => parsed?.columns?.includes(column))
+    : defaults.length ? defaults : all;
   const rowsLabel = ROWS_LABEL[entry.id];
   const fresh = freshnessLine(entry.id);
-  // Presented by its record structure (Foundation & Corporate Giving, PLOT):
-  // the frame shows what each record holds, where another collection shows
-  // its sample records. No count, span or sample value is stated for it.
-  const structure = recordStructure(entry.id);
   const coverage = coverageLabel(entry);
   return (
     <div className="cp-pane" data-testid="collection-stage" data-collection={entry.id}>
@@ -134,8 +135,10 @@ export default function CollectionPreview({ entry, tier, register }) {
         <p className="cp-pane__blurb">{entry.blurb}</p>
       </div>
 
-      {structure ? (
+      {status === "none" && recordStructure(entry.id) ? (
         <>
+          {/* No real records exist yet for this collection, so it shows what
+              each record holds rather than invented rows. */}
           <RecordStructureCap collectionId={entry.id} />
           <div className="cp-pane__records">
             <RecordStructureTable collectionId={entry.id} name={entry.name} />
@@ -149,7 +152,7 @@ export default function CollectionPreview({ entry, tier, register }) {
                 observations the dataset holds. */}
             <span>Example records</span>
             <span>
-              {items.length} of {table.rows ? `${table.rows.toLocaleString("en-US")} observations` : `${parsed.rows.length} sample records`}
+              {table.rows ? `${items.length} of ${table.rows.toLocaleString("en-US")} observations` : `${items.length} example records`}
             </span>
           </p>
           {/* THE SAME TABLE, NOT A TABLE THAT LOOKS LIKE IT.
@@ -160,7 +163,10 @@ export default function CollectionPreview({ entry, tier, register }) {
               the first day. It renders `Rows` now: the same component, the
               same `columnPlan`, the same cell rules, read-only. */}
           <div className="cp-pane__records">
-            {narrow ? (
+            {/* An example file has no contract, so the card view (built on a
+                row's entity and observation) would read "not linked to an
+                entity" on every card: it keeps the table on a phone too. */}
+            {narrow && !table.example ? (
               <Cards readOnly items={items} onActive={() => {}} openRecord={null} />
             ) : (
             <Rows
@@ -206,7 +212,7 @@ export default function CollectionPreview({ entry, tier, register }) {
 
       {/* No linkage sentence here: the owner took the entity-linkage claim
           off the door on 2026-09-04, and it still lives on /data. */}
-      {!structure && status === "ok" && table && !table.flagship ? (
+      {status === "ok" && table && !table.flagship ? (
         <p className="cp-pane__note">
           This collection&rsquo;s main table ships with the release; its sample is not published
           on the site yet, so the preview shows a supporting table from the same release.

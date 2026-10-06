@@ -19,7 +19,6 @@
 import { LAUNCH_COLLECTION } from "../../features/grove/collection";
 import { coverageLabel } from "../../features/grove/pressAccess";
 import { formatUpdated } from "../../features/grove/pressReleases";
-import { recordStructure } from "../../features/grove/pressRecordStructure.js";
 import { COLLECTION_ICONS } from "./pressCollectionIcons";
 
 /** The dataset's published observations as the release states them, or
@@ -40,14 +39,11 @@ export default function PressReleaseSpecimen({ entry }) {
   const release = RELEASE[entry.id] ?? {};
   const rows = rowsOf(release);
   const coverage = coverageLabel(entry);
-  // A collection presented by its record structure states its fields, and
-  // no release, span or row count.
-  const structure = recordStructure(entry.id);
 
   return (
     <aside className="cp-spec cp-fade" aria-label="Current release">
       <p className="cp-spec__cap">
-        Cedar Press <span aria-hidden="true">/</span> {structure ? "Record structure" : "Current release"}
+        Cedar Press <span aria-hidden="true">/</span> Current release
       </p>
       <p className="cp-spec__name">
         <span className="cp-spec__mark" aria-hidden="true">{COLLECTION_ICONS[entry.id] ?? null}</span>
@@ -63,12 +59,6 @@ export default function PressReleaseSpecimen({ entry }) {
           <div>
             <dt>Updated</dt>
             <dd>{formatUpdated(release.updated)}</dd>
-          </div>
-        ) : null}
-        {structure ? (
-          <div>
-            <dt>Fields</dt>
-            <dd>{structure.fields.length}</dd>
           </div>
         ) : null}
       </dl>

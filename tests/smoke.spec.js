@@ -976,6 +976,24 @@ test.describe("Explore the collections", () => {
       });
     }
 
+    // PLOT shows ten real BIA trust tracts on the door (owner, 2026-10-06:
+    // "we should have data for everything"); Foundation & Corporate Giving
+    // has no verified records yet and still shows what each record holds.
+    if (id === "plot") {
+      test("the door shows plot by ten real parcel records, with no observation count", async ({ page }) => {
+        const errors = watchConsole(page);
+        await page.goto(`/?collection=${id}`);
+        const stage = page.locator(`[data-testid="collection-stage"][data-collection="${id}"]`);
+        await expect(stage).toBeVisible();
+        await expect(stage.locator(".cp-pane__tablecap")).toContainText("10 example records");
+        await expect(stage).toContainText("256 M 560");
+        await expect(stage).toContainText("TURTLE MOUNTAIN PD");
+        await expect(stage.locator(".cp-pane__facts")).not.toContainText(/\d/);
+        expect(errors).toEqual([]);
+      });
+      continue;
+    }
+
     test(`the door shows ${id} by what each record holds, with no count`, async ({ page }) => {
       const errors = watchConsole(page);
       await page.goto(`/?collection=${id}`);
@@ -1274,7 +1292,8 @@ test.describe("About this collection", () => {
     await expect(panel).toBeVisible();
     await expect(panel).toContainText("Awardees are matched to a Native entity");
     // The release facts a reader checks a figure against.
-    for (const field of ["Release", "Updated", "Coverage", "Records"]) {
+    // No "Release": datasets carry no version for readers (owner, 2026-10-06).
+    for (const field of ["Updated", "Coverage", "Records"]) {
       await expect(panel.locator("dt", { hasText: new RegExp(`^${field}$`) }).first()).toBeVisible();
     }
     // The unit of observation, in the codebook's own words: the sentence

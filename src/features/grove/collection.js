@@ -141,6 +141,11 @@ const CEDAR = deepFreeze(
  */
 const datasetRows = (entry) =>
   entry.tables?.find((table) => table.table === entry.sample?.table)?.rows_published ?? null;
+/** The published observations in one collection's dataset, or null. */
+export function datasetRowsOf(collectionId) {
+  const entry = manifest.collections.find((item) => item.id === collectionId);
+  return entry ? datasetRows(entry) : null;
+}
 export const LAUNCH_ROWS_TOTAL = manifest.collections.every((entry) => Number.isInteger(datasetRows(entry)))
   ? manifest.collections.reduce((sum, entry) => sum + datasetRows(entry), 0)
   : null;
