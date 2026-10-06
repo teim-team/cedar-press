@@ -833,11 +833,19 @@ export default function PressGate({ user }) {
           </div>
           <ol className="cp-why__proof">
             {PROOF_POINTS.map((point, i) => (
+              // Owner, 2026-10-06: the headline is enough at a glance; the
+              // paragraph opens on request. A native disclosure, so it works
+              // from the keyboard and with a screen reader as it is.
               <li className="cp-why__item cp-fade" key={point.id}>
-                <span className="cp-why__step" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>
-                <span className="cp-why__ic" aria-hidden="true">{point.icon}</span>
-                <span className="cp-why__label">{point.label}</span>
-                <span className="cp-why__body">{point.body}</span>
+                <details className="cp-why__more">
+                  <summary className="cp-why__sum">
+                    <span className="cp-why__step" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>
+                    <span className="cp-why__ic" aria-hidden="true">{point.icon}</span>
+                    <span className="cp-why__label">{point.label}</span>
+                    <span className="cp-why__toggle" aria-hidden="true" />
+                  </summary>
+                  <p className="cp-why__body">{point.body}</p>
+                </details>
               </li>
             ))}
           </ol>
