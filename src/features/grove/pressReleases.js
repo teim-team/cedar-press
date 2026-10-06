@@ -138,28 +138,34 @@ export function ledgerFor(id, source = ledger) {
 /**
  * What a recorded release shipped, said for a reader, from its facts alone.
  *
- * Only the CURRENT release's preview "downloads from the shelf". The importer
- * writes each sample to one unversioned path and the shelf serves whatever is
- * there, so an older release's preview is a fact about what shipped then, not
- * a file a reader can still take (Codex, PR #52).
+ * Only the CURRENT release's example records are available to download. The
+ * importer writes each sample to one unversioned path and the site serves
+ * whatever is there, so an older release's sample is a fact about what
+ * shipped then, not a file a reader can still take (Codex, PR #52).
+ *
+ * Reader wording (owner review, 2026-10-06): no "preview", "shelf",
+ * "manifest" or "readiness". The sample is "example records", the word the
+ * collection profile uses, and a release held back is "on hold" with the
+ * number of reasons the ledger recorded.
  */
 function describe(record, { isFirst, isCurrent, served }) {
   const lead = isFirst ? "First published on Cedar Press" : "Dataset updated";
   const changed = [`${lead}: ${record.rowsLabel}.`];
   if (record.preview) {
-    const preview = `A ${record.preview.rows}-row preview`;
+    const n = record.preview.rows;
+    const examples = `${n} example ${n === 1 ? "record" : "records"}`;
     changed.push(isCurrent && served
-      ? `${preview} downloads from the shelf.`
+      ? `${examples} ${n === 1 ? "is" : "are"} available to download.`
       : isCurrent
-        ? `${preview} is not published on the shelf yet.`
-        : `${preview} accompanied this update; the shelf now serves the current preview.`);
+        ? `${examples} ${n === 1 ? "is" : "are"} not available to download yet.`
+        : `${examples} accompanied this update; the current update's examples have replaced ${n === 1 ? "it" : "them"}.`);
   } else {
-    changed.push("No public preview is available yet.");
+    changed.push("No example records are available yet.");
   }
   const blockers = Array.isArray(record.blockers) ? record.blockers.length : 0;
   if (blockers) {
     changed.push(
-      `Readiness is blocked, with ${blockers} named ${blockers === 1 ? "blocker" : "blockers"} recorded in the manifest.`,
+      `This update is on hold, for ${blockers} recorded ${blockers === 1 ? "reason" : "reasons"}.`,
     );
   }
   return changed;

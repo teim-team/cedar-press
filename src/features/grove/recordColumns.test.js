@@ -7,6 +7,7 @@ import manifest from "../../../data/cedar/collections.manifest.json" with { type
 import { spreadsheetContract, spreadsheetDefaultColumns } from "../../../scripts/derive-explore.mjs";
 import { downloadRecord } from "./customerTables.js";
 import { CONTRACTS, SOURCE_LINK_COLUMN, labelFor, meaningFor, parseCsv, rowDate, rowSource } from "./explore.js";
+import { DISPLAY_DEFAULTS } from "./showcase.js";
 import { columnPlan } from "./recordColumns.js";
 import { loadCodebook } from "./codebook.js";
 // The codebook loads on demand in the browser (codebook.js); the readers
@@ -119,7 +120,12 @@ test("installed customer contracts open on their declared columns and carry no p
     const header = downloadRecord(key.split("/")[0])?.header;
     assert.ok(header?.length, key + ": no rendered customer table");
     const plan = columnPlan(key, contract, header);
-    assert.deepEqual(plan.defaults, contract.default_columns, key);
+    // The declared view, or the showcase's display defaults where the
+    // declared one opened on blank or misleading columns (showcase.js,
+    // owner audit 2026-10-06); either way every column is one the table has.
+    const collection = key.split("/")[0];
+    const expected = DISPLAY_DEFAULTS[collection]?.filter((column) => header.includes(column)) ?? contract.default_columns;
+    assert.deepEqual(plan.defaults, expected.length >= 3 ? expected : contract.default_columns, key);
     for (const column of plan.defaults) assert.ok(header.includes(column), key + ": opens on " + column);
     assert.ok(plan.defaults.length <= 8, key + ": opening view exceeds eight columns");
     for (const column of header) assert.ok(plan.all.includes(column), key + ": customer column lost " + column);
@@ -129,13 +135,15 @@ test("installed customer contracts open on their declared columns and carry no p
   }
 });
 
-test("NEED keeps its six reviewed enterprise and relationship columns", () => {
+test("NEED keeps its reviewed enterprise and relationship columns, and opens on the Native owner", () => {
   const contract = CONTRACTS["need/need"];
   assert.ok(contract);
   assert.deepEqual(contract.default_columns, ["enterprise_name", "related_entity_name", "relationship_type", "ownership_extent", "uei", "cage_code"]);
   const header = downloadRecord("need").header;
-  const plan = columnPlan("need/need", contract, header);
-  assert.deepEqual(plan.defaults, contract.default_columns);
+  // The pinned file has no owner column; the viewer adds the evidenced one
+  // (exampleEnrichment.js) and opens on it.
+  const plan = columnPlan("need/need", contract, [...header, "native_owner", "native_owner_basis"]);
+  assert.deepEqual(plan.defaults, ["enterprise_name", "native_owner", "related_entity_name", "relationship_type", "uei", "cage_code"]);
   assert.ok(plan.all.includes("source_urls"));
   // The retired enterprise scheme is not a column a reader can open.
   assert.ok(!header.includes("enterprise_id"));

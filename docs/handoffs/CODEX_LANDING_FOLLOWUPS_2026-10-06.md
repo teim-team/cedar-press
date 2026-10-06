@@ -61,7 +61,7 @@ To do, in Lumecon-data with the database:
    contracts with, which NEED does not carry today (it carries UEI and CAGE
    only; agency would come from a join to Prime Contracting).
 4. Pin the new release into cedar-press with `scripts/stage_verified_previews.py`
-   (its docstring gives the queue format), then regenerate as in section 6.
+   (its docstring gives the queue format), then regenerate as in section 7.
 
 **Every NEED row must also name its top-level Native entity (owner,
 2026-10-06: "why don't the ANC examples have the ultimate ANC, like Arctic
@@ -147,7 +147,63 @@ into the producer so the patches can be deleted:
   in history, so nothing breaks when this branch merges; move the pin to the
   new cedar-press `main` when convenient.
 
-## 6. Regenerating after a re-pin
+## 6. Example-record audit: data notes for the producer (2026-10-06)
+
+All fourteen pinned example files were audited on 2026-10-06. The site now
+works around what it can, **for display only**: the downloads are still the
+pinned bytes. Each item below needs a producer fix, after which the matching
+consumer workaround should be deleted.
+
+**Consumer workarounds to delete once fixed upstream**
+
+- `src/features/grove/showcase.js`: `EXCLUDED_EXAMPLES` (three records hidden),
+  `SHOWCASE_RULES` (unattributed contract rows, monthly subaward repeats, $0
+  and negative obligations pushed out or down), `DISPLAY_DEFAULTS` and
+  `COLUMN_FALLBACKS` (opening columns chosen because the declared ones are
+  blank in the sample).
+- `src/features/grove/exampleEnrichment.js`: NEED's `native_owner` columns
+  and the three prepended tribe-owned examples (CNI Advantage, Chickasaw
+  Nation Industries, Choctaw Defense Manufacturing Group), each sourced to an
+  owner ruling in `code/55_stage_anc_subsidiary_rulings.py`; owned's
+  `stated_tribe`, parsed from `identity_claim_text`.
+- `readerPresentation.js` `repairMojibake`: garbled UTF-8 in several samples
+  (for example "CNSPÃ¢Â‚Â¬Â„Â¢S").
+
+**Data notes, by collection**
+
+- **NEED**: no top-level Native owner column; all ten examples are ANC
+  subsidiaries, none tribe-owned. Publish `native_owner` (name and
+  `cedar_uid`) from the ruling chain and re-draw the sample to include tribal
+  enterprises. Check whether Salish Networks is a tribal enterprise (CSKT).
+  Cherokee Nation Research Labs has a UEI conflict between sources.
+- **Natural Resources**: the examples are 1925 to 1931 national aggregates;
+  re-draw from recent, tribe-level ONRR records.
+- **Federal Register**: only five rows, several off topic; the count mixes
+  grains (9,856 documents plus 11,402 participants). Publish one grain.
+- **PLOT**: only three example rows; the count includes permits. State what
+  the count measures, and pin at least ten parcels.
+- **Wrong links**: Leech Lake (entity class and name), Shoshone-Bannock (name),
+  legislation `100-hr-2642` (Colorado Ute settlement linked to Uintah and
+  Ouray, should be Southern Ute and Ute Mountain Ute), NAGPRA `00-11378`
+  (Duckwater Shoshone Elementary School resolved as a tribe; also check the
+  Crow link), giving `FF-03B9C4E5A6CA00E15034` (recipient "Notah Begay",
+  almost certainly NB3 Foundation), nonprofits (a Seneca organization left
+  unlinked).
+- **Deals**: `sector` and `capital_source` blank or uninformative in most rows.
+- **Subcontracting**: one subaward re-filed monthly appears as several rows;
+  a Bowhead row carries prime amount 0.
+- **Prime Contracting**: three of ten rows have no attributed Native entity;
+  `affiliation_attribution_status = NOT_EVALUATED` sorts as the strongest
+  basis in the reader view. Rank it below every evaluated status.
+- **Lobbying**: carries LDA filings only; the collection description now says
+  so. If agency meetings, consultations, comments and testimony are meant to
+  be in scope, they are not in this release.
+- **Native Nonprofits**: the method note does not match the published 89;
+  align it (see section 2).
+- **Re-draw all samples** as a showcase (entity-linked, recent, with money
+  where the collection has money) rather than the first rows of a sort.
+
+## 7. Regenerating after a re-pin
 
 From the cedar-press root, after staging:
 

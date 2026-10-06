@@ -156,8 +156,8 @@ test("a retired collection stays in the feed as read-only history", () => {
   assert.equal(retired.version, "v0");
   assert.equal(retired.cadence, null);
   assert.equal(retired.history.length, 1);
-  // Not the current release of anything: its preview is not on the shelf.
-  assert.ok(!retired.history[0].changed.some((line) => line.includes("downloads from the shelf")));
+  // Not the current release of anything: its sample is not downloadable.
+  assert.ok(!retired.history[0].changed.some((line) => line.includes("available to download")));
   const feed = buildFeed(releases);
   const entry = feed.find((item) => item.anchor === "retired-fixture-v0");
   assert.ok(entry, "the retired permalink no longer resolves");
@@ -208,15 +208,21 @@ test("the ledger script refuses a file that is not a ledger", () => {
   assert.equal(current.status, 0, current.stderr);
 });
 
-// Only the current release's preview is a file on the shelf.
-test("only the current release says its preview downloads", () => {
+// Only the current release's sample is a file a reader can download.
+test("only the current release says its example records download", () => {
   for (const dataset of LAUNCH_COLLECTION) {
     const [current, ...older] = releaseFor(dataset.id).history;
     if (collectionSample(dataset.id)?.path) {
-      assert.ok(current.changed.some((line) => line.endsWith("downloads from the shelf.")), dataset.id);
+      assert.ok(current.changed.some((line) => line.endsWith("are available to download.")), dataset.id);
     }
     for (const entry of older) {
-      assert.ok(!entry.changed.some((line) => line.includes("downloads from the shelf")), `${dataset.id} ${entry.version}`);
+      assert.ok(!entry.changed.some((line) => / available to download\./.test(line)), `${dataset.id} ${entry.version}`);
+    }
+    // Reader wording: the feed never speaks the build's vocabulary.
+    for (const entry of [current, ...older]) {
+      for (const line of entry.changed) {
+        assert.ok(!/\b(preview|shelf|manifest|readiness)\b/i.test(line), `${dataset.id} ${entry.version}: ${line}`);
+      }
     }
   }
 });
@@ -261,11 +267,11 @@ test("the first release keeps its own facts, the latest matches the manifest", (
     assert.equal(latest.version, dataset.version,
                  `${dataset.id}: ledger's newest release is not the manifest's version`);
   }
-  // The collection that had no preview file said so rather than promising one.
+  // The collection that had no sample file said so rather than promising one.
   const owned = releaseFor("owned").history.at(-1);
-  assert.ok(owned.changed.some((line) => line.startsWith("No public preview is available yet")));
+  assert.ok(owned.changed.some((line) => line.startsWith("No example records are available yet")));
   const funding = releaseFor("funding").history.at(-1);
-  assert.ok(funding.changed.some((line) => /-row preview/.test(line)));
+  assert.ok(funding.changed.some((line) => /^\d+ example records? /.test(line)));
 });
 
 // Editorial notes describe shipped releases: a note names a version the

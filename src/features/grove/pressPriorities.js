@@ -55,7 +55,7 @@ export const PRIORITY_EXAMPLES = Object.freeze({
     Object.freeze({ theme: "Capital access", text: "Loans, guarantees and equity reaching Native enterprises and households, by lender type, terms and outcome." }),
     Object.freeze({ theme: "Housing", text: "Housing units built, rehabilitated and financed by tribal housing authorities, with the programs and partners behind each one." }),
     Object.freeze({ theme: "Healthcare", text: "Tribal and Indian Health Service facilities, the services each offers, its staffing and its funding over time." }),
-    Object.freeze({ theme: "Energy", text: "Energy projects on tribal lands from proposal to operation, with capacity, ownership, offtake and revenue to the Nation." }),
+    Object.freeze({ theme: "Energy", text: "Energy projects on tribal lands from proposal to operation, with capacity, ownership, offtake and revenue to the nation." }),
     Object.freeze({ theme: "Workforce", text: "Employment in tribal governments and enterprises by sector and occupation, including TERO hiring and training outcomes." }),
   ]),
   research: Object.freeze({
@@ -66,14 +66,14 @@ export const PRIORITY_EXAMPLES = Object.freeze({
     ]),
     causal: Object.freeze([
       "Did changes to 8(a) rules alter how tribally owned firms grow?",
-      "Does federal infrastructure funding change how many enterprises a Nation starts in the years that follow?",
-      "How much of a Nation's economic diversification follows from its gaming revenue?",
+      "Does federal infrastructure funding change how many enterprises a nation starts in the years that follow?",
+      "How much of a nation's economic diversification follows from its gaming revenue?",
     ]),
   }),
   expansions: Object.freeze([
     "Add annual filing history to Native Nonprofits.",
     "Add more tribal TERO and commerce offices to Individual Native-Owned Businesses.",
-    "Carry Natural Resource Revenues to more Nations and commodities.",
+    "Carry Natural Resource Revenues to more nations and commodities.",
   ]),
 });
 

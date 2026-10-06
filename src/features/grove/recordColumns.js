@@ -11,6 +11,7 @@ import { PRESENTATION_COLUMNS } from "./mixedSpreadsheet.js";
 
 import { SOURCE_LINK_COLUMN, codebookColumns } from "./explore.js";
 import { isInternalProvenanceColumn } from "./readerValues.js";
+import { displayColumns } from "./showcase.js";
 import { PRESS_CATALOG_BY_ID } from "./pressCatalog.js";
 import { isRetiredIdentifierColumn } from "./readerPresentation.js";
 
@@ -33,7 +34,7 @@ export function short(id) {
  * declared. Review, 2026-09-15: "for this collection, prioritize entity,
  * program, amount, date, and source. Make other columns selectable."
  */
-export function columnPlan(tableKey, contract, tableColumns) {
+export function columnPlan(tableKey, contract, tableColumns, rows = []) {
   const publicColumns = tableColumns.filter((column) => !isRetiredIdentifierColumn(column));
   const has = (c) => c && publicColumns.includes(c);
   // A table whose link is BUILT from its identifiers (a USAspending award
@@ -66,7 +67,11 @@ export function columnPlan(tableKey, contract, tableColumns) {
     ? [...new Set([...declared.filter((column) => !dispatchedSources.has(column)), ...(built ? [SOURCE_LINK_COLUMN] : [])])]
     : [...new Set([...roleFirst, ...(declared.length ? declared : listed)])];
   const all = [...new Set([...lead, ...publicColumns, ...declared.filter((column) => Object.hasOwn(PRESENTATION_COLUMNS, column)), ...(built ? [SOURCE_LINK_COLUMN] : [])])];
-  return { lead, defaults, all };
+  // The showcase's opening view (showcase.js): display defaults where the
+  // declared view opens on blank or misleading columns, and never a column
+  // blank in every example record.
+  const opened = displayColumns(tableKey?.split("/")[0] ?? null, defaults, rows, [...publicColumns, ...(built ? [SOURCE_LINK_COLUMN] : [])]);
+  return { lead, defaults: opened, all };
 }
 
 /** Display a reported point or bounds; never substitute an aggregate for either. */

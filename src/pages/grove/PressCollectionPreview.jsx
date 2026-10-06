@@ -27,6 +27,8 @@ import { codebookLoaded, loadCodebook } from "../../features/grove/codebook.js";
 import { fetchSampleText, onBackOnline } from "../../features/grove/sampleFetch.js";
 import { contractFor, exploreTables, parseCsv, universalRows } from "../../features/grove/explore.js";
 import { columnPlan } from "../../features/grove/recordColumns.js";
+import { showcaseItems } from "../../features/grove/showcase.js";
+import { enrichSample } from "../../features/grove/exampleEnrichment.js";
 import { Cards, Rows } from "./PressRecordTable.jsx";
 import { useNarrow } from "../../features/grove/useNarrow.js";
 import { coverageLabel } from "../../features/grove/pressAccess";
@@ -99,7 +101,7 @@ function usePreviewSample(collectionId) {
     pending.current.add(table.path);
     // The rows are drawn by the product's own table, which reads the
     // codebook's labels; the two arrive together.
-    Promise.all([fetchSampleText(table.path, { sha256: table.sha256 }).then(parseCsv), loadCodebook()]).then(
+    Promise.all([fetchSampleText(table.path, { sha256: table.sha256 }).then((text) => enrichSample(collectionId, parseCsv(text))), loadCodebook()]).then(
       ([parsed]) => {
         pending.current.delete(table.path);
         setLoaded((prev) => (prev.has(table.path) ? prev : new Map(prev).set(table.path, parsed)));
@@ -109,7 +111,7 @@ function usePreviewSample(collectionId) {
         setFailed((prev) => (prev.has(table.path) ? prev : new Set(prev).add(table.path)));
       },
     );
-  }, [table, loaded, failed]);
+  }, [table, loaded, failed, collectionId]);
   const retry = useCallback(() => setFailed((prev) => (prev.size ? new Set() : prev)), []);
   useEffect(() => onBackOnline(retry), [retry]);
   if (!table) return { status: "none", table: null, parsed: null, retry };
@@ -124,8 +126,8 @@ export default function CollectionPreview({ entry, tier, register }) {
   // the collection's own columns squeezed into 320px.
   const narrow = useNarrow();
   const items = useMemo(
-    () => (parsed ? universalRows(table.key, parsed.rows, register).slice(0, PANE_ROWS) : []),
-    [parsed, table, register],
+    () => (parsed ? showcaseItems(entry.id, universalRows(table.key, parsed.rows, register)).slice(0, PANE_ROWS) : []),
+    [parsed, table, register, entry.id],
   );
   const showAmount = items.some((item) => item.amount != null);
   // The columns the product would open this collection on, off the same
@@ -136,7 +138,7 @@ export default function CollectionPreview({ entry, tier, register }) {
   // Planned once the sample is in hand: the plan reads the codebook, which
   // arrives with it (usePreviewSample).
   const { defaults, all } = status === "ok"
-    ? columnPlan(table?.key ?? null, contract, parsed?.columns ?? [])
+    ? columnPlan(table?.key ?? null, contract, parsed?.columns ?? [], parsed?.rows ?? [])
     : { defaults: [], all: [] };
   const shownColumns = defaults.length ? defaults : all;
   const fresh = freshnessLine(entry.id);

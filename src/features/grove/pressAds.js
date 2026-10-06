@@ -208,7 +208,7 @@ export const AD_HOUSE = Object.freeze({
   body:
     "This space reaches the tribal governments, enterprises and the firms and analysts " +
     "working with them. Display and sponsored content are sold through Tribal Business News.",
-  action: "Enquire about this space",
+  action: "Inquire about this space",
 });
 
 /** Whether an unsold slot invites a buyer rather than rendering nothing. */

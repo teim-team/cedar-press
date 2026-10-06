@@ -317,7 +317,7 @@ export const PRESS_CATALOG = Object.freeze([
     blurb:
       "Documented federal advocacy and engagement involving Native nations and organizations, including registered lobbying, agency meetings, tribal consultations, regulatory comments, congressional testimony and nonprofit lobbying disclosures. Each row represents one entity-linked activity or source record.",
     linkage:
-      "Each activity, from a lobbying registration to a consultation, a docket filing or testimony, resolved to the tribe or Native organization behind it where the record supports the link; a row the record cannot place keeps its printed party name and a blank key rather than a guess.",
+      "Each filing resolved to the tribe or Native organization behind it where the record supports the link; a filing the record cannot place keeps its printed party name and a blank key rather than a guess.",
   }),
   Object.freeze({
     id: "foundation-corporate-giving",
@@ -356,7 +356,7 @@ export const PRESS_CATALOG = Object.freeze([
     // roughly FY2000 (docs/datasets/native-owned-businesses.md).
     coverage: Object.freeze({ kind: "series", from: 2000 }),
     blurb:
-      "Federal contract transactions awarded directly to Native governments, enterprises, organizations and identified Native-owned businesses. Examine awarding agencies, recipients, industries, obligations, procurement mechanisms and set-asides.",
+      "Federal contract transactions awarded directly to Native governments, Native-owned enterprises and Native organizations, including candidate records whose ownership attribution is still being established. Examine awarding agencies, recipients, industries, obligations, procurement mechanisms and set-asides.",
     linkage:
       "Vendors resolved to tribally owned firms, ANC and NHO subsidiaries and 8(a) participants, then rolled up to the parent nation or corporation.",
   }),
@@ -377,7 +377,7 @@ export const PRESS_CATALOG = Object.freeze([
     // floor to 2010 on the nose, which is the statutory floor.
     coverage: Object.freeze({ kind: "series", from: 2010 }),
     blurb:
-      "Reported federal subawards to Native entities and businesses beneath prime contracts. Follow the prime relationship, subrecipient, amount, industry and timing of reported subcontracting activity.",
+      "Reported federal subawards where a Native entity is the prime, the subrecipient, or both, under federal contracts and grants. Follow the prime relationship, subrecipient, amount, industry and timing of each subaward.",
     linkage:
       "Subawards matched to the same resolved entities as the prime contracts above them.",
   }),
@@ -461,7 +461,7 @@ export const PRESS_CATALOG = Object.freeze([
     // The public component is a reviewed cohort, not the full enterprise register.
     coverage: OBSERVATIONS,
     blurb:
-      "The Native Entity Enterprise Dataset (NEED): enterprises owned by or tied to tribes, Alaska Native corporations and Native Hawaiian organizations, with their parent companies and federal contracting identifiers. Each relationship is checked against the owner's own sources.",
+      "The Native Entity Enterprise Dataset (NEED): enterprises owned by or tied to tribes, Alaska Native corporations and Native Hawaiian organizations, with their federal contracting identifiers. Ownership and parent relationships are shown where the owner's own sources state them.",
     linkage:
       "Business identifiers and owner relationships remain separate claims. Each public fact retains its source release and evidence; an owner association never becomes the business identity.",
   }),

@@ -23,14 +23,17 @@ import { LAUNCH_COLLECTION, collectionCedarFacts } from "../src/features/grove/c
 import { coverageLabel } from "../src/features/grove/pressAccess.js";
 import { formatUpdated } from "../src/features/grove/pressReleases.js";
 import { recordHref } from "../src/features/grove/pressRecord.js";
+import { enrichSample } from "../src/features/grove/exampleEnrichment.js";
+import { showcaseItems } from "../src/features/grove/showcase.js";
 
 // The browser suite follows the exact published release, including refreshed
 // source keys. It never revives retired samples just to keep a fixture alive.
 // What a reader sees is each collection's customer table (customerTables.js),
-// so that is what the suite reads too.
+// so that is what the suite reads too, with the same display-only additions
+// the viewer makes (exampleEnrichment.js).
 async function currentSample(id) {
   const path = new URL(`../public/data/cedar/downloads/${id}.csv`, import.meta.url);
-  return parseCsv(await readFile(path, "utf8"));
+  return enrichSample(id, parseCsv(await readFile(path, "utf8")));
 }
 const FUNDING_SAMPLE = await currentSample("funding");
 const FR_SAMPLE = await currentSample("federal-register");
@@ -147,10 +150,16 @@ test("reviewed NEED businesses remain individually named on phones and use reada
   const records = page.getByTestId("explore-record");
   await expect(records).toHaveCount(NEED_SAMPLE.rows.length);
   for (const row of NEED_SAMPLE.rows) {
-    await expect(records.filter({ hasText: row.enterprise_name })).toHaveCount(1);
+    // A parent that is itself an example (Chickasaw Nation Industries) is
+    // also named on its subsidiary's record.
+    const naming = NEED_SAMPLE.rows.filter((other) => other === row || other.related_entity_name === row.enterprise_name).length;
+    await expect(records.filter({ hasText: row.enterprise_name })).toHaveCount(naming);
   }
-  await expect(records.first()).toContainText("Wholly owned");
-  await expect(records.first()).toContainText(testInfo.project.name === "phone" ? "owned by" : "Owned by");
+  // A tribe-owned enterprise leads (exampleEnrichment.js); its parent is
+  // stated in readable words, never the source's codes.
+  const cni = records.filter({ hasText: "Chickasaw Nation Industries, Inc." }).filter({ hasText: "The Chickasaw Nation" }).filter({ hasNotText: "CNI Advantage" });
+  await expect(cni).toHaveCount(1);
+  await expect(cni).toContainText("Owned by");
   await expect(page.locator("main")).not.toContainText("wholly_owned");
   await expect(page.locator("main")).not.toContainText("owned_by");
   if (testInfo.project.name === "phone") {
@@ -441,7 +450,7 @@ test.describe("the gate", () => {
     await expect(stage.getByRole("link", { name: /Browse the records/ })).toHaveCount(0);
     // Owner, 2026-10-06: example records of the dataset's observations, and
     // the hero states the observations across every collection.
-    await expect(stage.locator(".cp-pane__tablecap")).toContainText(/Example records\s*10 of [\d,]+ observations/);
+    await expect(stage.locator(".cp-pane__tablecap")).toContainText(/Example records\s*\d+ of [\d,]+ observations/);
     await expect(stage.locator(".cp-pane__facts")).not.toContainText(/\d[\d,]*\s+(rows|records)/i);
     await expect(page.locator(".cp-hero3__facts")).toContainText(/[\d,]+\s+observations/i);
     await expect(page.locator("#catalog")).toHaveCount(0);
@@ -1031,7 +1040,9 @@ test.describe("Explore the collections", () => {
     if (!table || !release?.rowsLabel || !release.updated || !sample.rows.length) {
       throw new Error(id + " needs a published sample and a dated release descriptor");
     }
-    const expectedIds = universalRows(table.key, sample.rows).map((row) => row.recordId).sort();
+    // What a reader is shown: the pinned records after the showcase rules
+    // (showcase.js), which leave out records the audit found misleading.
+    const expectedIds = showcaseItems(id, universalRows(table.key, sample.rows)).map((row) => row.recordId).sort();
     if (expectedIds.some((value) => !value)) throw new Error(id + " has an unnamed sample observation");
     for (const { account, open } of cases) {
       test(id + (open ? " opens its reviewed sample" : " is offered on Cedar Press+") + " for " + (account === ACCOUNT ? "Cedar Press+" : "Cedar Press"), async ({ page }) => {
@@ -1048,7 +1059,7 @@ test.describe("Explore the collections", () => {
         await expect(page.getByTestId("explore-structure")).toHaveCount(0);
         if (open) {
           const records = page.getByTestId("explore-record");
-          await expect(records).toHaveCount(sample.rows.length);
+          await expect(records).toHaveCount(expectedIds.length);
           const seen = await records.evaluateAll((nodes) => nodes.map((node) => node.dataset.recordId).sort());
           expect(seen).toEqual(expectedIds);
           await expect(page.getByTestId("explore-locked")).toHaveCount(0);
@@ -1076,11 +1087,11 @@ test.describe("Explore the collections", () => {
       await expect(stage).toBeVisible();
       await expect(stage.getByTestId("record-structure")).toHaveCount(0);
       const records = stage.getByTestId("stage-record");
-      await expect(records).toHaveCount(Math.min(10, sample.rows.length));
+      await expect(records).toHaveCount(Math.min(10, expectedIds.length));
       expect(await records.evaluateAll((nodes) => nodes.map((node) => node.dataset.recordId).sort()))
         .toEqual(expectedIds.slice(0, 10));
       await expect(stage.locator(".cp-pane__tablecap")).toContainText(
-        Math.min(10, sample.rows.length) + " of " + collectionCedarFacts(id).n_rows.toLocaleString("en-US") + " observations");
+        Math.min(10, expectedIds.length) + " of " + collectionCedarFacts(id).n_rows.toLocaleString("en-US") + " observations");
       await expect(stage.locator(".cp-pane__facts")).toContainText(formatUpdated(release.updated).replace(/, \d{4}$/, ""));
       if (coverageLabel(entry)) await expect(stage.locator(".cp-pane__facts")).toContainText(coverageLabel(entry));
       await expect(stage).not.toContainText(/not yet published|first release|preview pending/i);
@@ -1100,7 +1111,7 @@ test.describe("Explore the collections", () => {
         await expect(page.getByTestId("explore-unavailable")).toHaveCount(0);
         if (account === ACCOUNT) {
           await expect(page.getByTestId("explore-record").first()).toBeVisible();
-          await expect(page.getByTestId("explore-record")).toHaveCount(10);
+          await expect(page.getByTestId("explore-record")).toHaveCount((id === "need" ? NEED_SAMPLE : OWNED_SAMPLE).rows.length);
           await expect(page.getByTestId("explore-locked")).toHaveCount(0);
         } else {
           await expect(page.getByTestId("explore-locked")).toBeVisible();
@@ -2803,7 +2814,7 @@ test.describe("Methods", () => {
     await expect(page.locator(".cp-idp__shape").first()).toHaveText(/^CE-[0-9A-Z]{5}-[0-9A-Z]{2}$/);
     await expect(page.locator(".cp-idp__shape").nth(1)).toHaveText(/^CB-\d{7}$/);
     // The business register is not claimed as live while nothing mints it.
-    await expect(page.locator(".cp-idp__pending")).toContainText("being minted");
+    await expect(page.locator(".cp-idp__pending")).toContainText("No published record carries this identifier yet");
     // A nation and the company it owns are two subjects, and the page says so
     // with the ownership as a dated edge rather than a merged row.
     // The uid on the page must be the nation's real one. It was not: the

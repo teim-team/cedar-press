@@ -40,6 +40,29 @@ import { COLLECTION_ICONS } from "./pressCollectionIcons";
 import { focusWasWithin, keepTabInside, rememberFocus } from "../../features/grove/focusReturn.js";
 
 /** A section, rendered only when it has something to say. */
+/**
+ * The grain sentence, read as the end of "One row is ...".
+ *
+ * The grain comes from the codebook or the generated download record, and
+ * both write it as a sentence of its own ("One source transaction."). After
+ * the bold "One row is" that read "One row is One source transaction", so the
+ * first word is lower-cased when it is an ordinary capitalised word (an
+ * acronym such as "EIN" is left alone).
+ *
+ * The download record for transaction tables also carries a producer's note,
+ * "; part boundaries have no economic meaning", which is about how the file
+ * is split for building and tells a reader nothing. The record is generated
+ * upstream, so the clause is dropped here, at display, rather than by
+ * hand-editing generated JSON.
+ */
+function grainSentence(row) {
+  let text = String(row ?? "").trim();
+  if (!text) return "";
+  text = text.replace(/;\s*part boundaries[^.;]*/i, "");
+  if (/^[A-Z](?:[a-z]|\s)/.test(text)) text = text.charAt(0).toLowerCase() + text.slice(1);
+  return text;
+}
+
 function Block({ title, children }) {
   if (!children) return null;
   return (
@@ -132,7 +155,7 @@ export default function PressCollectionAbout({ entry, flagship, onClose, article
                   count, and it was not on this surface anywhere. */}
               {book?.row ? (
                 <p className="cp-ab__unit">
-                  <b>One row is</b> {book.row}
+                  <b>One row is</b> {grainSentence(book.row)}
                 </p>
               ) : null}
             </>

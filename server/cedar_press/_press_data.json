@@ -95,7 +95,7 @@
         "from": 1999
       },
       "blurb": "Documented federal advocacy and engagement involving Native nations and organizations, including registered lobbying, agency meetings, tribal consultations, regulatory comments, congressional testimony and nonprofit lobbying disclosures. Each row represents one entity-linked activity or source record.",
-      "linkage": "Each activity, from a lobbying registration to a consultation, a docket filing or testimony, resolved to the tribe or Native organization behind it where the record supports the link; a row the record cannot place keeps its printed party name and a blank key rather than a guess."
+      "linkage": "Each filing resolved to the tribe or Native organization behind it where the record supports the link; a filing the record cannot place keeps its printed party name and a blank key rather than a guess."
     },
     {
       "id": "foundation-corporate-giving",
@@ -117,7 +117,7 @@
         "kind": "series",
         "from": 2000
       },
-      "blurb": "Federal contract transactions awarded directly to Native governments, enterprises, organizations and identified Native-owned businesses. Examine awarding agencies, recipients, industries, obligations, procurement mechanisms and set-asides.",
+      "blurb": "Federal contract transactions awarded directly to Native governments, Native-owned enterprises and Native organizations, including candidate records whose ownership attribution is still being established. Examine awarding agencies, recipients, industries, obligations, procurement mechanisms and set-asides.",
       "linkage": "Vendors resolved to tribally owned firms, ANC and NHO subsidiaries and 8(a) participants, then rolled up to the parent nation or corporation."
     },
     {
@@ -129,7 +129,7 @@
         "kind": "series",
         "from": 2010
       },
-      "blurb": "Reported federal subawards to Native entities and businesses beneath prime contracts. Follow the prime relationship, subrecipient, amount, industry and timing of reported subcontracting activity.",
+      "blurb": "Reported federal subawards where a Native entity is the prime, the subrecipient, or both, under federal contracts and grants. Follow the prime relationship, subrecipient, amount, industry and timing of each subaward.",
       "linkage": "Subawards matched to the same resolved entities as the prime contracts above them."
     },
     {
@@ -176,7 +176,7 @@
       "coverage": {
         "kind": "observations"
       },
-      "blurb": "The Native Entity Enterprise Dataset (NEED): enterprises owned by or tied to tribes, Alaska Native corporations and Native Hawaiian organizations, with their parent companies and federal contracting identifiers. Each relationship is checked against the owner's own sources.",
+      "blurb": "The Native Entity Enterprise Dataset (NEED): enterprises owned by or tied to tribes, Alaska Native corporations and Native Hawaiian organizations, with their federal contracting identifiers. Ownership and parent relationships are shown where the owner's own sources state them.",
       "linkage": "Business identifiers and owner relationships remain separate claims. Each public fact retains its source release and evidence; an owner association never becomes the business identity."
     },
     {
@@ -205,7 +205,7 @@
           "kind": "data",
           "changed": [
             "Dataset updated: 640,942 observations.",
-            "A 10-row preview downloads from the shelf."
+            "10 example records are available to download."
           ]
         },
         {
@@ -214,7 +214,7 @@
           "kind": "data",
           "changed": [
             "Dataset updated: 640,942 observations.",
-            "A 10-row preview accompanied this update; the shelf now serves the current preview."
+            "10 example records accompanied this update; the current update's examples have replaced them."
           ]
         },
         {
@@ -223,7 +223,7 @@
           "kind": "data",
           "changed": [
             "Dataset updated: 3,646,750 rows.",
-            "A 10-row preview accompanied this update; the shelf now serves the current preview."
+            "10 example records accompanied this update; the current update's examples have replaced them."
           ]
         },
         {
@@ -232,7 +232,7 @@
           "kind": "data",
           "changed": [
             "Dataset updated: 3,646,750 rows.",
-            "A 10-row preview accompanied this update; the shelf now serves the current preview."
+            "10 example records accompanied this update; the current update's examples have replaced them."
           ]
         },
         {
@@ -241,7 +241,7 @@
           "kind": "data",
           "changed": [
             "First published on Cedar Press: 3,646,750 rows.",
-            "A 10-row preview accompanied this update; the shelf now serves the current preview."
+            "10 example records accompanied this update; the current update's examples have replaced them."
           ]
         }
       ]
@@ -259,7 +259,7 @@
           "kind": "data",
           "changed": [
             "Dataset updated: 21,258 observations.",
-            "A 10-row preview downloads from the shelf."
+            "10 example records are available to download."
           ]
         },
         {
@@ -268,7 +268,7 @@
           "kind": "data",
           "changed": [
             "Dataset updated: 21,258 observations.",
-            "A 10-row preview accompanied this update; the shelf now serves the current preview."
+            "10 example records accompanied this update; the current update's examples have replaced them."
           ]
         },
         {
@@ -277,7 +277,7 @@
           "kind": "data",
           "changed": [
             "Dataset updated: 502,483 rows.",
-            "A 10-row preview accompanied this update; the shelf now serves the current preview."
+            "10 example records accompanied this update; the current update's examples have replaced them."
           ]
         },
         {
@@ -286,7 +286,7 @@
           "kind": "data",
           "changed": [
             "Dataset updated: 502,483 rows.",
-            "A 10-row preview accompanied this update; the shelf now serves the current preview."
+            "10 example records accompanied this update; the current update's examples have replaced them."
           ]
         },
         {
@@ -295,7 +295,7 @@
           "kind": "data",
           "changed": [
             "First published on Cedar Press: 502,483 rows.",
-            "A 10-row preview accompanied this update; the shelf now serves the current preview."
+            "10 example records accompanied this update; the current update's examples have replaced them."
           ]
         }
       ]
@@ -313,7 +313,7 @@
           "kind": "data",
           "changed": [
             "Dataset updated: 3,064 observations.",
-            "A 10-row preview downloads from the shelf."
+            "10 example records are available to download."
           ]
         },
         {
@@ -322,7 +322,7 @@
           "kind": "data",
           "changed": [
             "Dataset updated: 3,064 observations.",
-            "A 10-row preview accompanied this update; the shelf now serves the current preview."
+            "10 example records accompanied this update; the current update's examples have replaced them."
           ]
         },
         {
@@ -331,7 +331,7 @@
           "kind": "data",
           "changed": [
             "Dataset updated: 206,354 rows.",
-            "A 10-row preview accompanied this update; the shelf now serves the current preview."
+            "10 example records accompanied this update; the current update's examples have replaced them."
           ]
         },
         {
@@ -340,7 +340,7 @@
           "kind": "data",
           "changed": [
             "Dataset updated: 206,354 rows.",
-            "A 10-row preview accompanied this update; the shelf now serves the current preview."
+            "10 example records accompanied this update; the current update's examples have replaced them."
           ]
         },
         {
@@ -349,7 +349,7 @@
           "kind": "data",
           "changed": [
             "First published on Cedar Press: 149,293 rows.",
-            "A 10-row preview accompanied this update; the shelf now serves the current preview."
+            "10 example records accompanied this update; the current update's examples have replaced them."
           ]
         }
       ]
@@ -367,7 +367,7 @@
           "kind": "data",
           "changed": [
             "Dataset updated: 978 observations.",
-            "A 10-row preview downloads from the shelf."
+            "10 example records are available to download."
           ]
         },
         {
@@ -376,7 +376,7 @@
           "kind": "data",
           "changed": [
             "Dataset updated: 978 observations.",
-            "A 10-row preview accompanied this update; the shelf now serves the current preview."
+            "10 example records accompanied this update; the current update's examples have replaced them."
           ]
         },
         {
@@ -385,7 +385,7 @@
           "kind": "data",
           "changed": [
             "Dataset updated: 2,662 rows.",
-            "A 10-row preview accompanied this update; the shelf now serves the current preview."
+            "10 example records accompanied this update; the current update's examples have replaced them."
           ]
         },
         {
@@ -394,7 +394,7 @@
           "kind": "data",
           "changed": [
             "Dataset updated: 2,662 rows.",
-            "A 10-row preview accompanied this update; the shelf now serves the current preview."
+            "10 example records accompanied this update; the current update's examples have replaced them."
           ]
         },
         {
@@ -403,7 +403,7 @@
           "kind": "data",
           "changed": [
             "First published on Cedar Press: 2,662 rows.",
-            "A 10-row preview accompanied this update; the shelf now serves the current preview."
+            "10 example records accompanied this update; the current update's examples have replaced them."
           ]
         }
       ]
@@ -421,7 +421,7 @@
           "kind": "data",
           "changed": [
             "Dataset updated: 6,792 observations.",
-            "A 10-row preview downloads from the shelf."
+            "10 example records are available to download."
           ]
         },
         {
@@ -430,7 +430,7 @@
           "kind": "data",
           "changed": [
             "Dataset updated: 6,792 observations.",
-            "A 10-row preview accompanied this update; the shelf now serves the current preview."
+            "10 example records accompanied this update; the current update's examples have replaced them."
           ]
         },
         {
@@ -439,7 +439,7 @@
           "kind": "data",
           "changed": [
             "Dataset updated: 100,786 rows.",
-            "A 10-row preview accompanied this update; the shelf now serves the current preview."
+            "10 example records accompanied this update; the current update's examples have replaced them."
           ]
         },
         {
@@ -448,7 +448,7 @@
           "kind": "data",
           "changed": [
             "Dataset updated: 100,786 rows.",
-            "A 10-row preview accompanied this update; the shelf now serves the current preview."
+            "10 example records accompanied this update; the current update's examples have replaced them."
           ]
         },
         {
@@ -457,7 +457,7 @@
           "kind": "data",
           "changed": [
             "First published on Cedar Press: 72,302 rows.",
-            "A 10-row preview accompanied this update; the shelf now serves the current preview."
+            "10 example records accompanied this update; the current update's examples have replaced them."
           ]
         }
       ]
@@ -475,7 +475,7 @@
           "kind": "data",
           "changed": [
             "Dataset updated: 27,825 observations.",
-            "A 10-row preview downloads from the shelf."
+            "10 example records are available to download."
           ]
         },
         {
@@ -484,7 +484,7 @@
           "kind": "data",
           "changed": [
             "Dataset updated: 27,825 observations.",
-            "A 10-row preview accompanied this update; the shelf now serves the current preview."
+            "10 example records accompanied this update; the current update's examples have replaced them."
           ]
         },
         {
@@ -493,7 +493,7 @@
           "kind": "data",
           "changed": [
             "Dataset updated: 264,478 rows.",
-            "A 10-row preview accompanied this update; the shelf now serves the current preview."
+            "10 example records accompanied this update; the current update's examples have replaced them."
           ]
         },
         {
@@ -502,7 +502,7 @@
           "kind": "data",
           "changed": [
             "Dataset updated: 264,478 rows.",
-            "A 10-row preview accompanied this update; the shelf now serves the current preview."
+            "10 example records accompanied this update; the current update's examples have replaced them."
           ]
         },
         {
@@ -511,7 +511,7 @@
           "kind": "data",
           "changed": [
             "First published on Cedar Press: 264,478 rows.",
-            "A 10-row preview accompanied this update; the shelf now serves the current preview."
+            "10 example records accompanied this update; the current update's examples have replaced them."
           ]
         }
       ]
@@ -529,7 +529,7 @@
           "kind": "data",
           "changed": [
             "Dataset updated: 841,002 observations.",
-            "A 10-row preview downloads from the shelf."
+            "10 example records are available to download."
           ]
         },
         {
@@ -538,7 +538,7 @@
           "kind": "data",
           "changed": [
             "Dataset updated: 841,002 observations.",
-            "A 10-row preview accompanied this update; the shelf now serves the current preview."
+            "10 example records accompanied this update; the current update's examples have replaced them."
           ]
         },
         {
@@ -547,7 +547,7 @@
           "kind": "data",
           "changed": [
             "Dataset updated: 3,345,971 rows.",
-            "A 10-row preview accompanied this update; the shelf now serves the current preview."
+            "10 example records accompanied this update; the current update's examples have replaced them."
           ]
         },
         {
@@ -556,7 +556,7 @@
           "kind": "data",
           "changed": [
             "Dataset updated: 3,345,971 rows.",
-            "A 10-row preview accompanied this update; the shelf now serves the current preview."
+            "10 example records accompanied this update; the current update's examples have replaced them."
           ]
         },
         {
@@ -565,7 +565,7 @@
           "kind": "data",
           "changed": [
             "First published on Cedar Press: 3,345,971 rows.",
-            "A 10-row preview accompanied this update; the shelf now serves the current preview."
+            "10 example records accompanied this update; the current update's examples have replaced them."
           ]
         }
       ]
@@ -583,7 +583,7 @@
           "kind": "data",
           "changed": [
             "Dataset updated: 70,054 observations.",
-            "A 10-row preview downloads from the shelf."
+            "10 example records are available to download."
           ]
         },
         {
@@ -592,7 +592,7 @@
           "kind": "data",
           "changed": [
             "Dataset updated: 70,054 observations.",
-            "A 10-row preview accompanied this update; the shelf now serves the current preview."
+            "10 example records accompanied this update; the current update's examples have replaced them."
           ]
         },
         {
@@ -601,7 +601,7 @@
           "kind": "data",
           "changed": [
             "Dataset updated: 90,479 rows.",
-            "A 10-row preview accompanied this update; the shelf now serves the current preview."
+            "10 example records accompanied this update; the current update's examples have replaced them."
           ]
         },
         {
@@ -610,7 +610,7 @@
           "kind": "data",
           "changed": [
             "Dataset updated: 90,479 rows.",
-            "A 10-row preview accompanied this update; the shelf now serves the current preview."
+            "10 example records accompanied this update; the current update's examples have replaced them."
           ]
         },
         {
@@ -619,7 +619,7 @@
           "kind": "data",
           "changed": [
             "First published on Cedar Press: 90,479 rows.",
-            "A 10-row preview accompanied this update; the shelf now serves the current preview."
+            "10 example records accompanied this update; the current update's examples have replaced them."
           ]
         }
       ]
@@ -637,7 +637,7 @@
           "kind": "data",
           "changed": [
             "Dataset updated: 3,725 observations.",
-            "A 10-row preview downloads from the shelf."
+            "10 example records are available to download."
           ]
         },
         {
@@ -646,7 +646,7 @@
           "kind": "data",
           "changed": [
             "Dataset updated: 3,725 observations.",
-            "A 10-row preview accompanied this update; the shelf now serves the current preview."
+            "10 example records accompanied this update; the current update's examples have replaced them."
           ]
         },
         {
@@ -655,7 +655,7 @@
           "kind": "data",
           "changed": [
             "Dataset updated: 3,725 observations.",
-            "A 10-row preview accompanied this update; the shelf now serves the current preview."
+            "10 example records accompanied this update; the current update's examples have replaced them."
           ]
         },
         {
@@ -664,7 +664,7 @@
           "kind": "data",
           "changed": [
             "Dataset updated: 5,930 rows.",
-            "A 10-row preview accompanied this update; the shelf now serves the current preview."
+            "10 example records accompanied this update; the current update's examples have replaced them."
           ]
         },
         {
@@ -673,7 +673,7 @@
           "kind": "data",
           "changed": [
             "Dataset updated: 5,930 rows.",
-            "A 10-row preview accompanied this update; the shelf now serves the current preview."
+            "10 example records accompanied this update; the current update's examples have replaced them."
           ]
         },
         {
@@ -682,8 +682,8 @@
           "kind": "data",
           "changed": [
             "First published on Cedar Press: row count unresolved.",
-            "No public preview is available yet.",
-            "Readiness is blocked, with 3 named blockers recorded in the manifest."
+            "No example records are available yet.",
+            "This update is on hold, for 3 recorded reasons."
           ]
         }
       ]
@@ -701,7 +701,7 @@
           "kind": "data",
           "changed": [
             "Dataset updated: 43 observations.",
-            "A 10-row preview downloads from the shelf."
+            "10 example records are available to download."
           ]
         },
         {
@@ -710,7 +710,7 @@
           "kind": "data",
           "changed": [
             "Dataset updated: 43 observations.",
-            "A 10-row preview accompanied this update; the shelf now serves the current preview."
+            "10 example records accompanied this update; the current update's examples have replaced them."
           ]
         },
         {
@@ -719,7 +719,7 @@
           "kind": "data",
           "changed": [
             "Dataset updated: 27 observations.",
-            "A 10-row preview accompanied this update; the shelf now serves the current preview."
+            "10 example records accompanied this update; the current update's examples have replaced them."
           ]
         },
         {
@@ -728,8 +728,8 @@
           "kind": "data",
           "changed": [
             "Dataset updated: 14,868 rows.",
-            "No public preview is available yet.",
-            "Readiness is blocked, with 1 named blocker recorded in the manifest."
+            "No example records are available yet.",
+            "This update is on hold, for 1 recorded reason."
           ]
         },
         {
@@ -738,7 +738,7 @@
           "kind": "data",
           "changed": [
             "Dataset updated: 14,868 rows.",
-            "A 10-row preview accompanied this update; the shelf now serves the current preview."
+            "10 example records accompanied this update; the current update's examples have replaced them."
           ]
         },
         {
@@ -747,7 +747,7 @@
           "kind": "data",
           "changed": [
             "Dataset updated: 14,868 rows.",
-            "A 10-row preview accompanied this update; the shelf now serves the current preview."
+            "10 example records accompanied this update; the current update's examples have replaced them."
           ]
         },
         {
@@ -756,7 +756,7 @@
           "kind": "data",
           "changed": [
             "First published on Cedar Press: 5,757 rows.",
-            "A 10-row preview accompanied this update; the shelf now serves the current preview."
+            "10 example records accompanied this update; the current update's examples have replaced them."
           ]
         }
       ]
@@ -774,7 +774,7 @@
           "kind": "data",
           "changed": [
             "Dataset updated: 11,120 observations.",
-            "A 10-row preview downloads from the shelf."
+            "10 example records are available to download."
           ]
         },
         {
@@ -783,7 +783,7 @@
           "kind": "data",
           "changed": [
             "Dataset updated: 11,120 observations.",
-            "A 10-row preview accompanied this update; the shelf now serves the current preview."
+            "10 example records accompanied this update; the current update's examples have replaced them."
           ]
         },
         {
@@ -792,7 +792,7 @@
           "kind": "data",
           "changed": [
             "Dataset updated: 283,716 rows.",
-            "A 10-row preview accompanied this update; the shelf now serves the current preview."
+            "10 example records accompanied this update; the current update's examples have replaced them."
           ]
         },
         {
@@ -801,7 +801,7 @@
           "kind": "data",
           "changed": [
             "Dataset updated: 283,716 rows.",
-            "A 10-row preview accompanied this update; the shelf now serves the current preview."
+            "10 example records accompanied this update; the current update's examples have replaced them."
           ]
         },
         {
@@ -810,7 +810,7 @@
           "kind": "data",
           "changed": [
             "First published on Cedar Press: 283,716 rows.",
-            "A 10-row preview accompanied this update; the shelf now serves the current preview."
+            "10 example records accompanied this update; the current update's examples have replaced them."
           ]
         }
       ]
@@ -828,7 +828,7 @@
           "kind": "data",
           "changed": [
             "Dataset updated: 89 observations.",
-            "A 10-row preview downloads from the shelf."
+            "10 example records are available to download."
           ]
         },
         {
@@ -837,7 +837,7 @@
           "kind": "data",
           "changed": [
             "Dataset updated: 89 observations.",
-            "A 10-row preview accompanied this update; the shelf now serves the current preview."
+            "10 example records accompanied this update; the current update's examples have replaced them."
           ]
         },
         {
@@ -846,7 +846,7 @@
           "kind": "data",
           "changed": [
             "Dataset updated: 131,090 rows.",
-            "A 10-row preview accompanied this update; the shelf now serves the current preview."
+            "10 example records accompanied this update; the current update's examples have replaced them."
           ]
         },
         {
@@ -855,7 +855,7 @@
           "kind": "data",
           "changed": [
             "Dataset updated: 131,090 rows.",
-            "A 10-row preview accompanied this update; the shelf now serves the current preview."
+            "10 example records accompanied this update; the current update's examples have replaced them."
           ]
         },
         {
@@ -864,7 +864,7 @@
           "kind": "data",
           "changed": [
             "First published on Cedar Press: 123,293 rows.",
-            "A 10-row preview accompanied this update; the shelf now serves the current preview."
+            "10 example records accompanied this update; the current update's examples have replaced them."
           ]
         }
       ]
@@ -882,7 +882,7 @@
           "kind": "data",
           "changed": [
             "Dataset updated: 193 observations.",
-            "A 10-row preview downloads from the shelf."
+            "10 example records are available to download."
           ]
         },
         {
@@ -891,7 +891,7 @@
           "kind": "data",
           "changed": [
             "First published on Cedar Press: 193 observations.",
-            "A 10-row preview accompanied this update; the shelf now serves the current preview."
+            "10 example records accompanied this update; the current update's examples have replaced them."
           ]
         }
       ]
@@ -909,7 +909,7 @@
           "kind": "data",
           "changed": [
             "Dataset updated: 151,715 observations.",
-            "A 10-row preview downloads from the shelf."
+            "10 example records are available to download."
           ]
         },
         {
@@ -918,7 +918,7 @@
           "kind": "data",
           "changed": [
             "First published on Cedar Press: 151,715 observations.",
-            "A 10-row preview accompanied this update; the shelf now serves the current preview."
+            "10 example records accompanied this update; the current update's examples have replaced them."
           ]
         }
       ]
@@ -994,7 +994,7 @@
         "route": "content"
       },
       {
-        "q": "How are awards to subsidiaries and housing authorities credited to their Nation?",
+        "q": "How are awards to subsidiaries and housing authorities credited to their nation?",
         "kind": "Trace",
         "route": "construct"
       },
@@ -1062,7 +1062,7 @@
         "route": "content"
       },
       {
-        "q": "How are notices matched to the Nations and Native Hawaiian organizations they name?",
+        "q": "How are notices matched to the nations and Native Hawaiian organizations they name?",
         "kind": "Trace",
         "route": "construct"
       },
@@ -1074,12 +1074,12 @@
     ],
     "lobbying": [
       {
-        "q": "What does this collection include beyond registered lobbying?",
+        "q": "What does each lobbying disclosure in this collection include?",
         "kind": "Describe",
         "route": "content"
       },
       {
-        "q": "How is each activity tied to the tribe or organization behind it?",
+        "q": "How is each filing tied to the tribe or organization behind it?",
         "kind": "Trace",
         "route": "construct"
       },
@@ -1096,7 +1096,7 @@
         "route": "content"
       },
       {
-        "q": "How are vendors rolled up to their parent Nation or corporation?",
+        "q": "How are vendors rolled up to their parent nation or corporation?",
         "kind": "Trace",
         "route": "construct"
       },
@@ -1130,7 +1130,7 @@
         "route": "content"
       },
       {
-        "q": "How are production and disbursements matched to Nations and allottees?",
+        "q": "How are production and disbursements matched to nations and allottees?",
         "kind": "Trace",
         "route": "construct"
       },
@@ -1181,7 +1181,7 @@
         "route": "content"
       },
       {
-        "q": "How are subsidiaries and joint ventures tied to the Nation or corporation behind them?",
+        "q": "How are subsidiaries and joint ventures tied to the nation or corporation behind them?",
         "kind": "Trace",
         "route": "construct"
       },

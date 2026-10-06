@@ -176,7 +176,7 @@ export default function CedarPressWhatsNew() {
           {model && !current ? <dl className="cp-nh__pulse" aria-label="Update activity">
             <dt>Updates, last {activity.days} days</dt>
             <dd className="cp-nh__pulselead">
-              {activity.releases} {activity.releases === 1 ? "release" : "releases"}
+              {activity.releases} {activity.releases === 1 ? "update" : "updates"}
             </dd>
             {activity.releases ? (
               <>
@@ -186,7 +186,7 @@ export default function CedarPressWhatsNew() {
                 </dd>
                 <dd>
                   {activity.methodology} methodology{" "}
-                  {activity.methodology === 1 ? "release" : "releases"}
+                  {activity.methodology === 1 ? "update" : "updates"}
                 </dd>
               </>
             ) : null}
@@ -219,7 +219,7 @@ export default function CedarPressWhatsNew() {
               </button>
             ))}
           </div>
-          <div className="cp-filter__set" role="group" aria-label="Filter by release kind">
+          <div className="cp-filter__set" role="group" aria-label="Filter by update kind">
             <span className="cp-filter__cap">Kind</span>
             {[
               ["all", "All"],
@@ -241,8 +241,8 @@ export default function CedarPressWhatsNew() {
             type="search"
             value={query}
             onChange={(event) => choose(setQuery)(event.target.value)}
-            placeholder="Search releases…"
-            aria-label="Search releases"
+            placeholder="Search updates…"
+            aria-label="Search updates"
           />
           <p className="cp-filter__count" aria-live="polite">
             {model ? `${entries.length} ${current ? "available collections" : "updates"}` : "Updates unavailable"}
@@ -291,7 +291,7 @@ export default function CedarPressWhatsNew() {
                       {/* The version is the release's permalink: a citation
                           names one, and #funding-v4-2 gives the name a stable
                           address to point at. */}
-                      <a className="cp-feed__ver" href={`#${anchor}`} title="Link to this release">
+                      <a className="cp-feed__ver" href={`#${anchor}`} title="Link to this update">
                         {current ? "Link" : "Updated"}
                       </a>
                     </h2>
@@ -362,7 +362,7 @@ export default function CedarPressWhatsNew() {
                               detail: {
                                 id: entry.id,
                                 name,
-                                q: entry.date ? `What changed in the ${name} preview on ${entry.date}?` : `What information is available in ${name}?`,
+                                q: entry.date ? `What changed in ${name} on ${entry.date}?` : `What information is available in ${name}?`,
                               },
                             }),
                           )
@@ -377,7 +377,7 @@ export default function CedarPressWhatsNew() {
             })}
           </ol>
         ) : (
-          <p className="cp-feed__none">{model ? "No available updates match that combination." : "The service has not supplied current release information."}</p>
+          <p className="cp-feed__none">{model ? "No available updates match that combination." : "The service has not supplied current update information."}</p>
         )}
 
         {/* The list and the control that continues it are one thing, so

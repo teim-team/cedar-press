@@ -118,7 +118,34 @@ function codebookField(key, column) {
 }
 
 /** The plain-English label for a column, or a heading made from its name. */
+/**
+ * Reader labels that win over the codebook's, where the codebook carries the
+ * column name in lower case ("uei", "related entity name") or names a column
+ * by its storage shape. By collection, then column; "*" applies everywhere.
+ */
+const READER_LABELS = Object.freeze({
+  "*": Object.freeze({ native_owner: "Native owner", native_owner_basis: "Native owner evidence", native_owner_cedar_uid: "Native owner Cedar ID" }),
+  need: Object.freeze({
+    enterprise_name: "Enterprise", related_entity_name: "Parent or related company", relationship_type: "Relationship",
+    ownership_extent: "Ownership", uei: "UEI (SAM.gov)", cage_code: "CAGE code", source_reported_name: "Name as the source reports it",
+    owner_name: "Reviewed owner", owner_scope: "Owner scope", verified_claims: "Verified claims", reviewed_on: "Reviewed on",
+    review_reason: "Review basis", cage_evidence_scope: "CAGE evidence", subject_binding: "How the source was matched",
+  }),
+  "foundation-corporate-giving": Object.freeze({
+    funder_name: "Funder", recipient_name: "Recipient", amount_exact_usd: "Amount (USD)", amount_basis: "Amount type",
+    financial_status: "Status", announcement_date: "Announced", recipient_name_reported: "Recipient as reported", report_year: "Report year",
+    funder_class: "Funder type", recipient_affiliation: "Recipient affiliation", payment_date: "Paid",
+  }),
+  owned: Object.freeze({ stated_tribe: "Tribe (as listed)", certifying_authority_name: "Certifying authority", service_category: "Services" }),
+  plot: Object.freeze({ source_parcel_id: "Parcel ID", land_record_kind: "Land record", owner_name_raw: "Owner as recorded", recorded_acres: "Acres", county_fips: "County FIPS", source_record_url: "Source record" }),
+  nonprofits: Object.freeze({ inclusion_category: "Category", ntee_code: "NTEE code", bmf_revenue_usd: "Revenue (IRS)" }),
+  subcontracting: Object.freeze({ prime_name: "Prime contractor", subcontractor_name: "Subcontractor" }),
+});
+
 export function labelFor(key, column) {
+  const collection = String(key ?? "").split("/")[0];
+  const reader = READER_LABELS[collection]?.[column] ?? READER_LABELS["*"][column];
+  if (reader) return reader;
   const field = codebookField(key, column);
   if (field) return field.label;
   if (Object.hasOwn(CUSTOMER_COLUMNS, column)) return CUSTOMER_COLUMNS[column].label;

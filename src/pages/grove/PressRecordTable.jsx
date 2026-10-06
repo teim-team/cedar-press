@@ -35,7 +35,8 @@ import { money, short, reportedAmountText } from "../../features/grove/recordCol
 import { scrollEdges } from "../../features/grove/scrollEdges.js";
 import SourceCitation from "./SourceCitation.jsx";
 import { safeSourceUrl } from "../../features/grove/sourcePresentation.js";
-import { readerValueLabel, unlinkedRecordSubject } from "../../features/grove/readerPresentation.js";
+import { readableCode, readerValueLabel, repairMojibake, unlinkedRecordSubject } from "../../features/grove/readerPresentation.js";
+import { COLUMN_FALLBACKS } from "../../features/grove/showcase.js";
 
 export function Human({ column, value, contract, item = null }) {
   if (column === "__subject") return item?.entity?.withheld || item?.linkStatus === "withheld" ? WITHHELD_TEXT : item?.subject ?? item?.entity?.name ?? "Not provided";
@@ -47,8 +48,26 @@ export function Human({ column, value, contract, item = null }) {
   }
   if ((column === contract?.source || column === SOURCE_LINK_COLUMN) && item?.sourceDetails) return <SourceCitation source={item.sourceDetails} compact />;
   if (["source_inbox", "source_files", "link_ledger_source_file", "source_dataset", "raw_path", "storage_path"].includes(column)) return "Retained in internal provenance";
+  // A blank column whose fact the record carries in its reported form (a
+  // gift's recipient as the source printed it) shows that form.
+  if (value === "" || value == null) {
+    const fallback = COLUMN_FALLBACKS[item?.collection]?.[column];
+    if (fallback && String(item?.row?.[fallback] ?? "").trim()) value = item.row[fallback];
+  }
+  // The table's own entity columns read blank where the record names its
+  // Native party through another role (a subaward's subrecipient, a
+  // payment's beneficiary): the register's name for that party is shown
+  // rather than a blank beside its ID.
+  if ((value === "" || value == null) && item?.entity?.entities?.length) {
+    const first = item.entity.entities[0];
+    if (column === contract?.entity_name && first.name) return first.name;
+    if (column === contract?.entity_role_column && first.role) return readerValueLabel(item.collection, "cedar_entity_role", first.role);
+  }
   if (value === "" || value == null || isBareScheme(value)) return "Not provided";
-  const raw = String(value);
+  // FPDS's inherently-governmental-function marker is a code, not a
+  // description of the work.
+  if (/^IGF::[A-Z]{2}::IGF$/.test(String(value).trim())) return "Not provided";
+  const raw = repairMojibake(String(value));
   if (column === "record_type" && contract?.row_type_contracts?.[raw]?.label) return contract.row_type_contracts[raw].label;
   if (/^[A-Za-z]:[\\/]|^file:\/\/|^\\\\/.test(raw)) return "Retained in internal provenance";
   if (isWellFormedUrl(raw)) {
@@ -80,7 +99,7 @@ export function Human({ column, value, contract, item = null }) {
       // Not JSON: shown as it is.
     }
   }
-  return text;
+  return readableCode(text);
 }
 
 /** A scope element in words: the population and the relationship. */

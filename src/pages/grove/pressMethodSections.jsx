@@ -324,8 +324,8 @@ export function IdentityPair() {
           </ul>
           {identifier.live ? null : (
             <p className="cp-idp__pending">
-              <span className="cp-idp__pendingtag">In progress</span>
-              <span>The register is being minted. The form and its rules are settled.</span>
+              <span className="cp-idp__pendingtag">Not issued yet</span>
+              <span>The form and its rules are settled. No published record carries this identifier yet.</span>
             </p>
           )}
           <details className="cp-idp__tech">
@@ -552,7 +552,7 @@ export function WhyBoth() {
           <h3 className="cp-wb__name">{WHY_BOTH.business.name}</h3>
           <p className="cp-wb__role">{WHY_BOTH.business.role}</p>
           {WHY_BOTH.business.pending ? (
-            <p className="cp-wb__prov">The form, not this enterprise&rsquo;s identifier. The business register is being minted.</p>
+            <p className="cp-wb__prov">An example of the form, not this enterprise&rsquo;s identifier. Business ids are not issued yet.</p>
           ) : null}
         </article>
       </div>

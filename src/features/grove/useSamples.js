@@ -24,6 +24,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { EMPTY_REGISTER, parseCsv, universalRows } from "./explore.js";
 import { fetchSampleText, onBackOnline } from "./sampleFetch.js";
+import { showcaseItems } from "./showcase.js";
+import { enrichSample } from "./exampleEnrichment.js";
 
 /**
  * `tables` is a list of `{ key, path, sha256 }` (exploreTables). Returns the rows of every table that
@@ -40,7 +42,7 @@ export function useSampleRows(tables, register = EMPTY_REGISTER) {
     for (const t of tables) {
       if (loaded.has(t.path) || failed.has(t.path) || pending.current.has(t.path)) continue;
       const promise = fetchSampleText(t.path, { sha256: t.sha256 })
-        .then((text) => parseCsv(text))
+        .then((text) => enrichSample(t.key.split("/")[0], parseCsv(text)))
         .then(
           (parsed) => {
             pending.current.delete(t.path);
@@ -68,7 +70,9 @@ export function useSampleRows(tables, register = EMPTY_REGISTER) {
       if (!loaded.has(t.path)) { loading = true; continue; }
       const parsed = loaded.get(t.path);
       columns.set(t.key, parsed.columns);
-      rows.push(...universalRows(t.key, parsed.rows, register));
+      // The showcase order and exclusions (showcase.js): the same records,
+      // in the order and selection the door shows them.
+      rows.push(...showcaseItems(t.key.split("/")[0], universalRows(t.key, parsed.rows, register)));
     }
     return { rows, missing, columns, loading, retry };
     // eslint-disable-next-line react-hooks/exhaustive-deps

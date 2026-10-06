@@ -330,8 +330,8 @@ export default function CedarPressMethods() {
           <p className="cp-mh__sub">
             Source records use inconsistent names and identifiers, so one organization appears
             under several spellings. Cedar assigns a permanent identifier to each Native
-            government, enterprise and firm it can resolve, and maintains it through renames,
-            acquisitions and changes in legal status. Maintaining that identity layer is what
+            nation and organization it can resolve, and keeps it through renames and
+            changes in status. Maintaining that identity layer is what
             lets the same organization be compared across collections, releases and new
             analytical tools without rebuilding the underlying record each time.
           </p>
@@ -350,7 +350,7 @@ export default function CedarPressMethods() {
             </li>
             <li>
               <b>Entity</b>
-              <span>The nation, enterprise or firm a record is about, held by a permanent Cedar id.</span>
+              <span>The nation or organization a record is about, held by its Cedar id.</span>
             </li>
             <li>
               <b>Record</b>
@@ -388,12 +388,11 @@ export default function CedarPressMethods() {
                   <p>
                     Every source is available to the public: government records, regulatory
                     and securities filings, and published reporting, so the document a record
-                    cites is one anyone can obtain. Owned&rsquo;s certified-business rosters
-                    are requested from each nation&rsquo;s TERO or commerce office through its
-                    publicly listed contact, and whether the office releases one is the
-                    office&rsquo;s decision. Owned listings are published only on the terms the
-                    nation sets, and until it sets them Owned reports aggregates from the
-                    roster, not its entries.
+                    cites is one anyone can obtain. The certified-business rosters behind
+                    Individual Native-Owned Businesses are requested from each nation&rsquo;s
+                    TERO or commerce office through its publicly listed contact, and whether
+                    the office releases one is the office&rsquo;s decision. A listing appears
+                    by name only on the terms the nation sets.
                   </p>
                   <p>
                     Select a collection in the figure to see which sources it is built from and
@@ -497,16 +496,14 @@ export default function CedarPressMethods() {
               claim="Coverage is measured and published with its reasons, a record can carry no entity by design, and Cedar does not infer what a nation has not said about its own."
             >
               {/* Codex, PR #77: the linkage claim once promised the "whole
-                  footprint". LINKAGE_COVERAGE.md measures 70.93% across the
-                  flagships and 6.24% on Natural Resource Revenues, so the
-                  measured figure sits beside the claim, in the open. */}
+                  footprint". The note says coverage varies by collection and
+                  why, without the dated cross-collection figures, which were
+                  measured on a smaller shelf than the one readers see. */}
               <p className="cp-msec__aside">
                 {LINKAGE_COVERAGE.note}
-                <Explain label="how the coverage figure is counted">
-                  <p><span className="cp-ex1__cap">What the denominator is</span>{LINKAGE_COVERAGE.caveat}</p>
-                  <p><span className="cp-ex1__cap">When it was measured</span>{LINKAGE_COVERAGE.measuredOn}, against the built collections, by <code>{LINKAGE_COVERAGE.source}</code>.</p>
-                </Explain>{" "}
-                Measured {LINKAGE_COVERAGE.measuredOn} against the built collections.
+                <Explain label="why there is no single coverage figure">
+                  <p><span className="cp-ex1__cap">Why each collection reports its own</span>{LINKAGE_COVERAGE.caveat}</p>
+                </Explain>
               </p>
               {/* Two of these three are intentional and stay intentional however
                   long Cedar runs: a notice addressed to every federally

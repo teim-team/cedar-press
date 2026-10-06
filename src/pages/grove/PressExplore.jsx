@@ -977,7 +977,8 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
   // The column order is `columnPlan`, shared with the door so the public
   // preview and the product are literally the same table. What used to be
   // thirty lines of role-first reasoning here is that function's docstring.
-  const { defaults, all: allColumns } = columnPlan(table?.key ?? null, contract, tableColumns);
+  const tableRows = table ? rows.filter((item) => item.key === table.key).map((item) => item.row) : [];
+  const { defaults, all: allColumns } = columnPlan(table?.key ?? null, contract, tableColumns, tableRows);
   const shownColumns = table ? (showAll || !defaults.length ? allColumns : defaults) : [];
   const yearBasis = table
     ? contract?.year_basis

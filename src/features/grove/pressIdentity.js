@@ -271,7 +271,7 @@ export const WITHHELD_CLASS = "Individually Native-owned business";
 
 /** What Cedar publishes about an individually owned firm, said plainly. */
 export const WITHHELD_NOTE =
-  "A firm carries its business id and its name whatever it is named after. Where a nation's own commerce office published its certified businesses and shared them under stated terms, they are in the collection by name. Where the only evidence is a federal award file, the firm's name, identifiers and business address publish as the public business records they are, the same fields SAM and USAspending publish for every federal awardee; what Cedar does not publish is internal working text, and any aggregate cell that resolves to fewer than three firms is suppressed. The identifier holds both cases in one series.";
+  "A firm is published under its own name whatever it is named after. Where a nation's own commerce office published its certified businesses and shared them under stated terms, they are in the collection by name. Where the only evidence is a federal award file, the firm's name, identifiers and business address publish as the public business records they are, the same fields SAM and USAspending publish for every federal awardee; what Cedar does not publish is internal working text, and any aggregate cell that resolves to fewer than three firms is suppressed.";
 
 /**
  * MEASURED LINKAGE COVERAGE, and why it is on the page.
@@ -344,12 +344,21 @@ export const LINKAGE_COVERAGE = Object.freeze({
   unmeasured: 7848,
   mostlyStructural: Object.freeze({ label: "Natural Resource Revenues", pct: "6.24%", share: "97.6%" }),
   mostlyUnresolved: Object.freeze({ label: "Federal Prime Contracting", pct: "65.02%", share: "84.8%" }),
-  // The caveat the generated file puts in bold, carried across verbatim in
-  // substance: a reader who takes 70.93% as a quality score has read it wrong.
+  // The caveat the generated file puts in bold, carried across in substance:
+  // a reader who takes a cross-collection total as a quality score has read
+  // it wrong.
+  //
+  // The page prints no figure from the generated file (owner review,
+  // 2026-10-06). That file was measured on thirteen collections and the
+  // shelf now carries fourteen, so its total and its split describe a
+  // population the reader cannot see. The note keeps the two facts that
+  // survive a re-measurement: coverage varies by collection, and a record can
+  // carry no entity by design. The figures above stay, held to the file by
+  // `pressIdentity.test.js`, for the day the page quotes them again.
   caveat:
-    "The total sums thirteen tables whose rows are not the same kind of thing. A contract award and a NAGPRA notice each count as one, so the figure is a measure of scale and never of quality. The per-dataset rows are the ones to quote, and each collection publishes its own.",
+    "A total across collections sums tables whose rows are not the same kind of thing. A contract award and a NAGPRA notice each count as one, so any total is a measure of scale and never of quality. The figure to quote is each collection's own.",
   note:
-    "Across the thirteen measured flagships, 1,485,083 of 2,093,620 rows carry a resolved Cedar entity, and the spread runs from 100% to 6.24%. What a low number means is not the same in two collections: 97.6% of what is unlinked in Natural Resource Revenues could never carry an entity, because a royalty line names a lease and no organization, while 84.8% of what is unlinked in Federal Prime Contracting could be resolved and is not yet. Of 608,537 unlinked rows across all thirteen, 600,689 sit in the four flagships that publish a third denominator, and there 82,055 could never name an entity while 518,634 could and do not. The remaining 7,848 sit in nine flagships where that split has not been measured, and they are not counted either way. A cut returns the rows Cedar can stand behind, and every collection publishes its own figure.",
+    "How many records carry a resolved Cedar entity varies by collection, from every record in some to a small share in others. A low share does not mean the same thing everywhere. In Natural Resource Revenues most unlinked records could never carry an entity, because a royalty line names a lease and no organization. In Federal Prime Contracting many unlinked records could carry one and do not yet. A record can carry no entity by design, and the reasons are below. A cut returns the records Cedar can stand behind, and every collection publishes its own figure.",
 });
 
 /**
