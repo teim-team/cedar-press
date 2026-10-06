@@ -37,10 +37,10 @@ test("the reach figure is the measured count of kinds of source", () => {
   assert.doesNotMatch(SOURCE_REACH_FIGURE, /\+/);
 });
 
-// Owner, 2026-09-27: the source count is never "websites". Since 2026-10-06 it
-// is stated with its measured unit, "kinds of source", on the landing page
-// and in Cedar's answers alike, and no surface repeats the unmeasured 700.
-test("the source count is never worded as websites", () => {
+// Owner, 2026-09-27: the source count is never "websites". Owner,
+// 2026-10-06: the landing page and Cedar's answers state no source count at
+// all, and no surface repeats the unmeasured 700.
+test("the source count is never worded as websites, and no page states one", () => {
   const files = [
     new URL("./sourceRotation.js", import.meta.url),
     new URL("./doorCedar.js", import.meta.url),
@@ -49,7 +49,7 @@ test("the source count is never worded as websites", () => {
   for (const file of files) {
     const text = readFileSync(file, "utf8");
     assert.doesNotMatch(text, /(?:700\+?|SOURCE_REACH_FIGURE\}?|distinct|source) (?:source )?websites/i, file.pathname);
-    assert.match(text, /kinds of (?:public )?source/, file.pathname);
+    if (!file.pathname.endsWith("sourceRotation.js")) assert.doesNotMatch(text, /kinds of (?:public )?source/, file.pathname);
     assert.doesNotMatch(text, /700\+|more than 700|documented upstream sources|total sources/, file.pathname);
   }
 });

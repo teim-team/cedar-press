@@ -233,8 +233,9 @@ test.describe("the gate", () => {
     for (const label of ["Patent publication and family records", "Historical S&P and Fitch ratings", "AM Best insurance financial-strength releases", "IRS Form 990-PF grant schedules", "Recorded deeds and land transfers"]) {
       await expect(panel).toContainText(label);
     }
-    await expect(panel.locator(".cp-hero3__proofcount")).toContainText(/^\d+ kinds of source behind/);
-    await expect(panel.locator(".cp-hero3__proofcount")).not.toContainText("700");
+    // Owner, 2026-10-06: no source count and no pause control on the band.
+    await expect(panel.locator(".cp-hero3__proofcount")).toHaveCount(0);
+    await expect(panel.getByRole("button")).toHaveCount(0);
   });
 
   // The greeting note above Ask Cedar (owner, 2026-09-27): it rises once the
@@ -280,7 +281,7 @@ test.describe("the gate", () => {
     await expect(bar).toHaveCSS("backdrop-filter", "none");
     await expect(page.locator(".cp-hero3__reach")).toHaveCount(0);
     await expect(page.locator(".cp-hero3")).not.toContainText("Lumecon builds its datasets and research from");
-    await expect(page.locator(".cp-hero3__proofcount")).toContainText(/^\d+ kinds of source behind/);
+    await expect(page.locator(".cp-hero3__proofcount")).toHaveCount(0);
   });
 
   // The landing layout of 2026-09-27: the source banner in the navy
@@ -316,12 +317,6 @@ test.describe("the gate", () => {
     await runs.hover();
     expect((await states()).every((s) => s === "paused")).toBe(true);
     await page.mouse.move(0, 0);
-    const toggle = page.getByRole("button", { name: "Pause the moving source list" });
-    await toggle.click();
-    await page.mouse.move(0, 0);
-    expect((await states()).every((s) => s === "paused")).toBe(true);
-    await page.getByRole("button", { name: "Play the moving source list" }).click();
-    await page.mouse.move(0, 0);
     expect((await states()).every((s) => s === "running")).toBe(true);
     await expect(runs).toHaveCSS("user-select", "none");
     await runs.evaluate((el) => el.scrollIntoView({ block: "center" }));
@@ -342,7 +337,6 @@ test.describe("the gate", () => {
     const marquees = page.locator(".cp-why__sources .cp-hero3__marquee");
     const names = await marquees.evaluateAll((els) => els.map((el) => getComputedStyle(el).animationName));
     expect(names.every((n) => n === "none")).toBe(true);
-    await expect(page.locator(".cp-why__toggle")).toBeHidden();
     // Every source wraps onto the page rather than being clipped.
     const clipped = await page.locator(".cp-why__runs .cp-hero3__run:not([aria-hidden]) li").evaluateAll((lis) => lis.filter((li) => {
       const box = li.getBoundingClientRect();

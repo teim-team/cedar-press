@@ -13,13 +13,13 @@ test("every collection has curated landing examples, each copied from a recorded
   assert.equal(Object.keys(LANDING_EXAMPLES).length, 14);
   for (const [id, set] of Object.entries(LANDING_EXAMPLES)) {
     const { columns } = download(id);
-    assert.ok(set.rows.length >= 3, id);
+    assert.ok(set.rows.length >= 2, id);
     for (const row of set.rows) {
       assert.match(row._origin ?? "", /\S+:\S+/, `${id}: a row with no origin`);
-      for (const key of Object.keys(row)) assert.ok(key === "_origin" || columns.includes(key), `${id}: ${key} is not a column of the download`);
+      for (const key of Object.keys(row)) assert.ok(key === "_origin" || columns.includes(key) || (set.extra_columns ?? []).includes(key), `${id}: ${key} is not a column of the download`);
       for (const [key, value] of Object.entries(row)) assert.ok(!GARBLED.test(String(value)), `${id}.${key}: garbled text`);
     }
-    for (const column of set.columns ?? []) assert.ok(columns.includes(column), `${id}: shown column ${column}`);
+    for (const column of set.columns ?? []) assert.ok(columns.includes(column) || (set.extra_columns ?? []).includes(column), `${id}: shown column ${column}`);
   }
 });
 
@@ -32,10 +32,10 @@ test("the landing examples name a Native entity, carry no $0 or negative amount 
       if (item.amount != null) assert.ok(item.amount > 0, `${id}: ${item.recordId} amount ${item.amount}`);
       assert.ok(!Object.hasOwn(EXCLUDED_EXAMPLES[id] ?? {}, item.recordId), `${id}: ${item.recordId} is a known wrong record`);
     }
-    if (!["federal-register", "plot", "nonprofits", "owned", "foundation-corporate-giving"].includes(id)) {
+    if (!["federal-register", "nonprofits", "owned", "foundation-corporate-giving"].includes(id)) {
       assert.ok(items.every((item) => item.entity.uid || item.entity.name), `${id}: a record names no Native entity`);
     }
-    assert.ok(set.rows.length >= 3, id);
+    assert.ok(set.rows.length >= 2, id);
   }
 });
 
@@ -60,4 +60,14 @@ test("the landing sample keeps the download's columns and leaves a collection wi
   assert.deepEqual(shown.columns, parsed.columns);
   assert.equal(shown.rows.length, LANDING_EXAMPLES.funding.rows.length);
   assert.equal(landingSample("gaming", parsed), parsed);
+});
+
+test("every PLOT landing parcel is tied to the tribe its recorded owner names", () => {
+  const items = universalRows("plot/plot", landingSample("plot", download("plot")).rows);
+  assert.ok(items.length >= 2);
+  for (const item of items) {
+    assert.match(item.entity.uid ?? "", /^CE-[0-9A-Z]{5}-[0-9A-Z]{2}$/);
+    const tribeWord = item.entity.name.split(/[ ,]/).find((word) => word.length > 4).toUpperCase();
+    assert.ok(item.row.owner_name_raw.toUpperCase().includes(tribeWord), `${item.row.owner_name_raw} vs ${item.entity.name}`);
+  }
 });

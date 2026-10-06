@@ -2871,19 +2871,9 @@
 .teim-rd .cp-why__runs { position: relative; -webkit-user-select: none; user-select: none; }
 .teim-rd .cp-why__runs::after { content: ''; position: absolute; inset: 0; z-index: 1; }
 /* Paused on hover over the runs (the layer above them takes the pointer, so
- * the hover is read on the container) and by the band's own Pause button,
- * which is the keyboard's way to stop it: nothing inside the runs takes
- * focus, and pausing on the button's own focus made Play look broken. */
-.teim-rd .cp-why__runs:hover .cp-hero3__marquee,
-.teim-rd .cp-why__sources.is-paused .cp-hero3__marquee { animation-play-state: paused; }
-.teim-rd .cp-why__toggle { display: inline-flex; align-items: center; gap: 0.35rem; min-height: 32px; min-width: 44px; padding: 0.2rem 0.6rem; border: 1px solid rgba(9, 19, 43, 0.28); border-radius: 999px; background: #fff; color: var(--door-navy); font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; }
-.teim-rd .cp-why__toggle svg { width: 0.7rem; height: 0.7rem; }
-.teim-rd .cp-why__toggle:hover { border-color: var(--door-navy); }
-.teim-rd .cp-why__toggle:focus-visible { outline: 2px solid var(--door-action-bottom); outline-offset: 2px; }
-@media (pointer: coarse) { .teim-rd .cp-why__toggle { min-height: 44px; } }
-/* Nothing moves under reduced motion, so there is nothing to pause. */
-@media (prefers-reduced-motion: reduce) { .teim-rd .cp-why__toggle { display: none; } }
-.teim-rd .cp-why__sources .cp-hero3__proofcount { color: var(--door-action-bottom); }
+ * the hover is read on the container). Owner, 2026-10-06: no Pause button;
+ * under reduced motion the band does not move at all. */
+.teim-rd .cp-why__runs:hover .cp-hero3__marquee { animation-play-state: paused; }
 .teim-rd .cp-why__sources .cp-nowrap { white-space: nowrap; }
 .teim-rd .cp-why__sources .cp-hero3__run li { color: var(--door-navy); }
 .teim-rd .cp-why__sources .cp-hero3__run li::before { background: rgba(9, 19, 43, 0.18); }

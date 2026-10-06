@@ -417,7 +417,8 @@ test("institutional accounts: team and organization questions reach their own an
 test("Cedar says the material is public and never that some of it is not", () => {
   const sources = DOOR_INTENTS.find((intent) => intent.id === "sources");
   // The count is measured and carries its unit (2026-10-06); never "700".
-  assert.match(sources.answer, /public material, drawn from \d+ kinds of public source/);
+  assert.match(sources.answer, /built from public material\. The sources include/);
+  assert.doesNotMatch(sources.answer, /kinds of (public )?source/);
   assert.doesNotMatch(sources.answer, /700|documented upstream sources/);
   // Lobbying is LDA filings only in this release; dockets and appeals are not sources.
   assert.doesNotMatch(sources.answer, /FERC|IBIA|regulations\.gov/);

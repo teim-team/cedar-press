@@ -80,6 +80,7 @@ import {
   BUILD_NEXT_QUESTION,
   MAINTENANCE,
   CREDIBILITY_DISCLAIMER,
+  EXAMPLES_NOTE,
   CREDIBILITY_STRIP,
   METHOD_COMMITMENTS,
   expertiseSentence,
@@ -449,8 +450,8 @@ export default function CedarPressMethods() {
               <Reasoning label="Why an identifier has to be minted, and what one identifier space would cost">
                 <p>
                   A 990 says who filed it. A royalty statement says who was paid. A docket says
-                  who appeared. None of them says whether those three are the same nation, and no
-                  public system will tell you. Cedar assigns the key none of them carries and
+                  who appeared. None of them says whether those three are the same nation, and
+                  public systems do not consistently record it. Cedar assigns the key none of them carries and
                   keeps it current. The ownership between the two namespaces is a dated
                   relationship carrying its source, which is what keeps a nation and the company
                   it owns from collapsing into one row.
@@ -524,6 +525,7 @@ export default function CedarPressMethods() {
                   and identifiers as business records; WITHHELD_NOTE holds the
                   wording with the rule it comes from cited beside it. */}
               <p className="cp-msec__aside">{WITHHELD_NOTE}</p>
+              <p className="cp-msec__aside" data-testid="methods-examples-note">{EXAMPLES_NOTE}</p>
             </Chapter>
 
             {/* Owner, 2026-09-26: how a question becomes a collection. The
