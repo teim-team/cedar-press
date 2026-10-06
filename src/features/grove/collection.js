@@ -122,7 +122,7 @@ export const COUNT_NOT_SHOWN = Object.freeze(new Set(["need"]));
  * where the descriptor does not spell it out (owner, 2026-10-06). The service
  * applies the same text (collections.py ACRONYM_LEADS).
  */
-const ACRONYM_LEADS = Object.freeze({ plot: "PLOT (Parcels, Land Ownership and Transfers)" });
+const ACRONYM_LEADS = Object.freeze({ plot: "PLOT (Parcel-Level Ownership and Transfers)" });
 const tracksForReaders = (descriptor) => {
   const lead = ACRONYM_LEADS[descriptor.id];
   return lead && !(descriptor.tracks ?? "").includes(lead) ? `${lead}: ${descriptor.tracks}` : descriptor.tracks;

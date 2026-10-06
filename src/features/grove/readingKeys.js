@@ -30,7 +30,7 @@ export const READING_KEYS = Object.freeze({
   }),
   plot: Object.freeze({
     intro:
-      "PLOT stands for Parcels, Land Ownership and Transfers. Each row is one piece of land as a public land record reports it: a county assessor's tax parcel or a Bureau of Indian Affairs trust tract. The owner is what the record says, not a verified title.",
+      "PLOT stands for Parcel-Level Ownership and Transfers. Each row is one piece of land as a public land record reports it: a county assessor's tax parcel or a Bureau of Indian Affairs trust tract. The owner is what the record says, not a verified title.",
     terms: Object.freeze([
       term("Land record kind", "assessor parcel: a county tax parcel. BIA tract: a Bureau of Indian Affairs trust or restricted tract."),
       term("Parcel ID", "The parcel's or tract's identifier in its source. It is unique only within that county or BIA register."),

@@ -203,7 +203,7 @@ COUNT_NOT_SHOWN: frozenset[str] = frozenset({"need"})
 #: is prefixed where it is read. The client applies the same text
 #: (pressCatalog.js blurbs).
 ACRONYM_LEADS: dict[str, str] = {
-    "plot": "PLOT (Parcels, Land Ownership and Transfers)",
+    "plot": "PLOT (Parcel-Level Ownership and Transfers)",
 }
 
 

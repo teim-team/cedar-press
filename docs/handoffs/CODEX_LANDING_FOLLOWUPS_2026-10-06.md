@@ -127,10 +127,9 @@ These are applied in cedar-press when the descriptor is read, and should move
 into the producer so the patches can be deleted:
 
 - **PLOT's description** does not say what PLOT stands for. Both sides prefix
-  "PLOT (Parcels, Land Ownership and Transfers)" (`ACRONYM_LEADS` in
+  "PLOT (Parcel-Level Ownership and Transfers)" (`ACRONYM_LEADS` in
   `collection.js` and `collections.py`). **Owner, 2026-10-06: PLOT stands for
-  "Parcels, Land Ownership and Transfers"** (dictated as "parcel of ownership
-  and transfers"; confirm the exact wording with the owner). The Lumecon-data
+  "Parcel-Level Ownership and Transfers"** (owner's exact wording). The Lumecon-data
   glossary and `docs/plot-convergence.md` still say "Parcels, Ownership, Land
   Activity & Permits" and must be updated to match. House style writes "and",
   never an ampersand, in reader prose.

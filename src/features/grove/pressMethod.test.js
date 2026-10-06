@@ -161,7 +161,7 @@ test("public NEED describes its reviewed cohort while restricted enrichments ret
   assert.doesNotMatch(need.blurb, /under review|cohort|preview|pending/i);
   assert.doesNotMatch(need.blurb, /complete enterprise register|all enterprises verified/i);
   const plot = STOREFRONT_CATALOG.find((entry) => entry.id === "plot");
-  assert.match(plot.blurb, /PLOT \(Parcels, Land Ownership and Transfers\)/);
+  assert.match(plot.blurb, /PLOT \(Parcel-Level Ownership and Transfers\)/);
   const all = Object.values(NEED_ENRICHMENTS).join(" ");
   assert.match(all, /where records are available/i);
   assert.match(all, /acquired patent is shown as acquired rather than as the entity's own invention/);
