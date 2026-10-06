@@ -2827,7 +2827,6 @@
  * adding one does not speed the whole band up. */
 .teim-rd .cp-hero3__marqwrap { -webkit-mask-image: linear-gradient(90deg, transparent, #000 3rem, #000 calc(100% - 3rem), transparent); mask-image: linear-gradient(90deg, transparent, #000 3rem, #000 calc(100% - 3rem), transparent); }
 .teim-rd .cp-hero3__marquee { display: flex; width: max-content; animation: cp-run var(--run-dur, 90s) linear infinite; }
-.teim-rd .cp-hero3__marquee:hover, .teim-rd .cp-hero3__marquee:focus-within { animation-play-state: paused; }
 @keyframes cp-run { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(-50%, 0, 0); } }
 .teim-rd .cp-hero3__run { list-style: none; display: flex; align-items: baseline; margin: 0; padding: 0; }
 .teim-rd .cp-hero3__run li { position: relative; flex: none; padding: 0 clamp(0.8rem, 1.6vw, 1.4rem); font-size: 0.9rem; font-weight: 500; color: var(--ink-2); white-space: nowrap; }
@@ -2870,10 +2869,8 @@
 .teim-rd .cp-hero3__marquee--back { animation-direction: reverse; }
 .teim-rd .cp-why__runs { position: relative; -webkit-user-select: none; user-select: none; }
 .teim-rd .cp-why__runs::after { content: ''; position: absolute; inset: 0; z-index: 1; }
-/* Paused on hover over the runs (the layer above them takes the pointer, so
- * the hover is read on the container). Owner, 2026-10-06: no Pause button;
- * under reduced motion the band does not move at all. */
-.teim-rd .cp-why__runs:hover .cp-hero3__marquee { animation-play-state: paused; }
+/* Owner, 2026-10-06: the band never pauses, on hover, press or a button.
+ * Under reduced motion it does not move at all. */
 .teim-rd .cp-why__sources .cp-nowrap { white-space: nowrap; }
 .teim-rd .cp-why__sources .cp-hero3__run li { color: var(--door-navy); }
 .teim-rd .cp-why__sources .cp-hero3__run li::before { background: rgba(9, 19, 43, 0.18); }

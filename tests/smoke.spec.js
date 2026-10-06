@@ -314,8 +314,11 @@ test.describe("the gate", () => {
     await runs.scrollIntoViewIfNeeded();
     await page.mouse.move(0, 0);
     expect((await states()).every((s) => s === "running")).toBe(true);
+    // Owner, 2026-10-06: the band never pauses, not on hover and not on a tap.
     await runs.hover();
-    expect((await states()).every((s) => s === "paused")).toBe(true);
+    expect((await states()).every((s) => s === "running")).toBe(true);
+    await runs.click({ force: true });
+    expect((await states()).every((s) => s === "running")).toBe(true);
     await page.mouse.move(0, 0);
     expect((await states()).every((s) => s === "running")).toBe(true);
     await expect(runs).toHaveCSS("user-select", "none");
