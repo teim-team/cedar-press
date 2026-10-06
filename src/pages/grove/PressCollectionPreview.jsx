@@ -36,6 +36,7 @@ import { recordStructure } from "../../features/grove/pressRecordStructure.js";
 import { EVENT, track } from "../../features/grove/telemetry.js";
 import { RecordStructureCap, RecordStructureTable } from "./PressRecordStructure.jsx";
 import { TierName } from "./TierName";
+import PressReadingKey from "./PressReadingKey.jsx";
 
 /**
  * How many of the ten sample records the pane shows.
@@ -242,6 +243,7 @@ export default function CollectionPreview({ entry, tier, register }) {
           the collection&rsquo;s main table.
         </p>
       ) : null}
+      {status === "ok" ? <PressReadingKey collectionId={entry.id} /> : null}
       <div className="cp-pane__foot">
         <p className="cp-pane__acts">
           <a

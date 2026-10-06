@@ -87,6 +87,7 @@ import PressCollectionAbout from "./PressCollectionAbout.jsx";
 import Explain from "./Explain";
 import { useDismissable } from "./useDismissable.jsx";
 import { TierName } from "./TierName";
+import PressReadingKey from "./PressReadingKey.jsx";
 
 /** Row counts as the launch descriptors state them, keyed by collection. */
 const ROWS_BY_ID = Object.fromEntries(LAUNCH_COLLECTION.map((e) => [e.id, e.rowsLabel]));
@@ -1357,6 +1358,7 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
                 {contract?.superseded ? <span><b>Versions</b> superseded ones are not shown</span> : null}
               </Legend>
             ) : null}
+            {single ? <PressReadingKey collectionId={single.entry.id} /> : null}
             <button
               type="button"
               className="cp-read__cedar"

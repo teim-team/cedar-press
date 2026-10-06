@@ -37,6 +37,8 @@ import { recordStructure } from "../../features/grove/pressRecordStructure.js";
 import { TBN_PLANS_URL } from "../../features/grove/pressArticles";
 import { COLLECTION_ICONS } from "./pressCollectionIcons";
 import { TierName } from "./TierName";
+import { coverageLabel } from "../../features/grove/pressAccess";
+import { freshnessLine } from "../../features/grove/pressReleases";
 
 const ROWS_LABEL = Object.fromEntries(LAUNCH_COLLECTION.map((entry) => [entry.id, entry.rowsLabel]));
 
@@ -80,6 +82,30 @@ function ShelfDownload({ tier, entries }) {
  * @param mode        "preview" | "app"
  * @param allLabel    optional first row, e.g. "All 12 collections"
  */
+/**
+ * The hover card (owner, 2026-10-06: "when you hover over a data set, it
+ * tells you more"). In the app only: on the door, pointing at a collection
+ * already opens it in the pane beside the rail, and the door's rail sits in a
+ * scaled frame a floating card would be clipped by. Fixed-positioned beside
+ * the item, so the rail's own scrolling cannot clip it; a mouse or keyboard
+ * focus opens it, a tap never does.
+ */
+function RailTip({ tip }) {
+  if (!tip) return null;
+  const { entry, top, left } = tip;
+  const facts = [coverageLabel(entry), ROWS_LABEL[entry.id], freshnessLine(entry.id)].filter(Boolean);
+  return (
+    <div className="cp-railtip" role="tooltip" id={`cp-railtip-${entry.id}`} style={{ top, left }}>
+      <b className="cp-railtip__name"><TierName name={entry.name} /></b>
+      {entry.blurb ? <p className="cp-railtip__blurb">{entry.blurb}</p> : null}
+      {facts.length ? <p className="cp-railtip__facts">{facts.join(" \u00b7 ")}</p> : null}
+    </div>
+  );
+}
+
+const canHover = () =>
+  typeof window !== "undefined" && window.matchMedia?.("(hover: hover) and (pointer: fine)").matches;
+
 export default function PressCollectionRail({
   selectedId,
   onSelect,
@@ -88,8 +114,16 @@ export default function PressCollectionRail({
   mode = "app",
   allLabel = null,
 }) {
+  const [tip, setTip] = useState(null);
+  const showTip = (entry, element) => {
+    if (mode !== "app") return;
+    const box = element.getBoundingClientRect();
+    setTip({ entry, top: Math.max(8, box.top), left: box.right + 10 });
+  };
+  const hideTip = () => setTip(null);
   return (
-    <nav className={`cp-rail cp-rail--${mode}`} aria-label="Collections">
+    <nav className={`cp-rail cp-rail--${mode}`} aria-label="Collections" onScroll={hideTip}>
+      <RailTip tip={tip} />
       {allLabel ? (
         <button
           type="button"
@@ -149,12 +183,19 @@ export default function PressCollectionRail({
                     // Preview only where changing the specimen cannot move
                     // the rail. Touch compatibility hover/focus can otherwise
                     // shift the target before the tap commits its selection.
-                    onPointerEnter={onPoint ? (event) => {
-                      if (event.pointerType === "mouse" && window.matchMedia("(min-width: 1101px) and (hover: hover) and (pointer: fine)").matches) onPoint(entry.id);
-                    } : undefined}
-                    onFocus={onPoint ? (event) => {
-                      if (event.currentTarget.matches(":focus-visible") && window.matchMedia("(min-width: 1101px)").matches) onPoint(entry.id);
-                    } : undefined}
+                    aria-describedby={tip?.entry.id === entry.id ? `cp-railtip-${entry.id}` : undefined}
+                    onPointerEnter={(event) => {
+                      if (event.pointerType === "mouse" && canHover()) showTip(entry, event.currentTarget);
+                      if (onPoint && event.pointerType === "mouse" && window.matchMedia("(min-width: 1101px) and (hover: hover) and (pointer: fine)").matches) onPoint(entry.id);
+                    }}
+                    onPointerLeave={hideTip}
+                    onFocus={(event) => {
+                      if (!event.currentTarget.matches(":focus-visible")) return;
+                      showTip(entry, event.currentTarget);
+                      if (onPoint && window.matchMedia("(min-width: 1101px)").matches) onPoint(entry.id);
+                    }}
+                    onBlur={hideTip}
+                    onKeyDown={(event) => { if (event.key === "Escape") hideTip(); }}
                   >
                     <span className="cp-rail__mark" aria-hidden="true">
                       {COLLECTION_ICONS[entry.id] ?? null}

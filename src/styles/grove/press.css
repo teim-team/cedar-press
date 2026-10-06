@@ -5028,3 +5028,32 @@ body[data-cp-preview-in-view] .teim-rd .cp-dc__fab { display: none; }
   .teim-rd .cp-ar__body .cp-ar__fig, .teim-rd .cp-ar__quote { transition: none; }
   .teim-rd .cp-ar__body .cp-ar__fig:hover, .teim-rd .cp-ar__quote:hover { transform: none; }
 }
+
+/* HOW TO READ THESE RECORDS (NEED and PLOT, PressReadingKey.jsx).
+ * In the door's pane it opens inline under the records; in the viewer's
+ * status bar it opens above the bar, the way "How to read this" does. */
+.teim-rd .cp-key { position: relative; }
+.teim-rd .cp-key > summary { list-style: none; cursor: pointer; font-family: var(--sans); font-size: 0.84rem; font-weight: 700; color: var(--dteal); }
+.teim-rd .cp-key > summary::-webkit-details-marker { display: none; }
+.teim-rd .cp-key > summary::after { content: ' \203A'; display: inline-block; transform: rotate(90deg); }
+.teim-rd .cp-key[open] > summary::after { transform: rotate(-90deg); }
+.teim-rd .cp-key__in { font-size: 0.84rem; line-height: 1.5; color: var(--ink-2); }
+.teim-rd .cp-key__intro { margin: 0 0 0.55rem; }
+.teim-rd .cp-key__list { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 0.35rem 1rem; margin: 0; }
+.teim-rd .cp-key__list > div { display: contents; }
+.teim-rd .cp-key__list dt { font-weight: 700; color: var(--ink); }
+.teim-rd .cp-key__list dd { margin: 0; }
+.teim-rd .cp-pane .cp-key { padding: 0.55rem 1.1rem; border-top: 1px solid var(--line); }
+.teim-rd .cp-pane .cp-key[open] > .cp-key__in { margin-top: 0.55rem; max-height: 15rem; overflow-y: auto; }
+.teim-rd .cp-ex__foot .cp-key[open] > .cp-key__in { position: absolute; z-index: 30; bottom: calc(100% + 0.5rem); left: 0; width: min(40rem, 90vw); max-height: 60vh; overflow-y: auto; padding: 0.8rem 1rem; border: 1px solid var(--line); background: var(--bg); box-shadow: 0 -12px 34px -18px rgba(10, 15, 38, 0.45); }
+@media (max-width: 640px) {
+  .teim-rd .cp-key__list { grid-template-columns: minmax(0, 1fr); gap: 0.1rem; }
+  .teim-rd .cp-key__list dd { margin-bottom: 0.45rem; }
+}
+
+/* The collection hover card in the app's rail (PressCollectionRail RailTip). */
+.teim-rd .cp-railtip { position: fixed; z-index: 160; width: 20rem; max-width: calc(100vw - 2rem); padding: 0.75rem 0.9rem; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--ink-2); box-shadow: 0 14px 34px rgba(10, 15, 38, 0.18); pointer-events: none; font-size: 0.82rem; line-height: 1.45; }
+.teim-rd .cp-railtip__name { display: block; color: var(--ink); font-family: var(--sans); font-size: 0.9rem; margin-bottom: 0.3rem; }
+.teim-rd .cp-railtip__blurb { margin: 0 0 0.4rem; }
+.teim-rd .cp-railtip__facts { margin: 0; font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+@media (max-width: 1100px) { .teim-rd .cp-railtip { display: none; } }

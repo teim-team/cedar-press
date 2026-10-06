@@ -3337,3 +3337,42 @@ test("built public assets contain no subscriber article paragraphs or review fil
     }
   }
 });
+
+// Owner, 2026-10-06: hovering a collection tells you more, and NEED and PLOT
+// explain their columns for readers meeting them for the first time.
+test.describe("explaining the collections", () => {
+  test("hovering a collection in the app shows what it tracks, its coverage and its count", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name === "phone", "a phone has no hover");
+    await signIn(page);
+    await page.goto("/data?c=funding");
+    // An item already in view: scrolling the rail closes the card, since its
+    // position would be stale, and hover() scrolls an item below the fold.
+    const item = page.locator(".cp-rail__item", { hasText: "Deals" });
+    await item.hover();
+    const tip = page.getByRole("tooltip");
+    await expect(tip).toBeVisible();
+    await expect(tip).toContainText("Indian Country Deals");
+    await expect(tip).toContainText(/observations/i);
+    await expect(item).toHaveAttribute("aria-describedby", "cp-railtip-deals");
+    await page.mouse.move(900, 600);
+    await expect(page.getByRole("tooltip")).toHaveCount(0);
+  });
+
+  for (const id of ["need", "plot"]) {
+    test(`the door's ${id} preview explains its records`, async ({ page }) => {
+      await page.goto(`/?collection=${id}`);
+      const stage = page.locator(`[data-testid="collection-stage"][data-collection="${id}"]`);
+      const key = stage.getByTestId("reading-key");
+      await expect(key).toBeVisible();
+      await key.locator("summary").click();
+      await expect(key.locator("dt").first()).toBeVisible();
+    });
+  }
+
+  test("a collection whose columns read plainly carries no key", async ({ page }) => {
+    await page.goto("/?collection=funding");
+    const stage = page.locator('[data-testid="collection-stage"][data-collection="funding"]');
+    await expect(stage.locator('[data-testid="stage-record"]').first()).toBeVisible();
+    await expect(stage.getByTestId("reading-key")).toHaveCount(0);
+  });
+});
