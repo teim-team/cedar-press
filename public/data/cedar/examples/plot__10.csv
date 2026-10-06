@@ -1,0 +1,11 @@
+parcel_id,land_area,acres,ownership,interest,regional_office,state,source_url
+256 1548 -A,TURTLE MOUNTAIN PD (FT PECK - ND),80,Trust,Both (Mineral and Surface),A-GREAT PLAINS REGIONAL OFFICE,ND,https://biamaps.geoplatform.gov/server/rest/services/Hosted/BIA_Mineral_Acreage_Table/FeatureServer/0
+256 M 560,TURTLE MOUNTAIN PD (FT PECK - ND),160,Trust,Minerals Only,A-GREAT PLAINS REGIONAL OFFICE,ND,https://biamaps.geoplatform.gov/server/rest/services/Hosted/BIA_Mineral_Acreage_Table/FeatureServer/0
+256 M 978,TURTLE MOUNTAIN PD (FT PECK - ND),80,Trust,Minerals Only,A-GREAT PLAINS REGIONAL OFFICE,ND,https://biamaps.geoplatform.gov/server/rest/services/Hosted/BIA_Mineral_Acreage_Table/FeatureServer/0
+256 M 1385,TURTLE MOUNTAIN PD (FT PECK - ND),157.72,Trust,Minerals Only,A-GREAT PLAINS REGIONAL OFFICE,ND,https://biamaps.geoplatform.gov/server/rest/services/Hosted/BIA_Mineral_Acreage_Table/FeatureServer/0
+256 M 1858,TURTLE MOUNTAIN PD (FT PECK - ND),159.92,Trust,Minerals Only,A-GREAT PLAINS REGIONAL OFFICE,ND,https://biamaps.geoplatform.gov/server/rest/services/Hosted/BIA_Mineral_Acreage_Table/FeatureServer/0
+256 M 2158,TURTLE MOUNTAIN PD (FT PECK - ND),160,Trust,Minerals Only,A-GREAT PLAINS REGIONAL OFFICE,ND,https://biamaps.geoplatform.gov/server/rest/services/Hosted/BIA_Mineral_Acreage_Table/FeatureServer/0
+256 M 2483,TURTLE MOUNTAIN PD (FT PECK - ND),160,Trust,Minerals Only,A-GREAT PLAINS REGIONAL OFFICE,ND,https://biamaps.geoplatform.gov/server/rest/services/Hosted/BIA_Mineral_Acreage_Table/FeatureServer/0
+256 M 2799,TURTLE MOUNTAIN PD (FT PECK - ND),159.32,Trust,Minerals Only,A-GREAT PLAINS REGIONAL OFFICE,ND,https://biamaps.geoplatform.gov/server/rest/services/Hosted/BIA_Mineral_Acreage_Table/FeatureServer/0
+256 T 395 -B,TURTLE MOUNTAIN PD (FT PECK - ND),9.79,Trust,Surface Only,A-GREAT PLAINS REGIONAL OFFICE,ND,https://biamaps.geoplatform.gov/server/rest/services/Hosted/BIA_Mineral_Acreage_Table/FeatureServer/0
+256 T 1270,TURTLE MOUNTAIN PD (FT PECK - ND),146.52,Trust,Surface Only,A-GREAT PLAINS REGIONAL OFFICE,ND,https://biamaps.geoplatform.gov/server/rest/services/Hosted/BIA_Mineral_Acreage_Table/FeatureServer/0
