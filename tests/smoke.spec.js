@@ -159,12 +159,14 @@ test("reviewed NEED businesses remain individually named on phones and use reada
   // stated in readable words, never the source's codes.
   const cni = records.filter({ hasText: "Chickasaw Nation Industries, Inc." }).filter({ hasText: "The Chickasaw Nation" }).filter({ hasNotText: "CNI Advantage" });
   await expect(cni).toHaveCount(1);
-  await expect(cni).toContainText("Owned by");
+  await expect(cni).toContainText(/owned by/i);
   await expect(page.locator("main")).not.toContainText("wholly_owned");
   await expect(page.locator("main")).not.toContainText("owned_by");
   if (testInfo.project.name === "phone") {
     await expect(records.first().locator(".cp-ex__cardwho")).toContainText(NEED_SAMPLE.rows[0].enterprise_name);
-    await expect(records.first().locator(".cp-ex__cardwho")).toContainText("not linked to an entity");
+    // Every NEED record names its ultimate Native owner.
+    await expect(records.first().locator(".cp-ex__cardwho")).toContainText("Ultimate parent: The Chickasaw Nation");
+    await expect(page.locator("main")).not.toContainText("not linked to an entity");
     const bounds = await records.evaluateAll((elements) => elements.map((el) => {
       const heading = el.querySelector(".cp-ex__cardwho");
       const arrow = el.querySelector(".cp-ex__cardgo");

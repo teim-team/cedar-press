@@ -42,9 +42,15 @@ test("NEED examples name their top-level Native owner, with evidence, and includ
     assert.match(row.native_owner_cedar_uid, /^CE-[0-9A-Z]{5}-[0-9A-Z]{2}$/);
   }
   const owners = new Set(parsed.rows.map((row) => row.native_owner));
-  for (const owner of ["Arctic Slope Regional Corporation", "Ahtna, Incorporated", "The Chickasaw Nation", "The Choctaw Nation of Oklahoma"]) {
+  for (const owner of ["Arctic Slope Regional Corporation", "Ahtna, Incorporated", "NANA Regional Corporation, Inc.", "Koniag, Incorporated", "The Chickasaw Nation", "The Choctaw Nation of Oklahoma"]) {
     assert.ok(owners.has(owner), owner);
   }
+  // Each record links to its ultimate owner, never to the holding company.
+  const linked = universalRows("need/need", parsed.rows);
+  for (const item of linked) assert.match(item.entity.uid ?? "", /^CE-/, item.row.enterprise_name);
+  assert.equal(linked.find((item) => item.row.enterprise_name === "CNI Advantage, LLC").entity.name, "The Chickasaw Nation");
+  // The first screen shows a tribe and four regional corporations.
+  assert.deepEqual(new Set(parsed.rows.slice(0, 6).map((row) => row.native_owner)).size, 5);
   // A tribe-owned enterprise is the first record a reader sees.
   assert.equal(parsed.rows[0].native_owner, "The Chickasaw Nation");
   // Every tribal example carries the federal identifiers its ruling is keyed by.

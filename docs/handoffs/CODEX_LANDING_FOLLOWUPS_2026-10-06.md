@@ -162,7 +162,9 @@ consumer workaround should be deleted.
   `COLUMN_FALLBACKS` (opening columns chosen because the declared ones are
   blank in the sample).
 - `src/features/grove/exampleEnrichment.js`: NEED's `native_owner` columns
-  and the three prepended tribe-owned examples (CNI Advantage, Chickasaw
+  (and `CONTRACT_ADDITIONS`, which links each NEED record to that owner),
+  the two added NANA and Koniag examples, the filled ASRC parents, and the
+  three prepended tribe-owned examples (CNI Advantage, Chickasaw
   Nation Industries, Choctaw Defense Manufacturing Group), each sourced to an
   owner ruling in `code/55_stage_anc_subsidiary_rulings.py`; owned's
   `stated_tribe`, parsed from `identity_claim_text`.
@@ -172,9 +174,17 @@ consumer workaround should be deleted.
 **Data notes, by collection**
 
 - **NEED**: no top-level Native owner column; all ten examples are ANC
-  subsidiaries, none tribe-owned. Publish `native_owner` (name and
-  `cedar_uid`) from the ruling chain and re-draw the sample to include tribal
-  enterprises. Check whether Salish Networks is a tribal enterprise (CSKT).
+  subsidiaries of two owners (ASRC, Ahtna), none tribe-owned, and four leave
+  the immediate parent blank. **Owner, 2026-10-06: every NEED record must
+  name its ultimate parent** (the regional corporation or the tribe, not the
+  holding company one level up). Publish `native_owner` (name and
+  `cedar_uid`) from the ruling chain as a column of the customer table, fill
+  the immediate parent, and re-draw the sample to include tribal enterprises
+  and other regional corporations (NANA, Koniag and more). The viewer
+  currently adds two NANA and Koniag examples (Akima Global Services, Koniag
+  Services) and fills the four blank ASRC parents ("ASRC Federal Holding
+  Company, LLC" where the ruling names it, else "Part of ASRC Federal family
+  of companies"); all from `code/55_stage_anc_subsidiary_rulings.py`. Check whether Salish Networks is a tribal enterprise (CSKT).
   Cherokee Nation Research Labs has a UEI conflict between sources.
 - **Natural Resources**: the examples are 1925 to 1931 national aggregates;
   re-draw from recent, tribe-level ONRR records.

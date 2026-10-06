@@ -132,12 +132,12 @@ export function EntityCell({ item, subjectFirst = false }) {
   return (
     <>
       {why.length ? <small className="cp-ex__uid">Broad scope: {why.map(scopeLine).join("; ")}. The chosen entity is not individually named.</small> : null}
-      {leadSubject ? <>{leadSubject}<small className="cp-ex__uid">{first.role ? readerValueLabel(item.collection, "cedar_entity_role", first.role) : "Associated entity"}: {first.name ?? first.uid}</small></> : <>
+      {leadSubject ? <>{leadSubject}<small className="cp-ex__uid">{first.role ? readerValueLabel(item.collection, "cedar_entity_role", first.role) : item.collection === "need" ? "Ultimate parent" : "Associated entity"}: {first.name ?? first.uid}</small></> : <>
         {first.name ?? <em>{first.withheld ? WITHHELD_TEXT : first.uid}</em>}
         {first.role ? <small className="cp-ex__uid">Role: {readerValueLabel(item.collection, "cedar_entity_role", first.role)}</small> : null}
       </>}
       {entities.length > 1 ? <small className="cp-ex__uid"> +{entities.length - 1} more</small> : null}
-      {first.uid ? <small className="cp-ex__uid">{leadSubject ? "Associated entity ID: " : ""}{item.entity.uids.join(" · ")}</small> : null}
+      {first.uid ? <small className="cp-ex__uid">{leadSubject ? (item.collection === "need" ? "Ultimate parent Cedar ID: " : "Associated entity ID: ") : ""}{item.entity.uids.join(" · ")}</small> : null}
       {item.subject && !leadSubject ? <small className="cp-ex__uid">record names: {item.subject}</small> : null}
     </>
   );

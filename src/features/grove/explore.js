@@ -47,6 +47,7 @@
 // count the card states is a count of sample rows, and the caption says so.
 
 import { csvCell } from "./csv.js";
+import { CONTRACT_ADDITIONS } from "./exampleEnrichment.js";
 import explore from "../../../data/cedar/explore.json" with { type: "json" };
 import scopesJson from "../../../data/cedar/scopes.json" with { type: "json" };
 
@@ -126,7 +127,8 @@ function codebookField(key, column) {
 const READER_LABELS = Object.freeze({
   "*": Object.freeze({ native_owner: "Native owner", native_owner_basis: "Native owner evidence", native_owner_cedar_uid: "Native owner Cedar ID" }),
   need: Object.freeze({
-    enterprise_name: "Enterprise", related_entity_name: "Parent or related company", relationship_type: "Relationship",
+    enterprise_name: "Enterprise", native_owner: "Ultimate parent", native_owner_cedar_uid: "Ultimate parent Cedar ID", native_owner_basis: "Ultimate parent evidence",
+    related_entity_name: "Immediate parent or related company", relationship_type: "Relationship",
     ownership_extent: "Ownership", uei: "UEI (SAM.gov)", cage_code: "CAGE code", source_reported_name: "Name as the source reports it",
     owner_name: "Reviewed owner", owner_scope: "Owner scope", verified_claims: "Verified claims", reviewed_on: "Reviewed on",
     review_reason: "Review basis", cage_evidence_scope: "CAGE evidence", subject_binding: "How the source was matched",
@@ -705,31 +707,55 @@ const OBSERVATION_LIMIT = 180;
  */
 export function observationOf(row, contract, collection = null) {
   contract = contractForRow(row, contract);
+  if (collection === "need") return clip(needObservation(row));
   const parts = [];
-  const reviewedOwnership = collection === "need" && cell(row, "relationship_type") === "owned_by" && cell(row, "ownership_extent") === "wholly_owned" && cell(row, "owner_name");
-  if (reviewedOwnership) {
-    parts.push(`Wholly owned by ${cell(row, "owner_name")}${cell(row, "owner_scope") === "immediate" ? " (immediate owner)" : ""}`);
-  }
   for (const column of contract?.observation ?? []) {
-    if (reviewedOwnership && (["owner_name", "ownership_extent", "relationship_type"].includes(column) ||
-        (column === "related_entity_name" && cell(row, column) === cell(row, "owner_name")))) continue;
     const sourceField = Object.entries(contract?.source_fields ?? {}).find(([, target]) => target === column)?.[0] ?? column;
     const value = readerValueLabel(collection, sourceField, cell(row, column)).replace(/\s*\|\s*/g, ", ").replace(/\s+/g, " ");
     if (value && !parts.includes(value)) parts.push(value);
   }
-  // A reviewed NEED row may support identity only. Preserve that distinction
-  // rather than inventing an owner or displaying an empty observation.
-  if (collection === "need" && parts.length === 0) {
+  return clip(parts.join(" · "));
+}
+
+function clip(line) {
+  return line.length > OBSERVATION_LIMIT ? `${line.slice(0, OBSERVATION_LIMIT - 1).trimEnd()}…` : line;
+}
+
+/**
+ * A NEED row read as a sentence about its owners: the immediate parent with
+ * the relationship in the right direction ("Subsidiary of X", never
+ * "X · Subsidiary of · <the enterprise>"), then the ultimate Native owner
+ * when it is someone else. A row that supports identity only says so through
+ * its federal identifiers rather than an invented owner.
+ */
+function needObservation(row) {
+  const parts = [];
+  const related = cell(row, "related_entity_name") || cell(row, "owner_name");
+  const relationship = cell(row, "relationship_type");
+  if (related) {
+    const wholly = cell(row, "ownership_extent") === "wholly_owned";
+    const verb = { owned_by: wholly ? "Wholly owned by" : "Owned by", subsidiary_of: "Subsidiary of", part_of: "Part of", affiliated_with: "Affiliated with", "": "Related to" }[relationship];
+    if (verb) {
+      parts.push(`${verb} ${related}${cell(row, "owner_scope") === "immediate" ? " (immediate owner)" : ""}`);
+    } else {
+      // A relationship the reviewers have not named stays as recorded,
+      // never read as ownership.
+      for (const [column, value] of [["related_entity_name", related], ["ownership_extent", cell(row, "ownership_extent")], ["relationship_type", relationship]]) {
+        const label = readerValueLabel("need", column, value);
+        if (label) parts.push(label);
+      }
+    }
+  }
+  const ultimate = cell(row, "native_owner");
+  if (ultimate && ultimate !== related) parts.push(`Ultimate parent: ${ultimate}`);
+  if (!parts.length) {
     for (const [label, column] of [["UEI", "uei"], ["CAGE", "cage_code"]]) {
       const value = cell(row, column);
       if (value) parts.push(`${label}: ${value}`);
     }
-    if (parts.length === 0 && cell(row, "enterprise_name")) {
-      parts.push(`Enterprise name: ${cell(row, "enterprise_name")}`);
-    }
+    if (!parts.length && cell(row, "enterprise_name")) parts.push(`Enterprise name: ${cell(row, "enterprise_name")}`);
   }
-  const line = parts.join(" · ");
-  return line.length > OBSERVATION_LIMIT ? `${line.slice(0, OBSERVATION_LIMIT - 1).trimEnd()}…` : line;
+  return parts.join(" · ");
 }
 
 /**
@@ -761,7 +787,10 @@ export function universalRows(key, rows, register = EMPTY_REGISTER, contract = c
   const [collection] = key.split("/");
   return rows.map((raw, i) => {
     const own = contractForRow(raw, contract);
-    const entity = rowEntity(raw, own, register);
+    // NEED's examples link to the ultimate Native owner the viewer adds to
+    // them (exampleEnrichment.js); the published contract is left as is.
+    const additions = CONTRACT_ADDITIONS[key];
+    const entity = rowEntity(raw, additions && raw[additions.entity_uid] !== undefined ? { ...own, ...additions } : own, register);
     let row = publicRow(raw, own, entity);
     const subjectColumns = own?.subject_candidates ?? (own?.subject ? [own.subject] : []);
     if (entity.withheld && own?.subject_entity_role === "recipient") {
