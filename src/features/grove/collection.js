@@ -116,6 +116,17 @@ export const EXCLUDED_COLLECTIONS = deepFreeze(manifest.excluded);
  */
 export const COUNT_NOT_SHOWN = Object.freeze(new Set(["nonprofits"]));
 
+/**
+ * What an abbreviated collection name stands for, prefixed to its description
+ * where the descriptor does not spell it out (owner, 2026-10-06). The service
+ * applies the same text (collections.py ACRONYM_LEADS).
+ */
+const ACRONYM_LEADS = Object.freeze({ plot: "PLOT (Parcels, Ownership, Land Activity and Permits)" });
+const tracksForReaders = (descriptor) => {
+  const lead = ACRONYM_LEADS[descriptor.id];
+  return lead && !(descriptor.tracks ?? "").includes(lead) ? `${lead}: ${descriptor.tracks}` : descriptor.tracks;
+};
+
 export const LAUNCH_COLLECTION = deepFreeze(
   manifest.collections.map((entry) => ({
     id: entry.descriptor.id,
@@ -124,7 +135,7 @@ export const LAUNCH_COLLECTION = deepFreeze(
     name: entry.descriptor.name,
     shortName: entry.descriptor.short_name,
     shelf: entry.descriptor.shelf,
-    tracks: entry.descriptor.tracks,
+    tracks: tracksForReaders(entry.descriptor),
     rowsLabel: COUNT_NOT_SHOWN.has(entry.descriptor.id) ? "" : entry.descriptor.rows_label,
     downloads: entry.descriptor.downloads,
     vintage: entry.descriptor.vintage,

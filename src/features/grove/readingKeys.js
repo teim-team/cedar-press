@@ -15,7 +15,7 @@ const term = (name, meaning) => Object.freeze({ term: name, meaning });
 export const READING_KEYS = Object.freeze({
   need: Object.freeze({
     intro:
-      "Each row is one enterprise that a Native entity owns or is tied to, checked by a reviewer against the owner's own sources. A blank field has not been reviewed yet; it never means no or zero.",
+      "NEED is the Native Entity Enterprise Dataset. Each row is one enterprise that a Native entity owns or is tied to, checked by a reviewer against the owner's own sources. A blank field has not been reviewed yet; it never means no or zero.",
     terms: Object.freeze([
       term("Enterprise", "The business, as Cedar's enterprise register names it. The name the source printed is kept beside it."),
       term("Owner", "The company that owns the enterprise, shown only where a reviewer confirmed it from a source."),
@@ -30,7 +30,7 @@ export const READING_KEYS = Object.freeze({
   }),
   plot: Object.freeze({
     intro:
-      "Each row is one piece of land as a public land record reports it: a county assessor's tax parcel or a Bureau of Indian Affairs trust tract. The owner is what the record says, not a verified title.",
+      "PLOT stands for Parcels, Ownership, Land Activity and Permits. Each row is one piece of land as a public land record reports it: a county assessor's tax parcel or a Bureau of Indian Affairs trust tract. The owner is what the record says, not a verified title.",
     terms: Object.freeze([
       term("Land record kind", "assessor parcel: a county tax parcel. BIA tract: a Bureau of Indian Affairs trust or restricted tract."),
       term("Parcel ID", "The parcel's or tract's identifier in its source. It is unique only within that county or BIA register."),

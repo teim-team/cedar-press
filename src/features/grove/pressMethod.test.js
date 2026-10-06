@@ -155,10 +155,13 @@ test("public NEED describes its reviewed cohort while restricted enrichments ret
   assert.equal(STOREFRONT_CATALOG.length, 14);
   assert.ok(!STOREFRONT_CATALOG.some((entry) => /patent|rating/i.test(`${entry.id} ${entry.name}`)), "no standalone collection");
   const need = STOREFRONT_CATALOG.find((entry) => entry.id === "need");
-  assert.match(need.blurb, /limited evidence-pinned cohort/);
-  assert.match(need.blurb, /wider enterprise register/);
-  assert.match(need.blurb, /restricted enrichments remain under review/);
+  // Owner, 2026-10-06: the paragraph says what NEED stands for and carries no
+  // draft wording; it still never claims the register is complete.
+  assert.match(need.blurb, /Native Entity Enterprise Dataset \(NEED\)/);
+  assert.doesNotMatch(need.blurb, /under review|cohort|preview|pending/i);
   assert.doesNotMatch(need.blurb, /complete enterprise register|all enterprises verified/i);
+  const plot = STOREFRONT_CATALOG.find((entry) => entry.id === "plot");
+  assert.match(plot.blurb, /PLOT \(Parcels, Ownership, Land Activity and Permits\)/);
   const all = Object.values(NEED_ENRICHMENTS).join(" ");
   assert.match(all, /where records are available/i);
   assert.match(all, /acquired patent is shown as acquired rather than as the entity's own invention/);

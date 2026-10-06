@@ -9,6 +9,10 @@ An external issued-ID package does not establish consumer liveness; see the
 
 ## Current workflow
 
+Database follow-ups from the 2026-10-06 landing-page work (a larger NEED
+release, an accurate Native Nonprofits count, the other held populations) are
+in [the landing follow-ups handoff](handoffs/CODEX_LANDING_FOLLOWUPS_2026-10-06.md).
+
 The [current review status](REVIEW_STATUS.md) records the current cross-repository
 checkpoints, measured review results and remaining integration work. The dated
 [producer convergence checkpoint](https://github.com/teim-team/Lumecon-data/blob/bdb630841bc344872d79a444eadebcde61b21bb7/docs/cedar-convergence.md)

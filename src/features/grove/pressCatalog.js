@@ -461,7 +461,7 @@ export const PRESS_CATALOG = Object.freeze([
     // The public component is a reviewed cohort, not the full enterprise register.
     coverage: OBSERVATIONS,
     blurb:
-      "Source-backed enterprise identities and reviewed parent relationships. The current public release contains a limited evidence-pinned cohort; the wider enterprise register and restricted enrichments remain under review.",
+      "The Native Entity Enterprise Dataset (NEED): enterprises owned by or tied to tribes, Alaska Native corporations and Native Hawaiian organizations, with their parent companies and federal contracting identifiers. Each relationship is checked against the owner's own sources.",
     linkage:
       "Business identifiers and owner relationships remain separate claims. Each public fact retains its source release and evidence; an owner association never becomes the business identity.",
   }),
@@ -478,7 +478,7 @@ export const PRESS_CATALOG = Object.freeze([
     // to it. A nation's site acquisition may be a Deal while the parcels it
     // bought appear separately in PLOT: link the two, never collapse them.
     blurb:
-      "Source observations of tracts, assessor parcels, permits and environmental records. Examine their recorded subjects, dates and citations while keeping parcel observations and permit events at their separate grains.",
+      "PLOT (Parcels, Ownership, Land Activity and Permits): county assessor parcels, Bureau of Indian Affairs trust tracts, permits and environmental records associated with Native nations. Examine their recorded owners, dates and citations, with parcel observations and permit events kept at their separate grains.",
     // The owner's Methods concepts for this collection (2026-09-26).
     linkage:
       "Land ownership observations and permitting records retain their source identifiers. An assessor label, mapped tract or regulatory record does not establish Native ownership, legal title or a canonical entity binding.",

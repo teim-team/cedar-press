@@ -196,10 +196,24 @@ class CollectionDataset:
 COUNT_NOT_SHOWN: frozenset[str] = frozenset({"nonprofits"})
 
 
+#: What an abbreviated collection name stands for (owner, 2026-10-06: a
+#: paragraph describing NEED or PLOT says what the letters mean). NEED's
+#: descriptor name already spells it out; PLOT's description does not, so it
+#: is prefixed where it is read. The client applies the same text
+#: (pressCatalog.js blurbs).
+ACRONYM_LEADS: dict[str, str] = {
+    "plot": "PLOT (Parcels, Ownership, Land Activity and Permits)",
+}
+
+
 def _descriptor_for_readers(descriptor: dict[str, Any]) -> dict[str, Any]:
-    if descriptor.get("id") in COUNT_NOT_SHOWN:
-        return {**descriptor, "rows_label": ""}
-    return descriptor
+    out = dict(descriptor)
+    if out.get("id") in COUNT_NOT_SHOWN:
+        out["rows_label"] = ""
+    lead = ACRONYM_LEADS.get(out.get("id"))
+    if lead and lead not in (out.get("tracks") or ""):
+        out["tracks"] = f"{lead}: {out['tracks']}"
+    return out
 
 
 LAUNCH_COLLECTION: tuple[CollectionDataset, ...] = tuple(
