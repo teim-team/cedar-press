@@ -129,12 +129,20 @@ const CEDAR = deepFreeze(
 );
 
 /**
- * Every row the twelve releases hold, added up from the workspace's own
- * count per collection, or null if any collection arrived without one: a
- * total that quietly skipped a collection would read as the total.
+ * The published observations in each collection's dataset, added up, or null
+ * if any collection arrived without a count: a total that quietly skipped a
+ * collection would read as the total.
+ *
+ * The dataset is the collection's main table (`sample.table`), counted as
+ * published (`rows_published`, after withheld rows). `cedar.n_rows` is NOT
+ * this: it adds every supporting table in the release (crosswalks, audits,
+ * coverage tables) and read 8,595,567 against 2,074,020 real observations
+ * (owner, 2026-10-06).
  */
-export const LAUNCH_ROWS_TOTAL = manifest.collections.every((entry) => Number.isInteger(entry.cedar?.n_rows))
-  ? manifest.collections.reduce((sum, entry) => sum + entry.cedar.n_rows, 0)
+const datasetRows = (entry) =>
+  entry.tables?.find((table) => table.table === entry.sample?.table)?.rows_published ?? null;
+export const LAUNCH_ROWS_TOTAL = manifest.collections.every((entry) => Number.isInteger(datasetRows(entry)))
+  ? manifest.collections.reduce((sum, entry) => sum + datasetRows(entry), 0)
   : null;
 /**
  * Sample files the manifest declares and this repository does not hold.

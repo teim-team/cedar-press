@@ -127,23 +127,12 @@ async function openDoorCedar(page) {
 }
 
 test.describe("the gate", () => {
-  test("the early access note names the summit and gives an access contact", async ({ page }) => {
+  // The early-access note was removed from the door (owner, 2026-10-06).
+  test("the door carries no early access note", async ({ page }) => {
     await page.goto("/");
-    const notice = page.getByTestId("press-preview-note");
-    await expect(notice).toBeVisible();
-    await expect(notice.locator("b")).toHaveText("Early access.");
-    await expect(notice.locator(".cp-preview__copy")).toHaveText(
-      "Early access. Cedar Press is open early to attendees of the Great Lakes Tribal Economic Summit ahead of its public launch. Need a login? elijah.moreno@lumecon.ai",
-    );
-    await expect(notice).not.toContainText("small group");
-    await expect(notice.getByRole("link", { name: "elijah.moreno@lumecon.ai" }))
-      .toHaveAttribute("href", "mailto:elijah.moreno@lumecon.ai?subject=Cedar%20Press%20preview%20access");
-    // The way out is a close control, not a "Continue →" pill. A reader who
-    // does not want to continue anywhere still has to be able to shut it.
-    await notice.getByRole("button", { name: "Close this notice" }).click();
-    await expect(notice).toHaveCount(0);
-    await page.reload();
+    await expect(page.locator(".cp-hero3")).toBeVisible();
     await expect(page.getByTestId("press-preview-note")).toHaveCount(0);
+    await expect(page.locator("body")).not.toContainText("elijah.moreno@lumecon.ai");
   });
 
   // The maintenance story and the NEED enrichment sources (owner,
@@ -244,14 +233,6 @@ test.describe("the gate", () => {
     const shown = await page.locator(".cp-why__runs .cp-hero3__run:not([aria-hidden])").evaluateAll((uls) => uls.flatMap((ul) => [...ul.querySelectorAll("li")].map((li) => li.textContent)));
     const sorted = [...shown].sort((a, b) => a.localeCompare(b));
     expect(shown).not.toEqual(sorted);
-  });
-
-  test("a reader who closed the old private-preview note sees the early access note once", async ({ page }) => {
-    await page.goto("/");
-    await page.evaluate(() => sessionStorage.setItem("cedar-press-private-preview-notice", "dismissed"));
-    await page.reload();
-    await expect(page.getByTestId("press-preview-note")).toBeVisible();
-    await expect(page.getByTestId("press-preview-note")).toContainText("Early access.");
   });
 
   test("every signed-in route wears the same masthead", async ({ page }) => {

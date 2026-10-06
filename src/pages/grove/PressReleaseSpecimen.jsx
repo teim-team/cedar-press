@@ -16,16 +16,16 @@
 // It is the selected collection's, so pointing at the rail below changes it
 // and the two objects read as one surface rather than as a card beside a
 // screenshot.
-import { LAUNCH_COLLECTION, collectionCedarFacts } from "../../features/grove/collection";
+import { LAUNCH_COLLECTION } from "../../features/grove/collection";
 import { coverageLabel } from "../../features/grove/pressAccess";
 import { formatUpdated } from "../../features/grove/pressReleases";
 import { recordStructure } from "../../features/grove/pressRecordStructure.js";
 import { COLLECTION_ICONS } from "./pressCollectionIcons";
 
-/** "3646750" as the release states it, or null rather than a guess. */
-function rowsOf(entry, facts) {
-  if (entry?.rowsLabel) return entry.rowsLabel;
-  return Number.isInteger(facts?.n_rows) ? `${facts.n_rows.toLocaleString("en-US")} rows` : null;
+/** The dataset's published observations as the release states them, or
+ * null rather than a guess. Never `n_rows`: that adds every supporting table. */
+function rowsOf(entry) {
+  return entry?.rowsLabel ?? null;
 }
 
 /** The release descriptors, by id: the catalog entry does not carry them. */
@@ -33,14 +33,12 @@ const RELEASE = Object.fromEntries(LAUNCH_COLLECTION.map((entry) => [entry.id, e
 
 export default function PressReleaseSpecimen({ entry }) {
   if (!entry) return null;
-  const facts = collectionCedarFacts(entry.id);
   // The version and the date live on the LAUNCH descriptor, not on the
   // storefront catalog entry this component is handed. Reading them off
   // `entry` rendered a specimen with a table count and no release, which is
   // the one thing it exists to state.
   const release = RELEASE[entry.id] ?? {};
-  const rows = rowsOf(release, facts);
-  const tables = Number.isInteger(facts?.n_tables) ? facts.n_tables : null;
+  const rows = rowsOf(release);
   const coverage = coverageLabel(entry);
   // A collection presented by its record structure states its fields, and
   // no release, span or row count.
@@ -57,24 +55,14 @@ export default function PressReleaseSpecimen({ entry }) {
       </p>
       {coverage ? <p className="cp-spec__cover">{coverage}</p> : null}
       {/* The bookkeeping, as fields rather than as a sentence: a reader
-          checking whether a release is current reads a date, not prose. */}
+          checking whether a release is current reads a date, not prose.
+          No release number and no table count (owner, 2026-10-06): the door
+          shows one clean dataset, its date and its observations. */}
       <dl className="cp-spec__facts">
-        {release.version ? (
-          <div>
-            <dt>Release</dt>
-            <dd>{release.version}</dd>
-          </div>
-        ) : null}
         {release.updated ? (
           <div>
             <dt>Updated</dt>
             <dd>{formatUpdated(release.updated)}</dd>
-          </div>
-        ) : null}
-        {tables ? (
-          <div>
-            <dt>Tables</dt>
-            <dd>{tables}</dd>
           </div>
         ) : null}
         {structure ? (

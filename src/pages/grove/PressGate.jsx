@@ -80,7 +80,6 @@ import CollectionPreview from "./PressCollectionPreview";
 import PressCollectionRail from "./PressCollectionRail.jsx";
 import PressDoorCedar from "./PressDoorCedar";
 import PressAudienceExample from "./PressAudienceExample";
-import { PressPreviewNotice } from "./PressChrome";
 import { TierName } from "./TierName";
 import PressReleaseSpecimen from "./PressReleaseSpecimen";
 import { useTicker } from "../../features/grove/useTicker";
@@ -563,7 +562,6 @@ export default function PressGate({ user }) {
           </div>
         ) : null}
       </header>
-      <PressPreviewNotice />
 
       {/* ── The hero: the promise, and beside it the product ─────────── */}
       <section className="cp-hero3" aria-label="Cedar Press">
@@ -661,7 +659,7 @@ export default function PressGate({ user }) {
                 use cases start higher. */}
             <ul className="cp-hero3__facts" aria-label="What Cedar Press holds">
               <li><Tick value={STOREFRONT_CATALOG.length} /> collections</li>
-              {LAUNCH_ROWS_TOTAL ? <li><Tick value={LAUNCH_ROWS_TOTAL} format={formatCount} /> records</li> : null}
+              {LAUNCH_ROWS_TOTAL ? <li><Tick value={LAUNCH_ROWS_TOTAL} format={formatCount} /> observations</li> : null}
               {EARLIEST_YEAR ? <li>as far back as <Tick value={EARLIEST_YEAR} from={new Date().getFullYear()} /></li> : null}
               {recentlyUpdated(1)[0] ? <li>updated <b>{formatUpdated(recentlyUpdated(1)[0].updated)}</b></li> : null}
             </ul>

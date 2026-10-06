@@ -25,7 +25,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { LAUNCH_COLLECTION } from "../../features/grove/collection";
 import { contractFor, exploreTables, parseCsv, universalRows } from "../../features/grove/explore.js";
 import { columnPlan } from "../../features/grove/recordColumns.js";
-import { tableLabel } from "../../features/grove/readerValues.js";
 import { Cards, Rows } from "./PressRecordTable.jsx";
 import { useNarrow } from "../../features/grove/useNarrow.js";
 import { coverageLabel } from "../../features/grove/pressAccess";
@@ -145,13 +144,12 @@ export default function CollectionPreview({ entry, tier, register }) {
       ) : status === "ok" && items.length ? (
         <>
           <p className="cp-pane__tablecap">
+            {/* One clean dataset (owner, 2026-10-06): no table name, no
+                "supporting table" tag, just what the sample is and how many
+                observations the dataset holds. */}
+            <span>Example records</span>
             <span>
-              {tableLabel(table)}
-              {table.flagship ? null : <em> · supporting table</em>}
-            </span>
-            <span>
-              {items.length} of {parsed.rows.length} sample records
-              {table.rows ? ` · ${table.rows.toLocaleString("en-US")} in the release` : ""}
+              {items.length} of {table.rows ? `${table.rows.toLocaleString("en-US")} observations` : `${parsed.rows.length} sample records`}
             </span>
           </p>
           {/* THE SAME TABLE, NOT A TABLE THAT LOOKS LIKE IT.

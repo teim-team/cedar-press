@@ -5,7 +5,7 @@
 // three copies of a footer drift three ways — which is exactly what had
 // happened: every page carried its own two-link version, so where the footer
 // took you depended on where you already were.
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { Link, NavLink } from "react-router";
 
 import { useAuth } from "../../context/useAuth";
@@ -165,76 +165,6 @@ function SectionMenu({ section }) {
         ))}
       </nav>
     </details>
-  );
-}
-
-// A new key for new wording (owner, 2026-09-27): a reader who closed the old
-// "Private preview" note sees the early-access one once. The old key,
-// "cedar-press-private-preview-notice", is no longer read.
-export const PREVIEW_NOTICE_KEY = "cedar-press-early-access-notice";
-
-function previewNoticeIsDismissed() {
-  try {
-    return window.sessionStorage.getItem(PREVIEW_NOTICE_KEY) === "dismissed";
-  } catch {
-    // Storage can be unavailable in a private or embedded browser. The
-    // notice is still useful there; it simply returns on the next route.
-    return false;
-  }
-}
-
-/**
- * The arrival note for the limited pre-launch circulation: early access
- * for attendees of the Great Lakes Tribal Economic Summit (owner, 2026-09-27;
- * it replaced the "Private preview" wording, same note, same close, same
- * landing-only scope, same address).
- *
- * IT BELONGS TO THE DOOR AND NOWHERE ELSE.
- * It used to render inside `PressMast`, which every signed-in page mounts,
- * so a subscriber met "we've shared Cedar Press with a small group" on the
- * collections table, on an entity profile and on the methods page — an
- * explanation of how they got in, addressed to someone who is already
- * inside, standing on top of the product they came for. Owner, 2026-09-20:
- * it should only be on the landing page. It is rendered once, by
- * `PressGate`, and the app chrome no longer knows about it.
- *
- * WHY IT IS NOT A CARD.
- * It was a tinted rounded box with a teal bar down its left edge, which is
- * the house style of software nobody designed. A notice is not a component:
- * it is a line of type at the top of a page, ruled off from what follows,
- * and that is what this is now. Nothing is lost but the packaging.
- */
-export function PressPreviewNotice() {
-  const [visible, setVisible] = useState(() => !previewNoticeIsDismissed());
-
-  const dismiss = () => {
-    try { window.sessionStorage.setItem(PREVIEW_NOTICE_KEY, "dismissed"); } catch { /* Keep the current view dismissed. */ }
-    setVisible(false);
-  };
-
-  if (!visible) return null;
-  return (
-    <aside className="cp-preview" data-testid="press-preview-note" aria-label="Early access">
-      <p className="cp-preview__copy">
-        <b>Early access.</b> Cedar Press is open early to attendees of the Great Lakes Tribal
-        Economic Summit ahead of its public launch. Need a login?{" "}
-        <a href="mailto:elijah.moreno@lumecon.ai?subject=Cedar%20Press%20preview%20access">elijah.moreno@lumecon.ai</a>
-      </p>
-      {/* A CLOSE CONTROL THAT LOOKS LIKE ONE.
-          This was a pill reading "Continue →", which is the language of a
-          step in a flow: it says the notice is something to get past, not
-          something to shut, and a reader who did not want to "continue"
-          anywhere had no reason to press it. The note is an interruption and
-          the way out of an interruption is a cross. */}
-      <button
-        type="button"
-        className="cp-preview__close"
-        onClick={dismiss}
-        aria-label="Close this notice"
-      >
-        <span aria-hidden="true">&times;</span>
-      </button>
-    </aside>
   );
 }
 
