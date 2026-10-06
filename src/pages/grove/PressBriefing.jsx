@@ -112,7 +112,7 @@ export default function PressBriefing({ releaseState }) {
         {/* THREE SIGNALS. Releases, newest first, each one a link to exactly
             what changed rather than to the feed's top. */}
         <div className="cp-brief__block">
-          <span className="cp-brief__cap">{releaseState?.data?.source === "verified_current" ? "Available now" : "Preview updates"}</span>
+          <span className="cp-brief__cap">{releaseState?.data?.source === "verified_current" ? "Available now" : "Updates"}</span>
           {!releaseState?.data ? <p role="status">{releaseState?.status === "loading" ? "Loading collection updates…" : "Collection updates are unavailable."}</p> : null}
           <ul className="cp-brief__signals">
             {signals.map((release) => {

@@ -19,7 +19,7 @@ import { expect, test } from "@playwright/test";
 
 import { EMAIL, HASH, PASSWORD, PRESS_EMAIL } from "./demoAccount.js";
 import { loadCodebook, parseCsv, rowSource, contractFor, exploreTables, labelFor, universalRows } from "../src/features/grove/explore.js";
-import { LAUNCH_COLLECTION } from "../src/features/grove/collection.js";
+import { LAUNCH_COLLECTION, collectionCedarFacts } from "../src/features/grove/collection.js";
 import { coverageLabel } from "../src/features/grove/pressAccess.js";
 import { formatUpdated } from "../src/features/grove/pressReleases.js";
 import { recordHref } from "../src/features/grove/pressRecord.js";
@@ -197,13 +197,13 @@ test.describe("the gate", () => {
     await page.goto("/");
     const notice = page.getByTestId("press-preview-note");
     await expect(notice).toBeVisible();
-    await expect(notice.locator("b")).toHaveText("Early access.");
+    await expect(notice.locator("b")).toHaveText("Early access");
     await expect(notice.locator(".cp-preview__copy")).toHaveText(
-      "Early access. Cedar Press is open early to attendees of the Great Lakes Tribal Economic Summit ahead of its public launch. Need a login? elijah.moreno@lumecon.ai",
+      "Early access is available soon for attendees of the Great Lakes Tribal Economic Summit. Questions? contact@lumecon.ai",
     );
-    await expect(notice).not.toContainText("small group");
-    await expect(notice.getByRole("link", { name: "elijah.moreno@lumecon.ai" }))
-      .toHaveAttribute("href", "mailto:elijah.moreno@lumecon.ai?subject=Cedar%20Press%20preview%20access");
+    await expect(notice).not.toContainText("elijah");
+    await expect(notice.getByRole("link", { name: "contact@lumecon.ai" }))
+      .toHaveAttribute("href", /^mailto:contact@lumecon\.ai\?subject=Cedar%20Press%20early%20access/);
     // The way out is a close control, not a "Continue →" pill. A reader who
     // does not want to continue anywhere still has to be able to shut it.
     await notice.getByRole("button", { name: "Close this notice" }).click();
@@ -312,12 +312,12 @@ test.describe("the gate", () => {
     expect(shown).not.toEqual(sorted);
   });
 
-  test("a reader who closed the old private-preview note sees the early access note once", async ({ page }) => {
+  test("a reader who closed the earlier early-access note sees the new one once", async ({ page }) => {
     await page.goto("/");
-    await page.evaluate(() => sessionStorage.setItem("cedar-press-private-preview-notice", "dismissed"));
+    await page.evaluate(() => sessionStorage.setItem("cedar-press-early-access-notice", "dismissed"));
     await page.reload();
     await expect(page.getByTestId("press-preview-note")).toBeVisible();
-    await expect(page.getByTestId("press-preview-note")).toContainText("Early access.");
+    await expect(page.getByTestId("press-preview-note")).toContainText("Early access is available soon");
   });
 
   test("every signed-in route wears the same masthead", async ({ page }) => {
@@ -439,9 +439,11 @@ test.describe("the gate", () => {
     // The way in is named on the stage, never a route past the paywall.
     await expect(stage.getByRole("link", { name: /^Get Cedar Press/ })).toBeVisible();
     await expect(stage.getByRole("link", { name: /Browse the records/ })).toHaveCount(0);
-    await expect(stage.locator(".cp-pane__tablecap")).toContainText("sample records");
+    // Owner, 2026-10-06: example records of the dataset's observations, and
+    // the hero states the observations across every collection.
+    await expect(stage.locator(".cp-pane__tablecap")).toContainText(/Example records\s*10 of [\d,]+ observations/);
     await expect(stage.locator(".cp-pane__facts")).not.toContainText(/\d[\d,]*\s+(rows|records)/i);
-    await expect(page.locator(".cp-hero3__facts")).not.toContainText(/\d[\d,]*\s+records/i);
+    await expect(page.locator(".cp-hero3__facts")).toContainText(/[\d,]+\s+observations/i);
     await expect(page.locator("#catalog")).toHaveCount(0);
     expect(errors).toEqual([]);
   });
@@ -1077,7 +1079,8 @@ test.describe("Explore the collections", () => {
       await expect(records).toHaveCount(Math.min(10, sample.rows.length));
       expect(await records.evaluateAll((nodes) => nodes.map((node) => node.dataset.recordId).sort()))
         .toEqual(expectedIds.slice(0, 10));
-      await expect(stage.locator(".cp-pane__tablecap")).toContainText(sample.rows.length + " of " + sample.rows.length + " sample records");
+      await expect(stage.locator(".cp-pane__tablecap")).toContainText(
+        Math.min(10, sample.rows.length) + " of " + collectionCedarFacts(id).n_rows.toLocaleString("en-US") + " observations");
       await expect(stage.locator(".cp-pane__facts")).toContainText(formatUpdated(release.updated).replace(/, \d{4}$/, ""));
       if (coverageLabel(entry)) await expect(stage.locator(".cp-pane__facts")).toContainText(coverageLabel(entry));
       await expect(stage).not.toContainText(/not yet published|first release|preview pending/i);
@@ -1317,7 +1320,7 @@ test.describe("the question mark", () => {
     // the viewport. Opened the way this pointer opens it: a mouse click is
     // deliberately inert, because hover governs a mouse.
     if (testInfo.project.name === "desktop") await btn.hover(); else await btn.tap();
-    await expect(panel).toContainText("up to ten sample rows");
+    await expect(panel).toContainText("up to ten example records");
     const box = await panel.boundingBox();
     const width = page.viewportSize().width;
     expect(box.x).toBeGreaterThanOrEqual(-1);
@@ -1375,7 +1378,7 @@ test.describe("About this collection", () => {
     await expect(panel).toBeVisible();
     await expect(panel).toContainText("Awardees are matched to a Native entity");
     // The release facts a reader checks a figure against.
-    for (const field of ["Preview updated", "Coverage", "Sample records"]) {
+    for (const field of ["Updated", "Coverage", "Example records"]) {
       await expect(panel.locator("dt", { hasText: new RegExp(`^${field}$`) }).first()).toBeVisible();
     }
     // The unit of observation, in the codebook's own words: the sentence
@@ -1900,7 +1903,7 @@ test.describe("the product copy reads the jobs layer", () => {
       "Compare peers, follow funding and business activity, spot changes worth investigating and trace the evidence behind them.",
     );
     const caps = await page.locator(".cp-brief__cap").allInnerTexts();
-    expect(caps.map((c) => c.toLowerCase())).toEqual(expect.arrayContaining(["preview updates", "explore the records"]));
+    expect(caps.map((c) => c.toLowerCase())).toEqual(expect.arrayContaining(["updates", "explore the records"]));
     expect(caps.join(" ")).not.toMatch(/worth watching|open today|insight|opportunit/i);
 
     await page.goto("/data?c=funding");

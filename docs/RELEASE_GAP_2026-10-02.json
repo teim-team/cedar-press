@@ -310,7 +310,7 @@
    "id": "GAP-22",
    "collection": "owned / display name",
    "gate": "collection name is a data contract carried into every download's citation (AGENTS.md section 6)",
-   "exists": "Owner decision 2026-10-02: the collection is 'Individual Native-Owned Businesses', never 'Native-Owned Businesses' (which makes NEED sound redundant). Served now as 'Individual Native-Owned Businesses' at version v4 (updated 2026-10-02); the pinned sample and receipt are unchanged.",
+   "exists": "Owner decision 2026-10-02: the collection is 'Individual Native-Owned Businesses', never 'Native-Owned Businesses' (which makes NEED sound redundant). Served now as 'Individual Native-Owned Businesses' at version v5 (updated 2026-10-06); the pinned sample and receipt are unchanged.",
    "served": "Manifest, descriptors, codebook, guides, SEO/JSON-LD, the press dump and the catalog carry the new name; the release ledger keeps v0-v3 under the name they shipped with and records the rename as v4 (the ledger refuses a changed fact on an existing version). The producer's descriptor still carries the old title; Lumecon-data #17 is changing it so the next pin agrees. Catalog `short` now equals the full name pending a copy decision.",
    "gate_location": "data/cedar/collections.manifest.json owned.descriptor; scripts/stage_verified_previews.py copies name from the producer descriptor at pin; server/tests/test_collection_display_names.py",
    "closing_condition": "Producer title changed (Lumecon-data #17) before the next pin; a short label chosen for tiles; downloads already held cite the old name, which the ledger records.",
@@ -329,8 +329,8 @@
     "rows_withheld": 0,
     "sample_rows": 10,
     "sample_columns": 42,
-    "version": "v3",
-    "updated": "2026-10-01"
+    "version": "v4",
+    "updated": "2026-10-06"
    },
    "federal-register": {
     "n_rows": 21258,
@@ -339,8 +339,8 @@
     "rows_withheld": 0,
     "sample_rows": 10,
     "sample_columns": 61,
-    "version": "v3",
-    "updated": "2026-10-01"
+    "version": "v4",
+    "updated": "2026-10-06"
    },
    "legislation": {
     "n_rows": 3064,
@@ -349,8 +349,8 @@
     "rows_withheld": 0,
     "sample_rows": 10,
     "sample_columns": 33,
-    "version": "v3",
-    "updated": "2026-10-01"
+    "version": "v4",
+    "updated": "2026-10-06"
    },
    "deals": {
     "n_rows": 978,
@@ -359,8 +359,8 @@
     "rows_withheld": 0,
     "sample_rows": 10,
     "sample_columns": 36,
-    "version": "v3",
-    "updated": "2026-10-01"
+    "version": "v4",
+    "updated": "2026-10-06"
    },
    "nagpra": {
     "n_rows": 6792,
@@ -369,8 +369,8 @@
     "rows_withheld": 0,
     "sample_rows": 10,
     "sample_columns": 55,
-    "version": "v3",
-    "updated": "2026-10-01"
+    "version": "v4",
+    "updated": "2026-10-06"
    },
    "lobbying": {
     "n_rows": 27825,
@@ -379,8 +379,8 @@
     "rows_withheld": 0,
     "sample_rows": 10,
     "sample_columns": 41,
-    "version": "v3",
-    "updated": "2026-10-01"
+    "version": "v4",
+    "updated": "2026-10-06"
    },
    "contractors": {
     "n_rows": 841002,
@@ -389,8 +389,8 @@
     "rows_withheld": 0,
     "sample_rows": 10,
     "sample_columns": 52,
-    "version": "v3",
-    "updated": "2026-10-01"
+    "version": "v4",
+    "updated": "2026-10-06"
    },
    "subcontracting": {
     "n_rows": 70054,
@@ -399,8 +399,8 @@
     "rows_withheld": 0,
     "sample_rows": 10,
     "sample_columns": 57,
-    "version": "v3",
-    "updated": "2026-10-01"
+    "version": "v4",
+    "updated": "2026-10-06"
    },
    "owned": {
     "n_rows": 3725,
@@ -409,8 +409,8 @@
     "rows_withheld": 0,
     "sample_rows": 10,
     "sample_columns": 35,
-    "version": "v4",
-    "updated": "2026-10-02"
+    "version": "v5",
+    "updated": "2026-10-06"
    },
    "need": {
     "n_rows": 43,
@@ -419,8 +419,8 @@
     "rows_withheld": 0,
     "sample_rows": 10,
     "sample_columns": 23,
-    "version": "v5",
-    "updated": "2026-10-01"
+    "version": "v6",
+    "updated": "2026-10-06"
    },
    "natural-resources": {
     "n_rows": 11120,
@@ -429,8 +429,8 @@
     "rows_withheld": 0,
     "sample_rows": 10,
     "sample_columns": 41,
-    "version": "v3",
-    "updated": "2026-10-01"
+    "version": "v4",
+    "updated": "2026-10-06"
    },
    "nonprofits": {
     "n_rows": 89,
@@ -439,8 +439,8 @@
     "rows_withheld": 0,
     "sample_rows": 10,
     "sample_columns": 27,
-    "version": "v3",
-    "updated": "2026-10-01"
+    "version": "v4",
+    "updated": "2026-10-06"
    },
    "foundation-corporate-giving": {
     "n_rows": 193,
@@ -449,8 +449,8 @@
     "rows_withheld": 0,
     "sample_rows": 10,
     "sample_columns": 66,
-    "version": "v3",
-    "updated": "2026-10-01"
+    "version": "v4",
+    "updated": "2026-10-06"
    },
    "plot": {
     "n_rows": 151715,
@@ -459,8 +459,8 @@
     "rows_withheld": 0,
     "sample_rows": 10,
     "sample_columns": 106,
-    "version": "v3",
-    "updated": "2026-10-01"
+    "version": "v4",
+    "updated": "2026-10-06"
    }
   },
   "receipt_types": {

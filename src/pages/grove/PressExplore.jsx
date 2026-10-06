@@ -1287,18 +1287,17 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
             {/* What a "sample record" is, which the caption counts and cannot
                 explain. The commonest wrong reading of this page is that an
                 entity absent from a result is absent from the collection. */}
-            {!atlas ? <Explain label="what these sample records are">
+            {!atlas ? <Explain label="what these example records are">
               <p>
-                <span className="cp-ex1__cap">This is a preview</span>
-                Each published table ships up to ten sample rows, and this viewer reads those.
-                Some ship fewer. A search that returns nothing may mean the collection holds
-                nothing, or that the handful of rows sampled from a million-row table did not
-                include it.
+                <span className="cp-ex1__cap">Example records</span>
+                Each collection shows up to ten example records from its dataset, and this
+                viewer reads those. A search that returns nothing may mean the collection holds
+                nothing, or that the ten records shown here do not include it.
                 </p>
               <p>
-                <span className="cp-ex1__cap">The release is the whole table</span>
-                Counts here are counts of sample records, never of the release. Every download
-                says so in its README, and the release itself carries the full table.
+                <span className="cp-ex1__cap">The dataset is the whole table</span>
+                Counts here are counts of the example records shown, never of the dataset. The
+                full dataset carries every observation.
                 </p>
             </Explain> : null}
             {!atlas && loading ? " · loading" : ""}

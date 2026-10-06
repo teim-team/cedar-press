@@ -188,8 +188,22 @@ class CollectionDataset:
     shelf: str = "standard"
 
 
+#: Collections whose observation count is not shown to readers (owner,
+#: 2026-10-06: the Native Nonprofits count understates the universe it
+#: describes, so no count is stated rather than a misleading one). The label
+#: reads empty, which every surface already treats as "no count". The client
+#: applies the same set (collection.js COUNT_NOT_SHOWN).
+COUNT_NOT_SHOWN: frozenset[str] = frozenset({"nonprofits"})
+
+
+def _descriptor_for_readers(descriptor: dict[str, Any]) -> dict[str, Any]:
+    if descriptor.get("id") in COUNT_NOT_SHOWN:
+        return {**descriptor, "rows_label": ""}
+    return descriptor
+
+
 LAUNCH_COLLECTION: tuple[CollectionDataset, ...] = tuple(
-    CollectionDataset(**entry["descriptor"]) for entry in _MANIFEST["collections"]
+    CollectionDataset(**_descriptor_for_readers(entry["descriptor"])) for entry in _MANIFEST["collections"]
 )
 
 #: Cedar's own facts per dataset, keyed by product id: readiness status, the

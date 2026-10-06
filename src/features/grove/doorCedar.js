@@ -321,11 +321,11 @@ const GENERAL_INTENTS = [
       `Each person keeps their own sign-in, and their conversations and activity stay private to them, so ` +
       `teammates do not see each other's conversations. Access comes through the organization's plan: someone ` +
       `removed from the organization loses that access at once and keeps anything they hold individually.\n\n` +
-      `To set one up, contact elijah.moreno@lumecon.ai.`,
+      `To set one up, contact contact@lumecon.ai.`,
     expanded:
       `Going deeper: the organization's plan is what opens the collections for its members, and the admin ` +
       `manages who is in it by email invitation. Collaborative analysis and shared projects are part of ` +
-      `Cedar Grove rather than Cedar Press.\n\nTo set up an institutional plan, contact elijah.moreno@lumecon.ai.`,
+      `Cedar Grove rather than Cedar Press.\n\nTo set up an institutional plan, contact contact@lumecon.ai.`,
   },
   {
     id: "collaboration",
@@ -336,7 +336,7 @@ const GENERAL_INTENTS = [
       `Collaborative analysis and shared projects are part of Cedar Grove, not Cedar Press. In Cedar Press ` +
       `each person's conversations and activity stay private to them; on the institutional plan, members ` +
       `share the organization's details and its Cedar context.\n\nTo ask about either, contact ` +
-      `elijah.moreno@lumecon.ai.`,
+      `contact@lumecon.ai.`,
     expanded:
       `Going deeper: Cedar Press is where the collections are read, cited and downloaded, one person at a ` +
       `time or through an organization's institutional plan. Work that a team builds together belongs in ` +

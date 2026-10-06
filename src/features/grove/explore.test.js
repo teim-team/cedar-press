@@ -687,7 +687,7 @@ test("the caption says the cut in words and never invents a filter", () => {
     { ...EMPTY_CUT, collections: ["lobbying"], entities: ["CE-00134-BX"], years: [2015, 2024], q: "water", history: true },
     { register: REGISTER, shown: 3, total: 10 },
   );
-  assert.equal(said, "Advocacy · Cherokee Nation · 2015–2024 · “water” · including superseded versions · 3 of 10 sample records");
+  assert.equal(said, "Advocacy · Cherokee Nation · 2015–2024 · “water” · including superseded versions · 3 of 10 example records");
   assert.equal(describeCut({ ...EMPTY_CUT, entities: [WITHHELD_UID] }, { register: MASKED.register }), `all collections · ${WITHHELD_UID} (name withheld)`);
   // The question to Cedar asks about the collection, not about rows it has not seen.
   assert.match(questionFor({ ...EMPTY_CUT, collections: ["lobbying"] }, REGISTER), /What does this collection cover/);

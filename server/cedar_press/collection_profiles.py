@@ -373,7 +373,10 @@ def _fmt(value: Any) -> str:
 
 def _stats_sentence(profile: dict[str, Any]) -> str | None:
     headline = profile.get("headline_statistics")
-    if not headline:
+    # Demonstration figures are never quoted to a reader (owner, 2026-10-06:
+    # nothing on the product reads as a draft or a mock-up). The caller then
+    # says the collection has no published figures, which is true.
+    if not headline or profile["demonstration"]:
         return None
     # A two-series figure answers with both series: the card draws value and
     # comparison together, and an answer that silently drops the gray line is
@@ -383,17 +386,14 @@ def _stats_sentence(profile: dict[str, Any]) -> str | None:
         + (f" (comparison {_fmt(p['compare'])})" if p.get("compare") is not None else "")
         for p in headline["points"]
     )
-    # Every statistics answer carries its standing: demonstration figures say
-    # so, and real figures say where they came from.
-    caveat = (
-        " These figures are demonstration data, standing in until the first real release."
-        if profile["demonstration"]
-        else f" Source: {profile['primary_sources']}."
-    )
-    return (
+    # Real figures say where they came from.
+    caveat = f" Source: {profile['primary_sources']}."
+    holds = (
         f"{profile['collection_name']} currently holds {profile['record_count_label']}. "
-        f"{headline['title']} ({headline['basis']}): {points}.{caveat}"
+        if profile.get("record_count_label")
+        else ""
     )
+    return f"{holds}{headline['title']} ({headline['basis']}): {points}.{caveat}"
 
 
 # Change words are checked first: "what changed in v4.2" is a question about

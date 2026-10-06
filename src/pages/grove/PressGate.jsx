@@ -45,6 +45,7 @@ import { activatePressAccount, validatePressCode } from "../../api";
 import { coverageFrom } from "../../features/grove/pressAccess";
 import { LUMECON_TEAM_URL, LUMECON_URL, TBN_PLANS_URL, TBN_URL } from "../../features/grove/pressArticles";
 import { PRESS_TIERS, STOREFRONT_CATALOG, collectionsOnShelf } from "../../features/grove/pressCatalog";
+import { LAUNCH_ROWS_TOTAL } from "../../features/grove/collection";
 import { formatUpdated, recentlyUpdated } from "../../features/grove/pressReleases";
 import { SOURCE_REACH_FIGURE, SOURCE_REACH_UPDATED, SOURCE_ROTATION_ORDER } from "../../features/grove/sourceRotation.js";
 import { MAINTENANCE } from "../../features/grove/pressMethod.js";
@@ -96,6 +97,7 @@ const SOURCE_ROWS = Array.from({ length: SOURCE_ROW_COUNT }, (_, r) =>
  * The year counts back from this year to the earliest record, the others up
  * from zero. The final value is what is prerendered and what a reader who
  * prefers reduced motion sees. */
+const formatCount = (n) => n.toLocaleString("en-US");
 function Tick({ value, from = 0, format = String }) {
   const ref = useTicker(value, { from, format });
   return <b ref={ref} className="cp-tick">{format(value)}</b>;
@@ -663,14 +665,17 @@ export default function PressGate({ user }) {
             </div>
             </div>
             <figcaption className="cp-fade">
-              A live preview: the real viewer, reading the sample records published with
-              each collection&rsquo;s current release.
+              The Cedar Press viewer, showing example records from each collection&rsquo;s
+              current dataset.
             </figcaption>
             {/* The summary figures, one line under the caption (owner,
                 2026-09-27), so nothing sits below the hero's button and the
                 use cases start higher. */}
             <ul className="cp-hero3__facts" aria-label="What Cedar Press holds">
               <li><Tick value={STOREFRONT_CATALOG.length} /> collections</li>
+              {/* Observations across every collection's dataset (owner,
+                  2026-10-06), from the manifest's own count per collection. */}
+              {LAUNCH_ROWS_TOTAL ? <li><Tick value={LAUNCH_ROWS_TOTAL} format={formatCount} /> observations</li> : null}
               {EARLIEST_YEAR ? <li>as far back as <Tick value={EARLIEST_YEAR} from={new Date().getFullYear()} /></li> : null}
               <li>updated <b>{formatUpdated(PAGE_UPDATED)}</b></li>
             </ul>

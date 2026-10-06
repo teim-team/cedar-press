@@ -57,7 +57,7 @@ function ShelfDownload({ tier, entries }) {
       onClick={async () => {
         setState("busy");
         try {
-          await downloadAll(entries, `cedar-press-${tier.id}-samples.zip`);
+          await downloadAll(entries, `cedar-press-${tier.id}-examples.zip`);
           setState("idle");
         } catch {
           // Said, not swallowed: a download that quietly does nothing is
@@ -66,7 +66,7 @@ function ShelfDownload({ tier, entries }) {
         }
       }}
     >
-      {state === "busy" ? "Preparing" : state === "failed" ? "Try again" : `All ${entries.length} samples`}
+      {state === "busy" ? "Preparing" : state === "failed" ? "Try again" : `Download all ${entries.length}`}
       <span aria-hidden="true"> &#8595;</span>
     </button>
   );

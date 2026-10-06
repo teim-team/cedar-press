@@ -256,7 +256,7 @@ Classifications: **CODE** (fixed or fixable here, with a test), **EVIDENCE_IN_RE
 ### GAP-22: owned / display name
 
 - **Gate:** collection name is a data contract carried into every download's citation (AGENTS.md section 6)
-- **Exists:** Owner decision 2026-10-02: the collection is 'Individual Native-Owned Businesses', never 'Native-Owned Businesses' (which makes NEED sound redundant). Served now as 'Individual Native-Owned Businesses' at version v4 (updated 2026-10-02); the pinned sample and receipt are unchanged.
+- **Exists:** Owner decision 2026-10-02: the collection is 'Individual Native-Owned Businesses', never 'Native-Owned Businesses' (which makes NEED sound redundant). Served now as 'Individual Native-Owned Businesses' at version v5 (updated 2026-10-06); the pinned sample and receipt are unchanged.
 - **Served:** Manifest, descriptors, codebook, guides, SEO/JSON-LD, the press dump and the catalog carry the new name; the release ledger keeps v0-v3 under the name they shipped with and records the rename as v4 (the ledger refuses a changed fact on an existing version). The producer's descriptor still carries the old title; Lumecon-data #17 is changing it so the next pin agrees. Catalog `short` now equals the full name pending a copy decision.
 - **Gate location:** data/cedar/collections.manifest.json owned.descriptor; scripts/stage_verified_previews.py copies name from the producer descriptor at pin; server/tests/test_collection_display_names.py
 - **Closing condition:** Producer title changed (Lumecon-data #17) before the next pin; a short label chosen for tiles; downloads already held cite the old name, which the ledger records.

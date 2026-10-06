@@ -104,11 +104,13 @@ class OwnedDisplayName(unittest.TestCase):
         current = next(r for r in ledger if r["version"] == owned["descriptor"]["version"])
         self.assertEqual(current["name"], NEW)
         self.assertEqual(current["date"], owned["descriptor"]["updated"])
+        # Releases before the rename (v4) shipped under their own name; v4 and
+        # every later release carry the new one.
         for row in ledger:
-            if row["version"] != owned["descriptor"]["version"]:
-                self.assertEqual(
-                    row["name"], "Native-Owned Businesses", row
-                )  # earlier releases shipped under their own name
+            renamed = int(row["version"].lstrip("v")) >= 4
+            self.assertEqual(
+                row["name"], NEW if renamed else "Native-Owned Businesses", row
+            )
         # The rename changed no served bytes: the pinned sample and receipt are untouched.
         receipts = json.loads(
             (ROOT / "data/cedar/verified-preview-releases.json").read_text(encoding="utf-8")

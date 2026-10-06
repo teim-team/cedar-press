@@ -25,21 +25,21 @@ test("the door's preview says a failed sample failed, and Retry reads it again",
   await page.route(SAMPLES, (route) => route.abort("internetdisconnected"));
   await page.goto("/");
   const stage = page.getByTestId("collection-stage");
-  await expect(stage).toContainText("The sample could not be read");
+  await expect(stage).toContainText("The records could not be loaded");
   const retry = stage.getByRole("button", { name: "Retry" });
   await expect(retry).toBeVisible();
 
   await page.unroute(SAMPLES);
   await retry.click();
   await expect(stage.locator(".cp-pane__records")).toBeVisible();
-  await expect(stage).not.toContainText("The sample could not be read");
+  await expect(stage).not.toContainText("The records could not be loaded");
 });
 
 test("the door's preview reads the sample again when the browser is back online", async ({ page, context }) => {
   await page.route(SAMPLES, (route) => route.abort("internetdisconnected"));
   await page.goto("/");
   const stage = page.getByTestId("collection-stage");
-  await expect(stage).toContainText("The sample could not be read");
+  await expect(stage).toContainText("The records could not be loaded");
   await page.unroute(SAMPLES);
   await context.setOffline(true);
   await context.setOffline(false);

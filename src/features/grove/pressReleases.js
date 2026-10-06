@@ -339,7 +339,7 @@ export function recentlyUpdated(limit = 3, releases = PRESS_RELEASES) {
 /** Public preview history retains old citations without claiming current full-row totals. */
 const PREVIEW_RELEASES = Object.fromEntries(Object.entries(PRESS_RELEASES).map(([id, entry]) => [id, {
   ...entry, history: entry.history.map((event) => ({ ...event, date_basis: "public_preview",
-    changed: ["Public preview updated."], note: undefined })),
+    changed: ["Collection updated."], note: undefined })),
 }]));
 export function previewReleaseModel() {
   return { source: "public_preview", historyComplete: false, releases: PREVIEW_RELEASES,

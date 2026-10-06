@@ -9,7 +9,7 @@ import { useState } from "react";
 import { Link, NavLink } from "react-router";
 
 import { useAuth } from "../../context/useAuth";
-import { contactHref } from "../../features/grove/appLink.js";
+import { CONTACT_EMAIL, contactHref } from "../../features/grove/appLink.js";
 import { useNarrow } from "../../features/grove/useNarrow.js";
 import { canReadCedarPress } from "../../features/grove/pressAccess";
 import { useDismissable } from "./useDismissable.jsx";
@@ -139,10 +139,12 @@ function SectionMenu({ section }) {
   );
 }
 
+// New wording again (owner, 2026-10-06), so a new key: a reader who closed
+// the earlier note sees this one once.
 // A new key for new wording (owner, 2026-09-27): a reader who closed the old
 // "Private preview" note sees the early-access one once. The old key,
 // "cedar-press-private-preview-notice", is no longer read.
-export const PREVIEW_NOTICE_KEY = "cedar-press-early-access-notice";
+export const PREVIEW_NOTICE_KEY = "cedar-press-early-access-soon-notice";
 
 function previewNoticeIsDismissed() {
   try {
@@ -187,9 +189,10 @@ export function PressPreviewNotice() {
   return (
     <aside className="cp-preview" data-testid="press-preview-note" aria-label="Early access">
       <p className="cp-preview__copy">
-        <b>Early access.</b> Cedar Press is open early to attendees of the Great Lakes Tribal
-        Economic Summit ahead of its public launch. Need a login?{" "}
-        <a href="mailto:elijah.moreno@lumecon.ai?subject=Cedar%20Press%20preview%20access">elijah.moreno@lumecon.ai</a>
+        {/* Owner copy, 2026-10-06: the team address, not a person's. */}
+        <b>Early access</b> is available soon for attendees of the Great Lakes Tribal Economic
+        Summit. Questions?{" "}
+        <a href={contactHref("Cedar Press early access")}>{CONTACT_EMAIL}</a>
       </p>
       {/* A CLOSE CONTROL THAT LOOKS LIKE ONE.
           This was a pill reading "Continue →", which is the language of a

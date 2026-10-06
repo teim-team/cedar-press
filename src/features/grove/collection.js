@@ -107,6 +107,15 @@ export const EXCLUDED_COLLECTIONS = deepFreeze(manifest.excluded);
  * transformation this file performs: the JavaScript surface was camelCase
  * before the manifest existed and renaming it would touch every consumer.
  */
+/**
+ * Collections whose observation count is not shown to readers (owner,
+ * 2026-10-06): the Native Nonprofits count understates the universe it
+ * describes, so no count is stated rather than a misleading one. An empty
+ * label is what every surface already reads as "no count". The service
+ * applies the same set (collections.py COUNT_NOT_SHOWN).
+ */
+export const COUNT_NOT_SHOWN = Object.freeze(new Set(["nonprofits"]));
+
 export const LAUNCH_COLLECTION = deepFreeze(
   manifest.collections.map((entry) => ({
     id: entry.descriptor.id,
@@ -116,7 +125,7 @@ export const LAUNCH_COLLECTION = deepFreeze(
     shortName: entry.descriptor.short_name,
     shelf: entry.descriptor.shelf,
     tracks: entry.descriptor.tracks,
-    rowsLabel: entry.descriptor.rows_label,
+    rowsLabel: COUNT_NOT_SHOWN.has(entry.descriptor.id) ? "" : entry.descriptor.rows_label,
     downloads: entry.descriptor.downloads,
     vintage: entry.descriptor.vintage,
     version: entry.descriptor.version,

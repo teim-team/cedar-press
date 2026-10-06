@@ -165,16 +165,16 @@ export default function CedarPressWhatsNew() {
           <div className="cp-nh__say">
             <p className="cp-nh__sub">
               {!model ? "See the latest collection information available to your subscription." : current
-                ? "Current verified data available to your subscription. Publication dates and complete update history are not recorded yet."
-                : "Public preview history records updates to the preview files. These dates do not establish when the full subscriber data was published."}
+                ? "Current verified data available to your subscription."
+                : "Every collection update is recorded here with its date, so a figure can be checked against the data it came from."}
             </p>
             {model ? <p className="cp-nh__sub cp-nh__sub--use">
-              {current ? "Public preview history is kept separately for earlier citations."
-                : "Use the preview history to check earlier preview citations."}
+              {current ? "Earlier update dates are kept for citations."
+                : "Use the update history to check an earlier citation."}
             </p> : null}
           </div>
-          {model && !current ? <dl className="cp-nh__pulse" aria-label="Public preview activity">
-            <dt>Preview updates, last {activity.days} days</dt>
+          {model && !current ? <dl className="cp-nh__pulse" aria-label="Update activity">
+            <dt>Updates, last {activity.days} days</dt>
             <dd className="cp-nh__pulselead">
               {activity.releases} {activity.releases === 1 ? "release" : "releases"}
             </dd>
@@ -245,7 +245,7 @@ export default function CedarPressWhatsNew() {
             aria-label="Search releases"
           />
           <p className="cp-filter__count" aria-live="polite">
-            {model ? `${entries.length} ${current ? "available collections" : "preview updates"}` : "Updates unavailable"}
+            {model ? `${entries.length} ${current ? "available collections" : "updates"}` : "Updates unavailable"}
             {filtered ? " matching" : ""}
           </p>
         </div> : null}
@@ -285,7 +285,7 @@ export default function CedarPressWhatsNew() {
                         for. */}
                     <h2 className="cp-feed__name">
                       <span className={`cp-feed__kind${method ? " cp-feed__kind--method" : ""}`}>
-                        {current ? "Currently available" : method ? "Methodology" : "Preview update"}
+                        {current ? "Currently available" : method ? "Methodology" : "Data update"}
                       </span>
                       <span>{name}</span>
                       {/* The version is the release's permalink: a citation
@@ -296,7 +296,7 @@ export default function CedarPressWhatsNew() {
                       </a>
                     </h2>
                     {entry.note ? <p className="cp-feed__note">{entry.note}</p> : null}
-                    {model.releases[entry.id]?.preview_updated ? <p className="cp-feed__note">Preview updated {formatUpdated(model.releases[entry.id].preview_updated)}</p> : null}
+                    {model.releases[entry.id]?.preview_updated ? <p className="cp-feed__note">Updated {formatUpdated(model.releases[entry.id].preview_updated)}</p> : null}
                     {/* WHAT CHANGED, THEN THE ARITHMETIC.
                         Every release lists its table and row counts beside
                         whatever actually changed, at the same weight, so a
@@ -398,10 +398,10 @@ export default function CedarPressWhatsNew() {
             full feed only, and never an empty result. It sits after the feed
             and its control, which is where a page pauses. */}
         {history.length ? <details className="cp-feed__detail" data-testid="public-preview-history">
-          <summary>Public preview history</summary>
-          <p>Earlier preview dates remain available for citation. They do not establish historical full-data counts or publication dates.</p>
+          <summary>Update history</summary>
+          <p>Earlier update dates remain available for citation.</p>
           <ul>{history.map((entry) => <li key={entry.anchor} id={entry.anchor}>
-            <a href={`#${entry.anchor}`}>{entry.name}</a>: preview updated {formatUpdated(entry.date)}
+            <a href={`#${entry.anchor}`}>{entry.name}</a>: updated {formatUpdated(entry.date)}
           </li>)}</ul>
         </details> : null}
         {filtered || !model ? null : <PressAd slot={AD_SLOT.FEED} />}

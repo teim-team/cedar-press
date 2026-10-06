@@ -1142,7 +1142,7 @@ export function describeCut(cut, { register = EMPTY_REGISTER, shown = null, tota
   if (cut.years) parts.push(cut.years[0] === cut.years[1] ? String(cut.years[0]) : `${cut.years[0]}–${cut.years[1]}`);
   if (cut.q) parts.push(`“${cut.q}”`);
   if (cut.history) parts.push("including superseded versions");
-  const count = shown == null || total == null ? "" : `${shown} of ${total} sample records`;
+  const count = shown == null || total == null ? "" : `${shown} of ${total} example records`;
   // "every record" is the unfiltered state said in words. Beside a count it
   // says the same thing twice — "every record · 10 of 10 sample records" —
   // and the status bar it sits in has a finite line. It stays wherever there
@@ -1265,15 +1265,15 @@ export function cutReadme(rows, { view, cut, register = EMPTY_REGISTER, columns 
     "Cedar Press · Explore the collections · sample export",
     "",
     view === "table"
-      ? `records.csv holds ${rows.length} sample record(s) from ${scopeOf(cut)} with the table's own ${columns.length} columns.`
-      : `records.csv holds ${rows.length} sample record(s) across ${collections.length} collection(s) in a REDUCED summary shape: one line per record with the entity, its type, the date, a 180-character observation, the amount where the table records one (never comparable across collections) and the source. entity_uids, entity_names, entity_types and entity_roles are pipe-separated lists aligned position for position (the first position is the entity_name/entity_type entity); a record naming several parties carries them all. Use each collection's own download for the full columns.`,
+      ? `records.csv holds ${rows.length} example record(s) from ${scopeOf(cut)} with the table's own ${columns.length} columns.`
+      : `records.csv holds ${rows.length} example record(s) across ${collections.length} collection(s) in a REDUCED summary shape: one line per record with the entity, its type, the date, a 180-character observation, the amount where the table records one (never comparable across collections) and the source. entity_uids, entity_names, entity_types and entity_roles are pipe-separated lists aligned position for position (the first position is the entity_name/entity_type entity); a record naming several parties carries them all. Use each collection's own download for the full columns.`,
     `Cut: ${describeCut(cut, { register })}`,
     `Cut query (cut version ${CUT_VERSION}): ${encodeCut(cut) || "(none)"}`,
     ...(missing.length
       ? ["", `NOT INCLUDED: the preview for ${missing.map((id) => PRESS_CATALOG_BY_ID[id]?.short ?? id).join(", ")} could not be read when this file was made, so the cut above selected more than this file holds.`]
       : []),
     "",
-    "These are SAMPLES: each collection's customer table (one flat table per collection, up to ten rows), not the release. Counts here are counts of sample records.",
+    "These are EXAMPLE RECORDS: up to ten rows of each collection's dataset (one flat table per collection), not the full dataset. Counts here are counts of example records.",
     "Cells that a spreadsheet would read as a formula (a leading =, + or @) carry a leading apostrophe.",
     "",
     "Cite as:",

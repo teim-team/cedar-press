@@ -17,6 +17,7 @@ import {
   collectionCedarFacts,
   collectionDeclaredSample,
   collectionSample,
+  COUNT_NOT_SHOWN,
 } from "./collection.js";
 import { PRESS_CATALOG } from "./pressCatalog.js";
 import {
@@ -91,7 +92,9 @@ test("the ledger's entry for the current version is what the manifest measures",
       date: dataset.updated,
       name: dataset.name,
       tables: cedar.n_tables,
-      rowsLabel: dataset.rowsLabel,
+      // The ledger records the measured label even where the page shows none
+      // (COUNT_NOT_SHOWN, collection.js).
+      rowsLabel: COUNT_NOT_SHOWN.has(dataset.id) ? record.rowsLabel : dataset.rowsLabel,
       preview: sample?.path ? { table: sample.table, rows: sample.rows, of: sample.of } : null,
       // By name, not by count: a blocker that changed is a fact that changed.
       blockers: [...cedar.blockers],
@@ -351,7 +354,7 @@ test("current feed never borrows publication dates or aggregate totals from publ
   assert.equal(model.feed[0].anchor, `funding-${"a".repeat(64)}`);
   assert.ok(model.previewHistory.length);
   assert.ok(model.previewHistory.every((event) => event.date_basis === "public_preview"));
-  assert.ok(model.previewHistory.every((event) => event.changed.join() === "Public preview updated."));
+  assert.ok(model.previewHistory.every((event) => event.changed.join() === "Collection updated."));
   const preview = previewReleaseModel();
   assert.equal(preview.source, "public_preview");
   assert.deepEqual(preview.feed.map((item) => item.anchor), RELEASE_FEED.map((item) => item.anchor));

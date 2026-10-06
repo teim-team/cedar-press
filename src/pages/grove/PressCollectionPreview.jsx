@@ -22,12 +22,11 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { LAUNCH_COLLECTION } from "../../features/grove/collection";
+import { LAUNCH_COLLECTION, collectionCedarFacts } from "../../features/grove/collection";
 import { codebookLoaded, loadCodebook } from "../../features/grove/codebook.js";
 import { fetchSampleText, onBackOnline } from "../../features/grove/sampleFetch.js";
 import { contractFor, exploreTables, parseCsv, universalRows } from "../../features/grove/explore.js";
 import { columnPlan } from "../../features/grove/recordColumns.js";
-import { tableLabel } from "../../features/grove/readerValues.js";
 import { Cards, Rows } from "./PressRecordTable.jsx";
 import { useNarrow } from "../../features/grove/useNarrow.js";
 import { coverageLabel } from "../../features/grove/pressAccess";
@@ -47,6 +46,14 @@ import { TierName } from "./TierName";
  * holds, so the caption's "N of N" is the whole of what is public.
  */
 const PANE_ROWS = 10;
+
+/** Observations in each collection's dataset, by id. A collection whose count
+ * is not shown (COUNT_NOT_SHOWN, collection.js) has an empty label and no
+ * entry here, so its caption counts only the example records. */
+const DATASET_ROWS = Object.fromEntries(
+  LAUNCH_COLLECTION.filter((entry) => entry.rowsLabel)
+    .map((entry) => [entry.id, collectionCedarFacts(entry.id)?.n_rows ?? null]),
+);
 
 const SOURCES = Object.fromEntries(LAUNCH_COLLECTION.map((entry) => [entry.id, entry.sources]));
 
@@ -146,7 +153,7 @@ export default function CollectionPreview({ entry, tier, register }) {
         </div>
         <p className="cp-pane__facts">
           {coverage ? <span>{coverage}</span> : null}
-          {fresh ? <span>Preview {fresh.charAt(0).toLowerCase() + fresh.slice(1)}</span> : null}
+          {fresh ? <span>{fresh}</span> : null}
         </p>
         <p className="cp-pane__blurb">{entry.blurb}</p>
       </div>
@@ -161,12 +168,14 @@ export default function CollectionPreview({ entry, tier, register }) {
       ) : status === "ok" && items.length ? (
         <>
           <p className="cp-pane__tablecap">
+            {/* One clean dataset (owner, 2026-10-06): no table name, just
+                what the rows are and how many observations the dataset
+                holds, where a count is shown for it. */}
+            <span>Example records</span>
             <span>
-              {tableLabel(table)}
-              {table.flagship ? null : <em> · supporting table</em>}
-            </span>
-            <span>
-              {items.length} of {parsed.rows.length} sample records
+              {DATASET_ROWS[entry.id]
+                ? `${items.length} of ${DATASET_ROWS[entry.id].toLocaleString("en-US")} observations`
+                : `${items.length} example records`}
             </span>
           </p>
           {/* THE SAME TABLE, NOT A TABLE THAT LOOKS LIKE IT.
@@ -204,7 +213,7 @@ export default function CollectionPreview({ entry, tier, register }) {
       ) : (
         <div className="cp-pane__pending" role="status">
           <span className="cp-pane__pendingcap">
-            {status === "none" ? "Preview pending" : "The sample could not be read"}
+            {status === "none" ? "Records coming soon" : "The records could not be loaded"}
           </span>
           {status === "none" ? (
             <p>
@@ -212,7 +221,7 @@ export default function CollectionPreview({ entry, tier, register }) {
             </p>
           ) : (
             <p>
-              The public sample could not be loaded. Check the connection and try again.{" "}
+              The records could not be loaded. Check the connection and try again.{" "}
               <button type="button" className="cp-retry" onClick={retry}>Retry</button>
             </p>
           )}

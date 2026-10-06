@@ -230,13 +230,18 @@ class TestCatalog(unittest.TestCase):
         )
         self.assertIn("Deals", payload["basis"])
 
-    def test_cedar_flags_demonstration_statistics(self) -> None:
+    def test_cedar_never_quotes_demonstration_statistics(self) -> None:
+        # Owner, 2026-10-06: nothing a reader sees is a draft or a mock-up, so
+        # a demonstration figure series is never quoted; Cedar says the
+        # collection has no published figures and states what it holds.
         response = client.post(
             "/cedar/ask",
             json={"question": "What are the headline figures?", "collectionId": "deals"},
         )
         self.assertEqual(response.status_code, 200)
-        self.assertIn("demonstration", response.json()["answer"])
+        answer = response.json()["answer"]
+        self.assertNotIn("demonstration", answer)
+        self.assertIn("has no published figures yet", answer)
 
     def test_cedar_labels_real_statistics_with_their_source(self) -> None:
         # As Cedar Press+, because `owned` is on the `pro` shelf and
@@ -263,15 +268,19 @@ class TestCatalog(unittest.TestCase):
             json={"question": "How many records are in this collection?", "collectionId": "deals"},
         )
         self.assertEqual(response.status_code, 200)
-        self.assertIn("currently holds", response.json()["answer"])
+        answer = response.json()["answer"]
+        self.assertIn("978 observations", answer)
+        self.assertNotIn("demonstration", answer)
 
-    def test_a_two_series_figure_answers_with_both_series(self) -> None:
+    def test_a_demonstration_two_series_figure_is_not_quoted(self) -> None:
+        # Funding's two-series figure is demonstration data, so neither series
+        # is quoted (owner, 2026-10-06).
         response = client.post(
             "/cedar/ask",
             json={"question": "What are the headline figures?", "collectionId": "funding"},
         )
         self.assertEqual(response.status_code, 200)
-        self.assertIn("comparison", response.json()["answer"])
+        self.assertNotIn("comparison", response.json()["answer"])
 
     def test_cedar_still_refuses_what_it_cannot_support(self) -> None:
         # An unscoped "what?" used to land here too, and it is a different

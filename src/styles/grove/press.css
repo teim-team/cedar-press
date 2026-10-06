@@ -4660,6 +4660,10 @@ body[data-cp-preview-in-view] .teim-rd .cp-dc__fab { display: none; }
  * of the window, rail to edge, instead of stopping at the document's 1560px
  * and leaving paper either side on a wide screen. */
 .teim-rd .cp-page--table { max-width: none; }
+/* The footer sits directly on the table (owner, 2026-10-06): the deep
+ * footer's 2.6rem top margin left a band of paper between the records and
+ * the footer on the one page whose job is to show as much table as fits. */
+.teim-rd .cp-page--table .cp-foot--deep { margin-top: 0; }
 /* THE MASTHEAD, ON A PAGE THAT IS A WORKING SURFACE.
  * 141px of a 900px window before the frame even started. It keeps its
  * gutters (it is the same masthead as every other page) and loses what a

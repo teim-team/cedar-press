@@ -404,7 +404,7 @@ test("institutional accounts: team and organization questions reach their own an
   assert.match(intent.answer, /own sign-in/);
   assert.match(intent.answer, /teammates do not see each other's conversations/);
   assert.match(intent.answer, /loses that access at once and keeps anything they hold individually/);
-  assert.match(intent.answer, /elijah\.moreno@lumecon\.ai/);
+  assert.match(intent.answer, /contact@lumecon\.ai/);
   for (const text of [intent.answer, intent.expanded]) {
     assert.doesNotMatch(text, /\bseats?\b|\$|\bprice|\bcost|per user|up to \d/i, text.slice(0, 60));
   }

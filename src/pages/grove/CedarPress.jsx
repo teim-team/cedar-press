@@ -159,7 +159,7 @@ export default function CedarPress() {
                   <li className="cp-new__item" key={release.id}>
                     <Link className="cp-new__link" to={to}>
                       <b>{PRESS_CATALOG_BY_ID[release.id]?.name ?? release.id}</b>
-                      <span className="cp-new__date">{release.updated ? `Preview updated ${formatUpdated(release.updated)}` : "Current verified data"}</span>
+                      <span className="cp-new__date">{release.updated ? `Updated ${formatUpdated(release.updated)}` : "Current verified data"}</span>
                     </Link>
                   </li>
                 );
