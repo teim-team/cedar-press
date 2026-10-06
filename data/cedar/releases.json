@@ -46,7 +46,7 @@
         "date": "2026-10-06",
         "name": "Federal Funding to Indian Country",
         "tables": 14,
-        "rowsLabel": "701,955 rows",
+        "rowsLabel": "701,955 observations",
         "preview": {
           "table": "federal_funding_transactions.csv",
           "rows": 10,
@@ -100,7 +100,7 @@
         "date": "2026-10-06",
         "name": "Federal Register — Indian Affairs",
         "tables": 23,
-        "rowsLabel": "11,402 rows",
+        "rowsLabel": "11,402 observations",
         "preview": {
           "table": "consultation_events.csv",
           "rows": 10,
@@ -154,7 +154,7 @@
         "date": "2026-10-06",
         "name": "Native Legislation and Votes",
         "tables": 15,
-        "rowsLabel": "3,069 rows",
+        "rowsLabel": "3,069 observations",
         "preview": {
           "table": "native_bills.csv",
           "rows": 10,
@@ -208,7 +208,7 @@
         "date": "2026-10-06",
         "name": "Indian Country Deals",
         "tables": 15,
-        "rowsLabel": "1,073 rows",
+        "rowsLabel": "1,073 observations",
         "preview": {
           "table": "deals_classified.csv",
           "rows": 10,
@@ -262,7 +262,7 @@
         "date": "2026-10-06",
         "name": "NAGPRA Notices",
         "tables": 12,
-        "rowsLabel": "6,792 rows",
+        "rowsLabel": "6,792 observations",
         "preview": {
           "table": "nagpra_notices.csv",
           "rows": 10,
@@ -316,7 +316,7 @@
         "date": "2026-10-06",
         "name": "Native Federal Advocacy and Engagement",
         "tables": 35,
-        "rowsLabel": "27,825 rows",
+        "rowsLabel": "27,825 observations",
         "preview": {
           "table": "native_entity_lobbying_disclosures.csv",
           "rows": 10,
@@ -370,7 +370,7 @@
         "date": "2026-10-06",
         "name": "Native Federal Contractors",
         "tables": 10,
-        "rowsLabel": "1,217,768 rows",
+        "rowsLabel": "1,217,768 observations",
         "preview": {
           "table": "prime_contracts.csv",
           "rows": 10,
@@ -424,7 +424,7 @@
         "date": "2026-10-06",
         "name": "Native Federal Subcontracting",
         "tables": 3,
-        "rowsLabel": "70,597 rows",
+        "rowsLabel": "70,597 observations",
         "preview": {
           "table": "subawards.csv",
           "rows": 10,
@@ -478,7 +478,7 @@
         "date": "2026-10-06",
         "name": "Native-Owned Businesses",
         "tables": 7,
-        "rowsLabel": "3,725 rows",
+        "rowsLabel": "3,725 observations",
         "preview": {
           "table": "native_owned_businesses.csv",
           "rows": 10,
@@ -532,7 +532,7 @@
         "date": "2026-10-06",
         "name": "Cedar Native Entity Enterprise Dataset (NEED)",
         "tables": 3,
-        "rowsLabel": "5,820 rows",
+        "rowsLabel": "5,820 observations",
         "preview": {
           "table": "need_enterprises.csv",
           "rows": 10,
@@ -586,7 +586,7 @@
         "date": "2026-10-06",
         "name": "Tribal Natural Resource Revenue",
         "tables": 9,
-        "rowsLabel": "11,305 rows",
+        "rowsLabel": "11,305 observations",
         "preview": {
           "table": "resource_revenue.csv",
           "rows": 10,
@@ -640,7 +640,7 @@
         "date": "2026-10-06",
         "name": "Native Nonprofits",
         "tables": 12,
-        "rowsLabel": "12,689 rows",
+        "rowsLabel": "12,689 observations",
         "preview": {
           "table": "np_orgs.csv",
           "rows": 10,
