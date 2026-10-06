@@ -55,7 +55,7 @@
    "entity_uid": "cedar_uid",
    "plural": false,
    "entity_role": "constant:recipient",
-   "columns_today": 63,
+   "columns_today": 62,
    "columns_target": 39,
    "default_viewer": [
     "canonical_name",
@@ -67,7 +67,7 @@
     "attribution_status",
     "source_url"
    ],
-   "note": "The owner's list carries recipient_duns (40 columns). The retirement rule in the same addendum says DUNS is used internally to reconcile historical records and is not published; the later rule wins, DUNS is internal_crosswalk, and the file ships 39.",
+   "note": "The owner's list carries recipient_duns (40 columns). The retirement rule in the same addendum says DUNS is used internally to reconcile historical records and is not published; the later rule wins, DUNS is internal_crosswalk, and the file ships 39. Under the owner's ruling of 2026-10-04 (DUNS is private) the publication gate drops every column whose name contains `duns` before the map runs (cedar_publication.DROP_SUBSTRINGS), so recipient_duns no longer reaches the sample header.",
    "header_source": "sample",
    "fields": [
     {
@@ -163,18 +163,6 @@
      "decision": "keep",
      "why": "Official identifier.",
      "spec": "§1"
-    },
-    {
-     "column": "recipient_duns",
-     "decision": "internal",
-     "why": "Retired federal identifier: used internally to reconcile historical records to the UEI and the cedar_uid, never published (retirement rule; DROP_COLS already bars it).",
-     "spec": "retirement",
-     "retire": {
-      "identifies": "the recipient in the pre-2022 federal record",
-      "disposition": "internal_crosswalk",
-      "replacement": "recipient_uei and cedar_uid",
-      "column": "recipient_duns"
-     }
     },
     {
      "column": "recipient_name",

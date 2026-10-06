@@ -12,7 +12,7 @@ Generated from `data/cedar/field_map.json` and the sample headers by `scripts/do
 
 | dataset | old_identifier | what_it_identified | cedar_uid_or_replacement | disposition | rows_affected (sample) | unresolved_count (sample) |
 |---|---|---|---|---|---:|---:|
-| `funding` | `recipient_duns` | the recipient in the pre-2022 federal record | recipient_uei and cedar_uid | internal_crosswalk | 10 | 0 |
+| `funding` | `recipient_duns` | the recipient in the pre-2022 federal record | recipient_uei and cedar_uid | internal_crosswalk | 0 | 0 |
 | `funding` | `attribution_status` | how the row was attributed, in a vocabulary naming the retired scheme | a recoded attribution_status vocabulary | retired_scheme | 10 | 10 |
 | `lobbying` | `entity_id` | the canonical Native entity, as a second spelling of cedar_uid on the same row | cedar_uid | alias_verified | 10 | 0 |
 | `lobbying` | `client_id` | the client in the LDA database | client_id, kept | object_id | 10 | 0 |
@@ -51,9 +51,6 @@ Supporting tables are not customer downloads, but the rule reaches the whole pip
 | `federal-register/nepa_eplanning_projects` | `tribe_ids_named_in_record` |
 | `federal-register/section_106_project_parties` | `resolved_native_entity_id` |
 | `funding/faads_identifier_coverage_by_agency_year` | `pct_with_duns`, `pct_with_duns_tribal_rows_only` |
-| `funding/faads_transactions` | `recipient_duns` |
-| `funding/faads_transactions_all_agencies` | `recipient_duns` |
-| `funding/funding_identifier_harvest` | `recipient_duns` |
 | `funding/native_passthrough` | `from_tribe_id`, `to_tribe_id` |
 | `funding/native_passthrough_pairs` | `from_tribe_id`, `to_tribe_id` |
 | `legislation/congressional_correspondence_log` | `tribe_entity_id` |
@@ -90,7 +87,7 @@ Supporting tables are not customer downloads, but the rule reaches the whole pip
 | `nonprofits/np_schedule_i_filers` | `filer_tribe_id_np_orgs`, `cedar_filer_spine_entity_id` |
 | `nonprofits/np_schedule_i_grants` | `recipient_np_orgs_tribe_id`, `recipient_entity_id`, `cedar_filer_spine_entity_id`, `cedar_recipient_spine_entity_id` |
 
-48 supporting tables carry such a column in their samples. Columns whose name ends in `_entity_id` are listed because they may hold a Cedar uid under another name (an alias to verify) or a non-Cedar namespace (an object id to keep, as Natural Resources' payer and operator ids are); each needs the same determination the flagship columns received.
+45 supporting tables carry such a column in their samples. Columns whose name ends in `_entity_id` are listed because they may hold a Cedar uid under another name (an alias to verify) or a non-Cedar namespace (an object id to keep, as Natural Resources' payer and operator ids are); each needs the same determination the flagship columns received.
 
 ## The rest of the pipeline
 
