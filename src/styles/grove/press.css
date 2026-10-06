@@ -2699,7 +2699,7 @@
 .teim-rd .cp-hero3__facts b { font-weight: 700; color: var(--ink); }
 /* The ticking figures keep their width while they count, so the line does
  * not reflow under them. */
-.teim-rd .cp-tick { font-variant-numeric: tabular-nums; }
+.teim-rd .cp-tick { font-variant-numeric: tabular-nums; display: inline-block; text-align: right; }
 /* Each fact is one unit: a date broken across two lines ("UPDATED SEPT. 26, /
  * 2026") reads as two facts. On a phone the two columns size to their facts
  * rather than splitting the width evenly, which is what gives the date room. */

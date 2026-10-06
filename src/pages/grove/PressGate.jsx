@@ -99,7 +99,11 @@ const SOURCE_ROWS = Array.from({ length: SOURCE_ROW_COUNT }, (_, r) =>
 const formatCount = (n) => n.toLocaleString("en-US");
 function Tick({ value, from = 0, format = String }) {
   const ref = useTicker(value, { from, format });
-  return <b ref={ref} className="cp-tick">{format(value)}</b>;
+  const final = format(value);
+  // The final value's width is held while the count runs, so a number
+  // ticking up from 0 never rewraps the line it sits in (the hero's facts
+  // line wrapped mid-count and moved the page by a line, 2026-10-06).
+  return <b ref={ref} className="cp-tick" style={{ minWidth: `${final.length}ch` }}>{final}</b>;
 }
 
 /** The brand mark, served from public/. The all-teal mark is the current one. */

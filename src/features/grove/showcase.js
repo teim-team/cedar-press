@@ -113,9 +113,12 @@ export const DISPLAY_DEFAULTS = Object.freeze({
   "natural-resources": Object.freeze(["commodity", "revenue_type", "aggregation_level", "amount_usd", "measurement_status", "period_start", "period_end", "source_url"]),
 });
 
-/** Values that stand in for a blank column, by collection: the reported form of the same fact. */
+/** Values that stand in for a blank column, by collection: the reported form of the same fact (one column, or several tried in order). */
 export const COLUMN_FALLBACKS = Object.freeze({
-  "foundation-corporate-giving": Object.freeze({ recipient_name: "recipient_name_reported", announcement_date: "payment_date" }),
+  // A Form 990-PF gift is dated only by its report year.
+  "foundation-corporate-giving": Object.freeze({ recipient_name: "recipient_name_reported", announcement_date: Object.freeze(["payment_date", "report_year"]) }),
+  // A payment dated only by its payment date (a state severance-tax share).
+  "natural-resources": Object.freeze({ period_start: "payment_date" }),
 });
 
 /**
@@ -128,8 +131,8 @@ export function displayColumns(collectionId, defaults, rows = [], available = nu
   const base = declared?.length >= 3 ? declared : defaults;
   if (!rows.length) return base;
   const fallbacks = COLUMN_FALLBACKS[collectionId] ?? {};
-  const filled = (column) => rows.some((row) => String(row?.[column] ?? row?.[fallbacks[column]] ?? "").trim()
-    || String(row?.[fallbacks[column]] ?? "").trim());
+  const filled = (column) => rows.some((row) => [column, ...[fallbacks[column] ?? []].flat()]
+    .some((name) => String(row?.[name] ?? "").trim()));
   const kept = base.filter(filled);
   return kept.length >= 3 ? kept : base;
 }

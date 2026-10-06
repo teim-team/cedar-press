@@ -208,6 +208,8 @@ data/restricted/
 # NEED ownership chains with their evidence: what the NEED download adds
 # as native_owner columns (server/cedar_press/collections.py).
 !/data/cedar/need_ownership_evidence.json
+# Curated landing-frame examples, one file per collection (landingExamples.js).
+!/data/cedar/landing_examples/
 !/data/cedar/field_map.json
 # The one Cedar Grove release pin (immutable Lumecon release IDs and hashes only).
 !/data/cedar/grove_release_pin.json

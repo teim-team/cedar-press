@@ -51,8 +51,9 @@ export function Human({ column, value, contract, item = null }) {
   // A blank column whose fact the record carries in its reported form (a
   // gift's recipient as the source printed it) shows that form.
   if (value === "" || value == null) {
-    const fallback = COLUMN_FALLBACKS[item?.collection]?.[column];
-    if (fallback && String(item?.row?.[fallback] ?? "").trim()) value = item.row[fallback];
+    const fallbacks = [COLUMN_FALLBACKS[item?.collection]?.[column] ?? []].flat();
+    const fallback = fallbacks.find((name) => String(item?.row?.[name] ?? "").trim());
+    if (fallback) value = item.row[fallback];
   }
   // The table's own entity columns read blank where the record names its
   // Native party through another role (a subaward's subrecipient, a

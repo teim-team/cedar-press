@@ -85,6 +85,27 @@ Fixed on this branch:
   entries, 154 discovery leads (not sources). **Owner decision:** restore a
   larger figure only with a registry and unit behind it.
 
+**Owner, later on 2026-10-06: the landing page may show examples beyond the
+current release, as long as they are clean.** The landing frame now reads
+curated sets, one per collection, in `data/cedar/landing_examples/<id>.json`
+(`src/features/grove/landingExamples.js`). Every row is copied from real
+records already in this repository (the pinned downloads, the 100-row previews
+in `dist/preview/`, test fixtures under `server/tests/fixtures/`, and Cedar's
+ownership rulings in `code/55_stage_anc_subsidiary_rulings.py`), and each row
+names its `_origin`. NEED's set leads with tribe-owned enterprises
+(CNI Advantage, Choctaw Manufacturing Defense Contractors) and spans ASRC,
+NANA, Koniag, Chugach, Calista, Ahtna, Tyonek and Ukpeaġvik Iñupiat, each
+with its ultimate parent, UEI and CAGE. Only the landing frame reads these
+sets: the viewer, record pages and downloads still read the release.
+`landingExamples.test.js` checks every row against the download's columns,
+for an origin, garbled text, positive amounts and the known wrong records.
+Thin spots: PLOT has only three real records in the repository (two with a
+blank cell); five Natural Resources rows come from the 100-row preview with
+no source page; Individual Native-Owned Businesses has only the Tulalip TERO
+registry rows with both a stated tribe and a source; Prime Contracting and
+Subcontracting have six clean rows each. Re-drawn producer samples would
+replace all of this.
+
 Open, needs the producer or the owner:
 
 - The three wrong bindings (section 8), with corrections recorded in

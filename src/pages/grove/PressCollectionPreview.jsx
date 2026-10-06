@@ -29,6 +29,7 @@ import { contractFor, exploreTables, parseCsv, universalRows } from "../../featu
 import { columnPlan } from "../../features/grove/recordColumns.js";
 import { showcaseItems } from "../../features/grove/showcase.js";
 import { enrichSample } from "../../features/grove/exampleEnrichment.js";
+import { LANDING_EXAMPLES, landingSample } from "../../features/grove/landingExamples.js";
 import { Cards, Rows } from "./PressRecordTable.jsx";
 import { useNarrow } from "../../features/grove/useNarrow.js";
 import { coverageLabel } from "../../features/grove/pressAccess";
@@ -104,7 +105,7 @@ function usePreviewSample(collectionId) {
     pending.current.add(table.path);
     // The rows are drawn by the product's own table, which reads the
     // codebook's labels; the two arrive together.
-    Promise.all([fetchSampleText(table.path, { sha256: table.sha256 }).then((text) => enrichSample(collectionId, parseCsv(text))), loadCodebook()]).then(
+    Promise.all([fetchSampleText(table.path, { sha256: table.sha256 }).then((text) => enrichSample(collectionId, landingSample(collectionId, parseCsv(text)))), loadCodebook()]).then(
       ([parsed]) => {
         pending.current.delete(table.path);
         setLoaded((prev) => (prev.has(table.path) ? prev : new Map(prev).set(table.path, parsed)));
@@ -146,7 +147,10 @@ export default function CollectionPreview({ entry, tier, register }) {
   const { defaults, all } = status === "ok"
     ? columnPlan(table?.key ?? null, contract, parsed?.columns ?? [], parsed?.rows ?? [])
     : { defaults: [], all: [] };
-  const shownColumns = defaults.length ? defaults : all;
+  // A curated landing set may name the columns it is shown on
+  // (landingExamples.js), where the collection's own opening view leaves out
+  // who the record is about.
+  const shownColumns = LANDING_EXAMPLES[entry.id]?.columns ?? (defaults.length ? defaults : all);
   const fresh = freshnessLine(entry.id);
   // Presented by its record structure (Foundation & Corporate Giving, PLOT):
   // the frame shows what each record holds, where another collection shows

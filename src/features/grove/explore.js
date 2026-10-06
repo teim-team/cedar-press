@@ -128,7 +128,7 @@ const READER_LABELS = Object.freeze({
   "*": Object.freeze({ native_owner: "Native owner", native_owner_basis: "Native owner basis", native_owner_source: "Native owner source", native_owner_cedar_uid: "Native owner Cedar ID" }),
   need: Object.freeze({
     enterprise_name: "Enterprise", native_owner: "Ultimate parent", native_owner_cedar_uid: "Ultimate parent Cedar ID", native_owner_basis: "Ultimate parent basis", native_owner_source: "Ultimate parent source",
-    related_entity_name: "Immediate parent or related company", relationship_type: "Relationship",
+    related_entity_name: "Parent company", relationship_type: "Relationship",
     ownership_extent: "Ownership", uei: "UEI (SAM.gov)", cage_code: "CAGE code", source_reported_name: "Name as the source reports it",
     owner_name: "Reviewed owner", owner_scope: "Owner scope", verified_claims: "Verified claims", reviewed_on: "Reviewed on",
     review_reason: "Review basis", cage_evidence_scope: "CAGE evidence", subject_binding: "How the source was matched",

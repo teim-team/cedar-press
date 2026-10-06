@@ -25,6 +25,7 @@ import { formatUpdated } from "../src/features/grove/pressReleases.js";
 import { recordHref } from "../src/features/grove/pressRecord.js";
 import { enrichSample } from "../src/features/grove/exampleEnrichment.js";
 import { showcaseItems } from "../src/features/grove/showcase.js";
+import { landingSample } from "../src/features/grove/landingExamples.js";
 
 // The browser suite follows the exact published release, including refreshed
 // source keys. It never revives retired samples just to keep a fixture alive.
@@ -1142,7 +1143,8 @@ test.describe("Explore the collections", () => {
     // The viewer is analytical: every downloaded record. The door shows the
     // editorial selection (showcase.js).
     const expectedIds = universalRows(table.key, sample.rows).map((row) => row.recordId).sort();
-    const doorIds = showcaseItems(id, universalRows(table.key, sample.rows)).map((row) => row.recordId).sort();
+    // The door shows the curated landing examples (landingExamples.js).
+    const doorIds = showcaseItems(id, universalRows(table.key, landingSample(id, sample).rows)).map((row) => row.recordId).sort();
     if (expectedIds.some((value) => !value)) throw new Error(id + " has an unnamed sample observation");
     for (const { account, open } of cases) {
       test(id + (open ? " opens its reviewed sample" : " is offered on Cedar Press+") + " for " + (account === ACCOUNT ? "Cedar Press+" : "Cedar Press"), async ({ page }) => {
