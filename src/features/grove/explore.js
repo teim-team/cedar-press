@@ -139,7 +139,7 @@ const READER_LABELS = Object.freeze({
     funder_class: "Funder type", recipient_affiliation: "Recipient affiliation", payment_date: "Paid",
   }),
   owned: Object.freeze({ stated_tribe: "Tribe (as listed)", certifying_authority_name: "Certifying authority", service_category: "Services" }),
-  plot: Object.freeze({ source_parcel_id: "Parcel ID", land_record_kind: "Land record", owner_name_raw: "Owner as recorded", recorded_acres: "Acres", county_fips: "County FIPS", source_record_url: "Source record" }),
+  plot: Object.freeze({ native_entity_name: "Native entity", native_entity_cedar_uid: "Cedar ID", source_parcel_id: "Parcel ID", land_record_kind: "Land record", owner_name_raw: "Owner as recorded", recorded_acres: "Acres", county_fips: "County FIPS", source_record_url: "Source record" }),
   nonprofits: Object.freeze({ inclusion_category: "Category", ntee_code: "NTEE code", bmf_revenue_usd: "Revenue (IRS)" }),
   subcontracting: Object.freeze({ prime_name: "Prime contractor", subcontractor_name: "Subcontractor" }),
 });

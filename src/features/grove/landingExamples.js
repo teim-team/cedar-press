@@ -38,13 +38,17 @@ export const LANDING_EXAMPLES = Object.freeze(Object.fromEntries(
 /**
  * The parsed example file the landing frame shows: the collection's curated
  * rows laid onto the download's own columns (a column a curated row does not
- * fill is blank), or the pinned file unchanged where none are curated.
+ * fill is blank), plus any `extra_columns` the set declares (PLOT's parcels
+ * carry the tribe their recorded owner names, which the PLOT table has no
+ * column for), or the pinned file unchanged where none are curated.
  */
 export function landingSample(collectionId, parsed) {
-  const rows = LANDING_EXAMPLES[collectionId]?.rows;
-  if (!parsed?.columns || !rows?.length) return parsed;
+  const set = LANDING_EXAMPLES[collectionId];
+  if (!parsed?.columns || !set?.rows?.length) return parsed;
+  const columns = [...parsed.columns, ...(set.extra_columns ?? []).filter((column) => !parsed.columns.includes(column))];
   return {
     ...parsed,
-    rows: rows.map((row) => Object.fromEntries(parsed.columns.map((column) => [column, row[column] ?? ""]))),
+    columns,
+    rows: set.rows.map((row) => Object.fromEntries(columns.map((column) => [column, row[column] ?? ""]))),
   };
 }

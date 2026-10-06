@@ -67,7 +67,6 @@ import { ECOSYSTEM_EXAMPLES, MAINTENANCE, NEED_ENRICHMENTS } from "./pressMethod
 import { recordStructure } from "./pressRecordStructure.js";
 import { formatUpdated, freshnessLine, recentlyUpdated } from "./pressReleases.js";
 import { REGISTRY_PROGRAMS } from "./pressSources.js";
-import { SOURCE_REACH_FIGURE } from "./sourceRotation.js";
 
 const DESCRIPTOR = Object.fromEntries(LAUNCH_COLLECTION.map((entry) => [entry.id, entry]));
 const TIER_BY_SHELF = Object.fromEntries(PRESS_TIERS.map((tier) => [tier.shelf, tier]));
@@ -238,7 +237,7 @@ const GENERAL_INTENTS = [
     triggers: ["what is cedar press", "what is this", "what does cedar press do", "what is cedar", "about cedar press", "explain cedar press", "what do you do", "what is press", "cedar press", "what is it", "what are you", "what can cedar answer", "what can cedar press answer", "what can you answer", "what can i ask"],
     answer:
       `Cedar Press is a research and intelligence service about Indian Country's economy. ` +
-      `It publishes ${COUNT} maintained collections, built from ${SOURCE_REACH_FIGURE} kinds of public source and ` +
+      `It publishes ${COUNT} maintained collections, built from public sources and ` +
       `resolved to the nations, corporations and organizations the records belong to.\n\n` +
       `A federal contract names the company that won it but not the nation that owns the company, so ` +
       `Cedar does the work between the record and the entity, publishes what it could not resolve, and keeps the ` +
@@ -274,7 +273,7 @@ const GENERAL_INTENTS = [
     followUps: ["current", "entities", "limits"],
     triggers: ["where does the data come from", "what are the sources", "what sources", "source systems", "is this public data", "where do you get", "how do you get the data", "provenance", "the sources", "data sources", "where is it from", "where does it come from"],
     answer:
-      `Every collection is built from public material, drawn from ${SOURCE_REACH_FIGURE} kinds of public source. They include ` +
+      `Every collection is built from public material. The sources include ` +
       `federal spending and award systems (USAspending, FPDS, FSRS, SAM, FAADS), Congress and the ` +
       `Federal Register (Congress.gov, Voteview, federalregister.gov), lobbying disclosures filed under the ` +
       `Lobbying Disclosure Act, IRS filings (the Business Master File and ` +

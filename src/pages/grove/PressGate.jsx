@@ -47,7 +47,7 @@ import { LUMECON_TEAM_URL, LUMECON_URL, TBN_URL } from "../../features/grove/pre
 import { PRESS_TIERS, STOREFRONT_CATALOG, collectionsOnShelf } from "../../features/grove/pressCatalog";
 import { LAUNCH_COLLECTION, LAUNCH_ROWS_TOTAL, OBSERVATIONS_NOTE } from "../../features/grove/collection";
 import { formatUpdated, recentlyUpdated } from "../../features/grove/pressReleases";
-import { SOURCE_REACH_FIGURE, SOURCE_REACH_UPDATED, SOURCE_ROTATION_ORDER } from "../../features/grove/sourceRotation.js";
+import { SOURCE_REACH_UPDATED, SOURCE_ROTATION_ORDER } from "../../features/grove/sourceRotation.js";
 import { MAINTENANCE } from "../../features/grove/pressMethod.js";
 import {
   PRESS_METHODS_PATH,
@@ -220,7 +220,6 @@ export default function PressGate({ user }) {
   const [error, setError] = useState(null);
   // The source band moves until a reader stops it (WCAG 2.2.2): the button
   // beside its count pauses and resumes it, and reduced motion stills it.
-  const [bandPaused, setBandPaused] = useState(false);
 
   // The collection in hand: the first on the rail on arrival, never none.
   // THE COLLECTION IN HAND IS IN THE URL.
@@ -781,34 +780,17 @@ export default function PressGate({ user }) {
                 is already about how the records are gathered, and this column
                 was empty above the shelves. */}
             <div className="cp-why__side">
-              <aside className={`cp-hero3__proof cp-why__sources cp-fade${bandPaused ? " is-paused" : ""}`} aria-label="Source systems">
+              <aside className="cp-hero3__proof cp-why__sources cp-fade" aria-label="Source systems">
                 <div className="cp-hero3__proofhead">
                   <Link className="cp-hero3__prooflabel" to={PRESS_METHODS_PATH}>
                     Sources Lumecon draws on
                   </Link>
-                  <span className="cp-hero3__proofcount">
-                    {SOURCE_REACH_FIGURE} kinds of source behind{" "}
-                    <span className="cp-nowrap">{STOREFRONT_CATALOG.length} collections</span>
-                  </span>
-                  <button
-                    type="button"
-                    className="cp-why__toggle"
-                    aria-label={bandPaused ? "Play the moving source list" : "Pause the moving source list"}
-                    onClick={() => setBandPaused((paused) => !paused)}
-                  >
-                    {bandPaused ? (
-                      <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 1.5v9l7.5-4.5z" fill="currentColor" /></svg>
-                    ) : (
-                      <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 1.5h2.5v9H2.5zM7 1.5h2.5v9H7z" fill="currentColor" /></svg>
-                    )}
-                    <span>{bandPaused ? "Play" : "Pause"}</span>
-                  </button>
                 </div>
                 {/* Several runs, alternating direction, so the banner fills
                     the column rather than one line at its foot. Each run is
                     duplicated for a seamless loop; the copy is aria-hidden so
                     a screen reader hears every source once. It pauses on
-                    hover and with its own button, and a transparent layer over the
+                    hover, and a transparent layer over the
                     runs keeps the moving text from being selected and copied
                     (owner, 2026-09-27). */}
                 <div className="cp-why__runs">

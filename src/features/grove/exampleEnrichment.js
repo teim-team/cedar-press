@@ -45,4 +45,7 @@ function withStatedTribe(parsed) {
  */
 export const CONTRACT_ADDITIONS = Object.freeze({
   "need/need": Object.freeze({ entity_uid: "native_owner_cedar_uid", entity_name: "native_owner" }),
+  // The landing's PLOT parcels name the tribe their recorded owner is
+  // (landingExamples.js `extra_columns`).
+  "plot/plot": Object.freeze({ entity_uid: "native_entity_cedar_uid", entity_name: "native_entity_name" }),
 });
