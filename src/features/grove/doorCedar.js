@@ -137,6 +137,17 @@ function collectionAnswer(entry) {
   return lines.join("\n\n");
 }
 
+/**
+ * A method note without its bookkeeping sentences: about the preview or
+ * sample file, or about publication holds and owner rulings. Those are
+ * internal records of how a release was cleared, not how it was built.
+ */
+function withoutPreviewSentences(text) {
+  const kept = text.split(/(?<=[.!?])\s+/)
+    .filter((sentence) => !/\b(preview|sample|publication hold|owner ruling)\b/i.test(sentence));
+  return kept.length ? kept.join(" ") : text;
+}
+
 /** The deeper answer for a collection: how it is constructed, off its own method note. */
 function collectionExpanded(entry) {
   if (recordStructure(entry.id)) {
@@ -147,7 +158,11 @@ function collectionExpanded(entry) {
     ].join("\n\n");
   }
   const descriptor = DESCRIPTOR[entry.id];
-  const method = descriptor?.method ? leadSentences(descriptor.method, 2) : null;
+  // A method note can describe the public preview file ("This preview is
+  // ...", "The public preview is ten rows ..."): bookkeeping about the
+  // excerpt, not how the collection is built, and draft-sounding to a reader
+  // (owner, 2026-10-06). Those sentences are skipped.
+  const method = descriptor?.method ? leadSentences(withoutPreviewSentences(descriptor.method), 2) : null;
   const lines = [];
   if (method) lines.push(`Going deeper on how ${entry.short || entry.name} is built: ${lowerFirst(method)}`);
   else if (entry.linkage) lines.push(`Going deeper: ${lowerFirst(entry.linkage)}`);
@@ -160,6 +175,8 @@ function collectionExpanded(entry) {
 
 function lowerFirst(text) {
   const value = String(text ?? "");
+  // An acronym or a proper noun keeps its capitals: "NEED has", not "nEED has".
+  if (/^[A-Z]{2}/.test(value)) return value;
   return value ? value[0].toLowerCase() + value.slice(1) : value;
 }
 
@@ -245,7 +262,7 @@ const GENERAL_INTENTS = [
       `${lowerFirst(PRESS?.promise ?? "")} The ${PRESS_PRO?.name} shelf is the structure behind it: ` +
       `who holds the contracts and subawards, who owns which enterprise and which parcels, where resource ` +
       `revenue goes, which businesses and nonprofits are Native-controlled.\n\n` +
-      `Each collection states its own coverage, row count and sources, and I can give you any of them by name.`,
+      `Each collection states its own coverage, observation count and sources, and I can give you any of them by name.`,
   },
   {
     id: "sources",
@@ -541,6 +558,38 @@ const AUDIENCES_INTENT = {
 };
 
 /**
+ * "How can I use this data?" (owner, 2026-10-06): answered with the home
+ * page's own use cases, so Cedar and the use-case band say the same thing.
+ * Every line is read from AUDIENCE_JOBS (pressJobs.js) via visibleAudiences,
+ * never typed here, so a change to a use case changes this answer too.
+ */
+const USE_LEAD = 4;
+const useLine = (audience) =>
+  `${audience.audience}: ${audience.outcome} ${audience.explanation} ` +
+  `(${audienceCollections(audience)})`;
+const USE_INTENT = {
+  id: "use",
+  chip: "How can I use this data?",
+  followUps: ["audiences", "collections", "plans"],
+  triggers: [
+    "how can i use", "how do i use", "how would i use", "how could i use", "how can we use", "how do we use",
+    "how can i use this data", "how can i use cedar press", "use this data", "use the data",
+    "what can i do with", "what can i do with this", "what can i use it for", "what is it good for",
+    "ways to use", "examples of use", "give me an example", "give me examples", "show me an example",
+    "real world example", "what would i use it for",
+  ],
+  answer:
+    `Here is how people use it, from the use cases on this page:\n\n` +
+    AUDIENCES.slice(0, USE_LEAD).map(useLine).join("\n\n") +
+    `\n\nTell me what you do and I will walk through the collections that carry that work.`,
+  expanded:
+    `More ways people use it:\n\n` +
+    AUDIENCES.slice(USE_LEAD).map(useLine).join("\n\n") +
+    `\n\nEvery record carries the source it came from, so whatever you build can be checked and cited.`,
+  links: ["plans"],
+};
+
+/**
  * Conversational filler. None of these is a topic: "thanks" then "tell me
  * more" still drills into the topic before the thanks. Their variants
  * rotate on repeats so two hellos in a row never read identically.
@@ -603,6 +652,7 @@ const FILLER_INTENTS = [
  */
 export const DOOR_INTENTS = Object.freeze([
   ...GENERAL_INTENTS,
+  USE_INTENT,
   AUDIENCES_INTENT,
   ...COLLECTION_INTENTS,
   ...AUDIENCE_INTENTS,
@@ -624,6 +674,7 @@ export const DOOR_STARTERS = Object.freeze([
   "tribal",
   "research",
   "who",
+  "use",
   "audiences",
 ]);
 

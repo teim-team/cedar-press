@@ -421,3 +421,29 @@ test("Cedar says the material is public and never that some of it is not", () =>
   const source = readFileSync(new URL("./doorCedar.js", import.meta.url), "utf8");
   assert.doesNotMatch(source, /not all of it is public|private record|source websites/i);
 });
+
+// Owner, 2026-10-06: "how can I use this data" answers with the home page's
+// own use cases, read from AUDIENCE_JOBS rather than typed into Cedar.
+test("how can I use this data answers with the home page's use cases", async () => {
+  const { answer, DOOR_CHIPS } = await import("./doorCedar.js");
+  const { visibleAudiences } = await import("./pressJobs.js");
+  const audiences = visibleAudiences();
+  for (const question of ["How can I use this data?", "what can I do with this", "give me an example", "how would I use Cedar Press"]) {
+    assert.equal(answer(question).id, "use", question);
+  }
+  const reply = answer("How can I use this data?");
+  for (const audience of audiences.slice(0, 4)) assert.ok(reply.answer.includes(audience.outcome), audience.audience);
+  for (const audience of audiences.slice(4)) assert.ok(reply.expanded.includes(audience.outcome), audience.audience);
+  assert.ok(DOOR_CHIPS.some((chip) => chip.id === "use"));
+  // "Who is it for" keeps its own answer.
+  assert.equal(answer("who is it for").id, "audiences");
+});
+
+test("a collection's deeper answer carries no preview, hold or ruling bookkeeping, and keeps acronyms", async () => {
+  const { DOOR_INTENTS } = await import("./doorCedar.js");
+  for (const intent of DOOR_INTENTS.filter((item) => item.id.startsWith("collection:"))) {
+    const text = `${intent.answer}\n${intent.expanded}`;
+    assert.doesNotMatch(text, /\b(this preview|public preview|publication hold|owner ruling)\b/i, intent.id);
+    assert.doesNotMatch(text, /\bnEED\b|\bpLOT\b/, intent.id);
+  }
+});

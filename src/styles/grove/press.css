@@ -2724,42 +2724,8 @@
  * `container-type: size` gives cqw a definite basis, so the scale is pure
  * CSS. transform-origin is the top left corner because the frame's own box
  * is what clips and rounds; the scaled child never paints outside it. */
-/* ══ THE RELEASE SPECIMEN ═════════════════════════════════════════════════
- * Mineral paper over the frame's top-right corner, with a navy rule and one
- * teal marker: a made object, not a glass widget floating on a gradient. It
- * overlaps deliberately — the overlap is what turns a headline beside a
- * screenshot into one layered surface, and it is the only thing in the hero
- * that occupies the space between the two. */
-/* At the frame's LOWER edge, which is where the brief puts it and where the
- * hero actually has room. Two earlier placements were wrong and the
- * screenshots said so: inside the top-right it covered the amount
- * column (annotating a release by hiding it), and above the frame it ran
- * off the top of the hero under the masthead. */
-/* OFF on desktop (owner, this session). As a corner object it overhung the
- * preview's lower right, covered the caption that says what the preview is,
- * and read as a card stuck on a screenshot rather than as part of it. The
- * dead zone it was built to fill is real and is now empty again — worth a
- * look, but an empty corner beats a box that hides the caption.
- *
- * It stays below 1100px, where it is already a strip ABOVE the preview
- * rather than over it, and reads fine. */
-.teim-rd .cp-spec { display: none; position: absolute; z-index: 3; bottom: -2.2rem; right: -1rem; width: 16.5rem; padding: 0.9rem 1rem 1rem; border: 1px solid var(--door-rule); border-top: 3px solid var(--door-navy); border-radius: 10px; background: var(--door-ground-bright, #fafcfd); box-shadow: var(--door-shadow-high); }
-.teim-rd .cp-spec__cap { margin: 0 0 0.5rem; font-family: var(--mono); font-size: 0.58rem; font-weight: 700; letter-spacing: 0.11em; text-transform: uppercase; color: var(--muted); }
-.teim-rd .cp-spec__name { display: flex; align-items: flex-start; gap: 0.45rem; margin: 0; font-family: var(--sans); font-size: 0.92rem; font-weight: 700; line-height: 1.25; letter-spacing: -0.014em; color: var(--ink); }
-.teim-rd .cp-spec__mark { flex: 0 0 auto; display: grid; place-items: center; width: 18px; height: 18px; margin-top: 1px; color: var(--dteal); }
-.teim-rd .cp-spec__mark svg { width: 16px; height: 16px; }
-.teim-rd .cp-spec__cover { margin: 0.35rem 0 0.75rem; font-family: var(--sans); font-size: 0.76rem; line-height: 1.4; color: var(--ink-2); }
-.teim-rd .cp-spec__facts { display: grid; grid-template-columns: repeat(3, minmax(0, auto)); gap: 0 0.9rem; margin: 0; padding-top: 0.7rem; border-top: 1px solid var(--door-rule); }
-.teim-rd .cp-spec__facts dt { font-family: var(--mono); font-size: 0.55rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
-.teim-rd .cp-spec__facts dd { margin: 0.15rem 0 0; font-family: var(--sans); font-size: 0.82rem; font-weight: 700; color: var(--ink); white-space: nowrap; }
-.teim-rd .cp-spec__rows { margin: 0.6rem 0 0; font-family: var(--mono); font-size: 0.64rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--dteal); }
-/* On a phone it stops being a corner object and becomes a strip before the
-   preview, because a card pinned over a scaled frame on a 390px screen
-   covers the thing it is annotating. */
-@media (max-width: 1100px) {
-  .teim-rd .cp-spec { display: block; position: static; width: auto; margin: 0 0 0.9rem; border-top-width: 2px; box-shadow: var(--door-shadow-surface); }
-  .teim-rd .cp-spec__facts { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-}
+/* The release specimen card was removed (owner, 2026-10-06): it showed only
+ * below 1100px, as a white strip above the product frame on phones. */
 
 .teim-rd .cp-hero3__frame { position: relative; aspect-ratio: 16 / 10; container-type: size; overflow: hidden; border: 1px solid rgba(10, 15, 38, 0.17); border-radius: 14px; background: var(--door-surface); box-shadow: var(--door-shadow-high); }
 .teim-rd .cp-app { display: flex; flex-direction: column; width: 1280px; height: 800px; transform: scale(calc(100cqw / 1280px)); transform-origin: top left; background: var(--door-surface); }
