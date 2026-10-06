@@ -1,6 +1,6 @@
 # Federal Funding to Indian Country: a researcher's guide
 
-Collection `funding` · public file `funding.csv` · v3 · 2026-10-06. Generated from `data/cedar/guides.json`, `data/cedar/field_map.json`, `data/cedar/codebook.json` and the collection descriptor by `scripts/guides-markdown.mjs`; edit those, not this file. Written 2026-09-05 under `docs/PUBLIC_DATASET_SPEC_2026-09-05.md`.
+Collection `funding` · public file `funding.csv` · updated 2026-10-06. Generated from `data/cedar/guides.json`, `data/cedar/field_map.json`, `data/cedar/codebook.json` and the collection descriptor by `scripts/guides-markdown.mjs`; edit those, not this file. Written 2026-09-05 under `docs/PUBLIC_DATASET_SPEC_2026-09-05.md`.
 
 ## Purpose
 
@@ -135,11 +135,11 @@ Target columns the specification asks for that the terminal has not yet built fr
 
 ## Release, citation and method
 
-**Version:** v3. **Release date:** 2026-10-06.
+**Release date:** 2026-10-06.
 
-**Cite as:** Lumecon, "Federal Funding to Indian Country" (v3), Cedar Press collection, cedarpress.ai. Add the date accessed.
+**Cite as:** Lumecon, "Federal Funding to Indian Country" (updated 2026-10-06), Cedar Press collection, cedarpress.ai. Add the date accessed.
 
 **Method:** Recipients are matched to the entity layer and the basis for inclusion is carried on the row, so a payment to a tribal government, to an intertribal consortium acting for many tribes, and to a Native-serving non-Native organisation are distinguishable. Apparent duplicate transactions are retained: they are usually distinct modifications to one award that agree on every published field, and removing them would have destroyed $8.29B of real obligations.
 
-Dataset-level version, release date and citation live here and in the manifest, never as rows appended to the CSV. The row-level `source_url` and the qualifications named above are the file's own provenance.
+Dataset-level release date and citation live here and in the manifest, never as rows appended to the CSV. The row-level `source_url` and the qualifications named above are the file's own provenance.
 

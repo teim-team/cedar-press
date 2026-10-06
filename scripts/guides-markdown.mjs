@@ -110,7 +110,6 @@ function guideFor(collection) {
   const prose = GUIDES.collections[collection];
   const entry = MANIFEST.collections.find((c) => c.id === collection);
   const descriptor = DESCRIPTORS.find((d) => d.id === collection) ?? entry?.descriptor ?? {};
-  const version = entry?.descriptor?.version ?? descriptor.version ?? "v0";
   const updated = entry?.descriptor?.updated ?? descriptor.updated ?? "";
   const vintage = entry?.descriptor?.vintage ?? descriptor.vintage;
   const mapKey = Object.keys(MAP.tables).find((k) => MAP.tables[k].collection === collection);
@@ -122,7 +121,7 @@ function guideFor(collection) {
   const p = (s = "") => lines.push(s);
   p(`# ${name}: a researcher's guide`);
   p();
-  p(`Collection \`${collection}\` · public file \`${map?.public_file ?? `${collection}.csv`}\` · ${version}${updated ? ` · ${updated}` : ""}. Generated from \`data/cedar/guides.json\`, \`data/cedar/field_map.json\`, \`data/cedar/codebook.json\` and the collection descriptor by \`scripts/guides-markdown.mjs\`; edit those, not this file. Written 2026-09-05 under \`docs/PUBLIC_DATASET_SPEC_2026-09-05.md\`.`);
+  p(`Collection \`${collection}\` · public file \`${map?.public_file ?? `${collection}.csv`}\` ${updated ? `· updated ${updated}` : ""}. Generated from \`data/cedar/guides.json\`, \`data/cedar/field_map.json\`, \`data/cedar/codebook.json\` and the collection descriptor by \`scripts/guides-markdown.mjs\`; edit those, not this file. Written 2026-09-05 under \`docs/PUBLIC_DATASET_SPEC_2026-09-05.md\`.`);
   p();
   p("## Purpose");
   p();
@@ -262,13 +261,13 @@ function guideFor(collection) {
   p();
   p("## Release, citation and method");
   p();
-  p(`**Version:** ${version}${vintage ? `, vintage ${vintage}` : ""}. **Release date:** ${updated || "not recorded"}.`);
+  p(`**Release date:** ${updated || "not recorded"}${vintage ? `, vintage ${vintage}` : ""}.`);
   p();
-  p(`**Cite as:** Lumecon, "${name}" (${version}${vintage ? `, vintage ${vintage}` : ""}), Cedar Press collection, cedarpress.ai. Add the date accessed.`);
+  p(`**Cite as:** Lumecon, "${name}" (updated ${updated || "date not recorded"}${vintage ? `, vintage ${vintage}` : ""}), Cedar Press collection, cedarpress.ai. Add the date accessed.`);
   p();
   p(`**Method:** ${descriptor.method ?? ""}`);
   p();
-  p("Dataset-level version, release date and citation live here and in the manifest, never as rows appended to the CSV. The row-level `source_url` and the qualifications named above are the file's own provenance.");
+  p("Dataset-level release date and citation live here and in the manifest, never as rows appended to the CSV. The row-level `source_url` and the qualifications named above are the file's own provenance.");
   p();
   return lines.join("\n") + "\n";
 }

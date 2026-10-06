@@ -1,6 +1,6 @@
 # NAGPRA Notices: a researcher's guide
 
-Collection `nagpra` · public file `nagpra.csv` · v3 · 2026-10-06. Generated from `data/cedar/guides.json`, `data/cedar/field_map.json`, `data/cedar/codebook.json` and the collection descriptor by `scripts/guides-markdown.mjs`; edit those, not this file. Written 2026-09-05 under `docs/PUBLIC_DATASET_SPEC_2026-09-05.md`.
+Collection `nagpra` · public file `nagpra.csv` · updated 2026-10-06. Generated from `data/cedar/guides.json`, `data/cedar/field_map.json`, `data/cedar/codebook.json` and the collection descriptor by `scripts/guides-markdown.mjs`; edit those, not this file. Written 2026-09-05 under `docs/PUBLIC_DATASET_SPEC_2026-09-05.md`.
 
 ## Purpose
 
@@ -138,11 +138,11 @@ Nothing beyond the grain and harmonization work named above.
 
 ## Release, citation and method
 
-**Version:** v3. **Release date:** 2026-10-06.
+**Release date:** 2026-10-06.
 
-**Cite as:** Lumecon, "NAGPRA Notices" (v3), Cedar Press collection, cedarpress.ai. Add the date accessed.
+**Cite as:** Lumecon, "NAGPRA Notices" (updated 2026-10-06), Cedar Press collection, cedarpress.ai. Add the date accessed.
 
 **Method:** Tribal affiliations are taken from the notice's own text, which is the legally operative statement of affiliation, and an alias is only accepted into the identity layer when it appears across at least three independent notices. Cultural detail beyond what the notice publishes is not extracted, and no inference is made about ancestral remains or objects beyond the notice's own words.
 
-Dataset-level version, release date and citation live here and in the manifest, never as rows appended to the CSV. The row-level `source_url` and the qualifications named above are the file's own provenance.
+Dataset-level release date and citation live here and in the manifest, never as rows appended to the CSV. The row-level `source_url` and the qualifications named above are the file's own provenance.
 

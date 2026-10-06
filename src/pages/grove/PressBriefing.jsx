@@ -115,7 +115,6 @@ export default function PressBriefing() {
                       {PRESS_CATALOG_BY_ID[release.id]?.name ?? release.id}
                     </span>
                     <span className="cp-brief__sigwhen">
-                      {latest?.version ? `${latest.version} · ` : ""}
                       {formatUpdated(release.updated)}
                     </span>
                   </Link>

@@ -156,7 +156,7 @@ export default function CedarPressWhatsNew() {
             <p className="cp-nh__sub">
               Collections are maintained weekly with human review, and every change lands here.
               Methodology releases are marked, because they can move figures somebody has already
-              published. Every version keeps its address, so a citation can name the release it
+              published. Every release keeps its address, so a citation can name the date it
               came from.
             </p>
             <p className="cp-nh__sub cp-nh__sub--use">
@@ -281,7 +281,7 @@ export default function CedarPressWhatsNew() {
                           names one, and #funding-v4-2 gives the name a stable
                           address to point at. */}
                       <a className="cp-feed__ver" href={`#${anchor}`} title="Link to this release">
-                        {entry.version}
+                        {formatUpdated(entry.date)}
                       </a>
                     </h2>
                     {entry.note ? <p className="cp-feed__note">{entry.note}</p> : null}
@@ -312,11 +312,6 @@ export default function CedarPressWhatsNew() {
                             <ul className="cp-feed__list">
                               {news.map((line) => <li key={line}>{line}</li>)}
                             </ul>
-                          ) : null}
-                          {counts.length ? (
-                            <p className="cp-feed__counts">
-                              {counts.map((line) => line.replace(/^Release:\s/, "")).join(" · ")}
-                            </p>
                           ) : null}
                         </details>
                       );
@@ -350,7 +345,7 @@ export default function CedarPressWhatsNew() {
                               detail: {
                                 id: entry.id,
                                 name,
-                                q: `What changed in ${name} ${entry.version}?`,
+                                q: `What changed in ${name}?`,
                               },
                             }),
                           )

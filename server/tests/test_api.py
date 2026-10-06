@@ -337,7 +337,9 @@ class TestCatalog(unittest.TestCase):
         # 2026-09-04 and this pinned assertion failed - which is the wrong
         # signal entirely, because what it is really testing is that the basis
         # cites the measured descriptor rather than the catalog.
-        self.assertRegex(payload["basis"], r"v\d+")
+        # Datasets carry no reader-facing version (owner, 2026-10-06), so the
+        # descriptor shows up as its updated date.
+        self.assertRegex(payload["basis"], r"\(updated \d{4}-\d{2}-\d{2}")
         self.assertNotIn("vintage", payload["basis"])
 
     def test_coverage_is_the_same_sentence_for_every_tier(self) -> None:
@@ -419,15 +421,18 @@ class TestCatalog(unittest.TestCase):
         response = client.post(
             "/cedar/ask",
             json={
-                "question": f"What changed in Federal Funding {dataset.version}?",
+                "question": "What changed in Federal Funding?",
                 "collectionId": "funding",
             },
         )
         self.assertEqual(response.status_code, 200)
         answer = response.json()["answer"]
-        self.assertIn(dataset.version, answer)
+        # No version number and no table count reach a reader (owner,
+        # 2026-10-06): the release is named by its date.
+        self.assertIn(dataset.updated, answer)
         self.assertIn(dataset.rows_label, answer)
-        self.assertIn(f"{launch.collection_cedar_facts('funding')['n_tables']} tables", answer)
+        self.assertNotRegex(answer, r"\bv\d")
+        self.assertNotIn(" tables", answer)
         self.assertNotIn("demonstration", answer)
 
     def test_a_change_question_without_a_version_gets_the_latest(self) -> None:
@@ -438,7 +443,7 @@ class TestCatalog(unittest.TestCase):
         )
         self.assertEqual(response.status_code, 200)
         answer = response.json()["answer"]
-        self.assertIn(f"Indian Country Deals {dataset.version} ({dataset.updated}", answer)
+        self.assertIn(f"Indian Country Deals ({dataset.updated}", answer)
 
     def test_every_storefront_collection_has_a_release_the_feed_serves(self) -> None:
         # The feed covered ten collections while the storefront sold twelve;

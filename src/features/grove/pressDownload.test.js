@@ -56,9 +56,11 @@ test("a launch dataset downloads its sample rows, citation row included", async 
   const last = rows.at(-1);
   assert.equal(last[0], "cite_as");
   assert.ok(last[1].startsWith("Lumecon, "), last[1]);
-  // The version the descriptor carries, not one the release feed invented.
+  // The date the descriptor carries, and no version number (owner,
+  // 2026-10-06: datasets are not versioned for readers).
   const deals = LAUNCH_COLLECTION.find((d) => d.id === "deals");
-  assert.ok(last[1].includes(`(${deals.version})`), last[1]);
+  assert.ok(last[1].includes(`(updated ${deals.updated})`), last[1]);
+  assert.ok(!/\(v\d/.test(last[1]), last[1]);
   // The citation row is padded to the table's real width, so the file is not
   // ragged when a spreadsheet opens it.
   assert.equal(last.length, rows[0].length);

@@ -130,12 +130,11 @@ export function ledgerFor(id, source = ledger) {
  */
 function describe(record, { isFirst, isCurrent, served }) {
   const lead = isFirst ? "First release on Cedar Press" : "Release";
-  const tables = record.tables
-    ? `${record.tables} ${record.tables === 1 ? "table" : "tables"}, ${record.rowsLabel}`
-    : record.rowsLabel;
-  const changed = [`${lead}: ${tables}.`];
+  // No table count and no table names (owner, 2026-10-06): a reader sees one
+  // dataset and its observations.
+  const changed = [`${lead}: ${record.rowsLabel}.`];
   if (record.preview) {
-    const preview = `A ${record.preview.rows}-row preview of ${record.preview.table}, the collection's flagship table`;
+    const preview = `A ${record.preview.rows}-record preview of the dataset`;
     // A current preview the repository does not hold yet (samples.published
     // .json) is not on the shelf, and saying it is would be the 404 in prose.
     changed.push(
@@ -147,7 +146,7 @@ function describe(record, { isFirst, isCurrent, served }) {
     );
   } else {
     changed.push(
-      "No preview file yet: the collection's flagship table is unsettled, and no sample is published until it is.",
+      "No preview file yet: the dataset is unsettled, and no sample is published until it is.",
     );
   }
   const blockers = Array.isArray(record.blockers) ? record.blockers.length : 0;

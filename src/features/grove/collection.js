@@ -275,11 +275,13 @@ export function collectionShort(dataset) {
   return STOREFRONT_SHORT[dataset.id] ?? dataset.shortName;
 }
 
-/** One line for the context strip: versions and the latest refresh date. */
+/** One line for the context strip: the collections and the latest refresh
+ * date. No version numbers: datasets are not versioned for readers (owner,
+ * 2026-10-06). */
 export function collectionContextLine() {
-  const versions = LAUNCH_COLLECTION.map((d) => `${collectionShort(d)} ${d.version}`).join(" · ");
+  const names = LAUNCH_COLLECTION.map((d) => collectionShort(d)).join(" · ");
   const updated = LAUNCH_COLLECTION.map((d) => d.updated).sort().slice(-1)[0];
-  return `${versions} · all current as of ${updated}`;
+  return `${names} · all current as of ${updated}`;
 }
 
 /**
@@ -302,7 +304,7 @@ export function collectionContextLine() {
 export function collectionFindings() {
   const basis = (datasetId, detail) => {
     const dataset = LAUNCH_COLLECTION.find((item) => item.id === datasetId);
-    return `${collectionShort(dataset) ?? datasetId} ${dataset?.version ?? "v0"}, ${detail}`;
+    return `${collectionShort(dataset) ?? datasetId}, ${detail}`;
   };
 
   const supported = [
@@ -395,10 +397,10 @@ export function collectionFindings() {
   return { supported, needs, narratives };
 }
 
-/** A figure's basis line, derived so it cannot name a stale version. */
+/** A figure's basis line: the collection, never a version number. */
 function basisFor(datasetId, fallback) {
   const dataset = LAUNCH_COLLECTION.find((item) => item.id === datasetId);
-  return dataset ? `${collectionShort(dataset)} ${dataset.version}` : fallback;
+  return dataset ? collectionShort(dataset) : fallback;
 }
 
 /**
@@ -516,7 +518,7 @@ export function collectionCitation(datasetId, accessedOn = null) {
   const vintage = dataset.vintage ? `, vintage ${dataset.vintage}` : "";
   const accessed = accessedOn ? ` Accessed ${accessedOn}.` : "";
   return (
-    `Lumecon, "${dataset.name}" (${dataset.version}${vintage}), ` +
+    `Lumecon, "${dataset.name}" (updated ${dataset.updated}${vintage}), ` +
     `Cedar Press collection, cedarpress.ai.${accessed}`
   );
 }

@@ -271,10 +271,11 @@ def collection_short(dataset: Any) -> str | None:
 
 
 def collection_context_line() -> str:
-    """One line for the context strip: versions and the latest refresh date."""
-    versions = " · ".join(f"{collection_short(d)} {d.version}" for d in LAUNCH_COLLECTION)
+    """One line for the context strip: the collections and the latest refresh
+    date. No version numbers: datasets are not versioned for readers."""
+    names = " · ".join(collection_short(d) for d in LAUNCH_COLLECTION)
     updated = sorted(d.updated for d in LAUNCH_COLLECTION)[-1]
-    return f"{versions} · all current as of {updated}"
+    return f"{names} · all current as of {updated}"
 
 
 @dataclass(frozen=True)
@@ -342,8 +343,7 @@ def collection_findings() -> CollectionFindings:
     def basis(dataset_id: str, detail: str) -> str:
         dataset = _dataset_for(dataset_id)
         name = collection_short(dataset) if dataset else dataset_id
-        version = dataset.version if dataset else "v0"
-        return f"{name} {version}, {detail}"
+        return f"{name}, {detail}"
 
     supported = (
         CollectionSupported(
@@ -482,7 +482,7 @@ class CollectionFigure:
 def _basis_for(dataset_id: str, fallback: str) -> str:
     """A figure's basis line, derived so it cannot name a stale version."""
     dataset = _dataset_for(dataset_id)
-    return f"{collection_short(dataset)} {dataset.version}" if dataset else fallback
+    return collection_short(dataset) if dataset else fallback
 
 
 COLLECTION_FIGURES: tuple[CollectionFigure, ...] = (
@@ -580,7 +580,7 @@ def collection_citation(dataset_id: str, accessed_on: str | None = None) -> str 
     vintage = f", vintage {dataset.vintage}" if dataset.vintage else ""
     accessed = f" Accessed {accessed_on}." if accessed_on else ""
     return (
-        f'Lumecon, "{dataset.name}" ({dataset.version}{vintage}), '
+        f'Lumecon, "{dataset.name}" (updated {dataset.updated}{vintage}), '
         f"Cedar Press collection, cedarpress.ai.{accessed}"
     )
 
