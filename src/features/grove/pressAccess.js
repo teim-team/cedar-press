@@ -244,6 +244,7 @@ export function coverageLabel(dataset) {
   // Presented by its record structure: nothing is measured, so no span is
   // stated, and callers leave the line out rather than print a placeholder.
   if (coverage.kind === "structure") return null;
+  if (coverage.kind === "observations") return "Source-dated observations";
   if (coverage.kind === "roster") {
     return `Current roster, captured ${formatUpdated(coverage.captured)}`;
   }

@@ -1,0 +1,7 @@
+{
+  "schema_version": 1,
+  "policy": "recipient_hold",
+  "_note": "Per-UEI recipient holds and rebinds that are NOT not_native denials. Read and validated by code/cedar_publication.recipient_holds(); the shape is docs/schema/recipient_holds.schema.json and the procedure is docs/RECIPIENT_HOLDS_2026-10-02.md. An entry states that the recipient behind an exact UEI, on exact award keys, is a legal entity distinct from the Cedar entity the projection currently binds it to (hold_kind distinct_recipient, action withhold), or is a different registered entity (rebind_to_entity, action rebind). No entry mints, recycles or guesses a uid; the ruling may not say not_native. Nothing applies an entry yet: application is the funding candidate rebuild in Lumecon-data and a new pin, consuming entries whose status is ready.",
+  "_pending": "Siletz Tribal Arts and Heritage Society (recipient UEI GJV4PJ8M5PC7, award ASST_NON_1896753-42-22_417, Federal Funding): the entry is drafted in docs/RECIPIENT_HOLDS_2026-10-02.md with status evidence_incomplete and is not recorded here until the uid the two transactions currently carry is read off the funding projection, which is not in Git.",
+  "entries": []
+}

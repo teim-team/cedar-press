@@ -1,5 +1,14 @@
-// Derive each table's EXPLORE CONTRACT from its published sample, and record
-// it in data/cedar/explore.json.
+import { reviewedNeedColumns } from "../src/features/grove/readerPresentation.js";
+import { mixedSpreadsheetContract, PRESENTATION_COLUMNS } from "../src/features/grove/mixedSpreadsheet.js";
+// Derive each collection's EXPLORE CONTRACT from its customer table, and
+// record it in data/cedar/explore.json.
+//
+// Since 2026-10-04 the card reads one flat customer table per collection
+// (public/data/cedar/downloads/<id>.csv, rendered by
+// scripts/render_sample_downloads.py through the vendored customer_sheet
+// rules), not the raw multi-table producer previews, which are no longer
+// served. `customerTableContract` is the rule; the producer-spreadsheet
+// rules below it stay for the tests that pin their behaviour.
 //
 //     node scripts/derive-explore.mjs            # write the contracts
 //     node scripts/derive-explore.mjs --check    # exit 1 if the file is stale
@@ -39,13 +48,22 @@ const NAMES = `${REPO}data/spine/cedar_entity_names.csv`;
 const TYPES = `${REPO}data/spine/cedar_entity_types.csv`;
 const IDENTITY = TYPES.replace(/cedar_entity_types\.csv$/, "cedar_identity_register.csv");
 const REGISTER = `${PUBLIC}/data/cedar/register.json`;
+// The customer tables (one per collection) the Explore card reads.
+const DOWNLOADS = `${PUBLIC}/data/cedar/downloads`;
 
-// The one class whose names the publication rule withholds unless the owner
-// opted in (code/cedar_domain.py may_publish_individual_native_field: a
-// firm's website is evidence, never permission). The register carries the
-// uid and the class so a row keyed to one still filters by type; the name
-// is null and the picker says so.
+// Until 2026-10-02 the register withheld the name of every entity in this
+// class (null name, uid and class only), mirroring
+// code/cedar_domain.py may_publish_individual_native_field, which released a
+// name only on recorded OPTED_IN consent. Owner ruling 2026-10-02: a firm is
+// a business entity regardless of what it is named after, and its name,
+// identifiers and business address are public business records (SAM and
+// USAspending publish them for every federal awardee), so the rule now
+// publishes every such field and the register carries every name. The class
+// is still named so the count the register reports is measured against it,
+// and so the viewer's null-name masking (explore.js) keeps a defined meaning:
+// a null name is one the rule withholds, and today the rule withholds none.
 const WITHHELD_CLASS = "Individually Native-owned business";
+const WITHHELD_FIELD_PUBLISHES = true; // owner ruling 2026-10-02
 
 // Column names are matched lowercased, in this order; the first present wins.
 const RULES = {
@@ -92,7 +110,10 @@ const RULES = {
     "participant_name_as_published",
   ],
   superseded: ["is_superseded", "supersession_status"],
-  superseded_by: ["superseded_by_filing_uuid"],
+  // The producer renamed the lobbying key from filing_uuid to record_id
+  // (2026-10-01 release); the replacement link followed the old name until
+  // 2026-10-02 and so was never offered for a superseded filing.
+  superseded_by: ["superseded_by_record_id", "superseded_by_filing_uuid"],
   amount_basis: ["spend_basis", "value_type", "amount_sign_meaning", "measurement_status"],
 };
 
@@ -214,6 +235,261 @@ export function contractFor(columns, rows = []) {
   return c;
 }
 
+
+/** A verified producer spreadsheet keeps component identity and row grain. */
+/**
+ * The first view keeps the columns needed to interpret a reported observation.
+ * Raw keys, record types and grains remain available in the record and show-all
+ * views. Monetary qualifications and each union component's dates and sources
+ * take precedence over another descriptive column.
+ */
+export function spreadsheetDefaultColumns(contract, columns) {
+  const has = (column) => typeof column === "string" && columns.includes(column);
+  const unique = (values) => [...new Set(values.filter(has))];
+  const rowTypes = Object.values(contract.row_type_contracts ?? {});
+  const identity = unique([contract.subject, contract.entity_name, contract.entity_role_column]);
+  const kind = rowTypes.length > 1 ? unique(["record_type"]) : [];
+  const money = contract.amount ? unique([
+    contract.amount, contract.amount_basis,
+    ...["measurement_status", "amount_sign_meaning"].filter(has),
+    contract.currency, ...["currency", "currency_code", "amount_currency"].filter(has),
+  ]) : [];
+  const dateColumn = (type) => [type.date, type.year].find(has);
+  const dates = unique(rowTypes.length
+    ? rowTypes.map(dateColumn)
+    : [dateColumn(contract)]);
+  const sources = unique(rowTypes.length
+    ? rowTypes.map((type) => type.source)
+    : [contract.source]);
+  const required = unique([...identity, ...kind, ...money, ...dates, ...sources]);
+  if (required.length > 8) {
+    throw new Error("Spreadsheet opening view needs a reviewed choice of at most eight semantic columns");
+  }
+  const structural = new Set(["record_type", "record_key", "record_grain"]);
+  const observations = unique(contract.observation ?? [])
+    .filter((column) => !structural.has(column) && !isInternalProvenanceColumn(column) && !required.includes(column))
+    .slice(0, 8 - required.length);
+  return unique([...identity, ...kind, ...money, ...dates, ...observations, ...sources]);
+}
+
+export function spreadsheetContract(columns, sampleRows = [], presentation = {}) {
+  const mixed = mixedSpreadsheetContract(presentation.collection, columns, presentation.record_type_fields);
+  if (mixed) return mixed;
+  for (const required of ["record_type", "record_key", "record_grain"]) {
+    if (!columns.includes(required)) throw new Error("producer spreadsheet lacks " + required);
+  }
+  const c = contractFor(columns, sampleRows);
+  c.record_id = "record_key";
+  c.record_type = "record_type";
+  // Only the explicit central-entity block denotes a CE association. An
+  // enterprise id/name, owner name, certifier or parent id cannot fill it.
+  c.entity_uid = pick(columns, ["cedar_uid", "cedar_uids"]);
+  c.entity_uid_list = c.entity_uid === "cedar_uids";
+  c.entity_name = c.entity_uid ? pick(columns, c.entity_uid_list ? ["canonical_names"] : ["canonical_name"]) : null;
+  c.entity_type = c.entity_uid ? pick(columns, c.entity_uid_list ? ["entity_classes"] : ["entity_class"]) : null;
+  c.entity_role_column = c.entity_uid ? pick(columns, c.entity_uid_list ? ["entity_roles"] : ["cedar_entity_role"]) : null;
+  c.entity_name_list = c.entity_uid_list && c.entity_name === "canonical_names";
+  c.entity_type_list = c.entity_uid_list && c.entity_type === "entity_classes";
+  c.entity_role_list = c.entity_uid_list && c.entity_role_column === "entity_roles";
+  c.entity_role = null;
+  c.entity_roles = [
+    { column: "sub_cedar_uid", role: "subcontractor-side Native attribution" },
+    { column: "prime_cedar_uid", role: "prime-contractor-side Native attribution" },
+    { column: "affiliation_as_of_transaction_cedar_uid", role: "source-attributed affiliation as of the transaction" },
+    { column: "beneficiary_entity_id", role: "beneficiary" },
+  ].filter(role => columns.includes(role.column) && role.column !== c.entity_uid);
+  c.subject = pick(columns, RULES.subject);
+  if (c.subject === c.entity_name) c.subject = null;
+  c.year = pick(columns, ["fiscal_year", "reporting_year", ...RULES.year]);
+  c.date = pick(columns, [...RULES.date, "period_start"]);
+  c.year_basis = c.year ? words(c.year) : c.date ? "calendar year of " + words(c.date) : null;
+  // Resource observations describe a reporting period; an allocation need
+  // not have a payment date. Keep payment_date available as its own field.
+  if (["period_start", "period_end", "period_type", "measurement_status"].every(column => columns.includes(column))) {
+    c.year = null;
+    c.date = "period_start";
+    c.year_basis = "calendar year in which the reported period starts";
+  }
+  c.subject = pick(columns, [...RULES.subject, "subcontractor_name", "organization_name", "business_name"]);
+  if (c.subject === c.entity_name) c.subject = null;
+  c.amount = pick(columns, ["obligations_usd", "reported_amount_usd", "subaward_amount_usd", "amount_usd", "announced_value_usd"]);
+  c.amount_basis = c.amount ? pick(columns, ["amount_basis", "value_basis", "measurement_status", "amount_sign_meaning"]) : null;
+  c.amount_label = c.amount ? words(c.amount) : null;
+  c.observation = c.observation.filter(column => !["record_type", "record_key", "record_grain"].includes(column));
+  if (["resource_type", "revenue_type", "commodity"].every(column => columns.includes(column))) {
+    // A national revenue observation can intentionally name no recipient.
+    // Describe the resource and revenue, without inventing a tribal payer/payee.
+    c.observation = ["commodity", "resource_type", "revenue_type"];
+  }
+  c.default_columns = spreadsheetDefaultColumns(c, columns);
+  const reviewedNeed = reviewedNeedColumns(columns);
+  if (reviewedNeed) {
+    c.observation = reviewedNeed.observation;
+    c.default_columns = reviewedNeed.defaults;
+  }
+  // A union spreadsheet retains component-qualified columns when meanings
+  // differ. Select them by record_type; an action date is not a notice date.
+  if (columns.includes("consultation_participants__source_url") &&
+      columns.includes("federal_actions__source_url")) {
+    for (const name of ["record_type", "notice_date", "publication_date", "html_url"]) {
+      if (!columns.includes(name)) throw new Error("Federal Register spreadsheet lacks " + name);
+    }
+    c.row_type_contracts = {
+      consultation_participants: {
+        label: "Consultation participant",
+        source: "consultation_participants__source_url", source_fallback: null,
+        date: "notice_date", year: null, year_basis: "calendar year of notice date",
+      },
+      federal_actions: {
+        label: "Federal action",
+        source: "federal_actions__source_url", source_fallback: "html_url",
+        date: "publication_date", year: null, year_basis: "calendar year of publication date",
+      },
+    };
+    c.source = null;
+    c.date = null;
+    c.year = null;
+    c.year_basis = null;
+    c.default_columns = spreadsheetDefaultColumns(c, columns);
+  }
+  c.mapping_kind = "producer_spreadsheet";
+  c.reviewed = true;
+  c.review_reason = "Presentation mapping of the verified producer spreadsheet: exact record key/grain, explicit CE block and source-declared roles. This is not a new identity or ownership determination.";
+  return c;
+}
+
+/**
+ * The record id of a customer table: the collection's own event or record
+ * identifier, by name, and only when it is unique across the sample rows. A
+ * repeated value would give two records one id (Codex, PR #63), so a table
+ * whose identifier repeats falls back to the row's position, as before.
+ */
+const CUSTOMER_RECORD_ID = [
+  "transaction_id", "deal_id", "document_number", "bill_id", "activity_id",
+  "resource_revenue_event_id", "subaward_record_id", "disclosure_id", "plot_record_id",
+  "business_uid", "business_source_id", "ein",
+];
+
+export function customerRecordId(columns, sampleRows = []) {
+  for (const name of CUSTOMER_RECORD_ID) {
+    if (!columns.includes(name)) continue;
+    const values = sampleRows.map((row) => row[name] ?? "");
+    if (values.every(Boolean) && new Set(values).size === values.length) return name;
+  }
+  return null;
+}
+
+/**
+ * The contract for a collection's CUSTOMER TABLE: one flat table, one grain,
+ * rendered by the vendored customer_sheet rules (owner ruling 2026-10-04,
+ * scripts/render_sample_downloads.py). It carries no record_type, record_key
+ * or record_grain -- those belonged to the raw multi-table producer preview,
+ * which is no longer served -- so nothing here dispatches by record type.
+ * The entity block is read by its approved names only, as for the producer
+ * spreadsheet: an enterprise, owner or certifier name never fills it.
+ */
+// Collection rules that carry a reviewed reading of a column over from the
+// producer-spreadsheet mapping (mixedSpreadsheet.js, readerPresentation.js)
+// to the customer table's own column names. Each key is present in the
+// customer table today; validateContract refuses the contract if one goes.
+const CUSTOMER_PRESENTATION = Object.freeze({
+  // NEED: the related entity and the relationship are the observation; the
+  // enterprise is the subject (readerPresentation.reviewedNeedColumns).
+  need: {
+    subject: "enterprise_name",
+    // The name the source used, for the enterprises no relationship names.
+    observation: ["related_entity_name", "relationship_type", "ownership_extent", "source_reported_name"],
+    default_columns: ["enterprise_name", "related_entity_name", "relationship_type", "ownership_extent", "uei", "cage_code"],
+  },
+  // Federal Register: the customer table keeps the federal-action documents
+  // only (customer_sheet.LAYOUTS), so it has no entity block; the document
+  // number and type say which document a row is.
+  "federal-register": {
+    default_columns: ["document_number", "publication_date", "type", "title", "agency_names", "source_url"],
+  },
+  // Giving: announcement date and the source-reported year, the recipient as
+  // reported when no name was resolved (mixedSpreadsheet.js GIVING_TYPES).
+  "foundation-corporate-giving": {
+    subject: "recipient_name",
+    subject_candidates: ["recipient_name", "recipient_name_reported"],
+    subject_entity_role: "recipient", entity_role: "recipient",
+    date: "announcement_date", date_basis: "Announcement date",
+    year: "report_year", year_basis: "Source-reported year",
+    amount_label: "Reported nominal USD",
+    amount_lower: "amount_lower_usd", amount_upper: "amount_upper_usd", amount_class: "amount_class",
+    observation: ["funder_name", "financial_status", "record_kind"],
+  },
+  // PLOT: a source parcel observed on a date; nothing about ownership, title
+  // or Native identity is inferred (mixedSpreadsheet.js PLOT_TYPES).
+  plot: {
+    subject: "source_parcel_id",
+    subject_candidates: ["source_parcel_id", "plot_record_id"],
+    // No date or year column is read: the customer table's dated columns
+    // (ownership observation, source snapshot) are blank on every sample row,
+    // and tax_year is a tax year, not when the land was observed. A year
+    // filter over this table would filter on nothing.
+    date: null, year: null, year_basis: null,
+    source: "source_record_url", source_fallback: "source_url",
+    observation: ["land_record_kind", "record_role", "estate_type", "trust_status"],
+  },
+});
+
+export function customerTableContract(columns, sampleRows = [], collection = null) {
+  const c = contractFor(columns, sampleRows);
+  c.record_id = customerRecordId(columns, sampleRows);
+  c.record_type = null;
+  c.entity_uid = pick(columns, ["cedar_uid", "cedar_uids"]);
+  c.entity_uid_list = c.entity_uid === "cedar_uids";
+  c.entity_name = c.entity_uid ? pick(columns, c.entity_uid_list ? ["canonical_names"] : ["canonical_name"]) : null;
+  c.entity_type = c.entity_uid ? pick(columns, c.entity_uid_list ? ["entity_classes"] : ["entity_class"]) : null;
+  c.entity_role_column = c.entity_uid ? pick(columns, c.entity_uid_list ? ["entity_roles"] : ["cedar_entity_role"]) : null;
+  c.entity_name_list = c.entity_uid_list && c.entity_name === "canonical_names";
+  c.entity_type_list = c.entity_uid_list && c.entity_type === "entity_classes";
+  c.entity_role_list = c.entity_uid_list && c.entity_role_column === "entity_roles";
+  c.entity_role = null;
+  c.entity_roles = [
+    { column: "sub_cedar_uid", role: "subcontractor-side Native attribution" },
+    { column: "prime_cedar_uid", role: "prime-contractor-side Native attribution" },
+    { column: "affiliation_as_of_transaction_cedar_uid", role: "source-attributed affiliation as of the transaction" },
+    { column: "beneficiary_entity_id", role: "beneficiary" },
+  ].filter((role) => columns.includes(role.column) && role.column !== c.entity_uid);
+  c.year = pick(columns, ["fiscal_year", "reporting_year", ...RULES.year]);
+  c.date = pick(columns, [...RULES.date, "announcement_date", "period_start"]);
+  if (["period_start", "period_end", "period_type", "measurement_status"].every((column) => columns.includes(column))) {
+    c.year = null;
+    c.date = "period_start";
+  }
+  c.year_basis = c.year ? words(c.year) : c.date ? `calendar year of ${words(c.date)}` : null;
+  if (c.date === "period_start") c.year_basis = "calendar year in which the reported period starts";
+  c.subject = pick(columns, [...RULES.subject, "subcontractor_name", "organization_name", "business_name", "recipient_name_reported"]);
+  if (c.subject === c.entity_name) c.subject = null;
+  c.amount = pick(columns, ["obligations_usd", "reported_amount_usd", "subaward_amount_usd", "amount_usd", "announced_value_usd", "amount_exact_usd"]);
+  c.amount_basis = c.amount ? pick(columns, ["amount_basis", "value_basis", "measurement_status", "amount_sign_meaning"]) : null;
+  c.amount_label = c.amount ? words(c.amount) : null;
+  // The observation is what the record says, from the named list only: a
+  // role, an identifier or the citation never pads it.
+  const internal = internalValueColumns(sampleRows);
+  const taken = new Set([c.entity_uid, c.entity_name, c.entity_type, c.entity_role_column, c.subject,
+    c.year, c.date, c.amount, c.amount_basis, c.source, c.record_id].filter(Boolean));
+  c.observation = OBSERVATION
+    .map((name) => columns.find((column) => norm(column) === name))
+    .filter((column) => column && !taken.has(column) && !internal.has(column) && !isInternalProvenanceColumn(column))
+    .slice(0, 4);
+  if (["resource_type", "revenue_type", "commodity"].every((column) => columns.includes(column))) {
+    // A national revenue observation can intentionally name no recipient.
+    c.observation = ["commodity", "resource_type", "revenue_type"];
+  }
+  const preset = CUSTOMER_PRESENTATION[collection] ?? {};
+  Object.assign(c, preset);
+  if (!("year_basis" in preset)) c.year_basis = c.year ? words(c.year) : c.date ? `calendar year of ${words(c.date)}` : null;
+  c.search = [...new Set([c.entity_name, ...(c.subject_candidates ?? [c.subject]), ...c.observation].filter(Boolean))];
+  if (!CUSTOMER_PRESENTATION[collection]?.default_columns) c.default_columns = spreadsheetDefaultColumns(c, columns);
+  c.mapping_kind = "customer_table";
+  c.reviewed = true;
+  c.review_reason = "Presentation mapping of the collection's customer table (vendored customer_sheet rules, owner ruling 2026-10-04): its own record identifier, the explicit Cedar entity block and source-declared roles. This is not a new identity or ownership determination.";
+  return c;
+}
+
 function rows(path) {
   const text = readFileSync(path, "utf8").replace(/^\uFEFF/, "");
   const out = [];
@@ -256,7 +532,7 @@ export function deriveRegister() {
   let withheld = 0;
   for (const r of rows(NAMES)) {
     if (!index.has(r.entity_class)) throw new Error(`register: unknown class ${r.entity_class} on ${r.cedar_uid}`);
-    const withhold = r.entity_class === WITHHELD_CLASS;
+    const withhold = r.entity_class === WITHHELD_CLASS && !WITHHELD_FIELD_PUBLISHES;
     if (withhold) withheld += 1;
     entities.push([r.cedar_uid, withhold ? null : r.name, index.get(r.entity_class)]);
   }
@@ -266,7 +542,8 @@ export function deriveRegister() {
     source: "data/spine/cedar_entity_names.csv, cedar_entity_types.csv, and cedar_identity_register.csv (as_of: its latest mint date)",
     note:
       "Each entity is [cedar_uid, name, class index into `classes`]. A null name is " +
-      `withheld by the publication rule for ${WITHHELD_CLASS} (code/cedar_domain.py).`,
+      `one the publication rule withholds (code/cedar_domain.py may_publish_individual_native_field); ` +
+      `since the owner ruling of 2026-10-02 every ${WITHHELD_CLASS} name publishes, so withheld_names is 0.`,
     withheld_names: withheld,
     as_of: asOf,
     classes,
@@ -292,8 +569,14 @@ export const SOURCE_BUILDERS = Object.freeze({
 });
 
 export function validateContract(key, contract, columns) {
+  for (const [kind, child] of Object.entries(contract.row_type_contracts ?? {})) {
+    validateContract(key + ":" + kind, child, columns);
+    for (const field of ["source_fallback", "date", "year", "subject", "entity_uid", "entity_name", "entity_type", "entity_role_column", "amount", "amount_basis", "amount_lower", "amount_upper", "amount_class"]) {
+      if (child[field] && !columns.includes(child[field])) throw new Error(key + ": missing component " + field);
+    }
+  }
   for (const column of contract.default_columns ?? []) {
-    if (!columns.includes(column)) throw new Error(`${key}: default column ${column} is not in the sample`);
+    if (!columns.includes(column) && !(contract.mapping_kind === "producer_spreadsheet" && Object.hasOwn(PRESENTATION_COLUMNS, column))) throw new Error(`${key}: default column ${column} is not in the sample`);
   }
   if (contract.source && !columns.includes(contract.source)) {
     throw new Error(`${key}: source column ${contract.source} is not in the sample`);
@@ -316,31 +599,56 @@ export function validateContract(key, contract, columns) {
   }
 }
 
+/**
+ * Override keys that name no table the manifest declares. An override is a
+ * hand-written declaration that only takes effect when its key matches
+ * `<collection>/<table stem>`; after the 2026-10-01 release renamed every
+ * table to `<collection>.csv`, all 27 keys written against the 2026-09-02
+ * tables matched nothing and their `reviewed`, `record_id` and
+ * `default_columns` silently stopped applying (found 2026-10-02). Keys that
+ * begin with `_` are prose or retired blocks and are never matched.
+ */
+export function unknownOverrideKeys(overrides, manifest) {
+  const known = new Set();
+  for (const collection of manifest.collections) {
+    for (const table of collection.tables) known.add(`${collection.id}/${table.table.replace(/\.csv$/, "")}`);
+  }
+  return Object.keys(overrides).filter((key) => !key.startsWith("_") && !known.has(key)).sort();
+}
+
 export function derive() {
   const manifest = JSON.parse(readFileSync(MANIFEST, "utf8"));
   const overrides = existsSync(OVERRIDES) ? JSON.parse(readFileSync(OVERRIDES, "utf8")) : {};
+  const unknown = unknownOverrideKeys(overrides, manifest);
+  if (unknown.length) {
+    throw new Error(
+      `explore.overrides.json declares ${unknown.length} table(s) the manifest does not: ${unknown.join(", ")}. ` +
+      "An override that matches no table applies to nothing; retire it under a `_` key or rename it.",
+    );
+  }
   const tables = {};
   const unpublished = [];
+  // One table per collection: the customer table rendered from its flagship
+  // (scripts/render_sample_downloads.py). The release's supporting tables
+  // have no served sample since 2026-10-04, so each is listed as unpublished.
   for (const collection of manifest.collections) {
+    const flagship = collection.sample?.path ? collection.sample.table : null;
     for (const table of collection.tables) {
       const key = `${collection.id}/${table.table.replace(/\.csv$/, "")}`;
-      const path = table.sample_path ? `${PUBLIC}${table.sample_path}` : null;
+      const path = table.table === flagship ? `${DOWNLOADS}/${collection.id}.csv` : null;
       if (!path || !existsSync(path)) {
         unpublished.push(key);
         continue;
       }
       const columns = header(path);
       const override = overrides[key] ?? {};
-      const contract = { ...contractFor(columns, rows(path)), ...override };
+      const contract = { ...customerTableContract(columns, rows(path), collection.id), ...override };
       // The year's meaning follows the year and date the override settled on,
       // unless the override states it in its own words.
-      if (!("year_basis" in override)) {
+      if (!("year_basis" in override) && "year" in override) {
         contract.year_basis = contract.year ? words(contract.year) : contract.date ? `calendar year of ${words(contract.date)}` : null;
       }
       if (!("amount_basis" in override) && !contract.amount) contract.amount_basis = null;
-      // Derived by name, so PROPOSED, not certified: only a declaration in the
-      // overrides file, with its reason, marks a table's mapping reviewed.
-      contract.reviewed = override.reviewed === true;
       validateContract(key, contract, columns);
       contract.columns = columns.length;
       tables[key] = contract;
@@ -353,9 +661,10 @@ export function derive() {
       "Per table: which columns the Explore card reads as the record id, the entity, its type, " +
       "the record's own subject, the year (and what year means there), the date, the amount and " +
       "its basis, the source, supersession, and which columns make the one-line observation. " +
-      "Derived from the published sample's header by name, so PROPOSED; a table is `reviewed` " +
-      "only where data/cedar/explore.overrides.json declares it so, with its reason. " +
-      "Re-run after the importer copies samples.",
+      "Derived by name from each collection's customer table (public/data/cedar/downloads/<id>.csv, " +
+      "one flat table per collection, rendered by scripts/render_sample_downloads.py); " +
+      "data/cedar/explore.overrides.json wins where it speaks, with its reason. " +
+      "Re-run after re-rendering the customer tables.",
     unpublished,
     tables: sorted,
   };

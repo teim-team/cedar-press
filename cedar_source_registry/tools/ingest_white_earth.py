@@ -471,7 +471,7 @@ def extract_ordinance_rules(lines):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--src", default="C:/Users/esm247/Downloads")
+    ap.add_argument("--src", default=os.path.join(os.path.expanduser("~"), "Downloads"))
     ap.add_argument("--write", action="store_true")
     args = ap.parse_args()
 

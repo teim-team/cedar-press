@@ -34,6 +34,8 @@ from collections import Counter
 from datetime import date
 from pathlib import Path
 
+from cedar_pipeline import guard
+
 CEDAR = Path(__file__).resolve().parent.parent
 CLEAN = CEDAR / "data" / "clean"
 OUT = CEDAR / "docs" / "codebooks"
@@ -2162,6 +2164,8 @@ def dtype(d):
 
 
 def main():
+    # Helper imports remain supported; the destructive whole-master writer does not.
+    guard(Path(__file__).name)
     print("=== Cedar Press 41: build codebooks ===\n")
     OUT.mkdir(parents=True, exist_ok=True)
     master = []

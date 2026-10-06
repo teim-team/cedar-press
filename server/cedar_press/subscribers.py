@@ -35,6 +35,7 @@ import hmac
 import json
 import os
 import re
+import threading
 from dataclasses import dataclass
 
 from cedar_press import db
@@ -58,6 +59,7 @@ class Subscriber:
     tier: str
     account_id: str
     password_hash: str | None = None
+    session_revision: str = ""
 
 
 @dataclass(frozen=True)
@@ -77,6 +79,7 @@ class Code:
 
 
 # ── the subscription an address belongs to ──────────────────────────────────
+
 
 def account_id_for(email: str) -> str:
     """The SUBSCRIPTION an address belongs to, for Shape the Research.
@@ -168,6 +171,8 @@ def verify_password(password: str, stored: str | None) -> bool:
 #: which is why `DATABASE_URL` exists.
 _activated: dict[str, tuple[str, str]] = {}
 _spent: set[str] = set()
+_session_revisions: dict[str, int] = {}
+_session_lock = threading.Lock()
 
 
 def _env_accounts() -> dict[str, tuple[str, str]]:
@@ -216,9 +221,18 @@ def _env_codes() -> dict[str, dict[str, object]]:
 def forget_activated_for_tests() -> None:
     _activated.clear()
     _spent.clear()
+    with _session_lock:
+        _session_revisions.clear()
 
 
 # ── the interface ───────────────────────────────────────────────────────────
+
+
+def _session_revision(value: dt.datetime) -> str:
+    """Stable instant across worker/database session timezone settings."""
+    if not isinstance(value, dt.datetime) or value.tzinfo is None or value.utcoffset() is None:
+        raise ValueError("Subscriber session revision must be timezone-aware")
+    return value.astimezone(dt.timezone.utc).isoformat(timespec="microseconds")
 
 
 def find(email: str) -> Subscriber | None:
@@ -228,13 +242,19 @@ def find(email: str) -> Subscriber | None:
         return None
     if db.configured():
         row = db.one(
-            "SELECT email, tier, account_id, password_hash"
+            "SELECT email, tier, account_id, password_hash, updated_at"
             " FROM cedar_press_subscribers WHERE lower(email) = %s",
             (address,),
         )
         if not row:
             return None
-        return Subscriber(row["email"], row["tier"], row["account_id"], row["password_hash"])
+        return Subscriber(
+            row["email"],
+            row["tier"],
+            row["account_id"],
+            row["password_hash"],
+            _session_revision(row["updated_at"]),
+        )
     if address in _activated:
         password, tier = _activated[address]
     else:
@@ -242,7 +262,31 @@ def find(email: str) -> Subscriber | None:
         if not found:
             return None
         password, tier = found
-    return Subscriber(address, tier, account_id_for(address), password)
+    with _session_lock:
+        revision = str(_session_revisions.get(address, 0))
+    return Subscriber(address, tier, account_id_for(address), password, revision)
+
+
+def revoke_sessions(email: str) -> bool:
+    """Invalidate all sessions for this account, persistently when configured."""
+    address = (email or "").strip().lower()
+    if not address:
+        return False
+    if db.configured():
+        return (
+            db.execute(
+                "UPDATE cedar_press_subscribers SET updated_at ="
+                " GREATEST(clock_timestamp(), updated_at + interval '1 microsecond')"
+                " WHERE lower(email) = %s",
+                (address,),
+            )
+            > 0
+        )
+    if find(address) is None:
+        return False
+    with _session_lock:
+        _session_revisions[address] = _session_revisions.get(address, 0) + 1
+    return True
 
 
 def authenticate(email: str, password: str) -> Subscriber | None:
@@ -286,6 +330,8 @@ def create(email: str, password: str, tier: str) -> Subscriber:
         )
     else:
         _activated[address] = (password, tier)
+        with _session_lock:
+            _session_revisions[address] = _session_revisions.get(address, 0) + 1
     return Subscriber(address, tier, account)
 
 
@@ -362,8 +408,7 @@ def find_code(code: str) -> Code | None:
         return None
     if db.configured():
         row = db.one(
-            "SELECT code, email, tier, expires_on, spent_at FROM cedar_press_codes"
-            " WHERE code = %s",
+            "SELECT code, email, tier, expires_on, spent_at FROM cedar_press_codes WHERE code = %s",
             (key,),
         )
         if not row:

@@ -145,10 +145,11 @@ the TRIBAL LINK and AFFIRMS Native ownership. Read literally as "not Native" it
 inverts the owner's meaning, and it already has — CAGE `9DVK5` sits in the ledger
 at tier X bound to a tribe that does not own it. Ask
 `is_tribal_link_refusal_not_native_refusal()`; never match the words.
-`elijah_ruling` makes these tier A **as attributions**; it does not make them
-publishable **as names** — `may_publish_individual_native_field()` withholds
-every name, address and, for a firm whose legal name is a person's, the UEI and
-CAGE, absent recorded `OPTED_IN` consent.
+`elijah_ruling` makes these tier A **as attributions**; publication is the
+separate question `may_publish_individual_native_field()` answers. Since the
+owner ruling of 2026-10-02 it publishes the firm's name, address, UEI and CAGE
+without consent (a firm is a business entity whatever it is named after);
+until that date it withheld them absent recorded `OPTED_IN` consent.
 
 **`BIE School`** — **NOT tribally owned by default.** 56 of 185 are FEDERALLY
 operated and their blank parent is a ruling. `Navajo_Operation` in BIE data is an

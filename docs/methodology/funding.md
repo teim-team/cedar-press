@@ -757,14 +757,14 @@ The collection holds **20 tables**. Those with a named build stage, flagship fir
 
 | table | rebuilt by | then enriched by (must run LAST) | status |
 |---|---|---|---|
-| `federal_funding_transactions.csv` **(flagship)** | `24_funding_merge.py` | `1131_attribution_method_vocabulary.py`, `115_pull_assistance_archive.py`, `335_harmonize_assistance_seams_in_place.py`, `336_correct_scheme_resolution_by_spine_membership.py`, `503_identity.py` | shippable |
+| `federal_funding_transactions.csv` **(flagship)** | `24_funding_merge.py` | `1131_attribution_method_vocabulary.py`, `115_pull_assistance_archive.py`, `503_identity.py` | shippable |
 | `faads_entity_attribution.csv` | `73_faads_name_attribution.py` | `710_faads_attribution_content_key.py`, `791_faads_transaction_key_and_repoint.py`, `874_geography_two_sums.py` | shippable |
 | `faads_transactions_all_agencies.csv` | `30_funding_pre2008.py` | `1086_faads_award_key_promote.py` | shippable |
 | `native_passthrough.csv` | `121_pull_subawards_api.py` | `81_build_passthrough_dataset.py` | shippable |
 
 **A full rebuild and an in-place enricher on one file need an ordering, and the enricher must run LAST.** A `.bak_*_pre<script>` file sitting beside a table is the signal that an enricher has touched it since the last build. This has cost this project four reverts of one file in a single day.
 
-The delivered spreadsheet is then assembled by `code/1137_customer_dataset_combine.py`, which folds supporting tables onto the flagship **only where the measured cardinality on the shared key is one**, reverts any join that moved the row count, and prefixes every joined column with its source table's stem. One-to-many tables contribute a count column instead of rows, so a money total cannot be multiplied by a join.
+For `funding`, Cedar's supported unpublished release adapter is `py -3 code/build.py release-pilot funding --source <pinned-source.csv> --output-root <isolated-store> --as-of <YYYY-MM-DD> --code-sha <reviewed-lumecon-sha>`. It delegates candidate construction to Lumecon Data's existing collection-build contract; it does not authorize publication. The former 1137 customer writer refuses this collection. Legacy acquisition and source-table maintenance remain separate responsibilities. The dated counts and table statuses in this paper are historical measurements, not current release certification.
 
 ## M3 · How entities were attributed
 

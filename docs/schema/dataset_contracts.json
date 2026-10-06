@@ -449,8 +449,6 @@
       "1131_attribution_method_vocabulary.py",
       "1140_linkage_close.py",
       "115_pull_assistance_archive.py",
-      "335_harmonize_assistance_seams_in_place.py",
-      "336_correct_scheme_resolution_by_spine_membership.py",
       "503_identity.py"
      ],
      "never_run_warning": []

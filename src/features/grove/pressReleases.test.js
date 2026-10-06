@@ -21,6 +21,8 @@ import {
 import { PRESS_CATALOG } from "./pressCatalog.js";
 import {
   CADENCE,
+  connectedReleaseModel,
+  previewReleaseModel,
   DECLARED_CADENCE,
   PRESS_RELEASES,
   RELEASE_FEED,
@@ -168,7 +170,7 @@ test("a retired collection stays in the feed as read-only history", () => {
 // overwritten with the manifest's current releases alone.
 test("the ledger script refuses a file that is not a ledger", () => {
   // fileURLToPath, not .pathname. On Windows .pathname yields
-  // "/C:/Users/.../Cedar%20Press/..." - a leading slash Node cannot resolve
+  // "/C:/<home>/Cedar%20Press/..." - a leading slash Node cannot resolve
   // and a percent-encoded space - so this test failed on every Windows
   // checkout whose path contains a space, which is every checkout of this
   // repo. It passed in CI, so the breakage was invisible where it was run.
@@ -244,9 +246,9 @@ test("the first release keeps its own facts, the latest matches the manifest", (
     const first = releaseFor(dataset.id).history.at(-1);
     assert.equal(first.kind, RELEASE_KIND.DATA);
     assert.ok(first.changed.length >= 2, dataset.id);
-    assert.match(first.changed[0], /^First release on Cedar Press: /);
+    assert.match(first.changed[0], /^First published on Cedar Press: /);
     // it states SOME measured row count - its own, not necessarily today's
-    assert.match(first.changed[0], /[\d,]+ (rows|observations)|row count unresolved/,
+    assert.match(first.changed[0], /[\d,]+ (?:rows|observations)|row count unresolved/,
                  `${dataset.id}: ${first.changed[0]}`);
     // and the ledger's NEWEST release is the version the manifest is on.
     // (latestRelease returns a release - kind, changed, version - not the raw
@@ -258,9 +260,9 @@ test("the first release keeps its own facts, the latest matches the manifest", (
   }
   // The collection that had no preview file said so rather than promising one.
   const owned = releaseFor("owned").history.at(-1);
-  assert.ok(owned.changed.some((line) => line.startsWith("No preview file yet")));
+  assert.ok(owned.changed.some((line) => line.startsWith("No public preview is available yet")));
   const funding = releaseFor("funding").history.at(-1);
-  assert.ok(funding.changed.some((line) => /-record preview of /.test(line)));
+  assert.ok(funding.changed.some((line) => /-row preview/.test(line)));
 });
 
 // Editorial notes describe shipped releases: a note names a version the
@@ -329,4 +331,52 @@ test("dates are spelled one way everywhere", () => {
   assert.equal(freshnessLine("not-a-collection"), "");
   assert.equal(latestRelease("need").version, releaseFor("need").version);
   assert.equal(latestRelease("not-a-collection"), null);
+});
+
+
+function currentFixture() {
+  const version = "a".repeat(64);
+  return { source: "verified_current", history_complete: false, releases: [{
+    id: "funding", name: "Funding", version, updated: null, retired: false,
+    history: [{ version, date: null, date_basis: "not_recorded", kind: "data", changed: ["Available observations."] }],
+  }] };
+}
+
+test("current feed never borrows publication dates or aggregate totals from public previews", () => {
+  const model = connectedReleaseModel(currentFixture());
+  assert.equal(model.source, "verified_current");
+  assert.equal(model.historyComplete, false);
+  assert.equal(model.feed.length, 1);
+  assert.equal(model.feed[0].date, null);
+  assert.equal(model.feed[0].anchor, `funding-${"a".repeat(64)}`);
+  assert.ok(model.previewHistory.length);
+  assert.ok(model.previewHistory.every((event) => event.date_basis === "public_preview"));
+  assert.ok(model.previewHistory.every((event) => event.changed.join() === "Public preview updated."));
+  const preview = previewReleaseModel();
+  assert.equal(preview.source, "public_preview");
+  assert.deepEqual(preview.feed.map((item) => item.anchor), RELEASE_FEED.map((item) => item.anchor));
+});
+
+test("invalid live response cannot masquerade as a release feed", () => {
+  const invalid = [null, { releases: [] }];
+  for (const mutate of [
+    (p) => p.releases.push(p.releases[0]),
+    (p) => { p.releases[0].id = "infrastructure"; },
+    (p) => { p.releases[0].id = "__proto__"; },
+    (p) => { p.releases[0].updated = "2026-10-03"; },
+    (p) => { p.releases[0].history[0].date = "2026-10-03"; },
+    (p) => { p.releases[0].version = "v3"; },
+    (p) => { p.releases[0].record_count = -1; },
+    (p) => { p.releases[0].preview_updated = "2026-02-30"; },
+  ]) { const fixture = currentFixture(); mutate(fixture); invalid.push(fixture); }
+  for (const value of invalid) assert.throws(() => connectedReleaseModel(value));
+});
+
+test("activity excludes undated current entries and future dates", () => {
+  const current = connectedReleaseModel(currentFixture()).feed[0];
+  const activity = recentActivity(30, new Date("2026-10-03T12:00:00Z"), [
+    { ...current, date: "2026-12-01" }, current, { ...current, date: "2026-10-01" },
+  ]);
+  assert.equal(activity.releases, 1);
+  assert.equal(activity.latest, "2026-10-01");
 });

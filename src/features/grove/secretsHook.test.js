@@ -23,7 +23,8 @@ const ROOT = fileURLToPath(new URL("../../../", import.meta.url));
 const SCRIPT = "scripts/no-secrets-staged.sh";
 
 const hook = (...names) => {
-  const result = spawnSync("bash", [join(ROOT, SCRIPT), ...names], { encoding: "utf8" });
+  const result = spawnSync(process.env.CEDAR_TEST_BASH || "bash", [join(ROOT, SCRIPT), ...names], { encoding: "utf8", windowsHide: true });
+  assert.ifError(result.error);
   return { status: result.status, out: result.stdout + result.stderr };
 };
 

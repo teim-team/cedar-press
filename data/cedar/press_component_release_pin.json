@@ -1,0 +1,6 @@
+{
+  "schema_version": 1,
+  "product": "cedar_press",
+  "status": "UNPINNED: no production Giving or PLOT release is approved. Review pins require an isolated review environment and exact catalog and manifest digests.",
+  "pins": {}
+}

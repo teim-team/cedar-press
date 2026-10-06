@@ -19,479 +19,7 @@
       "dek": "White Earth Nation's TERO sent its certified Indian-owned business list in answer to a request through the office's public contact, the first roster in a consent-first dataset of the businesses no federal register counts.",
       "date": "August 2026",
       "byline": "Elijah S. Moreno",
-      "minutes": 3,
-      "highlights": [
-        "White Earth Nation's TERO sent its certified Indian-owned business list on request, the first roster in the collection",
-        "The roster certifies 22 individually owned businesses, 17 at first preference, mostly in the building trades",
-        "Each nation decides how its list may be used; until it does, its businesses appear only in aggregate"
-      ],
-      "authors": [
-        {
-          "name": "Elijah S. Moreno",
-          "role": "Founder and CEO, Lumecon",
-          "photo": "/photo/authors/elijah-moreno.webp"
-        }
-      ],
-      "body": [
-        {
-          "kind": "p",
-          "text": "Federal datasets count Native entity-owned enterprises well: tribally owned firms, ANC and NHO subsidiaries, 8(a) participants. What they do not count is the individually owned side of Indian Country's economy, the businesses certified not by a federal registry but by their own nations' TERO and commerce offices. Those certification lists exist, office by office, and no public source collates them."
-        },
-        {
-          "kind": "p",
-          "text": "The Owned collection is built to close that gap the only defensible way: by asking. Each nation's office is asked through its public contact, each decides whether and how its list may be used, and a roster enters the dataset only under the terms its office states. White Earth Nation's TERO answered first, sending its current Certified Indian Owned Businesses list the morning after the request went out."
-        },
-        {
-          "kind": "pull",
-          "text": "Nothing overrides what a nation says about its own certified businesses."
-        },
-        {
-          "kind": "h2",
-          "text": "What one roster shows"
-        },
-        {
-          "kind": "p",
-          "text": "White Earth's list certifies 22 individually owned businesses, 17 of them at first preference, concentrated in the building trades: construction, drywall, tile, tree and site services. That is one nation's certified economy in a single sheet, and it is exactly the layer the federal registers miss, because none of these firms needs a federal registration to work tribal preference contracts at home."
-        },
-        {
-          "kind": "figure",
-          "chart": "bars",
-          "caption": "White Earth's certified businesses by preference tier",
-          "source": "owned",
-          "points": [
-            {
-              "label": "1st preference",
-              "value": 17
-            },
-            {
-              "label": "2nd preference",
-              "value": 4
-            },
-            {
-              "label": "4th preference",
-              "value": 1
-            }
-          ],
-          "notes": [
-            "Counts the 22 individually owned businesses on the roster White Earth Nation's TERO supplied on Aug. 28, 2026.",
-            "Preference tiers are the nation's own; a tier with no business on the roster is not drawn.",
-            "One nation's list. It is not a sample of Native-owned businesses anywhere else."
-          ]
-        },
-        {
-          "kind": "p",
-          "text": "One roster is a beginning, not a finding. The outreach wave behind it spans TERO and commerce offices across the country, and the early responses already sketch the range of governance the dataset has to respect: one office is taking the request to its commission for formal review, and another keeps its list confidential but is forwarding the invitation to its businesses so each can opt in itself. Both of those are good outcomes. A dataset assembled on those terms is slower, and it is the only version of this dataset worth building."
-        },
-        {
-          "kind": "image",
-          "src": "/pitch/lanes/professional-wide.webp",
-          "tone": "green",
-          "alt": "A meeting around a conference table",
-          "caption": "Each nation's office decides the terms: publication, aggregates only, or a process of its own design."
-        },
-        {
-          "kind": "p",
-          "text": "Until each nation confirms how its listings may appear, its businesses show up here in aggregates only, credited to the office that certified them. As terms land, the entity rows follow."
-        }
-      ]
-    },
-    {
-      "id": "brief-deals",
-      "hosted": true,
-      "demonstration": true,
-      "tone": "teal",
-      "image": "/pitch/lanes/professional-wide.webp",
-      "imageAlt": "A negotiation around a conference table",
-      "caption": "Announced capital in energy and project finance is concentrated in a small number of large transactions, which makes the annual figure sensitive to a single closing.",
-      "datasetId": "deals",
-      "draws": [
-        "deals",
-        "funding"
-      ],
-      "tag": "Original Research",
-      "title": "Announced deals in Indian Country are running ahead of any year in the series",
-      "dek": "Energy and project finance lead 2026's announced transactions, the Deals database shows, with closings confirmed against primary sources before they enter totals.",
-      "date": "July 2026",
-      "byline": "Cedar Press research desk",
-      "minutes": 4,
-      "highlights": [
-        "Energy and project finance carry most of the rise in announced transactions",
-        "A deal enters the totals only once a primary source confirms it",
-        "Ownership changes visible only in federal contracting are reported, with the record cited"
-      ],
-      "authors": [
-        {
-          "name": "Cedar Press research desk",
-          "role": "Lumecon"
-        }
-      ],
-      "body": [
-        {
-          "kind": "p",
-          "text": "Announced transactions in Indian Country are running ahead of any comparable period in the Deals series, and the composition has moved as much as the count. Energy and project finance carry most of the increase, with tribal governments and tribal enterprises appearing as principals rather than as counterparties. A nation financing its own generation capacity is a different economic actor from one leasing land to somebody else's project, and the record is starting to show the difference."
-        },
-        {
-          "kind": "p",
-          "text": "Deals is the one Cedar collection that exists nowhere else in any form. There is no federal register of tribal acquisitions, no filing that captures a tribal enterprise buying an operating business, and no index that follows an Alaska Native corporation's holding company as it restructures. The 2,662 records in the current release are assembled from tribal newsletters and tribal press, trade and journalist coverage, ANCSA shareholder filings and Cedar's own federal contracting record, and every one of them links to the document it came from."
-        },
-        {
-          "kind": "figure",
-          "chart": "line",
-          "caption": "Announced against confirmed transactions, by quarter",
-          "source": "deals",
-          "series": [
-            "announced",
-            "confirmed"
-          ],
-          "points": [
-            {
-              "label": "Q2'25",
-              "announced": 31,
-              "confirmed": 24
-            },
-            {
-              "label": "Q3'25",
-              "announced": 38,
-              "confirmed": 29
-            },
-            {
-              "label": "Q4'25",
-              "announced": 34,
-              "confirmed": 28
-            },
-            {
-              "label": "Q1'26",
-              "announced": 47,
-              "confirmed": 33
-            },
-            {
-              "label": "Q2'26",
-              "announced": 52,
-              "confirmed": 35
-            }
-          ],
-          "notes": [
-            "Announced counts a transaction at first public report. Confirmed counts it once its status is verified against a primary source, which is usually one to three quarters later.",
-            "The most recent quarter is therefore always understated on the confirmed line.",
-            "Undisclosed values are counted as transactions and excluded from any dollar total."
-          ]
-        },
-        {
-          "kind": "h2",
-          "text": "Announced is not closed"
-        },
-        {
-          "kind": "p",
-          "text": "The distinction matters for anyone reading a total. Announced and closed are labeled separately, and a transaction enters totals only once its status is confirmed against a primary source. A year that looks strong on announcements can settle differently, and the gap between the two lines is worth watching in its own right: the latest quarters always read low on the confirmed line, because confirmation usually follows announcement by one to three quarters."
-        },
-        {
-          "kind": "p",
-          "text": "That rule costs speed and buys citability. A figure built from announcements moves every time a press release is withdrawn or a closing slips; a figure built from confirmed transactions moves only when the underlying record does. Where a value is not disclosed, the transaction is counted and the value is not, rather than being estimated into a dollar total that nobody could check."
-        },
-        {
-          "kind": "pull",
-          "text": "A transaction enters the totals only once a primary source confirms it. Until then it is an announcement, and it is labeled as one."
-        },
-        {
-          "kind": "h2",
-          "text": "The deals nobody announced"
-        },
-        {
-          "kind": "p",
-          "text": "Some of the most consequential transactions in Indian Country were never announced at all. A tribal holding company acquires a federal contractor, the contractor keeps its name and its registrations, and the only public trace is that its parent identifier changes in the federal contracting record. Cedar reports those changes as transactions, cites the contracting record with the identifier and the years involved, and leaves the check open for a reader to re-run."
-        },
-        {
-          "kind": "p",
-          "text": "The same discipline runs the other way. A change of reporting parent inside one tribal corporate family, a subsidiary moved from one holding company to its sister, is an internal reorganization rather than a deal, and it is not counted as one. Treating it as a transaction would inflate the count and misstate who is buying what."
-        },
-        {
-          "kind": "pair",
-          "images": [
-            {
-              "src": "/pitch/lanes/publicadmin-wide.webp",
-              "tone": "bronze",
-              "alt": "The United States Capitol",
-              "caption": "Federal programs remain the counterparty on a large share of project financings."
-            },
-            {
-              "src": "/pitch/lanes/construction-wide.webp",
-              "tone": "gold",
-              "alt": "Crews working a large construction site",
-              "caption": "Construction starts trail announcements by two to four quarters in most of the series."
-            }
-          ]
-        },
-        {
-          "kind": "h2",
-          "text": "Who is on the other side"
-        },
-        {
-          "kind": "p",
-          "text": "Resolving counterparties is where a transaction record becomes readable. A financing that names a subsidiary says very little until the subsidiary is joined to its parent nation or corporation, and the same acquisition can appear under three names across a decade of filings. A tribal enterprise formed in 1998, renamed in 2006, reorganized under a holding company in 2014 and acquired in 2021 leaves four record trails that no public source connects. Cedar maintains that chain once, so an ownership change recorded in Deals also corrects rows in Prime Contracting and in Cedar NEED."
-        },
-        {
-          "kind": "p",
-          "text": "Read at face value, the transaction record looks more distributed than it is, because one buyer appears as several. Resolved to parents, the leading acquirers account for a larger share of announced capital than the unresolved list suggests, and the direction of that error is the same in every year of the series."
-        },
-        {
-          "kind": "h2",
-          "text": "What to watch"
-        },
-        {
-          "kind": "p",
-          "text": "Project finance in energy is the line to follow into next year. Announced capital is concentrated in a small number of large projects, so a single delay moves the annual figure more than the underlying rate of activity would suggest, and projects at the permitting stage carry the least predictable timelines."
-        },
-        {
-          "kind": "p",
-          "text": "Property and hospitality are the quieter half of the increase and the steadier one: smaller transactions, more of them, and less exposure to any single closing. Bond issuance is the third thread and the one most sensitive to conditions outside Indian Country. The collection carries all three together so they can be read against each other rather than separately."
-        },
-        {
-          "kind": "h2",
-          "text": "How to read the totals"
-        },
-        {
-          "kind": "p",
-          "text": "Inclusion rules travel with every release, so a transaction missing from the collection is a documented gap rather than a silent one. The confirmation rate below is the clearest way to see why the two lines in the first figure should never be added together or swapped for one another."
-        },
-        {
-          "kind": "figure",
-          "chart": "bars",
-          "caption": "Share of announced transactions confirmed, by quarter (percent)",
-          "source": "deals",
-          "points": [
-            {
-              "label": "Q2'25",
-              "value": 77
-            },
-            {
-              "label": "Q3'25",
-              "value": 76
-            },
-            {
-              "label": "Q4'25",
-              "value": 82
-            },
-            {
-              "label": "Q1'26",
-              "value": 70
-            },
-            {
-              "label": "Q2'26",
-              "value": 67
-            }
-          ],
-          "notes": [
-            "Confirmed transactions divided by announced transactions in the same quarter, from the first figure in this piece, rounded to a whole percent.",
-            "The latest quarters read low because confirmation usually follows announcement by one to three quarters."
-          ]
-        },
-        {
-          "kind": "p",
-          "text": "Anyone reproducing these numbers should note the as-of date beside each figure. The collection updates continuously, every correction is logged on the What's New page, and a figure cited with its date stays explainable. Comparisons are best made within this series: most national deal indices exclude the tribal enterprise structures that account for a large share of the activity here."
-        }
-      ]
-    },
-    {
-      "id": "brief-contractors",
-      "hosted": true,
-      "demonstration": true,
-      "tone": "green",
-      "image": "/pitch/lanes/construction-wide.webp",
-      "imageAlt": "Crews working a large construction site",
-      "caption": "Construction carries most of the obligation volume and almost none of the recent increase, which is in professional and technical services.",
-      "datasetId": "contractors",
-      "draws": [
-        "contractors",
-        "subcontracting"
-      ],
-      "tag": "Original Research",
-      "title": "Federal contracting to Native entities rises for a fourth straight quarter",
-      "dek": "Award histories rolled up to parent tribes, ANCs and NHOs show broad growth, led by 8(a) participants.",
-      "date": "June 2026",
-      "byline": "Cedar Press research desk",
-      "minutes": 4,
-      "highlights": [
-        "Obligations to Native-owned firms rose for a fourth straight quarter",
-        "$65.2 billion in candidate awards stays unattributed rather than guessed",
-        "Summed naively, subaward reporting overstates the true total by 63.4 percent"
-      ],
-      "authors": [
-        {
-          "name": "Cedar Press research desk",
-          "role": "Lumecon"
-        }
-      ],
-      "body": [
-        {
-          "kind": "p",
-          "text": "Obligations to Native-owned firms rose for a fourth consecutive quarter, and the growth is broader than the headline suggests. Rolled up to parent tribes, Alaska Native corporations and Native Hawaiian organizations, the increase reaches more entities than in any quarter of the prior year rather than concentrating in the largest holders."
-        },
-        {
-          "kind": "p",
-          "text": "The Native Federal Contractors collection holds 3,345,971 records across its tables, drawn from the Federal Procurement Data System through USAspending, SAM entity registrations and the subsidiary disclosures parent corporations publish themselves, including the audited filings Alaska Native corporations make under Alaska Statute 45.55.139. Coverage begins in fiscal 2000, because before then the federal record does not identify Native ownership at all."
-        },
-        {
-          "kind": "figure",
-          "chart": "stacked",
-          "caption": "Obligations by parent entity type, by quarter",
-          "source": "contractors",
-          "series": [
-            "Tribal enterprise",
-            "ANC subsidiary",
-            "NHO subsidiary"
-          ],
-          "points": [
-            {
-              "label": "Q3'25",
-              "Tribal enterprise": 41,
-              "ANC subsidiary": 33,
-              "NHO subsidiary": 9
-            },
-            {
-              "label": "Q4'25",
-              "Tribal enterprise": 44,
-              "ANC subsidiary": 34,
-              "NHO subsidiary": 10
-            },
-            {
-              "label": "Q1'26",
-              "Tribal enterprise": 49,
-              "ANC subsidiary": 35,
-              "NHO subsidiary": 11
-            },
-            {
-              "label": "Q2'26",
-              "Tribal enterprise": 56,
-              "ANC subsidiary": 36,
-              "NHO subsidiary": 13
-            }
-          ],
-          "notes": [
-            "These are obligations rather than receipts. An obligation is the government committing funds; the work and the payment can fall in later periods.",
-            "Each award is attributed to the parent the firm had at the date of award rather than the parent it has now.",
-            "Band order is fixed across every quarter, so only the bottom band and the total share a baseline."
-          ]
-        },
-        {
-          "kind": "h2",
-          "text": "The names do not match"
-        },
-        {
-          "kind": "p",
-          "text": "Resolving the vendor list to parents is what turns a procurement record into an industry picture, and it is harder than it looks. A subsidiary's legal name routinely shares no word with its owner's: ASRC Federal's operating companies file as BROADLEAF, INUTEQ and VISTRONIX. Federal reporting names the awardee, and the awardee is often two or three levels below the nation or corporation that owns it."
-        },
-        {
-          "kind": "p",
-          "text": "So awardees are matched by identifier first: the unique entity identifier, the CAGE code and the parent identifier a firm declares. A name match is accepted only with corroboration, the attribution tier is recorded on every row, and a tier is never promoted on a name alone. 8(a) status is handled the same way, as a status with a start and an end rather than a permanent attribute, so a firm that graduated in 2019 is not counted as an 8(a) awardee today."
-        },
-        {
-          "kind": "pull",
-          "text": "$65.2 billion in candidate awards stays unattributed rather than being handed to a plausible owner."
-        },
-        {
-          "kind": "p",
-          "text": "That caution has a visible cost, and the collection publishes it rather than hiding it. Candidate rows worth $65.2 billion remain unattributed because the evidence to name their owner is not there yet. Any total for the sector built from this collection is therefore a floor, and the release says so beside the number."
-        },
-        {
-          "kind": "h2",
-          "text": "The subaward layer"
-        },
-        {
-          "kind": "p",
-          "text": "Prime awards are the visible half. The Native Federal Subcontracting collection, 90,479 records in the current release, resolves both sides of every subaward independently, so a Native prime paying a non-Native subcontractor and the reverse are distinguishable, and work moving between Native firms appears that neither record describes on its own."
-        },
-        {
-          "kind": "p",
-          "text": "Subaward reporting needs its own care. A single subaward is often refiled month after month, and each filing is a real event, so the filings are kept and flagged rather than deleted. Summed without that flag, the subaward file comes to $57.02 billion; counted correctly, $34.91 billion. The $22.11 billion difference is 63.4 percent of the correct total and 38.8 percent of the unfiltered one. A subaward is also a slice of a prime award, so it is never added to prime obligations."
-        },
-        {
-          "kind": "image",
-          "src": "/pitch/lanes/professional-wide.webp",
-          "tone": "gold",
-          "alt": "A meeting around a conference table",
-          "caption": "Professional and technical services carry the quarters that moved, on smaller awards spread across more firms."
-        },
-        {
-          "kind": "h2",
-          "text": "Where the growth is not"
-        },
-        {
-          "kind": "p",
-          "text": "Construction and facilities services carry most of the volume and almost none of the increase. The quarters that moved are professional services and information technology, where the average award is smaller and the number of distinct entities winning work is higher. Read only in dollars, the sector looks flat; read in entities and awards, it does not."
-        },
-        {
-          "kind": "figure",
-          "chart": "sankey",
-          "caption": "Prime obligations reaching subcontracted work, by sector",
-          "source": "subcontracting",
-          "flows": [
-            {
-              "from": "Construction",
-              "to": "Native subcontractors",
-              "value": 12
-            },
-            {
-              "from": "Construction",
-              "to": "Other subcontractors",
-              "value": 46
-            },
-            {
-              "from": "Professional services",
-              "to": "Native subcontractors",
-              "value": 27
-            },
-            {
-              "from": "Professional services",
-              "to": "Other subcontractors",
-              "value": 19
-            },
-            {
-              "from": "Information technology",
-              "to": "Native subcontractors",
-              "value": 16
-            },
-            {
-              "from": "Information technology",
-              "to": "Other subcontractors",
-              "value": 14
-            }
-          ],
-          "notes": [
-            "Ribbon width is the only quantity. Vertical position carries no meaning.",
-            "Covers reported subawards only. Work performed in-house by the prime does not appear.",
-            "A subcontractor is counted as Native where ownership is established from filings or primary-source confirmation."
-          ]
-        },
-        {
-          "kind": "p",
-          "text": "That composition is worth watching beyond the totals. A base of many small awards across many firms responds differently from a base of a few large ones when an agency changes how it buys, and consolidation of small contracts into larger vehicles has been the direction of federal procurement for a decade."
-        },
-        {
-          "kind": "h2",
-          "text": "What the collection does and does not claim"
-        },
-        {
-          "kind": "p",
-          "text": "Obligations are not receipts. An obligation is the government committing funds, and the work and the payment can fall in later periods or, on a terminated contract, never arrive. Where a firm's parent changed during the period covered, the award is attributed to the parent it had at the time of award, and the rule is stated with the release so a figure can be reproduced or deliberately recomputed the other way."
-        },
-        {
-          "kind": "p",
-          "text": "Nor does the collection claim that every Native-owned firm appears. Ownership is established from identifiers, filings and primary-source confirmation, and a firm that has never declared it in a record Cedar reads will be missing. That gap is documented with the release, and it is the honest limit on any statement about the total size of the sector."
-        }
-      ]
-    },
-    {
-      "id": "brief-funding",
-      "demonstration": true,
-      "href": "https://tribalbusinessnews.com",
-      "tone": "slate",
-      "image": "/pitch/lanes/publicadmin-wide.webp",
-      "imageAlt": "The United States Capitol",
-      "datasetId": "funding",
-      "tag": "Original Research",
-      "title": "Where federal dollars reached Indian Country in FY2025",
-      "dek": "Assistance awards by program and recipient, from the Funding collection's first full-year release.",
-      "date": "May 2026"
+      "minutes": 3
     }
   ],
   "citations": [],
@@ -575,10 +103,10 @@
       "name": "Foundation & Corporate Giving",
       "shelf": "standard",
       "coverage": {
-        "kind": "structure"
+        "kind": "observations"
       },
-      "blurb": "Foundation, corporate and bank funding publicly disclosed for Native nations, organizations and initiatives. Follow the funder, legal recipient, purpose, geography, amount and timing while keeping commitments, payments, authorizations and other reported financial statuses distinct.",
-      "linkage": "Philanthropic, corporate and bank giving, each disclosure kept as its own record: commitments and payments are separate facts, and the legal recipient is kept distinct from the Native beneficiary."
+      "blurb": "Foundation, corporate and bank giving disclosures concerning Native nations, organizations and initiatives. Examine reported funders, recipients, dates, amounts and financial status; commitments, payments, ranges and program totals remain distinct.",
+      "linkage": "Philanthropic, corporate and bank giving, each disclosure kept as its own record. The reported recipient may be a program or intermediary; a reviewed Native recipient binding is distinct from ownership or beneficiary status."
     },
     {
       "id": "contractors",
@@ -618,8 +146,8 @@
     },
     {
       "id": "owned",
-      "short": "Native-Owned Businesses",
-      "name": "Individually Owned Native Businesses",
+      "short": "Individual Native-Owned",
+      "name": "Individual Native-Owned Businesses",
       "shelf": "pro",
       "coverage": {
         "kind": "roster",
@@ -646,11 +174,10 @@
       "name": "Cedar Native Entity Enterprise Dataset (NEED)",
       "shelf": "pro",
       "coverage": {
-        "kind": "series",
-        "from": 2016
+        "kind": "observations"
       },
-      "blurb": "Enterprises owned or controlled by Native nations, Alaska Native corporations and other Native entities, including subsidiaries, holding companies and joint ventures. Follow parent relationships and organizational changes over time. Where records are available, profiles also carry patents, assigned or later acquired, and dated credit ratings, each kept with the entity it concerns.",
-      "linkage": "This is the structure the rest of the record resolves against, published as a collection in its own right: every tie names the nation or corporation behind it."
+      "blurb": "Source-backed enterprise identities and reviewed parent relationships. The current public release contains a limited evidence-pinned cohort; the wider enterprise register and restricted enrichments remain under review.",
+      "linkage": "Business identifiers and owner relationships remain separate claims. Each public fact retains its source release and evidence; an owner association never becomes the business identity."
     },
     {
       "id": "plot",
@@ -658,27 +185,27 @@
       "name": "PLOT",
       "shelf": "pro",
       "coverage": {
-        "kind": "structure"
+        "kind": "observations"
       },
-      "blurb": "Parcel-level ownership and development records associated with Native nations, organizations and enterprises. Follow ownership, transfers, parcel characteristics, geometry, permits and other recorded property activity over time.",
-      "linkage": "Land ownership, transfers, permitting and development, followed parcel by parcel: each parcel and the recorded events attached to it, linked to the Native entity that holds it."
+      "blurb": "Source observations of tracts, assessor parcels, permits and environmental records. Examine their recorded subjects, dates and citations while keeping parcel observations and permit events at their separate grains.",
+      "linkage": "Land ownership observations and permitting records retain their source identifiers. An assessor label, mapped tract or regulatory record does not establish Native ownership, legal title or a canonical entity binding."
     }
   ],
   "releases": {
     "funding": {
       "name": "Federal Funding to Indian Country",
       "version": "v3",
-      "updated": "2026-10-06",
+      "updated": "2026-10-01",
       "cadence": "Updated weekly",
       "retired": false,
       "history": [
         {
           "version": "v3",
-          "date": "2026-10-06",
+          "date": "2026-10-01",
           "kind": "data",
           "changed": [
-            "Release: 701,955 observations.",
-            "A 10-record preview of the dataset, downloads from the shelf."
+            "Dataset updated: 640,942 observations.",
+            "A 10-row preview downloads from the shelf."
           ]
         },
         {
@@ -686,8 +213,8 @@
           "date": "2026-09-26",
           "kind": "data",
           "changed": [
-            "Release: 3,646,750 rows.",
-            "A 10-record preview of the dataset, was published with this release; the shelf now serves the current release's preview."
+            "Dataset updated: 3,646,750 rows.",
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         },
         {
@@ -695,8 +222,8 @@
           "date": "2026-09-04",
           "kind": "data",
           "changed": [
-            "Release: 3,646,750 rows.",
-            "A 10-record preview of the dataset, was published with this release; the shelf now serves the current release's preview."
+            "Dataset updated: 3,646,750 rows.",
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         },
         {
@@ -704,8 +231,8 @@
           "date": "2026-09-02",
           "kind": "data",
           "changed": [
-            "First release on Cedar Press: 3,646,750 rows.",
-            "A 10-record preview of the dataset, was published with this release; the shelf now serves the current release's preview."
+            "First published on Cedar Press: 3,646,750 rows.",
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         }
       ]
@@ -713,17 +240,17 @@
     "federal-register": {
       "name": "Federal Register — Indian Affairs",
       "version": "v3",
-      "updated": "2026-10-06",
+      "updated": "2026-10-01",
       "cadence": "Updated weekly",
       "retired": false,
       "history": [
         {
           "version": "v3",
-          "date": "2026-10-06",
+          "date": "2026-10-01",
           "kind": "data",
           "changed": [
-            "Release: 11,402 observations.",
-            "A 10-record preview of the dataset, downloads from the shelf."
+            "Dataset updated: 21,258 observations.",
+            "A 10-row preview downloads from the shelf."
           ]
         },
         {
@@ -731,8 +258,8 @@
           "date": "2026-09-26",
           "kind": "data",
           "changed": [
-            "Release: 502,483 rows.",
-            "A 10-record preview of the dataset, was published with this release; the shelf now serves the current release's preview."
+            "Dataset updated: 502,483 rows.",
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         },
         {
@@ -740,8 +267,8 @@
           "date": "2026-09-04",
           "kind": "data",
           "changed": [
-            "Release: 502,483 rows.",
-            "A 10-record preview of the dataset, was published with this release; the shelf now serves the current release's preview."
+            "Dataset updated: 502,483 rows.",
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         },
         {
@@ -749,8 +276,8 @@
           "date": "2026-09-02",
           "kind": "data",
           "changed": [
-            "First release on Cedar Press: 502,483 rows.",
-            "A 10-record preview of the dataset, was published with this release; the shelf now serves the current release's preview."
+            "First published on Cedar Press: 502,483 rows.",
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         }
       ]
@@ -758,17 +285,17 @@
     "legislation": {
       "name": "Native Legislation and Votes",
       "version": "v3",
-      "updated": "2026-10-06",
+      "updated": "2026-10-01",
       "cadence": "Updated weekly",
       "retired": false,
       "history": [
         {
           "version": "v3",
-          "date": "2026-10-06",
+          "date": "2026-10-01",
           "kind": "data",
           "changed": [
-            "Release: 3,069 observations.",
-            "A 10-record preview of the dataset, downloads from the shelf."
+            "Dataset updated: 3,064 observations.",
+            "A 10-row preview downloads from the shelf."
           ]
         },
         {
@@ -776,8 +303,8 @@
           "date": "2026-09-26",
           "kind": "data",
           "changed": [
-            "Release: 206,354 rows.",
-            "A 10-record preview of the dataset, was published with this release; the shelf now serves the current release's preview."
+            "Dataset updated: 206,354 rows.",
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         },
         {
@@ -785,8 +312,8 @@
           "date": "2026-09-04",
           "kind": "data",
           "changed": [
-            "Release: 206,354 rows.",
-            "A 10-record preview of the dataset, was published with this release; the shelf now serves the current release's preview."
+            "Dataset updated: 206,354 rows.",
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         },
         {
@@ -794,8 +321,8 @@
           "date": "2026-09-02",
           "kind": "data",
           "changed": [
-            "First release on Cedar Press: 149,293 rows.",
-            "A 10-record preview of the dataset, was published with this release; the shelf now serves the current release's preview."
+            "First published on Cedar Press: 149,293 rows.",
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         }
       ]
@@ -803,17 +330,17 @@
     "deals": {
       "name": "Indian Country Deals",
       "version": "v3",
-      "updated": "2026-10-06",
+      "updated": "2026-10-01",
       "cadence": "Updated weekly",
       "retired": false,
       "history": [
         {
           "version": "v3",
-          "date": "2026-10-06",
+          "date": "2026-10-01",
           "kind": "data",
           "changed": [
-            "Release: 1,073 observations.",
-            "A 10-record preview of the dataset, downloads from the shelf."
+            "Dataset updated: 978 observations.",
+            "A 10-row preview downloads from the shelf."
           ]
         },
         {
@@ -821,8 +348,8 @@
           "date": "2026-09-26",
           "kind": "data",
           "changed": [
-            "Release: 2,662 rows.",
-            "A 10-record preview of the dataset, was published with this release; the shelf now serves the current release's preview."
+            "Dataset updated: 2,662 rows.",
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         },
         {
@@ -830,8 +357,8 @@
           "date": "2026-09-04",
           "kind": "data",
           "changed": [
-            "Release: 2,662 rows.",
-            "A 10-record preview of the dataset, was published with this release; the shelf now serves the current release's preview."
+            "Dataset updated: 2,662 rows.",
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         },
         {
@@ -839,8 +366,8 @@
           "date": "2026-09-02",
           "kind": "data",
           "changed": [
-            "First release on Cedar Press: 2,662 rows.",
-            "A 10-record preview of the dataset, was published with this release; the shelf now serves the current release's preview."
+            "First published on Cedar Press: 2,662 rows.",
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         }
       ]
@@ -848,17 +375,17 @@
     "nagpra": {
       "name": "NAGPRA Notices",
       "version": "v3",
-      "updated": "2026-10-06",
+      "updated": "2026-10-01",
       "cadence": "Updated weekly",
       "retired": false,
       "history": [
         {
           "version": "v3",
-          "date": "2026-10-06",
+          "date": "2026-10-01",
           "kind": "data",
           "changed": [
-            "Release: 6,792 observations.",
-            "A 10-record preview of the dataset, downloads from the shelf."
+            "Dataset updated: 6,792 observations.",
+            "A 10-row preview downloads from the shelf."
           ]
         },
         {
@@ -866,8 +393,8 @@
           "date": "2026-09-26",
           "kind": "data",
           "changed": [
-            "Release: 100,786 rows.",
-            "A 10-record preview of the dataset, was published with this release; the shelf now serves the current release's preview."
+            "Dataset updated: 100,786 rows.",
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         },
         {
@@ -875,8 +402,8 @@
           "date": "2026-09-04",
           "kind": "data",
           "changed": [
-            "Release: 100,786 rows.",
-            "A 10-record preview of the dataset, was published with this release; the shelf now serves the current release's preview."
+            "Dataset updated: 100,786 rows.",
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         },
         {
@@ -884,8 +411,8 @@
           "date": "2026-09-02",
           "kind": "data",
           "changed": [
-            "First release on Cedar Press: 72,302 rows.",
-            "A 10-record preview of the dataset, was published with this release; the shelf now serves the current release's preview."
+            "First published on Cedar Press: 72,302 rows.",
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         }
       ]
@@ -893,17 +420,17 @@
     "lobbying": {
       "name": "Native Federal Advocacy and Engagement",
       "version": "v3",
-      "updated": "2026-10-06",
+      "updated": "2026-10-01",
       "cadence": "Updated weekly",
       "retired": false,
       "history": [
         {
           "version": "v3",
-          "date": "2026-10-06",
+          "date": "2026-10-01",
           "kind": "data",
           "changed": [
-            "Release: 27,825 observations.",
-            "A 10-record preview of the dataset, downloads from the shelf."
+            "Dataset updated: 27,825 observations.",
+            "A 10-row preview downloads from the shelf."
           ]
         },
         {
@@ -911,8 +438,8 @@
           "date": "2026-09-26",
           "kind": "data",
           "changed": [
-            "Release: 264,478 rows.",
-            "A 10-record preview of the dataset, was published with this release; the shelf now serves the current release's preview."
+            "Dataset updated: 264,478 rows.",
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         },
         {
@@ -920,8 +447,8 @@
           "date": "2026-09-04",
           "kind": "data",
           "changed": [
-            "Release: 264,478 rows.",
-            "A 10-record preview of the dataset, was published with this release; the shelf now serves the current release's preview."
+            "Dataset updated: 264,478 rows.",
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         },
         {
@@ -929,8 +456,8 @@
           "date": "2026-09-02",
           "kind": "data",
           "changed": [
-            "First release on Cedar Press: 264,478 rows.",
-            "A 10-record preview of the dataset, was published with this release; the shelf now serves the current release's preview."
+            "First published on Cedar Press: 264,478 rows.",
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         }
       ]
@@ -938,17 +465,17 @@
     "contractors": {
       "name": "Native Federal Contractors",
       "version": "v3",
-      "updated": "2026-10-06",
+      "updated": "2026-10-01",
       "cadence": "Updated weekly",
       "retired": false,
       "history": [
         {
           "version": "v3",
-          "date": "2026-10-06",
+          "date": "2026-10-01",
           "kind": "data",
           "changed": [
-            "Release: 1,217,768 observations.",
-            "A 10-record preview of the dataset, downloads from the shelf."
+            "Dataset updated: 841,002 observations.",
+            "A 10-row preview downloads from the shelf."
           ]
         },
         {
@@ -956,8 +483,8 @@
           "date": "2026-09-26",
           "kind": "data",
           "changed": [
-            "Release: 3,345,971 rows.",
-            "A 10-record preview of the dataset, was published with this release; the shelf now serves the current release's preview."
+            "Dataset updated: 3,345,971 rows.",
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         },
         {
@@ -965,8 +492,8 @@
           "date": "2026-09-04",
           "kind": "data",
           "changed": [
-            "Release: 3,345,971 rows.",
-            "A 10-record preview of the dataset, was published with this release; the shelf now serves the current release's preview."
+            "Dataset updated: 3,345,971 rows.",
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         },
         {
@@ -974,8 +501,8 @@
           "date": "2026-09-02",
           "kind": "data",
           "changed": [
-            "First release on Cedar Press: 3,345,971 rows.",
-            "A 10-record preview of the dataset, was published with this release; the shelf now serves the current release's preview."
+            "First published on Cedar Press: 3,345,971 rows.",
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         }
       ]
@@ -983,17 +510,17 @@
     "subcontracting": {
       "name": "Native Federal Subcontracting",
       "version": "v3",
-      "updated": "2026-10-06",
+      "updated": "2026-10-01",
       "cadence": "Updated weekly",
       "retired": false,
       "history": [
         {
           "version": "v3",
-          "date": "2026-10-06",
+          "date": "2026-10-01",
           "kind": "data",
           "changed": [
-            "Release: 70,597 observations.",
-            "A 10-record preview of the dataset, downloads from the shelf."
+            "Dataset updated: 70,054 observations.",
+            "A 10-row preview downloads from the shelf."
           ]
         },
         {
@@ -1001,8 +528,8 @@
           "date": "2026-09-26",
           "kind": "data",
           "changed": [
-            "Release: 90,479 rows.",
-            "A 10-record preview of the dataset, was published with this release; the shelf now serves the current release's preview."
+            "Dataset updated: 90,479 rows.",
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         },
         {
@@ -1010,8 +537,8 @@
           "date": "2026-09-04",
           "kind": "data",
           "changed": [
-            "Release: 90,479 rows.",
-            "A 10-record preview of the dataset, was published with this release; the shelf now serves the current release's preview."
+            "Dataset updated: 90,479 rows.",
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         },
         {
@@ -1019,26 +546,35 @@
           "date": "2026-09-02",
           "kind": "data",
           "changed": [
-            "First release on Cedar Press: 90,479 rows.",
-            "A 10-record preview of the dataset, was published with this release; the shelf now serves the current release's preview."
+            "First published on Cedar Press: 90,479 rows.",
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         }
       ]
     },
     "owned": {
-      "name": "Native-Owned Businesses",
-      "version": "v3",
-      "updated": "2026-10-06",
+      "name": "Individual Native-Owned Businesses",
+      "version": "v4",
+      "updated": "2026-10-02",
       "cadence": "Updated weekly",
       "retired": false,
       "history": [
         {
-          "version": "v3",
-          "date": "2026-10-06",
+          "version": "v4",
+          "date": "2026-10-02",
           "kind": "data",
           "changed": [
-            "Release: 3,725 observations.",
-            "A 10-record preview of the dataset, was produced with this release and is not published on the shelf yet."
+            "Dataset updated: 3,725 observations.",
+            "A 10-row preview downloads from the shelf."
+          ]
+        },
+        {
+          "version": "v3",
+          "date": "2026-10-01",
+          "kind": "data",
+          "changed": [
+            "Dataset updated: 3,725 observations.",
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         },
         {
@@ -1046,8 +582,8 @@
           "date": "2026-09-26",
           "kind": "data",
           "changed": [
-            "Release: 5,930 rows.",
-            "A 10-record preview of the dataset, was published with this release; the shelf now serves the current release's preview."
+            "Dataset updated: 5,930 rows.",
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         },
         {
@@ -1055,8 +591,8 @@
           "date": "2026-09-04",
           "kind": "data",
           "changed": [
-            "Release: 5,930 rows.",
-            "A 10-record preview of the dataset, was published with this release; the shelf now serves the current release's preview."
+            "Dataset updated: 5,930 rows.",
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         },
         {
@@ -1064,8 +600,8 @@
           "date": "2026-09-02",
           "kind": "data",
           "changed": [
-            "First release on Cedar Press: row count unresolved.",
-            "No preview file yet: the dataset is unsettled, and no sample is published until it is.",
+            "First published on Cedar Press: row count unresolved.",
+            "No public preview is available yet.",
             "Readiness is blocked, with 3 named blockers recorded in the manifest."
           ]
         }
@@ -1073,18 +609,37 @@
     },
     "need": {
       "name": "Cedar Native Entity Enterprise Dataset (NEED)",
-      "version": "v3",
-      "updated": "2026-10-06",
+      "version": "v5",
+      "updated": "2026-10-01",
       "cadence": "Updated weekly",
       "retired": false,
       "history": [
         {
-          "version": "v3",
-          "date": "2026-10-06",
+          "version": "v5",
+          "date": "2026-10-01",
           "kind": "data",
           "changed": [
-            "Release: 5,820 observations.",
-            "A 10-record preview of the dataset, downloads from the shelf."
+            "Dataset updated: 43 observations.",
+            "A 10-row preview downloads from the shelf."
+          ]
+        },
+        {
+          "version": "v4",
+          "date": "2026-10-01",
+          "kind": "data",
+          "changed": [
+            "Dataset updated: 27 observations.",
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
+          ]
+        },
+        {
+          "version": "v3",
+          "date": "2026-09-27",
+          "kind": "data",
+          "changed": [
+            "Dataset updated: 14,868 rows.",
+            "No public preview is available yet.",
+            "Readiness is blocked, with 1 named blocker recorded in the manifest."
           ]
         },
         {
@@ -1092,8 +647,8 @@
           "date": "2026-09-26",
           "kind": "data",
           "changed": [
-            "Release: 14,868 rows.",
-            "A 10-record preview of the dataset, was published with this release; the shelf now serves the current release's preview."
+            "Dataset updated: 14,868 rows.",
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         },
         {
@@ -1101,8 +656,8 @@
           "date": "2026-09-04",
           "kind": "data",
           "changed": [
-            "Release: 14,868 rows.",
-            "A 10-record preview of the dataset, was published with this release; the shelf now serves the current release's preview."
+            "Dataset updated: 14,868 rows.",
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         },
         {
@@ -1110,8 +665,8 @@
           "date": "2026-09-02",
           "kind": "data",
           "changed": [
-            "First release on Cedar Press: 5,757 rows.",
-            "A 10-record preview of the dataset, was published with this release; the shelf now serves the current release's preview."
+            "First published on Cedar Press: 5,757 rows.",
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         }
       ]
@@ -1119,17 +674,17 @@
     "natural-resources": {
       "name": "Tribal Natural Resource Revenue",
       "version": "v3",
-      "updated": "2026-10-06",
+      "updated": "2026-10-01",
       "cadence": "Updated weekly",
       "retired": false,
       "history": [
         {
           "version": "v3",
-          "date": "2026-10-06",
+          "date": "2026-10-01",
           "kind": "data",
           "changed": [
-            "Release: 11,305 observations.",
-            "A 10-record preview of the dataset, downloads from the shelf."
+            "Dataset updated: 11,120 observations.",
+            "A 10-row preview downloads from the shelf."
           ]
         },
         {
@@ -1137,8 +692,8 @@
           "date": "2026-09-26",
           "kind": "data",
           "changed": [
-            "Release: 283,716 rows.",
-            "A 10-record preview of the dataset, was published with this release; the shelf now serves the current release's preview."
+            "Dataset updated: 283,716 rows.",
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         },
         {
@@ -1146,8 +701,8 @@
           "date": "2026-09-04",
           "kind": "data",
           "changed": [
-            "Release: 283,716 rows.",
-            "A 10-record preview of the dataset, was published with this release; the shelf now serves the current release's preview."
+            "Dataset updated: 283,716 rows.",
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         },
         {
@@ -1155,8 +710,8 @@
           "date": "2026-09-02",
           "kind": "data",
           "changed": [
-            "First release on Cedar Press: 283,716 rows.",
-            "A 10-record preview of the dataset, was published with this release; the shelf now serves the current release's preview."
+            "First published on Cedar Press: 283,716 rows.",
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         }
       ]
@@ -1164,17 +719,17 @@
     "nonprofits": {
       "name": "Native Nonprofits",
       "version": "v3",
-      "updated": "2026-10-06",
+      "updated": "2026-10-01",
       "cadence": "Updated weekly",
       "retired": false,
       "history": [
         {
           "version": "v3",
-          "date": "2026-10-06",
+          "date": "2026-10-01",
           "kind": "data",
           "changed": [
-            "Release: 12,689 observations.",
-            "A 10-record preview of the dataset, downloads from the shelf."
+            "Dataset updated: 89 observations.",
+            "A 10-row preview downloads from the shelf."
           ]
         },
         {
@@ -1182,8 +737,8 @@
           "date": "2026-09-26",
           "kind": "data",
           "changed": [
-            "Release: 131,090 rows.",
-            "A 10-record preview of the dataset, was published with this release; the shelf now serves the current release's preview."
+            "Dataset updated: 131,090 rows.",
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         },
         {
@@ -1191,8 +746,8 @@
           "date": "2026-09-04",
           "kind": "data",
           "changed": [
-            "Release: 131,090 rows.",
-            "A 10-record preview of the dataset, was published with this release; the shelf now serves the current release's preview."
+            "Dataset updated: 131,090 rows.",
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
           ]
         },
         {
@@ -1200,8 +755,44 @@
           "date": "2026-09-02",
           "kind": "data",
           "changed": [
-            "First release on Cedar Press: 123,293 rows.",
-            "A 10-record preview of the dataset, was published with this release; the shelf now serves the current release's preview."
+            "First published on Cedar Press: 123,293 rows.",
+            "A 10-row preview accompanied this update; the shelf now serves the current preview."
+          ]
+        }
+      ]
+    },
+    "foundation-corporate-giving": {
+      "name": "Foundation & Corporate Giving",
+      "version": "v3",
+      "updated": "2026-10-01",
+      "cadence": "Updated weekly",
+      "retired": false,
+      "history": [
+        {
+          "version": "v3",
+          "date": "2026-10-01",
+          "kind": "data",
+          "changed": [
+            "First published on Cedar Press: 193 observations.",
+            "A 10-row preview downloads from the shelf."
+          ]
+        }
+      ]
+    },
+    "plot": {
+      "name": "PLOT",
+      "version": "v3",
+      "updated": "2026-10-01",
+      "cadence": "Updated weekly",
+      "retired": false,
+      "history": [
+        {
+          "version": "v3",
+          "date": "2026-10-01",
+          "kind": "data",
+          "changed": [
+            "First published on Cedar Press: 151,715 observations.",
+            "A 10-row preview downloads from the shelf."
           ]
         }
       ]
@@ -1465,6 +1056,40 @@
       },
       {
         "q": "How are subsidiaries and joint ventures tied to the Nation or corporation behind them?",
+        "kind": "Trace",
+        "route": "construct"
+      },
+      {
+        "q": "What changed since I last used this collection?",
+        "kind": "Compare",
+        "route": "changes"
+      }
+    ],
+    "foundation-corporate-giving": [
+      {
+        "q": "What does Foundation and Corporate Giving contain?",
+        "kind": "Describe",
+        "route": "content"
+      },
+      {
+        "q": "How is Foundation and Corporate Giving built?",
+        "kind": "Trace",
+        "route": "construct"
+      },
+      {
+        "q": "What changed since I last used this collection?",
+        "kind": "Compare",
+        "route": "changes"
+      }
+    ],
+    "plot": [
+      {
+        "q": "What does PLOT contain?",
+        "kind": "Describe",
+        "route": "content"
+      },
+      {
+        "q": "How is PLOT built?",
         "kind": "Trace",
         "route": "construct"
       },

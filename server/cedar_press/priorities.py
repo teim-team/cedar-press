@@ -391,9 +391,7 @@ class PostgresStore:
         back, so a refusal cannot strand it. Keyed on the SUBSCRIPTION, so two
         organizations never wait on each other.
         """
-        cur.execute(
-            "SELECT pg_advisory_xact_lock(%s, hashtext(%s))", (_LOCK_CLASS, account_id)
-        )
+        cur.execute("SELECT pg_advisory_xact_lock(%s, hashtext(%s))", (_LOCK_CLASS, account_id))
 
     def close(self) -> None:
         """Nothing to close: the pool is the service's, not this store's."""
@@ -732,11 +730,16 @@ class Priorities:
         text: str,
         use_case: str | None = None,
         priority_id: str | None = None,
+        support_points: int = 0,
     ) -> dict[str, Any]:
         """A subscriber's own words, kept beside the priority they read as related, if any."""
         text = (text or "").strip()
         if len(text) < 12:
             raise PointsError("Say a little more about what you need.")
+        if type(support_points) is not int or support_points < 0:
+            raise PointsError("Choose a nonnegative number of support points.")
+        if support_points and not priority_id:
+            raise PointsError("Choose a priority to support.")
         with self._sql.tx() as cur:
             if priority_id:
                 cur.execute(self._sql.q("SELECT 1 FROM {priorities} WHERE id = ?"), (priority_id,))
@@ -759,7 +762,12 @@ class Priorities:
                 ),
             )
             new_id = int(cur.fetchone()["id"])
-            return {"id": new_id, "status": status, "priority_id": priority_id}
+            result: dict[str, Any] = {"id": new_id, "status": status, "priority_id": priority_id}
+            if support_points and priority_id:
+                # The nested allocation shares this transaction. A refused
+                # debit must not leave a request that the API reported failed.
+                result["support"] = self.allocate(account, priority_id, support_points)
+            return result
 
     def evidence(self, priority_id: str) -> dict[str, Any]:
         """What sits behind a priority, for Cedar's own reading.

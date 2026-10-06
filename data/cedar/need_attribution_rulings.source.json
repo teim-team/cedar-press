@@ -1,0 +1,8 @@
+{
+  "source": "teim-team/Lumecon-data decisions/identity/need/attribution-2026-10-04/rulings.csv",
+  "source_branch": "codex/convergence-packet-guard-20260928",
+  "source_commit": "9f53275891f9f848ef3a55fb82c5c598ec15032d",
+  "sha256": "9c0634c103351ce3f8c1d234b3182f4c5b9cecc6d5cdaecf103a102991ecbce5",
+  "vendored": "2026-10-04",
+  "note": "Copied byte for byte; re-vendor, never edit. code/1189 verify fails if the hash drifts."
+}

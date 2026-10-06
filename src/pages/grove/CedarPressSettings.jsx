@@ -112,7 +112,7 @@ export default function CedarPressSettings() {
   useScrollToTop("settings");
   // Sitewide arrival language.
   const fadeRoot = useFadeIn();
-  const { influence, status: influenceStatus } = usePriorities({ signedIn: entitled });
+  const { influence, status: influenceStatus } = usePriorities({ user });
 
   if (!loading && !entitled) {
     return (

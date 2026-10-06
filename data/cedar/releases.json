@@ -43,14 +43,14 @@
       },
       {
         "version": "v3",
-        "date": "2026-10-06",
+        "date": "2026-10-01",
         "name": "Federal Funding to Indian Country",
-        "tables": 14,
-        "rowsLabel": "701,955 observations",
+        "tables": 1,
+        "rowsLabel": "640,942 observations",
         "preview": {
-          "table": "federal_funding_transactions.csv",
+          "table": "funding.csv",
           "rows": 10,
-          "of": 701955
+          "of": 640942
         },
         "blockers": []
       }
@@ -97,14 +97,14 @@
       },
       {
         "version": "v3",
-        "date": "2026-10-06",
+        "date": "2026-10-01",
         "name": "Federal Register — Indian Affairs",
-        "tables": 23,
-        "rowsLabel": "11,402 observations",
+        "tables": 1,
+        "rowsLabel": "21,258 observations",
         "preview": {
-          "table": "consultation_events.csv",
+          "table": "federal-register.csv",
           "rows": 10,
-          "of": 11402
+          "of": 21258
         },
         "blockers": []
       }
@@ -151,14 +151,14 @@
       },
       {
         "version": "v3",
-        "date": "2026-10-06",
+        "date": "2026-10-01",
         "name": "Native Legislation and Votes",
-        "tables": 15,
-        "rowsLabel": "3,069 observations",
+        "tables": 1,
+        "rowsLabel": "3,064 observations",
         "preview": {
-          "table": "native_bills.csv",
+          "table": "legislation.csv",
           "rows": 10,
-          "of": 3069
+          "of": 3064
         },
         "blockers": []
       }
@@ -205,14 +205,14 @@
       },
       {
         "version": "v3",
-        "date": "2026-10-06",
+        "date": "2026-10-01",
         "name": "Indian Country Deals",
-        "tables": 15,
-        "rowsLabel": "1,073 observations",
+        "tables": 1,
+        "rowsLabel": "978 observations",
         "preview": {
-          "table": "deals_classified.csv",
+          "table": "deals.csv",
           "rows": 10,
-          "of": 1073
+          "of": 978
         },
         "blockers": []
       }
@@ -259,12 +259,12 @@
       },
       {
         "version": "v3",
-        "date": "2026-10-06",
+        "date": "2026-10-01",
         "name": "NAGPRA Notices",
-        "tables": 12,
+        "tables": 1,
         "rowsLabel": "6,792 observations",
         "preview": {
-          "table": "nagpra_notices.csv",
+          "table": "nagpra.csv",
           "rows": 10,
           "of": 6792
         },
@@ -313,12 +313,12 @@
       },
       {
         "version": "v3",
-        "date": "2026-10-06",
+        "date": "2026-10-01",
         "name": "Native Federal Advocacy and Engagement",
-        "tables": 35,
+        "tables": 1,
         "rowsLabel": "27,825 observations",
         "preview": {
-          "table": "native_entity_lobbying_disclosures.csv",
+          "table": "lobbying.csv",
           "rows": 10,
           "of": 27825
         },
@@ -367,14 +367,14 @@
       },
       {
         "version": "v3",
-        "date": "2026-10-06",
+        "date": "2026-10-01",
         "name": "Native Federal Contractors",
-        "tables": 10,
-        "rowsLabel": "1,217,768 observations",
+        "tables": 1,
+        "rowsLabel": "841,002 observations",
         "preview": {
-          "table": "prime_contracts.csv",
+          "table": "contractors.csv",
           "rows": 10,
-          "of": 1217768
+          "of": 841002
         },
         "blockers": []
       }
@@ -421,14 +421,14 @@
       },
       {
         "version": "v3",
-        "date": "2026-10-06",
+        "date": "2026-10-01",
         "name": "Native Federal Subcontracting",
-        "tables": 3,
-        "rowsLabel": "70,597 observations",
+        "tables": 1,
+        "rowsLabel": "70,054 observations",
         "preview": {
-          "table": "subawards.csv",
+          "table": "subcontracting.csv",
           "rows": 10,
-          "of": 89809
+          "of": 70054
         },
         "blockers": []
       }
@@ -475,14 +475,27 @@
       },
       {
         "version": "v3",
-        "date": "2026-10-06",
+        "date": "2026-10-01",
         "name": "Native-Owned Businesses",
-        "tables": 7,
+        "tables": 1,
         "rowsLabel": "3,725 observations",
         "preview": {
-          "table": "native_owned_businesses.csv",
+          "table": "owned.csv",
           "rows": 10,
-          "of": 4273
+          "of": 3725
+        },
+        "blockers": []
+      },
+      {
+        "version": "v4",
+        "date": "2026-10-02",
+        "name": "Individual Native-Owned Businesses",
+        "tables": 1,
+        "rowsLabel": "3,725 observations",
+        "preview": {
+          "table": "owned.csv",
+          "rows": 10,
+          "of": 3725
         },
         "blockers": []
       }
@@ -529,14 +542,38 @@
       },
       {
         "version": "v3",
-        "date": "2026-10-06",
+        "date": "2026-09-27",
         "name": "Cedar Native Entity Enterprise Dataset (NEED)",
         "tables": 3,
-        "rowsLabel": "5,820 observations",
+        "rowsLabel": "14,868 rows",
+        "preview": null,
+        "blockers": [
+          "This collection is withheld from publication under its maintained publication policy."
+        ]
+      },
+      {
+        "version": "v4",
+        "date": "2026-10-01",
+        "name": "Cedar Native Entity Enterprise Dataset (NEED)",
+        "tables": 1,
+        "rowsLabel": "27 observations",
         "preview": {
-          "table": "need_enterprises.csv",
+          "table": "need.csv",
           "rows": 10,
-          "of": 5820
+          "of": 27
+        },
+        "blockers": []
+      },
+      {
+        "version": "v5",
+        "date": "2026-10-01",
+        "name": "Cedar Native Entity Enterprise Dataset (NEED)",
+        "tables": 1,
+        "rowsLabel": "43 observations",
+        "preview": {
+          "table": "need.csv",
+          "rows": 10,
+          "of": 43
         },
         "blockers": []
       }
@@ -583,14 +620,14 @@
       },
       {
         "version": "v3",
-        "date": "2026-10-06",
+        "date": "2026-10-01",
         "name": "Tribal Natural Resource Revenue",
-        "tables": 9,
-        "rowsLabel": "11,305 observations",
+        "tables": 1,
+        "rowsLabel": "11,120 observations",
         "preview": {
-          "table": "resource_revenue.csv",
+          "table": "natural-resources.csv",
           "rows": 10,
-          "of": 11305
+          "of": 11120
         },
         "blockers": []
       }
@@ -637,14 +674,44 @@
       },
       {
         "version": "v3",
-        "date": "2026-10-06",
+        "date": "2026-10-01",
         "name": "Native Nonprofits",
-        "tables": 12,
-        "rowsLabel": "12,689 observations",
+        "tables": 1,
+        "rowsLabel": "89 observations",
         "preview": {
-          "table": "np_orgs.csv",
+          "table": "nonprofits.csv",
           "rows": 10,
-          "of": 12764
+          "of": 89
+        },
+        "blockers": []
+      }
+    ],
+    "foundation-corporate-giving": [
+      {
+        "version": "v3",
+        "date": "2026-10-01",
+        "name": "Foundation & Corporate Giving",
+        "tables": 1,
+        "rowsLabel": "193 observations",
+        "preview": {
+          "table": "foundation-corporate-giving.csv",
+          "rows": 10,
+          "of": 193
+        },
+        "blockers": []
+      }
+    ],
+    "plot": [
+      {
+        "version": "v3",
+        "date": "2026-10-01",
+        "name": "PLOT",
+        "tables": 1,
+        "rowsLabel": "151,715 observations",
+        "preview": {
+          "table": "plot.csv",
+          "rows": 10,
+          "of": 151715
         },
         "blockers": []
       }

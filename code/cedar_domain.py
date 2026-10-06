@@ -543,30 +543,34 @@ SELF_CERTIFICATION_IS_NOT_A_VERDICT = (
 
 
 # ---------------------------------------------------------------------------
-# PRIVACY. A SECOND RESTRICTION, INDEPENDENT OF D&B LICENSING, THAT SURVIVES
-# ANY ANSWER TO THE LICENSING QUESTION.
+# PUBLICATION OF INDIVIDUALLY NATIVE-OWNED FIRM RECORDS.
 #
-# Naming a private individual in a shipping dataset is an exposure a tribal
-# government's name is not. Publishing "The Chickasaw Nation owns Chickasaw
-# Nation Industries" discloses a sovereign government's commercial activity.
-# Publishing a sole proprietor's legal name does three things and only the
-# first is ordinary: it states contract facts; it names a private individual
-# and their address; and it asserts that individual's ancestry.
+# OWNER RULING, 2026-10-02 (Elijah Moreno): a firm is a business entity
+# regardless of what it is named after. Its business name, DBA, UEI, CAGE,
+# city and business address are public business records - SAM and USAspending
+# publish exactly these fields for every federal awardee - not personal
+# identifying information. Consent is not required to publish them. Every
+# field in INDIVIDUAL_NATIVE_WITHHELD_FIELDS publishes; there is no carve-out
+# for `street`.
 #
-# Measured, and not hypothetical: **even in the TRIBAL extract - the ENTITY
-# class, where this was not supposed to appear - 8 of 402 distinct UEIs carry
-# a legal business name that is unambiguously a person's name**, each with a
-# street address in the same row.
+# WHAT THIS REPLACED. Until 2026-10-02 this block withheld the name, DBA,
+# identifiers, city and address of every firm in the class unless
+# `consent_status == "OPTED_IN"`, on the reasoning that a firm whose legal
+# name is its owner's name is a private individual, and inherited the
+# `nrc_meeting_participants` / `ferc_ex_parte_parties` naming policy. The
+# ruling rejects that reasoning for this class: those two policies concern
+# NATURAL PERSONS appearing in a record, and a federal awardee is a business
+# entity, whatever its name. `consent_status`, `consent_date` and
+# `consent_source` stay as recorded informational columns (schema unchanged);
+# they no longer gate anything.
 #
-# CEDAR PRESS'S OWN WRITTEN POLICY IS INHERITED HERE, NOT RESTATED:
-#   `nrc_meeting_participants` - "Cedar Press names an individual only where a
-#      public professional capacity is established"
-#   `ferc_ex_parte_parties`    - "Cedar Press does not publish datasets about
-#      private individuals."
+# Small-cell suppression (INDIVIDUAL_NATIVE_MIN_CELL_FIRMS, suppress_small_cell)
+# survived that ruling and was lifted by the owner ruling of 2026-10-04: no
+# hold other than a specific misattribution stands.
 # ---------------------------------------------------------------------------
 
 #: Fields that publish for this class. Facts about a contract or a segment,
-#: with no natural person in them.
+#: with no natural person in them. Published before and after the ruling.
 INDIVIDUAL_NATIVE_PUBLISHABLE_FIELDS = frozenset({
     "surrogate_entity_id", "entity_class", "fiscal_year", "n_contract_rows",
     "total_obligations_usd", "naics", "psc", "funding_agency", "setaside",
@@ -575,19 +579,33 @@ INDIVIDUAL_NATIVE_PUBLISHABLE_FIELDS = frozenset({
     "sam_self_certification", "n_firms", "value_suppressed_small_cell",
 })
 
-#: Fields that do NOT publish - in bulk OR singly - absent recorded consent.
+#: The business-record fields of the class: formerly withheld absent recorded
+#: consent, PUBLISHED since the owner ruling of 2026-10-02 (see the block
+#: above). The name is kept because `scripts/import_cedar_manifest.py`,
+#: `code/243`, `code/1001` and others import it by this name; it now names
+#: the set the ruling released, and `may_publish_individual_native_field`
+#: answers True for every member regardless of consent_status or
+#: firm_legal_name_is_person.
 INDIVIDUAL_NATIVE_WITHHELD_FIELDS = frozenset({
     "canonical_name", "legal_business_name", "awardee_name", "dba_name",
     "owner_name", "owner_tribal_affiliation_named",
     "street", "recipient_city_name", "place_of_perform_city",
-    "self_description_sentence", "researcher_note",
-    # THE CARVE-OUT. SAM's own public entity search resolves a UEI to a name
-    # and an address, so for a firm whose legal name is a person's name the
-    # UEI is a pointer to that person's front door: publishing it publishes
-    # the name by ONE HOP. Withheld wherever firm_legal_name_is_person is
-    # 1 or UNKNOWN; publishable where the firm is demonstrably incorporated.
+    "self_description_sentence",
+    # Federal identifiers. The pre-ruling carve-out withheld these where
+    # firm_legal_name_is_person was 1 or UNKNOWN, because SAM's public entity
+    # search resolves a UEI to a name and an address. The ruling: that name
+    # and address are a business entity's public registration, which SAM
+    # itself publishes for every awardee, so the hop resolves to a business
+    # record, not to a private individual. Publish.
     "awardee_uei", "cage_code",
 })
+
+#: Internal working text. NOT published, and not because of consent or
+#: privacy: `researcher_note` is the analyst's own scratch note on a row,
+#: never a fact about the firm, and no published output carries it on that
+#: basis. It left INDIVIDUAL_NATIVE_WITHHELD_FIELDS on 2026-10-02 so that set
+#: could mean "publishes" without an exception inside it.
+INDIVIDUAL_NATIVE_INTERNAL_FIELDS = frozenset({"researcher_note"})
 
 #: Any published aggregate cell resolving to fewer than this many FIRMS is
 #: suppressed. "Individually Native-owned firms in Wyoming, NAICS 236220,
@@ -598,35 +616,47 @@ INDIVIDUAL_NATIVE_MIN_CELL_FIRMS = 3
 
 def may_publish_individual_native_field(field, name_is_person=None,
                                         consent_status="NOT_ASKED") -> bool:
-    """Per-FIELD answer, never per-dataset. Defaults to withholding.
+    """Per-FIELD answer, never per-dataset. Unknown fields fail closed.
 
-    `consent_status = OPTED_IN` is the ONLY thing that releases a name, and it
-    must be recorded with a date and a source. **A firm's own website
-    statement is our EVIDENCE, never their PERMISSION.** A firm writing "Being
-    Of Cherokee Indian descent..." on its homepage has consented to that
-    sentence being on its homepage. It has not consented to being enumerated,
-    ranked by federal obligations, and distributed in a subscription dataset.
-    Conflating the two is the fastest route from a good product to a complaint.
+    OWNER RULING, 2026-10-02: a firm is a business entity regardless of what
+    it is named after. Its name, DBA, UEI, CAGE, city and business address are
+    public business records - SAM and USAspending publish exactly these for
+    every federal awardee - not personal identifying information, so consent
+    is not required and every field in INDIVIDUAL_NATIVE_WITHHELD_FIELDS
+    publishes. `name_is_person` and `consent_status` are accepted so every
+    caller keeps working and so the consent columns remain recorded facts
+    about a row; neither changes the answer.
+
+    This reverses the rule in force 2026-08-26 to 2026-10-02, which released
+    those fields only on `consent_status == "OPTED_IN"` and read a firm's own
+    website statement as evidence, never as permission. That rule treated a
+    firm named after its owner as a private individual; the ruling holds that
+    a federal awardee is a business whatever its name, and that the
+    `nrc_meeting_participants` / `ferc_ex_parte_parties` policies it inherited
+    concern natural persons appearing in a record, which this class is not.
+
+    Still False: a field this module does not know (fail closed, as before),
+    and INDIVIDUAL_NATIVE_INTERNAL_FIELDS (`researcher_note`), which is
+    internal working text rather than a fact about the firm. Small-cell
+    suppression is a separate, unchanged rule: see `suppress_small_cell`.
     """
     f = (field or "").strip()
     if f in INDIVIDUAL_NATIVE_PUBLISHABLE_FIELDS:
         return True
-    if f not in INDIVIDUAL_NATIVE_WITHHELD_FIELDS:
-        return False          # unknown field: withhold. Fail closed.
-    if (consent_status or "").strip().upper() == "OPTED_IN":
-        return True
-    if f in {"awardee_uei", "cage_code"}:
-        # An identifier for an incorporated firm; a pointer to a person
-        # otherwise. UNKNOWN counts as a person.
-        return str(name_is_person).strip().upper() in {"0", "FALSE", "NO"}
-    return False
+    if f in INDIVIDUAL_NATIVE_WITHHELD_FIELDS:
+        return True           # owner ruling 2026-10-02: business records publish
+    return False              # unknown or internal field: withhold. Fail closed.
 
 
 def suppress_small_cell(n_firms) -> bool:
-    try:
-        return int(n_firms) < INDIVIDUAL_NATIVE_MIN_CELL_FIRMS
-    except (TypeError, ValueError):
-        return True
+    """Always False since the owner ruling of 2026-10-04 (Elijah Moreno).
+
+    Individual Native-owned business records are publicly sourced and Lumecon
+    has permission to publish them; a firm-level aggregate under
+    INDIVIDUAL_NATIVE_MIN_CELL_FIRMS is no longer suppressed. The constant and
+    the function stay so every caller keeps working.
+    """
+    return False
 
 
 # ---------------------------------------------------------------------------
@@ -1264,7 +1294,8 @@ __all__ = __all__ + [
     "ABSENCE_VALUES", "FORBIDDEN_ABSENCE_VALUES", "absence_value_ok",
     "SELF_CERTIFICATION_IS_NOT_A_VERDICT",
     "INDIVIDUAL_NATIVE_PUBLISHABLE_FIELDS",
-    "INDIVIDUAL_NATIVE_WITHHELD_FIELDS", "INDIVIDUAL_NATIVE_MIN_CELL_FIRMS",
+    "INDIVIDUAL_NATIVE_WITHHELD_FIELDS", "INDIVIDUAL_NATIVE_INTERNAL_FIELDS",
+    "INDIVIDUAL_NATIVE_MIN_CELL_FIRMS",
     "may_publish_individual_native_field", "suppress_small_cell",
 ]
 

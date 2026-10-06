@@ -37,11 +37,13 @@ uvicorn cedar_press.app:app --reload --port 8000
 
 | Variable | Purpose |
 | --- | --- |
-| `CEDAR_PRESS_SECRET` | Signs the session cookie. Without one, a restart invalidates every session rather than accepting forgeable cookies. |
+| `CEDAR_PRESS_SECRET` | Stable server-only session signing secret; staging/production require at least 32 characters. Only development may generate a temporary key. |
 | `CEDAR_PRESS_ACCOUNTS` | Provisioned subscribers as JSON. Empty by default, so a service started without accounts authenticates nobody. |
 | `CEDAR_PRESS_CODES` | Access codes as issued, keyed by code: `{"CODE": {"email": ..., "tier": ..., "expires": "YYYY-MM-DD"}}`. `expires` is optional. Empty by default, so a service started without a register activates nobody. |
 | `CEDAR_PRESS_ORIGINS` | Comma-separated origins allowed to send credentialed requests. |
 | `CEDAR_PRESS_INSECURE_COOKIE` | `1` in local development only: drops `Secure` so the cookie works over http. |
+| `CEDAR_PRESS_TRUST_PROXY` | `1` when the API sits behind a proxy that appends to `X-Forwarded-For` (the documented deployment: CloudFront in front of the API origin, `docs/HOSTNAMES.md`); `0` when clients connect directly. Sign-in and activation are rate limited per client address, so this decides what "client" means. Unset reads as `0` in development and is refused (503) in staging and production, because behind CloudFront `0` would key every subscriber to CloudFront's address and one stranger's wrong passwords would lock everyone out. |
+| `CEDAR_PRESS_PROXY_HOPS` | With `CEDAR_PRESS_TRUST_PROXY=1`, how many trusted proxies append to `X-Forwarded-For`; default `1` (CloudFront). Set `2` if a load balancer sits between CloudFront and the service. The client is the entry that many places from the right; everything left of it is caller-written and ignored. Only correct when the service cannot be reached except through that chain. |
 
 ## Where the database goes
 
@@ -50,14 +52,26 @@ modules today. When the collections move into Postgres it answers from there
 and `app.py` does not change — routes hold HTTP concerns and no data access
 of their own, which is what keeps that swap to one module.
 
-Two other seams are marked and both are in-memory today, which means they are
-forgotten on restart: `codes.py` holds which access codes have been spent, and
-`session.py` holds accounts created by activation. In production both are rows
-written in the same transaction — the account created, the code spent — and
-neither belongs in process memory.
+`subscribers.py` already persists subscribers and access codes when `DATABASE_URL`
+is configured. Redemption spends the code and creates its subscriber in one
+PostgreSQL transaction. The environment-backed account/code fallback is for
+development; staging and production refuse it. Install the PostgreSQL extra
+with `uv sync --locked --no-dev --extra postgres --project server` from the
+repository root and run the existing migration command in `DATABASE.md`.
 
-`session.py` is the same shape: `_lookup` is the seam the subscriber table
-replaces, and the cookie, its flags and the payload the client reads all stay.
+Sessions expire after 14 days. Every authenticated request re-reads the subscriber
+and current Press tier; removed subscribers and changed credentials or account
+bindings invalidate existing cookies. Logout advances the subscriber's persistent
+revocation revision, ending that email's sessions on all devices without ending
+other seats' sessions. A stable server-only signing secret is required in staging
+and production. Existing passwords, accounts and subscription tiers are preserved;
+old cookies without lifecycle claims require a fresh sign-in.
+
+The static browser preview gate is a separate login authority. Enabling
+`VITE_API_URL` does not migrate its accounts. Before switching an existing site,
+verify every existing subscriber's credential compatibility and entitlement in
+the persistent API. Do not
+reset credentials or treat a public preview digest as a PostgreSQL password hash.
 
 ## Checks
 
@@ -74,3 +88,257 @@ which is ignored). Unset, the store lives in memory and a restart forgets it:
 right for the tests, wrong for a deployment. An account record in
 `CEDAR_PRESS_ACCOUNTS` may carry `"account": "acct-name"` so several seats share
 one subscription's ledger.
+
+
+## The customer table (owner rulings 2026-10-04)
+
+Every spreadsheet and sample download is one flat table per collection, built
+by `cedar_press/customer_sheet.py` (vendored byte for byte from Lumecon-data
+`src/lumecon_data/customer_sheet.py`; `tests/test_customer_sheet_policy.py`
+compares the copies where the producer is installed). Owner rulings,
+2026-10-04: the only Cedar identifiers published are the Cedar Entity ID
+(`CE-00001-6S`) and the Cedar Business ID (`CB-0000001`); an event-grain row
+carries its own dataset's event ID (`EVENT_ID_COLUMNS`) and never another
+dataset's (`DATASET_EVENT_ID_COLUMNS`, `DATASET_EVENT_ID_FORMS`); the public
+registry identifiers in `PUBLIC_REGISTRY_ID_COLUMNS` and every other identifier
+the source dataset carries ship as the source carries them; DUNS never ships;
+Casino City columns, `CCP-`/`TPL-` keys and values are removed; outdated Cedar
+schemes (`RETIRED_ID`: the CICD/NEID handles such as `TRBF-CHKNAT-00`, every
+`CEDAR-` namespace including `CEDAR-NEST-` and the Gaming facility keys
+`CEDAR-PLACE-`, `NESTREL-`, the `VP-`/`CED-` facility keys, `PROV-` keys,
+NEID/CICD codes) are removed from every column, and the `tribe_id` and
+`legacy_facility_id` columns that hold them are not shown. A Cedar ID column
+holds only `CE-`/`CB-`: another value takes the ID the exact register
+`data/spine/cedar_retired_neid_crosswalk.csv` binds it to
+(`spreadsheet.cedar_id_crosswalk`), otherwise it is blank. NEED and Gaming show
+`business_uid` with `needs_cedar_id`; no Cedar Business ID is issued yet, so
+those rows read `yes`. No replacement place ID exists or is built;
+internal content checksums, dedup and batch labels stay internal; a local source value (path, spreadsheet, terminal, desktop, manual entry)
+is traced to the release's recorded public source URL or left blank; version
+columns and labels stay internal. `spreadsheet.download` presents the pinned
+release this way after every byte check; `repository.collection_csv` presents
+the committed ten-row samples this way; `release_research` presents verified
+examples this way. Release bytes, hashes and the per-component JSONL routes are
+unchanged. The committed sample files and the Explore reader still use the
+earlier appended layout (Lumecon-data `docs/review-ledger.md`, 2026-10-04).
+
+Native identity basis (owner request, 2026-10-04). The customer tables of
+`owned`, `contractors`, `subcontracting`, `funding`, `deals`, `need` and
+`gaming` carry `native_identity_basis`, the strongest evidence behind the
+Native identity the record asserts (`tribal_government`, `ancsa_corporation`,
+`native_hawaiian_organization`, `enrolled_tribal_citizen`, `program_certified`,
+`publicly_stated`, `self_certified`, `unknown`), and `native_identity_source`,
+its public citation. Both are derived by the vendored module from evidence on
+the row, never guessed; the mapping and the measured sample distribution are in
+Lumecon-data `docs/native-identity-basis.md`. A ten-row sample is built without
+related tables, so NEED's sample rows (whose owner class is attached from
+`enterprises`) read `unknown`; the full table carries the owner class.
+
+## Pinned governed release downloads
+
+The existing sample download remains a sample. The additive
+`GET /press/collections/{collection_id}/full-download?release_id=<sha256>`
+serves the exact immutable `records.jsonl` artifact from an approved Lumecon
+release. The adapter is shared across collections; the local Legislation
+flagship is the first real-data proof. A passing table is not a complete product.
+`GET /press/collections` exposes separate `fullRelease` metadata with the table,
+format, rows, release, checksum and explicit pinned download URL.
+
+Server-only configuration (never Vite/browser variables):
+
+- `CEDAR_PRESS_ENVIRONMENT`: `development` (default), `staging`, or `production`.
+- `CEDAR_PRESS_RELEASE_CATALOG`: a reviewed local catalog from Lumecon `build_catalog`.
+- `CEDAR_PRESS_DATA_API`: the Lumecon API origin. HTTPS is required; HTTP loopback
+  is allowed only in development. Staging/production reject loopback and insecure cookies.
+- `CEDAR_PRESS_DATA_TOKEN`: a dataset-scoped backend grant; never a subscriber credential.
+- `CEDAR_PRESS_DATA_TIMEOUT_SECONDS`: bounded data-service socket wait, 1–300 seconds
+  (default 30). Cold validation of large multipart releases may require a measured
+  higher value in development. Invalid/nonfinite values fail before a request.
+  This does not change byte limits, verification, entitlement or production gates.
+- Staging/production also require explicit secrets of at least 32 characters, a
+  Postgres `DATABASE_URL`, and no development `CEDAR_PRESS_ACCOUNTS` fallback.
+  Configuration validation is not proof of database availability or deployment readiness.
+
+Cedar enforces subscriber access before fetching data, checks catalog integrity,
+explicit release equality, schema, publication holds, rights, exact artifact
+bytes/hash, row count and primary keys. No matching or cleaning happens in the
+consumer. Missing, stale or malformed pins and service failures do not fall back
+to a sample. NEED remains held by `code/cedar_publication.py`. Unconfigured
+collections fail closed. Single artifacts and individual manifest parts are bounded
+at 256 MiB. Larger logical tables require the explicit development-only
+`CEDAR_PRESS_PARTITIONED_REHEARSAL=1` contract; staging/production refuse that path.
+The paired Lumecon collection `/download` endpoint verifies every component once
+and returns the exact manifest-ordered JSONL concatenation. Cedar verifies each
+part boundary, digest, schema and row count plus global primary-key uniqueness
+before releasing bytes. Temporary disk storage bounds memory to one part and a
+64 MiB key-index cache. An older producer without this endpoint fails closed.
+
+`cedar_press.download` emits redacted structured INFO events to stderr for denial,
+invalid requests, verification failure and authorized/prepared responses. An event
+records no account, token or row data. Prepared bytes are not proof of completed
+network delivery. Production still needs durable log collection and tested session
+expiry/revocation; the local fixture is not production approval.
+
+Rollback selects a previous verified catalog pin, without mutating either release.
+The old client pin is refused after a catalog switch. Run
+`server/tests/release_download_rehearsal.py --store <root> --catalog <catalog>`
+with both existing packages for real local login, 401/403/200, exact download,
+stale-pin and byte-preserving rollback checks. See
+`docs/HAVALA_INFRASTRUCTURE_REVIEW.md` for exact revisions and results.
+
+## Giving and PLOT component releases
+
+`GET /press/release-collections` is the authenticated integration registry for
+the 15 collection targets: the original 12, Foundation and Corporate Giving,
+PLOT, and Gaming. Its tier-filtered entries have verified release metadata or
+an explicit missing/unavailable value. It supplies no invented samples or row
+counts. The existing original-12 storefront registry is preserved; this server
+surface does not claim the new collection pages are delivered.
+
+| Collection | Minimum Press tier | Grove access | Components |
+| --- | --- | --- | --- |
+| Foundation and Corporate Giving | Standard | Shared | `reviewed_disclosures` |
+| PLOT | Press+ | Shared | `environmental_permits`, `environmental_events` |
+| Gaming Intelligence | Unavailable | Exclusive | Existing Gaming component map |
+
+The existing `/press/collections/{id}/full-download` endpoint accepts an explicit
+`release_id` and `component` for these collections. All component downloads use
+the established collection catalog/manifest/hash/schema/rights verifier. The
+presentation list in `governed_collections.py` is a compatibility gate; Lumecon's
+embedded contract remains the type, grain, rights and release authority. Giving
+decimal amounts remain exact serialized strings. PLOT EPA context does not
+establish Native ownership or parcel affiliation.
+
+Configure `CEDAR_PRESS_COMPONENT_RELEASE_CATALOG` and
+`CEDAR_PRESS_COMPONENT_RELEASE_PIN` with the exact reviewed collection catalog
+and pin. They are separate from the original dataset catalog configuration so
+both formats can coexist. The committed shared pin is empty. Gaming keeps its
+existing Grove pin/catalog. A review requires `CEDAR_GROVE_ENVIRONMENT=review`
+with `CEDAR_PRESS_ENVIRONMENT=development`, matching the existing component
+review path; production refuses this setting. Source rights remain enforced
+even in review.
+
+Reproduce a saved real candidate without a server listener or child process:
+
+```sh
+PYTHONPATH=server python server/tests/shared_collection_rehearsal.py \
+  --store <immutable-store> --collection plot --release <sha256> \
+  --output <isolated-review-directory>
+```
+
+The interpreter must have both Cedar and Lumecon importable. The command verifies
+the actual immutable candidate, writes an isolated review catalog/pin, calls both
+FastAPI applications in process, tests Press/Press+/Grove and production refusal,
+and writes `receipt.json`. It does not start a database or claim database proof.
+Use `foundation-corporate-giving` for Giving; the current real 14-row candidate
+has redistribution disabled, so all subscriber tiers correctly receive a hold.
+
+Recovery verification on 2026-09-26 used real PLOT release
+`1d8a75617b4ee1749d65c7aacc344f9a228f7f2ea9081420bcd0547956fef3a6`:
+1,242 permit rows and 3,210 event rows matched their manifest checksums at both
+entitled tiers. Giving release
+`f65ea15d5f63ccd4ccb8b9425a744ab7e33f77e62ca66bb98a962fd4b81b6fac`
+was verified at 14 rows and download-held. These are rehearsal releases, not
+production eligibility or complete PLOT parcel/ownership coverage.
+
+### Replay the original collections and Gaming without collecting large bodies
+
+The legacy dataset v1 format has no governed production eligibility label.
+Its full-download path now requires both `CEDAR_PRESS_ENVIRONMENT=development`
+and `LUMECON_ENVIRONMENT=review`; staging and production refuse before calling
+the data API. Collection releases keep their production gate; a rights class is recorded as provenance and no longer gates (owner ruling 2026-10-04), except `tenant_private`.
+Neither redistribution rights nor a successful database import issues a release.
+
+`tests/stream_release_rehearsal.py` runs saved native datasets, original
+partitioned tables, and Gaming components through both real ASGI applications.
+The queue is a JSON array of `{ "collection": "...", "release": "<sha256>",
+"store": "<immutable-store>" }`. Install both packages in one interpreter.
+
+```sh
+PYTHONPATH=server python server/tests/stream_release_rehearsal.py \
+  --queue <saved-queue.json> --output <review-receipts> \
+  --temporary-directory <bulk-scratch-directory> --code-revision <consumer-sha> \
+  --timeout-seconds 1800
+```
+
+Use `--collection <id>` to run one unfinished collection, or `--resume` to
+reuse same-revision successes only after the producer re-verifies every saved
+part. The script refuses inherited database configuration before importing the
+app. It starts no listener or subprocess and does not rebuild source data.
+Producer HTTP bodies are disk-spooled; the unchanged consumer verifies bounded
+parts; the consumer ASGI send callback computes SHA-256, bytes and newline rows
+without storing the logical body. An independent streaming read checks the
+manifest-ordered local artifacts. Anonymous, wrong-tier and production controls
+remain active. An absent component is disclosed separately from served or held
+components. Failures write per-collection receipts and the queue continues.
+
+Temporary files, SQLite scratch, and configurable caches must point at a drive
+with measured space. Progress is emitted by collection and every 64 MiB of HTTP
+body. Requests have an asynchronous timeout; synchronous producer verification
+may finish before cancellation can complete, so retain the coordinator's process
+and log stall monitoring. Redirect output to a persistent operation log. The
+collector regression streams 16 MiB with less than 2 MiB of traced allocation;
+that synthetic check is not a real collection receipt.
+
+### Complete Gaming component review
+
+`data/cedar/gaming_component_contracts.json` records presentation columns from
+the exact saved Gaming release: 24 logical tables, including nine tables with
+permitted downloads. It contains schema metadata only. Existing field-map
+entries take precedence; additional tables must still match their pinned
+producer schema exactly. Since the owner ruling of 2026-10-04 ("Lumecon
+transforms the data it publishes; source rights statuses are recorded as
+provenance and do not block publication") Lumecon-data's Gaming releases ship
+every column of any field-rights class (projection rule
+`gaming-presented-fields-v2`), so each changed entry, and the
+`gaming_government_payments` field-map entry, also lists that column set in
+`compatible_orders`; `order` stays the saved release's columns. The added
+columns are in `fields` with their rights class and are not in `display_order`.
+Since projection rule `gaming-presented-rows-v3` (Lumecon-data
+`gaming.2026-10-04.2`) a Gaming row of any row-level rights class or publication
+status ships too, with both recorded, and every component, partitioned parts
+included, is downloadable; the columns did not change, so no declaration did.
+Since `gaming.2026-10-04.3` (owner ruling 2026-10-04) FAC single audits and
+bond disclosures (rating actions, fund holdings, MSRB EMMA) are tribal entity
+filings, not Gaming: `gaming_financial_disclosures` carries only SEC facility
+figures, management-contract terms and NIGC financing reviews, with the same
+columns, and Lumecon-data's `entity-filings` producer writes
+`tribal_entity_financial_filings.csv` for the entity layer keyed by Cedar ID.
+Since projection rule `gaming-public-sources-v4` (owner ruling 2026-10-04:
+"Casino City data is not published; Gaming publishes from public sources") a
+Gaming row of `rights_class` `internal_vendor`, or naming Casino City or
+4wheeler, is not published; columns are unchanged, so no declaration changed.
+Component rights, proposed-ID review restrictions and
+Grove-only entitlement remain runtime gates. Internal tables remain unavailable.
+The stream rehearsal now refuses to resume an old two-table receipt as evidence
+for the complete declaration. It checks each component, including held responses.
+
+
+### Verified download memory and lifetime
+
+Governed single components and multipart components use the same disk-backed
+validation path as partitioned Press tables. Network reads are at most 64 KiB;
+validation retains one JSON record at a time and uses SQLite for global key
+uniqueness. Every part must match its exact size, SHA-256, field set, row count
+and primary key before any response starts. Duplicate JSON fields, nonfinite
+constants, truncated records and duplicate keys are refused. Exact source bytes,
+including decimal spellings, remain unchanged. Temporary storage closes on
+validation failure, response completion, disconnect and cancellation.
+
+Size temporary storage for concurrent verified downloads; the configured
+per-component limit still applies. This change does not clear a publication
+hold, promote a rehearsal release or certify upstream transforms as streaming.
+Reproduce with `python -m unittest server.tests.test_partitioned_release
+server.tests.test_gaming_release server.tests.test_shared_release_collections
+server.tests.test_grove_exchange` from the repository root, with `server` on
+`PYTHONPATH` and the pinned Lumecon runtime installed. Fixture tests require the
+explicit review environment already used by CI.
+
+The Grove container installs only this consumer's dependencies from the
+committed `server/uv.lock`, using `uv sync --locked --no-dev --no-install-project
+--project server`. It imports the pinned checkout through `PYTHONPATH`. The
+producer remains behind the authenticated Lumecon API; producer source code is
+not a runtime dependency of the Grove container. The producer commit in the
+application contract identifies the tested API pair, not an extra local service.
+Regenerate this lock from `server/pyproject.toml` with `uv lock --project server`
+when changing dependencies and rerun the pinned container and consumer tests.

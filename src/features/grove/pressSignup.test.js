@@ -87,7 +87,6 @@ test("every redemption failure says something different and actionable", () => {
     "PRESS_CODE_INVALID",
     "PRESS_CODE_USED",
     "PRESS_CODE_EXPIRED",
-    "PRESS_CODE_EMAIL_MISMATCH",
     "EMAIL_IN_USE",
   ];
   const messages = codes.map((code) => pressSignupError(code));
@@ -98,7 +97,10 @@ test("every redemption failure says something different and actionable", () => {
   // A code is one authorized user, so a reused one must say so rather than
   // reading as a generic failure.
   assert.match(pressSignupError("PRESS_CODE_USED"), /one authorized user/i);
-  assert.match(pressSignupError("PRESS_CODE_EMAIL_MISMATCH"), /different address/i);
+  // The server answers a real code with the wrong address as INVALID, so
+  // that copy must point at the address as well as the code.
+  assert.match(pressSignupError("PRESS_CODE_INVALID"), /address/i);
+  assert.match(pressSignupError("PRESS_CODE_INVALID"), /membership/i);
 });
 
 test("an unknown failure falls back to the server's own message", () => {

@@ -1013,6 +1013,7 @@ def link(added):
 # MAIN
 # ---------------------------------------------------------------------------
 def main():
+    raise SystemExit("Retired BIE-/UIO- issuance is disabled; mint CE- through 503_identity after review")
     refetch = "--refetch" in sys.argv
     do_link = "--no-link" not in sys.argv
     print("=== Cedar Press 75: BIE schools + Urban Indian Organizations ===\n")

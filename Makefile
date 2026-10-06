@@ -72,11 +72,11 @@ hooks:
 # suite spawns each of these inside a test too; this is the gate that names
 # them, runs in seconds, and does not wait on a coverage run to say so.
 #
-#   codebook-markdown   docs/DATASET_CODEBOOK.md            from data/cedar/codebook.json
+#   docs-markdown --kind codebook   docs/DATASET_CODEBOOK.md            from data/cedar/codebook.json
 #   derive-explore      data/cedar/explore.json             from the published samples
-#   field-map-markdown  docs/FIELD_MAP_2026-09-05.md and
+#   docs-markdown --kind field-map  docs/FIELD_MAP_2026-09-05.md and
 #                       docs/IDENTIFIER_RETIREMENT_2026-09-05.md from data/cedar/field_map.json
-#   guides-markdown     docs/guides/<collection>.md         from four data/cedar JSON files
+#   docs-markdown --kind guides     docs/guides/<collection>.md         from four data/cedar JSON files
 #   measure-samples     data/cedar/samples.published.json   from the git index
 #   record-release      data/cedar/releases.json            from the manifest
 #   seo-head            index.html's JSON-LD block and public/sitemap.xml from the catalog
@@ -94,10 +94,9 @@ hooks:
 # that holds the data. `code/1050_preflight.py` is not a check at all: it
 # claims a script number as a side effect of running.
 check-generated:
-	node scripts/codebook-markdown.mjs --check
+	node scripts/docs-markdown.mjs --kind all --check
 	node scripts/derive-explore.mjs --check
-	node scripts/field-map-markdown.mjs --check
-	node scripts/guides-markdown.mjs --check
+	node scripts/dump.mjs --kind press --check
 	node scripts/measure-samples.mjs --check
 	node scripts/record-release.mjs --check
 	node scripts/seo-head.mjs --check

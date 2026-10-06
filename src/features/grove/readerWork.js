@@ -66,7 +66,7 @@ const GOVERNMENT = landingKind(AUDIENCE_JOBS.find((audience) => audience.id === 
  * reader who holds it (`workOptions`). They are never folded into economic
  * development or "outside partner": a federal agency is not one. The service
  * accepts every id in this list (`press_catalog.WORK_KINDS`, dumped from it
- * by `scripts/dump-press.mjs`), so a stored answer is never refused on
+ * by `scripts/dump.mjs --kind press`), so a stored answer is never refused on
  * re-save; `workAudience` groups them with `government` for reporting.
  */
 const PRESERVED = Object.freeze(

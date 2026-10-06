@@ -1,7 +1,41 @@
 # AGENTS.md — Native Deals & Native Entity Enterprise Data Project
+
+## Owner adjudication boundary (Elijah, 2026-09-24)
+
+Round-half-away-from-zero is ratified and Claude owns its implementation. Codex must not perform rounding work or edit Claude-owned changes; Havala reviews implementation. Elijah's menu contains only fully researched, genuinely ambiguous identity, affiliation or legal-object linkages. Do not expose receipt commands, schemas, engineering holds, optional history checks or unresolved research. Codex handles imports after an export is returned. When nothing qualifies, display exactly **No owner decisions ready** and continue independent work.
+
+
+Elijah is only reviewing genuinely ambiguous identity, affiliation, or legal-object linkages where human judgment is required. Never place code defects, schemas, missing fields, tests, source refreshes, documentation, infrastructure, or other engineering work in his adjudication queue. Codex is a frontier coding model and must diagnose and fix those issues itself, validate the fix, and keep working. Only escalate when the repository and available authoritative sources cannot determine a linkage or when an actual product-policy choice belongs to the owner. A queue that asks Elijah to resolve engineering problems is a failed deliverable.
+
 *Operating guide for AI-agent sessions. Written 2026-07-31 from the full Q3 build conversation. Owner: Elijah Moreno.*
 
 ---
+
+## Owner ruling on publication holds (Elijah Moreno, 2026-10-04) — supersedes every hold below
+
+**Owner ruling 2026-10-04 (Elijah Moreno): Lumecon decides what is blocked. The only hold is a specific record flagged as attributed to the wrong entity; records in the database have already been reviewed and sourced and are not held. Attribution review is an ongoing process, not a standing hold. Agents do not impose publication holds.**
+
+**Owner ruling 2026-10-04 (Elijah Moreno), on rights: Lumecon transforms the data it publishes; source rights statuses are recorded as provenance and do not block publication.**
+
+Also: NEED records and individual Native-owned business records come from publicly
+available websites, and Lumecon has permission to publish them. Neither collection
+carries a collection-wide publication hold. **Do not reinstate one without a new
+owner ruling.**
+
+This supersedes every instruction anywhere in this file, in `START_HERE.md`, in
+`docs/` and in `review/` that tells an agent to hold, withhold, quarantine, keep
+internal or not publish data or a collection pending review, consent, preview,
+contested status or a publication class. Older dated entries below are left as the
+history they are; where one reads as a standing hold, or as a licence or source
+term that blocks publication, this ruling wins. Only two kinds of data stay out of
+published output: DUNS numbers (private) and a private individual's personal data
+(`NEVER` columns). The code has not caught up on one point: `DROP_COLS` in
+`code/cedar_publication.py` still drops `casino_city_id` beside the DUNS columns; that
+is a leftover licensing rule, not a standing exclusion. The one record-level hold is a specific record ruled to be
+attributed to the wrong entity (the mask in `code/cedar_publication.py`). Accuracy
+rules about how a figure may be totalled or described, and duplicate filings
+collapsed to one record, are correctness rules, not exclusions. What was lifted is
+in the 2026-10-04 entry at the end of this file.
 
 ## HOW TO READ THIS FILE (added 2026-09-02)
 
@@ -68,10 +102,11 @@ with Tribal Business News: built by Lumecon and available exclusively through
 Tribal Business News, which handles subscriber plans (payment, renewals and
 issuance). There is no year gating: every subscriber gets full coverage.
 
-**The Cedar data workspace.** The collections themselves — the deal ledger, the
-entity universe and the outcomes panel — and the pipeline that builds them,
-under `code/`, `docs/` and `dist/customer/`. This is what `AGENTS.md` below is
-mostly about.
+**The preserved Cedar data workspace.** Historical acquisition, adjudication and
+reproduction scripts remain under `code/`, with their evidence in `docs/` and
+`dist/customer/`. Current versioned release builds and researcher spreadsheets
+are maintained in Lumecon-data. Press owns the shared consumer, publication
+filters and customer presentation. The journal below preserves earlier work.
 
 **Does not own:**
 
@@ -79,8 +114,9 @@ mostly about.
   to Tribal Business News, whose involvement is with Cedar Press only.
 - The shared data foundation. That is
   [`Lumecon-data`](https://github.com/teim-team/Lumecon-data), the separate
-  data repository decided on 2026-09-21. It exists as of 2026-09-23; the
-  pipeline in `code/` has not moved to it yet.
+  data repository decided on 2026-09-21. Its installed builders and spreadsheet
+  exporter now own current pinned releases. Historical scripts under `code/`
+  remain available for their documented reproduction and adjudication roles.
 - The economic model. That is `teim-engine`, whose reference data this workspace
   reads under ADR-044 `reference_dataset` treatment — pinned, checksummed,
   versioned, never `data_snapshot`.
@@ -96,7 +132,7 @@ mostly about.
 |---|---|---|
 | Web client | Vite + React, deployed as a static build | `npm run dev`; `src/` |
 | API | FastAPI, Python | `server/` — see [`server/README.md`](server/README.md) |
-| Data workspace | Python scripts, numbered | `code/<n>_*.py`; `dist/customer/` holds the built deliverables |
+| Preserved data workspace | Historical Python scripts, numbered | `code/<n>_*.py` and `dist/customer/`; current release entrypoints are linked from [`docs/TERMINAL_HANDOFF.md`](docs/TERMINAL_HANDOFF.md). Scripts with zero references and no tracked output sit in `code/archive/` (moved 2026-10-02, never deleted; `code/archive/INDEX.md` names each; the rule and measurement are `server/tests/code_reference_graph.py`) |
 
 Pointing `VITE_API_URL` at the API is the whole switch from the standalone build
 to a connected one. [`.env.example`](.env.example) lists every configuration
@@ -151,17 +187,20 @@ root: its `-s server/tests -t server` is why a bare
 importable` (`tests/` at the root is the Playwright smoke directory, not a
 Python package).
 
-**Verified 2026-09-24**, in the order above: `npm run lint` exits `0` ·
-`make check-generated` reports all seven files current · `npm run test`
-reports `398 pass, 0 fail` and a coverage floor met at 84.43 lines /
-83.33 branches / 90.24 functions · `ruff check server` reports
-`All checks passed!` · `make test-python` reports `Ran 265 tests … OK
-(skipped=31)` and its floor met · `make audit-python` and `make audit-node`
-report no known vulnerabilities. The Playwright pair, re-run the same day
-(browsers already installed, then `npm run test:smoke`), reports
-`180 passed`, `26 skipped`. `npm run build`, `npm run build:site`
-and `npm run seo:check` also complete; the build's chunk-size warning is
-pre-existing.
+**Verified 2026-10-02** (Linux, Node 22, Python 3.11), in the order above:
+`npm run lint` exits `0` · `make check-generated` reports all six generators
+current · `npm run test` reports `634 pass, 0 fail, 1 skipped` and a coverage
+floor met at 88.64 lines / 85.00 branches / 90.80 functions · `ruff check
+server` reports `All checks passed!` · `make test-python` reports `Ran 664
+tests`, 33 skipped, 85% coverage against the 77 floor, with five import
+errors and one failure that are Python 3.11 artifacts (`code/` scripts use
+3.12 f-string syntax and the writer census parses them with `ast`); on
+Python 3.12, which CI uses, the same suite was recorded green on 2026-10-02
+in `docs/REVIEW_STATUS.md` · `make audit-python` and `make audit-node` report
+no known vulnerabilities · `npm run build` completes; its chunk-size warning
+is pre-existing. The Playwright pair was not rerun on 2026-10-02; the hosted
+Checks run for the pushed head is the record for it. The 2026-09-24 figures
+this block replaced were `398 pass` and `Ran 265 tests`.
 
 **`py -3` is the Windows Python launcher.** The workspace's ~1,000 documented
 commands are written with it, because that is where they were written. On Linux
@@ -244,18 +283,23 @@ from prose that goes stale, and gives you `ondisk <term>`.
 
 ## 5. Who reviews what
 
+*Ownership as set by Elijah Moreno, 2026-10-04. It supersedes the earlier table, which routed frontend to Isabella and teim-engine to Francesca.*
+
 | Area | Owner |
 |---|---|
-| teim-engine, the Cedar service, data methods | Francesca Agnes (@mafranagn) |
-| Frontend | Isabella Agnes (@magnes1) |
-| Identity, entitlement, billing, infra | Brian Kim (@bkim28964) |
-| Product behaviour and customer-facing copy | Kaylyn Lee (@kaylynhl) |
-| **Cedar Grove and Cedar Press, including their data** | Havala Hanson (@Havala-Hanson) |
+| **Team lead; Cedar Press and Cedar Grove, including their data** | Havala Hanson (@Havala-Hanson) |
+| The app users see: teim-app's interface, product behaviour and customer-facing copy | Kaylyn Lee (@kaylynhl) |
+| Backend and ML outside the existing teim-app: Cedar Grove's server side, data pipelines, ML | Ari (@ArihantSwainLumecon) |
+| The existing teim-app's backend: account access, payments, the database, dependencies, Datadog | Brian Kim (@bkim28964) |
+| Cedar, the AI economic analyst (the `cedar` service) | Francesca Agnes (@mafranagn) |
+| teim-engine | Isabella Agnes (@magnes1) |
 
-This repository is Havala's. The web client is still frontend, so a substantial
-change to it also goes to Isabella; a change to the entitlement or access path
-is Brian's wherever it lands. None of that displaces the self-verification rule
-in §6 — a reviewer is not a substitute for an independent re-execution.
+This repository is Havala's. A change to the web client's interface also goes
+to Kaylyn; a change to the pipeline or ML work goes to Ari; a change to the existing
+teim-app's backend (accounts, access, payments, database, dependencies) is
+Brian's wherever it lands.
+None of that displaces the self-verification rule in §6 — a reviewer is not a
+substitute for an independent re-execution.
 
 ## 6. Invariants
 
@@ -325,7 +369,7 @@ editing when several agents run at once.
 
 ## 8. Cross-repo links and status
 
-*Section current as of 2026-09-23.*
+*Current release workflow is recorded in [the maintained consumer handoff](docs/TERMINAL_HANDOFF.md), which links the producer checkpoint. Dated journal entries below preserve history.*
 
 | Repo | What it is | Relationship to this one |
 |---|---|---|
@@ -333,7 +377,7 @@ editing when several agents run at once.
 | [`teim-engine`](https://github.com/teim-team/teim-engine) | The model engine behind Cedar Impact (internal) | This workspace reads its reference data as `reference_dataset` per ADR-044 |
 | [`cedar`](https://github.com/teim-team/cedar) | Cedar, the AI economic analyst, as a service | No runtime dependency in either direction |
 | [`lumecon-website`](https://github.com/teim-team/lumecon-website) | The public site, and the **North Star** for product vocabulary | Product names and their one-line definitions follow its `AGENTS.md` |
-| [`Lumecon-data`](https://github.com/teim-team/Lumecon-data) | The shared Python data foundation behind Cedar Press, Cedar Grove, Cedar and Cedar Impact | The separate data repository decided on 2026-09-21; data extraction and harmonization are to move there. The pipeline in `code/` is still here |
+| [`Lumecon-data`](https://github.com/teim-team/Lumecon-data) | The shared Python data foundation behind Cedar Press, Cedar Grove, Cedar and Cedar Impact | Owns current versioned builders, verification and researcher spreadsheet exports. Press consumes exact pins; historical workspace scripts remain here for reproduction and adjudication. |
 
 **Naming**, per the North Star: the impact product is **Cedar Impact**; "TEIM"
 survives as a repository, database and resource name only; "tribal economic
@@ -9457,6 +9501,16 @@ sample for a withheld name. Run `--audit` again after adding the nineteen
 absent samples: `native_owned_businesses.csv` is the flagship of that
 collection and has not been checked, because it is not here.
 
+*Dated note, 2026-10-02.* The owner ruled that an individually Native-owned
+firm is a business entity regardless of what it is named after, and that its
+name, identifiers and business address are public business records that
+publish without consent. `may_publish_individual_native_field` now answers
+True for every field it withheld; the importer's strike reads that answer and
+so re-admits those six samples on the next run, and `register.json` carries
+every name (`withheld_names: 0`). The paragraph above records the rule as it
+stood. Record: `docs/REVIEW_STATUS.md`, "Owner ruling: individually owned
+firm records publish, 2026-10-02".
+
 The filters, the URL, the saved view, the download and the question to Cedar
 are one object, the cut (`features/grove/explore.js`). Change what a cut is
 there and every use follows; add a control to the card that is not in the cut
@@ -9595,6 +9649,42 @@ repository does once the register exists, and records the owner's two further de
 the id carries two check characters over the uid's alphabet, and the
 individually owned entity class closes to new mints. Documentation only; no
 code changed.
+<!-- BEGIN CEDAR-GIVING-PLOT-CONSUMER-20260926 -->
+The coordinator also assigned this worker the legacy NEED conflict-writer defect
+in `code/1102_need_corroboration_adjudication.py`. The script no longer assigns
+the Chugach narrative to every conflict. Its recognizable prior claims are cleared
+to an explicit unadjudicated hold; original assertions, values and IDs survive.
+Archived candidates remain untouched. Three focused regressions cover distinct
+enterprises, the actual synthetic builder, idempotency and separate human reviews.
+The collection-wide publication hold remained binding at the time; the owner
+ruling of 2026-10-04 lifted it (see the 2026-10-04 entry at the end of this file).
+The same worker subsequently added bounded queue replay in
+`server/tests/stream_release_rehearsal.py` and fenced legacy dataset v1 delivery
+to explicit development/review. Staging/production refusal occurs before source
+transport. Synthetic streaming and release regression checks cover the mechanism;
+the coordinator records real queue results. Both rehearsal commands refuse
+inherited database configuration before importing the Cedar app.
+The isolated Giving/PLOT worker branch adds only server integration surfaces:
+`governed_collections.py`, the authenticated 15-target release registry,
+Press component pin/catalog configuration, and existing full-release verifier
+dispatch. Original-12 frontend declarations and the PR #131 presentation
+worktree remain separate. Giving is standard Press/shared Grove, PLOT is
+Press+/shared Grove, Gaming remains Grove exclusive. The default shared pin is
+empty. Real reproduction is `server/tests/shared_collection_rehearsal.py` using
+both installed packages and an immutable store: no listener or subprocess.
+Actual PLOT 1,242 permits/3,210 events served with exact hashes; Giving's real14
+remained rights-held. Root owns integrated pins, database proof and final CI.
+<!-- END CEDAR-GIVING-PLOT-CONSUMER-20260926 -->
+
+## 2026-09-27 Source presentation separates publisher from ingestion artifact
+
+Source labels come from the maintained Lumecon intake projection or exact reviewed
+source-system mappings. A seed URL, filename, funder, certifying authority or
+curated transaction title never establishes a row's original publisher/report.
+`sourcePresentation.js` and `SourceCitation.jsx` are the shared Press display
+path; missing evidence stays explicit. Grove-only Gaming placement remains in force; the NEED publication holds that
+stood here were lifted by the owner ruling of 2026-10-04. Current Giving adds three trailing fields;
+`compatible_orders` explicitly preserves its prior pinned schema.
 
 
 ## 2026-09-28: mobile preview rails must scroll inside their frame
@@ -9607,3 +9697,247 @@ compatibility hover/focus changing the specimen first. `tests/mobile-navigation.
 reproduces the old rail at 2,291px inside a 390px viewport and checks native touch
 swiping plus a one-tap selection at the far end. Audience-name tabs remain at
 720px and below; wider cards use their existing previous/next controls.
+
+## 2026-09-28 Living datasets use dates and one cohesive spreadsheet
+
+Owner direction: present each collection as a living dataset. Show Updated dates,
+not public release numbers or component/table counts. Cite the collection name,
+update date and access date. Keep immutable release pins and change history internal.
+A CSV file, storage partition or component is not an upstream source. Attribute
+registered publishers and source systems; never relabel table counts as sources.
+Final delivery is one cohesive data table per collection, with compatible columns,
+explicit record grain and provenance, and blanks for inapplicable fields. Preserve
+licensing rights; joins must not multiply observations or money. (Identity holds
+here were superseded by the owner ruling of 2026-10-04.)
+
+## 2026-10-01: sample counts and connected spreadsheet counts have different populations
+
+Public previews count their own eligible sample records and label the preview update date. Do not sum legacy collection/table counts into a customer record total. Connected spreadsheet counts come from permitted release descriptors and must match the same release's displayed record types. Reader-facing labels and retired identifier column filtering are shared in `src/features/grove/readerPresentation.js`; Cedar IDs, names and original record IDs remain. `docs/PRESENTATION_DATA_FLOW.md` owns this current maintenance boundary. Automated build, test and deployment checks remain enabled.
+
+## 2026-10-04: Owner ruling — no publication holds; NEED and individual Native-owned businesses publish
+
+Owner ruling 2026-10-04 (Elijah Moreno): NEED and individual Native-owned
+businesses are publicly sourced and published with permission; no collection-wide
+publication hold. Do not reinstate one without a new owner ruling.
+
+Owner ruling 2026-10-04 (Elijah Moreno): Lumecon decides what is blocked. The only hold is a specific record flagged as attributed to the wrong entity; records in the database have already been reviewed and sourced and are not held. Attribution review is an ongoing process, not a standing hold. Agents do not impose publication holds.
+
+Lifted in this branch, in code:
+
+- `code/cedar_publication.py`: `assert_collection_publishable` holds nothing
+  (the NEED affiliation quarantine and `NEEDAffiliationPublicationHold` are
+  gone); `GATES` (`publishable`, `source_terms_status`) no longer withholds;
+  `publish_hold` and the legislation admission hold are no longer read;
+  `BLOCKED_COMBINATIONS` (the quarantined-method tier-B mask) is empty; review
+  states that only say "not settled yet" (`NATIVE_PROPOSED_AWAITING_OWNER_RULING`,
+  `CONFLICT_EXCLUDED_AND_RULED_NATIVE`, `HELD_STATE_DISAGREES`,
+  `REDIRECT_PROPOSED`, `RULED_HOLD`, `RULING_CONFLICT`, identifier `HOLD`) are
+  FLAG, and an unknown state is FLAG instead of WITHHOLD.
+- Kept as the misattribution mask: `RULED_NOT_NATIVE`, `RULED_CLASS_ONLY`,
+  `RULED_NAME_KEY_ONLY_NOT_ATTRIBUTED`, `RULED_TIER_C_NOT_ATTRIBUTED`,
+  `CONTRADICTED_AS_OF`, `REFUSED_GENERIC_TOKEN_ONLY`,
+  `REFUSED_PLACE_NAME_IS_THE_ADDRESS`, `WITHDRAWN_BY_1079`, and the verified
+  denials (`enforce_denials`). Each is a specific record ruled to name the wrong
+  entity; the row still ships and only the attribution is blanked.
+- `server/cedar_press`: the NEED reviewed-base proof no longer gates a NEED
+  component, the preview or research packets; `publication_hold` and a review
+  `publication_status` (held, contested, unreviewed, withheld) no longer
+  withhold a component; the spreadsheet no longer drops held, contested or
+  withheld rows; NEED profiles no longer drop rows for `publication_status` or
+  `hold_reason`.
+- `scripts/import_cedar_manifest.py` no longer writes `publication_hold` or
+  strikes NEED samples; `scripts/measure-samples.mjs` no longer fails on a held
+  collection's files; the site (`collection.js`, `explore.js`,
+  `pressDownload.js`, `PressCollectionPreview.jsx`) no longer reads a collection
+  hold.
+- Individual Native-owned businesses: the consent rule was already lifted on
+  2026-10-02 (`may_publish_individual_native_field`). `suppress_small_cell`
+  (firm-level aggregates under 3 firms) is lifted here: it always answers
+  False. The internal `researcher_note` working field is left for the owner.
+
+Not changed, because it is not a publication hold set by an agent: release
+`rights` (`publication_class` restricted or tenant_private, `redistribution`,
+`download_permitted`) and `internal_only` on a component are the producer's
+licensing and product boundary. NEED's components in the pinned release still
+carry them until Lumecon-data re-cuts NEED under this ruling.
+
+## 2026-10-04: a panel that takes focus must give it back, and dteal on the paper ground is 4.49:1
+
+Accessibility pass, axe-core 4.13 (WCAG 2.0/2.1/2.2 A and AA plus best
+practice) with keyboard walks at 375 and 1280 px, over the door, sign-in, the
+overview, Collections, a collection, the downloads menu, Research Briefs, an
+article, Methods, Settings, What's new, Priorities, the tribal data request,
+research access and a record. 220 axe findings before, 149 after, and every
+remaining one is the same pair: `--dteal` `#0A7F74` text on the paper ground
+`#f3f6f8` measures 4.49:1, under 4.5:1. That is a brand-token decision, not a
+fix this pass could make with an existing token, and it is left for the owner.
+
+Fixed: the door pane's collection name is an `h2` (it was an `h3` straight
+under the page `h1`); the Priorities lists' bands are level-two headings; an
+article still loading or unavailable has a page heading; the rail's
+observation counts use the rail's own 0.6 alpha (4.47:1 and 4.09:1 at 0.45);
+the footer's tribal-government link is 24px tall. Focus: the collection
+profile wraps Tab inside itself (its comment said it did; it did not) and is
+`aria-modal`; it, the door's Cedar and the signed-in Cedar return focus to
+what opened them (`src/features/grove/focusReturn.js`), and the signed-in
+Cedar moves focus into itself when its composer is disabled (on a phone the
+launcher is hidden while it is open, so focus fell to `<body>`). The viewer's
+Filters and More panels close on Escape and an outside click, through the
+masthead's hook, now `src/pages/grove/useDismissable.jsx`; a closed entity
+picker no longer swallows that Escape. Live regions: the door preview's
+loading and failure share one `role="status"` element, and the viewer's empty
+line, the record page's line and the entity page's unreachable list announce
+a failed read. Phone width: the Filters panel hangs from the toolbar (it began
+53-63px off the left of a 375px screen) and the Sections menu opens from its
+right edge (it ran 43-59px past the right). Tests: `tests/accessibility.spec.js`
+and `focusReturn.test.js`, each checked by reverting the fix.
+
+## 2026-10-04 (later): Owner ruling on rights — rights statuses are provenance, not gates
+
+Owner ruling 2026-10-04 (Elijah Moreno): "We are transforming the data, so remove
+those blocks." Lumecon transforms the data it publishes; source rights statuses are recorded as provenance and do not block publication.
+
+This supersedes the "Not changed" paragraph of the entry above and commit
+`a77ebcf`. In `server/cedar_press`: `repository.grove_component_contract` no
+longer refuses a component for `publication_class` restricted or withheld,
+`redistribution: false`, `download_permitted: false`, a rights
+`publication_status` (`internal`, `source_limited`) or a non-public field rights
+class; the partitioned-part, pinned-release and research-packet checks drop the
+same conditions; `source_presentation` no longer hides a row's source citation
+for a held or rights status (and the site's `sourcePresentation.js`
+likewise). What still refuses: `tenant_private` (a customer's own data, an
+authorization boundary), `internal_only` working tables, malformed rights, and
+the field map's own consistency checks. The licensed-identifier column drops
+(DUNS, Casino City) in `code/cedar_publication.py` are column rules, not status
+gates, and were not changed; the owner decides them.
+
+## 2026-10-04: Home community is an entity attribute made of public Census codes, never a place ID
+
+Owner intent 2026-10-04 (Elijah Moreno): know the home community an entity's
+activity benefits wherever a deal or contract happens. ANCs go to their ANCSA
+region; tribes to their reservation or AIAN land, or without land to their
+headquarters county, which is kept regardless. Where something happened stays
+the row's geocoded address or place of performance (ADR-015 rule 1), with no
+ID. There is no Cedar place ID; do not create one.
+
+The rules live in Lumecon-data `src/lumecon_data/home_community.py` (commit
+`53d45eca0be4d932370aef30ec776860a9949796`, docs `docs/home-community.md`):
+`home_aiannh_*`, `home_anrc_*`, `hq_county_*`, `home_community_basis`
+(`aiannh_land`, `anrc_region`, `hq_county_only`, `unknown`) and
+`home_community_source` on each `CE-` entity; `benefit_entity_id` and
+`benefit_link` (`entity_attributed`, `in_home_area`) on rows. `in_home_area`
+comes only from 873's exact point-in-polygon rows on legal federal land (class
+`D1`, `D2`, `D3`, `D5`, `D8`); OTSA, TDSA, SDTSA, ANVSA and ANRC areas never
+trigger it. A shared polygon gives one flagged link per entity, so summing over
+links double-counts: sum per entity only.
+
+`code/1190_build_home_community.py` gathers Cedar's inputs and calls that
+module; it re-implements no rule. Measured from Git alone (register plus the
+twelve regional corporations bound to their Census ANRC areas), 1,916
+entities: `aiannh_land` 0, `anrc_region` 12, `hq_county_only` 0, `unknown`
+1,904 (`docs/GEO_HOME_COMMUNITY_STATS.json`). `verify` re-measures,
+`selftest` proves verify and the binding check fire;
+`server/tests/test_home_community_build.py` runs both where the producer is
+installed and skips otherwise. Workstation command, after placing reviewed
+link files (none exist yet) in `data/clean/`:
+
+    pip install "git+https://github.com/teim-team/Lumecon-data@53d45eca0be4d932370aef30ec776860a9949796"
+    python3 code/873_build_aiannh_crosswalk.py && python3 code/873_build_aiannh_crosswalk.py verify
+    python3 code/1190_build_home_community.py build && python3 code/1190_build_home_community.py verify
+
+The 303-row `tribe_aiannh_crosswalk_master.csv` is a name match, off Git, and
+is not read: it becomes `data/clean/geo_entity_aiannh_links.csv` only once each
+row carries an exact reviewed `cedar_uid`. Headquarters counties and village
+ANRC links have no source file yet. The 13th Regional Corporation has no
+Census ANRC area and is not in the register.
+
+## 2026-10-04: The standalone download is the customer table; 873 writes one row per containing polygon
+
+Three follow-ups to the entries above, all on #132.
+
+**Standalone download.** Without an API (`VITE_API_URL` unset) the Press
+download used to hand over the raw committed preview
+(`public/data/cedar/samples/*/spreadsheet__10.csv`), which for NEED carries
+retired `CEDAR-NEST-` IDs; only the service path applied the customer-table
+rules. Now `scripts/render_sample_downloads.py` writes the service's own bytes
+(`repository.collection_csv`, i.e. the vendored `customer_sheet` rules plus
+`cite_as`) to `public/data/cedar/downloads/<id>.csv` and records each file's
+SHA-256, rows and columns in `data/cedar/sample_downloads.json`;
+`pressDownload.csvFor` fetches only that file and hands it over only when the
+digest matches. Re-run the script whenever a sample or `customer_sheet.py`
+changes: `server/tests/test_customer_sheet_policy.py` runs its `--check`, and
+fails if any served file, in either mode, carries `CEDAR-NEST-`,
+`CEDAR-PLACE-`, `NESTREL-`, `TRBF-`, `VP-`, `CEDAR-FAC-`, `CCP-` or a DUNS
+column. Regenerating the raw previews instead was rejected: the Explore reader
+is built on their layout and about 20 reader tests depend on it. **Still
+open:** the raw previews remain public static files and the Explore reader and
+its cut export read them (Lumecon-data review ledger, "re-stage previews").
+
+**873.** `code/873_build_aiannh_crosswalk.py` kept only the first polygon a
+point fell in (`hits[0]`), so a point on trust land inside an OTSA could be
+recorded under the OTSA alone and never raise `in_home_area`. It now writes
+one row per (point, containing area), in `aiannh_geoid` order, with
+`n_containing_areas`; a point inside none keeps one outside row. `verify`
+counts points, not rows, for I3 and adds I6 (no repeated pair, no outside
+point with another row, counts agree); `selftest` fires both new cases.
+`server/tests/test_aiannh_crosswalk_873.py` tests the overlap case with
+synthetic boxes (no shapely, no TIGER bytes); restoring `hits[0]` fails four of
+its tests. It also runs in the `gaming-release-consumer` job, where the
+producer is installed, so the consumer test cannot skip there. Not rebuilt
+here: the TIGER zip and `data/clean` are workstation files, so
+`docs/GEO_AIANNH_STATS.json` still holds the 2026-09-02 one-row-per-point
+figures until 873 is rerun on the workstation.
+
+**customer_sheet `customer-sheet-2026-10-04.5`**, vendored byte for byte:
+`benefit_entity_id` is a Cedar ID column holding `CE-` IDs only, and
+`home_community_source` a source column holding public http(s) URLs only.
+
+## 2026-10-04: Every public sample is the customer table; the raw previews are no longer served
+
+Closes the "still open" item in the entry above. Owner ruling: one whole flat
+spreadsheet per collection, built by the shared `customer_sheet` rules.
+
+**Moved, not deleted.** The producer previews went from
+`public/data/cedar/samples/<c>/spreadsheet__10.csv` to
+`data/cedar/samples/<c>/spreadsheet__10.csv` (`git mv`, bytes unchanged). A
+manifest `sample_path` is now a path from the repository root, not a URL.
+`collections.raw_preview_file`, the importer (`sample_file_path`,
+`scrub_samples`), `preview_definitions.py`, `stage_verified_previews.py`,
+`measure-samples.mjs`, `dump.mjs` and `docs-markdown.mjs` resolve it there.
+Nothing under `public/` is a CSV except the 14 customer tables in
+`public/data/cedar/downloads/`.
+
+**One reader path.** `src/features/grove/customerTables.js` holds the render
+record (`data/cedar/sample_downloads.json`, which now also carries each
+table's header and one-row grain). `exploreTables` returns exactly one table
+per collection, its customer table, so Explore, its cut export and the
+record, entity and preview pages read the same bytes as the download.
+`fetchSampleText` requires the published SHA-256 and refuses bytes that do
+not match, which is the `e96fd6a` digest check applied to every reader.
+
+**Contracts.** `derive-explore.mjs` derives each contract from the customer
+table (`customerTableContract`, `mapping_kind: "customer_table"`): no
+`record_type`/`record_key`/`record_grain`, the dataset's own event ID as the
+record id where unique (NEED has none in its sample and is addressed by
+position), and a short `CUSTOMER_PRESENTATION` list carrying the reviewed
+NEED, Giving and PLOT readings over to customer column names. `codebookFor`
+now describes the customer table; `data/cedar/codebook.json` stays the
+producer preview's dictionary, and the few columns the rules add or rename
+take their meaning from `customerTables.js`, restating `customer_sheet.py`.
+
+**Label.** The button said "Ten-row sample" for all 14; Federal Register's
+customer table holds 5 rows and PLOT's 3. `pressDownload.sampleLabel` reads
+the count from the render record.
+
+**Tests.** `test_no_public_path_carries_a_retired_scheme_or_a_duns_column`
+(Python) and "no public path, the Explore reader's included, ..." (node) walk
+every text file under `public/` plus the data the bundle imports, and fail on
+any retired scheme, a DUNS column, a packaging column, or a CSV that is not a
+rendered customer table. Proved by mutation: the raw NEED preview copied back
+under `public/`, `CEDAR-NEST-` written into a served table, a DUNS column
+added, `VP-` appended to `robots.txt`, `CEDAR-PLACE-` in `explore.json`, and
+`exploreTables` pointed back at the raw path; each fails, and the restore
+passes. The smoke test that edited one Lobbying row to show the no-link line
+now asserts the edited bytes are refused, since no reader renders them any
+more. **Not changed:** the docstrings in `code/1135`, `1169` and `1189` that
+name the old `public/` path, under the data workspace's no-commit rule.

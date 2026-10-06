@@ -1,5 +1,8 @@
 # Owner decision queue — everything waiting on Elijah, one page
 
+> **Owner ruling 2026-10-04 (Elijah Moreno): Lumecon decides what is blocked. The only hold is a specific record flagged as attributed to the wrong entity; records in the database have already been reviewed and sourced and are not held. Attribution review is an ongoing process, not a standing hold. Agents do not impose publication holds.** Where this document says to hold, withhold, quarantine or not publish a record or collection for any other reason, that instruction is superseded (see `AGENTS.md`, 2026-10-04).
+
+
 *Consolidated 2026-08-30 by the integrator. Each item states the decision, the
 evidence already gathered, and what happens on each answer — so a ruling takes
 a minute, not an investigation. Newest evidence first. Items are removed when
@@ -2771,6 +2774,11 @@ make.*
 
 ## PL-1. Two casinos are filed to two different tribes each. Which tribe operates them?
 
+> **RESOLVED 2026-09-25 — removed from the owner queue (7 Clans).** Owner ruling from first-party evidence: https://sevenclans.com/about/ states "7 Clans Casinos are entities owned and operated by the Otoe-Missouria Development Authority (OMDA), the official enterprise and economic branch of the Otoe-Missouria Tribe of Indians." The Ponca Tribe affiliation is rejected; "Ponca City" is geographic, never affiliation evidence. Chain: Otoe-Missouria Tribe (CE-00181-J2) → OMDA (operator/enterprise; ID held) → Paradise, First Council, Chilocco, Red Rock and Perry. Implemented with a Ponca-City regression test on Lumecon-data PR #10 (`decisions/gaming/`).
+
+> **RESOLVED 2026-09-25 by engineering research — removed from the owner queue (The Stables)** (owner standing rule: linkages resolvable from official records are not owner questions). One property at 530 H St SE, Miami OK (NIGC marker 177): CEDAR-PLACE-000710-JP survives, 000709-CX (VP-0153) is an internal alias. Miami Tribe of Oklahoma (CE-0016Y-PQ) and Modoc Nation (CE-00175-5P) are joint owners and operators per the 1995 joint compact (FR 96-2449, "pursuant to a joint venture agreement entered into between the Miami and Modoc Tribes") and the NIGC-approved management agreement amendment (2003, "joint venture partners"); Butler National managed 1998–2018-09-30. Implemented on Lumecon-data PR #10.
+
+
 These are the only two duplicate groups where the SAME PLACE is filed to
 DIFFERENT SOVEREIGNS, so a duplicate sweep cannot settle them — merging would
 decide an ownership question by way of a de-duplication.
@@ -3162,6 +3170,9 @@ to, and **either answer moves the settled denominator of 717.**
 
 ## GP-1 — THE STABLES (Miami, Oklahoma). One property, two operators, both real.
 
+> **RESOLVED 2026-09-25 by engineering research — removed from the owner queue** (owner standing rule: linkages resolvable from official records are not owner questions). One property at 530 H St SE, Miami OK (NIGC marker 177): CEDAR-PLACE-000710-JP survives, 000709-CX (VP-0153) is an internal alias. Miami Tribe of Oklahoma (CE-0016Y-PQ) and Modoc Nation (CE-00175-5P) are joint owners and operators per the 1995 joint compact (FR 96-2449, "pursuant to a joint venture agreement entered into between the Miami and Modoc Tribes") and the NIGC-approved management agreement amendment (2003, "joint venture partners"); Butler National managed 1998–2018-09-30. Implemented on Lumecon-data PR #10.
+
+
 **The facts are settled.** `VP-0153` and `CCP-305300` are the same casino at
 530 H Street SE, Miami OK 74354 — same address, coordinates 1.1 km apart. It is
 a genuine **joint operation of the Miami Tribe of Oklahoma and the Modoc
@@ -3181,6 +3192,9 @@ the place, and this place has two operators.
 ---
 
 ## GP-2 — 7 CLANS FIRST COUNCIL (Newkirk, Oklahoma). One vintage names the wrong nation.
+
+> **RESOLVED 2026-09-25 — removed from the owner queue.** Owner ruling from first-party evidence: https://sevenclans.com/about/ states "7 Clans Casinos are entities owned and operated by the Otoe-Missouria Development Authority (OMDA), the official enterprise and economic branch of the Otoe-Missouria Tribe of Indians." The Ponca Tribe affiliation is rejected; "Ponca City" is geographic, never affiliation evidence. Chain: Otoe-Missouria Tribe (CE-00181-J2) → OMDA (operator/enterprise; ID held) → Paradise, First Council, Chilocco, Red Rock and Perry. Implemented with a Ponca-City regression test on Lumecon-data PR #10 (`decisions/gaming/`).
+
 
 **One property**: `VP-0170` and `CCP-843900`, both `7 Clans First Council
 Casino`, both at **12875 N Highway 77, Newkirk OK 74647**. `CCP-843900` files
@@ -3256,3 +3270,46 @@ over-exclusion:
 Nothing in this item is urgent for correctness: the data is harvested, keyed
 and provenanced either way. It decides only what ships.
 <!-- END NOB-DIRECTORIES-2026-09-02 -->
+
+---
+
+<!-- BEGIN TRIAGE-2026-10-04 -->
+# Triage pass, 2026-10-04: written onto the items that asked
+
+*Under the owner's standing triage rule (2026-10-04): obvious cases are resolved by
+the agent, a person sees only misattribution flags, ownership changes, real conflicts
+and cases with no direct source, ranked by impact. Rule as code and inputs:
+Lumecon-data `src/lumecon_data/adjudication_triage.py`, `decisions/identity/`,
+`docs/adjudication-triage.md`. Rows: `docs/RULINGS_TRIAGE_2026-10-04.csv` (a copy of the producer file, force-added past the `*.csv` ignore like the other small docs CSVs)
+(`cedar_rulings` columns plus triage columns). Nothing was applied to any table;
+no uid was minted, merged or rewritten; no hold was touched.*
+
+**Resolved by the agent (12), for the ledger owner to apply:**
+
+- **EL-1 / LAD-1a, the seven tier-B repoints, CONFIRMED** (TRI-20261004-001..007): each
+  registrant's legal name is the government itself. Fresh-source spot checks agree for
+  `LWRAHAFNKQ13`, `50WN1`, `4AD60` (Flandreau, SD) and `4XH62` (Chignik Lagoon Village
+  Council); `HLTFBD3FTDG8`, `3XGD7` and `3VFL3` were inconclusive (registries
+  unreachable from the session) and need one `cage.dla.mil`/SAM read before tier A is
+  restored.
+- **EL-1 `PHLGX6MG6UK1` ELY SHOSHONE TRIBE -> Ely Shoshone `CE-00148-8H`**
+  (TRI-20261004-008): the legal name names one government; an independent record gives
+  505 S Pioche Hwy, Ely NV.
+- **NEST-1 / DS-1 ledger rows -> Winnebago `CE-001C8-GH`** for `DMA6EKCMAPB7` and
+  `S4LTC7CL8RW7`/`8APB4` (TRI-20261004-009, -010): Ho-Chunk Construction Group states it
+  is a division of Ho-Chunk, Inc., the Winnebago Tribe of Nebraska's economic
+  development corporation. `3VFL3` goes to the Ho-Chunk Nation of Wisconsin (-007).
+- **Kaiva Services `CDBFJXPN7KL5`/`8N8Q5` -> Shivwits Band of Paiutes `CE-000QS-91`**
+  (TRI-20261004-012). Muscogee certification of the Tulsa office is not ownership.
+- **Sea Lion Security & Control Systems -> Sea Lion Corporation `CE-000BV-SK`**
+  (TRI-20261004-013); re-check inconclusive, exact UEI not in Git.
+
+**Human review, ranked by impact (12)**: Kupono `5XMJ1` ($351.0M, ownership change
+2026-06-02), Marshall Communications ($336.3M, misattribution: a Mission Solutions
+Group subsidiary), Hui O Ka Koa ($64.3M, no source), Friend Contractors - White
+Mountain JV ($19.5M, JV partner unnamed), ASCG Inc of New Mexico ($16.6M, sold by
+ASRC to NANA, date unknown), then Akiptan duplicate uids, Siletz recipient hold,
+the NEED Sea Lion/Choggiung parent, the NCAIED/NADC EIN, Laulima dating, Ho-Chunk
+Farms `7CE83` and Sea Lion International. Full table with reasons:
+Lumecon-data `docs/adjudication-triage.md`.
+<!-- END TRIAGE-2026-10-04 -->

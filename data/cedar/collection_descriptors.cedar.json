@@ -1,4 +1,5 @@
 {
+  "_superseded": "2026-10-02: a 2026-09-02 copy of dist/collection_descriptors.cedar.json (code/760) carrying the workspace's own row counts for fifteen ids, including the three the manifest excludes (gaming, newsletters, _entity_layer). Nothing in server/, src/ or scripts/ reads this file; the served counts are data/cedar/collections.manifest.json (producer pin cf29ec3, 2026-10-01). Kept as dated evidence of the earlier shape; do not quote these counts as current. Register: docs/RELEASE_GAP_2026-10-02.md.",
   "_entity_layer": {
     "cedar_id": "_entity_layer",
     "product_id": "_entity_layer",

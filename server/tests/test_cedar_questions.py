@@ -44,7 +44,9 @@ def branch_of(answer: str, profile: dict) -> str:
         return "content"
     if method and method in answer:
         return "construct"
-    if history and answer.startswith(f"{profile['collection_name']} ({history[0]['date']}, "):
+    if history and answer.startswith(
+        f"{profile['collection_name']}, updated {history[0]['date']} ("
+    ):
         return "changes"
     if profile.get("record_count_label") and profile["record_count_label"] in answer:
         return "stats"

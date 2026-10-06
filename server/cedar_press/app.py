@@ -45,23 +45,33 @@ or open the server-rendered shelf directly::
 from __future__ import annotations
 
 import io
+import json
+import logging
 import os
+import re
+import uuid
+from datetime import datetime, timezone
 from pathlib import Path
+from urllib.parse import quote
 
 from fastapi import Depends, FastAPI, HTTPException, Request, Response
 from fastapi.exception_handlers import http_exception_handler
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from cedar_press import (
     cedar_service,
     codes,
+    need_profiles,
     press_catalog,
     priorities,
+    protected_articles,
     ratelimit,
+    release_research,
     repository,
     shelf,
     subscribers,
@@ -71,9 +81,9 @@ from cedar_press.session import (
     account_exists,
     account_id_for,
     current_session,
-    issue,
     sign_in,
     sign_out,
+    validate_auth_configuration,
 )
 
 app = FastAPI(
@@ -86,19 +96,40 @@ app = FastAPI(
 # and the session rides in a cookie, so credentials must be allowed and the
 # origin list must be explicit — "*" is not permitted with credentials, and
 # should not be wanted.
+_AUTH_ORIGINS = [
+    origin.strip()
+    for origin in os.environ.get(
+        "CEDAR_PRESS_ORIGINS",
+        "http://localhost:5173,https://cedarpress.ai,https://app.cedarpress.ai",
+    ).split(",")
+    if origin.strip()
+]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        origin.strip()
-        for origin in os.environ.get(
-            "CEDAR_PRESS_ORIGINS", "http://localhost:5173,https://cedarpress.ai"
-        ).split(",")
-        if origin.strip()
-    ],
+    allow_origins=_AUTH_ORIGINS,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["Content-Type"],
+    expose_headers=[
+        "Content-Disposition",
+        "X-Cedar-Release",
+        "X-Cedar-SHA256",
+        "X-Cedar-Rows",
+        "X-Cedar-Citation",
+        "X-Cedar-Citation-Encoding",
+    ],
 )
+
+# Responses compressed for any client that accepts gzip. The catalog alone,
+# `/press/collections`, went out uncompressed (2026-10-04 audit); measured
+# with the test accounts, 48,283 bytes become 11,469 for Cedar Press+ and
+# 22,496 become 5,961 for Cedar Press, about 0.7 s saved at Slow 3G's
+# 50 kB/s. Under ~1 kB the header costs more than compression saves.
+# Level 6, not starlette's default 9: the streamed release downloads pass
+# through here too, and 9 buys a few percent for several times the CPU. A
+# browser decodes transparently, so `X-Cedar-SHA256` still describes the
+# bytes a subscriber saves.
+app.add_middleware(GZipMiddleware, minimum_size=1000, compresslevel=6)
 
 #: The repository root, from ``server/cedar_press/app.py``.
 _REPO = Path(__file__).resolve().parents[2]
@@ -131,9 +162,19 @@ class PointsMove(BaseModel):
     points: int
 
 
+#: Upper bounds on what a subscriber types, enforced by the model so an
+#: over-long body is a 422 before it reaches a store or Cedar. Generous beside
+#: the forms (the Cedar panel's input stops at 280 characters; a research
+#: request is a paragraph or two), and finite, so one request cannot write
+#: megabytes into the requests table or forward them upstream.
+MAX_REQUEST_TEXT = 4000
+MAX_USE_CASE = 500
+MAX_QUESTION = 1000
+
+
 class ResearchRequest(BaseModel):
-    text: str
-    use_case: str | None = None
+    text: str = Field(max_length=MAX_REQUEST_TEXT)
+    use_case: str | None = Field(default=None, max_length=MAX_USE_CASE)
     priority_id: str | None = None
     support_points: int = 0
 
@@ -159,7 +200,7 @@ def _points_error(exc: priorities.PointsError) -> HTTPException:
 
 
 class Question(BaseModel):
-    question: str
+    question: str = Field(max_length=MAX_QUESTION)
     surface: str = "cedar-press"
     collectionId: str | None = None
     #: Cedar's own conversation id. Absent on the first turn -- Cedar mints
@@ -255,7 +296,9 @@ def influence(session: Session = Depends(require_session)) -> dict[str, object]:
 
 @app.post("/press/priorities/{priority_id}/points")
 def move_points(
-    priority_id: str, move: PointsMove, session: Session = Depends(require_session),
+    priority_id: str,
+    move: PointsMove,
+    session: Session = Depends(require_session),
 ) -> dict[str, object]:
     """Put points on a priority (positive) or take them back (negative)."""
     account = _account(session)
@@ -274,10 +317,9 @@ def submit_request(
     account = _account(session)
     _priorities.accrue(account)
     try:
-        result = _priorities.submit_request(account, body.text, body.use_case, body.priority_id)
-        if body.priority_id and body.support_points > 0:
-            result["support"] = _priorities.allocate(account, body.priority_id, body.support_points)
-        return result
+        return _priorities.submit_request(
+            account, body.text, body.use_case, body.priority_id, body.support_points
+        )
     except priorities.PointsError as exc:
         raise _points_error(exc) from exc
 
@@ -316,9 +358,7 @@ def write_profile(
 
 
 @app.post("/auth/login")
-def login(
-    credentials: Credentials, request: Request, response: Response
-) -> dict[str, object]:
+def login(credentials: Credentials, request: Request, response: Response) -> dict[str, object]:
     _guard(request, "login", ratelimit.LOGIN_ATTEMPTS)
     session = sign_in(credentials.email, credentials.password, response)
     if session is None:
@@ -332,18 +372,21 @@ def login(
                 ),
             },
         )
-    # The subscription and the platform account can appear in either order --
-    # a Tribal Business News reader may activate months before they open the
-    # platform, or never. Binding here means whichever came second finds the
-    # first, without a migration or a back-fill. A no-op where there is no
-    # database, no `users` table, or no account at that address.
-    subscribers.link_platform_account(session.email)
     return session.as_payload()
 
 
 @app.post("/auth/logout", status_code=204)
-def logout(response: Response) -> None:
-    sign_out(response)
+def logout(
+    request: Request,
+    response: Response,
+    session: Session | None = Depends(current_session),
+) -> None:
+    # CORS governs response access, not whether a simple cross-site POST runs.
+    # Reject an unrelated browser origin before account-wide revocation.
+    origin = request.headers.get("origin")
+    if origin is not None and origin not in _AUTH_ORIGINS:
+        raise HTTPException(status_code=403, detail="Untrusted sign-out origin.")
+    sign_out(response, session)
 
 
 class CodeCheck(BaseModel):
@@ -365,6 +408,7 @@ def _guard(request: Request, bucket: str, attempts: int) -> None:
     tasks and a subscriber may legitimately be doing the second after failing
     the first.
     """
+    validate_auth_configuration()
     key = f"{bucket}:{ratelimit.client_key(request)}"
     if not ratelimit.allow(key, attempts=attempts):
         raise HTTPException(
@@ -408,9 +452,7 @@ def validate_code(check: CodeCheck, request: Request) -> None:
 
 
 @app.post("/press/activation")
-def activate(
-    activation: Activation, request: Request, response: Response
-) -> dict[str, object]:
+def activate(activation: Activation, request: Request, response: Response) -> dict[str, object]:
     """Step two: create the account and sign them in.
 
     The code is re-checked rather than trusted from step one. Step one set no
@@ -460,16 +502,69 @@ def activate(
     if made is None:
         # Somebody redeemed it between `check` above and this write.
         raise _refuse(codes.CODE_USED)
-    session = Session(email=made.email, tier=made.tier)
     codes.spend(issued.code)
-    subscribers.link_platform_account(made.email)
-    return issue(session, response).as_payload()
+    session = sign_in(made.email, activation.password, response)
+    if session is None:
+        raise HTTPException(
+            status_code=409,
+            detail={
+                "code": "ACCOUNT_CHANGED",
+                "message": "Your account changed during activation. Please sign in again.",
+            },
+        )
+    return session.as_payload()
 
 
 @app.get("/press/collections")
 def collections(session: Session = Depends(require_session)) -> dict[str, object]:
     """The catalog this subscription can see, with each entry's reach."""
     return {"collections": repository.collections_for(session.tier)}
+
+
+@app.get("/press/release-collections")
+def release_collections(
+    response: Response, session: Session = Depends(require_session)
+) -> dict[str, object]:
+    """Collection release integration targets with verified metadata when available."""
+    try:
+        subscriber = subscribers.find(session.email)
+    except Exception as error:
+        raise HTTPException(status_code=503, detail="Authorization unavailable") from error
+    if subscriber is None:
+        raise HTTPException(status_code=401, detail="Authentication required")
+    response.headers["Cache-Control"] = "private, no-store"
+    result = repository.release_targets_for(subscriber.tier)
+    # A Grove subscriber can visit Press; its Press surface still has fourteen collections.
+    result["collections"] = [entry for entry in result["collections"] if entry["id"] != "gaming"]
+    return result
+
+
+@app.get("/press/entities/{cedar_uid}/need-evidence")
+def need_entity_evidence(
+    cedar_uid: str,
+    response: Response,
+    session: Session = Depends(require_session),
+) -> dict:
+    """Sourced patent and rating observations, subject to the NEED publication hold."""
+    if not repository.may_download_full(session.tier, "need"):
+        raise HTTPException(status_code=403, detail="Collection not included")
+    try:
+        subscriber = subscribers.find(session.email)
+    except Exception as error:
+        raise HTTPException(status_code=503, detail="Authorization unavailable") from error
+    if subscriber is None:
+        raise HTTPException(status_code=401, detail="Authentication required")
+    if not repository.may_download_full(subscriber.tier, "need"):
+        raise HTTPException(status_code=403, detail="Collection not included")
+    response.headers["Cache-Control"] = "private, no-store"
+    try:
+        return need_profiles.entity_evidence(cedar_uid)
+    except need_profiles.UnregisteredEntity as error:
+        raise HTTPException(status_code=404, detail="No registered Native entity") from error
+    except repository.FullReleaseUnavailable as error:
+        raise HTTPException(status_code=503, detail="Verified NEED evidence unavailable") from error
+    except ValueError as error:
+        raise HTTPException(status_code=400, detail="Invalid entity identifier") from error
 
 
 @app.get("/press/shelf", response_class=HTMLResponse)
@@ -510,19 +605,246 @@ def press_shelf(
 
 
 @app.get("/press/releases")
-def releases(session: Session = Depends(require_session)) -> dict[str, object]:
-    return {"releases": repository.releases()}
+def releases(response: Response, session: Session = Depends(require_session)) -> dict[str, object]:
+    response.headers["Cache-Control"] = "private, no-store"
+    try:
+        subscriber = subscribers.find(session.email)
+    except Exception as error:
+        raise HTTPException(status_code=503, detail="Authorization unavailable") from error
+    if subscriber is None:
+        raise HTTPException(status_code=401, detail="Authentication required")
+    return repository.releases(subscriber.tier)
+
+
+def require_article_reader(session: Session | None = Depends(current_session)) -> Session:
+    if session is None:
+        raise HTTPException(
+            status_code=401, detail="Not signed in.", headers=protected_articles.ARTICLE_HEADERS
+        )
+    if not press_catalog.can_read_cedar_press(session.tier):
+        raise HTTPException(
+            status_code=403,
+            detail="This subscription does not include Cedar Press articles.",
+            headers=protected_articles.ARTICLE_HEADERS,
+        )
+    return session
 
 
 @app.get("/press/articles")
-def articles(session: Session = Depends(require_session)) -> dict[str, object]:
-    return {"articles": repository.articles()}
+def articles(session: Session = Depends(require_article_reader)) -> JSONResponse:
+    return JSONResponse(
+        {"articles": protected_articles.article_cards()},
+        headers=protected_articles.ARTICLE_HEADERS,
+    )
+
+
+@app.get("/press/articles/{slug}")
+def article(slug: str, session: Session = Depends(require_article_reader)) -> JSONResponse:
+    found = protected_articles.article_detail(slug)
+    if found is None:
+        raise HTTPException(
+            status_code=404, detail="No such article.", headers=protected_articles.ARTICLE_HEADERS
+        )
+    return JSONResponse({"article": found}, headers=protected_articles.ARTICLE_HEADERS)
+
+
+DOWNLOAD_LOG = logging.getLogger("cedar_press.download")
+DOWNLOAD_LOG.setLevel(logging.INFO)
+if not DOWNLOAD_LOG.handlers:
+    DOWNLOAD_LOG.addHandler(logging.StreamHandler())
+
+
+def _download_audit(
+    collection_id, outcome, release=None, requested_release_id=None, component=None
+):
+    component_release = repository.is_component_release(collection_id)
+    safe_collection = (
+        collection_id
+        if component_release
+        or any(item.id == collection_id for item in repository.launch.LAUNCH_COLLECTION)
+        else "unknown"
+    )
+    event = {
+        "event": "full_download",
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "requested_release_id": requested_release_id
+        if isinstance(requested_release_id, str)
+        and re.fullmatch(r"[0-9a-f]{64}", requested_release_id)
+        else None,
+        "request_id": uuid.uuid4().hex,
+        "collection_id": safe_collection,
+        "outcome": outcome,
+        "release_id": release.get("release_id") if release else None,
+        "sha256": release.get("sha256") if release else None,
+    }
+    if component_release:
+        # A collection release has governed components: the record names
+        # which one, redacted like the collection when it is not a declared one.
+        event["component"] = (
+            component
+            if component in repository.grove_components(collection_id)
+            else ("unknown" if component is not None else None)
+        )
+    DOWNLOAD_LOG.info(json.dumps(event, sort_keys=True))
+
+
+@app.get("/press/collections/{collection_id}/research")
+def release_research_preview(
+    collection_id: str,
+    release_id: str,
+    component: str | None = None,
+    session: Session | None = Depends(current_session),
+):
+    """Real bounded examples and definitions behind the same live-account gates as downloads."""
+    if session is None:
+        raise HTTPException(status_code=401, detail="Authentication required")
+    if not repository.may_download_full(session.tier, collection_id):
+        raise HTTPException(status_code=403, detail="Collection not included")
+    try:
+        subscriber = subscribers.find(session.email)
+    except Exception as error:
+        raise HTTPException(status_code=503, detail="Authorization unavailable") from error
+    if subscriber is None:
+        raise HTTPException(status_code=401, detail="Authentication required")
+    if not repository.may_download_full(subscriber.tier, collection_id):
+        raise HTTPException(status_code=403, detail="Collection not included")
+    try:
+        payload = release_research.packet(subscriber.tier, collection_id, release_id, component)
+    except (repository.FullReleaseUnavailable, OSError, ValueError, KeyError, TypeError) as error:
+        raise HTTPException(
+            status_code=503, detail="Pinned research preview unavailable or held"
+        ) from error
+    return JSONResponse(
+        payload, headers={"Cache-Control": "private, no-store", "X-Cedar-Release": release_id}
+    )
+
+
+class _VerifiedDownloadResponse(StreamingResponse):
+    """Own the private spool even when sending headers fails or is cancelled."""
+
+    def __init__(self, spool, **kwargs):
+        self.spool = spool
+        super().__init__(self.chunks(), **kwargs)
+
+    def chunks(self):
+        while chunk := self.spool.read(64 * 1024):
+            yield chunk
+
+    async def __call__(self, scope, receive, send):
+        try:
+            await super().__call__(scope, receive, send)
+        finally:
+            self.spool.close()
+
+
+@app.get("/press/collections/{collection_id}/spreadsheet-download")
+@app.get("/press/collections/{collection_id}/full-download")
+def full_download(
+    collection_id: str,
+    request: Request,
+    release_id: str | None = None,
+    component: str | None = None,
+    session: Session | None = Depends(current_session),
+):
+    """One pinned full release: a Press flagship, or one governed component of a
+    collection the reviewed Grove declaration names (``component`` required).
+    Entitlement is decided before any catalog or artifact is read."""
+
+    def audit(outcome, release=None, requested=release_id):
+        _download_audit(collection_id, outcome, release, requested, component)
+
+    if session is None:
+        audit("denied_anonymous")
+        raise HTTPException(status_code=401, detail="Authentication required")
+    if not repository.may_download_full(session.tier, collection_id):
+        audit("denied_entitlement")
+        raise HTTPException(status_code=403, detail="Collection not included")
+    # A signed cookie proves a prior login, not a current subscription. Use the
+    # existing account authority before touching a protected release; an account
+    # outage must not fall back to the cookie's stale tier.
+    try:
+        subscriber = subscribers.find(session.email)
+    except Exception as error:
+        audit("authorization_unavailable")
+        raise HTTPException(status_code=503, detail="Authorization unavailable") from error
+    if subscriber is None:
+        audit("denied_account")
+        raise HTTPException(status_code=401, detail="Authentication required")
+    if not repository.may_download_full(subscriber.tier, collection_id):
+        audit("denied_entitlement")
+        raise HTTPException(status_code=403, detail="Collection not included")
+    try:
+        if not release_id or not re.fullmatch(r"[0-9a-f]{64}", release_id):
+            audit("invalid_release_request", requested=None)
+            raise HTTPException(status_code=400, detail="Explicit release ID required")
+        if collection_id != "need" or (
+            component != repository.need_publication.COMPONENT
+            and not request.url.path.endswith("/spreadsheet-download")
+        ):
+            repository.assert_collection_publishable(collection_id)
+        if request.url.path.endswith("/spreadsheet-download"):
+            from cedar_press.spreadsheet import download as spreadsheet_download
+
+            if component is not None:
+                raise HTTPException(status_code=400, detail="Choose the collection spreadsheet")
+            release = spreadsheet_download(collection_id, release_id)
+        else:
+            # Retain the exact legacy participant download when a native release is
+            # still pinned. New collection releases require an explicit component;
+            # no ambiguous combined table or silent release substitution is offered.
+            legacy_federal = collection_id == "federal-register" and component is None
+            if (
+                repository.is_component_release(collection_id)
+                and component is None
+                and not legacy_federal
+            ):
+                audit("invalid_release_request")
+                raise HTTPException(status_code=400, detail="Explicit component required")
+            if repository.is_component_release(collection_id) and not legacy_federal:
+                release = repository.grove_full_release(
+                    collection_id, release_id, component=component
+                )
+            elif component is not None:
+                audit("invalid_release_request")
+                raise HTTPException(status_code=400, detail="A Press flagship has no components")
+            else:
+                release = repository.full_release(collection_id, release_id)
+    except repository.GroveReleaseNotPinned as error:
+        # Production state until the Gaming IDs are issued: say so plainly,
+        # never substitute a sample or an unpinned file.
+        audit("not_pinned")
+        raise HTTPException(
+            status_code=503, detail="No released data is pinned for this collection yet"
+        ) from error
+    except repository.FullReleaseUnavailable as error:
+        audit("unavailable")
+        raise HTTPException(status_code=503, detail="Full release unavailable") from error
+    audit("authorized_prepared", release)
+    headers = {
+        "Content-Disposition": f'attachment; filename="{release["filename"]}"',
+        "X-Cedar-Release": release["release_id"],
+        "X-Cedar-SHA256": release["sha256"],
+        "X-Cedar-Rows": str(release["record_count"]),
+        "X-Cedar-Citation": quote(release["citation"], safe=' ,.:/()"-'),
+        "X-Cedar-Citation-Encoding": "percent",
+        "Cache-Control": "private, no-store",
+    }
+    if release.get("component"):
+        headers["X-Cedar-Component"] = release["component"]
+    # A Grove component arrives as a verified `content_file`; a partitioned Press
+    # flagship as a verified `spool`. Both are disk spools the response closes.
+    spool = release.get("content_file") or release.get("spool")
+    if spool is not None:
+        return _VerifiedDownloadResponse(
+            spool,
+            media_type=release["media_type"],
+            headers=headers,
+        )
+    return Response(content=release["content"], media_type=release["media_type"], headers=headers)
 
 
 @app.get("/press/collections/{collection_id}/download")
-def download(
-    collection_id: str, session: Session = Depends(require_session)
-) -> StreamingResponse:
+def download(collection_id: str, session: Session = Depends(require_session)) -> StreamingResponse:
     """A release file.
 
     The entitlement check is here and not only on the shelf: a reader who
@@ -537,7 +859,16 @@ def download(
                 "message": "That collection is not included in this subscription.",
             },
         )
-    csv = repository.collection_csv(collection_id)
+    try:
+        csv = repository.collection_csv(collection_id)
+    except repository.FullReleaseUnavailable as error:
+        raise HTTPException(
+            status_code=503,
+            detail={
+                "code": "COLLECTION_HELD",
+                "message": "This collection is withheld from publication.",
+            },
+        ) from error
     if csv is None:
         # A collection on the shelf whose preview Cedar cannot produce is a
         # named data problem, not a missing route, and the reader is told
@@ -664,9 +995,7 @@ def _not_included_answer(
     return {
         "answer": f"{description}\n\n{reach}" if description else reach,
         "basis": None,
-        "answerBasis": _answer_basis(
-            "release", profile, collection_id, opened=False
-        ),
+        "answerBasis": _answer_basis("release", profile, collection_id, opened=False),
         "collectionId": collection_id,
         # The description came off the release, so the basis is a release and
         # says so. `source` names the answerer, and no answerer ran past the
@@ -723,9 +1052,7 @@ def _ask_which_collection(thread_id: str | None) -> dict[str, object]:
 
 
 @app.post("/cedar/ask")
-def ask_cedar(
-    question: Question, session: Session = Depends(require_session)
-) -> dict[str, object]:
+def ask_cedar(question: Question, session: Session = Depends(require_session)) -> dict[str, object]:
     """Cedar, scoped to what this subscription can open.
 
     THE ENTITLEMENT IS DECIDED HERE, BEFORE EITHER ANSWERER SEES THE ID.
@@ -780,9 +1107,7 @@ def ask_cedar(
         if repository.is_sold(question.collectionId) and not repository.may_open(
             session.tier, question.collectionId
         ):
-            return _not_included_answer(
-                profile, question.collectionId, question.threadId
-            )
+            return _not_included_answer(profile, question.collectionId, question.threadId)
         collection_name = profile.get("collection_name")
         answered = repository.cedar_answer(question.question, question.collectionId)
         if answered:
@@ -811,6 +1136,10 @@ def ask_cedar(
                 collection_name=collection_name,
                 pathname=question.pathname,
             )
+            if reply.unavailable:
+                raise cedar_service.CedarUnavailable(
+                    "Cedar reported that it is unavailable."
+                )
         except cedar_service.CedarUnavailable:
             raise HTTPException(
                 status_code=503,

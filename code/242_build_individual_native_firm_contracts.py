@@ -52,12 +52,15 @@ proposal requires (the research file and the register are different tables).
             CGCC precedent, where 318 rows carry
             `value_suppressed_by_regulator` with a blank value.
 
-The withholding rule is per FIELD and is asked of
-`cedar_domain.may_publish_individual_native_field()`, never decided here. The
-UEI carve-out is the one people get wrong: **SAM's own public entity search
-resolves a UEI to a legal name and a street address, so for a firm whose legal
-name is a person's name the UEI publishes the name by ONE HOP.** It is withheld
-wherever `firm_legal_name_is_person` is 1 or UNKNOWN.
+The publication rule is per FIELD and is asked of
+`cedar_domain.may_publish_individual_native_field()`, never decided here; this
+script reads the register's `publish_name` / `publish_federal_identifier`,
+which `241` writes from that rule. Owner ruling 2026-10-02: a firm is a
+business entity regardless of what it is named after, so the name, UEI and
+CAGE publish on every row (both flags are 1) and the guards below find nothing
+to strike. Until that date the UEI was withheld wherever
+`firm_legal_name_is_person` was 1 or UNKNOWN, because SAM's public entity
+search resolves a UEI to a legal name and a street address.
 
 This restriction is INDEPENDENT of D&B licensing and survives any answer to it.
 Cedar Press's own written policy is inherited, not restated:
@@ -268,8 +271,9 @@ def main():
             "surrogate_entity_id": sid,
             "entity_class": CLASS,
             "fiscal_year": year,
-            # INTERNAL ONLY. Present so the table can be joined; every one of
-            # these three is in cedar_domain.INDIVIDUAL_NATIVE_WITHHELD_FIELDS.
+            # Carried on the firm-year row; every one of these three is in
+            # cedar_domain.INDIVIDUAL_NATIVE_WITHHELD_FIELDS, which the owner
+            # ruling of 2026-10-02 published (the register's flags say so).
             "canonical_name": r["canonical_name"],
             "identifier_type": r["identifier_type"],
             "identifier": r["identifier"],

@@ -120,9 +120,16 @@ must be as cheap as saying no.
 
 A TERO roster of sole proprietorships is a list of private individuals with
 their home addresses and mobile numbers.
-`cedar_domain.INDIVIDUAL_NATIVE_WITHHELD_FIELDS` already withholds
-`owner_name`, `street`, `recipient_city_name` and `dba_name` for exactly this
-case; that rule is **inherited here, not re-invented**.
+When this was written `cedar_domain.INDIVIDUAL_NATIVE_WITHHELD_FIELDS` withheld
+`owner_name`, `street`, `recipient_city_name` and `dba_name` for the firm
+register, and this collection inherited that rule. The owner ruling of
+2026-10-02 published that set for the firm register (a firm is a business
+entity whatever it is named after), so the staging withholding below now stands
+on its own stated ground — a natural person's contact channel (mobile number,
+personal e-mail, home address) is not a business registration — and whether
+`owner_name_raw`, `dba_name` and the business street address should follow the
+ruling is a separate owner call (`docs/REVIEW_STATUS.md`, "Owner ruling:
+individually owned firm records publish").
 
 | | |
 |---|---|

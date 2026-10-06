@@ -1,0 +1,1914 @@
+{
+  "schema": "cedar.launch.review.v1",
+  "review_id": "CEDAR-LAUNCH-2026-09-24-v1",
+  "measured_at": "2026-09-24 22:00 UTC",
+  "candidate_root": "..",
+  "input_sha256": {
+    "data/cedar/collections.manifest.json": "2173bf6914ac28fa818c2ccad44002d80c1bcb93422d8143ce62f3060b5fc8b4",
+    "data/cedar/field_map.json": "fa4cec4bcee3fb40a8084fb0deaa78293e983a77d99b3944cecdc28ec10fcadb",
+    "data/cedar/samples.published.json": "fa70bec3fe2ecb63aca5b1fcc6c5e3f9c95255db12ad3a8fd9e8c1dcc52eb910",
+    "docs/PUBLICATION_POLICY.md": "7b5c3fa706d4bfc6ee3a30bca01108e964d75ca2f1c3e953c34a78df0dfa2cd9"
+  },
+  "collections": [
+    {
+      "collection_id": "funding",
+      "title": "Federal Funding",
+      "flagship": "federal_funding_transactions.csv",
+      "rows": 701955,
+      "grain": "Assistance transaction; unique declared transaction key",
+      "year_2025": 43254,
+      "year_2026": 18325,
+      "identity": "546,758 CE links; source-file lineage on every row",
+      "data_status": "BLOCKED",
+      "delivery_status": "NOT TESTED",
+      "blocker": "Attribution vocabulary and recipient-type derivation; refresh/transport unproved",
+      "gates": {
+        "source_refresh": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "grain_primary_key": {
+          "status": "READY WITH DISCLOSED LIMITATIONS",
+          "evidence": "Assistance transaction; unique declared transaction key"
+        },
+        "coverage": {
+          "status": "READY WITH DISCLOSED LIMITATIONS",
+          "evidence": "Observed flagship 2025=43254,2026=18325; no source-completeness cutoff established."
+        },
+        "identity": {
+          "status": "NOT TESTED",
+          "evidence": "546,758 CE links; source-file lineage on every row"
+        },
+        "provenance_rights": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "schema_field_map": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "publication": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "immutable_release": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "catalog_pin": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "entitled_download": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "rollback": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "description_sample": {
+          "status": "READY WITH DISCLOSED LIMITATIONS",
+          "evidence": "10-row flagship sample exists; manifest column count agrees. This does not establish representative contents or full component delivery. Live cedarpress.ai/data could not be retrieved in this pass."
+        }
+      },
+      "blocker_classes": {
+        "engineering_defect": [
+          "Recipient-type derivation and attribution-status public contract; transaction-grain/additive totals; bounded release transport"
+        ],
+        "missing_source_or_research": [
+          "Refresh 2025/2026 partitions and measure source cutoff/omissions"
+        ],
+        "linkage_research": [
+          "Review high-impact attribution evidence; 155197 rows without CE are not automatically owner cases"
+        ],
+        "actual_owner_product_policy": []
+      },
+      "owner_review_note": "No qualified ambiguous linkage card established by this classification. Research tasks are not owner adjudications. Existing owner rulings remain effective.",
+      "qualified_owner_decisions": 0,
+      "owner_queue_reason": "Current unresolved work is Codex engineering/source verification or previously recorded rulings; no evidence-complete ambiguous new linkage card is ready.",
+      "completed_checks": "701,955 rows and action-year counts remeasured; all source-file lineage; Omaha exclusion verified",
+      "work_underway": "Close recipient-type/attribution-status projection and source refresh; reconcile next high-impact negative/positive ledger cases.",
+      "next_concrete_action": "Recode public status conservatively; implement source-backed recipient dictionary",
+      "blocker_owners": {
+        "engineering_defect": "Codex",
+        "missing_source_or_research": "Codex",
+        "linkage_research": "Codex",
+        "actual_owner_product_policy": "Elijah"
+      },
+      "candidate_input_rows": 701955,
+      "candidate_projection_rows": 0,
+      "row_policy_eligible_rows": 701955,
+      "release_eligible_rows": null,
+      "release_eligible_status": "NOT_CERTIFIED",
+      "withheld_rows": 0,
+      "withheld_reasons": {},
+      "collection_publication_hold_rows": 0,
+      "identity_link_coverage": {
+        "cedar_uid": 546758
+      },
+      "provenance_coverage": {
+        "source_file": 701955
+      },
+      "duplicate_key_surplus": 0,
+      "blank_key_rows": 0,
+      "source_sha256": "fbb0729ff0d1359698a31d7f4dfbabb517be0d1f55895589c82a2fae7adc97f2",
+      "source_unchanged": true,
+      "validation_result": "REFUSED",
+      "validation_limit": "Schema/key success does not certify factual links, source rights, promised components or production delivery."
+    },
+    {
+      "collection_id": "federal-register",
+      "title": "Federal Register",
+      "flagship": "consultation_events.csv",
+      "rows": 11402,
+      "grain": "Document-participant rows; 2,313 document-event IDs",
+      "year_2025": 8,
+      "year_2026": 6,
+      "identity": "10,396 CE links; source references on every row",
+      "data_status": "BLOCKED",
+      "delivery_status": "NOT TESTED",
+      "blocker": "Date precision owed; 1,006 blank participant keys need grain treatment; current discovery gap",
+      "gates": {
+        "source_refresh": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "grain_primary_key": {
+          "status": "READY WITH DISCLOSED LIMITATIONS",
+          "evidence": "Document-participant rows; 2,313 document-event IDs"
+        },
+        "coverage": {
+          "status": "READY WITH DISCLOSED LIMITATIONS",
+          "evidence": "Observed flagship 2025=8,2026=6; no source-completeness cutoff established."
+        },
+        "identity": {
+          "status": "NOT TESTED",
+          "evidence": "10,396 CE links; source references on every row"
+        },
+        "provenance_rights": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "schema_field_map": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "publication": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "immutable_release": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "catalog_pin": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "entitled_download": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "rollback": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "description_sample": {
+          "status": "READY WITH DISCLOSED LIMITATIONS",
+          "evidence": "10-row flagship sample exists; manifest column count agrees. This does not establish representative contents or full component delivery. Live cedarpress.ai/data could not be retrieved in this pass."
+        }
+      },
+      "blocker_classes": {
+        "engineering_defect": [
+          "Source discovery and post-2022 parser/observability; event-date precision and source-grain contract"
+        ],
+        "missing_source_or_research": [
+          "Acquire supported current document universe; distinguish generic consultation from named participants"
+        ],
+        "linkage_research": [
+          "Only affirmative participant mentions support links; unobservability is not zero"
+        ],
+        "actual_owner_product_policy": []
+      },
+      "owner_review_note": "No qualified ambiguous linkage card established by this classification. Research tasks are not owner adjudications. Existing owner rulings remain effective.",
+      "qualified_owner_decisions": 0,
+      "owner_queue_reason": "Current unresolved work is Codex engineering/source verification or previously recorded rulings; no evidence-complete ambiguous new linkage card is ready.",
+      "completed_checks": "11,402 rows; 2,313 events; blank-link reason inspected; named-participant/source distinction checked",
+      "work_underway": "Repair discovery/date-precision path; validate current document universe separately from participant extraction.",
+      "next_concrete_action": "Separate document release from participant series and derive documented precision",
+      "blocker_owners": {
+        "engineering_defect": "Codex",
+        "missing_source_or_research": "Codex",
+        "linkage_research": "Codex",
+        "actual_owner_product_policy": "Elijah"
+      },
+      "candidate_input_rows": 11402,
+      "candidate_projection_rows": 0,
+      "row_policy_eligible_rows": 11402,
+      "release_eligible_rows": null,
+      "release_eligible_status": "NOT_CERTIFIED",
+      "withheld_rows": 0,
+      "withheld_reasons": {},
+      "collection_publication_hold_rows": 0,
+      "identity_link_coverage": {
+        "cedar_uid": 10396
+      },
+      "provenance_coverage": {
+        "source_url": 11402
+      },
+      "duplicate_key_surplus": 0,
+      "blank_key_rows": 1006,
+      "source_sha256": "e8bf4bbbab34cffaea5ec5e2870570904780c414899a338248a9138f4106d428",
+      "source_unchanged": true,
+      "validation_result": "REFUSED",
+      "validation_limit": "Schema/key success does not certify factual links, source rights, promised components or production delivery."
+    },
+    {
+      "collection_id": "legislation",
+      "title": "Legislation",
+      "flagship": "native_bills.csv",
+      "rows": 3069,
+      "grain": "One bill; unique issued bill ID",
+      "year_2025": 207,
+      "year_2026": 55,
+      "identity": "Plural associations retained; 8 historical source URLs absent",
+      "data_status": "BLOCKED",
+      "delivery_status": "BLOCKED",
+      "blocker": "Five treaty false positives held; 34 reservation-only Senate votes and associated tables require bounded reconciliation; three remaining blank source URLs.",
+      "gates": {
+        "source_refresh": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "grain_primary_key": {
+          "status": "READY WITH DISCLOSED LIMITATIONS",
+          "evidence": "One bill; unique issued bill ID"
+        },
+        "coverage": {
+          "status": "READY WITH DISCLOSED LIMITATIONS",
+          "evidence": "Observed flagship 2025=207,2026=55; no source-completeness cutoff established."
+        },
+        "identity": {
+          "status": "READY WITH DISCLOSED LIMITATIONS",
+          "evidence": "Plural associations retained; 8 historical source URLs absent"
+        },
+        "provenance_rights": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "schema_field_map": {
+          "status": "READY WITH DISCLOSED LIMITATIONS",
+          "evidence": "Previously pinned local real flagship rehearsal and Ubuntu safety fixtures; full collection and production not certified. See fixed release IDs in Havala packet."
+        },
+        "publication": {
+          "status": "READY WITH DISCLOSED LIMITATIONS",
+          "evidence": "Previously pinned local real flagship rehearsal and Ubuntu safety fixtures; full collection and production not certified. See fixed release IDs in Havala packet."
+        },
+        "immutable_release": {
+          "status": "READY WITH DISCLOSED LIMITATIONS",
+          "evidence": "Previously pinned local real flagship rehearsal and Ubuntu safety fixtures; full collection and production not certified. See fixed release IDs in Havala packet."
+        },
+        "catalog_pin": {
+          "status": "READY WITH DISCLOSED LIMITATIONS",
+          "evidence": "Previously pinned local real flagship rehearsal and Ubuntu safety fixtures; full collection and production not certified. See fixed release IDs in Havala packet."
+        },
+        "entitled_download": {
+          "status": "READY WITH DISCLOSED LIMITATIONS",
+          "evidence": "Previously pinned local real flagship rehearsal and Ubuntu safety fixtures; full collection and production not certified. See fixed release IDs in Havala packet."
+        },
+        "rollback": {
+          "status": "READY WITH DISCLOSED LIMITATIONS",
+          "evidence": "Previously pinned local real flagship rehearsal and Ubuntu safety fixtures; full collection and production not certified. See fixed release IDs in Havala packet."
+        },
+        "description_sample": {
+          "status": "READY WITH DISCLOSED LIMITATIONS",
+          "evidence": "10-row flagship sample exists; manifest column count agrees. This does not establish representative contents or full component delivery. Live cedarpress.ai/data could not be retrieved in this pass."
+        }
+      },
+      "blocker_classes": {
+        "engineering_defect": [
+          "Ancillary action/vote contracts and consumer coverage; production/full-download UI remains untested"
+        ],
+        "missing_source_or_research": [
+          "Refresh actions/votes; resolve 8 historical source URLs or disclose absence"
+        ],
+        "linkage_research": [
+          "Multi-entity measures may validly lack singular CE; no new owner batch identified"
+        ],
+        "actual_owner_product_policy": []
+      },
+      "owner_review_note": "No qualified ambiguous linkage card established by this classification. Research tasks are not owner adjudications. Existing owner rulings remain effective.",
+      "qualified_owner_decisions": 0,
+      "owner_queue_reason": "Current unresolved work is Codex engineering/source verification or previously recorded rulings; no evidence-complete ambiguous new linkage card is ready.",
+      "completed_checks": "Prior pinned flagship schema/ID/hash, 401/403/200, exact download, audit and rollback passed; ancillary collection not certified",
+      "work_underway": "Refresh actions/votes and demonstrate supporting-table delivery using the proven flagship adapter.",
+      "next_concrete_action": "Trace vote-only inclusion route; validate source evidence and supporting tables",
+      "blocker_owners": {
+        "engineering_defect": "Codex",
+        "missing_source_or_research": "Codex",
+        "linkage_research": "Codex",
+        "actual_owner_product_policy": "Elijah"
+      },
+      "status_scope": "Whole collection remains blocked; existing local flagship release/download proof passed with disclosed limitations.",
+      "candidate_input_rows": 3069,
+      "candidate_projection_rows": 3064,
+      "row_policy_eligible_rows": 3064,
+      "release_eligible_rows": null,
+      "release_eligible_status": "NOT_CERTIFIED",
+      "withheld_rows": 5,
+      "withheld_reasons": {
+        "legislation_inclusion_reservation_homonym": 5
+      },
+      "collection_publication_hold_rows": 0,
+      "identity_link_coverage": {},
+      "provenance_coverage": {
+        "source_file": 3069
+      },
+      "duplicate_key_surplus": 0,
+      "blank_key_rows": 0,
+      "source_sha256": "2c6e451cebdd05cc955730c7e7cc67016bb6ac454513feeee16ab33bbed7c060",
+      "source_unchanged": true,
+      "validation_result": "FIELD_MAP_AND_KEY_PASS",
+      "validation_limit": "Schema/key success does not certify factual links, source rights, promised components or production delivery.",
+      "current_projection_sha256": "1ae0dfa33112fe6ab6a7b2e3c8c3318a26e85a6b59a51504269cb25b0906edb8",
+      "current_projection_blockers": []
+    },
+    {
+      "collection_id": "deals",
+      "title": "Deals",
+      "flagship": "deals_classified.csv",
+      "rows": 1073,
+      "grain": "One declared deal/event; unique Deal_ID",
+      "year_2025": 105,
+      "year_2026": 103,
+      "identity": "959 CE links; Source_1 or Source_2 on every row",
+      "data_status": "BLOCKED",
+      "delivery_status": "NOT TESTED",
+      "blocker": "deal_type/status/structure and substantive Notes derivation owed",
+      "gates": {
+        "source_refresh": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "grain_primary_key": {
+          "status": "READY WITH DISCLOSED LIMITATIONS",
+          "evidence": "One declared deal/event; unique Deal_ID"
+        },
+        "coverage": {
+          "status": "READY WITH DISCLOSED LIMITATIONS",
+          "evidence": "Observed flagship 2025=105,2026=103; no source-completeness cutoff established."
+        },
+        "identity": {
+          "status": "NOT TESTED",
+          "evidence": "959 CE links; Source_1 or Source_2 on every row"
+        },
+        "provenance_rights": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "schema_field_map": {
+          "status": "BLOCKED",
+          "evidence": "Caveat/Candidate_Status contract; held evidence and R7 dependencies must be traced"
+        },
+        "publication": {
+          "status": "BLOCKED",
+          "evidence": "Caveat/Candidate_Status contract; held evidence and R7 dependencies must be traced"
+        },
+        "immutable_release": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "catalog_pin": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "entitled_download": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "rollback": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "description_sample": {
+          "status": "READY WITH DISCLOSED LIMITATIONS",
+          "evidence": "10-row flagship sample exists; manifest column count agrees. This does not establish representative contents or full component delivery. Live cedarpress.ai/data could not be retrieved in this pass."
+        }
+      },
+      "blocker_classes": {
+        "engineering_defect": [
+          "Caveat/Candidate_Status presentation versus approved field map; owed type/structure/status crosswalks; substantive Notes editorial mapping"
+        ],
+        "missing_source_or_research": [
+          "Resolve date-basis coverage and primary-source gaps; qualification evidence must survive"
+        ],
+        "linkage_research": [
+          "R7-dependent business links and existing unmatched parties require exact-object evidence, not blanket approval"
+        ],
+        "actual_owner_product_policy": []
+      },
+      "owner_review_note": "No qualified ambiguous linkage card established by this classification. Research tasks are not owner adjudications. Existing owner rulings remain effective.",
+      "qualified_owner_decisions": 0,
+      "owner_queue_reason": "Current unresolved work is Codex engineering/source verification or previously recorded rulings; no evidence-complete ambiguous new linkage card is ready.",
+      "completed_checks": "1,073 unique Deal_IDs; year/date discrepancy measured; existing SFIS/AFN rulings and NTIA sources checked",
+      "work_underway": "Complete type/status crosswalks and qualified public notes; preserve recorded no-parent decisions and rerun projection.",
+      "next_concrete_action": "Complete canonical taxonomy projection and preserve source qualifications",
+      "blocker_owners": {
+        "engineering_defect": "Codex",
+        "missing_source_or_research": "Codex",
+        "linkage_research": "Codex",
+        "actual_owner_product_policy": "Elijah"
+      },
+      "candidate_input_rows": 1073,
+      "candidate_projection_rows": 0,
+      "row_policy_eligible_rows": 1073,
+      "release_eligible_rows": null,
+      "release_eligible_status": "NOT_CERTIFIED",
+      "withheld_rows": 0,
+      "withheld_reasons": {},
+      "collection_publication_hold_rows": 0,
+      "identity_link_coverage": {
+        "cedar_uid": 959
+      },
+      "provenance_coverage": {},
+      "duplicate_key_surplus": 0,
+      "blank_key_rows": 0,
+      "source_sha256": "af0cfa2108e9f2fbdf06e40b851f410485b2fb2a86111ffe9186cda2e0dc86c1",
+      "source_unchanged": true,
+      "validation_result": "REFUSED",
+      "validation_limit": "Schema/key success does not certify factual links, source rights, promised components or production delivery."
+    },
+    {
+      "collection_id": "nagpra",
+      "title": "NAGPRA",
+      "flagship": "nagpra_notices.csv",
+      "rows": 6792,
+      "grain": "One notice; unique document_number",
+      "year_2025": 900,
+      "year_2026": 633,
+      "identity": "All source URLs; party lists/bridges are role-specific",
+      "data_status": "BLOCKED",
+      "delivery_status": "BLOCKED",
+      "blocker": "Historical bridge classification/link evidence not fully validated; new release path not rehearsed",
+      "gates": {
+        "source_refresh": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "grain_primary_key": {
+          "status": "READY WITH DISCLOSED LIMITATIONS",
+          "evidence": "One notice; unique document_number"
+        },
+        "coverage": {
+          "status": "READY WITH DISCLOSED LIMITATIONS",
+          "evidence": "Observed flagship 2025=900,2026=633; no source-completeness cutoff established."
+        },
+        "identity": {
+          "status": "NOT TESTED",
+          "evidence": "All source URLs; party lists/bridges are role-specific"
+        },
+        "provenance_rights": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "schema_field_map": {
+          "status": "READY WITH DISCLOSED LIMITATIONS",
+          "evidence": "2026-09-24 supported 1137 plan passed 6,792 rows x52 public columns, seven joined internals explicitly declared; source-ID validation remains separate."
+        },
+        "publication": {
+          "status": "BLOCKED",
+          "evidence": "Contract and historical source-ID defects fixed in code; bridge candidate validation and full release proof remain."
+        },
+        "immutable_release": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "catalog_pin": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "entitled_download": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "rollback": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "description_sample": {
+          "status": "READY WITH DISCLOSED LIMITATIONS",
+          "evidence": "10-row flagship sample exists; manifest column count agrees. This does not establish representative contents or full component delivery. Live cedarpress.ai/data could not be retrieved in this pass."
+        }
+      },
+      "blocker_classes": {
+        "engineering_defect": [
+          "Candidate-class and alias errors in entity bridge; immutable release and entitled-download proof still not run"
+        ],
+        "missing_source_or_research": [
+          "Verify current notice discovery/corrections against supported cutoff"
+        ],
+        "linkage_research": [
+          "Keep notice, institution, affiliation and consultation roles separate; no new owner batch qualified"
+        ],
+        "actual_owner_product_policy": []
+      },
+      "owner_review_note": "No qualified ambiguous linkage card established by this classification. Research tasks are not owner adjudications. Existing owner rulings remain effective.",
+      "qualified_owner_decisions": 0,
+      "owner_queue_reason": "Current unresolved work is Codex engineering/source verification or previously recorded rulings; no evidence-complete ambiguous new linkage card is ready.",
+      "completed_checks": "6,792 x52 supported public plan; all 6,792 unchanged source IDs unique and valid; 54 focused tests pass; 12 protected input hashes unchanged. Candidate-class selftest passes explicit-tribe versus college/CDFI controls; canonical bridge not rebuilt.",
+      "work_underway": "Resolve historical document-number namespace using source records; repair government-class candidate filtering on source-backed controls.",
+      "next_concrete_action": "Rebuild isolated party bridge with negative controls and source stratification",
+      "blocker_owners": {
+        "engineering_defect": "Codex",
+        "missing_source_or_research": "Codex",
+        "linkage_research": "Codex",
+        "actual_owner_product_policy": "Elijah"
+      },
+      "resolved_engineering": [
+        "Seven joined diagnostic fields explicitly internal; unknown joins still refused",
+        "619 historic publisher-issued ID formats accepted with pinned source membership; no IDs renamed"
+      ],
+      "candidate_input_rows": 6792,
+      "candidate_projection_rows": 6792,
+      "row_policy_eligible_rows": 6792,
+      "release_eligible_rows": null,
+      "release_eligible_status": "NOT_CERTIFIED",
+      "withheld_rows": 0,
+      "withheld_reasons": {},
+      "collection_publication_hold_rows": 0,
+      "identity_link_coverage": {},
+      "provenance_coverage": {
+        "source_url": 6792
+      },
+      "duplicate_key_surplus": 0,
+      "blank_key_rows": 0,
+      "source_sha256": "109db244884fa465272b49f6b3fc077849f37437c1330138ee294163fe2590aa",
+      "source_unchanged": true,
+      "validation_result": "FIELD_MAP_AND_KEY_PASS",
+      "validation_limit": "Schema/key success does not certify factual links, source rights, promised components or production delivery."
+    },
+    {
+      "collection_id": "lobbying",
+      "title": "Advocacy & Engagement",
+      "flagship": "native_entity_lobbying_disclosures.csv",
+      "rows": 27825,
+      "grain": "Disclosure component: unique filing UUID",
+      "year_2025": 1377,
+      "year_2026": 672,
+      "identity": "26,513 CE links; all filing URLs; 471 withdrawn attributions retained",
+      "data_status": "BLOCKED",
+      "delivery_status": "NOT TESTED",
+      "blocker": "Disclosures only; other promised Advocacy components unproved; intake size limit",
+      "gates": {
+        "source_refresh": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "grain_primary_key": {
+          "status": "READY WITH DISCLOSED LIMITATIONS",
+          "evidence": "Disclosure component: unique filing UUID"
+        },
+        "coverage": {
+          "status": "READY WITH DISCLOSED LIMITATIONS",
+          "evidence": "Observed flagship 2025=1377,2026=672; no source-completeness cutoff established."
+        },
+        "identity": {
+          "status": "NOT TESTED",
+          "evidence": "26,513 CE links; all filing URLs; 471 withdrawn attributions retained"
+        },
+        "provenance_rights": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "schema_field_map": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "publication": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "immutable_release": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "catalog_pin": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "entitled_download": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "rollback": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "description_sample": {
+          "status": "READY WITH DISCLOSED LIMITATIONS",
+          "evidence": "10-row flagship sample exists; manifest column count agrees. This does not establish representative contents or full component delivery. Live cedarpress.ai/data could not be retrieved in this pass."
+        }
+      },
+      "blocker_classes": {
+        "engineering_defect": [
+          "Disclosure transport cap; component-specific contracts and samples; product is Native Advocacy and Engagement"
+        ],
+        "missing_source_or_research": [
+          "Measure all promised meetings/calendars/testimony/comments/consultation sources; disclosure rows are only one component"
+        ],
+        "linkage_research": [
+          "1312 disclosure rows lack CE; source roles must be resolved before proposing linkages"
+        ],
+        "actual_owner_product_policy": []
+      },
+      "owner_review_note": "No qualified ambiguous linkage card established by this classification. Research tasks are not owner adjudications. Existing owner rulings remain effective.",
+      "qualified_owner_decisions": 0,
+      "owner_queue_reason": "Current unresolved work is Codex engineering/source verification or previously recorded rulings; no evidence-complete ambiguous new linkage card is ready.",
+      "completed_checks": "27,825 filing keys; source URLs and withdrawal flags measured; 39 components plus promised-channel gaps recorded",
+      "work_underway": "Verify Mille Lacs/Lytton client rows and canonical aliases; measure every promised engagement component and fix transport.",
+      "next_concrete_action": "Validate all promised components; adapt bounded release intake without weakening limits",
+      "blocker_owners": {
+        "engineering_defect": "Codex",
+        "missing_source_or_research": "Codex",
+        "linkage_research": "Codex",
+        "actual_owner_product_policy": "Elijah"
+      },
+      "candidate_input_rows": 27825,
+      "candidate_projection_rows": 27825,
+      "row_policy_eligible_rows": 27825,
+      "release_eligible_rows": null,
+      "release_eligible_status": "NOT_CERTIFIED",
+      "withheld_rows": 0,
+      "withheld_reasons": {},
+      "collection_publication_hold_rows": 0,
+      "identity_link_coverage": {
+        "cedar_uid": 26513
+      },
+      "provenance_coverage": {
+        "filing_url": 27825
+      },
+      "duplicate_key_surplus": 0,
+      "blank_key_rows": 0,
+      "source_sha256": "d039afb9a675176d287d5654bc7cdfcde188d439a16c0dae8320476ccc7f174f",
+      "source_unchanged": true,
+      "validation_result": "FIELD_MAP_AND_KEY_PASS",
+      "validation_limit": "Schema/key success does not certify factual links, source rights, promised components or production delivery."
+    },
+    {
+      "collection_id": "prime-contracting",
+      "title": "Prime Contracting",
+      "flagship": "prime_contracts.csv",
+      "rows": 1217768,
+      "grain": "Transaction plus historical aggregate populations",
+      "year_2025": 47599,
+      "year_2026": 55014,
+      "identity": "791,935 CE links; source lineage retained",
+      "data_status": "BLOCKED",
+      "delivery_status": "NOT TESTED",
+      "blocker": "Competition mapping passes; supersector-to-sector derivation and 639,544 blank composite-key rows remain.",
+      "gates": {
+        "source_refresh": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "grain_primary_key": {
+          "status": "READY WITH DISCLOSED LIMITATIONS",
+          "evidence": "Transaction plus historical aggregate populations"
+        },
+        "coverage": {
+          "status": "READY WITH DISCLOSED LIMITATIONS",
+          "evidence": "Observed flagship 2025=47599,2026=55014; no source-completeness cutoff established."
+        },
+        "identity": {
+          "status": "NOT TESTED",
+          "evidence": "791,935 CE links; source lineage retained"
+        },
+        "provenance_rights": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "schema_field_map": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "publication": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "immutable_release": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "catalog_pin": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "entitled_download": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "rollback": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "description_sample": {
+          "status": "READY WITH DISCLOSED LIMITATIONS",
+          "evidence": "10-row flagship sample exists; manifest column count agrees. This does not establish representative contents or full component delivery. Live cedarpress.ai/data could not be retrieved in this pass."
+        }
+      },
+      "blocker_classes": {
+        "engineering_defect": [
+          "Mixed transaction/aggregate grain, composite keys, protected transport and financial nonadditivity"
+        ],
+        "missing_source_or_research": [
+          "Refresh action/revision coverage and dated contractor/parent evidence"
+        ],
+        "linkage_research": [
+          "Business versus parent UEI/CAGE conflicts including R7; preserve disputed or withdrawn attribution"
+        ],
+        "actual_owner_product_policy": []
+      },
+      "owner_review_note": "No qualified ambiguous linkage card established by this classification. Research tasks are not owner adjudications. Existing owner rulings remain effective.",
+      "qualified_owner_decisions": 0,
+      "owner_queue_reason": "Current unresolved work is Codex engineering/source verification or previously recorded rulings; no evidence-complete ambiguous new linkage card is ready.",
+      "completed_checks": "1,217,768 rows and action-year counts remeasured; mixed grain and parent-versus-business evidence inspected",
+      "work_underway": "Separate aggregate and action keys; resolve exact recipient/parent identifier conflicts before attribution refresh.",
+      "next_concrete_action": "Rerun projection; resolve transaction-versus-award grain before release",
+      "blocker_owners": {
+        "engineering_defect": "Codex",
+        "missing_source_or_research": "Codex",
+        "linkage_research": "Codex",
+        "actual_owner_product_policy": "Elijah"
+      },
+      "candidate_input_rows": 1217768,
+      "candidate_projection_rows": 0,
+      "row_policy_eligible_rows": 1217768,
+      "release_eligible_rows": null,
+      "release_eligible_status": "NOT_CERTIFIED",
+      "withheld_rows": 0,
+      "withheld_reasons": {},
+      "collection_publication_hold_rows": 0,
+      "identity_link_coverage": {
+        "cedar_uid": 791935,
+        "owner_as_of_transaction_cedar_uid": 150842
+      },
+      "provenance_coverage": {
+        "source_file": 1217768,
+        "source_authority": 1217768
+      },
+      "duplicate_key_surplus": 0,
+      "blank_key_rows": 639544,
+      "source_sha256": "6beebe4889f2a796f3483b4899f1b93f64d7a30c4fa97239131d41833f068129",
+      "source_unchanged": true,
+      "validation_result": "REFUSED",
+      "validation_limit": "Schema/key success does not certify factual links, source rights, promised components or production delivery.",
+      "current_projection_sha256": null,
+      "current_projection_blockers": [
+        "contractors: supersector carries information on 1000 row(s) that must reach sector before the column leaves the file, and no sector has been built or supplied; the dataset does not ship until the terminal delivers sector",
+        "Declared key incomplete or duplicate; no new key invented"
+      ]
+    },
+    {
+      "collection_id": "subcontracting",
+      "title": "Subcontracting",
+      "flagship": "subawards.csv",
+      "rows": 89809,
+      "grain": "Unique (source_dataset,subaward_source_record_id)",
+      "year_2025": 6306,
+      "year_2026": 2049,
+      "identity": "39,704 prime /49,684 sub /87,645 either-leg CE links",
+      "data_status": "BLOCKED",
+      "delivery_status": "NOT TESTED",
+      "blocker": "Projection passes; source rights and per-route affiliation evidence/entitled path remain unproved",
+      "gates": {
+        "source_refresh": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "grain_primary_key": {
+          "status": "READY WITH DISCLOSED LIMITATIONS",
+          "evidence": "Unique (source_dataset,subaward_source_record_id)"
+        },
+        "coverage": {
+          "status": "READY WITH DISCLOSED LIMITATIONS",
+          "evidence": "Observed flagship 2025=6306,2026=2049; no source-completeness cutoff established."
+        },
+        "identity": {
+          "status": "NOT TESTED",
+          "evidence": "39,704 prime /49,684 sub /87,645 either-leg CE links"
+        },
+        "provenance_rights": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "schema_field_map": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "publication": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "immutable_release": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "catalog_pin": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "entitled_download": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "rollback": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "description_sample": {
+          "status": "READY WITH DISCLOSED LIMITATIONS",
+          "evidence": "10-row flagship sample exists; manifest column count agrees. This does not establish representative contents or full component delivery. Live cedarpress.ai/data could not be retrieved in this pass."
+        }
+      },
+      "blocker_classes": {
+        "engineering_defect": [
+          "Expose prime/subcontractor roles; generic CE mapping discrepancies; composite subaward key and amount filters"
+        ],
+        "missing_source_or_research": [
+          "Refresh reports and source lineage; repeated source IDs alone are not duplicates"
+        ],
+        "linkage_research": [
+          "117 rows have both generic and prime CE populated but unequal; account separately for null asymmetry in the earlier 654 all-row comparison. Diagnose roles before rematching."
+        ],
+        "actual_owner_product_policy": []
+      },
+      "owner_review_note": "No qualified ambiguous linkage card established by this classification. Research tasks are not owner adjudications. Existing owner rulings remain effective.",
+      "qualified_owner_decisions": 0,
+      "owner_queue_reason": "Current unresolved work is Codex engineering/source verification or previously recorded rulings; no evidence-complete ambiguous new linkage card is ready.",
+      "completed_checks": "89,809 rows and year counts remeasured; declared composite key unique; prime/sub role coverage measured",
+      "work_underway": "Repair generic-versus-prime CE mapping and enforce explicit subcontractor role; then reconcile reports.",
+      "next_concrete_action": "Verify source rights and route evidence; rehearse generic release-to-download",
+      "blocker_owners": {
+        "engineering_defect": "Codex",
+        "missing_source_or_research": "Codex",
+        "linkage_research": "Codex",
+        "actual_owner_product_policy": "Elijah"
+      },
+      "candidate_input_rows": 89809,
+      "candidate_projection_rows": 70597,
+      "row_policy_eligible_rows": 70597,
+      "release_eligible_rows": null,
+      "release_eligible_status": "NOT_CERTIFIED",
+      "withheld_rows": 19212,
+      "withheld_reasons": {
+        "duplicate_status=exact_repeat_within_source": 18366,
+        "duplicate_status=superseded_by_primary_source": 846
+      },
+      "collection_publication_hold_rows": 0,
+      "identity_link_coverage": {
+        "sub_cedar_uid": 49684,
+        "cedar_uid": 40201,
+        "prime_cedar_uid": 39704
+      },
+      "provenance_coverage": {
+        "source_file": 89809,
+        "source_url": 89809
+      },
+      "duplicate_key_surplus": 0,
+      "blank_key_rows": 0,
+      "source_sha256": "1cdd909a273097490fe49fb3c03a9e95cc81c9877044a61a984c8d93990a1cc5",
+      "source_unchanged": true,
+      "validation_result": "FIELD_MAP_AND_KEY_PASS",
+      "validation_limit": "Schema/key success does not certify factual links, source rights, promised components or production delivery."
+    },
+    {
+      "collection_id": "native-owned",
+      "title": "Native-Owned",
+      "flagship": "native_owned_businesses.csv",
+      "rows": 4273,
+      "grain": "Directory source assertion, not distinct legal firm",
+      "year_2025": 0,
+      "year_2026": 0,
+      "identity": "All source URLs;3,725 publishable flags;523 accuracy holds;19 terms unchecked",
+      "data_status": "BLOCKED",
+      "delivery_status": "BLOCKED",
+      "blocker": "Current source rights, evidence-specific affiliation validation and versioned entitled-download rehearsal remain unproved.",
+      "gates": {
+        "source_refresh": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "grain_primary_key": {
+          "status": "READY WITH DISCLOSED LIMITATIONS",
+          "evidence": "Directory source assertion, not distinct legal firm"
+        },
+        "coverage": {
+          "status": "READY WITH DISCLOSED LIMITATIONS",
+          "evidence": "Nonannual register; dates are source observations, not annual panels."
+        },
+        "identity": {
+          "status": "NOT TESTED",
+          "evidence": "All source URLs;3,725 publishable flags;523 accuracy holds;19 terms unchecked"
+        },
+        "provenance_rights": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "schema_field_map": {
+          "status": "BLOCKED",
+          "evidence": "Validated public projection and missing flagship sample; R7 additions independently blocked"
+        },
+        "publication": {
+          "status": "BLOCKED",
+          "evidence": "Validated public projection and missing flagship sample; R7 additions independently blocked"
+        },
+        "immutable_release": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "catalog_pin": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "entitled_download": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "rollback": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "description_sample": {
+          "status": "BLOCKED",
+          "evidence": "Flagship sample absent and explicitly unpublished."
+        }
+      },
+      "blocker_classes": {
+        "engineering_defect": [
+          "Publication filters and sample omission; current approved register versus pending R7 importer/cutover"
+        ],
+        "missing_source_or_research": [
+          "523 accuracy holds and 19 unchecked terms flags need source-level evidence/policy application"
+        ],
+        "linkage_research": [
+          "R7 exact-object bindings and unresolved business inclusion; 83 proposals are not automatically 83 owner questions"
+        ],
+        "actual_owner_product_policy": [
+          "Existing R7 G04 CB-format, G05 name-publication and G06 ship-bar decisions are absent from the frozen canonical decision record. Preserve these gates; this is not a new policy-waiver request or an identity card."
+        ]
+      },
+      "owner_review_note": "No qualified ambiguous linkage card established by this classification. Research tasks are not owner adjudications. Existing owner rulings remain effective.",
+      "qualified_owner_decisions": 0,
+      "owner_queue_reason": "Current unresolved work is Codex engineering/source verification or previously recorded rulings; no evidence-complete ambiguous new linkage card is ready.",
+      "completed_checks": "4,273 source assertions counted; publish/accuracy/terms flags measured; R7 kept separate",
+      "work_underway": "Validate existing publishable register independently of R7; retain withholding; implement reviewed importer without equivalence bypass.",
+      "next_concrete_action": "Validate source assertions and rights; rehearse the generic release path without exposing internal candidate identifiers.",
+      "blocker_owners": {
+        "engineering_defect": "Codex",
+        "missing_source_or_research": "Codex",
+        "linkage_research": "Codex",
+        "actual_owner_product_policy": "Elijah"
+      },
+      "researched_linkage_outcomes": [
+        {
+          "case_id": "PROP-NBID-CONFLICT-016",
+          "source_record": "TBD-079:155",
+          "status": "EVIDENCE_RESOLVED_APPLICATION_PENDING",
+          "owner": "Codex",
+          "reason": "Exact Kaiva Services UEI CDBFJXPN7KL5/CAGE 8N8Q5 agrees with live company roster; source workbook row156 names Shivwits, while certifier is Muscogee. Current capability sheet explains Ivins/Tulsa locations. No equivalence or affiliation promotion performed.",
+          "sources": [
+            "https://kaivacorp.com/our-companies/",
+            "https://kaivacorp.com/wp-content/uploads/2026/04/KAI.Infrastructure-Technology.pdf"
+          ],
+          "next_action": "Preserve historical refusal; prepare source-column correction through existing importer with publication filters intact."
+        }
+      ],
+      "candidate_input_rows": 4273,
+      "candidate_projection_rows": 3725,
+      "row_policy_eligible_rows": 3725,
+      "release_eligible_rows": null,
+      "release_eligible_status": "NOT_CERTIFIED",
+      "withheld_rows": 548,
+      "withheld_reasons": {
+        "publishable": 25,
+        "publish_hold": 523
+      },
+      "collection_publication_hold_rows": 0,
+      "identity_link_coverage": {},
+      "provenance_coverage": {
+        "source_url": 4273
+      },
+      "duplicate_key_surplus": 0,
+      "blank_key_rows": 0,
+      "source_sha256": "e96b27c652020fcf1ffb23671f203cea0919a3582eb696bd572f3e5473ca19b6",
+      "source_unchanged": true,
+      "validation_result": "FIELD_MAP_AND_KEY_PASS",
+      "validation_limit": "Schema/key success does not certify factual links, source rights, promised components or production delivery.",
+      "current_projection_sha256": "4c1bc38818bc268ce906dfb3018764354d9f0dcd0e496e0d8d21cc48b23aef1c",
+      "current_projection_blockers": []
+    },
+    {
+      "collection_id": "nonprofits",
+      "title": "Native Nonprofits",
+      "flagship": "np_orgs.csv",
+      "rows": 12764,
+      "grain": "One organization EIN; filings separate",
+      "year_2025": 0,
+      "year_2026": 0,
+      "identity": "1,423 CE links; all source references; BMF fetched2026-04-29",
+      "data_status": "BLOCKED",
+      "delivery_status": "NOT TESTED",
+      "blocker": "entity_id legal-object semantics; ruling propagation pending isolated validation",
+      "gates": {
+        "source_refresh": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "grain_primary_key": {
+          "status": "READY WITH DISCLOSED LIMITATIONS",
+          "evidence": "One organization EIN; filings separate"
+        },
+        "coverage": {
+          "status": "READY WITH DISCLOSED LIMITATIONS",
+          "evidence": "Nonannual register; dates are source observations, not annual panels."
+        },
+        "identity": {
+          "status": "NOT TESTED",
+          "evidence": "1,423 CE links; all source references; BMF fetched2026-04-29"
+        },
+        "provenance_rights": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "schema_field_map": {
+          "status": "BLOCKED",
+          "evidence": "Two conflicting rulings,73 proposed inclusions require triage; unadjudicated identifier gate"
+        },
+        "publication": {
+          "status": "BLOCKED",
+          "evidence": "Two conflicting rulings,73 proposed inclusions require triage; unadjudicated identifier gate"
+        },
+        "immutable_release": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "catalog_pin": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "entitled_download": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "rollback": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "description_sample": {
+          "status": "READY WITH DISCLOSED LIMITATIONS",
+          "evidence": "10-row flagship sample exists; manifest column count agrees. This does not establish representative contents or full component delivery. Live cedarpress.ai/data could not be retrieved in this pass."
+        }
+      },
+      "blocker_classes": {
+        "engineering_defect": [
+          "Automated-exclusion versus research precedence; published legacy-ID fields; preserve EIN object grain"
+        ],
+        "missing_source_or_research": [
+          "Research 73 inclusion proposals and verify current control evidence for two conflicting automated exclusions"
+        ],
+        "linkage_research": [
+          "6597 blank linkage-tier rows are research backlog, not owner decisions; exact EIN/CE evidence required"
+        ],
+        "actual_owner_product_policy": []
+      },
+      "owner_review_note": "No qualified ambiguous linkage card established by this classification. Research tasks are not owner adjudications. Existing owner rulings remain effective.",
+      "qualified_owner_decisions": 0,
+      "owner_queue_reason": "Current unresolved work is Codex engineering/source verification or previously recorded rulings; no evidence-complete ambiguous new linkage card is ready.",
+      "completed_checks": "12,764 EIN rows, 8,507 filings; 1,344 containment-linked rows identified; prior rulings and three primary cases researched; 13 fixture tests pass for consolidated-ruling precedence in matching, hub and fallback; no canonical producer run",
+      "work_underway": "Ruling-precedence patch verified in fixtures; source population measured read-only: 1,250 held EIN rows, 464 currently CE-linked across all hold types; 353 linked under unresolved-entity rulings. Candidate application remains pending.",
+      "next_concrete_action": "Validate EIN/ruling propagation and distinguish entity identity from organization membership",
+      "blocker_owners": {
+        "engineering_defect": "Codex",
+        "missing_source_or_research": "Codex",
+        "linkage_research": "Codex",
+        "actual_owner_product_policy": "Elijah"
+      },
+      "researched_linkage_outcomes": [
+        {
+          "case_id": "NPEXCL-03925",
+          "ein": "860928837",
+          "proposed_entity": "CE-0017F-1G",
+          "owner": "Codex",
+          "status": "DISTINCT_NONPROFIT_HISTORICAL_FUNDING_NOT_EQUIVALENCE",
+          "evidence": "Navajo Language Academy history states independent incorporation and Navajo Nation Education Committee funding for1999 institute. This supports a dated funding connection, not present government identity/control. Exclusion is explicitly automated_filter, not a case-level Elijah ruling.",
+          "source": "https://www.navajolanguageacademy.org/nla_history.htm",
+          "next_action": "Correct authority interpretation; preserve separate nonprofit object and source-attributed historical funding evidence."
+        },
+        {
+          "case_id": "NPEXCL-02937",
+          "ein": "731014291",
+          "proposed_entity": "CE-0013A-FK",
+          "owner": "Codex",
+          "status": "FORMAL_ENTITY_RELATIONSHIP_NOT_ESTABLISHED",
+          "evidence": "Historical nonprofit formation/leadership evidence does not identify it as the Cheyenne and Arapaho tribal government. Automated filter is not a case-level owner ruling. NPS historicalPDF nowredirects; do not claim it was retrieved.",
+          "source": "https://www.mennonitemission.net/news/native-mennonite-ministries-honors-betty-and-lawrence-hart-for-five-decades-of-ministry/",
+          "next_action": "Seek EIN-specific charter/governance evidence; keep CE unresolved without reclassifying absence as an owner judgment."
+        }
+      ],
+      "candidate_input_rows": 12764,
+      "candidate_projection_rows": 0,
+      "row_policy_eligible_rows": 12689,
+      "release_eligible_rows": null,
+      "release_eligible_status": "NOT_CERTIFIED",
+      "withheld_rows": 75,
+      "withheld_reasons": {
+        "disposition=NATIVE_PROPOSED_AWAITING_OWNER_RULING": 73,
+        "disposition=CONFLICT_EXCLUDED_AND_RULED_NATIVE": 2
+      },
+      "collection_publication_hold_rows": 0,
+      "identity_link_coverage": {
+        "cedar_uid": 1423
+      },
+      "provenance_coverage": {
+        "source_url": 12764
+      },
+      "duplicate_key_surplus": 0,
+      "blank_key_rows": 0,
+      "source_sha256": "ab6b0dfa05851e254fc6aff792caf8de18cfbb36765741b20810e619de0ab9fc",
+      "source_unchanged": true,
+      "validation_result": "REFUSED",
+      "validation_limit": "Schema/key success does not certify factual links, source rights, promised components or production delivery."
+    },
+    {
+      "collection_id": "natural-resources",
+      "title": "Natural Resources",
+      "flagship": "resource_revenue.csv",
+      "rows": 11305,
+      "grain": "Unique source observation; mixed nonadditive grains",
+      "year_2025": 505,
+      "year_2026": 280,
+      "identity": "705 CE links/17 entities; all source URLs;199 qualifications conserved",
+      "data_status": "BLOCKED",
+      "delivery_status": "BLOCKED",
+      "blocker": "Flagship local path proved; mixed scope/periods and supporting-table completeness unproved",
+      "gates": {
+        "source_refresh": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "grain_primary_key": {
+          "status": "READY WITH DISCLOSED LIMITATIONS",
+          "evidence": "Unique source observation; mixed nonadditive grains"
+        },
+        "coverage": {
+          "status": "READY WITH DISCLOSED LIMITATIONS",
+          "evidence": "Observed flagship 2025=505,2026=280; no source-completeness cutoff established."
+        },
+        "identity": {
+          "status": "READY WITH DISCLOSED LIMITATIONS",
+          "evidence": "705 CE links/17 entities; all source URLs;199 qualifications conserved"
+        },
+        "provenance_rights": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "schema_field_map": {
+          "status": "READY WITH DISCLOSED LIMITATIONS",
+          "evidence": "Previously pinned local real flagship rehearsal and Ubuntu safety fixtures; full collection and production not certified. See fixed release IDs in Havala packet."
+        },
+        "publication": {
+          "status": "READY WITH DISCLOSED LIMITATIONS",
+          "evidence": "Previously pinned local real flagship rehearsal and Ubuntu safety fixtures; full collection and production not certified. See fixed release IDs in Havala packet."
+        },
+        "immutable_release": {
+          "status": "READY WITH DISCLOSED LIMITATIONS",
+          "evidence": "Previously pinned local real flagship rehearsal and Ubuntu safety fixtures; full collection and production not certified. See fixed release IDs in Havala packet."
+        },
+        "catalog_pin": {
+          "status": "READY WITH DISCLOSED LIMITATIONS",
+          "evidence": "Previously pinned local real flagship rehearsal and Ubuntu safety fixtures; full collection and production not certified. See fixed release IDs in Havala packet."
+        },
+        "entitled_download": {
+          "status": "READY WITH DISCLOSED LIMITATIONS",
+          "evidence": "Previously pinned local real flagship rehearsal and Ubuntu safety fixtures; full collection and production not certified. See fixed release IDs in Havala packet."
+        },
+        "rollback": {
+          "status": "READY WITH DISCLOSED LIMITATIONS",
+          "evidence": "Previously pinned local real flagship rehearsal and Ubuntu safety fixtures; full collection and production not certified. See fixed release IDs in Havala packet."
+        },
+        "description_sample": {
+          "status": "READY WITH DISCLOSED LIMITATIONS",
+          "evidence": "10-row flagship sample exists; manifest column count agrees. This does not establish representative contents or full component delivery. Live cedarpress.ai/data could not be retrieved in this pass."
+        }
+      },
+      "blocker_classes": {
+        "engineering_defect": [
+          "Full-product frontend and supporting-table integration remain; flagship download path already proved"
+        ],
+        "missing_source_or_research": [
+          "Refresh source-observable periods; preserve suppressed recipients and reporting lag"
+        ],
+        "linkage_research": [
+          "705 CE references retained; missing recipients may be publisher-suppressed, not match defects"
+        ],
+        "actual_owner_product_policy": []
+      },
+      "owner_review_note": "No qualified ambiguous linkage card established by this classification. Research tasks are not owner adjudications. Existing owner rulings remain effective.",
+      "qualified_owner_decisions": 0,
+      "owner_queue_reason": "Current unresolved work is Codex engineering/source verification or previously recorded rulings; no evidence-complete ambiguous new linkage card is ready.",
+      "completed_checks": "Prior pinned flagship validation, login/entitlement, bytes, audit and rollback passed; 199 qualifications retained",
+      "work_underway": "Refresh observable source periods and prove supporting tables/full customer consumer with suppression intact.",
+      "next_concrete_action": "Validate public aggregation/suppression semantics and ancillary delivery",
+      "blocker_owners": {
+        "engineering_defect": "Codex",
+        "missing_source_or_research": "Codex",
+        "linkage_research": "Codex",
+        "actual_owner_product_policy": "Elijah"
+      },
+      "status_scope": "Whole collection remains blocked; existing local flagship release/download proof passed with disclosed limitations.",
+      "candidate_input_rows": 11305,
+      "candidate_projection_rows": 11305,
+      "row_policy_eligible_rows": 11305,
+      "release_eligible_rows": null,
+      "release_eligible_status": "NOT_CERTIFIED",
+      "withheld_rows": 0,
+      "withheld_reasons": {},
+      "collection_publication_hold_rows": 0,
+      "identity_link_coverage": {
+        "cedar_uid": 705
+      },
+      "provenance_coverage": {
+        "allocation_formula_source_url": 1514,
+        "source_url": 11305
+      },
+      "duplicate_key_surplus": 0,
+      "blank_key_rows": 0,
+      "source_sha256": "9967a3de568cb9d730d0b56323cfad62183510d3f3fd9f591af1d0f25b7af258",
+      "source_unchanged": true,
+      "validation_result": "FIELD_MAP_AND_KEY_PASS",
+      "validation_limit": "Schema/key success does not certify factual links, source rights, promised components or production delivery."
+    },
+    {
+      "collection_id": "need",
+      "title": "Cedar NEED",
+      "flagship": "need_enterprises.csv",
+      "rows": null,
+      "grain": "Current enterprise register; preserved candidate5820, canonical absent",
+      "year_2025": 0,
+      "year_2026": 0,
+      "identity": "Issued IDs preserved; quarantine and evidence admission remain held",
+      "data_status": "BLOCKED",
+      "delivery_status": "BLOCKED",
+      "blocker": "Collection publication hold; affiliation evidence quarantine",
+      "gates": {
+        "source_refresh": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "grain_primary_key": {
+          "status": "BLOCKED",
+          "evidence": "Current enterprise register; preserved candidate5820, canonical absent"
+        },
+        "coverage": {
+          "status": "READY WITH DISCLOSED LIMITATIONS",
+          "evidence": "Nonannual register; dates are source observations, not annual panels."
+        },
+        "identity": {
+          "status": "NOT TESTED",
+          "evidence": "Issued IDs preserved; quarantine and evidence admission remain held"
+        },
+        "provenance_rights": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "schema_field_map": {
+          "status": "BLOCKED",
+          "evidence": "Canonical migration/publication hold and unresolved affiliation evidence"
+        },
+        "publication": {
+          "status": "BLOCKED",
+          "evidence": "Canonical migration/publication hold and unresolved affiliation evidence"
+        },
+        "immutable_release": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "catalog_pin": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "entitled_download": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "rollback": {
+          "status": "NOT TESTED",
+          "evidence": "No new complete release-gate proof; existing evidence must not imply completeness."
+        },
+        "description_sample": {
+          "status": "READY WITH DISCLOSED LIMITATIONS",
+          "evidence": "10-row flagship sample exists; manifest column count agrees. This does not establish representative contents or full component delivery. Live cedarpress.ai/data could not be retrieved in this pass."
+        }
+      },
+      "blocker_classes": {
+        "engineering_defect": [
+          "Apply recorded INTERNAL_ONLY/publication hold; migration and relationship evidence-admission contract"
+        ],
+        "missing_source_or_research": [
+          "Finish quarantined-route evidence reconciliation; keep original inclusion sources"
+        ],
+        "linkage_research": [
+          "Remaining affiliations and CE/business same-object distinctions; no automatic promotion from surviving quarantine"
+        ],
+        "actual_owner_product_policy": [
+          "Existing R7 G04 CB-format, G05 name-publication and G06 ship-bar decisions are absent from the frozen canonical decision record. Preserve these gates; this is not a new policy-waiver request or an identity card."
+        ]
+      },
+      "owner_review_note": "No qualified ambiguous linkage card established by this classification. Research tasks are not owner adjudications. Existing owner rulings remain effective.",
+      "qualified_owner_decisions": 0,
+      "owner_queue_reason": "Current unresolved work is Codex engineering/source verification or previously recorded rulings; no evidence-complete ambiguous new linkage card is ready.",
+      "completed_checks": "Prior isolated migration: 5,820 enterprise IDs, 8,690 relations, 6,089 bindings, 269 historical-only, zero minted IDs; duplicate receipt import harmless",
+      "work_underway": "Apply already-recorded rejections through the controlled path; finish evidence admission without publication or affiliation promotion.",
+      "next_concrete_action": "Preserve hold/issued IDs and validate bounded surviving-evidence assessment",
+      "blocker_owners": {
+        "engineering_defect": "Codex",
+        "missing_source_or_research": "Codex",
+        "linkage_research": "Codex",
+        "actual_owner_product_policy": "Elijah"
+      },
+      "rows_note": "5,820 isolated candidate enterprises; canonical NEED output not promoted.",
+      "candidate_input_rows": 5820,
+      "candidate_projection_rows": 0,
+      "row_policy_eligible_rows": 5820,
+      "release_eligible_rows": null,
+      "release_eligible_status": "NOT_CERTIFIED",
+      "withheld_rows": 0,
+      "withheld_reasons": {},
+      "collection_publication_hold_rows": 5820,
+      "identity_link_coverage": {
+        "owner_hub_cedar_uid": 5820,
+        "cedar_uid": 5820,
+        "enterprise_existing_cedar_uid": 103
+      },
+      "provenance_coverage": {
+        "source_url": 3301
+      },
+      "duplicate_key_surplus": 0,
+      "blank_key_rows": 0,
+      "source_sha256": "5a68edf076ee7ea9832fb51c5171618044e5e068b694cd85c8c2c19452bbf5d9",
+      "source_unchanged": true,
+      "validation_result": "REFUSED",
+      "validation_limit": "Schema/key success does not certify factual links, source rights, promised components or production delivery."
+    }
+  ],
+  "items": [
+    {
+      "id": "LAUNCH:DECIMAL-POLICY",
+      "collection": "Cross-collection",
+      "title": "Ratify output-boundary decimal rounding",
+      "blocker_type": "product/policy decision",
+      "impact": "All future governed money/percentage outputs; existing priority scores differ at a reachable 5/16 tie: Python 0.312 versus JavaScript 0.313. No published values changed.",
+      "priority": "P0",
+      "question": "Adopt exact decimal round-half-away-from-zero at declared output boundaries, after aggregation, preserving source precision?",
+      "options": {
+        "RATIFY_PROSPECTIVE": "Adopt proposed rule for future reviewed outputs; do not rewrite published values",
+        "HOLD": "Hold rounding policy pending Havala review",
+        "REQUIRE_ALTERNATIVE": "Require a different explicit rule; specify it in notes"
+      },
+      "evidence": [
+        {
+          "url": "https://github.com/teim-team/cedar-press/blob/3195e7069d8717f81a33849f592b65b16f293e84/server/cedar_press/priorities.py",
+          "label": "server/cedar_press/priorities.py",
+          "excerpt": "Python round(s,3) differs from JavaScript Math.round(s*1000)/1000 for the reachable token-overlap score 5/16."
+        },
+        {
+          "url": "https://github.com/teim-team/cedar-press/blob/3195e7069d8717f81a33849f592b65b16f293e84/docs/MONEY_TOTALLING_RULES.md",
+          "label": "docs/MONEY_TOTALLING_RULES.md",
+          "excerpt": "Existing grain and denominator rules remain authoritative; a rounding rule does not make incompatible totals additive."
+        }
+      ],
+      "recommendation": "RATIFY_PROSPECTIVE: adopt prospectively with field-specific precision and explicit migration review before any published values change.",
+      "confidence": "High for measured mechanism; completeness and real-world accuracy not certified.",
+      "status": "RECORDED",
+      "decision_provenance": "Ratified explicitly by Elijah, 2026-09-24. Claude owns implementation; Havala reviews it. Codex rounding changes removed; do not ask again.",
+      "next_action": "",
+      "notes": "",
+      "decision": "ROUND_HALF_AWAY_FROM_ZERO",
+      "evidence_fingerprint": "d47bf7583197ded6cf906693d54a136855f2058765d82b6f109a51dbbc09647f",
+      "owner_review_eligible": false
+    },
+    {
+      "id": "LAUNCH:NEED-HOLD",
+      "collection": "Cedar NEED",
+      "title": "Preserve recorded NEED decisions and publication hold",
+      "blocker_type": "engineering defect",
+      "impact": "5,820 enterprise IDs; 8,690 relationship IDs; 4,901 quarantined observations across 4,714 enterprises. 20 recovered decision events across 19 cards.",
+      "priority": "P0",
+      "question": "No new field-level or previously rejected-affiliation ruling is requested.",
+      "options": {
+        "HOLD": "Keep unresolved; engineering work continues"
+      },
+      "evidence": [
+        {
+          "url": "https://github.com/teim-team/cedar-press/blob/3195e7069d8717f81a33849f592b65b16f293e84/docs/HAVALA_INFRASTRUCTURE_REVIEW.md",
+          "label": "docs/HAVALA_INFRASTRUCTURE_REVIEW.md",
+          "excerpt": "Recovered browser decisions are receipt-only; stable migration IDs preserved. Survivors are not automatically reliable."
+        }
+      ],
+      "recommendation": "Preserve INTERNAL_ONLY and all rejections; finish validated receipt application separately without promoting alternate affiliations.",
+      "confidence": "High for measured mechanism; completeness and real-world accuracy not certified.",
+      "status": "RECORDED",
+      "decision_provenance": "Elijah: INTERNAL_ONLY; publication hold; 18 exceptional affiliations rejected (one revision). Existing receipt ledger remains authoritative.",
+      "next_action": "Engineering validation and surviving-route evidence; canonical publication remains blocked.",
+      "notes": "",
+      "decision": "",
+      "evidence_fingerprint": "ef19f2efab36cb0e97744394ebc3417af8771d7eb876212dd92ff18c72c75309"
+    },
+    {
+      "id": "LAUNCH:R7-EXISTING-QUEUE",
+      "collection": "Native-Owned / NEED / downstream",
+      "title": "Existing 83 R7 equivalence decisions",
+      "blocker_type": "engineering defect",
+      "impact": "83 proposed equivalence pairs; 17,282 issued CB IDs, 17,279 active and 3 retired. G03-G06 blocked.",
+      "priority": "P0",
+      "question": "Use the existing R7 evidence-fingerprinted decision cards; this summary cannot approve equivalence or bypass its schema.",
+      "options": {
+        "HOLD": "Keep unresolved; engineering work continues"
+      },
+      "evidence": [
+        {
+          "url": "https://github.com/teim-team/cedar-press/blob/3195e7069d8717f81a33849f592b65b16f293e84/docs/HAVALA_INFRASTRUCTURE_REVIEW.md",
+          "label": "docs/HAVALA_INFRASTRUCTURE_REVIEW.md",
+          "excerpt": "Frozen local bundle f37240f77e40bf5e390219ae remains authoritative; audit is not an importer."
+        }
+      ],
+      "recommendation": "Hold unresolved equivalences. Stage only under the already-reviewed boundary; no canonical R7 import.",
+      "confidence": "High for measured mechanism; completeness and real-world accuracy not certified.",
+      "status": "BACKLOG",
+      "decision_provenance": "Existing R7 queue/schema owns these decisions; no repeated adjudication or new bulk approval.",
+      "next_action": "Link and triage original cases by impact; this card is informational and has no identity-approval control.",
+      "notes": "",
+      "decision": "",
+      "evidence_fingerprint": "452005e73d09a478b6e45784bbe777f92762f290634316ed0c30e398fde57c89"
+    },
+    {
+      "id": "LAUNCH:FUNDING-RELEASE",
+      "collection": "Federal Funding",
+      "title": "Close collection release gates",
+      "blocker_type": "engineering defect",
+      "impact": "701,955 flagship rows; 546,758 CE links; source-file lineage on every row",
+      "priority": "P1",
+      "question": "Engineering owner: Refresh/attribution and additive transaction semantics; 662 MB input requires bounded transport. No policy waiver requested.",
+      "options": {
+        "HOLD": "Keep unresolved; engineering work continues"
+      },
+      "evidence": [
+        {
+          "url": "https://github.com/teim-team/cedar-press/blob/3195e7069d8717f81a33849f592b65b16f293e84/docs/HAVALA_INFRASTRUCTURE_REVIEW.md",
+          "label": "docs/HAVALA_INFRASTRUCTURE_REVIEW.md",
+          "excerpt": "Refresh/attribution and additive transaction semantics; 662 MB input requires bounded transport"
+        },
+        {
+          "url": "https://github.com/teim-team/cedar-press/blob/3195e7069d8717f81a33849f592b65b16f293e84/data/cedar/collections.manifest.json",
+          "label": "data/cedar/collections.manifest.json",
+          "excerpt": "Current descriptor and declared ancillary tables define the scope; a flagship pass is not whole-collection readiness."
+        }
+      ],
+      "recommendation": "Preserve rows, IDs and qualifications; prove the existing contract before adding a catalog pin.",
+      "confidence": "High for measured mechanism; completeness and real-world accuracy not certified.",
+      "status": "IN_PROGRESS",
+      "decision_provenance": "No owner decision inferred. Engineering evidence is not publication approval.",
+      "next_action": "Refresh/attribution and additive transaction semantics; 662 MB input requires bounded transport",
+      "notes": "",
+      "decision": "",
+      "evidence_fingerprint": "8f133079ee6db8f53f3f081def52ca50701ccd00aa9246fc5b29ec1537a4e86e"
+    },
+    {
+      "id": "LAUNCH:FEDERAL-REGISTER-RELEASE",
+      "collection": "Federal Register",
+      "title": "Close collection release gates",
+      "blocker_type": "engineering defect",
+      "impact": "11,402 flagship rows; 10,396 CE links; source references on every row",
+      "priority": "P1",
+      "question": "Engineering owner: Date precision and discovery/parser coverage; participant table is not broad document collection. No policy waiver requested.",
+      "options": {
+        "HOLD": "Keep unresolved; engineering work continues"
+      },
+      "evidence": [
+        {
+          "url": "https://github.com/teim-team/cedar-press/blob/3195e7069d8717f81a33849f592b65b16f293e84/docs/HAVALA_INFRASTRUCTURE_REVIEW.md",
+          "label": "docs/HAVALA_INFRASTRUCTURE_REVIEW.md",
+          "excerpt": "Date precision and discovery/parser coverage; participant table is not broad document collection"
+        },
+        {
+          "url": "https://github.com/teim-team/cedar-press/blob/3195e7069d8717f81a33849f592b65b16f293e84/data/cedar/collections.manifest.json",
+          "label": "data/cedar/collections.manifest.json",
+          "excerpt": "Current descriptor and declared ancillary tables define the scope; a flagship pass is not whole-collection readiness."
+        }
+      ],
+      "recommendation": "Preserve rows, IDs and qualifications; prove the existing contract before adding a catalog pin.",
+      "confidence": "High for measured mechanism; completeness and real-world accuracy not certified.",
+      "status": "IN_PROGRESS",
+      "decision_provenance": "No owner decision inferred. Engineering evidence is not publication approval.",
+      "next_action": "Date precision and discovery/parser coverage; participant table is not broad document collection",
+      "notes": "",
+      "decision": "",
+      "evidence_fingerprint": "4f785bdc7fa01118b69b3f979d3716d1f2e1978333c5d97012c948afbca2eb46"
+    },
+    {
+      "id": "LAUNCH:LEGISLATION-RELEASE",
+      "collection": "Legislation",
+      "title": "Close collection release gates",
+      "blocker_type": "engineering defect",
+      "impact": "3,069 flagship rows; Plural associations retained; 8 historical source URLs absent",
+      "priority": "P2",
+      "question": "Engineering owner: Actions/votes, source refresh, full-download UI and CSV projection unproved. No policy waiver requested.",
+      "options": {
+        "HOLD": "Keep unresolved; engineering work continues"
+      },
+      "evidence": [
+        {
+          "url": "https://github.com/teim-team/cedar-press/blob/3195e7069d8717f81a33849f592b65b16f293e84/docs/HAVALA_INFRASTRUCTURE_REVIEW.md",
+          "label": "docs/HAVALA_INFRASTRUCTURE_REVIEW.md",
+          "excerpt": "Actions/votes, source refresh, full-download UI and CSV projection unproved"
+        },
+        {
+          "url": "https://github.com/teim-team/cedar-press/blob/3195e7069d8717f81a33849f592b65b16f293e84/data/cedar/collections.manifest.json",
+          "label": "data/cedar/collections.manifest.json",
+          "excerpt": "Current descriptor and declared ancillary tables define the scope; a flagship pass is not whole-collection readiness."
+        }
+      ],
+      "recommendation": "Preserve rows, IDs and qualifications; prove the existing contract before adding a catalog pin.",
+      "confidence": "High for measured mechanism; completeness and real-world accuracy not certified.",
+      "status": "IN_PROGRESS",
+      "decision_provenance": "No owner decision inferred. Engineering evidence is not publication approval.",
+      "next_action": "Actions/votes, source refresh, full-download UI and CSV projection unproved",
+      "notes": "",
+      "decision": "",
+      "evidence_fingerprint": "f88122c98487f6a920239138488038dc68e22509ae93d08f92840831c9c65092"
+    },
+    {
+      "id": "LAUNCH:DEALS-RELEASE",
+      "collection": "Indian Country Deals",
+      "title": "Close collection release gates",
+      "blocker_type": "engineering defect",
+      "impact": "1,073 flagship rows; 959 CE links; Source_1 or Source_2 on every row",
+      "priority": "P1",
+      "question": "Engineering owner: Caveat/Candidate_Status contract; held evidence and R7 dependencies must be traced. No policy waiver requested.",
+      "options": {
+        "HOLD": "Keep unresolved; engineering work continues"
+      },
+      "evidence": [
+        {
+          "url": "https://github.com/teim-team/cedar-press/blob/3195e7069d8717f81a33849f592b65b16f293e84/docs/HAVALA_INFRASTRUCTURE_REVIEW.md",
+          "label": "docs/HAVALA_INFRASTRUCTURE_REVIEW.md",
+          "excerpt": "Caveat/Candidate_Status contract; held evidence and R7 dependencies must be traced"
+        },
+        {
+          "url": "https://github.com/teim-team/cedar-press/blob/3195e7069d8717f81a33849f592b65b16f293e84/data/cedar/collections.manifest.json",
+          "label": "data/cedar/collections.manifest.json",
+          "excerpt": "Current descriptor and declared ancillary tables define the scope; a flagship pass is not whole-collection readiness."
+        }
+      ],
+      "recommendation": "Preserve rows, IDs and qualifications; prove the existing contract before adding a catalog pin.",
+      "confidence": "High for measured mechanism; completeness and real-world accuracy not certified.",
+      "status": "IN_PROGRESS",
+      "decision_provenance": "No owner decision inferred. Engineering evidence is not publication approval.",
+      "next_action": "Caveat/Candidate_Status contract; held evidence and R7 dependencies must be traced",
+      "notes": "",
+      "decision": "",
+      "evidence_fingerprint": "121ac2f09d8ede19188b643f0093ec03719ec0ab9284f645626dc9ad7ebecd75"
+    },
+    {
+      "id": "LAUNCH:NAGPRA-RELEASE",
+      "collection": "NAGPRA",
+      "title": "Close collection release gates",
+      "blocker_type": "engineering defect",
+      "impact": "6,792 flagship rows; All source URLs; party lists/bridges are role-specific",
+      "priority": "P1",
+      "question": "Codex: validate corrected resolver in an isolated bridge candidate, then complete current-source and release/download proof. Field-map and source-ID defects are fixed.",
+      "options": {
+        "HOLD": "Keep unresolved; engineering work continues"
+      },
+      "evidence": [
+        {
+          "url": "https://github.com/teim-team/cedar-press/blob/3195e7069d8717f81a33849f592b65b16f293e84/docs/HAVALA_INFRASTRUCTURE_REVIEW.md",
+          "label": "docs/HAVALA_INFRASTRUCTURE_REVIEW.md",
+          "excerpt": "Seven diagnostics explicitly internal; all 6,792 unchanged source keys validate, including 619 historical publisher formats; candidate-class fixtures pass."
+        },
+        {
+          "url": "https://github.com/teim-team/cedar-press/blob/3195e7069d8717f81a33849f592b65b16f293e84/data/cedar/collections.manifest.json",
+          "label": "data/cedar/collections.manifest.json",
+          "excerpt": "Current descriptor and declared ancillary tables define the scope; a flagship pass is not whole-collection readiness."
+        },
+        {
+          "url": "",
+          "label": "Current supported plan and focused tests",
+          "excerpt": "Current supported plan PASS: 6,792 x52; 27 field-map tests PASS; unknown/public-undeclared joins still refused"
+        }
+      ],
+      "recommendation": "Preserve rows, IDs and qualifications; prove the existing contract before adding a catalog pin.",
+      "confidence": "High for measured mechanism; completeness and real-world accuracy not certified.",
+      "status": "IN_PROGRESS",
+      "decision_provenance": "No owner decision inferred. Engineering evidence is not publication approval.",
+      "next_action": "Isolated candidate comparison; no canonical publication.",
+      "notes": "",
+      "decision": "",
+      "evidence_fingerprint": "236803a5758f0d27f5422de6e02a18c188b2d77bb5abf1e7b595433778e50443",
+      "owner_review_eligible": false
+    },
+    {
+      "id": "LAUNCH:LOBBYING-RELEASE",
+      "collection": "Native Advocacy and Engagement",
+      "title": "Close collection release gates",
+      "blocker_type": "engineering defect",
+      "impact": "27,825 flagship rows; 26,513 CE links; all filing URLs; 471 withdrawn attributions retained",
+      "priority": "P1",
+      "question": "Engineering owner: 20,053,457-byte disclosure projection exceeds intake cap; broad promised components unproved. No policy waiver requested.",
+      "options": {
+        "HOLD": "Keep unresolved; engineering work continues"
+      },
+      "evidence": [
+        {
+          "url": "https://github.com/teim-team/cedar-press/blob/3195e7069d8717f81a33849f592b65b16f293e84/docs/HAVALA_INFRASTRUCTURE_REVIEW.md",
+          "label": "docs/HAVALA_INFRASTRUCTURE_REVIEW.md",
+          "excerpt": "20,053,457-byte disclosure projection exceeds intake cap; broad promised components unproved"
+        },
+        {
+          "url": "https://github.com/teim-team/cedar-press/blob/3195e7069d8717f81a33849f592b65b16f293e84/data/cedar/collections.manifest.json",
+          "label": "data/cedar/collections.manifest.json",
+          "excerpt": "Current descriptor and declared ancillary tables define the scope; a flagship pass is not whole-collection readiness."
+        }
+      ],
+      "recommendation": "Preserve rows, IDs and qualifications; prove the existing contract before adding a catalog pin.",
+      "confidence": "High for measured mechanism; completeness and real-world accuracy not certified.",
+      "status": "IN_PROGRESS",
+      "decision_provenance": "No owner decision inferred. Engineering evidence is not publication approval.",
+      "next_action": "20,053,457-byte disclosure projection exceeds intake cap; broad promised components unproved",
+      "notes": "",
+      "decision": "",
+      "evidence_fingerprint": "31c564200ba1bb95642517ee836abb52cf4441e45b1744f4479c3616709f7173"
+    },
+    {
+      "id": "LAUNCH:PRIME-CONTRACTING-RELEASE",
+      "collection": "Prime Contracting",
+      "title": "Close collection release gates",
+      "blocker_type": "engineering defect",
+      "impact": "1,217,768 flagship rows; 791,935 CE links; source lineage retained",
+      "priority": "P1",
+      "question": "Engineering owner: 376,766 blank transaction keys need declared aggregate grain; 1.60 GB input and time-specific affiliation. No policy waiver requested.",
+      "options": {
+        "HOLD": "Keep unresolved; engineering work continues"
+      },
+      "evidence": [
+        {
+          "url": "https://github.com/teim-team/cedar-press/blob/3195e7069d8717f81a33849f592b65b16f293e84/docs/HAVALA_INFRASTRUCTURE_REVIEW.md",
+          "label": "docs/HAVALA_INFRASTRUCTURE_REVIEW.md",
+          "excerpt": "376,766 blank transaction keys need declared aggregate grain; 1.60 GB input and time-specific affiliation"
+        },
+        {
+          "url": "https://github.com/teim-team/cedar-press/blob/3195e7069d8717f81a33849f592b65b16f293e84/data/cedar/collections.manifest.json",
+          "label": "data/cedar/collections.manifest.json",
+          "excerpt": "Current descriptor and declared ancillary tables define the scope; a flagship pass is not whole-collection readiness."
+        }
+      ],
+      "recommendation": "Preserve rows, IDs and qualifications; prove the existing contract before adding a catalog pin.",
+      "confidence": "High for measured mechanism; completeness and real-world accuracy not certified.",
+      "status": "IN_PROGRESS",
+      "decision_provenance": "No owner decision inferred. Engineering evidence is not publication approval.",
+      "next_action": "376,766 blank transaction keys need declared aggregate grain; 1.60 GB input and time-specific affiliation",
+      "notes": "",
+      "decision": "",
+      "evidence_fingerprint": "b5cc2e44659d8dd1a016d2b8205ad482f47381b904c4317b1e815ce4fe294633"
+    },
+    {
+      "id": "LAUNCH:SUBCONTRACTING-RELEASE",
+      "collection": "Subcontracting",
+      "title": "Close collection release gates",
+      "blocker_type": "engineering defect",
+      "impact": "89,809 flagship rows; 39,704 prime /49,684 sub /87,645 either-leg CE links",
+      "priority": "P1",
+      "question": "Engineering owner: 654 generic CE/prime CE disagreements; explicit role mapping before customer release. No policy waiver requested.",
+      "options": {
+        "HOLD": "Keep unresolved; engineering work continues"
+      },
+      "evidence": [
+        {
+          "url": "https://github.com/teim-team/cedar-press/blob/3195e7069d8717f81a33849f592b65b16f293e84/docs/HAVALA_INFRASTRUCTURE_REVIEW.md",
+          "label": "docs/HAVALA_INFRASTRUCTURE_REVIEW.md",
+          "excerpt": "654 generic CE/prime CE disagreements; explicit role mapping before customer release"
+        },
+        {
+          "url": "https://github.com/teim-team/cedar-press/blob/3195e7069d8717f81a33849f592b65b16f293e84/data/cedar/collections.manifest.json",
+          "label": "data/cedar/collections.manifest.json",
+          "excerpt": "Current descriptor and declared ancillary tables define the scope; a flagship pass is not whole-collection readiness."
+        }
+      ],
+      "recommendation": "Preserve rows, IDs and qualifications; prove the existing contract before adding a catalog pin.",
+      "confidence": "High for measured mechanism; completeness and real-world accuracy not certified.",
+      "status": "IN_PROGRESS",
+      "decision_provenance": "No owner decision inferred. Engineering evidence is not publication approval.",
+      "next_action": "654 generic CE/prime CE disagreements; explicit role mapping before customer release",
+      "notes": "",
+      "decision": "",
+      "evidence_fingerprint": "78e7dc3c698ce59a57b814f6600e3ce1f1e070b6d5f52faa77e15d901704fc65"
+    },
+    {
+      "id": "LAUNCH:NATIVE-OWNED-RELEASE",
+      "collection": "Native-Owned Businesses",
+      "title": "Close collection release gates",
+      "blocker_type": "engineering defect",
+      "impact": "4,273 flagship rows; All source URLs;3,725 publishable flags;523 accuracy holds;19 terms unchecked",
+      "priority": "P1",
+      "question": "Engineering owner: Validated public projection and missing flagship sample; R7 additions independently blocked. No policy waiver requested.",
+      "options": {
+        "HOLD": "Keep unresolved; engineering work continues"
+      },
+      "evidence": [
+        {
+          "url": "https://github.com/teim-team/cedar-press/blob/3195e7069d8717f81a33849f592b65b16f293e84/docs/HAVALA_INFRASTRUCTURE_REVIEW.md",
+          "label": "docs/HAVALA_INFRASTRUCTURE_REVIEW.md",
+          "excerpt": "Validated public projection and missing flagship sample; R7 additions independently blocked"
+        },
+        {
+          "url": "https://github.com/teim-team/cedar-press/blob/3195e7069d8717f81a33849f592b65b16f293e84/data/cedar/collections.manifest.json",
+          "label": "data/cedar/collections.manifest.json",
+          "excerpt": "Current descriptor and declared ancillary tables define the scope; a flagship pass is not whole-collection readiness."
+        }
+      ],
+      "recommendation": "Preserve rows, IDs and qualifications; prove the existing contract before adding a catalog pin.",
+      "confidence": "High for measured mechanism; completeness and real-world accuracy not certified.",
+      "status": "IN_PROGRESS",
+      "decision_provenance": "No owner decision inferred. Engineering evidence is not publication approval.",
+      "next_action": "Validated public projection and missing flagship sample; R7 additions independently blocked",
+      "notes": "",
+      "decision": "",
+      "evidence_fingerprint": "d9e0a92c9f019e138b0281744d7c5d0af72e83b7f4822ec0242f30ee0cb23097"
+    },
+    {
+      "id": "LAUNCH:NONPROFITS-RELEASE",
+      "collection": "Native Nonprofits",
+      "title": "Close collection release gates",
+      "blocker_type": "engineering defect",
+      "impact": "12,764 flagship rows; 1,423 CE links; all source references; BMF fetched2026-04-29",
+      "priority": "P1",
+      "question": "Engineering owner: Two automated-filter/research classification conflicts,73 proposed inclusions require triage; unadjudicated identifier gate. No policy waiver requested.",
+      "options": {
+        "HOLD": "Keep unresolved; engineering work continues"
+      },
+      "evidence": [
+        {
+          "url": "https://github.com/teim-team/cedar-press/blob/3195e7069d8717f81a33849f592b65b16f293e84/docs/HAVALA_INFRASTRUCTURE_REVIEW.md",
+          "label": "docs/HAVALA_INFRASTRUCTURE_REVIEW.md",
+          "excerpt": "Two conflicting rulings,73 proposed inclusions require triage; unadjudicated identifier gate"
+        },
+        {
+          "url": "https://github.com/teim-team/cedar-press/blob/3195e7069d8717f81a33849f592b65b16f293e84/data/cedar/collections.manifest.json",
+          "label": "data/cedar/collections.manifest.json",
+          "excerpt": "Current descriptor and declared ancillary tables define the scope; a flagship pass is not whole-collection readiness."
+        }
+      ],
+      "recommendation": "Preserve rows, IDs and qualifications; prove the existing contract before adding a catalog pin.",
+      "confidence": "High for measured mechanism; completeness and real-world accuracy not certified.",
+      "status": "IN_PROGRESS",
+      "decision_provenance": "No owner decision inferred. Engineering evidence is not publication approval.",
+      "next_action": "Two automated-filter/research classification conflicts,73 proposed inclusions require triage; unadjudicated identifier gate",
+      "notes": "",
+      "decision": "",
+      "evidence_fingerprint": "a515225d89437c229feb95bf66204a8582e113dfa59c673f0346db1f2b84f0a9"
+    },
+    {
+      "id": "LAUNCH:NATURAL-RESOURCES-RELEASE",
+      "collection": "Natural Resources",
+      "title": "Close collection release gates",
+      "blocker_type": "engineering defect",
+      "impact": "11,305 flagship rows; 705 CE links/17 entities; all source URLs;199 qualifications conserved",
+      "priority": "P2",
+      "question": "Engineering owner: Source coverage and mixed measures remain limited; full UI and CSV projection unproved. No policy waiver requested.",
+      "options": {
+        "HOLD": "Keep unresolved; engineering work continues"
+      },
+      "evidence": [
+        {
+          "url": "https://github.com/teim-team/cedar-press/blob/3195e7069d8717f81a33849f592b65b16f293e84/docs/HAVALA_INFRASTRUCTURE_REVIEW.md",
+          "label": "docs/HAVALA_INFRASTRUCTURE_REVIEW.md",
+          "excerpt": "Source coverage and mixed measures remain limited; full UI and CSV projection unproved"
+        },
+        {
+          "url": "https://github.com/teim-team/cedar-press/blob/3195e7069d8717f81a33849f592b65b16f293e84/data/cedar/collections.manifest.json",
+          "label": "data/cedar/collections.manifest.json",
+          "excerpt": "Current descriptor and declared ancillary tables define the scope; a flagship pass is not whole-collection readiness."
+        }
+      ],
+      "recommendation": "Preserve rows, IDs and qualifications; prove the existing contract before adding a catalog pin.",
+      "confidence": "High for measured mechanism; completeness and real-world accuracy not certified.",
+      "status": "IN_PROGRESS",
+      "decision_provenance": "No owner decision inferred. Engineering evidence is not publication approval.",
+      "next_action": "Source coverage and mixed measures remain limited; full UI and CSV projection unproved",
+      "notes": "",
+      "decision": "",
+      "evidence_fingerprint": "3eef5a330de2eaceeb62a11c653265bbadadc715ddc85fce7bbd4f2f3a035713"
+    },
+    {
+      "id": "LAUNCH:NP-RULING-TRIAGE",
+      "collection": "Native Nonprofits",
+      "title": "Prepare only consequential unresolved inclusion cases",
+      "blocker_type": "engineering defect",
+      "impact": "Two automated-filter versus agent-research conflicts: EIN860928837 NAVAJO LANGUAGE ACADEMY INC and EIN731014291 CHEYENNE CULTURAL CENTER INC;73 further proposed inclusions. Not contradictory human rulings. 6,597 blank linkage tiers are not blanket owner cases.",
+      "priority": "P0",
+      "question": "Engineering owner: verify legal EIN binding and current control evidence; existing sources support purpose, not the native_controlled assertion. Do not ask Elijah to repeat an automated-filter correction.",
+      "options": {
+        "HOLD": "Keep unresolved; engineering work continues"
+      },
+      "evidence": [
+        {
+          "url": "https://navajolanguageacademy.org/nla.htm",
+          "label": "Navajo Language Academy: purpose",
+          "excerpt": "Own site describes nonprofit scientific study/promotion of Navajo language and Window Rock address. Supports purpose; does not establish EIN860928837 or tribal control."
+        },
+        {
+          "url": "https://navajolanguageacademy.org/nla_board.htm",
+          "label": "Navajo Language Academy: board",
+          "excerpt": "Undated own-site named board and institutional affiliations. Does not establish citizenship, majority Native control, voting rights or a tribal ownership/charter link."
+        },
+        {
+          "url": "https://www.mennonitemission.net/news/native-mennonite-ministries-honors-betty-and-lawrence-hart-for-five-decades-of-ministry/",
+          "label": "Cheyenne Cultural Center: historical context",
+          "excerpt": "2011-11-30 report describes the Harts building the center and Cheyenne Language Institute. Supports historical purpose/founder context, not current governance or EIN731014291."
+        }
+      ],
+      "recommendation": "Retain holds, preserve prior rulings, prioritize two conflicts and material proposals; do not resubmit resolved cases.",
+      "confidence": "High for measured mechanism; completeness and real-world accuracy not certified.",
+      "status": "OPEN",
+      "decision_provenance": "Exclusions NPEXCL-03925/NPEXCL-02937: automated_filter, reversible lower-authority script rules. Affirmative classification: agent_research 2026-08-05, not owner adjudication.",
+      "next_action": "Generate evidence-complete exception cards in this same queue after existing rulings eliminate routine cases.",
+      "notes": "",
+      "decision": "",
+      "evidence_fingerprint": "1cff0dc21f43f144c6e895733207658937303cb1b56888496bb4efa3c4570128",
+      "source_hashes": {
+        "data/clean/np_orgs.csv": "ab6b0dfa05851e254fc6aff792caf8de18cfbb36765741b20810e619de0ab9fc",
+        "data/spine/nonprofit_exclusion_rulings.csv": "d1a71d0c2c2831df76a71b2222d2694fb98309c193b6e8b7dba63e5e9697565e",
+        "data/raw/external/irs990/tribal_irs990_dropped_strict_2026_04_30.csv": "48785746ed86d95355b906451c28234ab6b7f44425b123dacdb80c9a3f97d76f"
+      }
+    },
+    {
+      "id": "LAUNCH:FR-OBSERVABILITY",
+      "collection": "Federal Register / NAGPRA",
+      "title": "Diagnose participant observability without fabricating zero activity",
+      "blocker_type": "engineering defect",
+      "impact": "11,402 consultation rows, only8/6 in2025/26; NAGPRA6,792 notices is a different series.",
+      "priority": "P1",
+      "question": "Engineering owner: determine discovery versus post-2022 parser/source observability at appropriate notice grains.",
+      "options": {
+        "HOLD": "Keep unresolved; engineering work continues"
+      },
+      "evidence": [
+        {
+          "url": "https://github.com/teim-team/cedar-press/blob/3195e7069d8717f81a33849f592b65b16f293e84/docs/HAVALA_INFRASTRUCTURE_REVIEW.md",
+          "label": "docs/HAVALA_INFRASTRUCTURE_REVIEW.md",
+          "excerpt": "Earlier parser limitation is not proof that no later source names participants."
+        }
+      ],
+      "recommendation": "Use stratified source evidence; named-party publication is not consultation participation. Do not force historical participant counts.",
+      "confidence": "High for measured mechanism; completeness and real-world accuracy not certified.",
+      "status": "OPEN",
+      "decision_provenance": "No owner decision inferred. Engineering evidence is not publication approval.",
+      "next_action": "Repair supported source discovery and compare post2022 notice patterns; publish narrow limitations only after measurement.",
+      "notes": "",
+      "decision": "",
+      "evidence_fingerprint": "f8d059a523fb948ad51878a26a2e44e35222c6ad11d9a7cb25de91ff123920f3"
+    },
+    {
+      "id": "LAUNCH:PRODUCTION-ACCESS",
+      "collection": "All twelve",
+      "title": "Production and frontend evidence remains incomplete",
+      "blocker_type": "external limitation",
+      "impact": "All customer-facing collections; no production deployment or AWS mutation authorized.",
+      "priority": "P1",
+      "question": "No production authorization requested in this queue. Complete development tests and present exact deployment change separately.",
+      "options": {
+        "HOLD": "Keep unresolved; engineering work continues"
+      },
+      "evidence": [
+        {
+          "url": "https://github.com/teim-team/cedar-press/blob/3195e7069d8717f81a33849f592b65b16f293e84/docs/SHIPPING_RUNBOOK.md",
+          "label": "docs/SHIPPING_RUNBOOK.md",
+          "excerpt": "Existing development release commands are not production promotion authorization."
+        }
+      ],
+      "recommendation": "Keep local proofs distinct from production; do not advertise full CSV download until pinned projection and UI pass.",
+      "confidence": "High for measured mechanism; completeness and real-world accuracy not certified.",
+      "status": "OPEN",
+      "decision_provenance": "No owner decision inferred. Engineering evidence is not publication approval.",
+      "next_action": "Claude frontend integration coordination; production credentials and explicit authorization required for actual deployment.",
+      "notes": "",
+      "decision": "",
+      "evidence_fingerprint": "882b3076b8bb091e71cc7fc74a521675ac8591ccfe9c5d46f29636b9dd477dc2"
+    }
+  ],
+  "records": [],
+  "measurement_boundary": "Internal candidate validation. Owner decision count is not an engineering task count. Annual counts use source rows before filtering. NEED is an isolated candidate, not canonical production. Null release-eligible count means not certified, never zero inferred from unmeasured gates.",
+  "evidence_fingerprint": "8f4204a8b308091238af4560b6f2123055a0ce893d6b0bc46aaa0caf1f67210b",
+  "owner_menu_rule": "Only fully researched, genuinely ambiguous identity, affiliation or legal-object linkages requiring owner judgment. No policy ratification, engineering, research, commands or schemas."
+}

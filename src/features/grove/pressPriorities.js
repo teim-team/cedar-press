@@ -72,7 +72,7 @@ export const PRIORITY_EXAMPLES = Object.freeze({
   }),
   expansions: Object.freeze([
     "Add annual filing history to Native Nonprofits.",
-    "Add more tribal TERO and commerce offices to Native-Owned Businesses.",
+    "Add more tribal TERO and commerce offices to Individual Native-Owned Businesses.",
     "Carry Natural Resource Revenues to more Nations and commodities.",
   ]),
 });
@@ -173,4 +173,68 @@ export function earningLine(tier) {
 /** "You asked. Cedar researched it." material: the published ones, most supported first. */
 export function published(list) {
   return sortPriorities(list.filter((p) => p.status === "published"));
+}
+
+/** Hide private balances during render, before an old request can be cleaned up. */
+export function visiblePriorityState(state, owner, { connected, enabled }) {
+  const empty = { priorities: [], influence: null, error: null };
+  if (!connected) return { ...empty, priorities: SEED_PRIORITIES, status: "static" };
+  if (!enabled) return { ...empty, status: "signed-out" };
+  return state?.owner === owner ? state : { ...empty, status: "loading" };
+}
+
+/** One authenticated visit owns reads and mutations; disposal never retries a debit. */
+export function createPrioritySession({ fetchPriorities, fetchInfluence, movePoints, submitResearchRequest, publish }) {
+  let disposed = false;
+  let sequence = 0;
+  let readController = null;
+  const mutations = new Set();
+  const cancelled = () => Object.assign(new Error("The account session changed."), { name: "AbortError" });
+  async function reload() {
+    if (disposed) throw cancelled();
+    readController?.abort();
+    const controller = new AbortController();
+    readController = controller;
+    const revision = ++sequence;
+    const current = () => !disposed && !controller.signal.aborted && revision === sequence;
+    try {
+      const [list, card] = await Promise.all([
+        fetchPriorities({ signal: controller.signal }), fetchInfluence({ signal: controller.signal }),
+      ]);
+      if (!current()) return;
+      if (!Array.isArray(list?.priorities) || !Number.isSafeInteger(card?.points_available)
+          || card.points_available < 0) throw new Error("The points service returned an invalid response.");
+      publish({ priorities: list.priorities, influence: card, status: "ok", error: null });
+    } catch (error) {
+      if (current()) publish({ priorities: [], influence: null, status: "failed",
+        error: error?.message || "The service did not answer." });
+    }
+  }
+  async function mutate(send, args) {
+    if (disposed) throw cancelled();
+    const controller = new AbortController();
+    mutations.add(controller);
+    try {
+      const result = await send({ ...args, signal: controller.signal });
+      if (disposed) throw cancelled();
+      await reload();
+      if (disposed) throw cancelled();
+      return result;
+    } catch (error) {
+      if (disposed || controller.signal.aborted) throw cancelled();
+      throw error;
+    } finally {
+      mutations.delete(controller);
+    }
+  }
+  return { reload,
+    move: (priorityId, points) => mutate(movePoints, { priorityId, points }),
+    submit: (args) => mutate(submitResearchRequest, args),
+    dispose() {
+    disposed = true;
+    sequence += 1;
+    readController?.abort();
+    for (const controller of mutations) controller.abort();
+    mutations.clear();
+  } };
 }

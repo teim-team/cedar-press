@@ -110,7 +110,7 @@ import { PressFoot, PressMast } from "./PressChrome";
 
 const TRUST_ROW = [
   "Documented methodology",
-  "Versioned releases",
+  "Dated updates",
   "Human review",
   "Source register",
   "Correction process",
@@ -522,9 +522,10 @@ export default function CedarPressMethods() {
                 ))}
               </ul>
               {/* The owner's challenge, 2026-09-13: is it wrong that Cedar does
-                  not publish what it resolves? It would be. What is actually
-                  withheld is much narrower, and WITHHELD_NOTE holds the wording
-                  with the rule it comes from cited beside it. */}
+                  not publish what it resolves? It would be. The owner ruling of
+                  2026-10-02 then published the individually owned firms' names
+                  and identifiers as business records; WITHHELD_NOTE holds the
+                  wording with the rule it comes from cited beside it. */}
               <p className="cp-msec__aside">{WITHHELD_NOTE}</p>
             </Chapter>
 
@@ -547,8 +548,8 @@ export default function CedarPressMethods() {
 
             <Chapter
               id="cite"
-              title="Cite the release you read."
-              claim="Every collection carries a version and every version keeps its address, so a citation names both and a figure can be checked against the release it came from after the collection has moved on."
+              title="Cite the dataset."
+              claim="Cite the collection by name and include its update date and your access date. Dated change notes explain corrections as the dataset grows."
             >
               {(() => {
                 const example = citationExample();
@@ -558,8 +559,8 @@ export default function CedarPressMethods() {
                     <code className="cp-cite__line">{example.citation}</code>
                     <p className="cp-cite__note">
                       Every record page prints the same line under &ldquo;Cite it&rdquo;, and every
-                      download carries it as its final row, with the version the rows came from.
-                      A correction to a release is logged against that version, so a citation
+                      download carries it alongside its records, with the collection name and update date.
+                      Corrections are recorded in the update history, so a citation
                       stays checkable after the collection has moved on.
                     </p>
                   </div>

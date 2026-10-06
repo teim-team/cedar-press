@@ -57,12 +57,13 @@ function sessionStore() {
  * A record whose table declares no id is addressed by its position in that
  * table's sample, which is stable for a given release and says so on the page.
  */
-export function recordHref({ key, recordId = null, index = null, from = "" } = {}) {
+export function recordHref({ key, recordId = null, recordType = null, index = null, from = "" } = {}) {
   if (!key) return PRESS_DATA_PATH;
   const params = new URLSearchParams();
   params.set("k", key);
   if (recordId) params.set("r", recordId);
   else if (Number.isInteger(index)) params.set("i", String(index));
+  if (recordType !== null) params.set("rt", recordType);
   if (from) params.set("from", from);
   return `${PRESS_RECORD_PATH}?${params.toString()}`;
 }
@@ -74,6 +75,7 @@ export function readRecordParams(search) {
   return {
     key: params.get("k") ?? null,
     recordId: params.get("r") ?? null,
+    recordType: params.get("rt") ?? null,
     index: Number.isFinite(index) && index >= 0 ? index : null,
     from: params.get("from") ?? "",
   };
@@ -143,13 +145,21 @@ export function neighbours(items, id) {
 
 /**
  * The record asked for, from the rows of its table: by its own id, and by
- * position only when the table declares no id column. An id that is not in
- * this release's sample returns null, and the page says so rather than
- * showing a neighbouring record as though it were the one linked to.
+ * position only when the table declares no id column. Record types qualify
+ * identifiers reused by different components in one spreadsheet. Legacy links
+ * without a type resolve only when the id has exactly one match. Missing or
+ * ambiguous matches return null rather than opening an arbitrary record.
  */
-export function findRecord(items, { recordId = null, index = null } = {}) {
-  if (recordId) return items.find((item) => item.recordId === recordId) ?? null;
-  if (Number.isInteger(index)) return items[index] ?? null;
+export function findRecord(items, { recordId = null, recordType = null, index = null } = {}) {
+  if (recordId) {
+    const matches = items.filter((item) =>
+      item.recordId === recordId && (recordType === null || item.recordType === recordType));
+    return matches.length === 1 ? matches[0] : null;
+  }
+  if (Number.isInteger(index)) {
+    const item = items[index] ?? null;
+    return item && (recordType === null || item.recordType === recordType) ? item : null;
+  }
   return null;
 }
 

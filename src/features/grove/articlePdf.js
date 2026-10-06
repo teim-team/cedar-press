@@ -304,6 +304,45 @@ export async function buildArticlePdf({ article, url, collections = [], lead = n
     return (block.notes ?? []).reduce((n, note) => n + doc.splitTextToSize(pdfText(note), FULL - 40).length * 10.5, 0);
   };
   const figureHeight = ({ block, chart }) => 40 + imgHeight(chart) + notesHeight(block) + 16;
+
+  const evidenceSourceLink = (source) => {
+    const label = pdfText(source.title || source.publisher || "Source");
+    font("normal", 8);
+    const lines = doc.splitTextToSize(label, FULL).slice(0, 3);
+    const height = Math.max(12, lines.length * 11);
+    room(height + 6);
+    font("normal", 8);
+    ink(DTEAL);
+    doc.text(lines, M, y + 8);
+    doc.link(M, y, FULL, height, { url: source.url });
+    y += height + 6;
+  };
+  const drawEvidence = (block, number) => {
+    if (pageNo() === 1 && y < railBottom) y = railBottom;
+    room(64);
+    para("FIGURE " + number, { size: 8, style: "bold", color: DTEAL, width: FULL });
+    para(block.caption, { size: 12, style: "bold", width: FULL });
+    y += 6;
+    const rows = block.chart === "relationships" ? block.relationships
+      : block.chart === "timeline" ? block.events : block.rows;
+    for (const row of rows) {
+      const heading = block.chart === "relationships"
+        ? row.from + " " + row.relationship + " " + row.to + " (as of " + row.asOf + ")"
+        : block.chart === "timeline" ? row.date + ": " + row.title
+        : row.entity + ": " + row.role + " (as of " + row.asOf + ")";
+      room(42);
+      para(heading, { size: 10, style: "bold", width: FULL });
+      para(row.detail, { size: 9, width: FULL });
+      y += 4;
+      for (const source of row.sources) evidenceSourceLink(source);
+      y += 5;
+    }
+    for (const note of block.notes) para(note, { size: 8, color: MUTED, width: FULL });
+    para(block.source, { size: 8, style: "bold", color: MUTED, width: FULL });
+    for (const source of block.sources) evidenceSourceLink(source);
+    y += 12;
+  };
+
   drawFigure = (fig) => {
     // Figures break out of the column to the full width.
     const { block, chart, n } = fig;
@@ -374,6 +413,11 @@ export async function buildArticlePdf({ article, url, collections = [], lead = n
       doc.line(M, y, M + qW, y);
       y += 18;
     } else if (block.kind === BLOCK.FIGURE) {
+      if (["relationships", "timeline", "evidenceTable"].includes(block.chart)) {
+        figureAt += 1;
+        drawEvidence(block, figureAt);
+        continue;
+      }
       const fig = { block, chart: figures[figureAt], n: figureAt + 1 };
       figureAt += 1;
       // A figure runs full width, so on page 1 it can only start below the

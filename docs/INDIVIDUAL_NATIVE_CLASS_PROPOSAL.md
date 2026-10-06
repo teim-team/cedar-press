@@ -127,6 +127,13 @@ signed. Every row therefore also carries:
     publish_name                        1 only when consent_status = OPTED_IN
     publish_surrogate_id_only           1 by default
 
+*Superseded 2026-10-02 by owner ruling:* `publish_name` and
+`publish_federal_identifier` are 1 and `publish_surrogate_id_only` 0 on every
+row; the consent columns stay as recorded facts and gate nothing. A firm is a
+business entity regardless of what it is named after (`docs/REVIEW_STATUS.md`,
+"Owner ruling: individually owned firm records publish"). The proposal above is
+left as written.
+
 ---
 
 ## 3. How it differs from a tribal or ANC entity

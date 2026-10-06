@@ -19,9 +19,11 @@ field names below are theirs, not a guess:
      context, message}
  -> {messageId, threadId, answer, contextUsed, unavailable}
 
-``threadId`` is what makes it a conversation: Cedar generates one on the first
-turn and the client sends it back on every turn after. The panel keeps it for
-the life of the panel.
+The browser receives a signed, expiring continuation handle bound to the
+authenticated subscriber, subscription, current tier and collection. Raw or
+legacy IDs start a new server-generated conversation. Changing subscription,
+scope or the internal key also starts a new conversation; credentials remain
+unchanged. The handle authenticates access; it does not encrypt conversation IDs.
 
 WHY THE SERVER CALLS IT AND NOT THE BROWSER
 The key is an internal one (``require_internal_key``, a bearer token shared
@@ -50,13 +52,19 @@ service it was never pointed at.
 
 from __future__ import annotations
 
+import base64
+import hmac
 import json
 import logging
+import math
 import os
+import time
 import urllib.error
 import urllib.request
 import uuid
 from dataclasses import dataclass
+
+from cedar_press import subscribers
 
 logger = logging.getLogger(__name__)
 
@@ -77,6 +85,10 @@ DEFAULT_CHAT_PATH = "/api/v1/messages"
 #: the panel says so. Same variable and same units as teim-app, because two
 #: names for one knob is how a deployment ends up setting the wrong one.
 DEFAULT_TIMEOUT_MS = 45_000
+MAX_REPLY_BYTES = 1_048_576
+MAX_THREAD_HANDLE = 4096
+THREAD_MAX_AGE = 60 * 60 * 24 * 14
+_THREAD_DOMAIN = b"cedar-press:conversation:v1:"
 
 
 def _truthy_enabled(value: str | None) -> bool:
@@ -101,7 +113,7 @@ def timeout_seconds() -> float:
         milliseconds = float(os.environ.get("CEDAR_TIMEOUT_MS", DEFAULT_TIMEOUT_MS))
     except ValueError:
         milliseconds = DEFAULT_TIMEOUT_MS
-    if not (milliseconds > 0):
+    if not math.isfinite(milliseconds) or not (milliseconds > 0):
         milliseconds = DEFAULT_TIMEOUT_MS
     return milliseconds / 1000.0
 
@@ -149,6 +161,71 @@ def available() -> bool:
     )
 
 
+def _thread_scope(
+    email: str, tier: str, collection_id: str | None, account_id: str | None = None
+) -> str:
+    # Only the server-authenticated principal and current authorized scope.
+    material = json.dumps(
+        [email.lower(), account_id or email.lower(), tier, collection_id], separators=(",", ":")
+    )
+    return hmac.new(api_key().encode(), _THREAD_DOMAIN + material.encode(), "sha256").hexdigest()
+
+
+def _seal_thread(
+    thread_id: str, *, email: str, tier: str, collection_id: str | None,
+    account_id: str | None = None,
+) -> str:
+    claims = {
+        "v": 1,
+        "thread": thread_id,
+        "scope": _thread_scope(email, tier, collection_id, account_id),
+        "exp": int(time.time()) + THREAD_MAX_AGE,
+    }
+    body = json.dumps(claims, separators=(",", ":"), sort_keys=True).encode()
+    signature = hmac.new(api_key().encode(), _THREAD_DOMAIN + body, "sha256").digest()
+    return base64.urlsafe_b64encode(body + signature).decode().rstrip("=")
+
+
+def _open_thread(
+    handle: str | None, *, email: str, tier: str, collection_id: str | None,
+    account_id: str | None = None,
+) -> str | None:
+    # Legacy/raw IDs are deliberately not forwarded: Cedar's memory store is
+    # keyed by thread ID, not by the user envelope. Invalid handles start anew.
+    if not isinstance(handle, str) or not handle or len(handle) > MAX_THREAD_HANDLE:
+        return None
+    try:
+        data = base64.b64decode(
+            handle + "=" * (-len(handle) % 4), altchars=b"-_", validate=True
+        )
+        if len(data) <= 32:
+            return None
+        body, signature = data[:-32], data[-32:]
+        expected = hmac.new(api_key().encode(), _THREAD_DOMAIN + body, "sha256").digest()
+        if not hmac.compare_digest(signature, expected):
+            return None
+        claims = json.loads(body)
+        if not isinstance(claims, dict):
+            return None
+        now = int(time.time())
+        expiry = claims.get("exp")
+        thread_id = claims.get("thread")
+        if (
+            type(claims.get("v")) is not int
+            or claims["v"] != 1
+            or type(expiry) is not int
+            or not now < expiry <= now + THREAD_MAX_AGE
+            or not isinstance(thread_id, str)
+            or not thread_id.strip()
+            or len(thread_id) > 512
+            or claims.get("scope") != _thread_scope(email, tier, collection_id, account_id)
+        ):
+            return None
+        return thread_id
+    except (ValueError, UnicodeError, TypeError):
+        return None
+
+
 def _payload(
     *,
     question: str,
@@ -193,6 +270,19 @@ def _payload(
         "context": {
             "route": "cedar-press",
             "pathname": pathname,
+            "pressContext": {
+                "surface": "cedar-press",
+                "collectionId": collection_id,
+                "collectionName": collection_name,
+                "retrieval": {
+                    "available": False,
+                    "instruction": (
+                        "No record retrieval is available in this exchange. "
+                        "Do not invent records, amounts, citations or current coverage. "
+                        "Identify missing evidence and direct the reader to the collection."
+                    ),
+                },
+            },
         },
         "message": {"id": request_id, "text": question},
     }
@@ -217,12 +307,18 @@ def ask(
     if not available():
         raise CedarUnavailable("Cedar is not configured for this deployment.")
 
+    # Authentication and collection access are checked by the route first.
+    # A raw identifier supplied by a browser can never select Cedar's memory.
+    account_id = subscribers.account_id_for(email)
+    upstream_thread = _open_thread(
+        thread_id, email=email, tier=tier, collection_id=collection_id, account_id=account_id
+    ) or str(uuid.uuid4())
     body = json.dumps(
         _payload(
             question=question,
             email=email,
             tier=tier,
-            thread_id=thread_id,
+            thread_id=upstream_thread,
             collection_id=collection_id,
             collection_name=collection_name,
             pathname=pathname,
@@ -239,23 +335,44 @@ def ask(
     )
     try:
         with urllib.request.urlopen(request, timeout=timeout_seconds()) as response:
-            payload = json.loads(response.read().decode("utf-8"))
-    except urllib.error.HTTPError as exc:  # a status, which is worth logging
-        detail = exc.read().decode("utf-8", "replace")[:400]
-        logger.warning("Cedar returned %s: %s", exc.code, detail)
+            raw = response.read(MAX_REPLY_BYTES + 1)
+            if len(raw) > MAX_REPLY_BYTES:
+                raise CedarUnavailable("Cedar's reply exceeded the response limit.")
+            payload = json.loads(raw.decode("utf-8"))
+    except urllib.error.HTTPError as exc:
+        # Status is enough for operations; upstream bodies can contain prompts.
+        logger.warning("Cedar returned HTTP %s", exc.code)
         raise CedarUnavailable(f"Cedar returned {exc.code}.") from exc
-    except (urllib.error.URLError, TimeoutError, ValueError) as exc:
-        logger.warning("Cedar could not be reached: %s", exc)
+    except (urllib.error.URLError, TimeoutError, ValueError, OSError) as exc:
+        logger.warning("Cedar request failed (%s)", type(exc).__name__)
         raise CedarUnavailable("Cedar could not be reached.") from exc
 
-    answer = (payload or {}).get("answer")
+    if not isinstance(payload, dict):
+        raise CedarUnavailable("Cedar returned an invalid response.")
+    answer = payload.get("answer")
+    returned_thread = payload.get("threadId")
+    unavailable = payload.get("unavailable", False)
     if not isinstance(answer, str) or not answer.strip():
         raise CedarUnavailable("Cedar returned no answer.")
+    if type(unavailable) is not bool:
+        raise CedarUnavailable("Cedar returned an invalid availability flag.")
+    if returned_thread is not None and (
+        not isinstance(returned_thread, str)
+        or not returned_thread.strip()
+        or len(returned_thread) > 512
+    ):
+        raise CedarUnavailable("Cedar returned an invalid conversation identifier.")
+    if not unavailable and returned_thread is None:
+        raise CedarUnavailable("Cedar returned no conversation identifier.")
     return CedarReply(
         answer=answer.strip(),
-        thread_id=(payload.get("threadId") or None),
-        # The contract carries its own degraded flag. Cedar saying "I am
-        # unavailable" in a 200 is not the same as an answer, and the panel
-        # must not file it under one.
-        unavailable=bool(payload.get("unavailable")),
+        thread_id=(
+            _seal_thread(
+                returned_thread, email=email, tier=tier, collection_id=collection_id,
+                account_id=account_id,
+            )
+            if returned_thread is not None and not unavailable
+            else None
+        ),
+        unavailable=unavailable,
     )

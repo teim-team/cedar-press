@@ -1,5 +1,8 @@
 # 02i_individual_native_firm_register
 
+> **Owner ruling 2026-10-04 (Elijah Moreno): Lumecon decides what is blocked. The only hold is a specific record flagged as attributed to the wrong entity; records in the database have already been reviewed and sourced and are not held. Attribution review is an ongoing process, not a standing hold. Agents do not impose publication holds.** For this class the consent-based withholding marked `WITHHELD from publication` below was already lifted by the owner ruling of 2026-10-02 (`may_publish_individual_native_field`); those fields publish. Where this document says to hold, withhold, quarantine or not publish a record or collection for any other reason, that instruction is superseded (see `AGENTS.md`, 2026-10-04).
+
+
 *The individually Native-owned FIRM register: one row per firm the owner has ruled, with the ruling, its evidence, the owner's self-stated affiliation as free text, self-certification in its own column, and the privacy decision per field.*
 
 Generated 2026-08-26 by `code/243_write_individual_native_class_codebook_fragment.py` from `individual_native_firm_register.csv` (45 rows, 55 variables).

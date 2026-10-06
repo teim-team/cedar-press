@@ -1,3 +1,17 @@
+> **2026-10-04: the producer samples now live one directory down.** The subdirectories here,
+> `<collection>/spreadsheet__10.csv`, are the producer's pinned samples, moved out of
+> `public/data/cedar/samples/` so the site no longer serves them (they carry the multi-table
+> layout and, for NEED, retired `CEDAR-NEST-` IDs). The API and
+> `scripts/render_sample_downloads.py` read them and render each as the collection's customer
+> table, `public/data/cedar/downloads/<collection>.csv`, which is the only sample the site serves.
+>
+> **Historical extracts, superseded 2026-10-02 note.** The top-level `*__sample.csv` files and
+> the counts in this README were measured on 2026-09-02 from the workspace's clean tables. They
+> are not the previews the site serves; current observation counts are in
+> `data/cedar/collections.manifest.json` and `docs/REVIEW_STATUS.md`. Nothing reads those
+> top-level files at build or run time (measured with `grep` on 2026-10-02). They are kept as
+> dated evidence of the earlier shape; do not quote their counts as current.
+
 # Cedar Press — sample extracts
 
 *Built 2026-09-02 by `code/770_sample_extracts.py`. 10 real rows per dataset, straight from the clean tables — nothing synthesised.*

@@ -38,12 +38,149 @@ Claimed 2026-08-26 with script numbers 284-292.
 """
 
 import ast
+import json
 import re
+import shlex
 from pathlib import Path
 
 CEDAR = Path(__file__).resolve().parent.parent
 CODE = CEDAR / "code"
 CLEAN = CEDAR / "data" / "clean"
+
+# Reviewed bridge inputs to the existing Lumecon release command. This is an
+# allowlist in the existing runner authority, not a second manifest or catalog.
+# Table grain, primary key and public fields come from the existing contracts.
+REFERENCE_PRESERVATION_AUTHORITY = {
+    "approved_by": "Owner execution directive: preserve existing issued IDs; reference validation only, no identity or affiliation adjudication",
+    "approved_on": "2026-09-23",
+}
+# Compatibility command allowlist, not producer metadata or release authority.
+# Collection schemas, rights and transformations live in Lumecon-data.
+RELEASE_PILOTS = (
+    "funding", "federal-register", "legislation", "deals", "nagpra", "lobbying",
+    "contractors", "subcontracting", "native-owned-businesses", "nonprofits", "natural-resources", "need",
+)
+# Admission is not release certification. Gated producers return held receipts;
+# the former Cedar customer/sample writers remain retired for these flagships.
+
+
+def retired_table_writer(script, table):
+    """Explicit table-scoped retirement outranks discovery and stale contracts."""
+    return any(o["file"] == table and script in o.get("retired_writers", [])
+               for o in KNOWN_ORDERINGS)
+
+
+def active_table_writers(table, scripts):
+    """Filter dispatch edges; retain historical scripts and unrelated outputs."""
+    return [script for script in scripts if not retired_table_writer(script, table)]
+
+
+def registration_problems(plan, contracts=None):
+    """Refuse discovered producer stages absent from the existing contracts.
+
+    The generated I/O map discovers possible writers; it does not authorize
+    them. dataset_contracts.json remains the table/stage authority, with
+    KNOWN_ORDERINGS supplying explicit, reviewed dependencies. Backup-derived
+    orderings and filename guesses cannot register a new production writer.
+    This checks the supported runner's dispatch boundary, not arbitrary shell
+    execution; dynamic writes still require isolated write-boundary tests.
+    """
+    if contracts is None:
+        try:
+            contracts = json.loads(
+                (CEDAR / "docs/schema/dataset_contracts.json").read_text(encoding="utf-8")
+            )
+        except (OSError, ValueError):
+            return ["REGISTRATION_UNAVAILABLE: dataset_contracts.json must be present and valid"]
+    if not isinstance(contracts, dict) or not isinstance(contracts.get("contracts"), list):
+        return ["REGISTRATION_UNAVAILABLE: malformed collection contracts"]
+    matches = [c for c in contracts["contracts"]
+               if isinstance(c, dict) and c.get("collection") == plan.get("id")]
+    if len(matches) != 1:
+        return ["UNREGISTERED_COLLECTION: exactly one existing contract is required"]
+    contract = matches[0]
+    try:
+        command = shlex.split(contract.get("rebuild_command", ""))
+    except (ValueError, TypeError):
+        command = []
+    suffix = ["code/build.py", "run", plan["id"], "--execute"]
+    if command[-4:] != suffix or command[:-4] not in (["py", "-3"], ["python"], ["python3"]):
+        return ["UNSUPPORTED_ENTRY_POINT: contract must route through code/build.py run"]
+    tables = contract.get("tables")
+    if not isinstance(tables, list) or any(not isinstance(t, dict) for t in tables):
+        return ["REGISTRATION_UNAVAILABLE: malformed table contracts"]
+    by_table = {}
+    for table in tables:
+        name = table.get("table")
+        if not isinstance(name, str) or not name or name in by_table:
+            return ["REGISTRATION_UNAVAILABLE: missing or duplicate table name"]
+        builders, enrichers = table.get("rebuilt_by", []), table.get("enriched_by", [])
+        if (not isinstance(builders, list) or not isinstance(enrichers, list)
+                or any(not isinstance(s, str) for s in builders + enrichers)):
+            return ["REGISTRATION_UNAVAILABLE: malformed producer declarations"]
+        by_table[name] = set(builders + enrichers)
+    # These are hand-declared dependencies in the existing pipeline authority.
+    # Do not call all_orderings(): it adds inferred backup-name observations.
+    for ordering in KNOWN_ORDERINGS:
+        if ordering["file"] in by_table:
+            by_table[ordering["file"]].update((ordering["rebuild"], ordering["enricher"]))
+    issues = []
+    stages = plan.get("phase1", []) + plan.get("phase2", [])
+    if any(not isinstance(stage, str) for stage in stages):
+        return ["INVALID_STAGE_PATH: stage names must be strings"]
+    for stage in sorted(set(stages)):
+        if (not isinstance(stage, str) or not stage.endswith(".py")
+                or "/" in stage or "\\" in stage or stage in {".", ".."}):
+            issues.append("INVALID_STAGE_PATH: " + str(stage))
+            continue
+        if stage in NEVER_RUN:
+            issues.append("FORBIDDEN_PRODUCER: " + stage)
+            continue
+        outputs = set(plan.get("rb", {}).get(stage, []) + plan.get("en", {}).get(stage, []))
+        if not outputs:
+            issues.append("UNDECLARED_OUTPUTS: " + stage)
+        for output in sorted(outputs):
+            if retired_table_writer(stage, output):
+                issues.append("RETIRED_TABLE_WRITER: " + stage + " -> " + output)
+            elif output not in by_table:
+                issues.append("UNREGISTERED_TABLE: " + str(output))
+            elif stage not in by_table[output]:
+                issues.append("UNREGISTERED_PRODUCER: " + stage + " -> " + output)
+    return issues
+
+
+def script_inventory_problems(root=CEDAR, inventory=None):
+    """Require new data-code files to enter the existing 521 inventory.
+
+    Census inclusion is not permission to build: registration_problems also
+    checks every dispatched stage/output against the collection authority.
+    This deliberately treats previously inventoried unresolved scripts as
+    unresolved, not approved. Neither check claims to police direct shell runs.
+    """
+    root = Path(root)
+    if inventory is None:
+        try:
+            inventory = json.loads(
+                (root / "docs/schema/inventory.json").read_text(encoding="utf-8")
+            )
+        except (OSError, ValueError):
+            return ["SCRIPT_INVENTORY_UNAVAILABLE: regenerate the existing 521 script census"]
+    if not isinstance(inventory, dict) or not isinstance(inventory.get("scripts"), list):
+        return ["SCRIPT_INVENTORY_UNAVAILABLE: malformed script census"]
+    registered = set()
+    for item in inventory["scripts"]:
+        if not isinstance(item, dict) or not isinstance(item.get("script"), str):
+            return ["SCRIPT_INVENTORY_UNAVAILABLE: malformed script record"]
+        directory = item.get("dir", "").replace(".", "/")
+        registered.add((Path(directory) / item["script"]).as_posix())
+    issues = []
+    for path in sorted((root / "code").rglob("*.py")):
+        relative = path.relative_to(root / "code").as_posix()
+        if "__pycache__" in path.parts:
+            continue
+        if relative not in registered:
+            issues.append("UNINVENTORIED_DATA_CODE: code/" + relative)
+    return issues
 
 
 class ForbiddenScript(Exception):
@@ -63,6 +200,43 @@ NEVER_RUN = {
         "most destructive command in the repo, and its name does not say so. "
         "Use cedar_codebook.write_fragment() or cedar_register_codebook.py.",
 }
+
+#: CEDAR GAMING WRITERS SUPERSEDED BY LUMECON-DATA (fenced 2026-09-25).
+#:
+#: Repository split 2026-09-24: Lumecon-data (`lumecon_data/gaming/`) builds,
+#: validates and releases Cedar Grove Gaming; Cedar issues its IDs and consumes
+#: the pinned release. These scripts wrote a Gaming table whose job the Lumecon
+#: package now does and which Lumecon does NOT read, or (588) duplicate the
+#: maintained writer of a table Lumecon does read. Every other writer of a Cedar
+#: table Lumecon still reads stays runnable (inventory and kept list in
+#: docs/handoffs/GAMING_INTELLIGENCE_AUDIT_HANDOFF_2026-09-24.md). FENCED, NOT
+#: DELETED: each calls `guard()` first, the supported runner refuses them as
+#: FORBIDDEN_PRODUCER, and server/tests/test_gaming_writer_fence.py proves a
+#: direct run refuses before any read or write. Retire to
+#: `graveyard/<date>_gaming_superseded/` only after every consumer of
+#: `gaming_properties.csv` is cut over to the Grove release.
+GAMING_SUPERSEDED_BY_LUMECON = {
+    "82_build_gaming_property_dataset.py":
+        "Rebuilds gaming_properties.csv and gaming_property_capacity_history.csv "
+        "(Casino City licensed; may never ship) from a stale upstream. Superseded "
+        "by Lumecon-data gaming_grove_facilities.csv and gaming_facility_capacity.csv.",
+    "160_sync_published_gaming_view.py":
+        "Patches dates into the gaming_properties.csv view. The view is "
+        "superseded by Lumecon-data gaming_grove_facilities.csv / "
+        "gaming_facility_history.csv.",
+    "175_sync_published_property_view_entities.py":
+        "Re-keys entities on the gaming_properties.csv view. Superseded by "
+        "Lumecon-data gaming_grove_facilities.csv and gaming_facility_relationships.csv.",
+    "255_fix_gaming_property_deal_counts.py":
+        "Rewrites deal counts on the gaming_properties.csv view. Superseded with "
+        "the view by Lumecon-data gaming_grove_facilities.csv.",
+    "588_promote_self_published_claims.py":
+        "DUPLICATE WRITER: a full 'w' rebuild of gaming_property_self_published_"
+        "claims/assertions.csv from 2026-08-26 staging that reverts the "
+        "1094_merge_web_harvest_into_gaming_claims.py merge. Lumecon-data pins "
+        "those tables' bytes; the maintained writer is 1094.",
+}
+NEVER_RUN.update(GAMING_SUPERSEDED_BY_LUMECON)
 
 #: SCRIPTS THAT USED TO BE IN `NEVER_RUN` AND ARE NOT ANY MORE.
 #:
@@ -597,6 +771,8 @@ KNOWN_ORDERINGS = [
     {"rebuild": "24_funding_merge.py",
      "enricher": "503_identity.py",
      "file": "federal_funding_transactions.csv",
+     "retired_writers": ["335_harmonize_assistance_seams_in_place.py",
+                         "336_correct_scheme_resolution_by_spine_membership.py"],
      "cost": "not yet paid - 505 runs LAST of all enrichers; any rebuild of a "
              "stamped table drops cedar_uid and ships a dataset a customer "
              "cannot join",

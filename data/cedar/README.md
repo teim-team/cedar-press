@@ -1,8 +1,96 @@
-# Cedar data → Cedar Press
+# Cedar data to Cedar Press
 
-Real rows from the Cedar Press data project, in the shape this product already
-declares. **This is wired in now.** It was not when the paragraph here said so,
-and the wiring is described below.
+This directory owns Cedar Press's tracked product metadata. See the
+[Havala packet](../../docs/HAVALA_INFRASTRUCTURE_REVIEW.md) for release proofs,
+fixed review ranges and limitations.
+
+## Add a collection to the governed release path
+
+Onboard one approved flagship with its existing collection ID and declared grain.
+This does not authorize production publication or certify ancillary tables. Reuse
+the existing runner, manifest, catalog and download adapter.
+
+1. **Pin evidence and gates.** Run `python code/build.py plan <collection>`, then
+   inspect its stages' inputs. Missing workspace data can leave this acquisition
+   plan incomplete; a snapshot pilot does not certify that acquisition rebuilt.
+   Record source, register and decision hashes; source
+   dates, rights, grain and primary key. Agents do not impose publication holds
+   (owner ruling 2026-10-04). Preserve rows and issued
+   IDs. Resolve owed fields through `data/cedar/field_map.json` and existing owner
+   decisions; never discard qualifications or rematch identities to pass.
+2. **Register the producer in Lumecon Data.** Follow its authoritative
+   `docs/data-intake.md` and `docs/developer-guide.md`: a reviewed source profile,
+   existing `DatasetContract`, bounded producer under `collections/`, and the
+   existing `collection-build` dispatch. Cedar's `RELEASE_PILOTS` is only a
+   compatibility allowlist, not the source schema or producer registry.
+   Preserve existing grains/keys during migration and regenerate contracts
+   through their owners. Lumecon's `DatasetContract`,
+   `ingest_csv`, `build_release` and `verify_release` own governed releases.
+   `registered_reference` preserves existing scalar CE links: null stays null,
+   unknown fails; preserve plural associations separately. The fixed
+   `REFERENCE_PRESERVATION_AUTHORITY` records preservation authorization, not
+   historical identity approval or the build's check date.
+3. **Build and repeat in isolation.** Use Lumecon's declared locked environment
+   and explicit immutable source, reviewed field-map, resolved register and scope
+   snapshots. Legislation additionally needs its action snapshot. These are
+   migration inputs, not live imports of the Cedar workspace. Keep stores outside
+   Git checkouts and canonical input directories:
+
+   ```powershell
+   Set-Location '<Lumecon-data-checkout>'
+   & '<Lumecon-python>' -B -m lumecon_data collection-build legislation --source '<snapshot>\native_bills.csv' --actions '<snapshot>\native_bill_actions.csv' --field-map '<snapshot>\legislation-field-map.json' --register '<snapshot>\register.json' --scopes '<snapshot>\scopes.json' --root '<isolated-store>' --as-of '2026-09-24'
+   ```
+
+   `--as-of` is an operator check date, not source cutoff. Require deterministic
+   release IDs, row/key conservation, namespace/minting-authority validation, no
+   filled/reassigned CE links, and recorded schema/count/snapshot/hashes. Missing
+   inputs, malformed CSV, path escapes and attempted immutable
+   replacement must fail. An empty plan is not success.
+4. **Pin and exercise the consumer.** Existing `build_catalog(...,
+   product="cedar_press")` binds the release and public API manifest through
+   `manifest_sha256`, including artifact hashes. Regenerate older catalogs lacking
+   that digest from verified releases. Catalog/API share `manifest_metadata`;
+   private identity mappings stay internal. Configure server-only
+   `CEDAR_PRESS_RELEASE_CATALOG`, `CEDAR_PRESS_DATA_API` and `CEDAR_PRESS_DATA_TOKEN`
+   per [server/README.md](../../server/README.md). The local rehearsal creates
+   development credentials and refuses inherited `DATABASE_URL`/`CEDAR_PRESS_DB`:
+
+   ```powershell
+   Set-Location '<Cedar-Press-checkout>'
+   $env:PYTHONPATH='<Lumecon-data-checkout>\src;<Cedar-Press-checkout>\server'
+   & '<consumer-test-python>' -B server/tests/release_download_rehearsal.py --store '<isolated-store>' --catalog '<printed-catalog-path>'
+   ```
+
+   Require anonymous/wrong-tier denial, exact authorized bytes, matching metadata,
+   eight current-run redacted audit events and rollback. Focused/database tests
+   must also prove removed/downgraded accounts and subscriber-store failures cannot
+   fetch artifacts. Rollback selects a previously verified catalog without
+   mutating either immutable release.
+5. **Verify format, metadata and handoff.** Full downloads are exact
+   `records.jsonl` (`application/x-ndjson`); samples remain CSV. `fullRelease`
+   excludes ancillary tables. Customer CSV and frontend full-download controls
+   require separate implementation/proof. Preserve the five metadata authorities
+   below; regenerate affected outputs without API-specific copies. Run
+   `python code/521_inventory.py check-scripts`, `make check-generated`, focused
+   registration/publication/ID and release-contract tests, and both repositories'
+   full CI, including Ubuntu symlinks and disposable Postgres. Preserve canonical
+   and published hashes; exclude private candidates from Git. Record results in
+   the existing Havala packet. Production changes require separate authorization.
+
+**Minimum files:** Lumecon's reviewed collection contract/producer and tests;
+Cedar's product field presentation/catalog and consumer tests only where required.
+Do not add another Cedar transform or handwritten release schema. Refresh
+registered transitional executable changes with
+`python code/521_inventory.py scripts-only`; preserve dated table measurements.
+No numbered scripts, new registries or collection-specific adapter branches.
+Retire replaced producers only after consumer, test and documentation cutover.
+
+**Historical onboarding before producer cutover:** Natural Resources added 9 configuration lines and one
+19-line qualification-preservation branch: zero new configuration files/endpoints
+or shared-adapter collection branches. Shared build and Lumecon validation changes
+are additional, separately reviewed infrastructure work. Its producer and source
+qualification rules now live in Lumecon; this historical count does not describe
+the later repository migration.
 
 ## Runtime metadata contract (takeover verification, 2026-09-23)
 
@@ -16,10 +104,10 @@ versioned data store; this repository retains the metadata for the release it se
 
 | File | Authority and required inputs | Consumers | Fresh-clone and release rule |
 |---|---|---|---|
-| `codebook.json` | Curated field definitions; no JSON generator. `scripts/codebook-markdown.mjs` generates its Markdown view, not this source. | `src/features/grove/explore.js` supplies headings/record meanings; codebook and guide generators; `server/tests/test_field_map.py` and Explore tests compare approved fields. | Commit the reviewed source. Definitions cannot be reconstructed from column names alone. Generated documentation is reproducible and freshness-checked. |
+| `codebook.json` | Curated field definitions; no JSON generator. `scripts/docs-markdown.mjs --kind codebook` generates its Markdown view, not this source. | `src/features/grove/explore.js` supplies headings/record meanings; codebook and guide generators; `server/tests/test_field_map.py` and Explore tests compare approved fields. | Commit the reviewed source. Definitions cannot be reconstructed from column names alone. Generated documentation is reproducible and freshness-checked. |
 | `collections.manifest.json` | `scripts/import_cedar_manifest.py`, from `760_collection_descriptors.py` outputs, `1135_full_dataset_review_bundle.py` review manifest/samples, and `770_sample_extracts.py` flagship declarations. | `collection.js` and `server/cedar_press/collections.py`, then catalog, filters, sources, citations, downloads and API; Explore, guides, codebook, field-map, sample, release and SEO generators. | Commit the imported release snapshot. A fresh product clone can serve and test it, but cannot regenerate it without the pinned workspace descriptors and release inputs. Never substitute an empty-workspace import. The importer's `--audit` also writes; it is not a read-only verification command. |
-| `field_map.json` | Curated publication/column decisions under `docs/PUBLIC_DATASET_SPEC_2026-09-05.md`; no JSON generator. `scripts/field-map-markdown.mjs` generates its two review documents. | `code/cedar_publication.py` applies it during `1137_customer_dataset_combine.py` exports; guide/field-map generators, Explore and Python field-map tests. | Commit reviewed decisions. A clone can test fixtures and sample compatibility; proving mappings on full customer files needs the full-data release job. Do not infer a decision for an undeclared column. |
-| `releases.json` | `scripts/record-release.mjs`, using the manifest **and retained prior ledger**. | `src/features/grove/pressReleases.js`, release feed and citations, release tests; `scripts/dump-press.mjs` includes that catalog in the Python API snapshot. | Commit append-only release history. `--check` verifies current manifest/ledger consistency without rewriting history. The latest manifest cannot recreate superseded releases. |
+| `field_map.json` | Curated publication/column decisions under `docs/PUBLIC_DATASET_SPEC_2026-09-05.md`; no JSON generator. `scripts/docs-markdown.mjs --kind field-map` generates its two review documents. | `code/cedar_publication.py` applies it during `1137_customer_dataset_combine.py` exports; guide/field-map generators, Explore and Python field-map tests. | Commit reviewed decisions. A clone can test fixtures and sample compatibility; proving mappings on full customer files needs the full-data release job. Do not infer a decision for an undeclared column. |
+| `releases.json` | `scripts/record-release.mjs`, using the manifest **and retained prior ledger**. | `src/features/grove/pressReleases.js`, release feed and citations, release tests; `scripts/dump.mjs --kind press` includes that catalog in the Python API snapshot. | Commit append-only release history. `--check` verifies current manifest/ledger consistency without rewriting history. The latest manifest cannot recreate superseded releases. |
 | `samples.published.json` | `scripts/measure-samples.mjs`, using the manifest plus Git index and matching public sample bytes. | `collection.js` and Python `collections.py` determine sample availability, then download/UI/API paths; sample and collection parity tests. | Commit the deterministic measured snapshot with its inputs. `--check` and `--selftest` distinguish committed, absent, untracked and unstaged samples. A file merely present on one machine is not a published sample. |
 
 The supported freshness surface remains `make check-generated`: codebook, Explore,
@@ -60,7 +148,14 @@ without replacing history, then run the existing generated and consumer checks
 from a clean checkout. Commit the resulting coherent metadata snapshot under the
 release authorization; do not label a passing static build a completed data release.
 
-## Why this exists
+## Historical sample integration background
+
+The sections below retain the original measured integration findings and review
+history. For current full-release behavior and onboarding, use the procedure
+above and the fixed Havala review packet; historical sample measurements are
+not a current completeness or deployment certificate.
+
+### Why this exists
 
 `server/cedar_press/collections.py` said it plainly:
 
@@ -116,24 +211,27 @@ workspace keeps every collection and this repository keeps
 `samples/newsletters__sample.csv`. What the ruling withdrew is a storefront
 slot, not a dataset.
 
-**Downloads hand over ten rows, and say so.** Each collection's download button
-serves its flagship table's ten-row sample from
-`public/data/cedar/samples/<collection>/<table>__10.csv`, with a `cite_as` row
-appended. Every tile, label and filename says "sample": a button called
+**Downloads hand over a sample, and say how many rows.** Each collection's
+download button serves its customer table,
+`public/data/cedar/downloads/<collection>.csv`: the flagship's producer sample
+rendered through the vendored `customer_sheet` rules, one flat table with a
+`cite_as` column (2026-10-04; `scripts/render_sample_downloads.py`). Every
+tile, label and filename says "sample", and the label states the table's real
+row count, which can be under ten (Federal Register 5, PLOT 3): a button called
 "Download Federal Register" that hands over ten rows is the defect this whole
-exercise is about.
+exercise is about. The raw producer samples sit under
+`data/cedar/samples/<collection>/spreadsheet__10.csv` and are not served.
 
-**The full spreadsheets are referenced, never committed.** 1135 also writes
+**The legacy full spreadsheets are referenced, never committed.** 1135 also writes
 `dist/review/spreadsheets/`, measured at **6.2 GB**, with single tables over
 GitHub's 100 MB limit. They are not here. Every table in the manifest carries
 its row count, its split (by fiscal year where the table has one), its file
 count and its largest file in MB, and `full_files.served` is `false`. That is
-what a serving layer needs to locate the real file, and the honest statement
-that no such layer exists yet. **When one does**, the files should be served
-from object storage behind the existing entitlement check in
-`server/cedar_press/app.py` — the route already refuses a collection the
-subscription does not include — and the manifest entry becomes the key rather
-than a description.
+the legacy spreadsheet export description, not proof of an authorized full
+download. A separate approved Lumecon catalog now enables the existing protected
+full-release API for exact JSONL artifacts; it does not serve these historical
+spreadsheets or turn `full_files.served` into true. Production object-storage
+provisioning and frontend full-download wiring remain separate gates.
 
 ### What is still not measured, and says so
 

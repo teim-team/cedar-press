@@ -145,7 +145,12 @@ same digest for every such row: a duplicate key wearing a hash.
 than restating it: SAM's public entity search resolves a UEI to a legal name and a
 street address, so for a firm whose legal name **is** a person's name, publishing the
 UEI publishes the person by one hop. `cedar_domain.INDIVIDUAL_NATIVE_WITHHELD_FIELDS`
-already withholds `awardee_uei` and `cage_code` for exactly that reason.
+withheld `awardee_uei` and `cage_code` for exactly that reason when this was written.
+*Dated note, 2026-10-02:* the owner ruled that a firm is a business entity regardless
+of what it is named after and its UEI is a public business registration, so the set
+now publishes (`docs/REVIEW_STATUS.md`, "Owner ruling: individually owned firm records
+publish"). The surrogate key below is kept for join stability; it is no longer the
+privacy control it was minted as.
 
 **A primary key must obey the same rule or it reintroduces what the field policy
 removed.** `individual_native_firm_register.csv` and

@@ -229,7 +229,10 @@
 .teim-rd .cp-foot__meta { display: flex; flex-direction: column; gap: 0.35rem; text-align: right; }
 /* The governance pathway, discoverable from every page's ending without
  * becoming a marketing element. */
-.teim-rd .cp-foot__gov a { color: var(--teal); }
+/* A 24px-tall target without moving the line: the padding is taken back by
+ * the margin. It was 16px tall with the footer nav close by, which axe's
+ * target-size rule (WCAG 2.5.8) failed on every signed-in page. */
+.teim-rd .cp-foot__gov a { color: var(--teal); display: inline-block; padding-block: 4px; margin-block: -4px; }
 .teim-rd .cp-foot--deep .cp-foot__nav a { color: rgba(255, 255, 255, 0.82); }
 .teim-rd .cp-foot--deep .cp-foot__nav a:hover { color: #fff; }
 .teim-rd .cp-foot--deep .cp-foot__meta { border-top-color: rgba(255, 255, 255, 0.14); }
@@ -484,7 +487,9 @@
 .teim-rd .cp-navm > summary:focus-visible { outline: 2px solid var(--dteal); outline-offset: 2px; }
 .teim-rd .cp-navm__here { font-family: var(--sans); font-size: 0.88rem; font-weight: 700; color: var(--ink); }
 .teim-rd .cp-navm__cue { font-size: 0.7rem; color: var(--muted); }
-.teim-rd .cp-navm__menu { position: absolute; top: calc(100% + 0.5rem); left: 0; z-index: 40; min-width: 14rem; display: flex; flex-direction: column; padding: 0.4rem; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 16px 40px rgba(10, 15, 38, 0.16); }
+/* Anchored to the control's right edge: from the left it ran 43-59px past a
+ * 375px screen, clipping the panel's edge (measured 2026-10-04). */
+.teim-rd .cp-navm__menu { position: absolute; top: calc(100% + 0.5rem); right: 0; z-index: 40; min-width: 14rem; display: flex; flex-direction: column; padding: 0.4rem; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 16px 40px rgba(10, 15, 38, 0.16); }
 .teim-rd .cp-navm__item { display: flex; align-items: center; min-height: 44px; padding: 0.4rem 0.7rem; border-radius: 6px; font-size: 0.95rem; color: var(--ink); text-decoration: none; }
 .teim-rd .cp-navm__item:hover { background: var(--teal-tint); color: var(--dteal); }
 .teim-rd .cp-navm__item[aria-current="page"] { color: var(--dteal); font-weight: 700; }
@@ -3571,7 +3576,10 @@ body[data-cp-explore-in-view] .teim-rd .cedar-widget .cp-greet { display: none; 
 .teim-rd .cp-rail__item:hover .cp-rail__name,
 .teim-rd .cp-rail__item.is-on .cp-rail__name { color: #fff; }
 .teim-rd .cp-rail__item.is-locked .cp-rail__name { color: rgba(255, 255, 255, 0.6); }
-.teim-rd .cp-rail__rows { font-family: var(--mono); font-size: 0.6rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: rgba(255, 255, 255, 0.45); }
+/* 0.6, the rail's own value for subordinate names (`.is-locked`). At 0.45 the
+ * counts measured 4.47:1 on the navy rail and 4.09:1 on the selected row,
+ * under the 4.5:1 that 9.6px text needs (axe, 2026-10-04). */
+.teim-rd .cp-rail__rows { font-family: var(--mono); font-size: 0.6rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: rgba(255, 255, 255, 0.6); }
 /* Subordinate, not removed, and named rather than padlocked: a reader who
  * cannot open something is owed the name of the thing that opens it. */
 .teim-rd .cp-rail__item.is-locked { color: rgba(255, 255, 255, 0.58); }
@@ -3767,7 +3775,8 @@ body[data-cp-preview-in-view] .teim-rd .cp-dc__fab { display: none; }
 /* A card is a link to the record's page now, not a drawer that opened one
  * inside the list. */
 .teim-rd .cp-ex__cards li { border-bottom: 1px solid var(--line-soft); }
-.teim-rd .cp-ex__cardwho { font-weight: 700; font-size: 0.92rem; }
+.teim-rd .cp-ex__cardwho { font-weight: 700; font-size: 0.92rem; padding-inline-end: 1.75rem; }
+.teim-rd .cp-ex__table .cp-rec__source { display: grid; gap: 0.2rem; min-width: 16rem; max-width: 24rem; white-space: normal; overflow-wrap: anywhere; }
 /* The identity block stacks too. `.cp-ex__uid` is `display: block`
  * everywhere else; this rule pulled it back inline to save a line, which
  * works for "Curyung Tribal Council CE-0001H-BS" and fails for every long
@@ -3787,7 +3796,9 @@ body[data-cp-preview-in-view] .teim-rd .cp-dc__fab { display: none; }
 .teim-rd .cp-ex__cardmeta { font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--dteal); }
 .teim-rd .cp-ex__cardobs { font-size: 0.86rem; line-height: 1.4; color: var(--ink-2); }
 .teim-rd .cp-ex__panelhead { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem; }
-.teim-rd .cp-ex__close { width: 2rem; height: 2rem; border: 1px solid var(--line); background: var(--bg); color: var(--ink); font: inherit; font-size: 1.1rem; line-height: 1; cursor: pointer; }
+/* flex: none: in the picker's head the label squeezed this to 14px wide on a
+ * phone, a sliver of a close button. */
+.teim-rd .cp-ex__close { flex: none; width: 2rem; height: 2rem; border: 1px solid var(--line); background: var(--bg); color: var(--ink); font: inherit; font-size: 1.1rem; line-height: 1; cursor: pointer; }
 .teim-rd .cp-ex__badge { display: inline-block; margin-right: 0.4rem; padding: 0.05rem 0.4rem; border: 1px solid var(--amber); color: var(--amber); font-family: var(--mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; vertical-align: middle; }
 .teim-rd .cp-ex__table tr.is-superseded td { color: var(--muted); }
 .teim-rd .cp-ex__unlinkedopt { border-top: 2px solid var(--line) !important; }
@@ -3814,7 +3825,14 @@ body[data-cp-preview-in-view] .teim-rd .cp-dc__fab { display: none; }
 .teim-rd .cp-ex__act { display: inline-flex; align-items: center; gap: 0.4rem; min-height: 44px; padding: 0.45rem 0.9rem; border: 1px solid var(--teal); border-radius: 0; background: var(--teal-tint); color: var(--dteal); font: inherit; font-size: 0.88rem; font-weight: 700; cursor: pointer; }
 .teim-rd .cp-ex__act:hover:not(:disabled) { background: var(--dteal); border-color: var(--dteal); color: #fff; }
 .teim-rd .cp-ex__act:disabled { opacity: 0.5; cursor: default; }
-.teim-rd .cp-ex__clear, .teim-rd .cp-ex__link { border: 0; background: none; padding: 0 0.3rem; font: inherit; font-size: 0.8rem; font-weight: 600; color: var(--dteal); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+/* `.cp-retry`: the Retry offered wherever a request failed or timed out
+ * (api.js, sampleFetch.js), the same quiet text button as Clear filters. */
+.teim-rd .cp-ex__clear, .teim-rd .cp-ex__link, .teim-rd .cp-retry { border: 0; background: none; padding: 0 0.3rem; font: inherit; font-size: 0.8rem; font-weight: 600; color: var(--dteal); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+/* The notice above every page when the session check did not reach the
+ * service (AuthProvider.jsx). */
+.teim-rd.cp-netnote { position: fixed; z-index: 90; display: block; min-height: 0; left: 1rem; bottom: 1rem; max-width: min(30rem, calc(100vw - 2rem)); margin: 0; padding: 0.75rem 1rem; background: var(--ground); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 8px 28px rgba(7, 24, 36, 0.18); font-family: var(--sans); font-size: 0.86rem; line-height: 1.45; color: var(--ink); }
+.teim-rd.cp-netnote p { margin: 0; }
+.teim-rd .cp-retry:disabled { color: var(--muted); text-decoration: none; cursor: default; }
 .teim-rd .cp-ex__clear:disabled { color: var(--muted); text-decoration: none; cursor: default; }
 .teim-rd .cp-ex__fine { font-size: 0.8rem; line-height: 1.45; color: var(--muted); }
 
@@ -3942,6 +3960,10 @@ body[data-cp-preview-in-view] .teim-rd .cp-dc__fab { display: none; }
 .teim-rd .cp-ex__foot .cp-read__cedar:disabled { color: var(--muted); cursor: default; text-decoration: none; }
 .teim-rd .cp-ex__pages { margin-left: auto; font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); display: inline-flex; align-items: center; gap: 0.4rem; }
 .teim-rd .cp-ex__pages .cp-ex__clear { font-size: 1.1rem; text-decoration: none; }
+/* The page arrows are a 20px glyph; on touch they get the 24px minimum. */
+@media (hover: none) {
+  .teim-rd .cp-ex__pages .cp-ex__clear { min-width: 24px; min-height: 24px; }
+}
 @media (max-width: 720px) {
   .teim-rd .cp-ex { padding-inline: 1.15rem; }
   .teim-rd .cp-ex__head { grid-template-columns: 1fr; }
@@ -4768,6 +4790,12 @@ body[data-cp-preview-in-view] .teim-rd .cp-dc__fab { display: none; }
   .teim-rd .cp-page--table .cp-ex__bar > .cp-ex__acts > * { flex: 1 1 0; justify-content: center; }
   /* The filters panel is the width of the screen here, not of a control. */
   .teim-rd .cp-page--table .cp-ex__bar > .cp-ex__filters[open] > .cp-ex__filtersin { width: min(20rem, calc(100vw - 2rem)); }
+  /* ...and it hangs from the toolbar, not from the Filters control. Anchored
+     to the control's right edge it started 53-63px left of a 375px screen,
+     so the labels and the first year box were cut off. */
+  .teim-rd .cp-page--table .cp-ex__bar { position: relative; }
+  .teim-rd .cp-page--table .cp-ex__bar > .cp-ex__filters { position: static; }
+  .teim-rd .cp-page--table .cp-ex__bar > .cp-ex__filters[open] > .cp-ex__filtersin { left: 1rem; right: auto; }
   /* The status bar wraps rather than truncating: below the records there is
      nothing to protect, and a phone cannot hold six things on one line. */
   .teim-rd .cp-page--table .cp-ex__foot { flex-wrap: wrap; }

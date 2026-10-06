@@ -70,7 +70,7 @@ anything below before relying on it.*
 - **The release ledger is append-only.** `scripts/record-release.mjs` refuses
   a date change under an existing version, so a new date needs a new version.
   All twelve collections went v1 to v2 on 2026-09-26 for this reason.
-- **Generated files and their gate.** `scripts/dump-press.mjs` now has
+- **Generated files and their gate.** `scripts/dump.mjs --kind press` now has
   `--check` and runs in `make check-generated` (on #122). Before that, a
   stale `server/cedar_press/_press_data.json` surfaced only in
   `make test-python`.

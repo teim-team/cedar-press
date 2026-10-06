@@ -56,8 +56,10 @@
  * drawn.
  */
 
+import { parseCsv, csvCell } from "./csv.js";
 import manifest from "../../../data/cedar/collections.manifest.json" with { type: "json" };
 import published from "../../../data/cedar/samples.published.json" with { type: "json" };
+import { codebookTables } from "./codebook.js";
 
 import { CLAIM_CLASS } from "./claims.js";
 // The storefront's own naming. `pressCatalog.js` imports nothing, so this is
@@ -129,25 +131,12 @@ const CEDAR = deepFreeze(
 );
 
 /**
- * The published observations in each collection's dataset, added up, or null
- * if any collection arrived without a count: a total that quietly skipped a
- * collection would read as the total.
- *
- * The dataset is the collection's main table (`sample.table`), counted as
- * published (`rows_published`, after withheld rows). `cedar.n_rows` is NOT
- * this: it adds every supporting table in the release (crosswalks, audits,
- * coverage tables) and read 8,595,567 against 2,074,020 real observations
- * (owner, 2026-10-06).
+ * Every row the twelve releases hold, added up from the workspace's own
+ * count per collection, or null if any collection arrived without one: a
+ * total that quietly skipped a collection would read as the total.
  */
-const datasetRows = (entry) =>
-  entry.tables?.find((table) => table.table === entry.sample?.table)?.rows_published ?? null;
-/** The published observations in one collection's dataset, or null. */
-export function datasetRowsOf(collectionId) {
-  const entry = manifest.collections.find((item) => item.id === collectionId);
-  return entry ? datasetRows(entry) : null;
-}
-export const LAUNCH_ROWS_TOTAL = manifest.collections.every((entry) => Number.isInteger(datasetRows(entry)))
-  ? manifest.collections.reduce((sum, entry) => sum + datasetRows(entry), 0)
+export const LAUNCH_ROWS_TOTAL = manifest.collections.every((entry) => Number.isInteger(entry.cedar?.n_rows))
+  ? manifest.collections.reduce((sum, entry) => sum + entry.cedar.n_rows, 0)
   : null;
 /**
  * Sample files the manifest declares and this repository does not hold.
@@ -179,6 +168,9 @@ function tableWithPublication(table) {
   return { ...table, sample_path: null, sample_unpublished: table.sample_path };
 }
 
+// Owner ruling 2026-10-04 (Elijah Moreno): Lumecon decides what is blocked.
+// No collection-wide publication hold stands, so the site applies none.
+
 const SAMPLES = deepFreeze(
   Object.fromEntries(
     manifest.collections.map((entry) => [entry.id, withPublication(entry.sample)]),
@@ -186,7 +178,7 @@ const SAMPLES = deepFreeze(
 );
 const TABLES = deepFreeze(
   Object.fromEntries(
-    manifest.collections.map((entry) => [entry.id, entry.tables.map(tableWithPublication)]),
+    manifest.collections.map((entry) => [entry.id, entry.tables.map((table) => tableWithPublication(table))]),
   ),
 );
 
@@ -280,13 +272,10 @@ export function collectionShort(dataset) {
   return STOREFRONT_SHORT[dataset.id] ?? dataset.shortName;
 }
 
-/** One line for the context strip: the collections and the latest refresh
- * date. No version numbers: datasets are not versioned for readers (owner,
- * 2026-10-06). */
+/** One line for the context strip: versions and the latest refresh date. */
 export function collectionContextLine() {
-  const names = LAUNCH_COLLECTION.map((d) => collectionShort(d)).join(" · ");
   const updated = LAUNCH_COLLECTION.map((d) => d.updated).sort().slice(-1)[0];
-  return `${names} · all current as of ${updated}`;
+  return `Updated ${updated}`;
 }
 
 /**
@@ -345,37 +334,59 @@ export function collectionFindings() {
     },
   ];
 
+  const availabilityNeeds = LAUNCH_COLLECTION.flatMap((dataset) => {
+    const facts = collectionCedarFacts(dataset.id);
+    const sample = collectionSample(dataset.id);
+    const missing = [];
+    if (!Number.isSafeInteger(facts?.n_rows) || facts.n_rows < 0) {
+      missing.push("The current release does not state a row count.");
+    }
+    if (!sample?.path) {
+      missing.push(sampleUnavailableReason(dataset.id) || "No preview file is published for the current release.");
+    }
+    return missing.length ? [{
+      id: `col-need-${dataset.id}-availability`,
+      text: `${dataset.name}: ${missing.join(" ")}`,
+      demonstration: false,
+    }] : [];
+  });
+  const withoutVintage = LAUNCH_COLLECTION.filter(
+    (dataset) => typeof dataset.vintage !== "string" || !dataset.vintage.trim(),
+  );
+  const vintageNeeds = withoutVintage.length ? [{
+    id: "col-need-vintage",
+    text: (withoutVintage.length === LAUNCH_COLLECTION.length
+      ? "No collection states a vintage."
+      : `A collection vintage is not stated for: ${withoutVintage.map((dataset) => dataset.name).join("; ")}.`)
+      + " An update date does not establish the periods covered by every source.",
+    demonstration: false,
+  }] : [];
+
   const needs = [
     {
       id: "col-need-closing",
-      text: "Three large announced deals await closing confirmation before they enter totals (Deals, primary source pending).",
+      text: "Demonstration: Three large announced deals await closing confirmation before they enter totals (Deals, primary source pending).",
+      demonstration: true,
     },
     {
       id: "col-need-fy26",
-      text: "FY2026 assistance figures are partial until the Q1 release lands (Funding, USAspending publication lag).",
+      text: "Demonstration: FY2026 assistance figures are partial until the Q1 release lands (Funding, USAspending publication lag).",
+      demonstration: true,
     },
     {
       id: "col-need-matches",
-      text: "Two parent-entity matches are provisional pending SAM re-registration (Contractors, entity resolution queue).",
+      text: "Demonstration: Two parent-entity matches are provisional pending SAM re-registration (Contractors, entity resolution queue).",
+      demonstration: true,
     },
-    {
-      id: "col-need-owned-terms",
-      text: "White Earth listings enter entity rows once the nation confirms publication terms; aggregates only until then (Owned, consent pending).",
-    },
-    {
-      id: "col-need-owned-membership",
-      text: "Native-Owned Businesses publishes no row count and no preview file: the table Cedar names as the collection's flagship is not one its collection contract claims, and the two memberships have not been reconciled (Owned, collection membership unresolved).",
-    },
-    {
-      id: "col-need-vintage",
-      text: "No collection states a vintage: Cedar's cadence measurement produced no newest-held period for any of them, so the field is absent rather than estimated.",
-    },
+    ...availabilityNeeds,
+    ...vintageNeeds,
   ];
 
   const narratives = [
     {
       id: "col-lead-energy",
-      name: "Energy project financing expansion",
+      name: "Demonstration: Energy project financing expansion",
+      demonstration: true,
       have: 3,
       need: 3,
       missing: [],
@@ -383,7 +394,8 @@ export function collectionFindings() {
     },
     {
       id: "col-lead-8a",
-      name: "8(a) participation and award growth",
+      name: "Demonstration: 8(a) participation and award growth",
+      demonstration: true,
       have: 3,
       need: 3,
       missing: [],
@@ -391,7 +403,8 @@ export function collectionFindings() {
     },
     {
       id: "col-lead-assist",
-      name: "Assistance shifts under new appropriations",
+      name: "Demonstration: Assistance shifts under new appropriations",
+      demonstration: true,
       have: 2,
       need: 3,
       missing: ["Q1 release"],
@@ -402,10 +415,10 @@ export function collectionFindings() {
   return { supported, needs, narratives };
 }
 
-/** A figure's basis line: the collection, never a version number. */
+/** A figure's basis line, derived so it cannot name a stale version. */
 function basisFor(datasetId, fallback) {
   const dataset = LAUNCH_COLLECTION.find((item) => item.id === datasetId);
-  return dataset ? collectionShort(dataset) : fallback;
+  return dataset ? `${collectionShort(dataset)}, updated ${dataset.updated}` : fallback;
 }
 
 /**
@@ -520,35 +533,12 @@ export function figuresInShelfOrder() {
 export function collectionCitation(datasetId, accessedOn = null) {
   const dataset = LAUNCH_COLLECTION.find((item) => item.id === datasetId);
   if (!dataset) return null;
-  const vintage = dataset.vintage ? `, vintage ${dataset.vintage}` : "";
+  const updated = dataset.updated ? ` Updated ${dataset.updated}.` : "";
   const accessed = accessedOn ? ` Accessed ${accessedOn}.` : "";
   return (
-    `Lumecon, "${dataset.name}" (updated ${dataset.updated}${vintage}), ` +
-    `Cedar Press collection, cedarpress.ai.${accessed}`
+    `Lumecon, "${dataset.name}", ` +
+    `Cedar Press collection, cedarpress.ai.${updated}${accessed}`
   );
-}
-
-// One CSV cell, quoted only when the value needs it, so ordinary cells stay
-// byte-identical to what they were before quoting existed.
-function csvCell(value) {
-  const text = String(value ?? "");
-  return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
-}
-
-/**
- * The number of columns in a CSV header line, respecting quoted cells.
- *
- * A header like `a,"b,c",d` is three columns, not four, and the citation row
- * has to be padded to the real width or the file is ragged.
- */
-function columnCount(headerLine) {
-  let count = 1;
-  let quoted = false;
-  for (const character of headerLine) {
-    if (character === '"') quoted = !quoted;
-    else if (character === "," && !quoted) count += 1;
-  }
-  return count;
 }
 
 /**
@@ -564,7 +554,7 @@ function columnCount(headerLine) {
  * the rows a tile promises is the failure this avoids, and `hasReleaseFile` in
  * pressDownload.js reads this to keep the tile honest.
  *
- * The last row is the citation. A downloaded file outlives the page it came
+ * The citation is a column on each observation, never an extra data row. A downloaded file outlives the page it came
  * from, so the file itself must say what it is, whose work it is and how to
  * credit it; provenance that lives only in the UI is provenance the reader
  * loses on save.
@@ -573,14 +563,32 @@ function columnCount(headerLine) {
  * Node reads from disk. The bytes are not bundled: the twelve collections
  * carry 169 sample files and inlining them would put 1.4 MB of CSV into the
  * page for a button most readers never press.
+ *
+ * A current-release spreadsheet sample is checked against the codebook's
+ * columns, so the caller awaits `loadCodebook()` (codebook.js) first;
+ * `csvFor` in pressDownload.js does.
  */
 export function collectionCsv(datasetId, sampleText) {
   const sample = SAMPLES[datasetId];
   if (!sample?.path || sampleText == null) return null;
-  const lines = sampleText.replace(/\r\n/g, "\n").replace(/\n+$/, "").split("\n");
-  const width = columnCount(lines[0]);
-  const citation = ["cite_as", collectionCitation(datasetId) ?? "", ...Array(Math.max(0, width - 2)).fill("")];
-  return [...lines, citation.map(csvCell).join(",")].join("\n");
+  const { columns, rows } = parseCsv(sampleText);
+  if (sample.path.endsWith("/spreadsheet__10.csv")) {
+    // The current release replaces historical previews. A cached response
+    // with the old schema must not acquire a citation for the new release.
+    const table = sample.table;
+    const key = typeof table === "string" && table.endsWith(".csv")
+      ? `${datasetId}/${table.slice(0, -4)}` : null;
+    const expected = codebookTables()[key]?.fields?.map((field) => field.column);
+    if (!expected || columns.length !== expected.length
+        || expected.length !== sample.columns
+        || columns.some((column, index) => column !== expected[index])
+        || rows.length !== sample.rows) return null;
+  }
+  const citation = collectionCitation(datasetId) ?? "";
+  return [
+    [...columns, "cite_as"],
+    ...rows.map((row) => [...columns.map((name) => row[name]), citation]),
+  ].map((row) => row.map(csvCell).join(",")).join("\n");
 }
 
 /**
@@ -597,4 +605,47 @@ export function hasSample(datasetId) {
 /** Where the browser fetches a collection's preview file, or `null`. */
 export function samplePath(datasetId) {
   return SAMPLES[datasetId]?.path ?? null;
+}
+
+/**
+ * Validate the public manifest binding for NEED's reviewed finite component,
+ * then compare the fetched CSV bytes. The private proof envelope stays off
+ * the client; staging verifies it before publishing this digest.
+ */
+export async function reviewedPreviewTextMatches(sampleText, sample, proof) {
+  const sha256 = (value) => typeof value === "string" && /^[a-f0-9]{64}$/.test(value);
+  if (typeof sampleText !== "string"
+      || sample?.table !== "need.csv"
+      || sample?.path !== "/data/cedar/samples/need/spreadsheet__10.csv"
+      || proof?.component !== "reviewed_public_base"
+      || proof?.envelope !== "data/cedar/need-reviewed-preview.json"
+      || !sha256(proof?.envelope_sha256)
+      || !sha256(proof?.sample_sha256)
+      || !sha256(sample?.release_id) || sample.release_id !== proof?.release_id
+      || !sha256(sample?.manifest_sha256) || sample.manifest_sha256 !== proof?.manifest_sha256
+      || !Number.isSafeInteger(proof?.public_records) || proof.public_records <= 0
+      || proof.public_records !== sample?.of
+      || !Number.isSafeInteger(sample?.rows) || sample.rows <= 0 || sample.rows > sample.of
+      || !Number.isSafeInteger(sample?.columns) || sample.columns <= 0) return false;
+  try {
+    const subtle = globalThis.crypto?.subtle;
+    if (!subtle) return false;
+    const bytes = new TextEncoder().encode(sampleText);
+    const digest = await subtle.digest("SHA-256", bytes);
+    const actual = Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
+    return actual === proof.sample_sha256;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Exact-byte verification where a sample carries a reviewed-preview proof.
+ * A NEED sample without one publishes like any other collection's (owner
+ * ruling 2026-10-04: no NEED publication hold).
+ */
+export async function sampleTextMatchesRelease(datasetId, sampleText) {
+  const proof = manifest.collections.find((entry) => entry.id === datasetId)?.verified_preview;
+  if (datasetId !== "need" || !proof) return true;
+  return reviewedPreviewTextMatches(sampleText, SAMPLES[datasetId], proof);
 }

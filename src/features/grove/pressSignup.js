@@ -81,7 +81,9 @@ export function formatPressCode(raw) {
  * everything else opens on activation, because someone arriving from a Tribal
  * Business News confirmation has a code in hand and no account yet.
  */
-export function initialPressStep(storage) {
+export function initialPressStep(storage, { signInRequested = false } = {}) {
+  // An explicit login link also works on a new host/browser with no local hint.
+  if (signInRequested) return PRESS_STEP.SIGN_IN;
   // With no server routes behind activation, sign-in is the only screen the
   // gate may open on; the storage hint matters again when activation ships.
   if (!PRESS_ACTIVATION_AVAILABLE) return PRESS_STEP.SIGN_IN;
@@ -121,18 +123,22 @@ export function rememberPressAccount(storage) {
 /**
  * What to say when activation fails. The server's codes are deliberately
  * distinct, because "we have never seen this code" and "this code was already
- * used" need different next steps from the reader.
+ * used" need different next steps from the reader. "Used" and "expired" are
+ * only ever said to the address a code was issued to; a code paired with any
+ * other address reads as not recognized, so the endpoint does not reveal
+ * which codes exist.
  */
 export function pressSignupError(code, fallback) {
   switch (code) {
+    // Also the answer for a real code paired with the wrong address: the
+    // server says nothing about a code until the code and the address both
+    // match, so this copy has to cover both mistakes.
     case "PRESS_CODE_INVALID":
-      return "That code was not recognized. Check it against your Tribal Business News confirmation, including the letter O against the digit 0.";
+      return "That code and address do not match a code we issued. Check the code against your Tribal Business News confirmation, including the letter O against the digit 0, and use the address on your membership.";
     case "PRESS_CODE_USED":
       return "That code has already been activated. Each code is issued to one authorized user, so sign in instead, or reset the password if you do not have it.";
     case "PRESS_CODE_EXPIRED":
       return "That code has expired. Tribal Business News can issue a new one with your membership.";
-    case "PRESS_CODE_EMAIL_MISMATCH":
-      return "That code was issued to a different address. Use the address on your Tribal Business News membership.";
     case "EMAIL_IN_USE":
       return "There is already an account with that address. Sign in instead.";
     default:

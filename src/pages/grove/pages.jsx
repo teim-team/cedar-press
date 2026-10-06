@@ -18,6 +18,8 @@
  */
 import { lazy } from "react";
 
+import { loadCodebook } from "../../features/grove/codebook.js";
+
 export { default as CedarPress } from "./CedarPress.jsx";
 // The two other prerendered pages are eager too: a lazy route's first commit
 // clears the prerendered markup and paints the fallback until its chunk
@@ -36,7 +38,11 @@ export const CedarPressWhatsNew = lazy(() => import("./CedarPressWhatsNew.jsx"))
 // The record and the entity: both reached from inside the Collections page,
 // both reading the same samples the viewer does, and neither on the path to
 // the first paint.
-export const CedarPressRecord = lazy(() => import("./CedarPressRecord.jsx"));
+// The record reads the codebook's labels and meanings synchronously, so the
+// codebook arrives with its chunk (codebook.js).
+export const CedarPressRecord = lazy(() =>
+  Promise.all([import("./CedarPressRecord.jsx"), loadCodebook()]).then(([page]) => page),
+);
 export const CedarPressEntity = lazy(() => import("./CedarPressEntity.jsx"));
 
 /**

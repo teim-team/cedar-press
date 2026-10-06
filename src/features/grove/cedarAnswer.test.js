@@ -90,7 +90,6 @@ test("a release with no name or version reads as an empty string, not `undefined
   // the failure mode a join with no filter produces.
   assert.equal(releaseOf({}), "");
   assert.equal(releaseOf({ collectionName: "Owned" }), "Owned");
-  // No version number is shown to a reader (owner, 2026-10-06).
   assert.equal(releaseOf({ version: "v1" }), "");
   assert.equal(answerSource({ kind: "synthesis" }).release, "");
 });

@@ -61,13 +61,16 @@ from __future__ import annotations
 import csv
 import hashlib
 import json
+import re
 import sqlite3
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 
+
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "code"))
+from cedar_ids import RETIRED_ISSUANCE_PREFIXES
 csv.field_size_limit(10_000_000)
 
 DIST = ROOT / "dist"
@@ -116,6 +119,20 @@ def neid_vocabulary() -> set:
     return vals
 
 
+def retired_value_pattern(vocab: set, *, gaming_facilities=False):
+    """Match known retired handles and source-only facility IDs in public data."""
+    if not vocab:
+        raise ValueError("retired identifier vocabulary is empty")
+    historical = "|".join(re.escape(v) for v in sorted(vocab, key=len, reverse=True))
+    vendor = r"|(?:CCP|VP|TPL|CEDAR-FAC)-[0-9]+" if gaming_facilities else ""
+    return re.compile(r"(?<![A-Za-z0-9])(?:" + historical + vendor +
+                      r")(?![A-Za-z0-9-])")
+
+
+_RETIRED_SCREEN = tuple(p + "-" for p in RETIRED_ISSUANCE_PREFIXES)
+_GAMING_SCREEN = _RETIRED_SCREEN + ("CEDAR-FAC-",)
+
+
 # ---------------------------------------------------------------------------
 # CHECKS
 # ---------------------------------------------------------------------------
@@ -124,17 +141,21 @@ def check_csv_identity(vocab: set) -> Check:
     c = Check("delivered CSV identity migration",
               f"{len(list(CUSTOMER.glob('*.csv')))} files in dist/customer, full pass",
               blocking=True)
+    rx = retired_value_pattern(vocab)
+    gaming_rx = retired_value_pattern(vocab, gaming_facilities=True)
     hits, files = 0, []
     for p in sorted(CUSTOMER.glob("*.csv")):
         n = 0
+        pattern = gaming_rx if p.stem.startswith("gaming") else rx
+        screen = _GAMING_SCREEN if p.stem.startswith("gaming") else _RETIRED_SCREEN
         with p.open(encoding="utf-8-sig", errors="replace", newline="") as fh:
             for row in csv.DictReader(fh):
                 for v in row.values():
                     if not v or "-" not in v:
                         continue
-                    for tok in (v.split("|") if "|" in v else [v]):
-                        if tok.strip() in vocab:
-                            n += 1
+                    if not any(tag in v for tag in screen):
+                        continue
+                    n += len(pattern.findall(v))
         if n:
             files.append(f"{p.name}={n}")
         hits += n
@@ -175,10 +196,14 @@ def check_sample_identity(vocab: set) -> Check:
         c.detail = ("neither sample tree exists; an absent tree must never "
                     "read as a clean one")
         return c
+    rx = retired_value_pattern(vocab)
+    gaming_rx = retired_value_pattern(vocab, gaming_facilities=True)
     hits, files = 0, []
     for tree in present:
         for p_ in sorted(tree.rglob("*.csv")):
             n = 0
+            pattern = gaming_rx if "gaming" in p_.parts or "gaming" in p_.stem else rx
+            screen = _GAMING_SCREEN if pattern is gaming_rx else _RETIRED_SCREEN
             try:
                 with p_.open(encoding="utf-8-sig", errors="replace",
                              newline="") as fh:
@@ -186,9 +211,9 @@ def check_sample_identity(vocab: set) -> Check:
                         for v in row.values():
                             if not v or "-" not in v:
                                 continue
-                            for tok in (v.split("|") if "|" in v else [v]):
-                                if tok.strip() in vocab:
-                                    n += 1
+                            if not any(tag in v for tag in screen):
+                                continue
+                            n += len(pattern.findall(v))
             except OSError:
                 continue
             if n:
@@ -753,6 +778,27 @@ def selftest() -> int:
 
     ok.append(_fixture_fails("a delivered CSV carrying a retired identifier",
                              b1, lambda: check_csv_identity(real_vocab)))
+
+    def b1b(root):
+        global CUSTOMER
+        (root / "customer").mkdir()
+        (root / "customer" / "x.csv").write_text(
+            "a,b\n1,source::" + probe + "::review\n", encoding="utf-8")
+        CUSTOMER = root / "customer"
+
+    ok.append(_fixture_fails("a delivered CSV embedding a retired identifier",
+                             b1b, lambda: check_csv_identity(real_vocab)))
+
+    def b1c(root):
+        global CUSTOMER
+        (root / "customer").mkdir()
+        (root / "customer" / "gaming.csv").write_text(
+            "facility_id,cedar_place_id\nCCP-123,CEDAR-PLACE-000001-XX\n",
+            encoding="utf-8")
+        CUSTOMER = root / "customer"
+
+    ok.append(_fixture_fails("a delivered Gaming CSV carrying a vendor facility ID",
+                             b1c, lambda: check_csv_identity(real_vocab)))
 
     # 2. a database table still carrying a retired-scheme column
     def b2(root):
