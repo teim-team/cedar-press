@@ -109,19 +109,20 @@ export const EXCLUDED_COLLECTIONS = deepFreeze(manifest.excluded);
  */
 /**
  * Collections whose observation count is not shown to readers (owner,
- * 2026-10-06): the Native Nonprofits count understates the universe it
- * describes, so no count is stated rather than a misleading one. An empty
+ * 2026-10-06): NEED's published reviewed set (43) is a small part of the
+ * enterprise register, so no count is stated rather than a misleading one;
+ * Native Nonprofits' 89 ruled-in organizations is shown. An empty
  * label is what every surface already reads as "no count". The service
  * applies the same set (collections.py COUNT_NOT_SHOWN).
  */
-export const COUNT_NOT_SHOWN = Object.freeze(new Set(["nonprofits"]));
+export const COUNT_NOT_SHOWN = Object.freeze(new Set(["need"]));
 
 /**
  * What an abbreviated collection name stands for, prefixed to its description
  * where the descriptor does not spell it out (owner, 2026-10-06). The service
  * applies the same text (collections.py ACRONYM_LEADS).
  */
-const ACRONYM_LEADS = Object.freeze({ plot: "PLOT (Parcels, Ownership, Land Activity and Permits)" });
+const ACRONYM_LEADS = Object.freeze({ plot: "PLOT (Parcels, Land Ownership and Transfers)" });
 const tracksForReaders = (descriptor) => {
   const lead = ACRONYM_LEADS[descriptor.id];
   return lead && !(descriptor.tracks ?? "").includes(lead) ? `${lead}: ${descriptor.tracks}` : descriptor.tracks;

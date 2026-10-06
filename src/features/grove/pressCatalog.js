@@ -478,7 +478,7 @@ export const PRESS_CATALOG = Object.freeze([
     // to it. A nation's site acquisition may be a Deal while the parcels it
     // bought appear separately in PLOT: link the two, never collapse them.
     blurb:
-      "PLOT (Parcels, Ownership, Land Activity and Permits): county assessor parcels, Bureau of Indian Affairs trust tracts, permits and environmental records associated with Native nations. Examine their recorded owners, dates and citations, with parcel observations and permit events kept at their separate grains.",
+      "PLOT (Parcels, Land Ownership and Transfers): county assessor parcels, Bureau of Indian Affairs trust tracts, permits and environmental records associated with Native nations. Examine their recorded owners, dates and citations, with parcel observations and permit events kept at their separate grains.",
     // The owner's Methods concepts for this collection (2026-09-26).
     linkage:
       "Land ownership observations and permitting records retain their source identifiers. An assessor label, mapped tract or regulatory record does not establish Native ownership, legal title or a canonical entity binding.",

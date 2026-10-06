@@ -137,29 +137,36 @@ const TIER_OF = Object.fromEntries(SHELVES.flatMap(({ tier, entries }) => entrie
 // restatement of the same claim, added because a review found the door said
 // nothing about the one thing that distinguishes the collections. Revert this
 // pillar if that ruling was meant to cover the claim and not only the wording.
+// Owner copy, 2026-10-06: each block a distinct purpose (usable data,
+// connected information, original research, guided exploration). The old
+// blocks repeated the sourcing and matching story the section already tells,
+// claimed "every row" carries an entity (a record about Indian Country
+// broadly need not), and promised Cedar would answer any question with the
+// underlying record, which it does not do. Cedar answers what a collection
+// covers, how it is built and what changed.
 const PROOF_POINTS = [
   {
     id: "collections",
-    label: "Documented source records",
-    body: "Federal systems, tribal publications and agency dockets are assembled here into one collection for the first time.",
+    label: "Put the data to work",
+    body: "Explore original datasets on funding, business, policy and land. Download collections for your own research, reporting and planning, with the definitions and source references needed to use them.",
     icon: OriginalCollectionsIcon,
   },
   {
     id: "insights",
-    label: "Resolved to Native entities",
-    body: "Every row carries the nation, corporation or organization behind it, tracked through name changes, subsidiaries and reorganizations.",
+    label: "Follow connections across collections",
+    body: "Connect a nation\u2019s enterprises with their contracts, funding and transactions. Read those relationships alongside broader policy and economic records to understand individual organizations and the developments shaping Indian Country.",
     icon: InsightsIcon,
   },
   {
     id: "credible",
-    label: "Published with its limits",
-    body: "Every collection ships its inclusion rules, its known gaps and its corrections. Indigenous researchers with Federal Reserve and university experience build them.",
+    label: "Research grounded in the collections",
+    body: "Read original research briefs examining funding patterns, enterprise activity and public policy. Follow the findings back to their evidence and use the underlying collections to investigate your own questions.",
     icon: CredibleResearchIcon,
   },
   {
     id: "cedar",
-    label: "Ask Cedar, and see the basis",
-    body: "Ask a question of any collection and get the answer with the record it came from. Where Cedar holds no published figure, it says so.",
+    label: "Explore with Cedar",
+    body: "Ask Cedar what a collection covers, how it is built and what has changed. Find relevant data and understand how the collections can help you approach your question.",
     icon: CedarIcon,
   },
 ];

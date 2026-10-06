@@ -189,11 +189,12 @@ class CollectionDataset:
 
 
 #: Collections whose observation count is not shown to readers (owner,
-#: 2026-10-06: the Native Nonprofits count understates the universe it
-#: describes, so no count is stated rather than a misleading one). The label
+#: 2026-10-06: NEED's published reviewed set (43) is a small part of the
+#: enterprise register, so no count is stated rather than a misleading one;
+#: Native Nonprofits' 89 ruled-in organizations is shown). The label
 #: reads empty, which every surface already treats as "no count". The client
 #: applies the same set (collection.js COUNT_NOT_SHOWN).
-COUNT_NOT_SHOWN: frozenset[str] = frozenset({"nonprofits"})
+COUNT_NOT_SHOWN: frozenset[str] = frozenset({"need"})
 
 
 #: What an abbreviated collection name stands for (owner, 2026-10-06: a
@@ -202,7 +203,7 @@ COUNT_NOT_SHOWN: frozenset[str] = frozenset({"nonprofits"})
 #: is prefixed where it is read. The client applies the same text
 #: (pressCatalog.js blurbs).
 ACRONYM_LEADS: dict[str, str] = {
-    "plot": "PLOT (Parcels, Ownership, Land Activity and Permits)",
+    "plot": "PLOT (Parcels, Land Ownership and Transfers)",
 }
 
 
