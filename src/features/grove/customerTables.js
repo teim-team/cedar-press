@@ -97,6 +97,22 @@ export const CUSTOMER_COLUMNS = Object.freeze({
     label: "Cite as",
     meaning: "The collection's citation, repeated on every row so a saved file still says what it is, whose work it is and how to credit it.",
   },
+  native_owner: {
+    label: "Native owner",
+    meaning: "The Native nation, Alaska Native corporation or Native Hawaiian organization at the top of the enterprise's ownership chain, as Cedar's recorded ownership evidence states it (server/cedar_press/collections.py, data/cedar/need_ownership_evidence.json). Blank where no ruling or binding is recorded; never inferred from a name.",
+  },
+  native_owner_cedar_uid: {
+    label: "Native owner Cedar ID",
+    meaning: "The Cedar Entity ID (CE-) of the Native owner.",
+  },
+  native_owner_basis: {
+    label: "Native owner basis",
+    meaning: "The kinds of evidence behind the Native owner, in plain words: a recorded ownership ruling, a register binding, the owner's own published page or a federal identifier chain.",
+  },
+  native_owner_source: {
+    label: "Native owner source",
+    meaning: "A public page a reader can open for the ownership: the owner's or its contracting arm's own page listing the enterprise.",
+  },
   native_identity_basis: {
     label: "Native identity basis",
     meaning: "The kind of evidence behind the Native identity the record asserts, strongest first: tribal_government, ancsa_corporation, native_hawaiian_organization, enrolled_tribal_citizen, program_certified, publicly_stated, self_certified or unknown. Derived only from evidence already on the row; where several apply, the strongest documented one.",

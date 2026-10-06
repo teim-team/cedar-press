@@ -17,7 +17,7 @@
 //
 // The page below the hero changes material the way the marketing site
 // does: a navy passage with the licensed photograph and the four pillars,
-// then the ways in on white, then a short foot. "View plans" and "Log in"
+// then the ways in on white, then a short foot. "Early access" and "Log in"
 // sit top right, where a visitor looks for them, and each opens a small
 // panel under the bar; the page underneath stays the page.
 //
@@ -37,15 +37,15 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router";
 
-import { contactHref } from "../../features/grove/appLink.js";
+import { EARLY_ACCESS_HREF, EARLY_ACCESS_LABEL, contactHref } from "../../features/grove/appLink.js";
 import { requestedSignIn, workspaceSignInHref } from "../../features/grove/pressSessionNavigation.js";
 import { useAuth } from "../../context/useAuth";
 import { useFadeIn } from "../../features/grove/useFadeIn";
 import { activatePressAccount, validatePressCode } from "../../api";
 import { coverageFrom } from "../../features/grove/pressAccess";
-import { LUMECON_TEAM_URL, LUMECON_URL, TBN_PLANS_URL, TBN_URL } from "../../features/grove/pressArticles";
+import { LUMECON_TEAM_URL, LUMECON_URL, TBN_URL } from "../../features/grove/pressArticles";
 import { PRESS_TIERS, STOREFRONT_CATALOG, collectionsOnShelf } from "../../features/grove/pressCatalog";
-import { LAUNCH_ROWS_TOTAL } from "../../features/grove/collection";
+import { LAUNCH_COLLECTION, LAUNCH_ROWS_TOTAL, OBSERVATIONS_NOTE } from "../../features/grove/collection";
 import { formatUpdated, recentlyUpdated } from "../../features/grove/pressReleases";
 import { SOURCE_REACH_FIGURE, SOURCE_REACH_UPDATED, SOURCE_ROTATION_ORDER } from "../../features/grove/sourceRotation.js";
 import { MAINTENANCE } from "../../features/grove/pressMethod.js";
@@ -114,6 +114,10 @@ const EARLIEST_YEAR = COLLECTION_STARTS.length ? Math.min(...COLLECTION_STARTS) 
 // Page revisions and collection refreshes have separate dates. A source-band
 // revision updates the landing page without rewriting any collection release.
 const PAGE_UPDATED = [SOURCE_REACH_UPDATED, ...recentlyUpdated(1).map((release) => release.updated)].sort().at(-1);
+// The data refresh is a third date, apart from the page revision and from
+// the period the records cover (2026-10-06): the newest producer refresh
+// any collection was staged from (collection.js `refreshed`).
+const DATA_REFRESHED = LAUNCH_COLLECTION.map((dataset) => dataset.refreshed).filter(Boolean).sort().at(-1) ?? null;
 
 // The shelves, each with its collections, in the storefront's order.
 const SHELVES = PRESS_TIERS.filter((tier) => tier.storefront).map((tier) => ({
@@ -160,7 +164,11 @@ const PROOF_POINTS = [
   {
     id: "credible",
     label: "Research grounded in the collections",
-    body: "Read original research briefs examining funding patterns, enterprise activity and public policy. Follow the findings back to their evidence and use the underlying collections to investigate your own questions.",
+    // Owner copy narrowed 2026-10-06: the public brief catalog
+    // (`PRESS_ARTICLES`) holds one brief, the Native-owned business roster,
+    // so the block says research briefs start there rather than promising a
+    // shelf across funding, enterprise activity and policy.
+    body: "Read original research briefs, starting with the first nation-shared roster of individually owned Native businesses. Follow the findings back to their evidence and use the underlying collections to investigate your own questions.",
     icon: CredibleResearchIcon,
   },
   {
@@ -206,6 +214,9 @@ export default function PressGate({ user }) {
   const [password, setPassword] = useState("");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState(null);
+  // The source band moves until a reader stops it (WCAG 2.2.2): the button
+  // beside its count pauses and resumes it, and reduced motion stills it.
+  const [bandPaused, setBandPaused] = useState(false);
 
   // The collection in hand: the first on the rail on arrival, never none.
   // THE COLLECTION IN HAND IS IN THE URL.
@@ -399,8 +410,8 @@ export default function PressGate({ user }) {
             // upgrading; the bar says who they are and offers the other account.
             <span className="cp-door__user">
               <span className="cp-door__who">Signed in as {user.email} · no Cedar Press</span>
-              <a className="cp-btn cp-btn--primary" href={TBN_PLANS_URL} target="_blank" rel="noreferrer">
-                View Cedar Press plans <span className="cp-btn__arrow" aria-hidden="true">&#8594;</span>
+              <a className="cp-btn cp-btn--primary" href={EARLY_ACCESS_HREF}>
+                {EARLY_ACCESS_LABEL} <span className="cp-btn__arrow" aria-hidden="true">&#8594;</span>
               </a>
               <button type="button" className="cp-split__linkbtn" onClick={() => logout()}>
                 Use a different account
@@ -419,7 +430,7 @@ export default function PressGate({ user }) {
                 aria-controls="cp-panel-plans"
                 onClick={() => toggle("plans")}
               >
-                View plans
+                Early access
               </button>
               {workspaceSignIn ? (
                 <a className="cp-btn cp-btn--primary" href={workspaceSignIn}>Log in</a>
@@ -440,10 +451,14 @@ export default function PressGate({ user }) {
 
         {!user && panel === "plans" ? (
           <div id="cp-panel-plans" role="tabpanel" aria-labelledby="cp-tab-plans" className="cp-door__panel" ref={panelRef}>
-            <h2 className="cp-gate__sub">Cedar Press is available exclusively through Tribal Business News.</h2>
-            <p className="cp-door__panelp">Upgrade your Tribal Business News membership to access Cedar Press.</p>
-            <a className="cp-btn cp-btn--primary cp-btn--wide" href={TBN_PLANS_URL} target="_blank" rel="noreferrer">
-              View Cedar Press plans <span className="cp-btn__arrow" aria-hidden="true">&#8594;</span>
+            {/* Enrollment is not open yet (2026-10-06), so this panel asks
+                for early access rather than sending a visitor to buy a
+                general Tribal Business News membership with no Cedar Press
+                plan on it. Log in stays beside it for existing accounts. */}
+            <h2 className="cp-gate__sub">Cedar Press will be available exclusively through Tribal Business News.</h2>
+            <p className="cp-door__panelp">Enrollment is not open yet. Early access is available soon: write to us and we will be in touch.</p>
+            <a className="cp-btn cp-btn--primary cp-btn--wide" href={EARLY_ACCESS_HREF}>
+              {EARLY_ACCESS_LABEL} <span className="cp-btn__arrow" aria-hidden="true">&#8594;</span>
             </a>
           </div>
         ) : null}
@@ -608,8 +623,8 @@ export default function PressGate({ user }) {
               <a href={TBN_URL} target="_blank" rel="noreferrer">Tribal Business News</a>.
             </p>
             <div className="cp-hero3__cta cp-fade">
-              <a className="cp-btn cp-btn--primary cp-btn--lg" href={TBN_PLANS_URL} target="_blank" rel="noreferrer">
-                View plans <span className="cp-btn__arrow" aria-hidden="true">&#8594;</span>
+              <a className="cp-btn cp-btn--primary cp-btn--lg" href={EARLY_ACCESS_HREF}>
+                {EARLY_ACCESS_LABEL} <span className="cp-btn__arrow" aria-hidden="true">&#8594;</span>
               </a>
               {user ? null : (
                 <button type="button" className="cp-btn cp-btn--quiet cp-btn--lg" onClick={openSignIn}>
@@ -676,10 +691,14 @@ export default function PressGate({ user }) {
               <li><Tick value={STOREFRONT_CATALOG.length} /> collections</li>
               {/* Observations across every collection's dataset (owner,
                   2026-10-06), from the manifest's own count per collection. */}
-              {LAUNCH_ROWS_TOTAL ? <li><Tick value={LAUNCH_ROWS_TOTAL} format={formatCount} /> observations</li> : null}
+              {LAUNCH_ROWS_TOTAL ? <li title={OBSERVATIONS_NOTE}><Tick value={LAUNCH_ROWS_TOTAL} format={formatCount} /> observations</li> : null}
               {EARLIEST_YEAR ? <li>as far back as <Tick value={EARLIEST_YEAR} from={new Date().getFullYear()} /></li> : null}
-              <li>updated <b>{formatUpdated(PAGE_UPDATED)}</b></li>
+              {DATA_REFRESHED ? <li data-testid="door-data-refreshed">data as of <b>{formatUpdated(DATA_REFRESHED)}</b></li> : null}
+              <li data-testid="door-page-updated">page updated <b>{formatUpdated(PAGE_UPDATED)}</b></li>
             </ul>
+            {/* The total adds rows of different kinds, so it says what it
+                counts (2026-10-06): not organizations, not dollars. */}
+            {LAUNCH_ROWS_TOTAL ? <p className="cp-gate__fine cp-hero3__factsnote" data-testid="door-observations-note">{OBSERVATIONS_NOTE}</p> : null}
           </figure>
 
         </div>
@@ -726,8 +745,8 @@ export default function PressGate({ user }) {
               <p className="cp-why__lede cp-fade">
                 A federal contract names the company that won it, a Form 990 names the nonprofit
                 that filed it, and a royalty statement names whoever was paid. None of them says
-                whether those names belong to one nation or three, and no public system keeps
-                track.
+                whether those names belong to one nation or three. Those relationships are not
+                consistently recorded across public systems.
               </p>
               {/* Owner copy, 2026-09-27 (second pass), verbatim: what the
                   researchers do with public material and what it produces,
@@ -740,10 +759,8 @@ export default function PressGate({ user }) {
                 <a href={LUMECON_URL} target="_blank" rel="noreferrer">Lumecon</a>&rsquo;s{" "}
                 <a href={LUMECON_TEAM_URL} target="_blank" rel="noreferrer">researchers</a> turn
                 material that is public but scattered, difficult to find, or structured for compliance
-                rather than analysis into original datasets. We extract evidence from agency APIs,
-                state and tribal databases, annual reports, filings, regulatory calendars, PDFs, parcel
-                and permit registers, organizational websites, public announcements, and news
-                reporting. We standardize dates and measures, reconcile duplicate events and changing
+                rather than analysis into original datasets, drawing on the source systems listed
+                on this page. We standardize dates and measures, reconcile duplicate events and changing
                 names, and check proposed Native entity links against source evidence with human
                 review. That work creates searchable data no single publisher provides, while
                 preserving the evidence and known limits behind each published record.
@@ -760,21 +777,34 @@ export default function PressGate({ user }) {
                 is already about how the records are gathered, and this column
                 was empty above the shelves. */}
             <div className="cp-why__side">
-              <aside className="cp-hero3__proof cp-why__sources cp-fade" aria-label="Source systems">
+              <aside className={`cp-hero3__proof cp-why__sources cp-fade${bandPaused ? " is-paused" : ""}`} aria-label="Source systems">
                 <div className="cp-hero3__proofhead">
                   <Link className="cp-hero3__prooflabel" to={PRESS_METHODS_PATH}>
                     Sources Lumecon draws on
                   </Link>
                   <span className="cp-hero3__proofcount">
-                    {SOURCE_REACH_FIGURE} total sources ·{" "}
+                    {SOURCE_REACH_FIGURE} kinds of source behind{" "}
                     <span className="cp-nowrap">{STOREFRONT_CATALOG.length} collections</span>
                   </span>
+                  <button
+                    type="button"
+                    className="cp-why__toggle"
+                    aria-label={bandPaused ? "Play the moving source list" : "Pause the moving source list"}
+                    onClick={() => setBandPaused((paused) => !paused)}
+                  >
+                    {bandPaused ? (
+                      <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 1.5v9l7.5-4.5z" fill="currentColor" /></svg>
+                    ) : (
+                      <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 1.5h2.5v9H2.5zM7 1.5h2.5v9H7z" fill="currentColor" /></svg>
+                    )}
+                    <span>{bandPaused ? "Play" : "Pause"}</span>
+                  </button>
                 </div>
                 {/* Several runs, alternating direction, so the banner fills
                     the column rather than one line at its foot. Each run is
                     duplicated for a seamless loop; the copy is aria-hidden so
-                    a screen reader hears every source once. It does not
-                    pause on hover or focus, and a transparent layer over the
+                    a screen reader hears every source once. It pauses on
+                    hover and with its own button, and a transparent layer over the
                     runs keeps the moving text from being selected and copied
                     (owner, 2026-09-27). */}
                 <div className="cp-why__runs">
@@ -838,12 +868,13 @@ export default function PressGate({ user }) {
               Available exclusively through <span>Tribal Business News.</span>
             </h2>
             <p className="cp-ways__lede">
-              A Cedar Press membership opens the collections, the research briefs and Cedar. Two
+              A Cedar Press membership will open the collections, the research briefs and Cedar.
+              Enrollment is not open yet, so request early access and we will be in touch. Two
               other relationships need no subscription at all.
             </p>
             <div className="cp-hero3__cta">
-              <a className="cp-btn cp-btn--primary cp-btn--lg" href={TBN_PLANS_URL} target="_blank" rel="noreferrer">
-                View plans <span className="cp-btn__arrow" aria-hidden="true">&#8594;</span>
+              <a className="cp-btn cp-btn--primary cp-btn--lg" href={EARLY_ACCESS_HREF}>
+                {EARLY_ACCESS_LABEL} <span className="cp-btn__arrow" aria-hidden="true">&#8594;</span>
               </a>
               {user ? null : (
                 <button type="button" className="cp-btn cp-btn--quiet cp-btn--lg" onClick={openSignIn}>

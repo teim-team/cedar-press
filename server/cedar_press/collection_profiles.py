@@ -87,8 +87,8 @@ _CONSTRUCTION: dict[str, dict[str, Any]] = {
         ),
         "inclusion_rules": (
             "Tribally owned firms, ANC and NHO subsidiaries and 8(a) "
-            "participants, collected weekly from SAM, SBA, FPDS and "
-            "USAspending, reconciled and versioned quarterly."
+            "participants, drawn from SAM, SBA, FPDS and USAspending and "
+            "reconciled against one another."
         ),
         "known_limitations": (
             "Parent-entity matches can be provisional pending SAM "

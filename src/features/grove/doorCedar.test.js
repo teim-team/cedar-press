@@ -369,7 +369,7 @@ test("who made it reads the same way everywhere the door says it", () => {
 
 test("maintenance and Cedar NEED's enrichments: door Cedar says weekly, and keeps each record with its entity", () => {
   const current = DOOR_INTENTS.find((intent) => intent.id === "current");
-  assert.match(current.answer, /maintains its datasets weekly with human review/);
+  assert.match(current.answer, /maintains its datasets on a weekly schedule with human review/);
   assert.match(current.expanded, /exceptionally useful, well-documented data and tools/);
   assert.equal(classify("do you have patents")?.id, "collection:need");
   assert.equal(classify("credit ratings for tribal enterprises")?.id, "collection:need");
@@ -416,7 +416,11 @@ test("institutional accounts: team and organization questions reach their own an
 // Cedar says so; it never tells a reader some of it is private.
 test("Cedar says the material is public and never that some of it is not", () => {
   const sources = DOOR_INTENTS.find((intent) => intent.id === "sources");
-  assert.match(sources.answer, /public material, drawn from more than 700 documented upstream sources/);
+  // The count is measured and carries its unit (2026-10-06); never "700".
+  assert.match(sources.answer, /public material, drawn from \d+ kinds of public source/);
+  assert.doesNotMatch(sources.answer, /700|documented upstream sources/);
+  // Lobbying is LDA filings only in this release; dockets and appeals are not sources.
+  assert.doesNotMatch(sources.answer, /FERC|IBIA|regulations\.gov/);
   // The whole module, so an answer defined outside DOOR_INTENTS is held too.
   const source = readFileSync(new URL("./doorCedar.js", import.meta.url), "utf8");
   assert.doesNotMatch(source, /not all of it is public|private record|source websites/i);

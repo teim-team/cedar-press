@@ -133,7 +133,11 @@ export default function PressCollectionAbout({ entry, flagship, onClose, article
         {/* The header's facts, as fields. A reader checking a figure wants
             the release and the coverage before they want the prose. */}
         <dl className="cp-ab__facts">
-          {launch.updated ? (<div><dt>Updated</dt><dd>{formatUpdated(launch.updated)}</dd></div>) : null}
+          {/* Two dates, kept apart (2026-10-06): when the data was last
+              refreshed from the producer, and when this release was issued.
+              Coverage, beside them, is the period the records span. */}
+          {launch.refreshed ? (<div><dt>Data as of</dt><dd>{formatUpdated(launch.refreshed)}</dd></div>) : null}
+          {launch.updated ? (<div><dt>Released</dt><dd>{formatUpdated(launch.updated)}</dd></div>) : null}
           {coverageLabel(catalog) ? (<div><dt>Coverage</dt><dd>{coverageLabel(catalog)}</dd></div>) : null}
           {sampleRows !== null ? (<div><dt>Example records</dt><dd>{sampleRows.toLocaleString("en-US")}</dd></div>) : null}
           <div><dt>Maintained</dt><dd>{MAINTENANCE.label}</dd></div>
@@ -233,8 +237,9 @@ export default function PressCollectionAbout({ entry, flagship, onClose, article
           {latest ? (
             <>
               <p className="cp-ab__rel">
-                <b>Updated</b>
+                <b>Released</b>
                 {latest.date ? ` · ${formatUpdated(latest.date)}` : ""}
+                {launch.refreshed ? ` · data as of ${formatUpdated(launch.refreshed)}` : ""}
               </p>
               {latest.note ? <p>{latest.note}</p> : null}
               <Link className="cp-ab__link" to={`${PRESS_WHATS_NEW_PATH}#${entry.id}-${String(latest.version).replace(/\./g, "-")}`}>

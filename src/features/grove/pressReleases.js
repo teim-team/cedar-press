@@ -60,7 +60,8 @@
  * Cedar's cadence measurement has produced no vintage for any collection
  * (`UNMEASURED_FIELDS` in collection.js), so the cadence here is what Cedar
  * commits to maintain: weekly, with human review, for every collection
- * (owner, 2026-09-27). The sources still publish on their own clocks; the
+ * (owner, 2026-09-27). Reader wording says "schedule" so the commitment is
+ * never read as a measured update history (2026-10-06). The sources still publish on their own clocks; the
  * weekly pass is when their changes are reviewed in. A collection with no
  * declared cadence states none rather than borrowing one.
  */
@@ -79,7 +80,9 @@ import { LAUNCH_COLLECTION, hasSample } from "./collection.js";
  * collection.
  */
 export const CADENCE = Object.freeze({
-  WEEKLY: "Updated weekly",
+  // A commitment, not a measured history (2026-10-06): the wording says it
+  // is the schedule Cedar Press keeps, not how often the data has moved.
+  WEEKLY: "Reviewed on a weekly schedule",
 });
 
 /** A release changes the data, or it changes how the data is made. */
@@ -210,6 +213,8 @@ export function buildReleases(source, launch) {
       name: dataset.name,
       version: dataset.version,
       updated: dataset.updated,
+      // The producer refresh the data came from, not the release date.
+      refreshed: dataset.refreshed ?? null,
       cadence: DECLARED_CADENCE[dataset.id] ?? null,
       retired: false,
       history: Object.freeze(historyOf(dataset.id, dataset.version, source)),
@@ -255,16 +260,23 @@ export function formatUpdated(iso) {
   return `${MONTHS[month - 1]} ${day}, ${year}`;
 }
 
-/** The short form for a metadata rail: `Updated Aug. 6 · weekly`. */
+/**
+ * The short form for a metadata rail: `Data as of Oct. 1 · weekly review
+ * schedule`.
+ *
+ * The date is the DATA refresh, not the release date (2026-10-06): every
+ * collection was re-released on Oct. 6 without new data, and "Updated Oct.
+ * 6" read as a refresh that did not happen. A collection with no recorded
+ * refresh states no date rather than borrowing the release's.
+ */
 export function freshnessLine(id) {
   const release = releaseFor(id);
-  if (!release?.updated) return "";
-  const [, month, day] = release.updated.split("-").map(Number);
-  // No version number: collections update continuously, and a vX.X on a
-  // continuously maintained series read as clutter. The date is the fact.
+  if (!release?.refreshed) return "";
+  const [, month, day] = release.refreshed.split("-").map(Number);
+  // No version number: a vX.X on a maintained series read as clutter.
   // No cadence where none is declared, rather than a plausible one.
-  const cadence = release.cadence ? ` · ${release.cadence.replace("Updated ", "")}` : "";
-  return `Updated ${MONTHS[month - 1]} ${day}${cadence}`;
+  const cadence = release.cadence === CADENCE.WEEKLY ? " · weekly review schedule" : "";
+  return `Data as of ${MONTHS[month - 1]} ${day}${cadence}`;
 }
 
 /** The release's stable anchor: cite `#funding-v0` and it stays citable. */

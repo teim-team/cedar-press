@@ -149,23 +149,20 @@ test("reviewed NEED businesses remain individually named on phones and use reada
   await page.goto("/data?c=need");
   const records = page.getByTestId("explore-record");
   await expect(records).toHaveCount(NEED_SAMPLE.rows.length);
+  // Exactly the downloaded records: the viewer adds no NEED record.
   for (const row of NEED_SAMPLE.rows) {
-    // A parent that is itself an example (Chickasaw Nation Industries) is
-    // also named on its subsidiary's record.
-    const naming = NEED_SAMPLE.rows.filter((other) => other === row || other.related_entity_name === row.enterprise_name).length;
-    await expect(records.filter({ hasText: row.enterprise_name })).toHaveCount(naming);
+    await expect(records.filter({ hasText: row.enterprise_name })).toHaveCount(1);
   }
-  // A tribe-owned enterprise leads (exampleEnrichment.js); its parent is
-  // stated in readable words, never the source's codes.
-  const cni = records.filter({ hasText: "Chickasaw Nation Industries, Inc." }).filter({ hasText: "The Chickasaw Nation" }).filter({ hasNotText: "CNI Advantage" });
-  await expect(cni).toHaveCount(1);
-  await expect(cni).toContainText(/owned by/i);
+  // A reviewed relationship reads in plain words, never the source's codes.
+  const builders = records.filter({ hasText: "Ahtna Builders, LLC" });
+  await expect(builders).toContainText("Ahtna Diversified Holdings, LLC");
+  await expect(builders).toContainText(/owned by/i);
   await expect(page.locator("main")).not.toContainText("wholly_owned");
   await expect(page.locator("main")).not.toContainText("owned_by");
   if (testInfo.project.name === "phone") {
     await expect(records.first().locator(".cp-ex__cardwho")).toContainText(NEED_SAMPLE.rows[0].enterprise_name);
     // Every NEED record names its ultimate Native owner.
-    await expect(records.first().locator(".cp-ex__cardwho")).toContainText("Ultimate parent: The Chickasaw Nation");
+    await expect(records.first().locator(".cp-ex__cardwho")).toContainText("Ultimate parent: " + NEED_SAMPLE.rows[0].native_owner);
     await expect(page.locator("main")).not.toContainText("not linked to an entity");
     const bounds = await records.evaluateAll((elements) => elements.map((el) => {
       const heading = el.querySelector(".cp-ex__cardwho");
@@ -224,17 +221,19 @@ test.describe("the gate", () => {
   });
 
   // The maintenance story and the NEED enrichment sources (owner,
-  // 2026-09-27), on the door; the figure is 700+ (owner, 2026-10-02).
+  // 2026-09-27), on the door; the figure is the measured count of kinds of
+  // source behind the collections (2026-10-06), never an unmeasured total.
   test("the door says how Cedar Press is maintained and names the NEED enrichment sources", async ({ page }) => {
     await page.goto("/");
     await expect(page.getByTestId("door-maintenance")).toContainText(
-      "Cedar Press maintains its datasets weekly with human review, expands their source coverage and useful fields over time and develops new collections.",
+      "Cedar Press maintains its datasets on a weekly schedule with human review, expands their source coverage and useful fields over time and develops new collections.",
     );
     const panel = page.locator(".cp-hero3__proof");
     for (const label of ["Patent publication and family records", "Historical S&P and Fitch ratings", "AM Best insurance financial-strength releases", "IRS Form 990-PF grant schedules", "Recorded deeds and land transfers"]) {
       await expect(panel).toContainText(label);
     }
-    await expect(panel.locator(".cp-hero3__proofcount")).toContainText("700+ total sources");
+    await expect(panel.locator(".cp-hero3__proofcount")).toContainText(/^\d+ kinds of source behind/);
+    await expect(panel.locator(".cp-hero3__proofcount")).not.toContainText("700");
   });
 
   // The greeting note above Ask Cedar (owner, 2026-09-27): it rises once the
@@ -280,7 +279,7 @@ test.describe("the gate", () => {
     await expect(bar).toHaveCSS("backdrop-filter", "none");
     await expect(page.locator(".cp-hero3__reach")).toHaveCount(0);
     await expect(page.locator(".cp-hero3")).not.toContainText("Lumecon builds its datasets and research from");
-    await expect(page.locator(".cp-hero3__proofcount")).toContainText("700+ total sources");
+    await expect(page.locator(".cp-hero3__proofcount")).toContainText(/^\d+ kinds of source behind/);
   });
 
   // The landing layout of 2026-09-27: the source banner in the navy
@@ -301,17 +300,30 @@ test.describe("the gate", () => {
     await expect(page.locator("body")).not.toContainText("As search and analytical tools improve");
   });
 
-  // The navy banner does not pause, cannot be selected, and is not in the
-  // order the source list is written in (owner, 2026-09-27).
-  test("the source banner keeps moving, cannot be selected, and is not in list order", async ({ page }, testInfo) => {
+  // The navy banner cannot be selected and is not in the order the source
+  // list is written in (owner, 2026-09-27). It does pause: on hover, on
+  // focus and with its own button (WCAG 2.2.2, layout review 2026-10-06).
+  test("the source banner pauses on hover and on its button, cannot be selected, and is not in list order", async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== "desktop", "a pointer question");
     await page.goto("/");
     const runs = page.locator(".cp-why__runs");
+    const marquees = page.locator(".cp-why__sources .cp-hero3__marquee");
+    const states = () => marquees.evaluateAll((els) => els.map((el) => getComputedStyle(el).animationPlayState));
     await runs.scrollIntoViewIfNeeded();
+    await page.mouse.move(0, 0);
+    expect((await states()).every((s) => s === "running")).toBe(true);
     await runs.hover();
-    const states = await page.locator(".cp-why__sources .cp-hero3__marquee").evaluateAll((els) => els.map((el) => getComputedStyle(el).animationPlayState));
-    expect(states.every((s) => s === "running")).toBe(true);
+    expect((await states()).every((s) => s === "paused")).toBe(true);
+    await page.mouse.move(0, 0);
+    const toggle = page.getByRole("button", { name: "Pause the moving source list" });
+    await toggle.click();
+    await page.mouse.move(0, 0);
+    expect((await states()).every((s) => s === "paused")).toBe(true);
+    await page.getByRole("button", { name: "Play the moving source list" }).click();
+    await page.mouse.move(0, 0);
+    expect((await states()).every((s) => s === "running")).toBe(true);
     await expect(runs).toHaveCSS("user-select", "none");
+    await runs.evaluate((el) => el.scrollIntoView({ block: "center" }));
     const covered = await runs.evaluate((el) => {
       const r = el.getBoundingClientRect();
       const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
@@ -321,6 +333,88 @@ test.describe("the gate", () => {
     const shown = await page.locator(".cp-why__runs .cp-hero3__run:not([aria-hidden])").evaluateAll((uls) => uls.flatMap((ul) => [...ul.querySelectorAll("li")].map((li) => li.textContent)));
     const sorted = [...shown].sort((a, b) => a.localeCompare(b));
     expect(shown).not.toEqual(sorted);
+  });
+
+  test("under reduced motion the source banner is static, whole, and has no pause control", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/");
+    const marquees = page.locator(".cp-why__sources .cp-hero3__marquee");
+    const names = await marquees.evaluateAll((els) => els.map((el) => getComputedStyle(el).animationName));
+    expect(names.every((n) => n === "none")).toBe(true);
+    await expect(page.locator(".cp-why__toggle")).toBeHidden();
+    // Every source wraps onto the page rather than being clipped.
+    const clipped = await page.locator(".cp-why__runs .cp-hero3__run:not([aria-hidden]) li").evaluateAll((lis) => lis.filter((li) => {
+      const box = li.getBoundingClientRect();
+      const wrap = li.closest(".cp-hero3__marqwrap").getBoundingClientRect();
+      return box.right > wrap.right + 1 || box.left < wrap.left - 1;
+    }).length);
+    expect(clipped).toBe(0);
+  });
+
+  // LAYOUT REVIEW, 2026-10-06. The frame was a 1280px window CSS-scaled into
+  // its column (labels 5.9px at 1100, 8.2px at 1440), and its sidebar column
+  // outlived the rail's switch to a strip by 180px.
+  for (const width of [1100, 1440]) {
+    test(`the frame's collection labels render at a readable size at ${width}px`, async ({ page }, testInfo) => {
+      test.skip(testInfo.project.name !== "desktop", "desktop widths");
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto("/");
+      const frame = page.getByTestId("press-frame");
+      await frame.locator(".cp-rail__item").first().waitFor();
+      const sizes = await frame.locator(".cp-rail__item").evaluateAll((items) => items.map((item) => {
+        const name = item.querySelector(".cp-rail__name");
+        const scale = name.getBoundingClientRect().width / name.offsetWidth;
+        return { font: parseFloat(getComputedStyle(name).fontSize) * scale, height: item.getBoundingClientRect().height };
+      }));
+      for (const { font, height } of sizes) {
+        expect(font).toBeGreaterThanOrEqual(12);
+        expect(height).toBeGreaterThanOrEqual(24);
+      }
+      await expect(page.locator(".cp-app")).toHaveCSS("transform", "none");
+    });
+  }
+
+  test("at 768px the rail strip and the frame drop their columns together", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop", "a tablet width");
+    for (const [width, direction, columns] of [[768, "row", 1], [900, "row", 1], [901, "column", 2]]) {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto("/");
+      const frame = page.getByTestId("press-frame");
+      await expect(frame.locator(".cp-rail")).toHaveCSS("flex-direction", direction);
+      const tracks = await frame.locator(".cp-app__body").evaluate((el) => getComputedStyle(el).gridTemplateColumns.split(" ").filter(Boolean).length);
+      expect(tracks, `${width}px`).toBe(columns);
+    }
+  });
+
+  test("a phone opens the pane on three records and shows the rest on request", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "phone", "the phone's record list");
+    await page.goto("/");
+    const stage = page.getByTestId("collection-stage");
+    await expect(stage.getByTestId("stage-record").first()).toBeVisible();
+    await expect(stage.getByTestId("stage-record")).toHaveCount(3);
+    const more = stage.getByRole("button", { name: /Show more examples/ });
+    await expect(more).toHaveAttribute("aria-expanded", "false");
+    expect((await more.boundingBox()).height).toBeGreaterThanOrEqual(44);
+    await more.focus();
+    await page.keyboard.press("Enter");
+    const fewer = stage.getByRole("button", { name: "Show fewer examples" });
+    await expect(fewer).toHaveAttribute("aria-expanded", "true");
+    expect(await stage.getByTestId("stage-record").count()).toBeGreaterThan(3);
+  });
+
+  test("a deep-linked collection is scrolled into view in the phone's rail strip", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "phone", "the strip is the phone's rail");
+    for (const id of ["plot", "need"]) {
+      await page.goto(`/?collection=${id}`);
+      await expect(page.locator(`[data-testid="collection-stage"][data-collection="${id}"]`)).toBeVisible();
+      const inView = await page.getByTestId("press-frame").locator(".cp-rail").evaluate((rail) => {
+        const on = rail.querySelector(".cp-rail__item.is-on");
+        const a = rail.getBoundingClientRect();
+        const b = on.getBoundingClientRect();
+        return b.left >= a.left - 1 && b.right <= a.right + 1;
+      });
+      expect(inView, id).toBe(true);
+    }
   });
 
   test("a reader who closed the earlier early-access note sees the new one once", async ({ page }) => {
@@ -448,7 +542,8 @@ test.describe("the gate", () => {
     await expect(stage).toBeVisible();
     await expect(stage.locator('[data-testid="stage-record"]').first()).toBeVisible();
     // The way in is named on the stage, never a route past the paywall.
-    await expect(stage.getByRole("link", { name: /^Get Cedar Press/ })).toBeVisible();
+    // Enrollment is not open yet (2026-10-06): the way in is early access.
+    await expect(stage.getByRole("link", { name: /^Request early access to Cedar Press/ })).toBeVisible();
     await expect(stage.getByRole("link", { name: /Browse the records/ })).toHaveCount(0);
     // Owner, 2026-10-06: example records of the dataset's observations, and
     // the hero states the observations across every collection.
@@ -1044,7 +1139,10 @@ test.describe("Explore the collections", () => {
     }
     // What a reader is shown: the pinned records after the showcase rules
     // (showcase.js), which leave out records the audit found misleading.
-    const expectedIds = showcaseItems(id, universalRows(table.key, sample.rows)).map((row) => row.recordId).sort();
+    // The viewer is analytical: every downloaded record. The door shows the
+    // editorial selection (showcase.js).
+    const expectedIds = universalRows(table.key, sample.rows).map((row) => row.recordId).sort();
+    const doorIds = showcaseItems(id, universalRows(table.key, sample.rows)).map((row) => row.recordId).sort();
     if (expectedIds.some((value) => !value)) throw new Error(id + " has an unnamed sample observation");
     for (const { account, open } of cases) {
       test(id + (open ? " opens its reviewed sample" : " is offered on Cedar Press+") + " for " + (account === ACCOUNT ? "Cedar Press+" : "Cedar Press"), async ({ page }) => {
@@ -1088,13 +1186,17 @@ test.describe("Explore the collections", () => {
       const stage = page.locator('[data-testid="collection-stage"][data-collection="' + id + '"]');
       await expect(stage).toBeVisible();
       await expect(stage.getByTestId("record-structure")).toHaveCount(0);
+      // A phone opens on three records; the rest are behind "Show more".
+      await stage.getByTestId("stage-record").first().waitFor();
+      const more = stage.locator(".cp-pane__more");
+      if (await more.count()) await more.click();
       const records = stage.getByTestId("stage-record");
-      await expect(records).toHaveCount(Math.min(10, expectedIds.length));
+      await expect(records).toHaveCount(Math.min(10, doorIds.length));
       expect(await records.evaluateAll((nodes) => nodes.map((node) => node.dataset.recordId).sort()))
-        .toEqual(expectedIds.slice(0, 10));
+        .toEqual(doorIds.slice(0, 10));
       await expect(stage.locator(".cp-pane__tablecap")).toContainText(
-        Math.min(10, expectedIds.length) + " of " + collectionCedarFacts(id).n_rows.toLocaleString("en-US") + " observations");
-      await expect(stage.locator(".cp-pane__facts")).toContainText(formatUpdated(release.updated).replace(/, \d{4}$/, ""));
+        Math.min(10, doorIds.length) + " of " + collectionCedarFacts(id).n_rows.toLocaleString("en-US") + " observations");
+      await expect(stage.locator(".cp-pane__facts")).toContainText(formatUpdated(release.refreshed).replace(/, \d{4}$/, ""));
       if (coverageLabel(entry)) await expect(stage.locator(".cp-pane__facts")).toContainText(coverageLabel(entry));
       await expect(stage).not.toContainText(/not yet published|first release|preview pending/i);
       expect(errors).toEqual([]);
@@ -1153,7 +1255,7 @@ test.describe("Explore the collections", () => {
       const row = atlas.getByTestId("atlas-row").filter({ has: page.getByRole("button", { name: entry.name, exact: true }) });
       await expect(row.getByTestId("atlas-rows")).toHaveText(release.rowsLabel);
       await expect(row.locator("td").nth(1)).toHaveText(coverageLabel(entry));
-      await expect(row.locator("td").nth(3)).toHaveText(formatUpdated(release.updated));
+      await expect(row.locator("td").nth(3)).toHaveText(formatUpdated(release.refreshed));
     }
     await expect(page.locator(".cp-ex__pages")).toHaveCount(0);
 
@@ -1391,7 +1493,8 @@ test.describe("About this collection", () => {
     await expect(panel).toBeVisible();
     await expect(panel).toContainText("Awardees are matched to a Native entity");
     // The release facts a reader checks a figure against.
-    for (const field of ["Updated", "Coverage", "Example records"]) {
+    // The data refresh and the release are separate dates (2026-10-06).
+    for (const field of ["Data as of", "Released", "Coverage", "Example records"]) {
       await expect(panel.locator("dt", { hasText: new RegExp(`^${field}$`) }).first()).toBeVisible();
     }
     // The unit of observation, in the codebook's own words: the sentence

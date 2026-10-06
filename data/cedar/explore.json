@@ -514,7 +514,7 @@
       "mapping_kind": "customer_table",
       "reviewed": true,
       "review_reason": "Presentation mapping of the collection's customer table (vendored customer_sheet rules, owner ruling 2026-10-04): its own record identifier, the explicit Cedar entity block and source-declared roles. This is not a new identity or ownership determination.",
-      "columns": 21
+      "columns": 25
     },
     "nonprofits/nonprofits": {
       "entity_uid": "cedar_uid",

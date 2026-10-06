@@ -11,11 +11,13 @@
 // Native entity in a collection about Native-owned awardees, six monthly
 // filings of one subaward.
 //
-// The fix that belongs upstream is a re-drawn sample (docs/handoffs/
-// CODEX_LANDING_FOLLOWUPS_2026-10-06.md). Until then this file decides, for
-// the door and the viewer alike, which of the pinned records are shown and in
-// what order. Nothing here edits a record, a value or a download: the CSV a
-// subscriber downloads is still the pinned file, byte for byte.
+// The fix that belongs upstream is a re-drawn sample and corrected bindings
+// (docs/handoffs/CODEX_LANDING_FOLLOWUPS_2026-10-06.md). Until then this file
+// decides which of the pinned records the landing frame shows first. It is an
+// editorial selection for the door ONLY: the collection viewer, record pages
+// and entity pages read every pinned record (useSamples.js), so what a reader
+// analyses is exactly what they download. Nothing here edits a record, a
+// value or a download.
 
 /**
  * Records left out of the showcase, by collection and record id, each with
@@ -45,14 +47,18 @@ export const EXCLUDED_EXAMPLES = Object.freeze({
  *   requireEntity  leave out records with no Native entity: these collections
  *                  are about Native-attributed awards, so an unattributed row
  *                  contradicts the description it sits under.
- *   positiveAmount leave out $0 and negative (deobligation) amounts.
- *   onePer         show one record per value of these columns (a subaward is
- *                  re-filed monthly; each filing is a row).
+ *   positiveAmount leave $0 and negative (deobligation) amounts out of the
+ *                  door's first screen. Deobligations are real transactions
+ *                  and stay in the viewer and every download.
+ *   spreadBy       order so the first screen shows different values of these
+ *                  columns before repeats (a subaward reports monthly, and
+ *                  each monthly report is its own observation). Ordering
+ *                  only: no record is dropped as a duplicate.
  *   amountFirst    records that carry money first.
  */
 export const SHOWCASE_RULES = Object.freeze({
   contractors: Object.freeze({ requireEntity: true, amountFirst: true }),
-  subcontracting: Object.freeze({ requireEntity: true, onePer: Object.freeze(["subaward_number", "subcontractor_name", "prime_name"]), amountFirst: true }),
+  subcontracting: Object.freeze({ requireEntity: true, spreadBy: Object.freeze(["subaward_number", "subcontractor_name", "prime_name"]), amountFirst: true }),
   funding: Object.freeze({ positiveAmount: true }),
   lobbying: Object.freeze({ amountFirst: true }),
   deals: Object.freeze({ amountFirst: true }),
@@ -62,35 +68,33 @@ const hasEntity = (item) => Boolean(item?.entity?.name || item?.entity?.uid);
 const hasAmount = (item) => Number.isFinite(item?.amount) && item.amount > 0;
 
 /**
- * The records to show, in showcase order: the collection's exclusions and
- * rules applied, then records naming a Native entity before those that do
- * not, each group in the pinned order. Never returns fewer than three records
- * when the pinned set has three or more: a rule that would empty the frame
- * gives way, because an empty preview misleads more than a weak record.
+ * The records the landing frame shows, in showcase order: the collection's
+ * exclusions and rules applied, then records naming a Native entity before
+ * those that do not, each group in the pinned order. A rule is never dropped
+ * to reach a minimum count: the frame shows fewer records rather than a
+ * record the rule exists to keep off it.
  */
 export function showcaseItems(collectionId, items) {
   const list = Array.isArray(items) ? items : [];
   const excluded = EXCLUDED_EXAMPLES[collectionId] ?? {};
   const rules = SHOWCASE_RULES[collectionId] ?? {};
   let kept = list.filter((item) => !(item?.recordId && Object.hasOwn(excluded, item.recordId)));
-  const apply = (next) => { if (next.length >= Math.min(3, list.length)) kept = next; };
-  if (rules.requireEntity) apply(kept.filter(hasEntity));
-  if (rules.positiveAmount) apply(kept.filter(hasAmount));
-  if (rules.onePer) {
-    const seen = new Set();
-    apply(kept.filter((item) => {
-      const parts = rules.onePer.map((column) => String(item?.row?.[column] ?? ""));
-      if (!parts.some(Boolean)) return true;
-      const key = JSON.stringify(parts);
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    }));
+  if (rules.requireEntity) kept = kept.filter(hasEntity);
+  if (rules.positiveAmount) kept = kept.filter(hasAmount);
+  const repeat = new Map();
+  if (rules.spreadBy) {
+    const seen = new Map();
+    for (const item of kept) {
+      const key = JSON.stringify(rules.spreadBy.map((column) => String(item?.row?.[column] ?? "")));
+      const count = seen.get(key) ?? 0;
+      repeat.set(item, count);
+      seen.set(key, count + 1);
+    }
   }
   const rank = (item) => (hasEntity(item) ? 0 : 2) + (rules.amountFirst && !hasAmount(item) ? 1 : 0);
   return kept
     .map((item, index) => ({ item, index }))
-    .sort((a, b) => rank(a.item) - rank(b.item) || a.index - b.index)
+    .sort((a, b) => (repeat.get(a.item) ?? 0) - (repeat.get(b.item) ?? 0) || rank(a.item) - rank(b.item) || a.index - b.index)
     .map(({ item }) => item);
 }
 

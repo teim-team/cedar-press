@@ -59,7 +59,7 @@ import {
   freshMemory,
   resolveLocally,
 } from "./cedarConversation.js";
-import { LAUNCH_COLLECTION } from "./collection.js";
+import { LAUNCH_COLLECTION, countNote } from "./collection.js";
 import { coverageLabel } from "./pressAccess.js";
 import { PRESS_CATALOG_BY_ID, PRESS_TIERS, STOREFRONT_CATALOG, spellCount } from "./pressCatalog.js";
 import { visibleAudiences } from "./pressJobs.js";
@@ -67,6 +67,7 @@ import { ECOSYSTEM_EXAMPLES, MAINTENANCE, NEED_ENRICHMENTS } from "./pressMethod
 import { recordStructure } from "./pressRecordStructure.js";
 import { formatUpdated, freshnessLine, recentlyUpdated } from "./pressReleases.js";
 import { REGISTRY_PROGRAMS } from "./pressSources.js";
+import { SOURCE_REACH_FIGURE } from "./sourceRotation.js";
 
 const DESCRIPTOR = Object.fromEntries(LAUNCH_COLLECTION.map((entry) => [entry.id, entry]));
 const TIER_BY_SHELF = Object.fromEntries(PRESS_TIERS.map((tier) => [tier.shelf, tier]));
@@ -74,11 +75,14 @@ const TIER_BY_SHELF = Object.fromEntries(PRESS_TIERS.map((tier) => [tier.shelf, 
 /** Extra words that should reach a collection beyond its own name. */
 const COLLECTION_WORDS = Object.freeze({
   funding: ["grant", "grants", "assistance", "award", "awards", "usaspending", "federal money", "block grant", "federal funding"],
-  "federal-register": ["notice", "notices", "rule", "rulemaking", "comment period", "register"],
+  "federal-register": ["notice", "notices", "rule", "rulemaking", "comment period", "register", "consultation", "consultations"],
   legislation: ["bill", "bills", "congress", "vote", "votes", "roll call", "senate", "house", "law", "laws"],
   deals: ["deal", "acquisition", "acquisitions", "merger", "mergers", "bond", "bonds", "financing", "transaction", "transactions", "investment", "investments", "joint venture"],
   nagpra: ["repatriation", "remains", "graves", "inventory", "museum", "museums", "ancestors"],
-  lobbying: ["lobby", "lobbying", "advocacy", "consultation", "docket", "dockets", "ferc", "nrc", "testimony", "lda"],
+  // The Advocacy release holds Lobbying Disclosure Act filings only
+  // (2026-10-06), so dockets and testimony no longer route here, and a
+  // consultation reaches the Federal Register, which carries participants.
+  lobbying: ["lobby", "lobbying", "lobbyist", "lobbyists", "advocacy", "lda", "lobbying disclosure"],
   contractors: ["contract", "contracts", "contracting", "prime", "fpds", "8(a)", "set aside", "set-aside", "vendor", "vendors"],
   subcontracting: ["subaward", "subawards", "subcontract", "subcontracts", "subcontractor", "subcontractors", "fsrs"],
   owned: ["tero", "small business", "small businesses", "individually owned", "business directory", "certified", "native owned", "native-owned"],
@@ -128,7 +132,7 @@ function collectionAnswer(entry) {
   // Cedar NEED's enrichments, in the Methods wording.
   if (entry.id === "need") lines.push(`${NEED_ENRICHMENTS.patents} ${NEED_ENRICHMENTS.ratings} ${NEED_ENRICHMENTS.attachment}`);
   const facts = [`Coverage: ${coverageLabel(entry)}.`];
-  if (descriptor?.rowsLabel) facts.push(`${descriptor.rowsLabel} in the current release.`);
+  if (descriptor?.rowsLabel) facts.push(countNote(entry.id) ?? `${descriptor.rowsLabel} in the current release.`);
   if (fresh) facts.push(`${fresh}.`);
   lines.push(facts.join(" "));
   if (descriptor?.sources) lines.push(`Built from ${lowerFirst(descriptor.sources)}`);
@@ -231,10 +235,10 @@ const GENERAL_INTENTS = [
     id: "what",
     chip: "What is Cedar Press?",
     followUps: ["collections", "audiences", "plans"],
-    triggers: ["what is cedar press", "what is this", "what does cedar press do", "what is cedar", "about cedar press", "explain cedar press", "what do you do", "what is press", "cedar press", "what is it", "what are you"],
+    triggers: ["what is cedar press", "what is this", "what does cedar press do", "what is cedar", "about cedar press", "explain cedar press", "what do you do", "what is press", "cedar press", "what is it", "what are you", "what can cedar answer", "what can cedar press answer", "what can you answer", "what can i ask"],
     answer:
       `Cedar Press is a research and intelligence service about Indian Country's economy. ` +
-      `It publishes ${COUNT} maintained collections, built from public material drawn from more than 700 documented upstream sources, and ` +
+      `It publishes ${COUNT} maintained collections, built from ${SOURCE_REACH_FIGURE} kinds of public source and ` +
       `resolved to the nations, corporations and organizations the records belong to.\n\n` +
       `A federal contract names the company that won it but not the nation that owns the company, so ` +
       `Cedar does the work between the record and the entity, publishes what it could not resolve, and keeps the ` +
@@ -270,15 +274,16 @@ const GENERAL_INTENTS = [
     followUps: ["current", "entities", "limits"],
     triggers: ["where does the data come from", "what are the sources", "what sources", "source systems", "is this public data", "where do you get", "how do you get the data", "provenance", "the sources", "data sources", "where is it from", "where does it come from"],
     answer:
-      `Every collection is built from public material, drawn from more than 700 documented upstream sources. They include ` +
-      `federal spending and award systems (USAspending, FPDS, FSRS, SAM, FAADS), Congress and rulemaking ` +
-      `(Congress.gov, Voteview, the Federal Register, regulations.gov), lobbying disclosures and regulatory ` +
-      `dockets (FERC and NRC dockets, IBIA and IBLA appeals), IRS filings (the Business Master File and ` +
+      `Every collection is built from public material, drawn from ${SOURCE_REACH_FIGURE} kinds of public source. They include ` +
+      `federal spending and award systems (USAspending, FPDS, FSRS, SAM, FAADS), Congress and the ` +
+      `Federal Register (Congress.gov, Voteview, federalregister.gov), lobbying disclosures filed under the ` +
+      `Lobbying Disclosure Act, IRS filings (the Business Master File and ` +
       `Form 990), resource revenue reporting (ONRR, OSMRE, ANCSA 7(i) and 7(j) filings, the Osage Minerals ` +
       `Council), and what nations and their enterprises publish about themselves.\n\n` +
-      `Cedar NEED also draws on patent records, supported by company, tribal, SEC and court evidence, and ` +
-      `rating-agency announcements, supported by issuer and tribal releases, filings, regulator records ` +
-      `and labeled secondary sources.`,
+      `Where they are available, Cedar NEED can also add patent records, supported by company, tribal, SEC ` +
+      `and court evidence, and rating-agency announcements, supported by issuer and tribal releases, filings, ` +
+      `regulator records and labeled secondary sources. Each stays with the exact legal entity and date it ` +
+      `concerns, and they are not on every record.`,
     expanded:
       `Going deeper: the tribal business directories are one source family with a registry of ` +
       `${REGISTRY_PROGRAMS} programs behind it: nations' own TERO lists, member-owned directories, state ` +
@@ -312,14 +317,16 @@ const GENERAL_INTENTS = [
     triggers: ["how current", "how often updated", "how fresh", "update", "updated", "cadence", "how often", "is it current", "snapshot", "how recent", "up to date", "latest release", "last updated"],
     answer:
       NEWEST
-        ? `${MAINTENANCE.sentence} The most recent release was ${formatUpdated(NEWEST.updated)}.\n\n` +
+        ? `${MAINTENANCE.sentence} The most recent release was ${formatUpdated(NEWEST.updated)}` +
+          (NEWEST.refreshed ? `, and its data was last refreshed ${formatUpdated(NEWEST.refreshed)}.\n\n` : `.\n\n`) +
           `Every release is maintained with dated updates, and the release history records what changed, so a figure ` +
           `you cited last quarter still reproduces.`
         : `${MAINTENANCE.sentence} Every release is maintained with dated updates so a figure you cited last ` +
           `quarter still reproduces.`,
     expanded:
-      `Going deeper: the sources publish on their own clocks, and each week a person reviews what they ` +
-      `published into the collection. A roster collection states the date it was captured rather than a span, ` +
+      `Going deeper: the sources publish on their own clocks, and on the weekly review schedule a person ` +
+      `reviews what they published before it enters the collection. Each collection shows the date its data ` +
+      `was refreshed and the period its records cover, apart from the date of a release. A roster collection states the date it was captured rather than a span, ` +
       `because its sources archive nothing. ${MAINTENANCE.goal}` +
       (recentLine ? `\n\nThe latest releases: ${recentLine}.` : ""),
   },
@@ -348,7 +355,7 @@ const GENERAL_INTENTS = [
     id: "collaboration",
     chip: "Can we work on analysis together?",
     followUps: ["institutional", "plans", "who"],
-    triggers: ["collaborate", "collaboration", "collaborative", "collaborative analysis", "shared project", "shared projects", "work together", "shared workspace", "team workspace", "co-author", "coauthor"],
+    triggers: ["collaborate", "collaboration", "collaborative", "collaborative analysis", "analysis together", "work on analysis", "shared project", "shared projects", "work together", "shared workspace", "team workspace", "co-author", "coauthor"],
     answer:
       `Collaborative analysis and shared projects are part of Cedar Grove, not Cedar Press. In Cedar Press ` +
       `each person's conversations and activity stay private to them; on the institutional plan, members ` +
@@ -365,8 +372,9 @@ const GENERAL_INTENTS = [
     followUps: ["tribal", "research", "collections"],
     triggers: ["how do i get", "how much", "price", "pricing", "cost", "subscribe", "subscription", "plans", "buy", "sign up", "membership", "tiers", "difference between", "get access", "access", "how do i read", "log in", "login"],
     answer:
-      `Cedar Press is available exclusively through a Tribal Business News membership, which handles ` +
-      `payment, renewals and upgrades.\n\n` +
+      `Cedar Press will be available exclusively through a Tribal Business News membership, which will ` +
+      `handle payment, renewals and upgrades. Enrollment is not open yet: early access is available soon, ` +
+      `and you can request it at contact@lumecon.ai. If you already have an account, log in.\n\n` +
       `${PRESS?.name} opens ${STANDARD.length} collections, ` +
       `${lowerFirst(PRESS?.question ?? "")}\n` +
       `${PRESS_PRO?.name} adds the other ${PRO.length}, ` +

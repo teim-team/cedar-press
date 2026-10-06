@@ -186,6 +186,13 @@ class CollectionDataset:
     #: client's catalog declares the same placement; this one is the control
     #: the routes enforce.
     shelf: str = "standard"
+    #: When the DATA was last refreshed from the producer, as distinct from
+    #: ``updated`` (the release date the ledger records). On 2026-10-06 every
+    #: collection was re-released at the owner's request without a producer
+    #: refresh, so the two dates differ. Read from the manifest provenance
+    #: (``_data_refreshed``); the client reads the same fields
+    #: (collection.js ``dataRefreshed``).
+    refreshed: str | None = None
 
 
 #: Collections whose observation count is not shown to readers (owner,
@@ -217,8 +224,24 @@ def _descriptor_for_readers(descriptor: dict[str, Any]) -> dict[str, Any]:
     return out
 
 
+def _data_refreshed(collection_id: str) -> str | None:
+    """The producer refresh a collection was staged from, or ``None``.
+
+    ``provenance.selected_refreshes[id].updated`` where the collection was
+    refreshed on its own, else ``provenance.updated``, the producer pin every
+    other collection was staged from. Never the release date.
+    """
+    provenance = _MANIFEST.get("provenance") or {}
+    selected = (provenance.get("selected_refreshes") or {}).get(collection_id) or {}
+    return selected.get("updated") or provenance.get("updated") or None
+
+
 LAUNCH_COLLECTION: tuple[CollectionDataset, ...] = tuple(
-    CollectionDataset(**_descriptor_for_readers(entry["descriptor"])) for entry in _MANIFEST["collections"]
+    CollectionDataset(
+        **_descriptor_for_readers(entry["descriptor"]),
+        refreshed=_data_refreshed(entry["descriptor"]["id"]),
+    )
+    for entry in _MANIFEST["collections"]
 )
 
 #: Cedar's own facts per dataset, keyed by product id: readiness status, the
@@ -674,6 +697,77 @@ def _csv_cell(value: object) -> str:
     if any(ch in text for ch in ('"', ",", "\n", "\r")):
         return '"' + text.replace('"', '""') + '"'
     return text
+
+
+#: NEED ownership chains, each with its evidence (``data/cedar/need_ownership_evidence.json``).
+_NEED_OWNERSHIP_PATH = _REPO / "data" / "cedar" / "need_ownership_evidence.json"
+#: The columns the NEED download adds after ``enterprise_name``. The reviewed
+#: NEED table records only the relationship each evidence page states
+#: directly (often the holding company one level up, or nothing); a reader
+#: needs the Native nation or corporation at the top of the chain. Every
+#: value comes from a recorded ownership ruling or register binding cited in
+#: ``native_owner_evidence``, never from a name.
+NATIVE_OWNER_COLUMNS = ("native_owner", "native_owner_cedar_uid", "native_owner_basis", "native_owner_source")
+
+#: Plain words for each kind of ownership evidence the file records.
+_EVIDENCE_WORDS = {
+    "owner_ruling": "ownership ruling recorded by Cedar",
+    "enterprise_register": "Cedar enterprise register binding",
+    "first_party_cage_list": "listed by the owner's federal contracting arm with its CAGE code",
+    "identifier_ledger": "federal identifier ledger ultimate-parent chain",
+    "derived_ranking": "Cedar contractor ranking attribution",
+    "producer_evidence_pin": "the owner's own published page",
+    "government_record": "federal procurement record",
+}
+
+
+def _need_ownership() -> list[dict[str, Any]]:
+    if not _NEED_OWNERSHIP_PATH.exists():
+        return []
+    return json.loads(_NEED_OWNERSHIP_PATH.read_text(encoding="utf-8")).get("records", [])
+
+
+def _public_url(urls: list[str]) -> str:
+    """The first page a reader can open: an owner's or agency's own page, never Cedar's private repository."""
+    return next((url for url in urls if url and "github.com/teim-team/" not in url), "")
+
+
+def with_native_owner(rows: list[list[str]]) -> list[list[str]]:
+    """NEED rows with their evidenced ultimate Native owner, matched by UEI, else exact name.
+
+    ``native_owner_source`` is a page the reader can open: the evidence's own
+    public page, else the row's first published source (the owner's page that
+    lists the enterprise). Rows with no recorded ruling stay blank.
+    """
+    header = rows[0]
+    if "enterprise_name" not in header or set(NATIVE_OWNER_COLUMNS) & set(header):
+        return rows
+    by_uei: dict[str, dict[str, Any]] = {}
+    by_name: dict[str, dict[str, Any]] = {}
+    for record in _need_ownership():
+        if not record.get("in_pinned_need_sample"):
+            continue
+        if record.get("uei"):
+            by_uei[record["uei"]] = record
+        if record.get("enterprise_name_as_recorded"):
+            by_name[record["enterprise_name_as_recorded"]] = record
+    col = {name: index for index, name in enumerate(header)}
+    at = col["enterprise_name"] + 1
+    out = [[*header[:at], *NATIVE_OWNER_COLUMNS, *header[at:]]]
+    for row in rows[1:]:
+        uei = row[col["uei"]] if "uei" in col else ""
+        record = (by_uei.get(uei) if uei else None) or by_name.get(row[col["enterprise_name"]])
+        if record is None:
+            added = ["", "", "", ""]
+        else:
+            evidence = record.get("evidence", [])
+            kinds = list(dict.fromkeys(_EVIDENCE_WORDS.get(e.get("kind"), "") for e in evidence))
+            basis = "; ".join(kind for kind in kinds if kind)
+            own_sources = row[col["source_urls"]].split(";") if "source_urls" in col else []
+            source = _public_url([e.get("url") or "" for e in evidence]) or _public_url([u.strip() for u in own_sources])
+            added = [record.get("ultimate_native_owner") or "", record.get("ultimate_native_owner_cedar_uid") or "", basis, source]
+        out.append([*row[:at], *added, *row[at:]])
+    return out
 
 
 def collection_csv(dataset_id: str) -> str | None:

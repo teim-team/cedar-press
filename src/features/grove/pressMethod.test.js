@@ -140,7 +140,8 @@ import { STOREFRONT_CATALOG } from "./pressCatalog.js";
 import { DECLARED_CADENCE } from "./pressReleases.js";
 
 test("the maintenance story says weekly, human review, wider coverage and new collections", () => {
-  assert.match(MAINTENANCE.sentence, /weekly with human review/);
+  // A schedule, not a measured history (2026-10-06).
+  assert.match(MAINTENANCE.sentence, /on a weekly schedule with human review/);
   assert.match(MAINTENANCE.sentence, /expands their source coverage and useful fields over time/);
   assert.match(MAINTENANCE.sentence, /develops new collections/);
   assert.match(MAINTENANCE.goal, /exceptionally useful, well-documented data and tools for Indian Country/);
@@ -148,7 +149,7 @@ test("the maintenance story says weekly, human review, wider coverage and new co
     assert.doesNotMatch(line, /[—&]|\bimpact\b/i, line);
   }
   // No surface promises a different cadence.
-  for (const [id, cadence] of Object.entries(DECLARED_CADENCE)) assert.equal(cadence, "Updated weekly", id);
+  for (const [id, cadence] of Object.entries(DECLARED_CADENCE)) assert.equal(cadence, "Reviewed on a weekly schedule", id);
 });
 
 test("public NEED describes its reviewed cohort while restricted enrichments retain their subject and date", () => {

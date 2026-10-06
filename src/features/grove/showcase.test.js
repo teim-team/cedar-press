@@ -3,9 +3,10 @@ import test from "node:test";
 import { readFileSync } from "node:fs";
 
 import { parseCsv, universalRows } from "./explore.js";
-import { enrichSample, NEED_EXAMPLE_EVIDENCE } from "./exampleEnrichment.js";
+import { enrichSample } from "./exampleEnrichment.js";
 import { EXCLUDED_EXAMPLES, showcaseItems } from "./showcase.js";
 import { readableCode, repairMojibake } from "./readerPresentation.js";
+import { viewerItems } from "./useSamples.js";
 
 const sample = (id) => parseCsv(readFileSync(new URL(`../../../public/data/cedar/downloads/${id}.csv`, import.meta.url), "utf8"));
 const items = (id, parsed = sample(id)) => universalRows(`${id}/${id}`, parsed.rows);
@@ -17,50 +18,65 @@ test("every excluded example names a record the pinned sample actually holds", (
   }
 });
 
-test("the showcase leaves out the records the audit found misleading, and keeps at least three", () => {
+test("the landing showcase leaves out the records the audit found misleading, and never abandons a rule for a minimum count", () => {
   const shown = showcaseItems("legislation", items("legislation"));
   assert.ok(!shown.some((item) => item.recordId === "100-hr-2642"));
-  for (const id of ["contractors", "subcontracting", "funding", "nagpra", "foundation-corporate-giving"]) {
-    assert.ok(showcaseItems(id, items(id)).length >= 3, id);
-  }
-  // Prime Contracting shows only records with a Native entity.
-  assert.ok(showcaseItems("contractors", items("contractors")).every((item) => item.entity.name || item.entity.uid));
-  // One subaward re-filed monthly shows once.
-  const subs = showcaseItems("subcontracting", items("subcontracting"));
-  const keys = subs.map((item) => [item.row.subaward_number, item.row.subcontractor_name, item.row.prime_name].join("|"));
-  assert.equal(new Set(keys).size, keys.length);
-  // Funding shows no $0 or negative obligation.
+  // Prime Contracting shows only records with a Native entity, however few.
+  const contracts = showcaseItems("contractors", items("contractors"));
+  assert.ok(contracts.every((item) => item.entity.name || item.entity.uid));
+  assert.equal(contracts.length, items("contractors").filter((item) => item.entity.name || item.entity.uid).length);
+  // The door's first screen shows no $0 or negative obligation.
   assert.ok(showcaseItems("funding", items("funding")).every((item) => item.amount > 0));
 });
 
-test("NEED examples name their top-level Native owner, with evidence, and include tribe-owned enterprises", () => {
-  const parsed = enrichSample("need", sample("need"));
-  assert.ok(parsed.columns.includes("native_owner"));
+test("monthly subaward reports are distinct observations: the showcase reorders them and drops none", () => {
+  const all = items("subcontracting");
+  const attributed = all.filter((item) => item.entity.name || item.entity.uid);
+  const subs = showcaseItems("subcontracting", all);
+  assert.equal(subs.length, attributed.length);
+  // Each report carries its own source report id, so none is a duplicate.
+  const reports = all.map((item) => item.row.report_id);
+  assert.equal(new Set(reports).size, reports.length);
+  // Different subawards come before a repeat of the same one.
+  const key = (item) => [item.row.subaward_number, item.row.subcontractor_name, item.row.prime_name].join("|");
+  const firstRepeat = subs.findIndex((item, index) => subs.slice(0, index).some((other) => key(other) === key(item)));
+  const distinct = new Set(subs.map(key)).size;
+  assert.equal(firstRepeat, distinct);
+});
+
+test("the analytical viewer shows exactly the downloaded records, deobligations and repeats included", () => {
+  for (const id of ["contractors", "deals", "federal-register", "foundation-corporate-giving", "funding", "legislation", "lobbying", "nagpra", "natural-resources", "need", "nonprofits", "owned", "plot", "subcontracting"]) {
+    const downloaded = sample(id);
+    const viewed = viewerItems(`${id}/${id}`, downloaded);
+    assert.equal(viewed.length, downloaded.rows.length, id);
+    // Same records, same order, same values as the file the reader downloads.
+    viewed.forEach((item, index) => {
+      for (const [column, value] of Object.entries(downloaded.rows[index])) {
+        assert.equal(item.row[column], value, `${id} row ${index} ${column}`);
+      }
+    });
+  }
+  const funding = viewerItems("funding/funding", sample("funding"));
+  assert.ok(funding.some((item) => Number(item.row.obligations_usd) < 0), "the deobligation is kept");
+  assert.ok(funding.some((item) => Number(item.row.obligations_usd) === 0), "the $0 action is kept");
+});
+
+test("every NEED example names its ultimate Native owner in the download itself, with a basis and a public source", () => {
+  const parsed = sample("need");
+  for (const column of ["native_owner", "native_owner_cedar_uid", "native_owner_basis", "native_owner_source"]) {
+    assert.ok(parsed.columns.includes(column), column);
+  }
   for (const row of parsed.rows) {
     assert.ok(row.native_owner, `${row.enterprise_name}: no Native owner`);
-    assert.ok(row.native_owner_basis.length > 30, `${row.enterprise_name}: no evidence`);
     assert.match(row.native_owner_cedar_uid, /^CE-[0-9A-Z]{5}-[0-9A-Z]{2}$/);
+    assert.ok(row.native_owner_basis.length > 10, `${row.enterprise_name}: no basis`);
+    assert.match(row.native_owner_source, /^https:\/\//);
+    assert.ok(!row.native_owner_source.includes("github.com/teim-team"), `${row.enterprise_name}: private source`);
   }
-  const owners = new Set(parsed.rows.map((row) => row.native_owner));
-  for (const owner of ["Arctic Slope Regional Corporation", "Ahtna, Incorporated", "NANA Regional Corporation, Inc.", "Koniag, Incorporated", "The Chickasaw Nation", "The Choctaw Nation of Oklahoma"]) {
-    assert.ok(owners.has(owner), owner);
-  }
-  // Each record links to its ultimate owner, never to the holding company.
-  const linked = universalRows("need/need", parsed.rows);
-  for (const item of linked) assert.match(item.entity.uid ?? "", /^CE-/, item.row.enterprise_name);
-  assert.equal(linked.find((item) => item.row.enterprise_name === "CNI Advantage, LLC").entity.name, "The Chickasaw Nation");
-  // The first screen shows a tribe and four regional corporations.
-  assert.deepEqual(new Set(parsed.rows.slice(0, 6).map((row) => row.native_owner)).size, 5);
-  // A tribe-owned enterprise is the first record a reader sees.
-  assert.equal(parsed.rows[0].native_owner, "The Chickasaw Nation");
-  // Every tribal example carries the federal identifiers its ruling is keyed by.
-  for (const example of NEED_EXAMPLE_EVIDENCE.tribal) {
-    assert.match(example.uei, /^[0-9A-Z]{12}$/);
-    assert.match(example.cage_code, /^[0-9A-Z]{5}$/);
-  }
-  // Every other collection is untouched.
-  const funding = sample("funding");
-  assert.equal(enrichSample("funding", funding), funding);
+  // The viewer adds no NEED record or owner of its own.
+  assert.equal(enrichSample("need", parsed), parsed);
+  // Each record links to that owner.
+  for (const item of viewerItems("need/need", parsed)) assert.equal(item.entity.uid, item.row.native_owner_cedar_uid);
 });
 
 test("an individually owned business shows the tribe its registry lists, not only the certifier", () => {
@@ -78,4 +94,31 @@ test("source codes and garbled characters read as text", () => {
   assert.equal(repairMojibake("CNSPÃ¢Â‚Â¬Â„Â¢S"), "CNSP’S");
   assert.equal(repairMojibake("Tribeâ€™s"), "Tribe’s");
   assert.equal(repairMojibake("Iñupiat"), "Iñupiat");
+});
+
+// Bindings an audit of 2026-10-06 found wrong. The correction belongs to the
+// producer (docs/handoffs/CODEX_LANDING_FOLLOWUPS_2026-10-06.md); until it
+// lands, the door leaves each record out. When a re-pinned release fixes a
+// binding, this test fails on purpose: delete the entry here and the
+// matching exclusion in showcase.js in the same change.
+const KNOWN_WRONG_BINDINGS = [
+  // Pub. L. 100-585 settles the Southern Ute and Ute Mountain Ute claims.
+  { collection: "legislation", record: "100-hr-2642", wrongUid: "CE-001BW-3N" },
+  // The notice names the Duckwater Shoshone Tribe, not the BIE school.
+  { collection: "nagpra", record: "00-11378", wrongUid: "CE-000E9-W1" },
+];
+
+test("known wrong bindings are still in the pinned data and kept off the door", () => {
+  for (const { collection, record, wrongUid } of KNOWN_WRONG_BINDINGS) {
+    const all = items(collection);
+    const row = all.find((item) => item.recordId === record);
+    assert.ok(row, `${collection} ${record} is no longer pinned: remove it from KNOWN_WRONG_BINDINGS and EXCLUDED_EXAMPLES`);
+    assert.ok(JSON.stringify(row.row).includes(wrongUid), `${collection} ${record} no longer carries ${wrongUid}: the producer fixed it`);
+    assert.ok(!showcaseItems(collection, all).some((item) => item.recordId === record), `${collection} ${record} reached the door`);
+  }
+  // The giving record keeps the recipient as the report printed it and is
+  // not bound to the NB3 Foundation without the report saying so.
+  const gift = items("foundation-corporate-giving").find((item) => item.recordId === "FF-03B9C4E5A6CA00E15034");
+  assert.equal(gift.row.recipient_name_reported, "Notah Begay");
+  assert.equal(gift.row.cedar_uid ?? "", "");
 });

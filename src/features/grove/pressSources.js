@@ -95,15 +95,15 @@ export const SOURCE_GROUPS = Object.freeze([
       { name: "Federal Register NAGPRA notices", collections: ["nagpra"] },
     ]),
   }),
+  // The Advocacy collection's current release holds Lobbying Disclosure Act
+  // filings only (2026-10-06). Consultation notices, FERC and NRC dockets,
+  // IBIA and IBLA appeals, regulations.gov and Form 990 Schedule C left with
+  // the descriptor's sources prose, and return when a release carries them.
   Object.freeze({
     id: "advocacy",
-    label: "Advocacy, consultation and dockets",
+    label: "Lobbying disclosure",
     sources: Object.freeze([
-      { name: "Senate and House lobbying disclosure", collections: ["lobbying"] },
-      { name: "Federal Register consultation and ex parte notices", collections: ["lobbying"] },
-      { name: "FERC and NRC dockets", collections: ["lobbying"] },
-      { name: "IBIA and IBLA appeals", collections: ["lobbying"] },
-      { name: "regulations.gov", collections: ["lobbying"] },
+      { name: "Senate and House lobbying disclosure", match: "lobbying disclosure filings made to the Senate and House", collections: ["lobbying"] },
     ]),
   }),
   Object.freeze({
@@ -113,7 +113,6 @@ export const SOURCE_GROUPS = Object.freeze([
       { name: "IRS Business Master File", collections: ["nonprofits"] },
       { name: "Form 990 e-file returns", collections: ["nonprofits"] },
       { name: "990-N e-Postcard corpus", collections: ["nonprofits"] },
-      { name: "IRS Form 990 Schedule C", collections: ["lobbying"] },
       { name: "ProPublica Nonprofit Explorer", collections: ["nonprofits"] },
     ]),
   }),

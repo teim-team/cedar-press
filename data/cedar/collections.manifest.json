@@ -387,9 +387,9 @@
         "downloads": null,
         "name": "Native Federal Advocacy and Engagement",
         "short_name": "Advocacy",
-        "tracks": "Documented federal advocacy and engagement involving Native nations and organizations, including registered lobbying, agency meetings, tribal consultations, regulatory comments, congressional testimony and nonprofit lobbying disclosures. Each row represents one entity-linked activity or source record.",
-        "sources": "Senate and House lobbying disclosure; Federal Register consultation and ex parte notices; FERC and NRC dockets; IBIA and IBLA appeals; regulations.gov; IRS Form 990 Schedule C.",
-        "method": "Built on the premise that the Lobbying Disclosure Act sees only a fraction of tribal advocacy: 300 entities appear in LDA filings, 669 appear in a non-LDA channel, and only 4 are visible to the LDA and nowhere else. Each channel is kept as its own record type rather than merged into a single misleading total, and organisations acting on behalf of many tribes are scoped as such rather than attributed to one."
+        "tracks": "Registered federal lobbying by and for Native nations and organizations, from disclosures filed under the Lobbying Disclosure Act. Each row is one lobbying disclosure filing, with its registrant, client, issues, the government bodies lobbied and reported amounts.",
+        "sources": "Lobbying disclosure filings made to the Senate and House under the Lobbying Disclosure Act (lda.gov).",
+        "method": "Each row is one filing as disclosed under the Lobbying Disclosure Act, linked to the Native nation or organization behind it where the filing supports the link. Registrant and client are kept as filed, amended and superseded filings are marked rather than removed, and organisations acting on behalf of many tribes are scoped as such rather than attributed to one. Agency meetings, consultations, regulatory comments, testimony and nonprofit lobbying disclosures are not part of this release."
       },
       "cedar": {
         "cedar_id": "lobbying",

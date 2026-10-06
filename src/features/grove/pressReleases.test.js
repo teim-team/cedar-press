@@ -335,8 +335,13 @@ test("dates are spelled one way everywhere", () => {
   // The SHAPE, not the day. Pinning this to "Sept. 2" made a routine data
   // refresh fail a formatting test, which teaches the next person to edit the
   // date rather than read the failure.
+  // The DATA refresh date, not the release date (2026-10-06), and the
+  // cadence worded as a schedule.
   assert.match(freshnessLine("funding"),
-               /^Updated [A-Z][a-z]+\.? \d{1,2} · weekly$/);
+               /^Data as of [A-Z][a-z]+\.? \d{1,2} · weekly review schedule$/);
+  assert.ok(releaseFor("funding").refreshed, "a sold collection carries its data refresh date");
+  assert.ok(releaseFor("funding").refreshed <= releaseFor("funding").updated,
+            "data cannot be refreshed after the release that carries it");
   assert.equal(freshnessLine("not-a-collection"), "");
   assert.equal(latestRelease("need").version, releaseFor("need").version);
   assert.equal(latestRelease("not-a-collection"), null);

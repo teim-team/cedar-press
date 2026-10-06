@@ -468,7 +468,7 @@ export function MethodsByCollection() {
                   line is left out rather than left empty. */}
               {release || coverageLabel(entry) ? (
                 <p className="cp-mbc__meta">
-                  {[release?.updated ? `Updated ${release.updated}` : "", coverageLabel(entry), release?.cadence].filter(Boolean).join(" · ")}
+                  {[release?.refreshed ? `Data as of ${release.refreshed}` : "", release?.updated ? `released ${release.updated}` : "", coverageLabel(entry), release?.cadence].filter(Boolean).join(" · ")}
                 </p>
               ) : null}
             </div>
@@ -496,7 +496,7 @@ export function MethodsByCollection() {
                 records are available, each kept with its own entity. */}
             {entry.id === "need" ? (
               <div data-testid="need-enrichments">
-                <span className="cp-mbc__cap">Patents and credit ratings</span>
+                <span className="cp-mbc__cap">Patents and credit ratings, where available</span>
                 <p>{NEED_ENRICHMENTS.patents} {NEED_ENRICHMENTS.ratings} {NEED_ENRICHMENTS.attachment}</p>
                 <p>
                   {NEED_ENRICHMENT_SOURCES.map((source) => `${source.name}, supported by ${source.supportedBy}`).join("; ")}.

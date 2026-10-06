@@ -128,6 +128,26 @@ const tracksForReaders = (descriptor) => {
   return lead && !(descriptor.tracks ?? "").includes(lead) ? `${lead}: ${descriptor.tracks}` : descriptor.tracks;
 };
 
+/**
+ * When each collection's DATA was last refreshed from the producer, which is
+ * not the same date as `updated`.
+ *
+ * `updated` is the release date the ledger records (data/cedar/releases.json).
+ * On 2026-10-06 every collection was re-released with that date at the
+ * owner's request, without a producer data refresh: the rows, samples and
+ * release ids did not change. A reader needs three dates kept apart: when
+ * the page was revised, when the data was refreshed, and what period the
+ * records cover. This is the second, read from the manifest's provenance:
+ * the producer refresh a collection was staged from
+ * (`provenance.selected_refreshes[id].updated`), else the producer pin every
+ * other collection was staged from (`provenance.updated`). Never typed. The
+ * service reads the same fields (collections.py `_data_refreshed`).
+ */
+function dataRefreshed(id) {
+  const provenance = manifest.provenance ?? {};
+  return provenance.selected_refreshes?.[id]?.updated ?? provenance.updated ?? null;
+}
+
 export const LAUNCH_COLLECTION = deepFreeze(
   manifest.collections.map((entry) => ({
     id: entry.descriptor.id,
@@ -142,10 +162,78 @@ export const LAUNCH_COLLECTION = deepFreeze(
     vintage: entry.descriptor.vintage,
     version: entry.descriptor.version,
     updated: entry.descriptor.updated,
+    refreshed: dataRefreshed(entry.descriptor.id),
     sources: entry.descriptor.sources,
     method: entry.descriptor.method,
   })),
 );
+
+/**
+ * What the headline observation count is, said wherever the total is shown
+ * (2026-10-06). The total adds rows across collections whose rows are
+ * different things, so it is a count of records, not of organizations and
+ * not of dollars.
+ */
+export const OBSERVATIONS_NOTE =
+  "Observations are rows across collections of different kinds, such as filings, awards, parcels and documents. They are not unique entities or an additive dollar total.";
+
+/**
+ * Plain names for the record types a collection's count is made of. A type
+ * without a name here falls back to its own words, never to a guess.
+ */
+const RECORD_TYPE_NAMES = Object.freeze({
+  tract_observations: "BIA tract observations",
+  ownership_observations: "assessor parcel ownership observations",
+  environmental_events: "EPA environmental events",
+  environmental_permits: "EPA environmental permits",
+  permit_events: "permit events",
+  permits: "local permits",
+  federal_actions: "Federal Register documents",
+  consultation_participants: "consultation participant records",
+  policy_eligible_disclosures: "policy-eligible disclosures",
+  reviewed_disclosures: "reviewed disclosures",
+});
+
+/** What the examples shown for a mixed collection are, where they are one kind. */
+const EXAMPLE_KIND = Object.freeze({
+  plot: "The example records shown are BIA tracts and assessor parcels; the count also covers permits and environmental records.",
+  "federal-register": "A participant record is one named participant in one document, so participants are not additional documents.",
+  "foundation-corporate-giving": "Each is one source disclosure, not an additive award total.",
+});
+
+const countWords = (n) => n.toLocaleString("en-US");
+const KIND_WORDS = Object.freeze({ 2: "two", 3: "three", 4: "four", 5: "five", 6: "six", 7: "seven", 8: "eight", 9: "nine" });
+const listWords = (items) =>
+  items.length < 3 ? items.join(" and ") : `${items.slice(0, -1).join(", ")} and ${items.at(-1)}`;
+
+/**
+ * For a collection whose count mixes record types, what the count is made
+ * of, from the manifest's own `record_types` per table. Null for a
+ * single-kind collection and for a collection whose count is not shown.
+ */
+export const COUNT_NOTES = deepFreeze(
+  Object.fromEntries(
+    manifest.collections
+      .filter((entry) => !COUNT_NOT_SHOWN.has(entry.id))
+      .map((entry) => {
+        const kinds = {};
+        for (const table of entry.tables ?? []) {
+          for (const [kind, n] of Object.entries(table.record_types ?? {})) kinds[kind] = (kinds[kind] ?? 0) + n;
+        }
+        const parts = Object.entries(kinds).sort((a, b) => b[1] - a[1]);
+        if (parts.length < 2) return [entry.id, null];
+        const total = parts.reduce((sum, [, n]) => sum + n, 0);
+        const named = parts.map(([kind, n]) => `${countWords(n)} ${RECORD_TYPE_NAMES[kind] ?? kind.replace(/_/g, " ")}`);
+        const lead = `${countWords(total)} observations of ${KIND_WORDS[parts.length] ?? parts.length} kinds: ${listWords(named)}.`;
+        return [entry.id, EXAMPLE_KIND[entry.id] ? `${lead} ${EXAMPLE_KIND[entry.id]}` : lead];
+      }),
+  ),
+);
+
+/** The count note for a collection, or null. */
+export function countNote(id) {
+  return COUNT_NOTES[id] ?? null;
+}
 
 const CEDAR = deepFreeze(
   Object.fromEntries(manifest.collections.map((entry) => [entry.id, entry.cedar])),

@@ -205,7 +205,7 @@ export const COLLECTION_JOBS = Object.freeze({
   }),
   lobbying: Object.freeze({
     questions: Object.freeze([
-      q(describe, "Which agencies and chambers do Native organizations engage, and on which issues?", ["government_bodies", "issue_codes"]),
+      q(describe, "Which agencies and chambers are lobbied for Native organizations, and on which issues?", ["government_bodies", "issue_codes"]),
       q(compare, "How much are peer organizations reporting on federal lobbying?", ["reported_amount_usd", "canonical_name", "reporting_year"]),
       q(trace, "Which registrants file on an organization's behalf?", ["registrant_name", "client_name", "canonical_name"]),
     ]),
@@ -453,7 +453,7 @@ export const AUDIENCE_JOBS = Object.freeze([
     // seated audience's faces: the two context textures, in slate.
     imagePool: Object.freeze(["context-lattice", "context-cedar"]),
     researchExample: Object.freeze({
-      text: "A researcher studying federal advocacy needs the Advocacy collection for one article and wants the underlying records and source trail.",
+      text: "A researcher studying federal lobbying needs the Advocacy collection for one article and wants the underlying records and source trail.",
       collections: Object.freeze(["lobbying"]),
     }),
   }),

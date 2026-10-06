@@ -55,7 +55,7 @@ import {
   intentForCollection,
   resolveDoor,
 } from "../../features/grove/doorCedar.js";
-import { TBN_PLANS_URL } from "../../features/grove/pressArticles";
+import { EARLY_ACCESS_HREF, EARLY_ACCESS_LABEL } from "../../features/grove/appLink.js";
 import { PRESS_METHODS_PATH, PRESS_REQUEST_PATH, PRESS_RESEARCH_PATH } from "../../features/grove/pressRoutes";
 import { EVENT, track } from "../../features/grove/telemetry.js";
 import { rememberFocus } from "../../features/grove/focusReturn.js";
@@ -65,7 +65,8 @@ import { CedarGreeting } from "./CedarGreeting";
 
 /** The routes an answer can offer, by the key an intent names. */
 const LINKS = {
-  plans: { label: "View plans at Tribal Business News", href: TBN_PLANS_URL, external: true },
+  // Enrollment is not open yet (2026-10-06), so the route is early access.
+  plans: { label: EARLY_ACCESS_LABEL, href: EARLY_ACCESS_HREF, external: false },
   request: { label: "Tribal government data requests", to: PRESS_REQUEST_PATH },
   research: { label: "Research access", to: PRESS_RESEARCH_PATH },
   methods: { label: "Read the methods", to: PRESS_METHODS_PATH },
@@ -203,6 +204,8 @@ export default function PressDoorCedar() {
             if (!link) return null;
             return link.external ? (
               <a key={key} href={link.href} target="_blank" rel="noreferrer">{link.label}</a>
+            ) : link.href ? (
+              <a key={key} href={link.href}>{link.label}</a>
             ) : (
               <Link key={key} to={link.to} onClick={() => close(false)}>{link.label}</Link>
             );

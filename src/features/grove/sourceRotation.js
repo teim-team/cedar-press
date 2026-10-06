@@ -32,20 +32,46 @@
  * state environmental label says "state" so it does not read as the federal
  * EPA line. `sourceRotation.test.js` refuses a repeated label.
  *
- * THE FIGURE IS NOT THIS LIST. SOURCE_REACH_FIGURE counts distinct upstream
- * sources, stated by the owner (2026-10-02: 700+). This remains an
- * owner-supplied total, not an independently recomputed registry count.
- * The labels below name kinds of source and add nothing to that total.
- * The business-directory additions are evidenced by the source registry
- * categories checked in pressSources.test.js. Grove-only Infrastructure
+ * THE FIGURE IS NOT THIS LIST, AND IT IS MEASURED (2026-10-06).
+ * The door used to state an owner-supplied total of seven hundred-plus
+ * sources (2026-10-02) that no registry in this repository or in
+ * Lumecon-data reproduces. Measured on
+ * 2026-10-06, with each unit stated:
+ *   - 47 kinds of source named by the released collections: every
+ *     `PRESS_SOURCES` entry evidenced by a collection descriptor's `sources`
+ *     prose (38) or by the tribal business source registry (9 kinds), one
+ *     line per source system or source kind. The two Cedar NEED enrichments
+ *     (`declared`) are left out: the current NEED release carries no patent
+ *     or rating rows.
+ *   - 174 source programs in the tribal business source registry
+ *     (`cedar_source_registry/sources.jsonl`), each one directory or
+ *     registry; behind the Individual Native-Owned Businesses collection.
+ *   - 114 registered source entries (103 distinct owner strings) in
+ *     Lumecon-data's intake profiles for the thirteen non-gaming collections
+ *     it profiles (branch codex/convergence-packet-guard-20260928). Producer
+ *     bookkeeping, not shown on the door.
+ *   - 154 dataset discovery leads (`cedar_source_registry/research/
+ *     dataset_discovery_*.jsonl`): candidates, not sources, and not counted.
+ * None of these reaches seven hundred with a unit a reader could check, so the door
+ * states the first, computed here rather than typed, and the labels below
+ * stay what they always were: kinds of source across collections and
+ * research, which add nothing to the figure. Grove-only Infrastructure
  * sources remain in Grove's own catalog.
  */
 
-export const SOURCE_REACH_CLAIM =
-  "Lumecon builds its datasets and research from public material drawn from 700+ documented upstream sources.";
+import { PRESS_SOURCES } from "./pressSources.js";
 
-export const SOURCE_REACH_FIGURE = "700+";
-export const SOURCE_REACH_UPDATED = "2026-10-02";
+/** Kinds of source behind the released collections. Counted, never typed. */
+export const RELEASED_SOURCE_KINDS = PRESS_SOURCES.filter((source) => !source.declared).length;
+
+export const SOURCE_REACH_CLAIM =
+  `Cedar Press collections are built from ${RELEASED_SOURCE_KINDS} kinds of public source, ` +
+  "including federal systems, filings and the registries nations and their enterprises publish.";
+
+export const SOURCE_REACH_FIGURE = String(RELEASED_SOURCE_KINDS);
+/** The unit the figure counts, said where the figure is shown. */
+export const SOURCE_REACH_UNIT = "kinds of source behind the collections";
+export const SOURCE_REACH_UPDATED = "2026-10-06";
 
 export const SOURCE_ROTATION = Object.freeze([
   "USAspending contract awards",

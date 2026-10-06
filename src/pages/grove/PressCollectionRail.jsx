@@ -27,7 +27,7 @@
 // The lock here is an affordance and nothing else. `pressAccess` says so in
 // its own header and it is worth repeating: the server has to refuse the
 // same request, and a client that dims a row has not protected anything.
-import { useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { canOpenDataset } from "../../features/grove/pressAccess";
 import { downloadAll } from "../../features/grove/pressDownload";
@@ -86,16 +86,31 @@ function ShelfDownload({ tier, entries }) {
  * The hover card (owner, 2026-10-06: "when you hover over a data set, it
  * tells you more"). In the app only: on the door, pointing at a collection
  * already opens it in the pane beside the rail, and the door's rail sits in a
- * scaled frame a floating card would be clipped by. Fixed-positioned beside
+ * clipped frame a floating card would be cut off by. Fixed-positioned beside
  * the item, so the rail's own scrolling cannot clip it; a mouse or keyboard
  * focus opens it, a tap never does.
  */
 function RailTip({ tip }) {
+  const ref = useRef(null);
+  // Kept inside the viewport: beside the row when it fits, flipped to the
+  // row's left when it would run off the right edge, and lifted when it
+  // would run off the bottom. Placed on the node before paint.
+  useLayoutEffect(() => {
+    const node = ref.current;
+    if (!tip || !node) return;
+    const box = node.getBoundingClientRect();
+    const margin = 8;
+    let left = tip.left;
+    if (left + box.width > window.innerWidth - margin) left = Math.max(margin, tip.rowLeft - box.width - 10);
+    const top = Math.max(margin, Math.min(tip.top, window.innerHeight - box.height - margin));
+    node.style.left = `${left}px`;
+    node.style.top = `${top}px`;
+  }, [tip]);
   if (!tip) return null;
   const { entry, top, left } = tip;
   const facts = [coverageLabel(entry), ROWS_LABEL[entry.id], freshnessLine(entry.id)].filter(Boolean);
   return (
-    <div className="cp-railtip" role="tooltip" id={`cp-railtip-${entry.id}`} style={{ top, left }}>
+    <div ref={ref} className="cp-railtip" role="tooltip" id={`cp-railtip-${entry.id}`} style={{ top, left }}>
       <b className="cp-railtip__name"><TierName name={entry.name} /></b>
       {entry.blurb ? <p className="cp-railtip__blurb">{entry.blurb}</p> : null}
       {facts.length ? <p className="cp-railtip__facts">{facts.join(" \u00b7 ")}</p> : null}
@@ -118,11 +133,38 @@ export default function PressCollectionRail({
   const showTip = (entry, element) => {
     if (mode !== "app") return;
     const box = element.getBoundingClientRect();
-    setTip({ entry, top: Math.max(8, box.top), left: box.right + 10 });
+    setTip({ entry, top: Math.max(8, box.top), left: box.right + 10, rowLeft: box.left });
   };
   const hideTip = () => setTip(null);
+  // Escape dismisses the card whether it was opened by focus or by the
+  // mouse (WCAG 1.4.13); focus never moves, so there is nothing to return.
+  useEffect(() => {
+    if (!tip) return undefined;
+    const onKey = (event) => { if (event.key === "Escape") setTip(null); };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [tip]);
+  // THE COLLECTION IN HAND IS ON SCREEN. When the rail lies down as a strip,
+  // a deep link (/?collection=plot) selected a chip far past the strip's
+  // right edge, so the visitor saw a pane with no visible selection. The
+  // strip scrolls itself (never the page) to bring the selected chip in.
+  const navRef = useRef(null);
+  useEffect(() => {
+    const nav = navRef.current;
+    const on = nav?.querySelector(".cp-rail__item.is-on");
+    if (!nav || !on) return;
+    const navBox = nav.getBoundingClientRect();
+    const onBox = on.getBoundingClientRect();
+    if (nav.scrollWidth > nav.clientWidth + 1 && (onBox.left < navBox.left || onBox.right > navBox.right)) {
+      nav.scrollLeft += onBox.left - navBox.left - (navBox.width - onBox.width) / 2;
+    }
+    // The same in the frame's sidebar, which scrolls on its own at real size.
+    if (nav.scrollHeight > nav.clientHeight + 1 && (onBox.top < navBox.top || onBox.bottom > navBox.bottom)) {
+      nav.scrollTop += onBox.top - navBox.top - (navBox.height - onBox.height) / 2;
+    }
+  }, [selectedId]);
   return (
-    <nav className={`cp-rail cp-rail--${mode}`} aria-label="Collections" onScroll={hideTip}>
+    <nav ref={navRef} className={`cp-rail cp-rail--${mode}`} aria-label="Collections" onScroll={hideTip}>
       <RailTip tip={tip} />
       {allLabel ? (
         <button
@@ -179,6 +221,8 @@ export default function PressCollectionRail({
                     type="button"
                     className={`cp-rail__item${on ? " is-on" : ""}${locked ? " is-locked" : ""}${pending ? " is-pending" : ""}`}
                     aria-pressed={on}
+                    // The rail shows a short name; the full one stays reachable.
+                    title={entry.short && entry.short !== entry.name ? entry.name : undefined}
                     onClick={() => onSelect(entry)}
                     // Preview only where changing the specimen cannot move
                     // the rail. Touch compatibility hover/focus can otherwise

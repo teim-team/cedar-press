@@ -49,3 +49,18 @@ export function contactHref(subject, body = null) {
     ? `mailto:${CONTACT_EMAIL}?${query}&body=${encodeURIComponent(body)}`
     : `mailto:${CONTACT_EMAIL}?${query}`;
 }
+
+/**
+ * THE WAY IN, UNTIL ENROLLMENT EXISTS (2026-10-06).
+ *
+ * The early-access banner says access is available soon, and Tribal Business
+ * News's subscribe page (`TBN_PLANS_URL`) sells general TBN membership with
+ * no Cedar Press plan on it. A "View plans" button pointing there told a
+ * visitor something could be bought today that cannot. Until enrollment
+ * opens, the primary call to action asks for early access through the
+ * contact route the banner already uses, and Log in stays for existing
+ * accounts. Flip the landing back to plans when a Cedar Press plan can
+ * actually be bought.
+ */
+export const EARLY_ACCESS_LABEL = "Request early access";
+export const EARLY_ACCESS_HREF = contactHref("Cedar Press early access");

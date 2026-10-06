@@ -22,7 +22,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { LAUNCH_COLLECTION, collectionCedarFacts } from "../../features/grove/collection";
+import { LAUNCH_COLLECTION, collectionCedarFacts, countNote } from "../../features/grove/collection";
 import { codebookLoaded, loadCodebook } from "../../features/grove/codebook.js";
 import { fetchSampleText, onBackOnline } from "../../features/grove/sampleFetch.js";
 import { contractFor, exploreTables, parseCsv, universalRows } from "../../features/grove/explore.js";
@@ -32,7 +32,7 @@ import { enrichSample } from "../../features/grove/exampleEnrichment.js";
 import { Cards, Rows } from "./PressRecordTable.jsx";
 import { useNarrow } from "../../features/grove/useNarrow.js";
 import { coverageLabel } from "../../features/grove/pressAccess";
-import { TBN_PLANS_URL } from "../../features/grove/pressArticles";
+import { EARLY_ACCESS_HREF } from "../../features/grove/appLink.js";
 import { freshnessLine } from "../../features/grove/pressReleases";
 import { recordStructure } from "../../features/grove/pressRecordStructure.js";
 import { EVENT, track } from "../../features/grove/telemetry.js";
@@ -49,6 +49,9 @@ import PressReadingKey from "./PressReadingKey.jsx";
  * holds, so the caption's "N of N" is the whole of what is public.
  */
 const PANE_ROWS = 10;
+
+/** Records shown on a phone before "Show more examples". */
+const PHONE_ROWS = 3;
 
 /** Observations in each collection's dataset, by id. A collection whose count
  * is not shown (COUNT_NOT_SHOWN, collection.js) has an empty label and no
@@ -125,6 +128,9 @@ export default function CollectionPreview({ entry, tier, register }) {
   // A phone gets the same list the product gives a phone, not a table of
   // the collection's own columns squeezed into 320px.
   const narrow = useNarrow();
+  // On a phone the pane opens on a few records and offers the rest: all of
+  // them stood ~1,700px tall at 390px, burying everything under the hero.
+  const [expanded, setExpanded] = useState(false);
   const items = useMemo(
     () => (parsed ? showcaseItems(entry.id, universalRows(table.key, parsed.rows, register)).slice(0, PANE_ROWS) : []),
     [parsed, table, register, entry.id],
@@ -158,7 +164,7 @@ export default function CollectionPreview({ entry, tier, register }) {
           {coverage ? <span>{coverage}</span> : null}
           {fresh ? <span>{fresh}</span> : null}
         </p>
-        <p className="cp-pane__blurb">{entry.blurb}</p>
+        <p className="cp-pane__blurb" title={entry.blurb}>{entry.blurb}</p>
       </div>
 
       {structure ? (
@@ -181,6 +187,13 @@ export default function CollectionPreview({ entry, tier, register }) {
                 : `${items.length} example records`}
             </span>
           </p>
+          {/* A count made of several record kinds says which (2026-10-06):
+              PLOT's examples are tracts and parcels while its count also
+              holds permits; the Federal Register mixes documents and
+              participants. From the manifest's record types, never typed. */}
+          {DATASET_ROWS[entry.id] && countNote(entry.id) ? (
+            <p className="cp-pane__countnote" data-testid="pane-count-note" style={{ margin: 0, padding: "0.45rem 1.4rem", fontSize: "0.8rem", lineHeight: 1.45, color: "var(--door-ink-3)" }}>{countNote(entry.id)}</p>
+          ) : null}
           {/* THE SAME TABLE, NOT A TABLE THAT LOOKS LIKE IT.
               This pane drew four columns of its own naming — Entity, Date,
               Record, Amount — while the product opened on the collection's
@@ -190,7 +203,22 @@ export default function CollectionPreview({ entry, tier, register }) {
               same `columnPlan`, the same cell rules, read-only. */}
           <div className="cp-pane__records">
             {narrow ? (
-              <Cards readOnly items={items} onActive={() => {}} openRecord={null} />
+              <div className="cp-pane__cardlist">
+                <div id={`cp-pane-records-${entry.id}`}>
+                  <Cards readOnly items={expanded ? items : items.slice(0, PHONE_ROWS)} onActive={() => {}} openRecord={null} />
+                </div>
+                {items.length > PHONE_ROWS ? (
+                  <button
+                    type="button"
+                    className="cp-pane__more"
+                    aria-expanded={expanded}
+                    aria-controls={`cp-pane-records-${entry.id}`}
+                    onClick={() => setExpanded((open) => !open)}
+                  >
+                    {expanded ? "Show fewer examples" : `Show more examples (${items.length - PHONE_ROWS})`}
+                  </button>
+                ) : null}
+              </div>
             ) : (
             <Rows
               readOnly
@@ -250,12 +278,11 @@ export default function CollectionPreview({ entry, tier, register }) {
         <p className="cp-pane__acts">
           <a
             className="cp-pane__act"
-            href={TBN_PLANS_URL}
-            target="_blank"
-            rel="noreferrer"
+            href={EARLY_ACCESS_HREF}
             onClick={() => track(EVENT.upgradeOpened, { collection: entry.id, shelf: entry.shelf })}
           >
-            Get <TierName name={tier.name} /> <span aria-hidden="true">&#8594;</span>
+            {/* Enrollment is not open yet (2026-10-06): early access, not a purchase. */}
+            Request early access to <TierName name={tier.name} /> <span aria-hidden="true">&#8594;</span>
           </a>
           <button
             type="button"

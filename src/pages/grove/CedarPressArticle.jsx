@@ -41,7 +41,6 @@ import {
   ARTICLE_IMAGE,
   BLOCK,
   LUMECON_URL,
-  TBN_PLANS_URL,
   TBN_URL,
 } from "../../features/grove/pressArticles";
 import { canOpenDataset, canReadCedarPress, upgradeFor } from "../../features/grove/pressAccess";
@@ -57,7 +56,7 @@ import {
   pressArticlePath,
 } from "../../features/grove/pressRoutes";
 import { useScrollToTop } from "../../features/grove/useScrollToTop";
-import { GROVE_MARKETING_URL } from "../../features/grove/appLink.js";
+import { EARLY_ACCESS_HREF, GROVE_MARKETING_URL } from "../../features/grove/appLink.js";
 import { toneClass } from "../../features/grove/duotone.js";
 import { ShareArticle } from "./ShareArticle";
 import PressAd from "./PressAd";
@@ -365,11 +364,11 @@ function UsedCollection({ id, user }) {
       ) : (
         <a
           className="cp-ar__usego"
-          href={upgrade.sameProduct ? TBN_PLANS_URL : GROVE_MARKETING_URL}
+          href={upgrade.sameProduct ? EARLY_ACCESS_HREF : GROVE_MARKETING_URL}
           target="_blank"
           rel="noreferrer"
         >
-          Included in {upgrade.name}. Get access <span aria-hidden="true">&#8594;</span>
+          Included in {upgrade.name}. {upgrade.sameProduct ? "Request early access" : "Get access"} <span aria-hidden="true">&#8594;</span>
         </a>
       )}
     </li>

@@ -137,7 +137,9 @@ export function EntityCell({ item, subjectFirst = false }) {
         {first.role ? <small className="cp-ex__uid">Role: {readerValueLabel(item.collection, "cedar_entity_role", first.role)}</small> : null}
       </>}
       {entities.length > 1 ? <small className="cp-ex__uid"> +{entities.length - 1} more</small> : null}
-      {first.uid ? <small className="cp-ex__uid">{leadSubject ? (item.collection === "need" ? "Ultimate parent Cedar ID: " : "Associated entity ID: ") : ""}{item.entity.uids.join(" · ")}</small> : null}
+      {/* A NEED card states its owner once: the name line above. The owner's
+          Cedar ID repeated it, so it stays in the table and the record. */}
+      {first.uid && !(leadSubject && item.collection === "need") ? <small className="cp-ex__uid">{leadSubject ? "Associated entity ID: " : ""}{item.entity.uids.join(" · ")}</small> : null}
       {item.subject && !leadSubject ? <small className="cp-ex__uid">record names: {item.subject}</small> : null}
     </>
   );
@@ -182,7 +184,16 @@ export function Rows({ view, items, columns, sort, onSort, onActive, showAmount,
       wrap.toggleAttribute("data-start", start);
       wrap.toggleAttribute("data-end", end);
     };
+    // A cell cut short by its ellipsis keeps its full text as a tooltip, so
+    // truncation never costs a value its meaning.
+    const titleTruncated = () => {
+      for (const td of node.querySelectorAll("td")) {
+        if (td.scrollWidth > td.clientWidth + 1) td.title = td.innerText.trim();
+        else td.removeAttribute("title");
+      }
+    };
     const measure = () => {
+      titleTruncated();
       node.style.setProperty("--vw", `${node.clientWidth}px`);
       const more = node.querySelector("th.cp-ex__more");
       const uid = node.querySelector("th.cp-ex__pin--uid");
@@ -293,7 +304,7 @@ export function Rows({ view, items, columns, sort, onSort, onActive, showAmount,
                         </button>
                       </td>
                       <td className="cp-ex__date">{item.date ?? "—"}</td>
-                      <td className="cp-ex__obs"><span className="cp-ex__clamp">{item.observation || "—"}</span></td>
+                      <td className="cp-ex__obs"><span className="cp-ex__clamp" title={item.observation || undefined}>{item.observation || "—"}</span></td>
                       {showAmount ? (
                         <td className="cp-ex__amount">
                           {item.amount == null ? "—" : money.format(item.amount)}
@@ -318,18 +329,25 @@ export function Cards({ items, onActive, openRecord, readOnly = false }) {
   return (
     <ul className="cp-ex__cards">
       {items.map((item) => {
+        // NEED reads as a hierarchy: the enterprise, its ultimate parent, then
+        // the relationship one level up, before the date line.
+        const ownership = item.collection === "need";
+        const obs = (
+          <span className="cp-ex__cardobs cp-ex__clamp" title={item.observation || undefined}>{item.observation || "—"}</span>
+        );
         const inside = (
           <>
             <span className="cp-ex__cardwho">
               {item.superseded ? <span className="cp-ex__badge">Superseded</span> : null}
               <EntityCell item={item} subjectFirst />
             </span>
+            {ownership && item.observation ? obs : null}
             <span className="cp-ex__cardmeta">
               {short(item.collection)} · {item.date ?? "undated"}{reportedAmountText(item) ? ` · ${reportedAmountText(item)}` : ""}
               {item.date && item.dateBasis ? <small className="cp-ex__uid">{item.dateBasis}</small> : null}
               {reportedAmountText(item) && item.amountBasis ? <small className="cp-ex__uid">{item.amountBasis}</small> : null}
             </span>
-            <span className="cp-ex__cardobs cp-ex__clamp">{item.observation || "—"}</span>
+            {ownership ? null : obs}
             {readOnly ? null : <span className="cp-ex__cardgo" aria-hidden="true">&#8594;</span>}
           </>
         );

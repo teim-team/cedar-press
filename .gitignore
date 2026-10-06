@@ -205,6 +205,9 @@ data/restricted/
 !/data/cedar/federal_register_component_contracts.json
 !/data/cedar/codebook.json
 !/data/cedar/collections.manifest.json
+# NEED ownership chains with their evidence: what the NEED download adds
+# as native_owner columns (server/cedar_press/collections.py).
+!/data/cedar/need_ownership_evidence.json
 !/data/cedar/field_map.json
 # The one Cedar Grove release pin (immutable Lumecon release IDs and hashes only).
 !/data/cedar/grove_release_pin.json
@@ -242,6 +245,9 @@ _profile_cache.json
 !review/OWNER_DECISION_QUEUE.md
 # Curated launch-control input to the existing review builder; HTML and receipts stay local.
 !review/launch_control.json
+# Attribution corrections for the producer, in its pending-items format
+# (docs/handoffs/CODEX_LANDING_FOLLOWUPS_2026-10-06.md section 8).
+!review/attribution_pending_items_2026-10-06.json
 
 # Agent worktrees are private scratch, never part of the tree. Committed as a
 # gitlink with no .gitmodules entry they become an unusable pseudo-submodule

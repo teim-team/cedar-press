@@ -1,7 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { SOURCE_REACH_FIGURE, SOURCE_ROTATION, SOURCE_ROTATION_ORDER } from "./sourceRotation.js";
+import { RELEASED_SOURCE_KINDS, SOURCE_REACH_FIGURE, SOURCE_ROTATION, SOURCE_ROTATION_ORDER } from "./sourceRotation.js";
+import { PRESS_SOURCES } from "./pressSources.js";
 
 test("no source label appears twice, even with different case or spacing", () => {
   const norm = SOURCE_ROTATION.map((l) => l.toLowerCase().replace(/\s+/g, " ").trim());
@@ -26,14 +27,19 @@ test("replaced labels are gone, so a source is not named twice", () => {
   }
 });
 
-// The website count is the owner's stated distinct-site figure, and it
-// never moves because labels were added to this list.
-test("the reach figure is the stated one", () => {
-  assert.equal(SOURCE_REACH_FIGURE, "700+");
+// The figure is measured (2026-10-06): the kinds of source the released
+// collections name, counted from pressSources.js. It never moves because
+// labels were added to this list, and it is never an unmeasured "700+".
+test("the reach figure is the measured count of kinds of source", () => {
+  const measured = PRESS_SOURCES.filter((source) => !source.declared).length;
+  assert.equal(RELEASED_SOURCE_KINDS, measured);
+  assert.equal(SOURCE_REACH_FIGURE, String(measured));
+  assert.doesNotMatch(SOURCE_REACH_FIGURE, /\+/);
 });
 
-// Owner, 2026-09-27: the source count is "documented upstream sources", never
-// "websites", on the landing page and in Cedar's answers alike.
+// Owner, 2026-09-27: the source count is never "websites". Since 2026-10-06 it
+// is stated with its measured unit, "kinds of source", on the landing page
+// and in Cedar's answers alike, and no surface repeats the unmeasured 700.
 test("the source count is never worded as websites", () => {
   const files = [
     new URL("./sourceRotation.js", import.meta.url),
@@ -43,6 +49,7 @@ test("the source count is never worded as websites", () => {
   for (const file of files) {
     const text = readFileSync(file, "utf8");
     assert.doesNotMatch(text, /(?:700\+?|SOURCE_REACH_FIGURE\}?|distinct|source) (?:source )?websites/i, file.pathname);
-    assert.match(text, /(?:documented upstream|total) sources/, file.pathname);
+    assert.match(text, /kinds of (?:public )?source/, file.pathname);
+    assert.doesNotMatch(text, /700\+|more than 700|documented upstream sources|total sources/, file.pathname);
   }
 });

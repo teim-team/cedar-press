@@ -315,7 +315,7 @@ export const PRESS_CATALOG = Object.freeze([
     // CANONICAL. Must match cedar_publication.DATASET_DEFINITION["lobbying"]
     // verbatim; 1169's release gate fails the build if it drifts.
     blurb:
-      "Documented federal advocacy and engagement involving Native nations and organizations, including registered lobbying, agency meetings, tribal consultations, regulatory comments, congressional testimony and nonprofit lobbying disclosures. Each row represents one entity-linked activity or source record.",
+      "Registered federal lobbying by and for Native nations and organizations, from disclosures filed under the Lobbying Disclosure Act. Each row is one lobbying disclosure filing, with its registrant, client, issues, the government bodies lobbied and reported amounts.",
     linkage:
       "Each filing resolved to the tribe or Native organization behind it where the record supports the link; a filing the record cannot place keeps its printed party name and a blank key rather than a guess.",
   }),

@@ -94,7 +94,7 @@
         "kind": "series",
         "from": 1999
       },
-      "blurb": "Documented federal advocacy and engagement involving Native nations and organizations, including registered lobbying, agency meetings, tribal consultations, regulatory comments, congressional testimony and nonprofit lobbying disclosures. Each row represents one entity-linked activity or source record.",
+      "blurb": "Registered federal lobbying by and for Native nations and organizations, from disclosures filed under the Lobbying Disclosure Act. Each row is one lobbying disclosure filing, with its registrant, client, issues, the government bodies lobbied and reported amounts.",
       "linkage": "Each filing resolved to the tribe or Native organization behind it where the record supports the link; a filing the record cannot place keeps its printed party name and a blank key rather than a guess."
     },
     {
@@ -196,7 +196,8 @@
       "name": "Federal Funding to Indian Country",
       "version": "v4",
       "updated": "2026-10-06",
-      "cadence": "Updated weekly",
+      "refreshed": "2026-10-01",
+      "cadence": "Reviewed on a weekly schedule",
       "retired": false,
       "history": [
         {
@@ -250,7 +251,8 @@
       "name": "Federal Register — Indian Affairs",
       "version": "v4",
       "updated": "2026-10-06",
-      "cadence": "Updated weekly",
+      "refreshed": "2026-10-01",
+      "cadence": "Reviewed on a weekly schedule",
       "retired": false,
       "history": [
         {
@@ -304,7 +306,8 @@
       "name": "Native Legislation and Votes",
       "version": "v4",
       "updated": "2026-10-06",
-      "cadence": "Updated weekly",
+      "refreshed": "2026-10-01",
+      "cadence": "Reviewed on a weekly schedule",
       "retired": false,
       "history": [
         {
@@ -358,7 +361,8 @@
       "name": "Indian Country Deals",
       "version": "v4",
       "updated": "2026-10-06",
-      "cadence": "Updated weekly",
+      "refreshed": "2026-10-01",
+      "cadence": "Reviewed on a weekly schedule",
       "retired": false,
       "history": [
         {
@@ -412,7 +416,8 @@
       "name": "NAGPRA Notices",
       "version": "v4",
       "updated": "2026-10-06",
-      "cadence": "Updated weekly",
+      "refreshed": "2026-10-01",
+      "cadence": "Reviewed on a weekly schedule",
       "retired": false,
       "history": [
         {
@@ -466,7 +471,8 @@
       "name": "Native Federal Advocacy and Engagement",
       "version": "v4",
       "updated": "2026-10-06",
-      "cadence": "Updated weekly",
+      "refreshed": "2026-10-01",
+      "cadence": "Reviewed on a weekly schedule",
       "retired": false,
       "history": [
         {
@@ -520,7 +526,8 @@
       "name": "Native Federal Contractors",
       "version": "v4",
       "updated": "2026-10-06",
-      "cadence": "Updated weekly",
+      "refreshed": "2026-10-01",
+      "cadence": "Reviewed on a weekly schedule",
       "retired": false,
       "history": [
         {
@@ -574,7 +581,8 @@
       "name": "Native Federal Subcontracting",
       "version": "v4",
       "updated": "2026-10-06",
-      "cadence": "Updated weekly",
+      "refreshed": "2026-10-01",
+      "cadence": "Reviewed on a weekly schedule",
       "retired": false,
       "history": [
         {
@@ -628,7 +636,8 @@
       "name": "Individual Native-Owned Businesses",
       "version": "v5",
       "updated": "2026-10-06",
-      "cadence": "Updated weekly",
+      "refreshed": "2026-10-01",
+      "cadence": "Reviewed on a weekly schedule",
       "retired": false,
       "history": [
         {
@@ -692,7 +701,8 @@
       "name": "Cedar Native Entity Enterprise Dataset (NEED)",
       "version": "v6",
       "updated": "2026-10-06",
-      "cadence": "Updated weekly",
+      "refreshed": "2026-10-01",
+      "cadence": "Reviewed on a weekly schedule",
       "retired": false,
       "history": [
         {
@@ -765,7 +775,8 @@
       "name": "Tribal Natural Resource Revenue",
       "version": "v4",
       "updated": "2026-10-06",
-      "cadence": "Updated weekly",
+      "refreshed": "2026-10-01",
+      "cadence": "Reviewed on a weekly schedule",
       "retired": false,
       "history": [
         {
@@ -819,7 +830,8 @@
       "name": "Native Nonprofits",
       "version": "v4",
       "updated": "2026-10-06",
-      "cadence": "Updated weekly",
+      "refreshed": "2026-10-01",
+      "cadence": "Reviewed on a weekly schedule",
       "retired": false,
       "history": [
         {
@@ -873,7 +885,8 @@
       "name": "Foundation & Corporate Giving",
       "version": "v4",
       "updated": "2026-10-06",
-      "cadence": "Updated weekly",
+      "refreshed": "2026-10-01",
+      "cadence": "Reviewed on a weekly schedule",
       "retired": false,
       "history": [
         {
@@ -900,7 +913,8 @@
       "name": "PLOT",
       "version": "v4",
       "updated": "2026-10-06",
-      "cadence": "Updated weekly",
+      "refreshed": "2026-10-01",
+      "cadence": "Reviewed on a weekly schedule",
       "retired": false,
       "history": [
         {

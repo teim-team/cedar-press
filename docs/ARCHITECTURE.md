@@ -64,9 +64,9 @@ git ls-files src/<dir>/grove                                   # files to move
 | | |
 |---|---|
 | Files to move | 187 — `features/grove` 139, `pages/grove` 45, `components/grove` 1, `styles/grove` 2 |
-| Path references to rewrite | 501, across 113 files |
+| Path references to rewrite | 501, across 114 files |
 | Referencing files inside `src/` | 56 — `pages/` 37, `features/` 15, `context/` 2, `components/` 1, `main.jsx` 1 |
-| Referencing files outside `src/` | 57 — `server/cedar_press/` 8, `scripts/` 8, `docs/` 22, `code/` 5, `server/tests/` 6, `tests/` 3, `data/` 1, `.github/` 1, `.env.example` 1, `AGENTS.md` 1, `eslint.config.js` 1 |
+| Referencing files outside `src/` | 58 — `server/cedar_press/` 8, `scripts/` 8, `docs/` 22, `code/` 5, `server/tests/` 6, `tests/` 3, `data/` 2, `.github/` 1, `.env.example` 1, `AGENTS.md` 1, `eslint.config.js` 1 |
 
 The reason this was deferred has expired. The table used to carry a fifth row
 — twelve files also touched by an open PR, which would each have become a

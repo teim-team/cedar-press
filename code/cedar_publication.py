@@ -2073,12 +2073,16 @@ DATASET_DEFINITION = {
     # attending a federal consultation is exercising a government-to-government
     # relationship, not lobbying under the LDA, and the old name misdescribed
     # its posture. `activity_type` now carries the distinction per row.
+    # NARROWED 2026-10-06: the released spreadsheet holds Lobbying Disclosure
+    # Act filings only (every sampled row has activity_type `lda_filing`, and
+    # the release count is the LDA filing count). Agency meetings,
+    # consultations, comments, testimony and nonprofit lobbying disclosures
+    # are not in this release, so the definition no longer names them.
     "lobbying": (
-        "Documented federal advocacy and engagement involving Native nations "
-        "and organizations, including registered lobbying, agency meetings, "
-        "tribal consultations, regulatory comments, congressional testimony "
-        "and nonprofit lobbying disclosures. Each row represents one "
-        "entity-linked activity or source record."
+        "Registered federal lobbying by and for Native nations and "
+        "organizations, from disclosures filed under the Lobbying Disclosure "
+        "Act. Each row is one lobbying disclosure filing, with its registrant, "
+        "client, issues, the government bodies lobbied and reported amounts."
     ),
 }
 

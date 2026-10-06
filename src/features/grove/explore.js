@@ -125,9 +125,9 @@ function codebookField(key, column) {
  * by its storage shape. By collection, then column; "*" applies everywhere.
  */
 const READER_LABELS = Object.freeze({
-  "*": Object.freeze({ native_owner: "Native owner", native_owner_basis: "Native owner evidence", native_owner_cedar_uid: "Native owner Cedar ID" }),
+  "*": Object.freeze({ native_owner: "Native owner", native_owner_basis: "Native owner basis", native_owner_source: "Native owner source", native_owner_cedar_uid: "Native owner Cedar ID" }),
   need: Object.freeze({
-    enterprise_name: "Enterprise", native_owner: "Ultimate parent", native_owner_cedar_uid: "Ultimate parent Cedar ID", native_owner_basis: "Ultimate parent evidence",
+    enterprise_name: "Enterprise", native_owner: "Ultimate parent", native_owner_cedar_uid: "Ultimate parent Cedar ID", native_owner_basis: "Ultimate parent basis", native_owner_source: "Ultimate parent source",
     related_entity_name: "Immediate parent or related company", relationship_type: "Relationship",
     ownership_extent: "Ownership", uei: "UEI (SAM.gov)", cage_code: "CAGE code", source_reported_name: "Name as the source reports it",
     owner_name: "Reviewed owner", owner_scope: "Owner scope", verified_claims: "Verified claims", reviewed_on: "Reviewed on",
@@ -746,8 +746,12 @@ function needObservation(row) {
       }
     }
   }
+  // The ultimate parent is named here only when nothing else names it. A row
+  // the viewer links to its ultimate owner (native_owner_cedar_uid, see
+  // CONTRACT_ADDITIONS) already shows that owner as the record's entity, and
+  // repeating it in this line said it twice on every NEED card.
   const ultimate = cell(row, "native_owner");
-  if (ultimate && ultimate !== related) parts.push(`Ultimate parent: ${ultimate}`);
+  if (ultimate && ultimate !== related && !cell(row, "native_owner_cedar_uid")) parts.push(`Ultimate parent: ${ultimate}`);
   if (!parts.length) {
     for (const [label, column] of [["UEI", "uei"], ["CAGE", "cage_code"]]) {
       const value = cell(row, column);

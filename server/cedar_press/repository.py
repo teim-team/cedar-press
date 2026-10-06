@@ -285,6 +285,11 @@ def collection_csv(collection_id: str) -> str | None:
     sample = io.StringIO(newline="")
     csv.writer(sample, lineterminator="\n").writerows(row[:-1] for row in rows)
     presented = list(csv.reader(io.StringIO(present_sample(collection_id, sample.getvalue()))))
+    if collection_id == "need":
+        # The evidenced ultimate Native owner of each reviewed enterprise
+        # (collections.with_native_owner), so the file a reader downloads and
+        # the record the page shows carry the same owner.
+        presented = launch.with_native_owner(presented)
     table = [[*presented[0], "cite_as"], *[[*row, citation] for row in presented[1:]]]
 
     def cell(value):

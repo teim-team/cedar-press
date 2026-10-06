@@ -77,7 +77,8 @@ import { Cards, Human, Rows } from "./PressRecordTable.jsx";
 import { columnPlan, short } from "../../features/grove/recordColumns.js";
 import { coverageLabel, upgradeFor } from "../../features/grove/pressAccess.js";
 import { RecordStructureCap, RecordStructureTable } from "./PressRecordStructure.jsx";
-import { TBN_PLANS_URL, articleHref, articlesDrawingOn } from "../../features/grove/pressArticles.js";
+import { articleHref, articlesDrawingOn } from "../../features/grove/pressArticles.js";
+import { EARLY_ACCESS_HREF } from "../../features/grove/appLink.js";
 import { useProtectedArticles } from "../../features/grove/useProtectedArticles.js";
 import { EVENT, track } from "../../features/grove/telemetry.js";
 import { useNarrow } from "../../features/grove/useNarrow.js";
@@ -564,7 +565,7 @@ function CollectionAtlas({ collections, query, onSelect }) {
               <th scope="col" className="cp-ex__c-text">Collection</th>
               <th scope="col" className="cp-ex__c-text">Coverage</th>
               <th scope="col" className="cp-ex__c-amount">Records</th>
-              <th scope="col" className="cp-ex__c-text">Updated</th>
+              <th scope="col" className="cp-ex__c-text">Data as of</th>
               <th scope="col" className="cp-ex__c-text">Access</th>
             </tr>
           </thead>
@@ -580,7 +581,8 @@ function CollectionAtlas({ collections, query, onSelect }) {
               // the cell is left empty rather than holding a placeholder.
               const coverage = coverageLabel(entry);
               const rows = ROWS_BY_ID[entry.id] ?? (structure ? "" : "—");
-              const updated = release?.updated ? formatUpdated(release.updated) : "";
+              // The data refresh, not the release date (2026-10-06).
+              const updated = release?.refreshed ? formatUpdated(release.refreshed) : "";
               const access = (compact = false) => {
                 if (unavailable) return <span className={compact ? "cp-atlas__mobileaccess is-pending" : "cp-atlas__pending"} title={previewUnavailable}>Preview pending</span>;
                 if (open) return <span className={compact ? "cp-atlas__mobileaccess is-included" : "cp-atlas__included"}>Included</span>;
@@ -603,7 +605,7 @@ function CollectionAtlas({ collections, query, onSelect }) {
                     <small className="cp-atlas__mobilemeta">
                       {coverage ? <span>{coverage}</span> : null}
                       {rows ? <span>{rows}</span> : null}
-                      {updated ? <span>Updated {updated}</span> : null}
+                      {updated ? <span>Data as of {updated}</span> : null}
                       {access(true)}
                     </small>
                   </td>
@@ -700,15 +702,15 @@ function LockedCollection({ collection, onAbout }) {
           <p className="cp-ex__caption">
             {entry.name}
             {rows ? ` · ${rows}` : ""}
-            {release?.updated ? ` · updated ${formatUpdated(release.updated)}` : ""}
+            {release?.refreshed ? ` · data as of ${formatUpdated(release.refreshed)}` : ""}
           </p>
           <p className="cp-lock__say">
             Available with <TierName name={upgrade.name} />.{" "}
             {structure
               ? "It opens on what each record holds and how the collection connects to the others."
               : "The published preview, filters, and sample export are included together."}{" "}
-            <a href={TBN_PLANS_URL} target="_blank" rel="noreferrer">
-              See <TierName name={upgrade.name} /> <span aria-hidden="true">&#8594;</span>
+            <a href={EARLY_ACCESS_HREF}>
+              Request early access to <TierName name={upgrade.name} /> <span aria-hidden="true">&#8594;</span>
             </a>
           </p>
         </div>
@@ -739,7 +741,7 @@ function UnavailableCollection({ collection, onAbout }) {
           <p className="cp-ex__caption">
             {entry.name}
             {rows ? ` · ${rows}` : ""}
-            {release?.updated ? ` · updated ${formatUpdated(release.updated)}` : ""}
+            {release?.refreshed ? ` · data as of ${formatUpdated(release.refreshed)}` : ""}
           </p>
           <p className="cp-lock__say">
             This collection is listed for transparency. The current release does not offer a public preview or self-service table access.
