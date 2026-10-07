@@ -179,7 +179,10 @@ test("reviewed NEED businesses remain individually named on phones and use reada
   } else {
     await page.goto("/data?c=owned");
     const row = page.getByTestId("explore-record").first();
-    await expect(row.locator("td.cp-ex__pin")).toHaveText(OWNED_SAMPLE.rows[0].business_name);
+    // Owner, 2026-10-07: Cedar's column leads and is the one pinned; the
+    // business sits beside it.
+    await expect(row.locator("td.cp-ex__pin")).toContainText(OWNED_SAMPLE.rows[0].canonical_name);
+    await expect(row).toContainText(OWNED_SAMPLE.rows[0].business_name);
     const scroller = page.locator(".cp-ex__scroll").first();
     await scroller.evaluate((el) => el.scrollTo({ left: el.scrollWidth, behavior: "instant" }));
     const pinned = await row.locator("td.cp-ex__pin").boundingBox();

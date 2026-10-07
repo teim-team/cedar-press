@@ -604,13 +604,15 @@ export default function PressGate({ user }) {
       {/* ── The hero: the promise, and beside it the product ─────────── */}
       <section className="cp-hero3" aria-label="Cedar Press">
         <div className="cp-hero3__in">
+          {/* Two messages, on purpose: the door sells the asset, the
+              signed-in overview keeps the editorial "Know what's shaping
+              Indian Country." The headline spans both columns on a wide
+              screen (owner, 2026-10-07: it was squeezed into the copy
+              column with the whole width free beside it). */}
+          <h1 className="cp-hero3__title cp-fade">
+            The <em>data</em> behind Indian Country.
+          </h1>
           <div className="cp-hero3__copy" ref={heroCopyRef}>
-            {/* Two messages, on purpose: the door sells the asset, the
-                signed-in overview keeps the editorial "Know what's shaping
-                Indian Country." */}
-            <h1 className="cp-hero3__title cp-fade">
-              The <em>data</em> behind Indian Country.
-            </h1>
             <p className="cp-hero3__lede cp-fade">
               Original collections built from publicly available sources, connected through original
               research, and maintained as Indian Country changes. Every record traces back to the
@@ -833,11 +835,19 @@ export default function PressGate({ user }) {
           </div>
           <ol className="cp-why__proof">
             {PROOF_POINTS.map((point, i) => (
+              // Owner, 2026-10-06: the headline is enough at a glance; the
+              // paragraph opens on request. A native disclosure, so it works
+              // from the keyboard and with a screen reader as it is.
               <li className="cp-why__item cp-fade" key={point.id}>
-                <span className="cp-why__step" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>
-                <span className="cp-why__ic" aria-hidden="true">{point.icon}</span>
-                <span className="cp-why__label">{point.label}</span>
-                <span className="cp-why__body">{point.body}</span>
+                <details className="cp-why__more">
+                  <summary className="cp-why__sum">
+                    <span className="cp-why__step" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>
+                    <span className="cp-why__ic" aria-hidden="true">{point.icon}</span>
+                    <span className="cp-why__label">{point.label}</span>
+                    <span className="cp-why__toggle" aria-hidden="true" />
+                  </summary>
+                  <p className="cp-why__body">{point.body}</p>
+                </details>
               </li>
             ))}
           </ol>

@@ -99,18 +99,30 @@ export function showcaseItems(collectionId, items) {
 }
 
 /**
- * The columns each collection opens on, where the producer's declared view
- * opened on columns that are blank or misleading in the example records
- * (audit of 2026-10-06). A column missing from a table is skipped.
+ * The columns each collection opens on. Owner, 2026-10-07: Cedar's own
+ * columns lead (the Native entity a row is attributed to, and its role),
+ * then the most useful of that collection's source columns. Earlier
+ * (audit of 2026-10-06) only collections whose producer view opened on
+ * blank or misleading columns were listed here. A column missing from a
+ * table is skipped, and one blank in every example record is dropped.
+ * "__source" is explore.js SOURCE_LINK_COLUMN: the link a table BUILDS from
+ * its identifiers when it has no source column, so a supporting table of
+ * the same collection still opens on a source.
  */
 export const DISPLAY_DEFAULTS = Object.freeze({
-  need: Object.freeze(["enterprise_name", "native_owner", "related_entity_name", "relationship_type", "uei", "cage_code"]),
-  nonprofits: Object.freeze(["organization_name", "inclusion_category", "city", "state", "ntee_code", "bmf_revenue_usd", "source_url"]),
+  funding: Object.freeze(["canonical_name", "cedar_entity_role", "recipient_name", "obligations_usd", "action_date", "program_name", "awarding_agency", "source_url", "__source"]),
+  legislation: Object.freeze(["canonical_names", "entity_roles", "title", "introduced_date", "sponsor_name", "latest_action", "source_url", "__source"]),
+  deals: Object.freeze(["canonical_name", "native_party_role", "title", "announced_value_usd", "value_basis", "event_date", "counterparty_or_funder", "source_url", "__source"]),
+  nagpra: Object.freeze(["canonical_names", "entity_roles", "institution_name", "title", "publication_date", "agency_names", "source_url", "__source"]),
+  lobbying: Object.freeze(["canonical_name", "cedar_entity_role", "client_name", "registrant_name", "reported_amount_usd", "amount_basis", "activity_date", "source_url", "__source"]),
+  contractors: Object.freeze(["canonical_name", "cedar_entity_role", "awardee_name", "obligations_usd", "action_date", "funding_agency", "description", "source_url", "__source"]),
+  subcontracting: Object.freeze(["canonical_name", "cedar_entity_role", "prime_name", "subcontractor_name", "subaward_amount_usd", "subaward_date", "description", "source_url", "__source"]),
+  owned: Object.freeze(["canonical_name", "cedar_entity_role", "business_name", "stated_tribe", "service_category", "city", "state", "source_url", "__source"]),
+  need: Object.freeze(["native_owner", "enterprise_name", "related_entity_name", "relationship_type", "uei", "cage_code"]),
+  "natural-resources": Object.freeze(["canonical_name", "cedar_entity_role", "commodity", "revenue_type", "amount_usd", "measurement_status", "period_start", "source_url", "__source"]),
+  nonprofits: Object.freeze(["canonical_name", "organization_name", "inclusion_category", "city", "state", "ntee_code", "bmf_revenue_usd", "source_url", "__source"]),
+  "foundation-corporate-giving": Object.freeze(["recipient_name", "funder_name", "amount_exact_usd", "financial_status", "announcement_date", "source_url", "__source"]),
   plot: Object.freeze(["source_parcel_id", "land_record_kind", "owner_name_raw", "recorded_acres", "state", "county_fips", "source_record_url"]),
-  owned: Object.freeze(["business_name", "stated_tribe", "certifying_authority_name", "service_category", "city", "state", "source_url"]),
-  subcontracting: Object.freeze(["prime_name", "subcontractor_name", "canonical_name", "cedar_entity_role", "subaward_amount_usd", "subaward_date", "description", "source_url"]),
-  "foundation-corporate-giving": Object.freeze(["funder_name", "recipient_name", "amount_exact_usd", "financial_status", "announcement_date", "source_url"]),
-  "natural-resources": Object.freeze(["commodity", "revenue_type", "aggregation_level", "amount_usd", "measurement_status", "period_start", "period_end", "source_url"]),
 });
 
 /** Values that stand in for a blank column, by collection: the reported form of the same fact (one column, or several tried in order). */
