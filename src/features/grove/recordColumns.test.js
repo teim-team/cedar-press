@@ -143,7 +143,8 @@ test("NEED keeps its reviewed enterprise and relationship columns, and opens on 
   // The pinned file has no owner column; the viewer adds the evidenced one
   // (exampleEnrichment.js) and opens on it.
   const plan = columnPlan("need/need", contract, [...header, "native_owner", "native_owner_basis"]);
-  assert.deepEqual(plan.defaults, ["enterprise_name", "native_owner", "related_entity_name", "relationship_type", "uei", "cage_code"]);
+  // Owner, 2026-10-07: Cedar's column (the Native owner) leads.
+  assert.deepEqual(plan.defaults, ["native_owner", "enterprise_name", "related_entity_name", "relationship_type", "uei", "cage_code"]);
   assert.ok(plan.all.includes("source_urls"));
   // The retired enterprise scheme is not a column a reader can open.
   assert.ok(!header.includes("enterprise_id"));

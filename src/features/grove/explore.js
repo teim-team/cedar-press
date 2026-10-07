@@ -125,7 +125,13 @@ function codebookField(key, column) {
  * by its storage shape. By collection, then column; "*" applies everywhere.
  */
 const READER_LABELS = Object.freeze({
-  "*": Object.freeze({ native_owner: "Native owner", native_owner_basis: "Native owner basis", native_owner_source: "Native owner source", native_owner_cedar_uid: "Native owner Cedar ID" }),
+  "*": Object.freeze({
+    native_owner: "Native owner", native_owner_basis: "Native owner basis", native_owner_source: "Native owner source", native_owner_cedar_uid: "Native owner Cedar ID",
+    // Cedar's own columns, which lead every table (showcase.js DISPLAY_DEFAULTS).
+    canonical_name: "Native entity", canonical_names: "Native entities", cedar_uid: "Cedar ID", cedar_uids: "Cedar IDs",
+    cedar_entity_role: "Entity role", entity_roles: "Entity roles", native_party_role: "Entity role",
+    source_url: "Source", city: "City", state: "State", sector: "Sector",
+  }),
   need: Object.freeze({
     enterprise_name: "Enterprise", native_owner: "Ultimate parent", native_owner_cedar_uid: "Ultimate parent Cedar ID", native_owner_basis: "Ultimate parent basis", native_owner_source: "Ultimate parent source",
     related_entity_name: "Parent company", relationship_type: "Relationship",
@@ -138,7 +144,7 @@ const READER_LABELS = Object.freeze({
     financial_status: "Status", announcement_date: "Announced", recipient_name_reported: "Recipient as reported", report_year: "Report year",
     funder_class: "Funder type", recipient_affiliation: "Recipient affiliation", payment_date: "Paid",
   }),
-  owned: Object.freeze({ stated_tribe: "Tribe (as listed)", certifying_authority_name: "Certifying authority", service_category: "Services" }),
+  owned: Object.freeze({ business_name: "Business", stated_tribe: "Tribe (as listed)", certifying_authority_name: "Certifying authority", service_category: "Services" }),
   plot: Object.freeze({ native_entity_name: "Native entity", native_entity_cedar_uid: "Cedar ID", source_parcel_id: "Parcel ID", land_record_kind: "Land record", owner_name_raw: "Owner as recorded", recorded_acres: "Acres", county_fips: "County FIPS", source_record_url: "Source record" }),
   nonprofits: Object.freeze({ inclusion_category: "Category", ntee_code: "NTEE code", bmf_revenue_usd: "Revenue (IRS)" }),
   subcontracting: Object.freeze({ prime_name: "Prime contractor", subcontractor_name: "Subcontractor" }),
