@@ -604,13 +604,15 @@ export default function PressGate({ user }) {
       {/* ── The hero: the promise, and beside it the product ─────────── */}
       <section className="cp-hero3" aria-label="Cedar Press">
         <div className="cp-hero3__in">
+          {/* Two messages, on purpose: the door sells the asset, the
+              signed-in overview keeps the editorial "Know what's shaping
+              Indian Country." The headline spans both columns on a wide
+              screen (owner, 2026-10-07: it was squeezed into the copy
+              column with the whole width free beside it). */}
+          <h1 className="cp-hero3__title cp-fade">
+            The <em>data</em> behind Indian Country.
+          </h1>
           <div className="cp-hero3__copy" ref={heroCopyRef}>
-            {/* Two messages, on purpose: the door sells the asset, the
-                signed-in overview keeps the editorial "Know what's shaping
-                Indian Country." */}
-            <h1 className="cp-hero3__title cp-fade">
-              The <em>data</em> behind Indian Country.
-            </h1>
             <p className="cp-hero3__lede cp-fade">
               Original collections built from publicly available sources, connected through original
               research, and maintained as Indian Country changes. Every record traces back to the

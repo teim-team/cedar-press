@@ -2684,9 +2684,9 @@
  * light plane, a little past the measure on wide screens so it reads as
  * the object the page is about rather than another column. */
 .teim-rd .cp-hero3 { position: relative; padding: clamp(2.2rem, 5vw, 4.2rem) var(--door-pad) 0; overflow: clip; }
-.teim-rd .cp-hero3__in { max-width: var(--door-max); margin: 0 auto; display: grid; grid-template-columns: minmax(0, 0.28fr) minmax(0, 0.72fr); gap: clamp(2rem, 3.5vw, 3.5rem); align-items: start; }
-.teim-rd .cp-hero3__copy { display: grid; gap: 1.1rem; padding-top: clamp(0.5rem, 2vw, 2rem); }
-.teim-rd .cp-hero3__title { font-family: var(--sans); font-size: clamp(2.6rem, 4.4vw, 4.3rem); font-weight: 750; letter-spacing: -0.035em; line-height: 1.0; color: var(--ink); margin: 0; text-wrap: balance; }
+.teim-rd .cp-hero3__in { max-width: var(--door-max); margin: 0 auto; display: grid; grid-template-columns: minmax(0, 0.28fr) minmax(0, 0.72fr); gap: clamp(1.6rem, 2.6vw, 2.6rem) clamp(2rem, 3.5vw, 3.5rem); align-items: start; }
+.teim-rd .cp-hero3__copy { display: grid; gap: 1.1rem; padding-top: 0.25rem; }
+.teim-rd .cp-hero3__title { grid-column: 1 / -1; font-family: var(--sans); font-size: clamp(2.8rem, 5.4vw, 5.6rem); font-weight: 750; letter-spacing: -0.035em; line-height: 1.0; color: var(--ink); margin: 0; text-wrap: balance; }
 .teim-rd .cp-hero3__title em { font-style: normal; color: var(--dteal); }
 .teim-rd .cp-hero3__lede { font-size: clamp(1.02rem, 1.25vw, 1.15rem); line-height: 1.6; color: var(--ink-2); margin: 0; max-width: 40ch; text-wrap: pretty; }
 .teim-rd .cp-hero3__cta { display: flex; flex-wrap: wrap; gap: 0.8rem; margin-top: 0.3rem; }
@@ -5056,7 +5056,7 @@ body[data-cp-preview-in-view] .teim-rd .cp-dc__fab { display: none; }
  * photograph. Fine pointer only for hover; nothing moves under reduced
  * motion. */
 @keyframes cp-rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
-.teim-rd .cp-hero3__copy { animation: cp-rise 0.7s var(--door-ease) both; }
+.teim-rd .cp-hero3__title, .teim-rd .cp-hero3__copy { animation: cp-rise 0.7s var(--door-ease) both; }
 .teim-rd .cp-hero3__stage { animation: cp-rise 0.85s var(--door-ease) 0.12s both; }
 @media (hover: hover) and (pointer: fine) {
   .teim-rd .cp-why__item { transition: border-color 0.2s var(--door-ease), transform 0.24s var(--door-ease); }
@@ -5065,7 +5065,7 @@ body[data-cp-preview-in-view] .teim-rd .cp-dc__fab { display: none; }
   .teim-rd .cp-aud__stack:hover .cp-aud__panel.is-on .cp-aud__media img { transform: scale(1.04); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .teim-rd .cp-hero3__copy, .teim-rd .cp-hero3__stage, .teim-rd .cp-why__body { animation: none; }
+  .teim-rd .cp-hero3__title, .teim-rd .cp-hero3__copy, .teim-rd .cp-hero3__stage, .teim-rd .cp-why__body { animation: none; }
   .teim-rd .cp-why__item, .teim-rd .cp-why__item:hover { transform: none; transition: none; }
   .teim-rd .cp-aud__media img { transition: none; }
   .teim-rd .cp-aud__stack:hover .cp-aud__panel.is-on .cp-aud__media img { transform: none; }
