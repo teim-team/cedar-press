@@ -44,10 +44,10 @@
       "shelf": "standard",
       "coverage": {
         "kind": "series",
-        "from": 1994
+        "from": 2025
       },
       "blurb": "Federal Register notices and agency actions concerning tribes, Native organizations, lands, resources, recognition and other Indian Country matters. Follow published actions, consultations and comment periods across agencies and time.",
-      "linkage": "Notices matched to the tribes, lands and organizations they name, including entities that appear under former or variant names."
+      "linkage": "Documents are gathered by a broad search of the Federal Register. As such, inclusion is not a confirmed relationship with a Native entity. Consultation participants are linked to an entity where the notice names one."
     },
     {
       "id": "legislation",

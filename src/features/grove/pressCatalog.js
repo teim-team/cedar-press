@@ -253,12 +253,17 @@ export const PRESS_CATALOG = Object.freeze([
     short: "Federal Register",
     name: "Federal Register",
     shelf: "standard",
-    // Series. Floor: min(notice_date) in dist/customer/federal-register.csv.
-    coverage: Object.freeze({ kind: "series", from: 1994 }),
+    // Series. Floor: the documents are the 2025 and 2026 windows of the
+    // producer's broad search (Lumecon-data convergence ledger at 4122429:
+    // 5,437 and 4,419 documents). The consultation participant records reach
+    // back to earlier notices but are not a year-by-year series (8 rows for
+    // 2025, 6 for 2026), so they do not set the floor; their earliest date
+    // is not stated anywhere a reader sees it.
+    coverage: Object.freeze({ kind: "series", from: 2025 }),
     blurb:
       "Federal Register notices and agency actions concerning tribes, Native organizations, lands, resources, recognition and other Indian Country matters. Follow published actions, consultations and comment periods across agencies and time.",
     linkage:
-      "Notices matched to the tribes, lands and organizations they name, including entities that appear under former or variant names.",
+      "Documents are gathered by a broad search of the Federal Register. As such, inclusion is not a confirmed relationship with a Native entity. Consultation participants are linked to an entity where the notice names one.",
   }),
   Object.freeze({
     id: "legislation",
