@@ -277,7 +277,7 @@ const GENERAL_INTENTS = [
       `federal spending and award systems (USAspending, FPDS, FSRS, SAM, FAADS), Congress and the ` +
       `Federal Register (Congress.gov, Voteview, federalregister.gov), lobbying disclosures filed under the ` +
       `Lobbying Disclosure Act, IRS filings (the Business Master File and ` +
-      `Form 990), resource revenue reporting (ONRR, OSMRE, ANCSA 7(i) and 7(j) filings, the Osage Minerals ` +
+      `Form 990), resource revenue reporting (ONRR, OSMRE, the Osage Minerals ` +
       `Council), NAGPRA notices and the National NAGPRA databases, parcel, tract and assessor records, ` +
       `foundation and corporate giving disclosures, and what nations and their enterprises publish about themselves.\n\n` +
       `Where they are available, Cedar NEED can also add patent records, supported by company, tribal, SEC ` +

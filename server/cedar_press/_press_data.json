@@ -139,10 +139,10 @@
       "shelf": "pro",
       "coverage": {
         "kind": "series",
-        "from": 1880
+        "from": 1909
       },
       "blurb": "Public records of energy and mineral production, revenues, royalties and related disbursements associated with tribal trust and restricted lands. Compare reported activity by commodity, Native entity, location and period.",
-      "linkage": "Production and disbursements matched to the nations and allottees they belong to."
+      "linkage": "Disbursements matched to the nations they belong to. Individual allottee detail is never published."
     },
     {
       "id": "owned",

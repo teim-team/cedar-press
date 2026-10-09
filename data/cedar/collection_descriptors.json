@@ -171,9 +171,9 @@
     "downloads": null,
     "name": "Tribal Natural Resource Revenue",
     "short_name": "Resources",
-    "tracks": "Revenue reaching tribes and individual allottees from minerals, oil and gas, coal, timber and surface leases, 1880 to current.",
-    "sources": "ONRR disbursements and monthly revenue; historical MMS American Indian collections; OSMRE Abandoned Mine Land distributions; state severance distributions; ANCSA section 7(i) and 7(j) filings; Osage Minerals Council payment history.",
-    "method": "Attribution routes through a party table rather than a single owner column, because one payment can involve the tribal government, allottees, an enterprise, an operator and a trust account at once. Where Interior suppresses the entity by law the row is published as an aggregate and labelled as one — 88.1% (9,791 national plus 167 state of 11,305 rows) of rows are aggregate for that reason, and none are unattributed for want of effort. Individual allottee detail is never published: Osage rows carry a class recipient at a per-headright rate, and the headright divisor is used as a check, never as a multiplier."
+    "tracks": "Revenue reaching tribes and individual allottees from minerals, oil and gas, coal, timber and surface leases, from 1909 to current. The Osage Minerals Council's figures for 1880 to 1908 are included as the Council presents them. They are retrospective rates, not payments.",
+    "sources": "ONRR disbursements and monthly revenue; historical MMS American Indian collections; OSMRE Abandoned Mine Land distributions; state severance distributions; Osage Minerals Council payment history.",
+    "method": "Attribution routes through a party table rather than a single owner column since one payment can involve the tribal government, allottees, an enterprise, an operator and a trust account at once. Where Interior suppresses the entity by law, the row is published as an aggregate and labelled as such. Most rows are aggregates for that reason and rows are attributed wherever possible. Individual allottee detail is never published. Osage rows have a class recipient at a per-headright rate, and the headright divisor is used as a check, never as a multiplier. Osage figures are rates, not payments, and are not added to revenue totals. Figures that Alaska Native corporations report under ANCSA sections 7(i) and 7(j) (185 rows) are not in this release while their publication is decided."
   },
   {
     "id": "nonprofits",

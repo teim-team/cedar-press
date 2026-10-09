@@ -391,14 +391,17 @@ export const PRESS_CATALOG = Object.freeze([
     short: "Natural Resources",
     name: "Natural Resource Revenues",
     shelf: "pro",
-    // Series. Floor: min(period_start) in dist/customer/natural-resources.csv.
-    // Osage headright payments, published retrospectively by the Osage Minerals
-    // Council and carried as dated revenue events with amounts.
-    coverage: Object.freeze({ kind: "series", from: 1880 }),
+    // Series. Floor: 1909, the year the Osage Minerals Council states
+    // individual payments began. The Council's figures for 1880 to 1908 are
+    // retrospective per-headright rates, not payments (Lumecon-data
+    // natural_resources.py at 4122429), so they do not set the floor, as the
+    // subcontracting rows that precede FFATA do not (COVERAGE IS NOT min(year),
+    // above). Revenue rows from other sources start later (MMS in 1925).
+    coverage: Object.freeze({ kind: "series", from: 1909 }),
     blurb:
       "Public records of energy and mineral production, revenues, royalties and related disbursements associated with tribal trust and restricted lands. Compare reported activity by commodity, Native entity, location and period.",
     linkage:
-      "Production and disbursements matched to the nations and allottees they belong to.",
+      "Disbursements matched to the nations they belong to. Individual allottee detail is never published.",
   }),
   Object.freeze({
     id: "owned",
