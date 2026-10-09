@@ -263,7 +263,7 @@ function Chapter({ id, title, claim, children }) {
         <div className="cp-ch__id">
           <span className="cp-ch__n">
             <span className="cp-ch__mark" aria-hidden="true">{chapter.icon}</span>
-            {String(at + 1).padStart(2, "0")} — {chapter.label}
+            {String(at + 1).padStart(2, "0")} · {chapter.label}
           </span>
           <h2 className="cp-msec__title">{title}</h2>
         </div>

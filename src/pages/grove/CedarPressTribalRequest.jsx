@@ -40,7 +40,7 @@ const AUTHORITY = [
   "NATION OR TRIBAL GOVERNMENT",
   "",
   "",
-  "YOU — name, title, and your authority to act for the government",
+  "YOU: name, title, and your authority to act for the government",
   "",
   "",
 ];
@@ -50,14 +50,14 @@ const TASKS = [
     id: "review",
     label: "Review the records tied to my government",
     blurb: "What Cedar Press holds about the government and its affiliated enterprises.",
-    ask: ["WHAT YOU WOULD LIKE TO SEE — all records, or a collection or period"],
+    ask: ["WHAT YOU WOULD LIKE TO SEE: all records, or a collection or period"],
   },
   {
     id: "correct",
     label: "Correct an identity or an enterprise relationship",
     blurb: "A name, a classification, or a link between a government and a business.",
     ask: [
-      "WHAT IS WRONG — the record, entity or relationship, and the Cedar id if you have it",
+      "WHAT IS WRONG: the record, entity or relationship, and the Cedar id if you have it",
       "WHAT IS CORRECT, and what supports it",
     ],
   },
@@ -65,7 +65,7 @@ const TASKS = [
     id: "missing",
     label: "Identify public records that are missing",
     blurb: "Something in the public record that Cedar Press has not picked up.",
-    ask: ["WHAT IS MISSING — the source, the period, and where it is published"],
+    ask: ["WHAT IS MISSING: the source, the period, and where it is published"],
   },
   {
     id: "partner",
@@ -77,7 +77,7 @@ const TASKS = [
 
 const draftFor = (task) =>
   contactHref(
-    `Cedar Tribal Record Review — ${task.label}`,
+    `Cedar Tribal Record Review: ${task.label}`,
     [...AUTHORITY, ...task.ask.flatMap((line) => [line, "", ""])].join("\n"),
   );
 

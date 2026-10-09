@@ -562,8 +562,8 @@ export default function CedarPressRecord() {
                   </div>
                 ) : (
                   <p className="cp-rec__fine">
-                    {groups.map((group) => group.label.toLowerCase()).join(", ")} — every column the
-                    release carries for this row.
+                    {groups.map((group) => group.label.toLowerCase()).join(", ")}: every column
+                    this record carries.
                   </p>
                 )}
               </section>
