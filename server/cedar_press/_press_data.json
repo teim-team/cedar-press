@@ -202,47 +202,11 @@
       "history": [
         {
           "version": "v4",
-          "date": "2026-10-06",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 640,942 observations.",
-            "10 example records are available to download."
-          ]
-        },
-        {
-          "version": "v3",
           "date": "2026-10-01",
           "kind": "data",
           "changed": [
-            "Dataset updated: 640,942 observations.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v2",
-          "date": "2026-09-26",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 3,646,750 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v1",
-          "date": "2026-09-04",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 3,646,750 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v0",
-          "date": "2026-09-02",
-          "kind": "data",
-          "changed": [
-            "First published on Cedar Press: 3,646,750 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
+            "Current dataset: 640,942 observations.",
+            "10 example records are available to download."
           ]
         }
       ]
@@ -257,47 +221,11 @@
       "history": [
         {
           "version": "v4",
-          "date": "2026-10-06",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 21,258 observations.",
-            "10 example records are available to download."
-          ]
-        },
-        {
-          "version": "v3",
           "date": "2026-10-01",
           "kind": "data",
           "changed": [
-            "Dataset updated: 21,258 observations.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v2",
-          "date": "2026-09-26",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 502,483 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v1",
-          "date": "2026-09-04",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 502,483 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v0",
-          "date": "2026-09-02",
-          "kind": "data",
-          "changed": [
-            "First published on Cedar Press: 502,483 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
+            "Current dataset: 21,258 observations.",
+            "5 example records are available to download."
           ]
         }
       ]
@@ -312,47 +240,11 @@
       "history": [
         {
           "version": "v4",
-          "date": "2026-10-06",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 3,064 observations.",
-            "10 example records are available to download."
-          ]
-        },
-        {
-          "version": "v3",
           "date": "2026-10-01",
           "kind": "data",
           "changed": [
-            "Dataset updated: 3,064 observations.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v2",
-          "date": "2026-09-26",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 206,354 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v1",
-          "date": "2026-09-04",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 206,354 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v0",
-          "date": "2026-09-02",
-          "kind": "data",
-          "changed": [
-            "First published on Cedar Press: 149,293 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
+            "Current dataset: 3,064 observations.",
+            "10 example records are available to download."
           ]
         }
       ]
@@ -367,47 +259,11 @@
       "history": [
         {
           "version": "v4",
-          "date": "2026-10-06",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 978 observations.",
-            "10 example records are available to download."
-          ]
-        },
-        {
-          "version": "v3",
           "date": "2026-10-01",
           "kind": "data",
           "changed": [
-            "Dataset updated: 978 observations.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v2",
-          "date": "2026-09-26",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 2,662 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v1",
-          "date": "2026-09-04",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 2,662 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v0",
-          "date": "2026-09-02",
-          "kind": "data",
-          "changed": [
-            "First published on Cedar Press: 2,662 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
+            "Current dataset: 978 observations.",
+            "10 example records are available to download."
           ]
         }
       ]
@@ -422,47 +278,11 @@
       "history": [
         {
           "version": "v4",
-          "date": "2026-10-06",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 6,792 observations.",
-            "10 example records are available to download."
-          ]
-        },
-        {
-          "version": "v3",
           "date": "2026-10-01",
           "kind": "data",
           "changed": [
-            "Dataset updated: 6,792 observations.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v2",
-          "date": "2026-09-26",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 100,786 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v1",
-          "date": "2026-09-04",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 100,786 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v0",
-          "date": "2026-09-02",
-          "kind": "data",
-          "changed": [
-            "First published on Cedar Press: 72,302 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
+            "Current dataset: 6,792 observations.",
+            "10 example records are available to download."
           ]
         }
       ]
@@ -477,47 +297,11 @@
       "history": [
         {
           "version": "v4",
-          "date": "2026-10-06",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 27,825 observations.",
-            "10 example records are available to download."
-          ]
-        },
-        {
-          "version": "v3",
           "date": "2026-10-01",
           "kind": "data",
           "changed": [
-            "Dataset updated: 27,825 observations.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v2",
-          "date": "2026-09-26",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 264,478 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v1",
-          "date": "2026-09-04",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 264,478 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v0",
-          "date": "2026-09-02",
-          "kind": "data",
-          "changed": [
-            "First published on Cedar Press: 264,478 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
+            "Current dataset: 27,825 observations.",
+            "10 example records are available to download."
           ]
         }
       ]
@@ -532,47 +316,11 @@
       "history": [
         {
           "version": "v4",
-          "date": "2026-10-06",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 841,002 observations.",
-            "10 example records are available to download."
-          ]
-        },
-        {
-          "version": "v3",
           "date": "2026-10-01",
           "kind": "data",
           "changed": [
-            "Dataset updated: 841,002 observations.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v2",
-          "date": "2026-09-26",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 3,345,971 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v1",
-          "date": "2026-09-04",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 3,345,971 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v0",
-          "date": "2026-09-02",
-          "kind": "data",
-          "changed": [
-            "First published on Cedar Press: 3,345,971 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
+            "Current dataset: 841,002 observations.",
+            "10 example records are available to download."
           ]
         }
       ]
@@ -587,47 +335,11 @@
       "history": [
         {
           "version": "v4",
-          "date": "2026-10-06",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 70,054 observations.",
-            "10 example records are available to download."
-          ]
-        },
-        {
-          "version": "v3",
           "date": "2026-10-01",
           "kind": "data",
           "changed": [
-            "Dataset updated: 70,054 observations.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v2",
-          "date": "2026-09-26",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 90,479 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v1",
-          "date": "2026-09-04",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 90,479 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v0",
-          "date": "2026-09-02",
-          "kind": "data",
-          "changed": [
-            "First published on Cedar Press: 90,479 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
+            "Current dataset: 70,054 observations.",
+            "10 example records are available to download."
           ]
         }
       ]
@@ -642,57 +354,11 @@
       "history": [
         {
           "version": "v5",
-          "date": "2026-10-06",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 3,725 observations.",
-            "10 example records are available to download."
-          ]
-        },
-        {
-          "version": "v4",
-          "date": "2026-10-02",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 3,725 observations.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v3",
           "date": "2026-10-01",
           "kind": "data",
           "changed": [
-            "Dataset updated: 3,725 observations.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v2",
-          "date": "2026-09-26",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 5,930 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v1",
-          "date": "2026-09-04",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 5,930 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v0",
-          "date": "2026-09-02",
-          "kind": "data",
-          "changed": [
-            "First published on Cedar Press: row count unresolved.",
-            "No example records are available yet.",
-            "This update is on hold, for 3 recorded reasons."
+            "Current dataset: 3,725 observations.",
+            "10 example records are available to download."
           ]
         }
       ]
@@ -707,66 +373,11 @@
       "history": [
         {
           "version": "v6",
-          "date": "2026-10-06",
+          "date": "2026-10-01",
           "kind": "data",
           "changed": [
-            "Dataset updated: 43 observations.",
+            "Current dataset: 43 observations.",
             "10 example records are available to download."
-          ]
-        },
-        {
-          "version": "v5",
-          "date": "2026-10-01",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 43 observations.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v4",
-          "date": "2026-10-01",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 27 observations.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v3",
-          "date": "2026-09-27",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 14,868 rows.",
-            "No example records are available yet.",
-            "This update is on hold, for 1 recorded reason."
-          ]
-        },
-        {
-          "version": "v2",
-          "date": "2026-09-26",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 14,868 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v1",
-          "date": "2026-09-04",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 14,868 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v0",
-          "date": "2026-09-02",
-          "kind": "data",
-          "changed": [
-            "First published on Cedar Press: 5,757 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
           ]
         }
       ]
@@ -781,47 +392,11 @@
       "history": [
         {
           "version": "v4",
-          "date": "2026-10-06",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 11,120 observations.",
-            "10 example records are available to download."
-          ]
-        },
-        {
-          "version": "v3",
           "date": "2026-10-01",
           "kind": "data",
           "changed": [
-            "Dataset updated: 11,120 observations.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v2",
-          "date": "2026-09-26",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 283,716 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v1",
-          "date": "2026-09-04",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 283,716 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v0",
-          "date": "2026-09-02",
-          "kind": "data",
-          "changed": [
-            "First published on Cedar Press: 283,716 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
+            "Current dataset: 11,120 observations.",
+            "10 example records are available to download."
           ]
         }
       ]
@@ -836,47 +411,11 @@
       "history": [
         {
           "version": "v4",
-          "date": "2026-10-06",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 89 observations.",
-            "10 example records are available to download."
-          ]
-        },
-        {
-          "version": "v3",
           "date": "2026-10-01",
           "kind": "data",
           "changed": [
-            "Dataset updated: 89 observations.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v2",
-          "date": "2026-09-26",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 131,090 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v1",
-          "date": "2026-09-04",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 131,090 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v0",
-          "date": "2026-09-02",
-          "kind": "data",
-          "changed": [
-            "First published on Cedar Press: 123,293 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
+            "Current dataset: 89 observations.",
+            "10 example records are available to download."
           ]
         }
       ]
@@ -891,20 +430,11 @@
       "history": [
         {
           "version": "v4",
-          "date": "2026-10-06",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 193 observations.",
-            "10 example records are available to download."
-          ]
-        },
-        {
-          "version": "v3",
           "date": "2026-10-01",
           "kind": "data",
           "changed": [
-            "First published on Cedar Press: 193 observations.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
+            "Current dataset: 193 observations.",
+            "10 example records are available to download."
           ]
         }
       ]
@@ -919,20 +449,11 @@
       "history": [
         {
           "version": "v4",
-          "date": "2026-10-06",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 151,715 observations.",
-            "10 example records are available to download."
-          ]
-        },
-        {
-          "version": "v3",
           "date": "2026-10-01",
           "kind": "data",
           "changed": [
-            "First published on Cedar Press: 151,715 observations.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
+            "Current dataset: 151,715 observations.",
+            "3 example records are available to download."
           ]
         }
       ]

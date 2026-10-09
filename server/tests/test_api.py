@@ -428,8 +428,8 @@ class TestCatalog(unittest.TestCase):
 
     def test_cedar_answers_what_a_release_changed(self) -> None:
         # The release log is derived from the manifest now, so the answer
-        # names the descriptor's version and carries the measured facts the
-        # first release states: the table count and the row label. It used to
+        # carries the measured facts of the dataset as it stands, dated by the
+        # data refresh, not the re-release (owner rule 2026-09-28). It used to
         # answer "v4.1 ... 412 awards" from demonstration notes no release had
         # shipped, and flagged them as demonstration; nothing here is.
         dataset = next(d for d in launch.LAUNCH_COLLECTION if d.id == "funding")
@@ -443,7 +443,7 @@ class TestCatalog(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         answer = response.json()["answer"]
         self.assertNotIn(dataset.version, answer)
-        self.assertIn(dataset.updated, answer)
+        self.assertIn(dataset.refreshed or dataset.updated, answer)
         self.assertIn(dataset.rows_label, answer)
         self.assertNotIn(" tables", answer)
         self.assertNotIn("demonstration", answer)
@@ -456,7 +456,8 @@ class TestCatalog(unittest.TestCase):
         )
         self.assertEqual(response.status_code, 200)
         answer = response.json()["answer"]
-        self.assertIn(f"Indian Country Deals, updated {dataset.updated}", answer)
+        updated = dataset.refreshed or dataset.updated
+        self.assertIn(f"Indian Country Deals, updated {updated}", answer)
 
     def test_release_feed_uses_current_permitted_metadata(self) -> None:
         payload = {"source": "verified_current", "history_complete": False, "releases": []}
