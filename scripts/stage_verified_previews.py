@@ -212,7 +212,8 @@ def proposed_entry(prior, metadata, counts, sample, updated, layout=None):
         entry["cedar"]["status"] = "REVIEWED_PUBLIC_BASE"
         entry["cedar"]["blockers"] = []
         entry["descriptor"]["method"] = (
-            "This preview is the evidence-pinned reviewed public base. NEED has no "
+            "This release is the reviewed public base: 43 enterprises, each pinned to its "
+            "evidence. NEED has no "
             "publication hold (owner ruling 2026-10-04): its records come from publicly "
             "available websites and Lumecon has permission to publish them, and source rights "
             "are recorded as provenance. Existing enterprise IDs and source evidence are preserved."
