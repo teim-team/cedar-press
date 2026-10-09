@@ -15,6 +15,7 @@ import {
   EXCLUDED_COLLECTIONS,
   LAUNCH_COLLECTION,
   collectionCedarFacts,
+  collectionCitation,
   collectionDeclaredSample,
   collectionSample,
   COUNT_NOT_SHOWN,
@@ -77,6 +78,19 @@ test("the release is the descriptor's version and date, and the ledger holds it"
   }
 });
 
+// One date for readers, the data refresh (L1-U05). The release date the
+// ledger records is kept as `released` and never shown, and nothing falls
+// back to it: a manifest without a refresh date fails here, not on the page.
+test("every collection is dated by its data refresh, and its citation carries that date", () => {
+  for (const dataset of LAUNCH_COLLECTION) {
+    assert.match(dataset.refreshed ?? "", /^\d{4}-\d{2}-\d{2}$/,
+                 `${dataset.id}: the manifest records no data refresh date`);
+    assert.equal(dataset.updated, dataset.refreshed, dataset.id);
+    assert.match(dataset.released, /^\d{4}-\d{2}-\d{2}$/, dataset.id);
+    assert.ok(collectionCitation(dataset.id).endsWith(` Updated ${dataset.refreshed}.`), dataset.id);
+  }
+});
+
 // The ledger is append-only and a recorded version keeps the facts it was
 // recorded with. The entry for the CURRENT version must equal what the
 // manifest measures now: a descriptor re-imported with different facts under
@@ -92,7 +106,7 @@ test("the ledger's entry for the current version is what the manifest measures",
     const sample = collectionDeclaredSample(dataset.id);
     assert.deepEqual(record, {
       version: dataset.version,
-      date: dataset.updated,
+      date: dataset.released,
       name: dataset.name,
       tables: cedar.n_tables,
       // The ledger records the measured label even where the page shows none
@@ -126,7 +140,7 @@ test("every version in the ledger is unique, dated and no newer than the descrip
       assert.match(record.date, /^\d{4}-\d{2}-\d{2}$/, `${id} ${record.version}`);
       assert.ok(Array.isArray(record.blockers), `${id} ${record.version} records blockers by count, not by name`);
       if (dataset) {
-        assert.ok(record.date <= dataset.updated, `${id} ${record.version} is dated after the descriptor`);
+        assert.ok(record.date <= dataset.released, `${id} ${record.version} is dated after the descriptor`);
       }
     }
     // A retired collection keeps a read-only record: citable, not sold.

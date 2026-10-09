@@ -317,8 +317,7 @@ const GENERAL_INTENTS = [
     triggers: ["how current", "how often updated", "how fresh", "update", "updated", "cadence", "how often", "is it current", "snapshot", "how recent", "up to date", "latest release", "last updated"],
     answer:
       NEWEST
-        ? `${MAINTENANCE.sentence} The most recent release was ${formatUpdated(NEWEST.updated)}` +
-          (NEWEST.refreshed ? `, and its data was last refreshed ${formatUpdated(NEWEST.refreshed)}.\n\n` : `.\n\n`) +
+        ? `${MAINTENANCE.sentence} The data was last updated ${formatUpdated(NEWEST.updated)}.\n\n` +
           `Every release is maintained with dated updates, and the release history records what changed, so a figure ` +
           `you cited last quarter still reproduces.`
         : `${MAINTENANCE.sentence} Every release is maintained with dated updates so a figure you cited last ` +

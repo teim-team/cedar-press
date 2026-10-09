@@ -1495,8 +1495,8 @@ test.describe("About this collection", () => {
     await expect(panel).toBeVisible();
     await expect(panel).toContainText("Awardees are matched to a Native entity");
     // The release facts a reader checks a figure against.
-    // The data refresh and the release are separate dates (2026-10-06).
-    for (const field of ["Data as of", "Released", "Coverage", "Example records"]) {
+    // One date, the data refresh; the release date is not shown (L1-U05).
+    for (const field of ["Updated", "Coverage", "Example records"]) {
       await expect(panel.locator("dt", { hasText: new RegExp(`^${field}$`) }).first()).toBeVisible();
     }
     // The unit of observation, in the codebook's own words: the sentence

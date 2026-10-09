@@ -179,20 +179,28 @@ class CollectionDataset:
     downloads: int | None
     vintage: str | None
     version: str
-    updated: str
+    #: The data date in ``LAUNCH_COLLECTION`` (see ``refreshed``). A
+    #: descriptor loaded directly with ``CollectionDataset(**descriptor)``
+    #: carries the release date here, as the descriptor states it.
+    updated: str | None
     sources: str
     method: str
     #: Which shelf carries this dataset ("standard", "pro", "grove"). The
     #: client's catalog declares the same placement; this one is the control
     #: the routes enforce.
     shelf: str = "standard"
-    #: When the DATA was last refreshed from the producer, as distinct from
-    #: ``updated`` (the release date the ledger records). On 2026-10-06 every
-    #: collection was re-released at the owner's request without a producer
-    #: refresh, so the two dates differ. Read from the manifest provenance
-    #: (``_data_refreshed``); the client reads the same fields
-    #: (collection.js ``dataRefreshed``).
+    #: When the DATA was last refreshed from the producer. In
+    #: ``LAUNCH_COLLECTION`` this is also ``updated``: the one date a reader
+    #: sees for a collection, labelled "Updated", and the date its citation
+    #: carries. On 2026-10-06 every collection was re-released at the owner's
+    #: request without a producer refresh, so the release date said the data
+    #: changed when it had not. Read from the manifest provenance
+    #: (``_data_refreshed``), never replaced by the release date; the client
+    #: reads the same fields (collection.js ``dataRefreshed``).
     refreshed: str | None = None
+    #: The release date the ledger records (data/cedar/releases.json), kept
+    #: for checks against the ledger and never shown.
+    released: str | None = None
 
 
 #: Collections whose observation count is not shown to readers (owner,
@@ -236,12 +244,18 @@ def _data_refreshed(collection_id: str) -> str | None:
     return selected.get("updated") or provenance.get("updated") or None
 
 
-LAUNCH_COLLECTION: tuple[CollectionDataset, ...] = tuple(
-    CollectionDataset(
-        **_descriptor_for_readers(entry["descriptor"]),
-        refreshed=_data_refreshed(entry["descriptor"]["id"]),
+def _launch_dataset(entry: dict[str, Any]) -> CollectionDataset:
+    """A storefront dataset, dated by its data refresh, not its release."""
+    descriptor = _descriptor_for_readers(entry["descriptor"])
+    released = descriptor.pop("updated", None)
+    refreshed = _data_refreshed(descriptor["id"])
+    return CollectionDataset(
+        **descriptor, updated=refreshed, refreshed=refreshed, released=released
     )
-    for entry in _MANIFEST["collections"]
+
+
+LAUNCH_COLLECTION: tuple[CollectionDataset, ...] = tuple(
+    _launch_dataset(entry) for entry in _MANIFEST["collections"]
 )
 
 #: Cedar's own facts per dataset, keyed by product id: readiness status, the
@@ -357,9 +371,9 @@ def collection_short(dataset: Any) -> str | None:
 
 
 def collection_context_line() -> str:
-    """One line for the context strip: versions and the latest refresh date."""
-    updated = sorted(d.updated for d in LAUNCH_COLLECTION)[-1]
-    return f"Updated {updated}"
+    """One line for the context strip: the latest data refresh date."""
+    dates = sorted(d.updated for d in LAUNCH_COLLECTION if d.updated)
+    return f"Updated {dates[-1]}" if dates else ""
 
 
 @dataclass(frozen=True)
@@ -591,7 +605,11 @@ class CollectionFigure:
 def _basis_for(dataset_id: str, fallback: str) -> str:
     """A figure's basis line, derived so it cannot name a stale version."""
     dataset = _dataset_for(dataset_id)
-    return f"{collection_short(dataset)}, updated {dataset.updated}" if dataset else fallback
+    if dataset is None:
+        return fallback
+    if not dataset.updated:
+        return collection_short(dataset)
+    return f"{collection_short(dataset)}, updated {dataset.updated}"
 
 
 COLLECTION_FIGURES: tuple[CollectionFigure, ...] = (

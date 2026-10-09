@@ -5,6 +5,7 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { assertReleasedDictionary, releasedBook } from "./release-docs.mjs";
+import { LAUNCH_COLLECTION } from "../src/features/grove/collection.js";
 const REPO = fileURLToPath(new URL("..", import.meta.url));
 const SAMPLES = REPO + "server/tests/fixtures/legacy-preview/samples/";
 const OUT_DIR = REPO + "docs/guides/";
@@ -427,7 +428,9 @@ export function renderReleasedGuide(collection, book, entry, descriptor, sample)
   const lines = [];
   const p = (text = "") => lines.push(text);
   const name = book.dataset || descriptor.name || collection;
-  const updated = descriptor?.updated ?? entry?.descriptor?.updated ?? null;
+  // The data date the caller passes (guideFor), the same date the
+  // collection's downloads cite; never the descriptor's release date.
+  const updated = descriptor?.updated ?? null;
   const facts = previewFacts(book, sample);
   const columns = new Set(book.fields.map((field) => field.column));
   const names = (pattern) => book.fields.filter((field) => pattern.test(field.column)).map((field) => `\`${field.column}\``).join(", ");
@@ -581,7 +584,9 @@ function guideFor(collection) {
   if (current) {
     const sample = sampleFor(collection);
     if (!sample) throw new Error(`Missing installed spreadsheet sample: ${collection}`);
-    return renderReleasedGuide(collection, current.book, entry, descriptor, sample);
+    // Dated by the data refresh, as the downloads' citation is (L1-U05).
+    const dataDate = LAUNCH_COLLECTION.find((item) => item.id === collection)?.updated ?? null;
+    return renderReleasedGuide(collection, current.book, entry, { ...descriptor, updated: dataDate }, sample);
   }
   if (!prose) {
     throw new Error(`Missing authored guide or installed producer dictionary: ${collection}`);
