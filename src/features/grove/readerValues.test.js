@@ -12,6 +12,8 @@ import {
   isBareScheme,
   isInternalProvenanceColumn,
   isWellFormedUrl,
+  LINK_TEXT_MAX,
+  linkText,
   namesInternalFile,
   readerText,
   tableLabel,
@@ -64,6 +66,32 @@ test("only a cell that is one address is rendered as a link", () => {
   assert.ok(isBareScheme("https://"));
   assert.ok(isBareScheme("http:// "));
   assert.ok(!isBareScheme("https://x.example"));
+});
+
+test("a long link is cut with an ellipsis, decided on the text shown", () => {
+  const link = (n) => `https://www.example.gov/${"a".repeat(n - "example.gov/".length)}`;
+  for (const n of [79, 80]) assert.equal(linkText(link(n)), link(n).slice("https://www.".length));
+  for (const n of [81, 88, 89, 200]) {
+    const shown = linkText(link(n));
+    assert.equal(shown.length, LINK_TEXT_MAX, n);
+    assert.ok(shown.endsWith("…"), n);
+    assert.ok(!shown.endsWith("?"), n);
+  }
+  assert.equal(linkText("http://x.example/a"), "x.example/a");
+  assert.equal(linkText(""), "");
+  // Every address the downloads serve: none is cut without saying so.
+  let long = 0;
+  for (const path of walk(DOWNLOADS)) {
+    for (const url of readFileSync(path, "utf8").match(/https?:\/\/[^\s,"|]+/g) ?? []) {
+      const shown = linkText(url);
+      assert.ok(shown.length <= LINK_TEXT_MAX, url);
+      if (url.replace(/^https?:\/\/(www\.)?/i, "").length > LINK_TEXT_MAX) {
+        long += 1;
+        assert.ok(shown.endsWith("…"), url);
+      }
+    }
+  }
+  assert.ok(long > 0, "the downloads hold no long links to check against");
 });
 
 test("Cedar's own files and scripts read as what they are, and a sentence keeps its words", () => {
