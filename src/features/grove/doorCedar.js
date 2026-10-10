@@ -318,16 +318,14 @@ const GENERAL_INTENTS = [
     answer:
       NEWEST
         ? `${MAINTENANCE.sentence} The data was last updated ${formatUpdated(NEWEST.updated)}.\n\n` +
-          `Every release is maintained with dated updates, and the release history records what changed, so a figure ` +
-          `you cited last quarter still reproduces.`
-        : `${MAINTENANCE.sentence} Every release is maintained with dated updates so a figure you cited last ` +
-          `quarter still reproduces.`,
+          `Every citation includes the date its data was updated.`
+        : `${MAINTENANCE.sentence} Every citation includes the date its data was updated.`,
     expanded:
       `Going deeper: the sources publish on their own clocks, and on the weekly review schedule a person ` +
       `reviews what they published before it enters the collection. Each collection shows the date its data ` +
-      `was refreshed and the period its records cover, apart from the date of a release. A roster collection states the date it was captured rather than a span, ` +
+      `was refreshed and the period its records cover. A roster collection states the date it was captured rather than a span, ` +
       `because its sources archive nothing. ${MAINTENANCE.goal}` +
-      (recentLine ? `\n\nThe latest releases: ${recentLine}.` : ""),
+      (recentLine ? `\n\nMost recently updated: ${recentLine}.` : ""),
   },
   // Institutional accounts (owner, 2026-09-27). Declared before "plans" so
   // a question about an organization's account wins a tie with the price

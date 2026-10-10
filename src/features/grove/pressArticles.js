@@ -23,7 +23,7 @@ export const PRESS_ARTICLES = Object.freeze([
     ],
     "tag": "Original Research",
     "title": "The first nation-shared roster of individually owned Native businesses is in",
-    "dek": "White Earth Nation's TERO sent its certified Indian-owned business list in answer to a request through the office's public contact, the first roster in a consent-first dataset of the businesses no federal register counts.",
+    "dek": "White Earth Nation's TERO sent its certified Indian-owned business list in answer to a request through the office's public contact, the first roster in a dataset of the businesses no federal register counts.",
     "date": "August 2026",
     "byline": "Elijah S. Moreno",
     "minutes": 3

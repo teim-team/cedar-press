@@ -45,7 +45,7 @@
     "short_name": "Legislation",
     "tracks": "Federal bills affecting Indian Country and the recorded votes on them, with sponsors, cosponsors and subject classification.",
     "sources": "Congress.gov API; Voteview roll-call records; committee and hearing records.",
-    "method": "Most legislation affecting Indian Country names no single tribe, so records are scoped to Indian Country as a whole rather than forced onto an entity — an unattached row here is the correct representation, not a gap. Subject classification is recorded with the basis on which a bill was judged Native-relevant."
+    "method": "Most legislation affecting Indian Country names no single tribe, so records are scoped to Indian Country as a whole rather than forced onto an entity. An unattached row here is the correct representation, not a gap. Subject classification is recorded with the basis on which a bill was judged Native-relevant."
   },
   {
     "id": "deals",
@@ -93,7 +93,7 @@
     "short_name": "Advocacy",
     "tracks": "Registered federal lobbying by and for Native nations and organizations, from disclosures filed under the Lobbying Disclosure Act. Each row is one lobbying disclosure filing, with its registrant, client, issues, the government bodies lobbied and reported amounts.",
     "sources": "Lobbying disclosure filings made to the Senate and House under the Lobbying Disclosure Act (lda.gov).",
-    "method": "Each row is one filing as disclosed under the Lobbying Disclosure Act, linked to the Native nation or organization behind it where the filing supports the link. Registrant and client are kept as filed, amended and superseded filings are marked rather than removed, and organisations acting on behalf of many tribes are scoped as such rather than attributed to one. Agency meetings, consultations, regulatory comments, testimony and nonprofit lobbying disclosures are not part of this release."
+    "method": "Each row is one filing as disclosed under the Lobbying Disclosure Act, linked to the Native nation or organization behind it where the filing supports the link. Registrant and client are kept as filed, amended and superseded filings are marked rather than removed, and organizations acting on behalf of many tribes are scoped as such rather than attributed to one. Agency meetings, consultations, regulatory comments, testimony and nonprofit lobbying disclosures are not part of this release."
   },
   {
     "id": "contractors",
@@ -139,7 +139,7 @@
     "downloads": null,
     "name": "Individual Native-Owned Businesses",
     "short_name": "Businesses",
-    "tracks": "Firms certified or listed as Native-owned by a tribal certifying authority — TERO vendor lists, Indian preference registers, tribal business licences and tribal enterprise registers — harmonised across nations into one schema.",
+    "tracks": "Firms certified or listed as Native-owned by a tribal certifying authority (TERO vendor lists, Indian preference registers, tribal business licenses and tribal enterprise registers), harmonized across nations into one schema.",
     "sources": "Tribal TERO offices, business licensing departments and enterprise registers, harvested from each nation's own publication. Contributing authorities are acknowledged in every release.",
     "method": "The strength of each certification is preserved rather than flattened, because the authorities do not mean the same thing: a firm certified at 100% enrolled-member ownership, one on an any-Native list, one qualifying through a shareholder's spouse or descendant, and a vendor with no ownership relation at all are recorded as different claims on the same scale. The relation published is affiliation with a named nation, not an ownership assertion the source never made. Sources whose terms forbid reuse are excluded by every route and named as excluded."
   },

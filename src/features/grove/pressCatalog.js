@@ -424,7 +424,7 @@ export const PRESS_CATALOG = Object.freeze([
     blurb:
       "Individually owned Native businesses identified through tribal TERO offices, commerce programs and other documented Native-business registries. Records preserve the issuing source, reported affiliation or certification, location and industry where available.",
     linkage:
-      "Every listing carries the nation whose office certified it, appears only under that nation's stated terms, and is credited to the issuing TERO or commerce office.",
+      "Every listing includes the nation whose office certified it and is credited to the issuing TERO or commerce office.",
   }),
   Object.freeze({
     id: "nonprofits",

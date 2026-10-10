@@ -101,7 +101,7 @@ export default function ReleasedCollections() {
         {state.entries.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
       </select></label>
       <h3>{entry.name}</h3>
-      <p>A living dataset in one spreadsheet, preserving each observation's type, period and original source. Held records remain excluded.</p>
+      <p>A living dataset in one spreadsheet, preserving each observation's type, period and original source. Each collection's About text says which records are not included.</p>
       {recordCount !== null ? <p>{recordCount.toLocaleString("en-US")} observations in this spreadsheet. Record types have distinct grains; combine amounts only as the codebook permits.</p> : null}
       {entry.updated ? <p>Updated {entry.updated}</p> : null}
       {spreadsheet ? <a href={spreadsheet}>Download spreadsheet</a> : <p role="status">The spreadsheet is not available for this account yet.</p>}

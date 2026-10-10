@@ -508,8 +508,8 @@ export default function CedarPressMethods() {
               </p>
               {/* Two of these three are intentional and stay intentional however
                   long Cedar runs: a notice addressed to every federally
-                  recognized tribe names no organization, and an individually
-                  owned firm's identity is withheld by policy. The third is work
+                  recognized tribe names no organization, and a match ruled to
+                  name the wrong entity is removed (2026-10-04). The third is work
                   still to do, and it says so. */}
               <h3 className="cp-ch__sub">Why a record can carry no entity</h3>
               <UnlinkedReasons />

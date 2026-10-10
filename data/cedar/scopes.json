@@ -139,6 +139,6 @@
     "no_individual_named": "The record addresses or concerns a population and names no individual entity; the Cedar block is blank by design. Never a failed match.",
     "resolved": "The named party resolved to the register; the Cedar block carries it.",
     "unresolved": "The record names a party the register could not place; the Cedar block is blank and the name as published stands. Never recast as a population.",
-    "withheld": "The publication rule withholds the identity; the Cedar block is blank by policy, not by failure."
+    "withheld": "The Cedar block is blank when the match named the wrong entity, which is noted in the record."
   }
 }

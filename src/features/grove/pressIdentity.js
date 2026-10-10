@@ -248,8 +248,7 @@ export const WHY_BOTH = Object.freeze({
  *
  * - The storefront's Individual Native-Owned Businesses collection publishes
  *   these firms BY NAME, because a nation's own TERO or commerce office
- *   published them and shared them under stated terms. The name is the
- *   nation's to give and it gave it.
+ *   published them. The name is the nation's to give and it gave it.
  * - Where the only evidence is a federal award file, the firm publishes by
  *   name too, since the owner ruling of 2026-10-02: a firm is a business
  *   entity regardless of what it is named after, and its name, identifiers
@@ -259,8 +258,9 @@ export const WHY_BOTH = Object.freeze({
  *   in `code/cedar_domain.py` withheld them absent recorded consent, on the
  *   reasoning that a firm named after its owner is a private individual; the
  *   ruling rejects that reasoning for this class. The rule is still per
- *   field and still fails closed on a field it does not know, and the
- *   aggregate small-cell rule (fewer than three firms) is unchanged.
+ *   field and still fails closed on a field it does not know. The
+ *   aggregate small-cell rule (fewer than three firms) was lifted by the
+ *   owner ruling of 2026-10-04, and source terms are provenance, not a gate.
  * - `register.json`, the entity lookup this whole site can read, therefore
  *   carries the name for this class; its `withheld_names` reads 0.
  *
@@ -271,7 +271,7 @@ export const WITHHELD_CLASS = "Individually Native-owned business";
 
 /** What Cedar publishes about an individually owned firm, said plainly. */
 export const WITHHELD_NOTE =
-  "A firm is published under its own name whatever it is named after. Where a nation's own commerce office published its certified businesses and shared them under stated terms, they are in the collection by name. Where the only evidence is a federal award file, the firm's name, identifiers and business address publish as the public business records they are, the same fields SAM and USAspending publish for every federal awardee; what Cedar does not publish is internal working text, and any aggregate cell that resolves to fewer than three firms is suppressed.";
+  "A firm is published under its own name whatever it is named after. Where a nation's commerce office published its certified businesses, they are in the collection by name. Where the only evidence is a federal award file, the firm's name, identifiers, and business address are published as public business records with the same fields SAM and USAspending publish for all federal awardees. Cedar does not publish internal working text.";
 
 /**
  * MEASURED LINKAGE COVERAGE, and why it is on the page.
@@ -400,7 +400,7 @@ export const UNLINKED_REASONS = Object.freeze(
       id,
       label: {
         no_individual_named: "It is about a population, not an organization",
-        withheld: "The identity is withheld by policy",
+        withheld: "The match was invalid",
         unresolved: "The register could not place the named party",
       }[id],
       intentional: id !== "unresolved",

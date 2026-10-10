@@ -2942,7 +2942,7 @@ test.describe("Methods", () => {
     await expect(page.locator(".cp-ur__item")).toHaveCount(3);
     await expect(page.locator(".cp-ur__item.is-by-design")).toHaveCount(2);
     await expect(page.locator(".cp-ur")).toContainText("Never a failed match");
-    await expect(page.locator(".cp-ur")).toContainText("not by failure");
+    await expect(page.locator(".cp-ur")).toContainText("noted in the record");
     // Codex, PR #79: the two phrases above come only from the intentional
     // statuses, so an empty "Still to do" card passed. Every card must carry
     // a real definition, and none may be the missing-definition fallback.
