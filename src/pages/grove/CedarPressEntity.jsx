@@ -134,7 +134,7 @@ export default function CedarPressEntity() {
 
   const notice = samplesLoading
     ? "Reading the published previews…"
-    : `Records Cedar Press has resolved to this entity, from the published previews — up to ten sample rows per table, never a count of a release. The name each source used stays visible.${locked ? ` ${locked} more collections open on Cedar Press+.` : ""}`;
+    : `Records Cedar Press has resolved to this entity, from the published previews: up to ten sample rows per table, never a total. The name each source used stays visible.${locked ? ` ${locked} more collections open on Cedar Press+.` : ""}`;
   const name = entity?.withheld ? WITHHELD_TEXT : entity?.name ?? null;
 
   /**

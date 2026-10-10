@@ -15,8 +15,10 @@ export function attributionLabel(row) {
 
 export function evidenceSections(profile) {
   if (profile?.status !== "available") return [];
+  // Owner ruling 2026-10-04 (Elijah Moreno): a row's review status is not a
+  // hold; a row is shown when it carries a usable public source link.
   const rows = (key) => (Array.isArray(profile[key]) ? profile[key] : [])
-    .filter((row) => row.publication_status === "eligible" && !row.hold_reason && sourceLink(row.source_url));
+    .filter((row) => sourceLink(row.source_url));
   return [
     { title: "Patent observations", items: rows("patent_observations").map((row) => ({
       id: row.observation_id,
@@ -25,7 +27,7 @@ export function evidenceSections(profile) {
         row.family_id && `Family: ${row.family_id}`, row.original_assignee && `Original assignee: ${row.original_assignee}`,
         row.subsequent_owner && `Subsequent owner: ${row.subsequent_owner}`,
         row.assignment_date && `Assignment: ${row.assignment_date}`, row.acquisition_date && `Acquisition: ${row.acquisition_date}`,
-        "Current patent ownership is not established by an acquisition alone."].filter(Boolean).join(" — "),
+        "Current patent ownership is not established by an acquisition alone."].filter(Boolean).join(" · "),
       source: sourceLink(row.source_url),
     })) },
     { title: "Patent events", items: rows("patent_events").map((row) => ({
@@ -51,13 +53,13 @@ export function evidenceSections(profile) {
         row.outlook && `Outlook: ${row.outlook}`, row.watch && `Watch: ${row.watch}`,
         (row.preliminary === true || row.preliminary === "true") && "Preliminary",
         (row.expected === true || row.expected === "true") && "Expected",
-        "Historical observation; not a verified current rating."].filter(Boolean).join(" — "),
+        "Historical observation; not a verified current rating."].filter(Boolean).join(" · "),
       source: sourceLink(row.source_url),
     })) },
     { title: "Rating availability", items: rows("rating_availability").map((row) => ({
       id: row.availability_id,
       label: [row.subject_name, row.agency, row.availability_status].filter(Boolean).join(" · "),
-      detail: [attributionLabel(row), row.publication_period, row.rating_scope, "Availability is not a rating grade."].filter(Boolean).join(" — "),
+      detail: [attributionLabel(row), row.publication_period, row.rating_scope, "Availability is not a rating grade."].filter(Boolean).join(" · "),
       source: sourceLink(row.source_url),
     })) },
   ].filter((section) => section.items.length);

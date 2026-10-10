@@ -15,10 +15,13 @@ import {
   EXCLUDED_COLLECTIONS,
   LAUNCH_COLLECTION,
   collectionCedarFacts,
+  collectionCitation,
   collectionDeclaredSample,
   collectionSample,
   COUNT_NOT_SHOWN,
+  hasSample,
 } from "./collection.js";
+import { downloadRecord } from "./customerTables.js";
 import { PRESS_CATALOG } from "./pressCatalog.js";
 import {
   CADENCE,
@@ -70,7 +73,21 @@ test("the release is the descriptor's version and date, and the ledger holds it"
       dataset.version,
       `${dataset.id}: the manifest is at ${dataset.version} and the ledger is not; run node scripts/record-release.mjs`,
     );
-    assert.equal(release.history[0].date, dataset.updated, dataset.id);
+    // Dated by the data refresh, not the re-release (2026-10-06 changed no data).
+    assert.equal(release.history[0].date, dataset.refreshed ?? dataset.updated, dataset.id);
+  }
+});
+
+// One date for readers, the data refresh (L1-U05). The release date the
+// ledger records is kept as `released` and never shown, and nothing falls
+// back to it: a manifest without a refresh date fails here, not on the page.
+test("every collection is dated by its data refresh, and its citation carries that date", () => {
+  for (const dataset of LAUNCH_COLLECTION) {
+    assert.match(dataset.refreshed ?? "", /^\d{4}-\d{2}-\d{2}$/,
+                 `${dataset.id}: the manifest records no data refresh date`);
+    assert.equal(dataset.updated, dataset.refreshed, dataset.id);
+    assert.match(dataset.released, /^\d{4}-\d{2}-\d{2}$/, dataset.id);
+    assert.ok(collectionCitation(dataset.id).endsWith(` Updated ${dataset.refreshed}.`), dataset.id);
   }
 });
 
@@ -89,7 +106,7 @@ test("the ledger's entry for the current version is what the manifest measures",
     const sample = collectionDeclaredSample(dataset.id);
     assert.deepEqual(record, {
       version: dataset.version,
-      date: dataset.updated,
+      date: dataset.released,
       name: dataset.name,
       tables: cedar.n_tables,
       // The ledger records the measured label even where the page shows none
@@ -123,7 +140,7 @@ test("every version in the ledger is unique, dated and no newer than the descrip
       assert.match(record.date, /^\d{4}-\d{2}-\d{2}$/, `${id} ${record.version}`);
       assert.ok(Array.isArray(record.blockers), `${id} ${record.version} records blockers by count, not by name`);
       if (dataset) {
-        assert.ok(record.date <= dataset.updated, `${id} ${record.version} is dated after the descriptor`);
+        assert.ok(record.date <= dataset.released, `${id} ${record.version} is dated after the descriptor`);
       }
     }
     // A retired collection keeps a read-only record: citable, not sold.
@@ -164,7 +181,7 @@ test("a retired collection stays in the feed as read-only history", () => {
   assert.equal(entry.retired, true);
   assert.equal(entry.name, "Retired Fixture");
   // Sold collections sort ahead of retired ones on a shared date.
-  const sameDay = buildFeed(buildReleases({ releases: { ...synthetic.releases, "retired-fixture": [{ ...synthetic.releases["retired-fixture"][0], date: first.updated }] } }, [first]));
+  const sameDay = buildFeed(buildReleases({ releases: { ...synthetic.releases, "retired-fixture": [{ ...synthetic.releases["retired-fixture"][0], date: first.refreshed ?? first.updated }] } }, [first]));
   assert.equal(sameDay[0].id, first.id);
 });
 
@@ -250,28 +267,37 @@ test("every collection declares a cadence, and it is one of the known ones", () 
 // ledger is append-only, so v0 keeps its own facts forever - that is the point
 // of it - while the manifest moved on. legislation went 149,293 -> 206,354 rows,
 // and the old assertion read that as a defect rather than as history.
-test("the first release keeps its own facts, the latest matches the manifest", () => {
+// Owner rule 2026-09-28: readers see Updated dates, not release numbers,
+// table counts or change history. The ledger keeps every version; a reader
+// sees one entry per collection, for the dataset as it stands.
+test("each collection shows one entry, for the dataset as it stands", () => {
   for (const dataset of LAUNCH_COLLECTION) {
-    const first = releaseFor(dataset.id).history.at(-1);
-    assert.equal(first.kind, RELEASE_KIND.DATA);
-    assert.ok(first.changed.length >= 2, dataset.id);
-    assert.match(first.changed[0], /^First published on Cedar Press: /);
-    // it states SOME measured row count - its own, not necessarily today's
-    assert.match(first.changed[0], /[\d,]+ (?:rows|observations)|row count unresolved/,
-                 `${dataset.id}: ${first.changed[0]}`);
-    // and the ledger's NEWEST release is the version the manifest is on.
-    // (latestRelease returns a release - kind, changed, version - not the raw
-    // ledger entry, so there is no rowsLabel on it to compare.)
-    const latest = latestRelease(dataset.id);
-    assert.ok(latest, dataset.id);
-    assert.equal(latest.version, dataset.version,
-                 `${dataset.id}: ledger's newest release is not the manifest's version`);
+    const history = releaseFor(dataset.id).history;
+    assert.equal(history.length, 1, `${dataset.id}: earlier versions are not shown`);
+    const [entry] = history;
+    assert.equal(entry.kind, RELEASE_KIND.DATA);
+    assert.equal(entry.version, dataset.version, dataset.id);
+    assert.equal(latestRelease(dataset.id).version, dataset.version, dataset.id);
+    // What the collection holds now, never a summed count of earlier tables.
+    assert.match(entry.changed[0], /^Current dataset: [\d,]+ observations\.$/, `${dataset.id}: ${entry.changed[0]}`);
+    // The example count is the served download's, not the ledger's sample.
+    const served = downloadRecord(dataset.id)?.rows;
+    if (hasSample(dataset.id) && served) {
+      assert.equal(entry.changed[1], `${served} example ${served === 1 ? "record is" : "records are"} available to download.`, dataset.id);
+    } else {
+      assert.equal(entry.changed[1], "No example records are available yet.", dataset.id);
+    }
   }
-  // The collection that had no sample file said so rather than promising one.
-  const owned = releaseFor("owned").history.at(-1);
-  assert.ok(owned.changed.some((line) => line.startsWith("No example records are available yet")));
-  const funding = releaseFor("funding").history.at(-1);
-  assert.ok(funding.changed.some((line) => /^\d+ example records? /.test(line)));
+  // The served downloads that hold fewer than ten rows say so.
+  assert.match(releaseFor("federal-register").history[0].changed[1], /^5 example records /);
+  assert.match(releaseFor("plot").history[0].changed[1], /^3 example records /);
+  // A synthetic collection with no served sample promises none.
+  const [first] = LAUNCH_COLLECTION;
+  const bare = buildReleases({ releases: { "no-sample": [
+    { version: "v0", date: "2026-01-15", name: "No Sample", tables: 1,
+      rowsLabel: "7 observations", preview: null, blockers: [] },
+  ] } }, [first])["no-sample"];
+  assert.deepEqual([...bare.history[0].changed], ["Current dataset: 7 observations.", "No example records are available yet."]);
 });
 
 // Editorial notes describe shipped releases: a note names a version the
@@ -363,9 +389,8 @@ test("current feed never borrows publication dates or aggregate totals from publ
   assert.equal(model.feed.length, 1);
   assert.equal(model.feed[0].date, null);
   assert.equal(model.feed[0].anchor, `funding-${"a".repeat(64)}`);
-  assert.ok(model.previewHistory.length);
-  assert.ok(model.previewHistory.every((event) => event.date_basis === "public_preview"));
-  assert.ok(model.previewHistory.every((event) => event.changed.join() === "Collection updated."));
+  // No earlier update dates beside the current facts (owner rule 2026-09-28).
+  assert.deepEqual(model.previewHistory, []);
   const preview = previewReleaseModel();
   assert.equal(preview.source, "public_preview");
   assert.deepEqual(preview.feed.map((item) => item.anchor), RELEASE_FEED.map((item) => item.anchor));

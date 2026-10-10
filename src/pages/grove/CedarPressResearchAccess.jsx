@@ -37,7 +37,7 @@ const DRAFT = [
   "WHICH ONE OR TWO COLLECTIONS, AND WHY THOSE",
   "",
   "",
-  "SCOPE — dates, geography or entities",
+  "SCOPE: dates, geography or entities",
   "",
   "",
   "WHAT YOU INTEND TO PUBLISH",
@@ -46,7 +46,7 @@ const DRAFT = [
   "TIMELINE",
   "",
   "",
-  "YOU — name, affiliation, contact",
+  "YOU: name, affiliation, contact",
   "",
   "",
 ].join("\n");
@@ -173,7 +173,7 @@ export default function CedarPressResearchAccess() {
           <ol className="cp-next">
             <li><b>A person reads it.</b> Requests go to the research desk, not to a queue.</li>
             <li><b>A fit gets the named collections, for the named project.</b> Nothing wider.</li>
-            <li><b>A miss gets an answer anyway</b> — which route fits, if one does.</li>
+            <li><b>A miss gets an answer anyway</b>: which route fits, if one does.</li>
           </ol>
           <a className="cp-trh__cta" href={REQUEST_HREF}>
             Start a research request <span aria-hidden="true">&#8594;</span>

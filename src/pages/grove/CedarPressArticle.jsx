@@ -150,7 +150,6 @@ function EvidenceFigure({ block, lead = false }) {
       <p className="cp-ar__figsrc">
         <b>{block.source}</b>
         {block.asOf ? ", as of " + block.asOf : null}
-        {block.releaseId ? " · Source release " + block.releaseId : null}
       </p>
       <EvidenceSources sources={block.sources} />
     </figure>
@@ -189,8 +188,7 @@ function Figure({ block, lead = false }) {
         {/* A date, never a version: the collections update continuously and
             the date is what makes the figure reproducible. */}
         <b>{entry?.name ?? block.source}</b>
-        {block.asOf ? ", as of " + block.asOf : !block.releaseId && release ? ", as of " + formatUpdated(release.updated) : null}
-        {block.releaseId ? <span> · Source release {block.releaseId}</span> : null}
+        {block.asOf ? ", as of " + block.asOf : release ? ", as of " + formatUpdated(release.updated) : null}
         .{" "}
         {/* To the Cedar Grove page on lumecon.ai, not /app/grove: a Press
             reader clicking this has no Grove entitlement, and the app route

@@ -124,7 +124,6 @@ export const SOURCE_GROUPS = Object.freeze([
       { name: "MMS American Indian collections", collections: ["natural-resources"] },
       { name: "OSMRE Abandoned Mine Land distributions", collections: ["natural-resources"] },
       { name: "State severance distributions", match: "state severance distributions", collections: ["natural-resources"] },
-      { name: "ANCSA section 7(i) and 7(j) filings", collections: ["natural-resources"] },
       { name: "Osage Minerals Council payment history", collections: ["natural-resources"] },
     ]),
   }),

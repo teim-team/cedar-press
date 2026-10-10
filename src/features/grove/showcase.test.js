@@ -21,10 +21,13 @@ test("every excluded example names a record the pinned sample actually holds", (
 test("the landing showcase leaves out the records the audit found misleading, and never abandons a rule for a minimum count", () => {
   const shown = showcaseItems("legislation", items("legislation"));
   assert.ok(!shown.some((item) => item.recordId === "100-hr-2642"));
-  // Prime Contracting shows only records with a Native entity, however few.
+  // Prime Contracting shows only records with a Native entity and a positive
+  // obligation, however few.
   const contracts = showcaseItems("contractors", items("contractors"));
-  assert.ok(contracts.every((item) => item.entity.name || item.entity.uid));
-  assert.equal(contracts.length, items("contractors").filter((item) => item.entity.name || item.entity.uid).length);
+  assert.ok(contracts.every((item) => (item.entity.name || item.entity.uid) && item.amount > 0));
+  assert.equal(contracts.length, items("contractors").filter((item) => (item.entity.name || item.entity.uid) && item.amount > 0).length);
+  // Legislation shows only bills that name a Native entity.
+  assert.ok(shown.length && shown.every((item) => item.entity.name || item.entity.uid));
   // The door's first screen shows no $0 or negative obligation.
   assert.ok(showcaseItems("funding", items("funding")).every((item) => item.amount > 0));
 });

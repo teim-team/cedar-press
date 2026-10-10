@@ -30,7 +30,7 @@ import {
   meaningFor,
   scopeName,
 } from "../../features/grove/explore.js";
-import { isBareScheme, isWellFormedUrl, readerText } from "../../features/grove/readerValues.js";
+import { isBareScheme, isWellFormedUrl, linkText, readerText } from "../../features/grove/readerValues.js";
 import { money, short, reportedAmountText } from "../../features/grove/recordColumns.js";
 import { scrollEdges } from "../../features/grove/scrollEdges.js";
 import SourceCitation from "./SourceCitation.jsx";
@@ -73,7 +73,7 @@ export function Human({ column, value, contract, item = null }) {
   if (/^[A-Za-z]:[\\/]|^file:\/\/|^\\\\/.test(raw)) return "Retained in internal provenance";
   if (isWellFormedUrl(raw)) {
     const url = safeSourceUrl(raw.trim());
-    return url ? <a href={url} target="_blank" rel="noreferrer">{url.replace(/^https?:\/\/(www\.)?/, "").slice(0, 80)}{url.length > 88 ? "?" : ""}</a> : "Source link unavailable";
+    return url ? <a href={url} target="_blank" rel="noreferrer">{linkText(url)}</a> : "Source link unavailable";
   }
   const text = readerText(readerValueLabel(item?.collection, column, raw));
   // Money wherever the column is money: the table's amount, or any column

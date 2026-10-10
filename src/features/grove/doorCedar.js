@@ -277,7 +277,7 @@ const GENERAL_INTENTS = [
       `federal spending and award systems (USAspending, FPDS, FSRS, SAM, FAADS), Congress and the ` +
       `Federal Register (Congress.gov, Voteview, federalregister.gov), lobbying disclosures filed under the ` +
       `Lobbying Disclosure Act, IRS filings (the Business Master File and ` +
-      `Form 990), resource revenue reporting (ONRR, OSMRE, ANCSA 7(i) and 7(j) filings, the Osage Minerals ` +
+      `Form 990), resource revenue reporting (ONRR, OSMRE, the Osage Minerals ` +
       `Council), NAGPRA notices and the National NAGPRA databases, parcel, tract and assessor records, ` +
       `foundation and corporate giving disclosures, and what nations and their enterprises publish about themselves.\n\n` +
       `Where they are available, Cedar NEED can also add patent records, supported by company, tribal, SEC ` +
@@ -317,18 +317,15 @@ const GENERAL_INTENTS = [
     triggers: ["how current", "how often updated", "how fresh", "update", "updated", "cadence", "how often", "is it current", "snapshot", "how recent", "up to date", "latest release", "last updated"],
     answer:
       NEWEST
-        ? `${MAINTENANCE.sentence} The most recent release was ${formatUpdated(NEWEST.updated)}` +
-          (NEWEST.refreshed ? `, and its data was last refreshed ${formatUpdated(NEWEST.refreshed)}.\n\n` : `.\n\n`) +
-          `Every release is maintained with dated updates, and the release history records what changed, so a figure ` +
-          `you cited last quarter still reproduces.`
-        : `${MAINTENANCE.sentence} Every release is maintained with dated updates so a figure you cited last ` +
-          `quarter still reproduces.`,
+        ? `${MAINTENANCE.sentence} The data was last updated ${formatUpdated(NEWEST.updated)}.\n\n` +
+          `Every citation includes the date its data was updated.`
+        : `${MAINTENANCE.sentence} Every citation includes the date its data was updated.`,
     expanded:
       `Going deeper: the sources publish on their own clocks, and on the weekly review schedule a person ` +
       `reviews what they published before it enters the collection. Each collection shows the date its data ` +
-      `was refreshed and the period its records cover, apart from the date of a release. A roster collection states the date it was captured rather than a span, ` +
+      `was refreshed and the period its records cover. A roster collection states the date it was captured rather than a span, ` +
       `because its sources archive nothing. ${MAINTENANCE.goal}` +
-      (recentLine ? `\n\nThe latest releases: ${recentLine}.` : ""),
+      (recentLine ? `\n\nMost recently updated: ${recentLine}.` : ""),
   },
   // Institutional accounts (owner, 2026-09-27). Declared before "plans" so
   // a question about an organization's account wins a tie with the price

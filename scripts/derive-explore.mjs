@@ -400,6 +400,8 @@ const CUSTOMER_PRESENTATION = Object.freeze({
     // The name the source used, for the enterprises no relationship names.
     observation: ["related_entity_name", "relationship_type", "ownership_extent", "source_reported_name"],
     default_columns: ["enterprise_name", "related_entity_name", "relationship_type", "ownership_extent", "uei", "cage_code"],
+    // The owner's page for the ownership first, then the record's other citations.
+    source: "native_owner_source", source_fallback: "source_urls",
   },
   // Federal Register: the customer table keeps the federal-action documents
   // only (customer_sheet.LAYOUTS), so it has no entity block; the document

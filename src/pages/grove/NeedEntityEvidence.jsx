@@ -22,7 +22,7 @@ export default function NeedEntityEvidence({ cedarUid }) {
       {current?.related_enterprises?.length ? (
         <div><h3>Related NEED enterprises</h3><ul>
           {current.related_enterprises.map((item) => (
-            <li key={item.profile_link_id}>{item.enterprise_name} — {item.relationship_type}
+            <li key={item.profile_link_id}>{item.enterprise_name} · {item.relationship_type}
               {item.valid_from || item.valid_to ? ` (${item.valid_from || "start unknown"} to ${item.valid_to || "end unknown"})` : " (relationship dates not established)"}
               {" "}<a href={item.source_url} target="_blank" rel="noopener noreferrer">Relationship source</a>
             </li>
@@ -40,7 +40,6 @@ export default function NeedEntityEvidence({ cedarUid }) {
           ))}</ul>
         </div>
       ))}
-      {current?.release_id ? <p className="cp-rec__fine">Release: <code>{current.release_id}</code></p> : null}
     </section>
   );
 }

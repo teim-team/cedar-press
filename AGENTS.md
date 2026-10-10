@@ -249,10 +249,15 @@ from prose that goes stale, and gives you `ondisk <term>`.
 - Never reset, rebase or force-push a shared or pushed branch. If the branch
   already exists on the remote, check it out and build on it; to take in the
   base, merge it in.
-- **An attribution trailer is a claim, so it is only ever true.** It records
-  who produced a commit; it is not a house style every commit wears.
-  - A commit **made in a Claude Code session** ends with exactly the two
-    trailer lines that session gives you, and no other trailer of that kind:
+- **An attribution trailer is a claim, so it is only ever true.** It says
+  who made a commit; it is not a house style every commit wears. The test is
+  who made the commit, not who wrote the lines in it.
+  - **A person's commit carries no AI trailer**, including when an agent
+    wrote the change with them in a session they were directing. The person
+    reviewed the change and committed it, so the person is its author.
+  - **A commit an agent makes on its own**, for example an agent given a
+    task and left to work and commit unattended, ends with exactly the two
+    trailer lines its session gives it, and no other trailer of that kind:
 
     ```
     Co-Authored-By: Claude <model name, as the session reports it> <noreply@anthropic.com>
@@ -262,11 +267,9 @@ from prose that goes stale, and gives you `ondisk <term>`.
     Copy both lines from the session rather than from here: the model name
     and the session id are the session's facts, which is why this file names
     neither.
-  - A commit **not** made in a Claude session carries neither line. Human
-    commits need no AI trailer at all; a Codex branch uses whatever
-    attribution Codex itself records, and never a Claude line. Nobody names a
-    co-author who did not take part or writes a session URL that does not
-    exist.
+  - A Codex branch uses whatever attribution Codex itself records, and never
+    a Claude line. Nobody names a co-author who did not take part or writes a
+    session URL that does not exist.
   - Whoever made the commit, no model identifier appears in a PR title or
     body or in a code comment.
 - Push with `git push -u origin <branch>`. Do not open a pull request unless

@@ -57,9 +57,10 @@ export const EXCLUDED_EXAMPLES = Object.freeze({
  *   amountFirst    records that carry money first.
  */
 export const SHOWCASE_RULES = Object.freeze({
-  contractors: Object.freeze({ requireEntity: true, amountFirst: true }),
+  contractors: Object.freeze({ requireEntity: true, positiveAmount: true, amountFirst: true }),
   subcontracting: Object.freeze({ requireEntity: true, spreadBy: Object.freeze(["subaward_number", "subcontractor_name", "prime_name"]), amountFirst: true }),
   funding: Object.freeze({ positiveAmount: true }),
+  legislation: Object.freeze({ requireEntity: true }),
   lobbying: Object.freeze({ amountFirst: true }),
   deals: Object.freeze({ amountFirst: true }),
 });

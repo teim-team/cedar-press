@@ -253,12 +253,17 @@ export const PRESS_CATALOG = Object.freeze([
     short: "Federal Register",
     name: "Federal Register",
     shelf: "standard",
-    // Series. Floor: min(notice_date) in dist/customer/federal-register.csv.
-    coverage: Object.freeze({ kind: "series", from: 1994 }),
+    // Series. Floor: the documents are the 2025 and 2026 windows of the
+    // producer's broad search (Lumecon-data convergence ledger at 4122429:
+    // 5,437 and 4,419 documents). The consultation participant records reach
+    // back to earlier notices but are not a year-by-year series (8 rows for
+    // 2025, 6 for 2026), so they do not set the floor; their earliest date
+    // is not stated anywhere a reader sees it.
+    coverage: Object.freeze({ kind: "series", from: 2025 }),
     blurb:
       "Federal Register notices and agency actions concerning tribes, Native organizations, lands, resources, recognition and other Indian Country matters. Follow published actions, consultations and comment periods across agencies and time.",
     linkage:
-      "Notices matched to the tribes, lands and organizations they name, including entities that appear under former or variant names.",
+      "Documents are gathered by a broad search of the Federal Register. As such, inclusion is not a confirmed relationship with a Native entity. Consultation participants are linked to an entity where the notice names one.",
   }),
   Object.freeze({
     id: "legislation",
@@ -386,14 +391,17 @@ export const PRESS_CATALOG = Object.freeze([
     short: "Natural Resources",
     name: "Natural Resource Revenues",
     shelf: "pro",
-    // Series. Floor: min(period_start) in dist/customer/natural-resources.csv.
-    // Osage headright payments, published retrospectively by the Osage Minerals
-    // Council and carried as dated revenue events with amounts.
-    coverage: Object.freeze({ kind: "series", from: 1880 }),
+    // Series. Floor: 1909, the year the Osage Minerals Council states
+    // individual payments began. The Council's figures for 1880 to 1908 are
+    // retrospective per-headright rates, not payments (Lumecon-data
+    // natural_resources.py at 4122429), so they do not set the floor, as the
+    // subcontracting rows that precede FFATA do not (COVERAGE IS NOT min(year),
+    // above). Revenue rows from other sources start later (MMS in 1925).
+    coverage: Object.freeze({ kind: "series", from: 1909 }),
     blurb:
       "Public records of energy and mineral production, revenues, royalties and related disbursements associated with tribal trust and restricted lands. Compare reported activity by commodity, Native entity, location and period.",
     linkage:
-      "Production and disbursements matched to the nations and allottees they belong to.",
+      "Disbursements matched to the nations they belong to. Individual allottee detail is never published.",
   }),
   Object.freeze({
     id: "owned",
@@ -416,7 +424,7 @@ export const PRESS_CATALOG = Object.freeze([
     blurb:
       "Individually owned Native businesses identified through tribal TERO offices, commerce programs and other documented Native-business registries. Records preserve the issuing source, reported affiliation or certification, location and industry where available.",
     linkage:
-      "Every listing carries the nation whose office certified it, appears only under that nation's stated terms, and is credited to the issuing TERO or commerce office.",
+      "Every listing includes the nation whose office certified it and is credited to the issuing TERO or commerce office.",
   }),
   Object.freeze({
     id: "nonprofits",

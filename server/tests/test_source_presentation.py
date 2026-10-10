@@ -79,6 +79,24 @@ class SourcePresentationTest(unittest.TestCase):
         )
         self.assertIsNone(value["publicationDate"])
 
+    def test_need_cites_its_ownership_page_and_the_kind_of_evidence(self):
+        # The first row of the served NEED download; sourcePresentation.test.js
+        # checks the same row in the browser.
+        row = {
+            "native_owner_basis": "the owner's published page",
+            "native_owner_source": "https://www.ahtna.com/company/ahtna-builders-llc/",
+            "source_urls": "https://www.ahtna.com/company/ahtna-builders-llc/",
+        }
+        value = present("need", row)
+        self.assertEqual(value["url"], "https://www.ahtna.com/company/ahtna-builders-llc/")
+        self.assertEqual(
+            value["evidenceBasis"],
+            {"label": "Ownership evidence", "text": "the owner's published page"},
+        )
+        self.assertIsNone(value["publisher"])
+        self.assertIsNone(present("need", {})["evidenceBasis"])
+        self.assertNotIn("evidenceBasis", present("deals", row))
+
     def test_gaming_publisher_does_not_replace_exact_issuer(self):
         row = {
             "source_authority": (

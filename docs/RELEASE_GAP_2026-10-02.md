@@ -76,7 +76,7 @@ Classifications: **CODE** (fixed or fixable here, with a test), **EVIDENCE_IN_RE
 
 - **Gate:** the served sample is the producer's pinned selection; the fixture is a regression input
 - **Exists:** 10 reviewed events (CEV-2025-01F262669F, CEV-2025-09E060E63E, CEV-2025-101F917A66 ... CEV-2021-357C5BC869), sources checked 2026-10-01 (docs/DEALS_PUBLIC_PREVIEW_REVIEW_2026-10-01.md), in the 40-column legacy fixture server/tests/fixtures/legacy-preview/samples/deals/deals_classified__10.csv.
-- **Served:** None of the 10 ids is in the served 36-column preview (ids ACQ2020-*/ANCSA-*); no tracked file under public/, data/cedar/, src/ or server/cedar_press/ names a CEV id (1 files). Whether the events are among the 978 released records is not measurable here.
+- **Served:** None of the 10 ids is in the served 36-column preview (ids ACQ2020-*/ANCSA-*); no tracked file under public/, data/cedar/, src/ or server/cedar_press/ names a CEV id (0 files). Whether the events are among the 978 released records is not measurable here.
 - **Gate location:** scripts/stage_verified_previews.py (sample = producer selection); data/cedar/verified-preview-releases.json deals.sample_sha256
 - **Closing condition:** The producer selects the reviewed events as the Deals sample (or confirms they are in the 978) and pins a new release; server/tests/legacy_deals_adapter.py documents the 40 -> 36 column mapping so that step is mechanical.
 - **Evidence in the repository:** docs/FACT_CHECK_2026-10-02.md section 4; the fixture; server/tests/test_legacy_deals_adapter.py
