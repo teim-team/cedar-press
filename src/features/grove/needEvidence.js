@@ -15,8 +15,10 @@ export function attributionLabel(row) {
 
 export function evidenceSections(profile) {
   if (profile?.status !== "available") return [];
+  // Owner ruling 2026-10-04 (Elijah Moreno): a row's review status is not a
+  // hold; a row is shown when it carries a usable public source link.
   const rows = (key) => (Array.isArray(profile[key]) ? profile[key] : [])
-    .filter((row) => row.publication_status === "eligible" && !row.hold_reason && sourceLink(row.source_url));
+    .filter((row) => sourceLink(row.source_url));
   return [
     { title: "Patent observations", items: rows("patent_observations").map((row) => ({
       id: row.observation_id,

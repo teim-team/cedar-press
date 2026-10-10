@@ -734,7 +734,7 @@ _EVIDENCE_WORDS = {
     "first_party_cage_list": "listed by the owner's federal contracting arm with its CAGE code",
     "identifier_ledger": "federal identifier ledger ultimate-parent chain",
     "derived_ranking": "Cedar contractor ranking attribution",
-    "producer_evidence_pin": "the owner's own published page",
+    "producer_evidence_pin": "the owner's published page",
     "government_record": "federal procurement record",
 }
 
