@@ -17,7 +17,7 @@
 //
 // Nothing here is typed. Every field is copied from the manifest at the
 // moment the version is recorded, which is the same moment the manifest was
-// written. Run this after `scripts/import_cedar_manifest.py`; the release
+// written. Run this after the manifest is updated; the release
 // tests (pressReleases.test.js) fail, naming this command, when the manifest
 // carries a version the ledger does not.
 //

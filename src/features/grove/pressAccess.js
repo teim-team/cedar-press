@@ -140,7 +140,7 @@ export function shelfReach(user) {
  * STOREFRONT_SHELVES ("standard", "pro") is what a paying Cedar Press
  * customer sees and GROVE_SHELVES ("grove") is the one built to the same
  * standard and sold through Cedar Grove; BUILD_SHELVES is the thirteen.
- * `scripts/import_cedar_manifest.py` carries that split into the manifest, so
+ * The manifest carries that split, so
  * a grove-shelf collection reaches this repository in `excluded` and never in
  * the launch collection. The Cedar Press API therefore cannot serve one
  * without the Cedar data workspace changing its ruling first, and a page that

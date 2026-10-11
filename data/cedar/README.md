@@ -105,7 +105,7 @@ versioned data store; this repository retains the metadata for the release it se
 | File | Authority and required inputs | Consumers | Fresh-clone and release rule |
 |---|---|---|---|
 | `codebook.json` | Curated field definitions; no JSON generator. `scripts/docs-markdown.mjs --kind codebook` generates its Markdown view, not this source. | `src/features/grove/explore.js` supplies headings/record meanings; codebook and guide generators; `server/tests/test_field_map.py` and Explore tests compare approved fields. | Commit the reviewed source. Definitions cannot be reconstructed from column names alone. Generated documentation is reproducible and freshness-checked. |
-| `collections.manifest.json` | `scripts/import_cedar_manifest.py`, from `760_collection_descriptors.py` outputs, `1135_full_dataset_review_bundle.py` review manifest/samples, and `770_sample_extracts.py` flagship declarations. | `collection.js` and `server/cedar_press/collections.py`, then catalog, filters, sources, citations, downloads and API; Explore, guides, codebook, field-map, sample, release and SEO generators. | Commit the imported release snapshot. A fresh product clone can serve and test it, but cannot regenerate it without the pinned workspace descriptors and release inputs. Never substitute an empty-workspace import. The importer's `--audit` also writes; it is not a read-only verification command. |
+| `collections.manifest.json` | `scripts/stage_verified_previews.py`, from verified Lumecon-data releases: it stages each collection's preview in a new directory, then installs the checked previews here with `--apply`. | `collection.js` and `server/cedar_press/collections.py`, then catalog, filters, sources, citations, downloads and API; Explore, guides, codebook, field-map, sample, release and SEO generators. | Commit the installed snapshot. A fresh product clone can serve and test it, but cannot regenerate it without the pinned Lumecon-data releases and the staging queue. |
 | `field_map.json` | Curated publication/column decisions under `docs/PUBLIC_DATASET_SPEC_2026-09-05.md`; no JSON generator. `scripts/docs-markdown.mjs --kind field-map` generates its two review documents. | `code/cedar_publication.py` applies it during `1137_customer_dataset_combine.py` exports; guide/field-map generators, Explore and Python field-map tests. | Commit reviewed decisions. A clone can test fixtures and sample compatibility; proving mappings on full customer files needs the full-data release job. Do not infer a decision for an undeclared column. |
 | `releases.json` | `scripts/record-release.mjs`, using the manifest **and retained prior ledger**. | `src/features/grove/pressReleases.js`, release feed and citations, release tests; `scripts/dump.mjs --kind press` includes that catalog in the Python API snapshot. | Commit append-only release history. `--check` verifies current manifest/ledger consistency without rewriting history. The latest manifest cannot recreate superseded releases. |
 | `samples.published.json` | `scripts/measure-samples.mjs`, using the manifest plus Git index and matching public sample bytes. | `collection.js` and Python `collections.py` determine sample availability, then download/UI/API paths; sample and collection parity tests. | Commit the deterministic measured snapshot with its inputs. `--check` and `--selftest` distinguish committed, absent, untracked and unstaged samples. A file merely present on one machine is not a published sample. |
@@ -181,25 +181,11 @@ runs in the same CI job as the rest of the Python suite — executes both
 implementations and compares every value they produce. A deliberate one-value
 edit to either side fails it.
 
-**`scripts/import_cedar_manifest.py` writes the manifest.** Point it at the
-Cedar data workspace and it reads three outputs and copies the sample rows:
-
-```
-py -3 scripts/import_cedar_manifest.py --workspace "<path to the data workspace>"
-```
-
-| input | produced by |
-|---|---|
-| `dist/collection_descriptors.json` | `code/760_collection_descriptors.py` |
-| `dist/collection_descriptors.cedar.json` | the same script |
-| `dist/review/MANIFEST.csv` | `code/1135_full_dataset_review_bundle.py` |
-| `dist/review/samples/<collection>/<table>__10.csv` | the same script |
-| `FLAGSHIP` (which table a customer opens first) | `code/770_sample_extracts.py`, read by text |
-
-Nothing is typed into the manifest by hand. The importer checks each
-descriptor's key set against the fourteen `CollectionDataset` fields in both
-directions and exits rather than writing, because that contract has broken
-twice on this interface already.
+**`scripts/stage_verified_previews.py` updates the manifest.** It reads each
+collection's verified release from Lumecon-data, stages a ten-row preview in a
+new directory, and with `--apply` installs the checked previews into the
+manifest, `codebook.json` and `verified-preview-releases.json`. Nothing is
+typed into the manifest by hand.
 
 **Twelve collections, and the other three named.** Cedar measures fifteen.
 `newsletters` is out by owner ruling (2026-09-02), `gaming` because it is a

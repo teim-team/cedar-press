@@ -38,7 +38,6 @@ def _load(name: str, path: Path):
 
 
 pub = _load("cedar_publication_duns", CODE / "cedar_publication.py")
-importer = _load("import_cedar_manifest_duns", ROOT / "scripts" / "import_cedar_manifest.py")
 csv.field_size_limit(10_000_000)
 
 DATA_ROOTS = ("dist", "public/data", "data/cedar/samples")
@@ -82,14 +81,6 @@ class DunsRule(unittest.TestCase):
         self.assertEqual(pub.row_ok({"node": "DUNS:000000000"}), (False, "proprietary:duns"))
         self.assertEqual(pub.row_ok({"note": "no DUNS/UEI exists on the row"}), (True, ""))
 
-    def test_the_importer_drops_the_column_and_the_row_from_a_served_copy(self) -> None:
-        raw = "a,recipient_duns,pct_with_duns,b\n1,000000000,0.4,2\nDUNS:123456789,x,0.1,3\n"
-        text, dropped, withheld = importer.drop_proprietary(raw)
-        self.assertEqual(dropped, ["recipient_duns"])
-        self.assertEqual(withheld, 1)
-        self.assertEqual(text, "a,pct_with_duns,b\n1,0.4,2\n")
-        self.assertEqual(importer.clean_sample_text(raw), text)
-
 
 class CommittedDataCarriesNoDuns(unittest.TestCase):
     def test_no_duns_column_or_duns_subject_in_any_committed_or_built_file(self) -> None:
@@ -105,7 +96,7 @@ class CommittedDataCarriesNoDuns(unittest.TestCase):
                 pub.row_ok({k: v for k, v in r.items() if k})[1] == "proprietary:duns" for r in rows
             ):
                 hits.append(f"{path.relative_to(ROOT)}: a row whose subject is a DUNS")
-        self.assertEqual(hits, [], "run `python3 scripts/import_cedar_manifest.py --audit`")
+        self.assertEqual(hits, [], "remove the DUNS column or row where the file is made")
 
 
 if __name__ == "__main__":

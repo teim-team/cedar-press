@@ -245,8 +245,8 @@ class TestNothingTheClientOpensIsRefused(unittest.TestCase):
     what a paying Cedar Press customer sees), ``GROVE_SHELVES = ("grove",)``
     (one, "built to the same standard, sold through Grove") and
     ``BUILD_SHELVES`` (the thirteen). `gaming` "ships through **Cedar Grove**,
-    not the Press storefront". ``scripts/import_cedar_manifest.py`` carries
-    that split into the manifest as ``collections`` and ``excluded``, so the
+    not the Press storefront". The manifest
+    carries that split as ``collections`` and ``excluded``, so the
     Cedar Press API cannot serve `gaming` unless the Cedar data workspace
     changes its ruling first. The client was the wrong side, and
     ``canOpenDataset`` now refuses a grove-shelf collection for every plan.
@@ -324,9 +324,9 @@ class TestGroveDivergence(unittest.TestCase):
     ("standard", "pro")`` are the shelves a paying Cedar Press customer sees,
     and the other shelf values -- ``grove``, ``withdrawn``, ``infrastructure``
     -- are each a different reason a measured collection is not on the
-    storefront. ``scripts/import_cedar_manifest.py`` carries that split into
-    ``data/cedar/collections.manifest.json`` as ``collections`` and
-    ``excluded``, and both language implementations read that file.
+    storefront. ``data/cedar/collections.manifest.json`` carries that split as
+    ``collections`` and ``excluded``, and both language implementations read
+    that file.
 
     These tests pin the site to it. Nothing here compared the catalog's
     ``grove`` shelf against the workspace's, so the two could have disagreed

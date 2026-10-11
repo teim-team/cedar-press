@@ -34,10 +34,8 @@
  * them field by field anyway.
  *
  * WHERE THE NUMBERS COME FROM
- * `scripts/import_cedar_manifest.py` writes the manifest from the Cedar data
- * workspace: `code/760_collection_descriptors.py` for the descriptors and
- * `code/1135_full_dataset_review_bundle.py` for the per-table row counts and
- * the ten-row samples. Nothing here is typed by hand.
+ * `scripts/stage_verified_previews.py` updates the manifest from verified
+ * Lumecon-data releases. Nothing here is typed by hand.
  *
  * WHAT IS STILL NOT MEASURED, AND SAYS SO
  * `vintage` and `downloads` are `null` on every dataset, and
