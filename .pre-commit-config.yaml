@@ -22,7 +22,7 @@
 #   files nobody asked it to touch is how people learn to distrust hooks.
 #
 #   a bulk-data guard -- this repository tracks its own datasets on purpose
-#   (data/spine/, docs/schema/, dist/preview/), several of them megabytes.
+#   (data/spine/, docs/schema/), several of them megabytes.
 #   A size limit here would fire on the content, not on a mistake.
 repos:
   - repo: local

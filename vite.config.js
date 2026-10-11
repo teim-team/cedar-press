@@ -29,18 +29,16 @@ function gitSha() {
 
 // Served at the domain root (cedarpress.ai), so base stays "/".
 //
-// The build output is `dist-site/`, not vite's default `dist/`, and that is
-// not cosmetic. The 2026-09-02 consolidation brought the data workspace into
-// this repository, and it TRACKS 295 files under `dist/` — `dist/review/`,
-// the sample bundle `scripts/import_cedar_manifest.py` reads. Vite empties
-// its output directory before every build, so with the default every
-// `npm run build` (and `npm run test:smoke`, which runs one) deleted all 295
-// of them, silently, from the working tree. It happened twice before anyone
-// noticed the missing files.
+// The build output is `dist-site/`, not vite's default `dist/`. `dist/` is
+// the data workspace's gitignored output directory, and vite empties its
+// output directory before every build, so the two cannot share one. Until
+// 2026-10 this repository also tracked a sample bundle under `dist/`, and
+// with the default every `npm run build` (and `npm run test:smoke`, which
+// runs one) deleted it from the working tree.
 //
 // Whatever else moves, these two must move together: `outDir` here and
 // `upload-pages-artifact`'s `path:` in .github/workflows/deploy.yml. Change
-// one alone and the deployment publishes the data bundle, or nothing.
+// one alone and the deployment publishes nothing.
 export default defineConfig({
   plugins: [react()],
   base: "/",

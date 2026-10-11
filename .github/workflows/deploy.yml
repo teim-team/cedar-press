@@ -102,9 +102,9 @@ jobs:
         env:
           VITE_API_URL: ${{ vars.VITE_API_URL }}
           VITE_PRESS_DEMO_ACCOUNTS: ${{ secrets.VITE_PRESS_DEMO_ACCOUNTS }}
-      # `dist-site`, not `dist`: the data workspace tracks 295 files under
-      # `dist/` and vite empties its output directory before every build. The
-      # two must move together with `build.outDir` in vite.config.js.
+      # `dist-site`, not `dist`: `dist/` is the data workspace's output
+      # directory and vite empties its output directory before every build.
+      # This path and `build.outDir` in vite.config.js must move together.
       #
       # ONE artifact, in a format neither destination is special about. Both
       # publishing jobs download this exact tree, so the two serve identical

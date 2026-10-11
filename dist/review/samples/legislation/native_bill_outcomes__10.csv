@@ -1,1 +1,0 @@
-bill_id,congress,chamber,bill_type,number,title,policy_area,bill_scope,introduced_date,sponsor,disposition,disposition_action_text,disposition_action_date,disposition_basis,reached_floor_vote,n_rollcalls,rollcall_vote_ids,n_actions_on_record,first_action_date,last_action_date,n_entities_in_bridge,entity_ids,outcome_prior_build,source,build_date
