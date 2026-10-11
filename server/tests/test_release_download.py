@@ -516,20 +516,13 @@ class ReleaseDownloadTest(unittest.TestCase):
         self.assertEqual(result.content, content)
         self.assertIn("application/x-ndjson", result.headers["content-type"])
 
-    def test_missing_policy_and_malformed_metadata_fail_closed_with_audit(self):
-        with (
-            patch.object(repository, "_publication_policy", side_effect=FileNotFoundError),
-            self.assertLogs("cedar_press.download", level="INFO"),
-        ):
-            response = self.client.get(
-                "/press/collections/legislation/full-download", params={"release_id": self.rid}
-            )
-        self.assertEqual(response.status_code, 503)
+    def test_malformed_metadata_fails_closed_with_audit(self):
         for content in ["[]", '{"collections":[null]}']:
             self.catalog.write_text(content)
-            response = self.client.get(
-                "/press/collections/legislation/full-download", params={"release_id": self.rid}
-            )
+            with self.assertLogs("cedar_press.download", level="INFO"):
+                response = self.client.get(
+                    "/press/collections/legislation/full-download", params={"release_id": self.rid}
+                )
             self.assertEqual(response.status_code, 503)
 
     def test_audit_is_enabled_without_test_logger_override_and_redacts_unknown_path(self):

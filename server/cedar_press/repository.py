@@ -22,7 +22,6 @@ from __future__ import annotations
 
 import csv
 import hashlib
-import importlib.util
 import io
 import json
 import math
@@ -32,7 +31,6 @@ import sqlite3
 import tempfile
 from collections.abc import Mapping
 from contextlib import closing
-from functools import lru_cache
 from http.client import HTTPException
 from pathlib import Path
 from typing import Any
@@ -271,7 +269,6 @@ def collection_csv(collection_id: str) -> str | None:
     """
     # Owner ruling 2026-10-04 (Elijah Moreno): NEED's preview is served like
     # any other collection's; it no longer needs the reviewed-base proof.
-    assert_collection_publishable(collection_id)
     served = launch.collection_csv(collection_id)
     if served is None:
         return None
@@ -531,16 +528,6 @@ MAX_COLLECTION_MANIFEST_BYTES = 32 * 1024 * 1024
 
 def _release_json(path, *, limit=4 * 1024 * 1024):
     return json.loads(_release_bytes(path, limit=limit))
-
-
-@lru_cache(maxsize=1)
-def _publication_policy():
-    # The existing governed producer owns the hold. Do not recreate it in the API.
-    path = Path(__file__).resolve().parents[2] / "code/cedar_publication.py"
-    spec = importlib.util.spec_from_file_location("cedar_release_publication", path)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
 
 
 def _partitioned_release(catalog, collection_id, requested_release_id, metadata_only):
@@ -860,11 +847,10 @@ def full_release(collection_id, requested_release_id=None, *, metadata_only=Fals
     """Exact pinned Lumecon artifact, checked against the existing product field map.
 
     A trusted, reviewed catalog enables a collection; user parameters cannot select
-    a different release. Holds remain enforced by the canonical publication owner.
+    a different release.
     """
     if not any(item.id == collection_id for item in launch.LAUNCH_COLLECTION):
         raise FullReleaseUnavailable("Unknown collection")
-    assert_collection_publishable(collection_id)
     location = os.environ.get("CEDAR_PRESS_RELEASE_CATALOG")
     if not location:
         raise FullReleaseUnavailable("No pinned release catalog configured")
@@ -1522,7 +1508,6 @@ def grove_full_release(
         raise FullReleaseUnavailable("A Grove release names a well-formed component")
     if component not in grove_components(collection_id):
         raise FullReleaseUnavailable("Component is not offered for this collection")
-    assert_collection_publishable(collection_id)
     try:
         pin = grove_release_pin(collection_id)
         release_id = pin["release_id"]
@@ -1530,7 +1515,6 @@ def grove_full_release(
             raise FullReleaseUnavailable("Requested release is not the approved catalog pin")
         _grove_catalog(pin)
         manifest = _grove_manifest(pin)
-        assert_collection_publishable(collection_id, manifest=manifest, component=component)
         return _grove_component_release(pin, manifest, component, metadata_only=metadata_only)
     except FullReleaseUnavailable:
         raise
@@ -1553,13 +1537,9 @@ def grove_release_metadata(collection_id):
         {"kind": "full", "table_id": name, "status": "unavailable"} for name in components
     ]
     try:
-        assert_collection_publishable(collection_id)
         pin = grove_release_pin(collection_id)
         _grove_catalog(pin)
         manifest = _grove_manifest(pin)
-        assert_collection_publishable(
-            collection_id, manifest=manifest, component=need_publication.COMPONENT
-        )
     except GroveReleaseNotPinned:
         return unavailable if collection_id == "need" else None
     except (
@@ -1587,20 +1567,6 @@ def grove_release_metadata(collection_id):
         ):
             out.append(missing)
     return out
-
-
-def assert_collection_publishable(collection_id, *, manifest=None, component=None):
-    """Run the maintained policy before component selection or release lookup."""
-    try:
-        policy = _publication_policy()
-    except (OSError, ImportError, AttributeError) as error:
-        raise FullReleaseUnavailable("Publication policy unavailable") from error
-    # Since the owner ruling of 2026-10-04 the policy holds no collection; a
-    # refusal it raises is still surfaced rather than ignored.
-    try:
-        policy.assert_collection_publishable(collection_id)
-    except policy.FieldMapRefusal as error:
-        raise FullReleaseUnavailable("Collection publication is held") from error
 
 
 def full_release_metadata(collection_id):

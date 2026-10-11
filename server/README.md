@@ -163,8 +163,7 @@ Cedar enforces subscriber access before fetching data, checks catalog integrity,
 explicit release equality, schema, publication holds, rights, exact artifact
 bytes/hash, row count and primary keys. No matching or cleaning happens in the
 consumer. Missing, stale or malformed pins and service failures do not fall back
-to a sample. NEED remains held by `code/cedar_publication.py`. Unconfigured
-collections fail closed. Single artifacts and individual manifest parts are bounded
+to a sample. Unconfigured collections fail closed. Single artifacts and individual manifest parts are bounded
 at 256 MiB. Larger logical tables require the explicit development-only
 `CEDAR_PRESS_PARTITIONED_REHEARSAL=1` contract; staging/production refuse that path.
 The paired Lumecon collection `/download` endpoint verifies every component once

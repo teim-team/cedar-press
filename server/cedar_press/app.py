@@ -777,11 +777,6 @@ def full_download(
         if not release_id or not re.fullmatch(r"[0-9a-f]{64}", release_id):
             audit("invalid_release_request", requested=None)
             raise HTTPException(status_code=400, detail="Explicit release ID required")
-        if collection_id != "need" or (
-            component != repository.need_publication.COMPONENT
-            and not request.url.path.endswith("/spreadsheet-download")
-        ):
-            repository.assert_collection_publishable(collection_id)
         if request.url.path.endswith("/spreadsheet-download"):
             from cedar_press.spreadsheet import download as spreadsheet_download
 

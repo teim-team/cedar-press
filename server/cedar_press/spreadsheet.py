@@ -155,8 +155,6 @@ def _spool(collection, layout, sheet, rows, origins):
 
 def download(collection, release_id=None, *, metadata_only=False):
     """Pins and every component's byte, schema, key and rights checks stay binding."""
-    if collection != "need":
-        r.assert_collection_publishable(collection)
     if not r.is_component_release(collection):
         return _single_dataset(collection, release_id, metadata_only=metadata_only)
     pin = r.grove_release_pin(collection)
@@ -164,9 +162,6 @@ def download(collection, release_id=None, *, metadata_only=False):
         raise r.FullReleaseUnavailable("Requested release is not the approved catalog pin")
     r._grove_catalog(pin)
     manifest = r._grove_manifest(pin)
-    r.assert_collection_publishable(
-        collection, manifest=manifest, component=r.need_publication.COMPONENT
-    )
     tables = _tables(collection, pin, manifest)
     layout, sheet = _layout(collection, tables)
     main = layout["main"]["tables"]

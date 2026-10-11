@@ -16,7 +16,6 @@ class SpreadsheetCountsTest(unittest.TestCase):
             "record_count": 12,
         }
         with (
-            patch.object(spreadsheet.r, "assert_collection_publishable"),
             patch.object(spreadsheet.r, "is_component_release", return_value=False),
             patch.object(spreadsheet.r, "full_release", return_value=source) as verified,
         ):
@@ -44,7 +43,6 @@ class SpreadsheetCountsTest(unittest.TestCase):
             "attach": [],
         }
         with (
-            patch.object(spreadsheet.r, "assert_collection_publishable"),
             patch.object(spreadsheet.r, "is_component_release", return_value=True),
             patch.object(spreadsheet.r, "grove_release_pin", return_value=pin),
             patch.object(spreadsheet.r, "_grove_catalog"),
