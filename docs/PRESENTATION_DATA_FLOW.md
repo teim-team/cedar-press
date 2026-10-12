@@ -48,8 +48,6 @@ Review-only material does not become a public sample when a local count changes.
 | Cross-language duplication measurement | scripts/measure_duplication.py |
 | Generated-file validation | make check-generated |
 | Structural audit of served previews, descriptors and spine (read-only; also a firing test) | server/tests/test_public_preview_audit.py --report; findings recorded in docs/FACT_CHECK_2026-10-02.md |
-| Consumer-side release-gap register (what exists but is not served, per gate) | server/tests/release_gap_register.py --write; held current by test_release_gap_register.py; docs/RELEASE_GAP_2026-10-02.md |
-| Per-UEI recipient holds and rebinds (policy input, not a denial; nothing applies it yet) | the retired code/cedar_publication.recipient_holds() (at the tag `data-workspace-final`); data/cedar/recipient_holds.json; docs/RECIPIENT_HOLDS_2026-10-02.md |
 | Legacy 40-column Deals preview to the 36-column producer header | server/tests/legacy_deals_adapter.py (tested mapping; changes nothing served) |
 | Collection display names (owned is Individual Native-Owned Businesses) | server/tests/test_collection_display_names.py |
 
