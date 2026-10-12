@@ -14,8 +14,8 @@ set of numbers to keep in agreement.
 
 It is also provenance and not a dependency. Cedar Press is a standalone
 product: nothing here imports a Cedar Grove module or calls a Grove service,
-and every value comes from ``data/cedar/collections.manifest.json``, generated
-from the Cedar data workspace in ``code/``.
+and every value comes from ``data/cedar/collections.manifest.json``, updated
+from verified Lumecon-data releases by ``scripts/stage_verified_previews.py``.
 """
 
 from __future__ import annotations
@@ -206,7 +206,7 @@ def may_download_full(tier: str, collection_id: str) -> bool:
 
 
 #: A component id is the field-map key's part after the slash (a table stem);
-#: the same shape ``code/build.py release_dataset_id`` accepts.
+#: the same shape the retired ``code/build.py release_dataset_id`` accepted.
 _COMPONENT_ID = re.compile(r"[a-z0-9][a-z0-9_]{0,59}")
 _PHYSICAL_COMPONENT_ID = re.compile(r"[a-z0-9][a-z0-9_-]{0,59}")
 GROVE_COMPONENT_SEPARATOR = "--"

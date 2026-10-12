@@ -7,8 +7,9 @@ for Cedar Grove, and was carried over here rather than reimplemented.
 
 That is provenance, not a dependency. Cedar Press is a standalone product: this
 package imports nothing from Cedar Grove and calls no Grove service. It reads
-`data/cedar/collections.manifest.json`, generated from the Cedar data workspace
-in `code/`, which is the same file the JavaScript client reads.
+`data/cedar/collections.manifest.json`, the same file the JavaScript client
+reads; `scripts/stage_verified_previews.py` updates it from verified
+Lumecon-data releases.
 
 ```
 cedar_press/

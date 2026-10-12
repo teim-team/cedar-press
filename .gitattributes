@@ -1,4 +1,4 @@
-# Content-addressed R7 audit artifacts (code/1188). Bundle ids and pointer hashes
+# Content-addressed R7 audit artifacts (written by the retired code/1188). Bundle ids and pointer hashes
 # are computed over exact bytes, so git must never convert their line endings.
 docs/imports/r7_audit/** -text
 
@@ -18,5 +18,4 @@ data/cedar/need-reviewed-preview.json -text
 data/cedar/verified-preview-releases.json -text
 data/cedar/field_map.json -text
 server/tests/fixtures/legacy-preview/** -text
-code/330_build_native_owned_businesses.py text eol=lf
 data/cedar/preview_definition_overrides.json text eol=lf

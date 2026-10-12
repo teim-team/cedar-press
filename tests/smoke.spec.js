@@ -2426,7 +2426,7 @@ test.describe("house style", () => {
   //      disagree with the release. The collection was then renamed at the
   //      source — the manifest, the catalog, the descriptors and Grove all
   //      say "and" now — so the exemption stopped protecting a name and
-  //      started hiding a straggler: `code/1176_build_review_artifact.py`
+  //      started hiding a straggler: the retired `code/1176_build_review_artifact.py`
   //      was still writing the ampersand into the downloadable review page,
   //      and this test was told not to look. The lesson is that an exemption
   //      for a generated value has to be withdrawn when the value changes,

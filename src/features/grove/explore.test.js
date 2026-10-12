@@ -220,7 +220,7 @@ const NAMED = [...REGISTER.byUid.entries()].find(([, e]) => e.name);
 
 // The published register withholds no name since the owner ruling of
 // 2026-10-02 (an individually Native-owned firm is a business entity whatever
-// it is named after; code/cedar_domain.py may_publish_individual_native_field).
+// it is named after; the retired code/cedar_domain.py may_publish_individual_native_field).
 // The viewer's masking path is kept for any future withholding, so it is
 // exercised on a copy of the register with one real uid's name set to null,
 // never on the published file, which has none.
@@ -359,7 +359,7 @@ test("a record-level source is built only where the table declares how, from its
     rowSource({ federal_action_document_number: "2015-06658" }, contractFor("lobbying/oira_federal_action_links")),
     "https://www.federalregister.gov/d/2015-06658",
   );
-  // An EIN to its ProPublica page, leading zeros dropped as code/33 writes it.
+  // An EIN to its ProPublica page, leading zeros dropped as the retired code/33 wrote it.
   const hub = contractFor("nonprofits/np_ein_entity_hub");
   assert.equal(rowSource({ ein: "020778620" }, hub), "https://projects.propublica.org/nonprofits/organizations/20778620");
   assert.equal(rowSource({ ein: "39-1773613" }, hub), "https://projects.propublica.org/nonprofits/organizations/391773613");

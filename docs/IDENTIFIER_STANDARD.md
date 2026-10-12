@@ -5,7 +5,7 @@
 > this document controls wherever a historical passage conflicts with it.
 
 *Policy plus a dated retirement audit. Re-measure snapshot counts before release.
-`code/audit_retired_ids.py` reproduces retired-value counts without editing data.*
+`code/audit_retired_ids.py`, at the tag `data-workspace-final`, reproduces retired-value counts without editing data.*
 
 Read this before writing anything that resolves, joins, or publishes an entity.
 
@@ -553,7 +553,8 @@ proved**. Cherry-pick/merge this commit and rerun the guards on each release
 branch before lifting the Gaming ID hold.
 The legacy spine and clean tables still contain old handles as historical
 input, source keys and compatibility evidence; their mere presence there is
-not a new issuance. The `code/audit_retired_ids.py` CSV inventory prints exact
+not a new issuance. The `code/audit_retired_ids.py` CSV inventory (at the tag
+`data-workspace-final`; run it from a checkout of the tag, as below) prints exact
 path, column, prefix, occurrence count, row count and example for every file
 under the supplied roots, including ignored files. Run it against `data/spine`,
 `data/clean`, `dist/customer`, `dist/review/samples`, `data/cedar/samples`
@@ -601,7 +602,8 @@ are not registered handles. Exact membership and object-role checks determine
 violations. Reproduce every path/column/count with:
 
 ```powershell
-python code/audit_retired_ids.py data/spine data/clean dist/customer dist/review/samples data/cedar/samples public/data/cedar/downloads
+git worktree add ../cedar-press-workspace data-workspace-final
+python ../cedar-press-workspace/code/audit_retired_ids.py data/spine data/clean dist/customer dist/review/samples data/cedar/samples public/data/cedar/downloads
 ```
 
 The active Press release gate is red independently of Gaming. Its customer

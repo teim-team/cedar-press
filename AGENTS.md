@@ -32,11 +32,12 @@ output: proprietary identifiers and a private individual's personal data (`NEVER
 columns). Owner correction 2026-10-04 (Elijah Moreno): "Dataset and public
 registry identifiers stay; only proprietary identifiers (DUNS, Casino City) are
 removed." So DUNS numbers and Casino City identifiers and content (Casino City is
-not published at all; `DROP_COLS` in `code/cedar_publication.py` drops
-`casino_city_id` beside the DUNS columns) stay out, and every other identifier that
+not published at all; the customer-table rules in `server/cedar_press/customer_sheet.py`,
+vendored from Lumecon-data, drop Casino City columns beside the DUNS columns) stay out, and every other identifier that
 comes with a dataset (lobbying, deal, disclosure, award and event IDs, UEI, CAGE,
 EIN and the like) stays in. The one record-level hold is a specific record ruled to be
-attributed to the wrong entity (the mask in `code/cedar_publication.py`). Accuracy
+attributed to the wrong entity (the mask was in `code/cedar_publication.py`, kept at the
+tag `data-workspace-final`). Accuracy
 rules about how a figure may be totalled or described, and duplicate filings
 collapsed to one record, are correctness rules, not exclusions. What was lifted is
 in the 2026-10-04 entry at the end of this file.
@@ -106,9 +107,9 @@ with Tribal Business News: built by Lumecon and available exclusively through
 Tribal Business News, which handles subscriber plans (payment, renewals and
 issuance). There is no year gating: every subscriber gets full coverage.
 
-**The preserved Cedar data workspace.** Historical acquisition, adjudication and
-reproduction scripts remain under `code/`, with their evidence in `docs/` and
-`dist/customer/`. Current versioned release builds and researcher spreadsheets
+**The former Cedar data workspace.** Its historical acquisition, adjudication and
+reproduction scripts left the tree and are kept in git history at the tag
+`data-workspace-final`, with their evidence in `docs/`. Current versioned release builds and researcher spreadsheets
 are maintained in Lumecon-data. Press owns the shared consumer, publication
 filters and customer presentation. The journal below preserves earlier work.
 
@@ -119,8 +120,9 @@ filters and customer presentation. The journal below preserves earlier work.
 - The shared data foundation. That is
   [`Lumecon-data`](https://github.com/teim-team/Lumecon-data), the separate
   data repository decided on 2026-09-21. Its installed builders and spreadsheet
-  exporter now own current pinned releases. Historical scripts under `code/`
-  remain available for their documented reproduction and adjudication roles.
+  exporter now own current pinned releases. The historical scripts that were
+  under `code/` remain available, for their documented reproduction and
+  adjudication roles, in git history at the tag `data-workspace-final`.
 - The economic model. That is `teim-engine`, whose reference data this workspace
   reads under ADR-044 `reference_dataset` treatment — pinned, checksummed,
   versioned, never `data_snapshot`.
@@ -136,7 +138,7 @@ filters and customer presentation. The journal below preserves earlier work.
 |---|---|---|
 | Web client | Vite + React, deployed as a static build | `npm run dev`; `src/` |
 | API | FastAPI, Python | `server/` — see [`server/README.md`](server/README.md) |
-| Preserved data workspace | Historical Python scripts, numbered | `code/<n>_*.py` and `dist/customer/`; current release entrypoints are linked from [`docs/TERMINAL_HANDOFF.md`](docs/TERMINAL_HANDOFF.md). Scripts with zero references and no tracked output sit in `code/archive/` (moved 2026-10-02, never deleted; `code/archive/INDEX.md` names each; the rule and measurement are `server/tests/code_reference_graph.py`) |
+| Former data workspace | Historical Python scripts, numbered | Not in the tree: `code/<n>_*.py`, with `code/archive/` (18 unreferenced scripts moved there 2026-10-02), are at the tag `data-workspace-final`. Current release entrypoints are linked from [`docs/TERMINAL_HANDOFF.md`](docs/TERMINAL_HANDOFF.md). |
 
 Pointing `VITE_API_URL` at the API is the whole switch from the standalone build
 to a connected one. [`.env.example`](.env.example) lists every configuration
@@ -215,32 +217,18 @@ scripts is Windows-specific. The prose was not rewritten, because it is a
 ~9,000-line append-only journal and a global substitution would rewrite history
 that is deliberately never edited.
 
-**Before you write anything in the data workspace:**
-
-```
-python3 code/1050_preflight.py     # py -3 code/1050_preflight.py on Windows
-```
-
-It claims a script number **atomically** (`O_CREAT|O_EXCL` — the OS refuses the
-second caller, which `ls` cannot), prints the shared files that need marker
-discipline, reads `NEVER_RUN` **live** out of `cedar_pipeline.py` rather than
-from prose that goes stale, and gives you `ondisk <term>`.
+**The data workspace's scripts have left the tree**, `code/1050_preflight.py`
+among them, and are kept at the tag `data-workspace-final`. New data work goes to
+Lumecon-data.
 
 **Not verified in this environment, and why:**
 
-- `python3 code/1050_preflight.py` — it claims a script number as a side effect,
-  so running it to test it would consume one. It compiles cleanly
-  (`python -m py_compile`); the behaviour above is as documented, not as
-  observed here.
 - `npm run test:smoke` needs Playwright's browsers, which
   `npx playwright install --with-deps chromium` installs once (it ran on
   2026-09-23; see above). Note it **builds as well as tests**:
   `playwright.config.js` starts the server with `npm run build` configured
   with a throwaway demo account, which is why the deployed build is the last
   step of the CI job and not this one.
-- The pipeline scripts under `code/` — the pipeline reaches live sources and
-  rebuilds committed deliverables. They need Python 3.12 or later: under 3.11
-  some fail to compile.
 
 ## 4. Branch, commit and review conventions
 
@@ -282,9 +270,9 @@ from prose that goes stale, and gives you `ondisk <term>`.
 > what an independent re-execution says it is worth, and it should not be
 > weakened casually. It reads as absolute, but every other repository in the
 > estate expects an agent to commit its own work on a branch. **Treat the
-> no-commit rule as binding for any change that touches `code/`,
-> `dist/customer/` or a published number**, and route such work through
-> `513_handoffs.py` as that section describes. For documentation and web-client
+> no-commit rule as binding for any change that touches `dist/customer/` or a
+> published number**, and route such work as that section describes (its
+> `513_handoffs.py` ledger is at the tag `data-workspace-final`). For documentation and web-client
 > changes that assert nothing about the data, commit on a branch as above.
 > Whether that split is the right one is a human call and has not been made.
 
@@ -326,10 +314,9 @@ list, all of which this project has paid for:
 - **Never re-baseline to clear a red gate.** A gate you stepped around is a gate
   the next six sessions will also step around.
 - **Fix the generating pipeline, never the output CSV.**
-- **Check `cedar_pipeline.NEVER_RUN` before any rebuild**, and run
-  `python3 code/build.py plan <collection>` first, every time.
-- **Self-verification is refused.** A completion claim is a row in
-  `513_handoffs.py` with re-executable commands, run by a different session.
+- **Self-verification is refused.** A completion claim carries re-executable
+  commands, run by a different session (the workspace's `513_handoffs.py`
+  ledger is at the tag `data-workspace-final`).
 - **The copy rules apply to every string a reader can see.** No ampersands
   (grep both forms: `&amp;|[A-Za-z0-9] & [A-Za-z0-9]`); no em dashes in prose a
   reader sees, though a `—` standing in for an empty table cell is typography and
@@ -384,7 +371,7 @@ editing when several agents run at once.
 | [`teim-engine`](https://github.com/teim-team/teim-engine) | The model engine behind Cedar Impact (internal) | This workspace reads its reference data as `reference_dataset` per ADR-044 |
 | [`cedar`](https://github.com/teim-team/cedar) | Cedar, the AI economic analyst, as a service | No runtime dependency in either direction |
 | [`lumecon-website`](https://github.com/teim-team/lumecon-website) | The public site, and the **North Star** for product vocabulary | Product names and their one-line definitions follow its `AGENTS.md` |
-| [`Lumecon-data`](https://github.com/teim-team/Lumecon-data) | The shared Python data foundation behind Cedar Press, Cedar Grove, Cedar and Cedar Impact | Owns current versioned builders, verification and researcher spreadsheet exports. Press consumes exact pins; historical workspace scripts remain here for reproduction and adjudication. |
+| [`Lumecon-data`](https://github.com/teim-team/Lumecon-data) | The shared Python data foundation behind Cedar Press, Cedar Grove, Cedar and Cedar Impact | Owns current versioned builders, verification and researcher spreadsheet exports. Press consumes exact pins; the historical workspace scripts are at the tag `data-workspace-final` for reproduction and adjudication. |
 
 **Naming**, per the North Star: the impact product is **Cedar Impact**; "TEIM"
 survives as a repository, database and resource name only; "tribal economic

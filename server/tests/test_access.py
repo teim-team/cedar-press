@@ -239,9 +239,10 @@ class TestNothingTheClientOpensIsRefused(unittest.TestCase):
     Grove or Tree session was shown `gaming` as open and
     ``may_open("tree", "gaming")`` returned False.
 
-    Which side was wrong is settled by ``code/cedar_publication.py``, not by
-    symmetry. It holds three constants, verified in this tree rather than
-    assumed: ``STOREFRONT_SHELVES = ("standard", "pro")`` (twelve collections,
+    Which side was wrong was settled by the retired ``code/cedar_publication.py``
+    (at the tag ``data-workspace-final``), not by symmetry. It held three
+    constants, verified in that tree rather than assumed:
+    ``STOREFRONT_SHELVES = ("standard", "pro")`` (twelve collections,
     what a paying Cedar Press customer sees), ``GROVE_SHELVES = ("grove",)``
     (one, "built to the same standard, sold through Grove") and
     ``BUILD_SHELVES`` (the thirteen). `gaming` "ships through **Cedar Grove**,
@@ -320,7 +321,7 @@ class TestGroveDivergence(unittest.TestCase):
     were sold, and it has to say it in the vocabulary the Cedar data workspace
     already uses rather than a second one invented here.
 
-    That vocabulary is ``code/cedar_publication.py``: ``CUSTOMER_SHELVES =
+    That vocabulary came from the retired ``code/cedar_publication.py``: ``CUSTOMER_SHELVES =
     ("standard", "pro")`` are the shelves a paying Cedar Press customer sees,
     and the other shelf values -- ``grove``, ``withdrawn``, ``infrastructure``
     -- are each a different reason a measured collection is not on the

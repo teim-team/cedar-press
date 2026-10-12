@@ -29,8 +29,9 @@ function gitSha() {
 
 // Served at the domain root (cedarpress.ai), so base stays "/".
 //
-// The build output is `dist-site/`, not vite's default `dist/`. `dist/` is
-// the data workspace's gitignored output directory, and vite empties its
+// The build output is `dist-site/`, not vite's default `dist/`. `dist/` was
+// the retired data workspace's gitignored output directory and may still
+// exist in a checkout, and vite empties its
 // output directory before every build, so the two cannot share one. Until
 // 2026-10 this repository also tracked a sample bundle under `dist/`, and
 // with the default every `npm run build` (and `npm run test:smoke`, which

@@ -79,7 +79,6 @@ def measure() -> dict:
     overrides = read_json(ROOT / "data/cedar/explore.overrides.json")
     explore = read_json(ROOT / "data/cedar/explore.json")["tables"]
     need_manifest = read_json(ROOT / "data/cedar/need-reviewed-preview.json")["manifest"]
-    graph = read_json(ROOT / "docs/CODE_REFERENCE_GRAPH_2026-10-02.json")["summary"]
     census = read_json(ROOT / "docs/schema/inventory.json")["script_census"]
     ledger_schema = read_json(ROOT / "docs/schema/tables/cedar_ruling_ledger_consolidated.json")
     prior_rulings = read_json(ROOT / "docs/schema/tables/individual_native_prior_rulings.json")
@@ -337,7 +336,6 @@ def measure() -> dict:
                 c["examples"] for c in exclusion_pairs["columns"] if c["name"] == "identifier"
             ),
         },
-        "graph": graph,
         "census": {
             k: census[k]
             for k in ("scripts", "operational_role_counts", "maintenance_status_counts")
@@ -796,19 +794,17 @@ def rows(m: dict) -> list[dict]:
         )
     )
     # --- 14. Scripts
-    g = m["graph"]
     out.append(
         row(
             id="GAP-21",
-            collection="code/ / 618 numbered workspace scripts",
-            gate="reference graph: Makefile, CI, package.json, other script, product code, document, journal, loader by stem or number",
-            exists=f"{g['numbered_scripts']} numbered scripts ({g['pure_numeric_prefix']} numeric-prefixed, {g['letter_suffixed_prefix']} letter-suffixed; the brief's 606 counted "
-            f"non-Python files with a numeric prefix). Referenced: {g['referenced']} ({g['referenced_outside_journal']} outside AGENTS.md). Zero references: {g['zero_references']}.",
-            served=f"{g['in_code_archive']} moved to code/archive/ (zero references, no tracked artifact written, not ACTIVE, not NEVER_RUN, in no contract or ordering), "
-            f"indexed in code/archive/INDEX.md; census refreshed (python3.12 code/521_inventory.py scripts-only).",
-            gate_location="docs/CODE_REFERENCE_GRAPH_2026-10-02.json; server/tests/code_reference_graph.py; docs/schema/inventory.json script_census",
-            closing_condition="Closed for this pass; the test module proves every archived script still has zero references in the tree.",
-            evidence="server/tests/test_code_reference_graph.py (11 tests)",
+            collection="code/ (the retired data workspace's numbered scripts)",
+            gate="whether anything live needs the workspace scripts",
+            exists="None in the tree: the numbered scripts under code/, code/archive/ included, left the tree.",
+            served="Nothing served depends on them; every CI step and Lumecon-data's consumer checks pass without them. "
+            "They are kept in git history at the tag data-workspace-final.",
+            gate_location="the tag data-workspace-final",
+            closing_condition="Closed: the scripts left the tree.",
+            evidence="AGENTS.md section 2 (Former data workspace row); README.md (The data workspace)",
             classification="CODE",
             owner=None,
             question=None,
@@ -918,8 +914,8 @@ def render_markdown(reg: dict) -> str:
         f"CEV ids in the served Deals preview: {len(m['cev']['in_served_sample'])} of {len(m['cev']['ids'])}. "
         f"Retired Explore overrides: {m['overrides']['retired']}; live override keys: {m['overrides']['live_keys'] or 'none'}. "
         f"Lobbying `superseded_by` after the fix: `{m['overrides']['lobbying_superseded_by']}`. "
-        f"Scripts: {m['graph']['numbered_scripts']} numbered, {m['graph']['referenced']} referenced, {m['graph']['in_code_archive']} archived; "
-        f"census {m['census']['scripts']} scripts, maintenance {m['census']['maintenance_status_counts']}.",
+        f"Script census (before the workspace left the tree): {m['census']['scripts']} scripts, "
+        f"maintenance {m['census']['maintenance_status_counts']}.",
         "",
         "Not found, recorded so it is not re-investigated: no consumer file filters rows on `identity_scope` (GAP-12); no tracked file under "
         "`public/`, `data/cedar/`, `src/` or `server/cedar_press/` names a `CEV-*` id (GAP-05). GAP-11's 45 register names are no longer withheld: "

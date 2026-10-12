@@ -80,19 +80,6 @@ hooks:
 #   measure-samples     data/cedar/samples.published.json   from the git index
 #   record-release      data/cedar/releases.json            from the manifest
 #   seo-head            index.html's JSON-LD block and public/sitemap.xml from the catalog
-#
-# Deliberately absent (2026-09-22): the data workspace's three drift checks,
-# `code/500_build_architecture_map.py --check`,
-# `code/374_build_cedar_taxonomy_export.py --check` and
-# `code/512_build_dataset_contracts.py verify`. Each measures data/clean,
-# data/spine or dist/ tables that git does not track (the workspace is
-# 38 GB), so a CI checkout and the owner's tree can never agree on their
-# output: 374 aborts on the missing spine, 512 reports every collection as
-# claiming zero tables, and 500 -- current today only because the tracked
-# map was itself rendered from a data-less checkout -- would go red the first
-# time it was regenerated beside real data. They run by hand, on the machine
-# that holds the data. `code/1050_preflight.py` is not a check at all: it
-# claims a script number as a side effect of running.
 check-generated:
 	node scripts/docs-markdown.mjs --kind all --check
 	node scripts/derive-explore.mjs --check

@@ -36,7 +36,7 @@
 // row is marked withheld, the name column is masked in the table, the
 // record, the search and the export, and the sample that carried it is
 // struck by the importer before it becomes a public file. Since the owner
-// ruling of 2026-10-02 (code/cedar_domain.py: an individually Native-owned
+// ruling of 2026-10-02 (the retired code/cedar_domain.py: an individually Native-owned
 // firm is a business entity whatever it is named after, and its name is a
 // public business record) the register withholds no name, so this path
 // carries nothing today; it stays so a future withholding reads the same.
@@ -611,11 +611,11 @@ const BILL_TYPES = {
  *   congress_bill              a congress.gov bill page from congress, type
  *                              and number.
  *   federal_register_document  a federalregister.gov page from the document
- *                              number (the pattern code/130 and code/1187
- *                              write as their own source_url).
+ *                              number (the pattern the retired code/130 and
+ *                              code/1187 wrote as their own source_url).
  *   propublica_ein             a ProPublica Nonprofit Explorer page from the
- *                              EIN, leading zeros dropped (code/33 writes the
- *                              same `propublica_url`).
+ *                              EIN, leading zeros dropped (the retired code/33
+ *                              wrote the same `propublica_url`).
  */
 function builtSource(row, contract) {
   const builder = contract?.source_builder;

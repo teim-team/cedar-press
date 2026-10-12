@@ -91,9 +91,6 @@ class RowShape(unittest.TestCase):
         self.assertEqual(m["overrides"]["live_keys"], [])
         self.assertEqual(m["overrides"]["retired"], 27)
         self.assertEqual(m["overrides"]["lobbying_superseded_by"], "superseded_by_record_id")
-        self.assertEqual(
-            m["graph"]["in_code_archive"], len(list((reg.ROOT / "code/archive").glob("*.py")))
-        )
 
 
 if __name__ == "__main__":

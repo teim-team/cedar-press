@@ -219,7 +219,8 @@ public site and the reference for product vocabulary) and
 Python data foundation behind Cedar Press, Cedar Grove, Cedar and Cedar
 Impact). `Lumecon-data` is the separate data repository the team decided on
 2026-09-21 for extraction and harmonization; it exists as of 2026-09-23, and
-the pipeline in `code/` is still here. Product names and
+the pipeline that was in `code/` has left this repository (it is kept in git
+history at the tag `data-workspace-final`). Product names and
 their one-line definitions follow the website's `AGENTS.md`, which is the
 North Star: where this repository and the website disagree about what
 something is called, the website wins. The vocabulary rule that matters most
@@ -262,7 +263,9 @@ Please report vulnerabilities as described in [SECURITY.md](SECURITY.md).
 
 ## The data workspace
 
-This repository retains the historical Cedar data workspace, merged on 2026-09-02.
+This repository held the Cedar data workspace from its merge on 2026-09-02. Its
+scripts (`code/`) have left the tree and are kept in git history at the tag
+`data-workspace-final`.
 Current versioned releases and researcher spreadsheets are built in Lumecon-data;
 Press consumes explicit release pins. Use these entry points:
 
@@ -277,11 +280,10 @@ Press consumes explicit release pins. Use these entry points:
 | Measured map of the collections | [`docs/DATA_ARCHITECTURE.md`](docs/DATA_ARCHITECTURE.md) |
 | Historical combined deliverables | `dist/customer/` preserves workspace CSVs, codebooks and notes; it is not the connected release authority. |
 | Build current researcher deliverables | The producer's installed `lumecon-data spreadsheet` command with explicit store, collection and release pins; see the [spreadsheet guide](https://github.com/teim-team/Lumecon-data/blob/codex/convergence-packet-guard-20260928/README.md#one-living-dataset-one-spreadsheet). The Press API consumes those verified releases. |
-| Historical workspace reproduction | `code/1137_customer_dataset_combine.py` and `code/846_session_audit.py` retain their original scopes and safety gates. Their prior results are historical evidence, not current release acceptance. |
+| Historical workspace reproduction | The workspace scripts, `code/1137_customer_dataset_combine.py` and `code/846_session_audit.py` among them, are at the tag `data-workspace-final`. Their prior results are historical evidence, not current release acceptance. |
 
-`py -3` is the Windows launcher; on Linux and macOS use `python3`, which
-must be 3.12 or later (some scripts, `code/1137_customer_dataset_combine.py`
-among them, use 3.12 f-string syntax and do not compile under 3.11).
+`py -3` is the Windows launcher; on Linux and macOS use `python3` (3.12, the
+version CI uses).
 
 The two trees were developed independently and share no history; the merge that
 brought them together is a deliberate `--allow-unrelated-histories` join, and

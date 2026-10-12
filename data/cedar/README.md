@@ -208,8 +208,8 @@ row count, which can be under ten (Federal Register 5, PLOT 3): a button called
 exercise is about. The raw producer samples sit under
 `data/cedar/samples/<collection>/spreadsheet__10.csv` and are not served.
 
-**The legacy full spreadsheets are referenced, never committed.** 1135 also writes
-`dist/review/spreadsheets/`, measured at **6.2 GB**, with single tables over
+**The legacy full spreadsheets are referenced, never committed.** The retired
+`code/1135` (at the tag `data-workspace-final`) also wrote `dist/review/spreadsheets/`, measured at **6.2 GB**, with single tables over
 GitHub's 100 MB limit. They are not here. Every table in the manifest carries
 its row count, its split (by fiscal year where the table has one), its file
 count and its largest file in MB, and `full_files.served` is `false`. That is

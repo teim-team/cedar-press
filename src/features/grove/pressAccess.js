@@ -136,7 +136,7 @@ export function shelfReach(user) {
  * shelf, for the day one returns.
  *
  * The client is the wrong side, and the reason is a product ruling rather than
- * a symmetry. `code/cedar_publication.py` splits the shelves in two:
+ * a symmetry. The retired `code/cedar_publication.py` split the shelves in two:
  * STOREFRONT_SHELVES ("standard", "pro") is what a paying Cedar Press
  * customer sees and GROVE_SHELVES ("grove") is the one built to the same
  * standard and sold through Cedar Grove; BUILD_SHELVES is the thirteen.

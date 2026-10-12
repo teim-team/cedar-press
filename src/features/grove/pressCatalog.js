@@ -14,7 +14,7 @@
  *
  * The Press/Grove content split is stated in one vocabulary, the Cedar data
  * workspace's: shelves `standard` and `pro` are what a Cedar Press customer
- * sees (`STOREFRONT_SHELVES` in `code/cedar_publication.py`), and shelf
+ * sees (`STOREFRONT_SHELVES`, first defined in the retired `code/cedar_publication.py`), and shelf
  * `grove` is where a collection Grove carries and Press does not would sit.
  * Nothing sits there today. Gaming Intelligence did, shown on the shelf as a
  * Grove-exclusive preview, and the owner withdrew that promise on 2026-09-04
@@ -77,7 +77,7 @@
  */
 
 /** The shelves a Cedar Press subscription can reach, in the workspace's own
- *  vocabulary (`STOREFRONT_SHELVES` in `code/cedar_publication.py`). A
+ *  vocabulary (`STOREFRONT_SHELVES`, first defined in the retired `code/cedar_publication.py`). A
  *  collection on any other shelf is not sold here, whatever the plan. */
 export const STOREFRONT_SHELVES = Object.freeze(["standard", "pro"]);
 

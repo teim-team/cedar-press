@@ -243,14 +243,14 @@ Classifications: **CODE** (fixed or fixable here, with a test), **EVIDENCE_IN_RE
 - **Classification:** DECISION; owner Havala Hanson (@Havala-Hanson), Cedar Grove and Cedar Press including their data
 - **Question:** Which Giving and PLOT releases (by release id and manifest digest) are the production pins, and in which review environment is that approval recorded?
 
-### GAP-21: code/ / 618 numbered workspace scripts
+### GAP-21: code/ (the retired data workspace's numbered scripts)
 
-- **Gate:** reference graph: Makefile, CI, package.json, other script, product code, document, journal, loader by stem or number
-- **Exists:** 621 numbered scripts (604 numeric-prefixed, 17 letter-suffixed; the brief's 606 counted non-Python files with a numeric prefix). Referenced: 603 (600 outside AGENTS.md). Zero references: 18.
-- **Served:** 18 moved to code/archive/ (zero references, no tracked artifact written, not ACTIVE, not NEVER_RUN, in no contract or ordering), indexed in code/archive/INDEX.md; census refreshed (python3.12 code/521_inventory.py scripts-only).
-- **Gate location:** docs/CODE_REFERENCE_GRAPH_2026-10-02.json; server/tests/code_reference_graph.py; docs/schema/inventory.json script_census
-- **Closing condition:** Closed for this pass; the test module proves every archived script still has zero references in the tree.
-- **Evidence in the repository:** server/tests/test_code_reference_graph.py (11 tests)
+- **Gate:** whether anything live needs the workspace scripts
+- **Exists:** None in the tree: the numbered scripts under code/, code/archive/ included, left the tree.
+- **Served:** Nothing served depends on them; every CI step and Lumecon-data's consumer checks pass without them. They are kept in git history at the tag data-workspace-final.
+- **Gate location:** the tag data-workspace-final
+- **Closing condition:** Closed: the scripts left the tree.
+- **Evidence in the repository:** AGENTS.md section 2 (Former data workspace row); README.md (The data workspace)
 - **Classification:** CODE
 
 ### GAP-22: owned / display name
@@ -283,6 +283,6 @@ Classifications: **CODE** (fixed or fixable here, with a test), **EVIDENCE_IN_RE
 | plot | 151,715 | no extract | no extract |
 | subcontracting | 70,054 | subawards.csv 89,809 | source_dataset: different table |
 
-Withheld register names: 0 ({}). CEV ids in the served Deals preview: 0 of 10. Retired Explore overrides: 27; live override keys: none. Lobbying `superseded_by` after the fix: `superseded_by_record_id`. Scripts: 621 numbered, 603 referenced, 18 archived; census 691 scripts, maintenance {'ACTIVE': 167, 'DUPLICATE': 0, 'SUPERSEDED': 0, 'HISTORICAL-RETAIN': 38, 'SAFE-DELETE-CANDIDATE': 0, 'REQUIRES-REVIEW': 486}.
+Withheld register names: 0 ({}). CEV ids in the served Deals preview: 0 of 10. Retired Explore overrides: 27; live override keys: none. Lobbying `superseded_by` after the fix: `superseded_by_record_id`. Script census (before the workspace left the tree): 691 scripts, maintenance {'ACTIVE': 167, 'DUPLICATE': 0, 'SUPERSEDED': 0, 'HISTORICAL-RETAIN': 38, 'SAFE-DELETE-CANDIDATE': 0, 'REQUIRES-REVIEW': 486}.
 
 Not found, recorded so it is not re-investigated: no consumer file filters rows on `identity_scope` (GAP-12); no tracked file under `public/`, `data/cedar/`, `src/` or `server/cedar_press/` names a `CEV-*` id (GAP-05). GAP-11's 45 register names are no longer withheld: the owner ruled on 2026-10-02 that they are business records, and the producer rebuild that applies it is pending.

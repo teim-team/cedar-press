@@ -790,7 +790,7 @@ def collection_csv(dataset_id: str) -> str | None:
     """The rows behind a dataset card's Download button.
 
     The collection's flagship table, ten real rows of it, straight from
-    ``code/1135_full_dataset_review_bundle.py``. This used to be the figure's
+    the retired ``code/1135_full_dataset_review_bundle.py``. This used to be the figure's
     own points -- five demonstration bars dressed as a release file. What
     downloads now is data.
 
