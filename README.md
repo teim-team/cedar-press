@@ -272,7 +272,7 @@ Press consumes explicit release pins. Use these entry points:
 | | |
 |---|---|
 | Consumer continuation | [`docs/TERMINAL_HANDOFF.md`](docs/TERMINAL_HANDOFF.md): current workflow, maintained authorities and archived checkpoints. |
-| Historical workspace orientation | [`START_HERE.md`](START_HERE.md); its dated counts and assignments are not current release evidence. |
+| Historical workspace orientation | `START_HERE.md`, at the tag `data-workspace-final`; its dated counts and assignments are not current release evidence. |
 | Rules for agents working in it | [`AGENTS.md`](AGENTS.md) |
 | Current release evidence | [Producer convergence checkpoint](https://github.com/teim-team/Lumecon-data/blob/codex/convergence-packet-guard-20260928/docs/cedar-convergence.md) and its linked dependency ledger. The older `docs/DATASET_READINESS.md` and `docs/TWELVE_DATASET_PLAN.md`, which describe the historical workspace, are at the tag `data-workspace-final`. |
 | Past handoffs, kept as records | [`docs/handoffs/`](docs/handoffs/) keeps the two still cited; the rest are at the tag `data-workspace-final`. Each carries a banner saying what superseded it |

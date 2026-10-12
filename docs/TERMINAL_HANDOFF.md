@@ -45,10 +45,10 @@ The [archived terminal checkpoints](handoffs/2026-10-01-terminal-history.md)
 preserve the complete former handoff, including prior dates, measurements,
 permissions and review-batch notes. They are historical observations, not live
 writer assignments or a substitute for the current user instruction.
-[START_HERE.md](../START_HERE.md) and the append-only part of AGENTS.md preserve
-workspace history. The numbered builders remain available for their documented
-reproduction or adjudication role; do not use a historical build chain as the
-current release/export entrypoint.
+START_HERE.md, the former journal in AGENTS.md and the numbered builders
+preserve workspace history at the tag `data-workspace-final`, for their
+documented reproduction or adjudication role; do not use a historical build
+chain as the current release/export entrypoint.
 
 Retain existing owner decisions, stable IDs and source receipts. Engineering
 fixes, schema repair, infrastructure and missing research stay with the coding
