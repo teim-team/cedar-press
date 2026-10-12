@@ -14,7 +14,10 @@ committed data file under ``dist/``, ``public/data/`` and
 ``data/cedar/samples/`` (plus ``dist-site/`` when built). The column rule is
 the live ``customer_sheet.is_private_identifier``, the one that strips the
 downloads; the DUNS-subject row check is ``sample_checks.duns_subject``. The
-contact-data rules of 895854c are restored separately and tested beside them.
+committed-data scan also refuses a Casino City column
+(``customer_sheet.is_proprietary_identifier``), the other licensed identifier
+the policy names. The contact-data rules of 895854c are restored separately
+and tested beside them.
 """
 
 from __future__ import annotations
@@ -76,12 +79,19 @@ class CommittedDataCarriesNoDuns(unittest.TestCase):
             text = path.read_text(encoding="utf-8-sig", errors="replace")
             reader = csv.DictReader(io.StringIO(text, newline=""))
             rows = list(reader)
-            bad = [c for c in reader.fieldnames or [] if customer_sheet.is_private_identifier(c)]
+            bad = [
+                c
+                for c in reader.fieldnames or []
+                if customer_sheet.is_private_identifier(c)
+                or customer_sheet.is_proprietary_identifier(c)
+            ]
             if bad:
                 hits.append(f"{path.relative_to(ROOT)}: {bad}")
             if any(sample_checks.duns_subject({k: v for k, v in r.items() if k}) for r in rows):
                 hits.append(f"{path.relative_to(ROOT)}: a row whose subject is a DUNS")
-        self.assertEqual(hits, [], "remove the DUNS column or row where the file is made")
+        self.assertEqual(
+            hits, [], "remove the DUNS or Casino City column, or the DUNS row, at its source"
+        )
 
 
 if __name__ == "__main__":
