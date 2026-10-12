@@ -1,7 +1,3 @@
-# Content-addressed R7 audit artifacts (written by the retired code/1188). Bundle ids and pointer hashes
-# are computed over exact bytes, so git must never convert their line endings.
-docs/imports/r7_audit/** -text
-
 # Generated text is byte-compared by make check-generated on every OS.
 # Keep only these declared outputs LF; do not renormalize the data tree.
 docs/DATASET_CODEBOOK.md text eol=lf

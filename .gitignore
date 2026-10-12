@@ -4,8 +4,8 @@
 # This repository holds TWO trees that were developed separately and
 # merged on 2026-09-02:
 #   * the product site (Vite + React, server/, src/, tests/)
-#   * the data workspace (data/, dist/, review/; its scripts, code/, left the
-#     tree and are kept at the tag data-workspace-final)
+#   * the data workspace (data/, dist/; its scripts, code/, and its review/
+#     files left the tree and are kept at the tag data-workspace-final)
 # Both sections are kept whole. Neither tree's rules are safe to prune
 # without reading the tree they belong to - the data workspace's rules in
 # particular carry deliberate `!` un-ignores for the two spine files that
@@ -75,14 +75,10 @@ cedar_source_registry/research/white_earth_*/
 /data/*
 dist/
 logs/
-# `review/*` and not `review/`, because git cannot re-include anything under
-# an excluded DIRECTORY - the negation below would be silently inert.
-review/*
-# ...except the fixtures. A check whose proof is not in the repository is a
-# check nobody can re-run, and this project's standard is that an invariant is
-# proven by injecting the violation rather than asserted. They are code, not
-# review output.
-!review/fixtures_D/
+# The retired workspace's local review output. Its tracked files (the owner
+# decision queue, the fixtures) left the tree and are kept at the tag
+# data-workspace-final.
+review/
 graveyard/
 
 # --- content, by extension, at any depth ---
@@ -242,15 +238,6 @@ data/restricted/
 # Regenerable caches (name says so).
 _profile_cache.json
 *_cache.json
-
-# The consolidated owner-decision queue is a curated document, not scratch -
-# its history shows what was asked and when it was answered.
-!review/OWNER_DECISION_QUEUE.md
-# Curated launch-control input to the existing review builder; HTML and receipts stay local.
-!review/launch_control.json
-# Attribution corrections for the producer, in its pending-items format
-# (docs/handoffs/CODEX_LANDING_FOLLOWUPS_2026-10-06.md section 8).
-!review/attribution_pending_items_2026-10-06.json
 
 # Agent worktrees are private scratch, never part of the tree. Committed as a
 # gitlink with no .gitmodules entry they become an unusable pseudo-submodule

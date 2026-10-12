@@ -144,7 +144,7 @@ Classifications: **CODE** (fixed or fixable here, with a test), **EVIDENCE_IN_RE
 - **Served:** public/data/cedar/register.json carries every name (withheld_names = 0); the viewer's null-name masking has nothing to mask. The producer's register CSV (data/clean/individual_native_firm_register.csv, workspace) still carries publish_name = 0 and the six native-owned-businesses samples struck on 2026-09-05 are still absent until the rebuild.
 - **Gate location:** code/cedar_domain.py may_publish_individual_native_field; code/241 publish_name / publish_federal_identifier; scripts/derive-explore.mjs deriveRegister; scripts/import_cedar_manifest.py sample_violations (reads the rule)
 - **Closing condition:** Workstation rebuild: python3 code/241_promote_individual_native_firms_in_place.py, the spine export, node scripts/derive-explore.mjs, then the importer re-admits the struck samples; the register CSV then reads publish_name = 1 on every row.
-- **Evidence in the repository:** Tracked documents naming any uid of the class: ['docs/ENTITY_TYPES.md']. The ruling and the reversed text are recorded in docs/REVIEW_STATUS.md, 'Owner ruling: individually owned firm records publish', 2026-10-02.
+- **Evidence in the repository:** Tracked documents naming any uid of the class: none. The ruling and the reversed text are recorded in docs/REVIEW_STATUS.md, 'Owner ruling: individually owned firm records publish', 2026-10-02.
 - **Classification:** RULED_REBUILD_PENDING
 
 ### GAP-12: owned / identity_scope

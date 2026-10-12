@@ -5,10 +5,11 @@ who wrote the line, and breaks when the work moves to another machine or to
 CI. Living documents name places by role (``<cedar-press checkout>``,
 ``<checkpoint root>``) and code reads them from arguments or the environment.
 
-The files below predate this rule: legacy ``code/`` scripts that are being
-retired into Lumecon-data producers, dated build logs, and content-addressed
-release artifacts whose bytes must not change. The list may only shrink. A
-file that stops matching must leave it, so the baseline never hides a regression.
+The file below predates this rule: the retired data workspace's script
+inventory, which the release-gap register still reads. The workspace's scripts,
+build logs and release artifacts that also carried such paths left the tree and
+are kept at the tag ``data-workspace-final``. The list may only shrink. A file
+that stops matching must leave it, so the baseline never hides a regression.
 """
 
 from __future__ import annotations
@@ -27,41 +28,6 @@ MACHINE_PATH = re.compile(
 )
 THIS_FILE = "server/tests/test_portable_paths.py"
 GRANDFATHERED = frozenset({
-    "Federal Spending/code/fed_funding_do_file.do",
-    "Federal Spending/code/fed_funding_do_file_corrtd.do",
-    "docs/ANCSA_PORTAL_V2_LOG.md",
-    "docs/ANNUAL_REPORT_ORG_DISCOVERY_LOG.md",
-    "docs/ARCHITECTURE_DECISIONS.md",
-    "docs/BILLS_VOTES_BUILD_LOG_2026-08-05.md",
-    "docs/COMPACTS_BUILD_LOG_2026-08-05.md",
-    "docs/COMPETITIVE_POSITION.md",
-    "docs/DEWEY_BRIEF_FOR_ANOTHER_INSTANCE.md",
-    "docs/DISCOVERY_GAP.json",
-    "docs/FEDERAL_FUNDING_RECONCILIATION_2026-08-05.md",
-    "docs/FPDS_HIERARCHY_BUILD_LOG_2026-08-05.md",
-    "docs/GAMING_SOURCE_AUDIT_2026-08-26.md",
-    "docs/NEED_BUILD_LOG.md",
-    "docs/PRE2007_FPDS_VS_PRIME_OVERLAP.json",
-    "docs/PRE2007_IDENTIFIER_BY_AGENCY.json",
-    "docs/PRE2007_IDENTIFIER_SURFACE.json",
-    "docs/RELEASE_REPLAY_LOG.md",
-    "docs/SHIP_GAP_REPORT.json",
-    "docs/SOURCE_FRESHNESS.json",
-    "docs/UNFINISHED_WORK_AUDIT.md",
-    "docs/WS2_GRAIN_AND_REBUILD.md",
-    "docs/lint_bug_classes.json",
-    "docs/methodology/legislation.md",
-    "docs/releases/nagpra-0de7096/manifest.json",
-    "docs/releases/nagpra-0de7096/replay_compare.json",
-    "docs/releases/nagpra-6c92a41/manifest.json",
-    "docs/releases/nagpra-6c92a41/replay_compare.json",
-    "docs/releases/native-owned-businesses-6c92a41/manifest.json",
-    "docs/releases/native-owned-businesses-6c92a41/replay_compare.json",
-    "docs/releases/natural-resources-6c92a41/manifest.json",
-    "docs/releases/natural-resources-6c92a41/replay_compare.json",
-    "docs/releases/subcontracting-6c92a41/manifest.json",
-    "docs/releases/subcontracting-6c92a41/replay_compare.json",
-    "docs/schema/c8_rebuild_proof.json",
     "docs/schema/inventory.json",
 })
 

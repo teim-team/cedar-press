@@ -109,7 +109,7 @@ issuance). There is no year gating: every subscriber gets full coverage.
 
 **The former Cedar data workspace.** Its historical acquisition, adjudication and
 reproduction scripts left the tree and are kept in git history at the tag
-`data-workspace-final`, with their evidence in `docs/`. Current versioned release builds and researcher spreadsheets
+`data-workspace-final`, with the build logs and evidence that were in `docs/`. Current versioned release builds and researcher spreadsheets
 are maintained in Lumecon-data. Press owns the shared consumer, publication
 filters and customer presentation. The journal below preserves earlier work.
 
@@ -143,9 +143,9 @@ filters and customer presentation. The journal below preserves earlier work.
 Pointing `VITE_API_URL` at the API is the whole switch from the standalone build
 to a connected one. [`.env.example`](.env.example) lists every configuration
 value. [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) describes the **web
-client**; [`docs/DATA_ARCHITECTURE.md`](docs/DATA_ARCHITECTURE.md) is the
-generated map of the **data collections**. They are different documents about
-different trees; do not read one for the other.
+client**. The generated map of the former workspace's **data collections**,
+`docs/DATA_ARCHITECTURE.md`, is at the tag `data-workspace-final` with the
+scripts that wrote it.
 
 `.teim-rd` is a CSS class root inherited from the product's design system. It is
 a contract, not a label anyone reads; leave it alone.
@@ -355,11 +355,8 @@ never rewrite it, put the *rule* in the heading so a grep finds it, and if the
 finding is a trap the next agent will hit blind, add a row to
 `docs/AGENT_FIELD_GUIDE.md` too.
 
-Three other places absorb specific kinds of update, so they do not all land
-here: `docs/TERMINAL_HANDOFF.md` is rewritten in place and is never a journal;
-`docs/DATASET_READINESS.md` is regenerated, never hand-edited; and
-`docs/ARCHITECTURE_DECISIONS.md` is where file ownership is declared before
-editing when several agents run at once.
+One other place absorbs a specific kind of update, so it does not land here:
+`docs/TERMINAL_HANDOFF.md` is rewritten in place and is never a journal.
 
 ## 8. Cross-repo links and status
 

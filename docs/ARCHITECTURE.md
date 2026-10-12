@@ -64,9 +64,9 @@ git ls-files src/<dir>/grove                                   # files to move
 | | |
 |---|---|
 | Files to move | 189 — `features/grove` 141, `pages/grove` 45, `components/grove` 1, `styles/grove` 2 |
-| Path references to rewrite | 496, across 109 files |
+| Path references to rewrite | 475, across 101 files |
 | Referencing files inside `src/` | 56 — `pages/` 37, `features/` 15, `context/` 2, `components/` 1, `main.jsx` 1 |
-| Referencing files outside `src/` | 53 — `server/cedar_press/` 8, `scripts/` 8, `docs/` 22, `server/tests/` 6, `tests/` 3, `data/` 2, `.github/` 1, `.env.example` 1, `AGENTS.md` 1, `eslint.config.js` 1 |
+| Referencing files outside `src/` | 45 — `server/cedar_press/` 8, `scripts/` 8, `docs/` 14, `server/tests/` 6, `tests/` 3, `data/` 2, `.github/` 1, `.env.example` 1, `AGENTS.md` 1, `eslint.config.js` 1 |
 
 The reason this was deferred has expired. The table used to carry a fifth row
 — twelve files also touched by an open PR, which would each have become a
@@ -79,16 +79,13 @@ as its own commit — moving the four directories to `press/` and rewriting the
 references in one pass — for two reasons that are about review rather than
 about risk.
 
-First, "did all 496 references get rewritten?" is a question the build, the
+First, "did all 475 references get rewritten?" is a question the build, the
 suites and the smoke run answer, and not one a reader can answer from a diff.
 Folded into a change that also alters behaviour or prose, the rename hides
 that change instead of accompanying it.
 
 Second, the rename reaches past the site, and part of what it touches no build
-would catch. One of the referencing files under `docs/`, `DATA_ARCHITECTURE.md`,
-carries a "do not hand-edit" banner from the retired
-`code/500_build_architecture_map.py` (at the tag `data-workspace-final`). The rest of what a
-build cannot see is prose — Markdown, comments, `.env.example` — which is why
+would catch. What a build cannot see is prose — Markdown, comments, `.env.example` — which is why
 `test_rename_plan.py` counts textual occurrences rather than imports. On the
 day the four directories move, the same measurement turns into the stale-path
 sweep and names every file that still spells the old one.

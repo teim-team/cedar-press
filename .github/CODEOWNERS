@@ -25,7 +25,6 @@
 /data/                              @Havala-Hanson
 /public/data/                       @Havala-Hanson
 /docs/schema/                       @Havala-Hanson
-/docs/codebooks/                    @Havala-Hanson
 
 # Security: CI, dependency policy and the security policy itself.
 /.github/                           @bkim28964 @Havala-Hanson
