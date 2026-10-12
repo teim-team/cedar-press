@@ -55,8 +55,6 @@ class NoPublicationHold(unittest.TestCase):
 
     def test_no_need_cleared_set_gates_publication(self):
         self.assertFalse((ROOT / "data" / "cedar" / "need_cleared_enterprise_ids.json").exists())
-        source = (ROOT / "code" / "cedar_publication.py").read_text(encoding="utf-8")
-        self.assertNotIn("need_row_cleared", source)
 
 
 if __name__ == "__main__":

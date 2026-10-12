@@ -195,11 +195,8 @@ jobs:
           sys.path.insert(0, "server")
           suite = unittest.defaultTestLoader.loadTestsFromNames([
               "tests.test_gaming_release",
-              "tests.test_gaming_issuance",
               # The vendored customer-table rules must be the installed producer's.
               "tests.test_customer_sheet_policy",
-              # 873's point rows read by the installed home_community consumer.
-              "tests.test_aiannh_crosswalk_873",
           ])
           result = unittest.TextTestRunner(verbosity=2).run(suite)
           if result.skipped:

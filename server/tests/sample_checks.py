@@ -1,4 +1,4 @@
-"""Text checks on the committed raw samples under ``data/cedar/samples/``.
+"""Text checks on the committed data files.
 
 ``scrub_local_paths`` lived in ``scripts/import_cedar_manifest.py``, the
 retired importer that once copied the samples here. The samples now come from
@@ -6,6 +6,11 @@ verified releases (``scripts/stage_verified_previews.py``), and this is the one
 check from the importer still worth running on them: a local filesystem path
 must never reach a committed sample. ``test_collection.py`` proves it fires on
 planted paths and runs it over every committed sample.
+
+``duns_subject`` lived in the retired ``code/cedar_publication.py`` as part of
+``row_ok``. No live module catches a DUNS that is a row's subject under a
+generic column name, so the check lives here; ``test_duns_never_ships.py``
+proves it fires and runs it over every committed data file.
 """
 
 from __future__ import annotations
@@ -41,3 +46,29 @@ def scrub_local_paths(text: str) -> str:
     text = ON_THIS_MACHINE.sub("", text)
     text = text.replace("the owner's research dataset", "Lumecon research dataset")
     return LOCAL_PATH.sub(LOCAL_PATH_REMOVED, text)
+
+
+#: A DUNS carried as a VALUE: a ``DUNS:<nine digits>`` node key, or the
+#: identifier itself beside its scheme name.
+DUNS_VALUE = re.compile(r"(?i)\bduns\W{0,3}\d{9}\b")
+#: A generic identifier pair whose scheme column ends in one of these names.
+DUNS_TYPE_SUFFIXES = ("identifier_type", "id_type")
+
+
+def duns_subject(row: dict) -> bool:
+    """Whether a DUNS is what this row is about.
+
+    Column drops cannot reach it: the identifier sits under a generic name
+    like ``identifier``, with ``identifier_type`` = ``DUNS``, or as a
+    ``DUNS:000000000`` node key. A row like that is withheld whole, because
+    masking the identifier leaves nothing.
+    """
+    for col, value in row.items():
+        v = value.strip() if isinstance(value, str) else ""
+        if not v:
+            continue
+        if (col or "").lower().endswith(DUNS_TYPE_SUFFIXES) and v.lower() == "duns":
+            return True
+        if DUNS_VALUE.search(v):
+            return True
+    return False

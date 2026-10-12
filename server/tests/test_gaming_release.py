@@ -541,8 +541,10 @@ class ZeroCanonicalDuplicationTest(unittest.TestCase):
         self.assertEqual(len(gaming), 1)
         self.assertEqual([t["table"] for t in gaming[0]["tables"] if t.get("grove_component")], [])
         self.assertEqual(len(gaming[0]["tables"]), gaming[0]["n_tables"])
-        # Build entry points: no Gaming producer command survives.
-        build = (ROOT / "code/build.py").read_text(encoding="utf-8")
+        # Build entry points: no Gaming producer command survives. The retired
+        # workspace may be absent; if present it carries no Grove command.
+        build_path = ROOT / "code/build.py"
+        build = build_path.read_text(encoding="utf-8") if build_path.exists() else ""
         for command in (
             "grove-contracts",
             "grove-leak-gate",
@@ -550,7 +552,8 @@ class ZeroCanonicalDuplicationTest(unittest.TestCase):
             "cmd_grove_candidate",
         ):
             self.assertNotIn(command, build)
-        pipeline = (ROOT / "code/cedar_pipeline.py").read_text(encoding="utf-8")
+        pipeline_path = ROOT / "code/cedar_pipeline.py"
+        pipeline = pipeline_path.read_text(encoding="utf-8") if pipeline_path.exists() else ""
         self.assertNotIn("GROVE_COMPONENTS", pipeline)
         self.assertNotIn('"gaming"', pipeline)
 

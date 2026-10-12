@@ -832,14 +832,18 @@ const OPENING_PLURAL = FIELD_MAP_JSON.opening.plural;
 const PROHIBITED_PUBLIC_COLUMN = /duns|neid|cicd|casino[ _-]?city|tribe_id|_candidate|proposed|resolver|built_date|fetched_date|retrieved_date|promoted_date|artifact_mtime/i;
 // Columns the publish-time presentation layer ADDS to a flagship before the
 // field map projects it, so the map must decide them although the raw sample
-// (an excerpt of the canonical flagship) never carries them. Read from
-// cedar_publication.py itself, never restated: deals_public_view appends
-// DEALS_PRESENTATION_COLUMNS and the `research_note` target they qualify.
-const PUBLICATION_SOURCE = readFileSync(fileURLToPath(new URL("../../../code/cedar_publication.py", import.meta.url)), "utf8");
-const DEALS_PRESENTATION_COLUMNS = [...(/^DEALS_PRESENTATION_COLUMNS = \(([^)]*)\)/m.exec(PUBLICATION_SOURCE)?.[1] ?? "").matchAll(/"([^"]+)"/g)].map((m) => m[1]);
+// (an excerpt of the canonical flagship) never carries them. Read from the
+// field map itself, never restated: the Deals columns it derives into
+// `research_note` that the raw sample lacks (Notes also feeds research_note
+// but is a column of the sample), plus the `research_note` target they qualify.
+const DEALS_FLAGSHIP = "deals/deals_classified";
+const DEALS_SAMPLE_COLUMNS = load(DEALS_FLAGSHIP).columns;
+const DEALS_PRESENTATION_COLUMNS = FIELD_MAP[DEALS_FLAGSHIP].fields
+  .filter((f) => f.decision === "derive" && f.to === "research_note" && !DEALS_SAMPLE_COLUMNS.includes(f.column))
+  .map((f) => f.column);
 const PUBLISH_TIME_COLUMNS = { deals: [...DEALS_PRESENTATION_COLUMNS, "research_note"] };
 
-test("the publish-time deals columns are read from cedar_publication.py, not guessed", () => {
+test("the publish-time deals columns are read from the field map, not guessed", () => {
   assert.deepEqual(DEALS_PRESENTATION_COLUMNS, ["Caveat", "Candidate_Status"]);
 });
 

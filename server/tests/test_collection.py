@@ -702,6 +702,21 @@ class TestManifestAndSamples(unittest.TestCase):
                     f"data/cedar/{name} is not tracked; commit the authoritative runtime contract",
                 )
 
+    def test_subaward_roles_do_not_assert_ownership(self) -> None:
+        # A subaward links a prime contractor and a subcontractor; either side
+        # may carry a Native attribution, and neither is an ownership claim.
+        tables = json.loads((_REPO / "data/cedar/field_map.json").read_text(encoding="utf-8"))[
+            "tables"
+        ]
+        entries = [t for t in tables.values() if t.get("collection") == "subcontracting"]
+        self.assertEqual(len(entries), 1)
+        entry = entries[0]
+        self.assertNotIn("owner of", entry["entity_role"])
+        self.assertEqual(
+            [r["role"] for r in entry["entity_roles"]],
+            ["subcontractor-side Native attribution", "prime-contractor-side Native attribution"],
+        )
+
 
 def _plain(value: Any) -> Any:
     """A frozen snapshot value in the shape ``json`` produced it."""
