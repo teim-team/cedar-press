@@ -33,7 +33,7 @@ Review-only material does not become a public sample when a local count changes.
 
 | Responsibility | Authority or entry point |
 | --- | --- |
-| Public descriptor and sample import | scripts/import_cedar_manifest.py (writes data/cedar/samples/, not served) |
+| Public descriptor and sample import | scripts/stage_verified_previews.py (from verified Lumecon-data releases; writes the manifest and data/cedar/samples/, not served) |
 | Sample publication availability | scripts/measure-samples.mjs; measures committed bytes against the Git index |
 | Public sample tables (one customer table per collection) | scripts/render_sample_downloads.py; public/data/cedar/downloads/ and data/cedar/sample_downloads.json |
 | Public sample display contracts | scripts/derive-explore.mjs; reads the customer-table headers plus reviewed explore.overrides.json |
@@ -47,10 +47,7 @@ Review-only material does not become a public sample when a local count changes.
 | Generated codebook documentation | scripts/docs-markdown.mjs --kind codebook |
 | Cross-language duplication measurement | scripts/measure_duplication.py |
 | Generated-file validation | make check-generated |
-| Structural audit of served previews, descriptors and spine (read-only; also a firing test) | server/tests/test_public_preview_audit.py --report; findings recorded in docs/FACT_CHECK_2026-10-02.md |
-| Consumer-side release-gap register (what exists but is not served, per gate) | server/tests/release_gap_register.py --write; held current by test_release_gap_register.py; docs/RELEASE_GAP_2026-10-02.md |
-| Reference graph for the numbered workspace scripts and the archive rule | server/tests/code_reference_graph.py --write; docs/CODE_REFERENCE_GRAPH_2026-10-02.json; code/archive/INDEX.md |
-| Per-UEI recipient holds and rebinds (policy input, not a denial; nothing applies it yet) | code/cedar_publication.recipient_holds(); data/cedar/recipient_holds.json; docs/RECIPIENT_HOLDS_2026-10-02.md |
+| Structural audit of served previews, descriptors and spine (read-only; also a firing test) | server/tests/test_public_preview_audit.py --report; open findings in docs/REVIEW_STATUS.md |
 | Legacy 40-column Deals preview to the 36-column producer header | server/tests/legacy_deals_adapter.py (tested mapping; changes nothing served) |
 | Collection display names (owned is Individual Native-Owned Businesses) | server/tests/test_collection_display_names.py |
 

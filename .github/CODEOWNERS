@@ -18,18 +18,14 @@
 # Accounts, sign-in, subscriptions and provisioning.
 /server/cedar_press/subscribers.py  @bkim28964 @ArihantSwainLumecon
 /server/cedar_press/migrations/     @bkim28964 @ArihantSwainLumecon
-/docs/SUBSCRIBERS.md                @bkim28964 @ArihantSwainLumecon
 
 # Research data: ingestion, the source registry and published data.
-/code/                              @Havala-Hanson @ArihantSwainLumecon
 /cedar_source_registry/             @Havala-Hanson @ArihantSwainLumecon
 /data/                              @Havala-Hanson
 /public/data/                       @Havala-Hanson
 /docs/schema/                       @Havala-Hanson
-/docs/codebooks/                    @Havala-Hanson
 
 # Security: CI, dependency policy and the security policy itself.
 /.github/                           @bkim28964 @Havala-Hanson
 /SECURITY.md                        @bkim28964 @Havala-Hanson
-/requirements.txt                   @bkim28964 @Havala-Hanson @ArihantSwainLumecon
 /package-lock.json                  @bkim28964 @Havala-Hanson @ArihantSwainLumecon

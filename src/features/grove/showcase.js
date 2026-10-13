@@ -12,7 +12,7 @@
 // filings of one subaward.
 //
 // The fix that belongs upstream is a re-drawn sample and corrected bindings
-// (docs/handoffs/CODEX_LANDING_FOLLOWUPS_2026-10-06.md). Until then this file
+// (docs/TERMINAL_HANDOFF.md, open follow-ups). Until then this file
 // decides which of the pinned records the landing frame shows first. It is an
 // editorial selection for the door ONLY: the collection viewer, record pages
 // and entity pages read every pinned record (useSamples.js), so what a reader

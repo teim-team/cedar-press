@@ -34,7 +34,6 @@ above is then true again in the only sense that matters.
 
 from __future__ import annotations
 
-import csv
 import dataclasses
 import datetime
 import json
@@ -47,6 +46,7 @@ from typing import Any
 
 from cedar_press import collection_profiles, press_catalog
 from cedar_press import collections as launch
+from tests import sample_checks
 
 _REPO = Path(__file__).resolve().parents[2]
 _DUMP = _REPO / "scripts" / "dump.mjs"
@@ -584,53 +584,24 @@ class TestPressCatalogSnapshot(unittest.TestCase):
         )
 
 
-class TestGeneratorAndManifestAgree(unittest.TestCase):
-    """The importer's declarations and the manifest it writes, held equal.
+class TestManifestAndSamples(unittest.TestCase):
+    """The committed manifest and samples, checked on every run.
 
-    ``scripts/import_cedar_manifest.py`` declares which collections ship
-    (``STOREFRONT``) and which are excluded with what reason (``EXCLUDED``),
-    and copies both into ``data/cedar/collections.manifest.json``. The
-    generator's other inputs -- Cedar's descriptors and review bundle -- are
-    not in this tree, so the manifest cannot be regenerated here, and an edit
-    to a reason in the script is an edit the manifest does not see until
-    somebody with the workspace re-runs it. That is how the gaming exclusion
-    read "the catalog already shows it as a Grove-exclusive preview" after
-    the preview was withdrawn. These compare the two on every run.
+    ``scripts/stage_verified_previews.py`` writes the manifest from verified
+    releases. These hold what a fresh clone must get right in it and in the
+    committed samples.
     """
 
     @classmethod
     def setUpClass(cls) -> None:
-        import importlib.util
-
-        spec = importlib.util.spec_from_file_location(
-            "import_cedar_manifest", _REPO / "scripts" / "import_cedar_manifest.py"
-        )
-        module = importlib.util.module_from_spec(spec)
-        assert spec.loader is not None
-        spec.loader.exec_module(module)
-        cls.script = module
         cls.manifest = json.loads(
             (_REPO / "data" / "cedar" / "collections.manifest.json").read_text(encoding="utf-8")
         )
 
-    def test_the_storefront_order_is_the_scripts(self) -> None:
-        self.assertEqual(
-            [entry["id"] for entry in self.manifest["collections"]],
-            list(self.script.STOREFRONT),
-        )
-
-    def test_every_exclusion_carries_the_scripts_reason(self) -> None:
-        manifest = {entry["id"]: entry["reason"] for entry in self.manifest["excluded"]}
-        self.assertEqual(set(manifest), set(self.script.EXCLUDED))
-        for collection_id, reason in self.script.EXCLUDED.items():
-            with self.subTest(excluded=collection_id):
-                self.assertEqual(manifest[collection_id], reason)
-
-    def test_the_unmeasured_fields_are_the_scripts(self) -> None:
-        self.assertEqual(self.manifest["unmeasured_fields"], self.script.UNMEASURED)
-
     def test_nothing_is_both_shipped_and_excluded(self) -> None:
-        self.assertEqual(set(self.script.STOREFRONT) & set(self.script.EXCLUDED), set())
+        shipped = {entry["id"] for entry in self.manifest["collections"]}
+        excluded = {entry["id"] for entry in self.manifest["excluded"]}
+        self.assertEqual(shipped & excluded, set())
 
     def test_the_unpublished_sample_record_matches_the_disk(self) -> None:
         # The record is measured, so it must agree with the checkout: a sample
@@ -645,222 +616,17 @@ class TestGeneratorAndManifestAgree(unittest.TestCase):
         )
         self.assertEqual(result.returncode, 0, result.stderr or result.stdout)
 
-    def test_a_sample_publishing_a_withheld_field_is_struck_before_it_is_copied(self) -> None:
-        # The publication rule, proven by injection, in the layout the IMPORT
-        # reads (dist/review/samples/<cedar_id>/) and the layout the AUDIT
-        # reads (public/<manifest path>): Codex, PR #63, found the first
-        # joined a URL to the bundle and struck nothing. Field-level, the way
-        # the rule is written. Two passes:
-        #   1. the LIVE rule. Owner ruling 2026-10-02: a firm is a business
-        #      entity whatever it is named after, so every business-record
-        #      field of the class publishes without consent and nothing is
-        #      struck - not the owner's-name row, not the firm's name under
-        #      another header.
-        #   2. the rule patched back to the pre-ruling consent gate, so the
-        #      striking machinery itself is still proven: a row of the class
-        #      with an owner's name and no consent is struck even when no
-        #      cell is the firm's canonical name; the same row with consent
-        #      recorded is not; a row of another class carrying the same
-        #      column is not; a firm's name under any column is the backstop.
-        import tempfile
-
-        names, uids = self.script.withheld_entities(
-            _REPO / "data" / "spine" / "cedar_entity_names.csv"
-        )
-        self.assertEqual(len(names), 45)
-        self.assertEqual(len(uids), 45)
-        leaked = next(iter(names)).title()
-        uid = next(iter(uids))
-        cls = self.script.WITHHELD_CLASS
-
-        from unittest.mock import patch
-
-        def consent_gate(field, name_is_person=None, consent_status="NOT_ASKED"):
-            # The rule as written before 2026-10-02, for pass 2 only.
-            if field not in self.script.WITHHELD_FIELDS:
-                return False
-            return (consent_status or "").strip().upper() == "OPTED_IN"
-
-        def plant(folder: Path, rows_by_name: dict[str, list[list[str]]]) -> None:
-            folder.mkdir(parents=True, exist_ok=True)
-            for name, rows in rows_by_name.items():
-                with (folder / f"{name}__10.csv").open("w", encoding="utf-8", newline="") as handle:
-                    writer = csv.writer(handle)
-                    writer.writerows(rows)
-
-        head = ["cedar_uid", "entity_class", "owner_name", "consent_status", "amount"]
-        samples = {
-            # No canonical name anywhere; the owner's name is the leak.
-            "owner": [head, [uid, cls, "A Person", "NOT_ASKED", "5"]],
-            "consented": [head, [uid, cls, "A Person", "OPTED_IN", "5"]],
-            "tribal": [head, ["CE-00134-BX", "Federally recognized tribe", "A Person", "", "5"]],
-            "named": [["id", "firm", "amount"], ["1", leaked, "5"]],
-            "clean": [["id", "firm", "amount"], ["1", "Cherokee Nation", "5"]],
-        }
-        at = "/data/cedar/samples/fixture"
-
-        def manifest() -> dict:
-            return {
-                "collections": [
-                    {
-                        "id": "fixture",
-                        "cedar": {"cedar_id": "fixture"},
-                        "sample": {"table": "owner.csv", "path": f"{at}/owner__10.csv"},
-                        "tables": [
-                            {"table": f"{name}.csv", "sample_path": f"{at}/{name}__10.csv"}
-                            for name in [*samples, "absent"]
-                        ],
-                    }
-                ]
-            }
-
-        # Pass 1: the live rule strikes nothing, in both layouts.
-        with tempfile.TemporaryDirectory() as tmp:
-            root = Path(tmp)
-            plant(root / "dist" / "review" / "samples" / "fixture", samples)
-            live = manifest()
-            self.assertEqual(
-                self.script.withhold_samples(live, self.script.review_sample(root), names, uids),
-                [],
-            )
-            for table in live["collections"][0]["tables"]:
-                if table["table"] != "absent.csv":
-                    self.assertTrue(table["sample_path"], table["table"])
-                self.assertNotIn("sample_withheld_why", table)
-            self.assertTrue(live["collections"][0]["sample"]["path"])
-            plant(root / "data" / "cedar" / "samples" / "fixture", samples)
-            audited_live = manifest()
-            self.assertEqual(
-                self.script.withhold_samples(
-                    audited_live, self.script.sample_file(root), names, uids
-                ),
-                [],
-            )
-
-        # Pass 2: the pre-ruling gate, so the machinery is still proven.
-        with (
-            tempfile.TemporaryDirectory() as tmp,
-            patch.object(self.script, "may_publish_individual_native_field", consent_gate),
-        ):
-            root = Path(tmp)
-            # The import layout.
-            plant(root / "dist" / "review" / "samples" / "fixture", samples)
-            imported = manifest()
-            struck = self.script.withhold_samples(
-                imported, self.script.review_sample(root), names, uids
-            )
-            self.assertEqual(sorted(s["table"] for s in struck), ["named.csv", "owner.csv"])
-            by_table = {s["table"]: s for s in struck}
-            self.assertEqual(by_table["owner.csv"]["columns"], ["owner_name"])
-            self.assertEqual(by_table["named.csv"]["columns"], ["firm"])
-            tables = {t["table"]: t for t in imported["collections"][0]["tables"]}
-            self.assertIsNone(tables["owner.csv"]["sample_path"])
-            self.assertIn(
-                "the publication rule withholds", tables["owner.csv"]["sample_withheld_why"]
-            )
-            for kept in ("consented.csv", "tribal.csv", "clean.csv", "absent.csv"):
-                self.assertTrue(tables[kept]["sample_path"], kept)
-            flagship = imported["collections"][0]["sample"]
-            self.assertIsNone(flagship["path"])
-            self.assertIn("the publication rule withholds", flagship["unavailable_because"])
-            # The served copy of a struck sample from an earlier import goes.
-            plant(root / "data" / "cedar" / "samples" / "fixture", samples)
-            self.script.unpublish(root, struck)
-            served = root / "data" / "cedar" / "samples" / "fixture"
-            self.assertFalse((served / "owner__10.csv").exists())
-            self.assertFalse((served / "named__10.csv").exists())
-            self.assertTrue((served / "clean__10.csv").exists())
-            # The audit layout, on a data/cedar/samples/ that still keeps the two.
-            plant(served, samples)
-            audited = manifest()
-            struck_public = self.script.withhold_samples(
-                audited, self.script.sample_file(root), names, uids
-            )
-            self.assertEqual(sorted(s["table"] for s in struck_public), ["named.csv", "owner.csv"])
-        # The raw previews the API and the renderer read.
-        for path in (_REPO / "data" / "cedar" / "samples").glob("*/*.csv"):
-            self.assertEqual(
-                self.script.sample_violations(path, names, uids),
-                [],
-                f"{path} publishes a withheld field; run import_cedar_manifest.py --audit",
-            )
-
-    def test_sample_paths_cannot_delete_or_overwrite_outside_the_samples_directory(self) -> None:
-        import tempfile
-
-        with tempfile.TemporaryDirectory() as folder:
-            root = Path(folder)
-            outside = root / "retained.csv"
-            outside.write_text("retained\n", encoding="utf-8")
-            valid = "/data/cedar/samples/deals/example.csv"
-            self.assertEqual(
-                self.script.sample_file_path(root, valid),
-                root.resolve() / valid[1:],
-            )
-            for bad in (
-                "/../retained.csv",
-                "//server/file.csv",
-                "C:/retained.csv",
-                "/C:/retained.csv",
-                "/data\\..\\retained.csv",
-                "/%2e%2e/retained.csv",
-                # Inside the repository, outside the samples directory.
-                "/data/cedar/collections.manifest.json",
-                "/public/data/cedar/downloads/deals.csv",
-            ):
-                with self.subTest(path=bad), self.assertRaises(ValueError):
-                    self.script.unpublish(root, [{"path": bad}])
-            self.assertEqual(outside.read_text(encoding="utf-8"), "retained\n")
-
-    def test_owner_ruling_need_sample_is_not_struck(self) -> None:
-        # Owner ruling 2026-10-04 (Elijah Moreno): NEED publishes like any
-        # other collection; a NEED sample is no longer struck by a policy hold.
-        import tempfile
-
-        with tempfile.TemporaryDirectory() as folder:
-            sample = Path(folder) / "restored.csv"
-            sample.write_text("enterprise_id,enterprise_name\nCEDAR-NEST-1,Example Enterprise\n",
-                              encoding="utf-8")
-            manifest = {
-                "collections": [
-                    {
-                        "id": "need",
-                        "cedar": {"cedar_id": "need", "status": "READY"},
-                        "publication_hold": {"code": "COLLECTION_PUBLICATION_HOLD", "message": "x"},
-                        "sample": {"path": "/data/cedar/samples/need/restored.csv"},
-                        "tables": [
-                            {
-                                "table": "restored.csv",
-                                "sample_path": "/data/cedar/samples/need/restored.csv",
-                            }
-                        ],
-                    }
-                ]
-            }
-            struck = self.script.withhold_samples(
-                manifest, lambda *_: sample, frozenset(), frozenset()
-            )
-        self.assertEqual(struck, [])
-        collection = manifest["collections"][0]
-        self.assertNotIn("publication_hold", collection)
-        self.assertEqual(collection["tables"][0]["sample_path"],
-                         "/data/cedar/samples/need/restored.csv")
-        self.assertEqual(collection["cedar"]["status"], "READY")
-
     def test_manifest_carries_no_collection_publication_hold(self) -> None:
+        # Owner ruling 2026-10-04: no collection-wide publication hold.
         for collection in self.manifest["collections"]:
             identifier = collection.get("cedar", {}).get("cedar_id", collection["id"])
-            self.script._COLLECTION_RULE.assert_collection_publishable(identifier)
             self.assertNotIn("publication_hold", collection, identifier)
 
-    def test_a_local_path_never_reaches_a_served_sample(self) -> None:
+    def test_a_local_path_never_reaches_a_committed_sample(self) -> None:
         # Found 2026-09-27: need_enterprises__10.csv served "the owner's
         # research dataset, on this machine at ~/Desktop/dissertation/...".
-        # Injected, the scrub fires and keeps the file's own quoting; restored
-        # (a clean file), it changes nothing; and every sample the site serves
-        # today is clean.
-        import tempfile
-
+        # Injected, the check fires and keeps the file's own quoting; and every
+        # committed sample is clean.
         leaked = (
             "id,source_document,note\n"
             "1,\"native_entity_enterprise_dataset_v6_geocoded.csv (the owner's research "
@@ -872,7 +638,7 @@ class TestGeneratorAndManifestAgree(unittest.TestCase):
             "someone\\x.csv\n"
             "3,https://www.example.com/home/about,~20% of rows\n"
         )
-        clean = self.script.scrub_local_paths(leaked)
+        clean = sample_checks.scrub_local_paths(leaked)
         self.assertNotIn("Desktop", clean)
         self.assertNotIn("/Users/", clean)
         self.assertNotIn("C:\\Users", clean)
@@ -881,40 +647,20 @@ class TestGeneratorAndManifestAgree(unittest.TestCase):
             ':: https://www.bowhead.com/about/",kept',
             clean,
         )
-        removed = self.script.LOCAL_PATH_REMOVED
+        removed = sample_checks.LOCAL_PATH_REMOVED
         self.assertIn(f"2,{removed},{removed}\n", clean)
         # A URL's own /home/ segment and a "~" that is not a home directory stay.
         self.assertIn("3,https://www.example.com/home/about,~20% of rows\n", clean)
         # The same line count and the same quoting: raw-text substitution only.
         self.assertEqual(clean.count("\n"), leaked.count("\n"))
         self.assertEqual(clean.count('"'), leaked.count('"'))
-        with tempfile.TemporaryDirectory() as tmp:
-            root = Path(tmp)
-            served = root / "data" / "cedar" / "samples" / "fixture"
-            served.mkdir(parents=True)
-            (served / "leak__10.csv").write_text(leaked, encoding="utf-8", newline="")
-            (served / "clean__10.csv").write_text("id,x\n1,y\n", encoding="utf-8", newline="")
-            rewritten = self.script.scrub_samples(root)
-            self.assertEqual([p.name for p in rewritten], ["leak__10.csv"])
-            self.assertEqual((served / "leak__10.csv").read_text(encoding="utf-8"), clean)
-            self.assertEqual(
-                self.script.scrub_samples(root), [], "a second pass finds nothing"
-            )
-            # The import path writes through the same scrub.
-            target = root / "out" / "leak__10.csv"
-            self.assertFalse(
-                self.script.publish_sample(served / "leak__10.csv", target), "already clean"
-            )
-            source = root / "bundle.csv"
-            source.write_text(leaked, encoding="utf-8", newline="")
-            self.assertTrue(self.script.publish_sample(source, target))
-            self.assertEqual(target.read_text(encoding="utf-8"), clean)
+        self.assertEqual(sample_checks.scrub_local_paths(clean), clean, "a clean text is unchanged")
         for path in (_REPO / "data" / "cedar" / "samples").glob("*/*.csv"):
             text = path.read_text(encoding="utf-8")
             self.assertEqual(
-                self.script.scrub_local_paths(text),
+                sample_checks.scrub_local_paths(text),
                 text,
-                f"{path} carries a local filesystem path; run import_cedar_manifest.py --audit",
+                f"{path} carries a local filesystem path; remove it where the sample is made",
             )
 
     def test_the_explore_contracts_match_the_samples(self) -> None:
@@ -955,6 +701,21 @@ class TestGeneratorAndManifestAgree(unittest.TestCase):
                     0,
                     f"data/cedar/{name} is not tracked; commit the authoritative runtime contract",
                 )
+
+    def test_subaward_roles_do_not_assert_ownership(self) -> None:
+        # A subaward links a prime contractor and a subcontractor; either side
+        # may carry a Native attribution, and neither is an ownership claim.
+        tables = json.loads((_REPO / "data/cedar/field_map.json").read_text(encoding="utf-8"))[
+            "tables"
+        ]
+        entries = [t for t in tables.values() if t.get("collection") == "subcontracting"]
+        self.assertEqual(len(entries), 1)
+        entry = entries[0]
+        self.assertNotIn("owner of", entry["entity_role"])
+        self.assertEqual(
+            [r["role"] for r in entry["entity_roles"]],
+            ["subcontractor-side Native attribution", "prime-contractor-side Native attribution"],
+        )
 
 
 def _plain(value: Any) -> Any:

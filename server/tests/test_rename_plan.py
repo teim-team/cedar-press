@@ -12,7 +12,7 @@ Three things follow, and this file is all of them.
 FIRST, THE TABLE IS DERIVED HERE AND STATED THERE
 The counts are re-measured from tracked files on every run and compared
 against what the document says. That is the same discipline
-``code/cedar_publication.py`` applies to its own shelf counts -- *"The counts
+the retired ``code/cedar_publication.py`` applied to its own shelf counts -- *"The counts
 are STATED, not derived, and that is the point... A derived count cannot catch
 that, because a derived count agrees with whatever the map happens to say"* --
 applied to a planning document instead of a build. When this fails, the fix is
@@ -48,8 +48,8 @@ here and already runs.
 WHY IT COUNTS WITH ``git grep``
 Tracked files only, and every tracked file. A filesystem walk would sweep in
 ``dist-site/`` and ``node_modules/``, which are build output; a search
-restricted to ``src/`` would miss the four references in ``code/`` and the six
-under ``docs/``, which are the ones nobody thinks of.
+restricted to ``src/`` would miss the references under ``docs/``, which are
+the ones nobody thinks of.
 
 This file names none of the four paths literally -- the pattern is assembled
 from its parts below -- so that the count it reports is not a count of itself.

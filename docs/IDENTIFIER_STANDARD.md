@@ -5,7 +5,7 @@
 > this document controls wherever a historical passage conflicts with it.
 
 *Policy plus a dated retirement audit. Re-measure snapshot counts before release.
-`code/audit_retired_ids.py` reproduces retired-value counts without editing data.*
+`code/audit_retired_ids.py`, at the tag `data-workspace-final`, reproduces retired-value counts without editing data.*
 
 Read this before writing anything that resolves, joins, or publishes an entity.
 
@@ -135,9 +135,10 @@ firm, a vendor, a deal target) gets a **Cedar Business ID**, `CB-`, from a
 separate register with the same contract: encodes nothing, never changes,
 never reused, never dropped, never a substitute for a uid. Ownership is a
 relationship; registrations are attributes; name changes are aliases. The
+current model is `docs/CEDAR_IDENTITY_SYSTEM_2026-09-13.md` §2. The 2026-09-06
 decision and its reconciliation with the NEED, place and identifier ledgers
-are in `docs/CEDAR_BUSINESS_ID_DECISION_2026-09-06.md` (ADR-043). It
-supersedes ADR-008.
+(`docs/CEDAR_BUSINESS_ID_DECISION_2026-09-06.md`, ADR-043) are at the tag
+`data-workspace-final`. It supersedes ADR-008.
 
 ---
 
@@ -172,7 +173,7 @@ Those are ENTITY (hub) prefixes. Two prefixes name SUB-HUBS and are **not** enti
 
 | prefix | what it names | register |
 |---|---|---|
-| `CEDAR-NEST-nnnnnn-CC` | an enterprise a nation, ANC or NHO owns. The collection was renamed NEST → NEED on 2026-09-10 and the prefix was NOT: these ids are issued, and a prefix is never rewritten — `docs/NEED_RENAME_2026-09-10.md` | `data/spine/cedar_need_id_register.csv` |
+| `CEDAR-NEST-nnnnnn-CC` | an enterprise a nation, ANC or NHO owns. The collection was renamed NEST → NEED on 2026-09-10 and the prefix was NOT: these ids are issued, and a prefix is never rewritten. The name leads with Cedar because the Minneapolis Fed publishes a dataset under close to the bare description (owner, 2026-09-10; `docs/NEED_RENAME_2026-09-10.md`, at the tag `data-workspace-final`) | `data/spine/cedar_need_id_register.csv` |
 | `CEDAR-PLACE-nnnnnn-CC` | a **physical place** an entity operates — gaming property, BIE school, IHS facility, BIA office, distinguished by a `place_class` COLUMN, never by the prefix | `data/spine/cedar_place_id_register.csv` |
 
 *This is a historical vocabulary, not a minting template. The original
@@ -553,7 +554,8 @@ proved**. Cherry-pick/merge this commit and rerun the guards on each release
 branch before lifting the Gaming ID hold.
 The legacy spine and clean tables still contain old handles as historical
 input, source keys and compatibility evidence; their mere presence there is
-not a new issuance. The `code/audit_retired_ids.py` CSV inventory prints exact
+not a new issuance. The `code/audit_retired_ids.py` CSV inventory (at the tag
+`data-workspace-final`; run it from a checkout of the tag, as below) prints exact
 path, column, prefix, occurrence count, row count and example for every file
 under the supplied roots, including ignored files. Run it against `data/spine`,
 `data/clean`, `dist/customer`, `dist/review/samples`, `data/cedar/samples`
@@ -601,7 +603,8 @@ are not registered handles. Exact membership and object-role checks determine
 violations. Reproduce every path/column/count with:
 
 ```powershell
-python code/audit_retired_ids.py data/spine data/clean dist/customer dist/review/samples data/cedar/samples public/data/cedar/downloads
+git worktree add ../cedar-press-workspace data-workspace-final
+python ../cedar-press-workspace/code/audit_retired_ids.py data/spine data/clean dist/customer dist/review/samples data/cedar/samples public/data/cedar/downloads
 ```
 
 The active Press release gate is red independently of Gaming. Its customer

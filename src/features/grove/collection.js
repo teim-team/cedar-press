@@ -34,10 +34,8 @@
  * them field by field anyway.
  *
  * WHERE THE NUMBERS COME FROM
- * `scripts/import_cedar_manifest.py` writes the manifest from the Cedar data
- * workspace: `code/760_collection_descriptors.py` for the descriptors and
- * `code/1135_full_dataset_review_bundle.py` for the per-table row counts and
- * the ten-row samples. Nothing here is typed by hand.
+ * `scripts/stage_verified_previews.py` updates the manifest from verified
+ * Lumecon-data releases. Nothing here is typed by hand.
  *
  * WHAT IS STILL NOT MEASURED, AND SAYS SO
  * `vintage` and `downloads` are `null` on every dataset, and
@@ -377,7 +375,8 @@ const STOREFRONT_SHORT = Object.freeze(
  * this side, and it was missing.
  *
  * It matters for exactly one collection today. NEED's descriptor short name
- * is a bare "NEED", and docs/NEED_RENAME_2026-09-10.md renamed the formal
+ * is a bare "NEED", and the owner's rename of 2026-09-10 (docs/NEED_RENAME_2026-09-10.md,
+ * at the tag data-workspace-final) renamed the formal
  * name to lead with Cedar precisely because a bare one reads as the
  * Minneapolis Fed's dataset. A basis line saying "NEED v1" under a figure is
  * where that ambiguity does the most damage, so it says "Cedar NEED v1".
@@ -661,7 +660,7 @@ export function collectionCitation(datasetId, accessedOn = null) {
  * The rows behind a dataset card's Download button.
  *
  * The collection's flagship table, ten real rows of it, straight from
- * `code/1135_full_dataset_review_bundle.py`. This used to be the figure's own
+ * the retired `code/1135_full_dataset_review_bundle.py`. This used to be the figure's own
  * points -- five demonstration bars dressed as a release file. What downloads
  * now is data.
  *

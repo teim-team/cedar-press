@@ -85,8 +85,9 @@ def retry_after(key: str, *, window: float = WINDOW_SECONDS) -> int:
 
 
 #: How many proxies sit in front of the API and append to ``X-Forwarded-For``
-#: when ``CEDAR_PRESS_TRUST_PROXY=1``. The documented deployment
-#: (``docs/HOSTNAMES.md``) is CloudFront in front of the API origin: one hop.
+#: when ``CEDAR_PRESS_TRUST_PROXY=1``. The intended deployment once the API is
+#: activated (``docs/HOSTNAMES.md``) is CloudFront in front of the API origin:
+#: one hop.
 #: A load balancer between CloudFront and the service is a second hop, and
 #: ``CEDAR_PRESS_PROXY_HOPS=2`` says so.
 DEFAULT_PROXY_HOPS = 1

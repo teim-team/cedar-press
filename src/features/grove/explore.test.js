@@ -220,7 +220,7 @@ const NAMED = [...REGISTER.byUid.entries()].find(([, e]) => e.name);
 
 // The published register withholds no name since the owner ruling of
 // 2026-10-02 (an individually Native-owned firm is a business entity whatever
-// it is named after; code/cedar_domain.py may_publish_individual_native_field).
+// it is named after; the retired code/cedar_domain.py may_publish_individual_native_field).
 // The viewer's masking path is kept for any future withholding, so it is
 // exercised on a copy of the register with one real uid's name set to null,
 // never on the published file, which has none.
@@ -359,7 +359,7 @@ test("a record-level source is built only where the table declares how, from its
     rowSource({ federal_action_document_number: "2015-06658" }, contractFor("lobbying/oira_federal_action_links")),
     "https://www.federalregister.gov/d/2015-06658",
   );
-  // An EIN to its ProPublica page, leading zeros dropped as code/33 writes it.
+  // An EIN to its ProPublica page, leading zeros dropped as the retired code/33 wrote it.
   const hub = contractFor("nonprofits/np_ein_entity_hub");
   assert.equal(rowSource({ ein: "020778620" }, hub), "https://projects.propublica.org/nonprofits/organizations/20778620");
   assert.equal(rowSource({ ein: "39-1773613" }, hub), "https://projects.propublica.org/nonprofits/organizations/391773613");
@@ -832,14 +832,18 @@ const OPENING_PLURAL = FIELD_MAP_JSON.opening.plural;
 const PROHIBITED_PUBLIC_COLUMN = /duns|neid|cicd|casino[ _-]?city|tribe_id|_candidate|proposed|resolver|built_date|fetched_date|retrieved_date|promoted_date|artifact_mtime/i;
 // Columns the publish-time presentation layer ADDS to a flagship before the
 // field map projects it, so the map must decide them although the raw sample
-// (an excerpt of the canonical flagship) never carries them. Read from
-// cedar_publication.py itself, never restated: deals_public_view appends
-// DEALS_PRESENTATION_COLUMNS and the `research_note` target they qualify.
-const PUBLICATION_SOURCE = readFileSync(fileURLToPath(new URL("../../../code/cedar_publication.py", import.meta.url)), "utf8");
-const DEALS_PRESENTATION_COLUMNS = [...(/^DEALS_PRESENTATION_COLUMNS = \(([^)]*)\)/m.exec(PUBLICATION_SOURCE)?.[1] ?? "").matchAll(/"([^"]+)"/g)].map((m) => m[1]);
+// (an excerpt of the canonical flagship) never carries them. Read from the
+// field map itself, never restated: the Deals columns it derives into
+// `research_note` that the raw sample lacks (Notes also feeds research_note
+// but is a column of the sample), plus the `research_note` target they qualify.
+const DEALS_FLAGSHIP = "deals/deals_classified";
+const DEALS_SAMPLE_COLUMNS = load(DEALS_FLAGSHIP).columns;
+const DEALS_PRESENTATION_COLUMNS = FIELD_MAP[DEALS_FLAGSHIP].fields
+  .filter((f) => f.decision === "derive" && f.to === "research_note" && !DEALS_SAMPLE_COLUMNS.includes(f.column))
+  .map((f) => f.column);
 const PUBLISH_TIME_COLUMNS = { deals: [...DEALS_PRESENTATION_COLUMNS, "research_note"] };
 
-test("the publish-time deals columns are read from cedar_publication.py, not guessed", () => {
+test("the publish-time deals columns are read from the field map, not guessed", () => {
   assert.deepEqual(DEALS_PRESENTATION_COLUMNS, ["Caveat", "Candidate_Status"]);
 });
 

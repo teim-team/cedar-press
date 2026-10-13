@@ -158,9 +158,9 @@ test("a release table is named in words, not by its file name", () => {
 
 test("no published sample carries a path on somebody's machine", () => {
   // Found 2026-09-27: need_enterprises__10.csv served "on this machine at
-  // ~/Desktop/dissertation/..." to every visitor. The importer now scrubs it
-  // (scripts/import_cedar_manifest.py scrub_local_paths); this holds every
-  // file the site serves to it, so a future value of the same shape fails here.
+  // ~/Desktop/dissertation/..." to every visitor. server/tests/sample_checks.py
+  // holds the committed raw samples to the same rule; this holds every file
+  // the site serves to it, so a future value of the same shape fails here.
   const LOCAL = /(^|[\s("'=,|])(~\/|\/Users\/|\/home\/|[A-Za-z]:\\Users\\)|\/Desktop\//;
   const manifest = JSON.parse(readFileSync(
     new URL("../../../data/cedar/collections.manifest.json", import.meta.url), "utf8",

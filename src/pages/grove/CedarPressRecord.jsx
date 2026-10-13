@@ -309,8 +309,8 @@ export default function CedarPressRecord() {
   const shownInSummary = new Set([contract?.amount, contract?.date, contract?.subject, ...(contract?.observation ?? [])].filter(Boolean));
   const columns = item ? Object.keys(row) : [];
   // THE OWNER'S DECLARED VIEW IS THE FIRST SCREEN.
-  // `default_columns` is the reviewed selection recorded in
-  // docs/PUBLIC_DATASET_SPEC_2026-09-05.md — the same seven the table opens
+  // `default_columns` is the reviewed selection scripts/derive-explore.mjs
+  // writes into each contract — the same seven the table opens
   // on. Everything else the codebook knows is the rest of the record, folded;
   // everything the codebook does not know is technical, folded under that. A
   // table with no declared view falls back to the codebook's own order.

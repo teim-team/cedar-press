@@ -12,7 +12,7 @@ As a report it prints the measurements the fact-check handoff quotes:
     python3 server/tests/test_public_preview_audit.py --report --json
 
 It writes nothing. The served CSVs are producer artifacts and are never edited
-here; a finding is a measurement for ``docs/FACT_CHECK_*.md`` and a producer
+here; a finding is a measurement for ``docs/REVIEW_STATUS.md`` and a producer
 queue item, not a value to recode.
 """
 

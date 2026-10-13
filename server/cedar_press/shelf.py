@@ -1,7 +1,8 @@
 """The shelf page's view model, composed in Python from Python.
 
 WHY THIS PAGE
-    ``docs/PYTHON_FIRST_SITE.md`` argues that the site should be rendered from
+    The Python-first proposal of 2026-09-02 (``docs/PYTHON_FIRST_SITE.md``, at
+    the tag ``data-workspace-final``) argues that the site should be rendered from
     Python because several modules are currently written twice, once per
     language, and have to be kept value-for-value in agreement. An argument
     like that is worth exactly as much as its demonstration, so this is the

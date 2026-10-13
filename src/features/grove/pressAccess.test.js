@@ -135,7 +135,7 @@ test("Cedar Grove opens everything this storefront sells", () => {
 // tree", which is the same class of defect as the `tree` drift and not its
 // fix: `PRESS_CATALOG` carried a grove-shelf collection the launch collection
 // did not, so the browser opened a collection `repository.may_open` refuses.
-// `code/cedar_publication.py` settles which side is wrong -- STOREFRONT_SHELVES
+// The retired `code/cedar_publication.py` settled which side is wrong -- STOREFRONT_SHELVES
 // is ("standard", "pro") and a grove-shelf collection ships through Cedar
 // Grove, not the Press storefront -- so nothing on the grove shelf opens HERE,
 // whatever the plan. The catalog carries no such collection today, so the

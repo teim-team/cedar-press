@@ -58,9 +58,6 @@ class NeedProfiles(unittest.TestCase):
         )
 
     def serve(self, links=None, records=None, returned_pin=PIN, held=(), broken=()):
-        policy = SimpleNamespace(
-            assert_collection_publishable=lambda _: None, FieldMapRefusal=ValueError
-        )
         streams = []
 
         def released(*args, **kwargs):
@@ -78,7 +75,6 @@ class NeedProfiles(unittest.TestCase):
             return {"content_file": stream, "release_id": returned_pin}
 
         with (
-            patch.object(repository, "_publication_policy", return_value=policy),
             patch.object(repository, "grove_release_pin", return_value={"release_id": PIN}),
             patch.object(repository, "grove_full_release", side_effect=released) as transport,
         ):

@@ -1,6 +1,7 @@
 """How much of this site is written twice, once per language.
 
-``docs/PYTHON_FIRST_SITE.md`` argues for moving the rendered site to Python on
+The Python-first proposal of 2026-09-02 (``docs/PYTHON_FIRST_SITE.md``, at the
+tag ``data-workspace-final``) argued for moving the rendered site to Python on
 the grounds that several modules exist in both JavaScript and Python and have
 to be kept value-for-value in agreement. That argument rests on a number, and a
 number in a document goes stale the day after it is typed. This script measures

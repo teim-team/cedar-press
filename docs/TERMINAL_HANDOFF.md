@@ -10,8 +10,8 @@ An external issued-ID package does not establish consumer liveness; see the
 ## Current workflow
 
 Database follow-ups from the 2026-10-06 landing-page work (a larger NEED
-release, an accurate Native Nonprofits count, the other held populations) are
-in [the landing follow-ups handoff](handoffs/CODEX_LANDING_FOLLOWUPS_2026-10-06.md).
+release, an accurate Native Nonprofits count, the other populations once held)
+are under "Open follow-ups" below.
 
 The [current review status](REVIEW_STATUS.md) records the current cross-repository
 checkpoints, measured review results and remaining integration work. The dated
@@ -39,16 +39,57 @@ changes. See [AGENTS.md](../AGENTS.md) section 3 and [server/README.md](../serve
 Current workflow configuration determines the tested producer revision; historical
 handoff pins below do not override it.
 
+## Open follow-ups from the 2026-10-06 landing-page work
+
+Carried from docs/handoffs/CODEX_LANDING_FOLLOWUPS_2026-10-06.md when that file was
+removed on 2026-10-12; the file, with the evidence for each item, is at the tag
+`data-workspace-final`.
+
+For the producer (Lumecon-data):
+
+- **NEED, a larger reviewed set.** Re-measure NEED's servable rows under the
+  2026-10-04 ruling, build the release from that population, and carry each row's
+  top-level Native entity (Cedar ID, name and class) from the enterprise register's
+  owner-hub binding, never from the name. Ask the owner what "agencies" means before
+  choosing example rows for it.
+- **Native Nonprofits, an accurate count.** Re-measure under the no-holds ruling,
+  decide with the owner which population is published, and make the descriptor's
+  method text agree with it.
+- **The populations once held.** Confirm under the 2026-10-04 ruling whether the rows
+  once held in Giving, PLOT, Prime Contracting, Federal Funding, Subcontracting,
+  Individual Native-Owned Businesses, Natural Resources, Deals and Legislation now
+  publish, and re-pin.
+- **PLOT's expansion.** The owner set it as "Parcel-Level Ownership and Transfers"
+  (2026-10-06); the producer's description and glossary still say otherwise.
+- **Three example bindings an audit of 2026-10-06 found wrong** (no primary source
+  could be read then): legislation `100-hr-2642` is bound to the Ute Indian Tribe of
+  the Uintah and Ouray Reservation where the Southern Ute and Ute Mountain Ute tribes
+  are likely meant; NAGPRA `00-11378` is bound to a BIE school and the Fallon tribe
+  where the Duckwater Shoshone and Lone Pine Paiute-Shoshone tribes are likely meant;
+  Giving `FF-03B9C4E5A6CA00E15034` is rightly left unlinked until its source page is
+  read.
+
+In this repository, once those fixes land:
+
+- Delete the display workarounds: `EXCLUDED_EXAMPLES`, `SHOWCASE_RULES`,
+  `DISPLAY_DEFAULTS` and `COLUMN_FALLBACKS` in `src/features/grove/showcase.js`;
+  `with_native_owner` in `server/cedar_press/collections.py`; `repairMojibake` in
+  `src/features/grove/readerPresentation.js`; `ACRONYM_LEADS` in
+  `src/features/grove/collection.js` and `server/cedar_press/collections.py`.
+- `src/features/grove/showcase.test.js` fails on purpose when a re-pinned release
+  fixes a binding: delete its entry there and the exclusion in
+  `src/features/grove/showcase.js` together.
+
 ## Preserved evidence and older instructions
 
 The [archived terminal checkpoints](handoffs/2026-10-01-terminal-history.md)
 preserve the complete former handoff, including prior dates, measurements,
 permissions and review-batch notes. They are historical observations, not live
 writer assignments or a substitute for the current user instruction.
-[START_HERE.md](../START_HERE.md) and the append-only part of AGENTS.md preserve
-workspace history. The numbered builders remain available for their documented
-reproduction or adjudication role; do not use a historical build chain as the
-current release/export entrypoint.
+START_HERE.md, the former journal in AGENTS.md and the numbered builders
+preserve workspace history at the tag `data-workspace-final`, for their
+documented reproduction or adjudication role; do not use a historical build
+chain as the current release/export entrypoint.
 
 Retain existing owner decisions, stable IDs and source receipts. Engineering
 fixes, schema repair, infrastructure and missing research stay with the coding

@@ -30,10 +30,8 @@ ONE SOURCE, TWO LANGUAGES
     them field by field anyway.
 
 WHERE THE NUMBERS COME FROM
-    ``scripts/import_cedar_manifest.py`` writes the manifest from the Cedar
-    data workspace: ``code/760_collection_descriptors.py`` for the descriptors
-    and ``code/1135_full_dataset_review_bundle.py`` for the per-table row
-    counts and the ten-row samples. Nothing here is typed by hand.
+    ``scripts/stage_verified_previews.py`` updates the manifest from
+    verified Lumecon-data releases. Nothing here is typed by hand.
 
 WHAT IS STILL NOT MEASURED, AND SAYS SO
     ``vintage`` and ``downloads`` are ``None`` on every dataset, and
@@ -357,7 +355,8 @@ def collection_short(dataset: Any) -> str | None:
     both sides agreed on the wrong answer and the parity test was satisfied.
 
     It matters for one collection today. NEED's descriptor short name is a
-    bare "NEED", and ``docs/NEED_RENAME_2026-09-10.md`` renamed the formal
+    bare "NEED", and the owner's rename of 2026-09-10 (``docs/NEED_RENAME_2026-09-10.md``,
+    at the tag ``data-workspace-final``) renamed the formal
     name to lead with Cedar precisely because a bare one reads as the
     Minneapolis Fed's dataset. A basis line under a figure is where that
     ambiguity does the most damage.
@@ -792,7 +791,7 @@ def collection_csv(dataset_id: str) -> str | None:
     """The rows behind a dataset card's Download button.
 
     The collection's flagship table, ten real rows of it, straight from
-    ``code/1135_full_dataset_review_bundle.py``. This used to be the figure's
+    the retired ``code/1135_full_dataset_review_bundle.py``. This used to be the figure's
     own points -- five demonstration bars dressed as a release file. What
     downloads now is data.
 

@@ -59,8 +59,8 @@
  * When the session payload carries `user.press` ({ canRead, shelfReach })
  * it is the answer: a renewal or a capability change on the server reaches
  * the browser through the payload rather than waiting for a client release.
- * NO SERVER SENDS IT TODAY (measured 2026-09-06,
- * docs/PLATFORM_INTEGRATION_2026-09-06.md): neither this repository's
+ * NO SERVER SENDS IT TODAY (measured 2026-09-06; the measurement,
+ * docs/PLATFORM_INTEGRATION_2026-09-06.md, is at the tag data-workspace-final): neither this repository's
  * FastAPI service nor the platform's tierCapabilities has a press
  * resolution, so the tier map below is what actually decides, and it must
  * stay identical to whatever the server grows.
@@ -136,11 +136,11 @@ export function shelfReach(user) {
  * shelf, for the day one returns.
  *
  * The client is the wrong side, and the reason is a product ruling rather than
- * a symmetry. `code/cedar_publication.py` splits the shelves in two:
+ * a symmetry. The retired `code/cedar_publication.py` split the shelves in two:
  * STOREFRONT_SHELVES ("standard", "pro") is what a paying Cedar Press
  * customer sees and GROVE_SHELVES ("grove") is the one built to the same
  * standard and sold through Cedar Grove; BUILD_SHELVES is the thirteen.
- * `scripts/import_cedar_manifest.py` carries that split into the manifest, so
+ * The manifest carries that split, so
  * a grove-shelf collection reaches this repository in `excluded` and never in
  * the launch collection. The Cedar Press API therefore cannot serve one
  * without the Cedar data workspace changing its ruling first, and a page that

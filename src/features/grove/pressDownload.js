@@ -9,7 +9,7 @@
 //
 // Eleven of the twelve collections ship a real preview extract: ten rows of
 // the collection's flagship table, straight out of Cedar's review bundle
-// (code/1135_full_dataset_review_bundle.py). The twelfth, and any shelf entry
+// (the retired code/1135_full_dataset_review_bundle.py). The twelfth, and any shelf entry
 // with no release behind it, hands over what Cedar holds about the collection
 // itself: coverage, shelf, contents and what it is joined to. Every download
 // is something true; none of it is invented rows.

@@ -280,7 +280,7 @@ function EntityPicker({ cut, facets, register, onChange }) {
 /**
  * Records covering a population collectively, apart from records naming an
  * entity: a notice to every federally recognized tribe is not a record of
- * any one of them (docs/COLLECTIVE_SCOPE_DECISION_2026-09-05.md). Two
+ * any one of them (the owner's collective-scope decision, in docs/ARCHITECTURE.md). Two
  * different operations, named as such: selecting a scope finds the records
  * covering it; the toggle lets an entity filter also include the records
  * covering a broader group the entity belongs to, off by default, and only

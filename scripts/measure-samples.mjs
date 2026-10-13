@@ -6,10 +6,9 @@
 //     node scripts/measure-samples.mjs --selftest  # prove it on a planted repository
 //
 // WHY THIS EXISTS
-// The manifest declares a ten-row sample for every table, and the importer
-// copies each one under data/cedar/samples/ from dist/review/samples/. Both directories
-// are ignored by git (`/data/*`, `dist/`, `*.csv`), so a sample the importer
-// wrote on one machine reaches the repository only when somebody adds it. On
+// The manifest declares a ten-row sample for every table, under
+// data/cedar/samples/. A sample written on one machine reaches the
+// repository only when somebody adds it. On
 // 2026-09-04 nineteen did not, and every deploy from then on failed the same
 // test, so the live site froze at the last green build for a day while the
 // twelve-collection release, a renamed collection and two rounds of review

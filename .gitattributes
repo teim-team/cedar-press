@@ -1,7 +1,3 @@
-# Content-addressed R7 audit artifacts (code/1188). Bundle ids and pointer hashes
-# are computed over exact bytes, so git must never convert their line endings.
-docs/imports/r7_audit/** -text
-
 # Generated text is byte-compared by make check-generated on every OS.
 # Keep only these declared outputs LF; do not renormalize the data tree.
 docs/DATASET_CODEBOOK.md text eol=lf
@@ -18,5 +14,4 @@ data/cedar/need-reviewed-preview.json -text
 data/cedar/verified-preview-releases.json -text
 data/cedar/field_map.json -text
 server/tests/fixtures/legacy-preview/** -text
-code/330_build_native_owned_businesses.py text eol=lf
 data/cedar/preview_definition_overrides.json text eol=lf

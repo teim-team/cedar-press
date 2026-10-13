@@ -100,7 +100,7 @@ test("source codes and garbled characters read as text", () => {
 });
 
 // Bindings an audit of 2026-10-06 found wrong. The correction belongs to the
-// producer (docs/handoffs/CODEX_LANDING_FOLLOWUPS_2026-10-06.md); until it
+// producer (docs/TERMINAL_HANDOFF.md, open follow-ups); until it
 // lands, the door leaves each record out. When a re-pinned release fixes a
 // binding, this test fails on purpose: delete the entry here and the
 // matching exclusion in showcase.js in the same change.

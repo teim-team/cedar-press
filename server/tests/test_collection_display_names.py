@@ -28,7 +28,6 @@ SURFACES = (
     "public",
     "data/cedar",
     "docs/guides",
-    "docs/datasets/_descriptors.json",
     "index.html",
     "README.md",
     "server/cedar_press",
@@ -73,10 +72,6 @@ class OwnedDisplayName(unittest.TestCase):
             (ROOT / "data/cedar/collection_descriptors.json").read_text(encoding="utf-8")
         )
         self.assertEqual(next(d for d in descriptors if d["id"] == "owned")["name"], NEW)
-        docs_desc = json.loads(
-            (ROOT / "docs/datasets/_descriptors.json").read_text(encoding="utf-8")
-        )
-        self.assertEqual(docs_desc["native-owned-businesses"]["name"], NEW)
         dump = (ROOT / "server/cedar_press/_press_data.json").read_text(encoding="utf-8")
         self.assertIn(f'"name": "{NEW}"', dump)
         catalog = (ROOT / "src/features/grove/pressCatalog.js").read_text(encoding="utf-8")

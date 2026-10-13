@@ -53,7 +53,7 @@ const DOWNLOADS = `${PUBLIC}/data/cedar/downloads`;
 
 // Until 2026-10-02 the register withheld the name of every entity in this
 // class (null name, uid and class only), mirroring
-// code/cedar_domain.py may_publish_individual_native_field, which released a
+// the retired code/cedar_domain.py may_publish_individual_native_field, which released a
 // name only on recorded OPTED_IN consent. Owner ruling 2026-10-02: a firm is
 // a business entity regardless of what it is named after, and its name,
 // identifiers and business address are public business records (SAM and
@@ -228,7 +228,7 @@ export function contractFor(columns, rows = []) {
   c.search = [...new Set([c.entity_name, ...observation].filter(Boolean))];
   // Collective scope and the link status, by their approved names only: the
   // population a record relates to is a different thing from the entity it
-  // names (docs/COLLECTIVE_SCOPE_DECISION_2026-09-05.md), and no older
+  // names (the owner's collective-scope decision, in docs/ARCHITECTURE.md), and no older
   // column is read as either.
   c.scopes = columns.includes("collective_scopes") ? "collective_scopes" : null;
   c.link_status = columns.includes("entity_link_status") ? "entity_link_status" : columns.includes("entity_link_statuses") ? "entity_link_statuses" : null;

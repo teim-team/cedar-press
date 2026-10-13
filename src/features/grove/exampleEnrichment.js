@@ -9,7 +9,7 @@
 // by server/cedar_press/collections.py from data/cedar/need_ownership_evidence.json
 // with a basis and a public source), so the page and the file agree, and the
 // five unreleased enterprises are gone until the producer publishes them
-// (docs/handoffs/CODEX_LANDING_FOLLOWUPS_2026-10-06.md).
+// (docs/TERMINAL_HANDOFF.md, "Open follow-ups from the 2026-10-06 landing-page work").
 //
 // What remains is a reading aid computed from the row's own cells.
 

@@ -138,7 +138,6 @@ class SpreadsheetUnion(unittest.TestCase):
             return {"content_file": io.BytesIO((json.dumps(values[name]) + "\n").encode())}
 
         with (
-            patch.object(repository, "assert_collection_publishable"),
             patch.object(repository, "is_component_release", return_value=True),
             patch.object(
                 repository,
