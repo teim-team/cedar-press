@@ -89,7 +89,7 @@ test("private, credentialed and nonweb links are never public citations", () => 
 });
 
 test("rights-status facts cite their source; Grove-only Gaming never becomes a Press card", () => {
-  for (const collection of ["need", "gaming"]) assert.equal(sourcePresentation(collection, {}, null), null);
+  assert.equal(sourcePresentation("gaming", {}, null), null);
   // Owner ruling 2026-10-04: a review or rights status is provenance, not a gate.
   for (const value of ["held", "internal_vendor", "withheld_unverified"]) {
     assert.notEqual(sourcePresentation("deals", { rights_class: value }, null), null);
@@ -97,6 +97,17 @@ test("rights-status facts cite their source; Grove-only Gaming never becomes a P
   const owned = sourcePresentation("owned", { certifying_authority_name: "Synthetic Nation", source_edition: "2025-Approved-Business-Licenses.pdf" }, null);
   assert.equal(owned.title, null);
   assert.equal(owned.publisher, null);
+});
+
+test("a NEED record cites its ownership page and says what kind of evidence it is", () => {
+  // The first row of the served NEED download; test_source_presentation.py checks the same row.
+  const row = { native_owner_basis: "the owner's published page", native_owner_source: "https://www.ahtna.com/company/ahtna-builders-llc/" };
+  const source = sourcePresentation("need", row, row.native_owner_source);
+  assert.equal(source.url, "https://www.ahtna.com/company/ahtna-builders-llc/");
+  assert.deepEqual(source.evidenceBasis, { label: "Ownership evidence", text: "the owner's published page" });
+  assert.equal(source.publisher, null);
+  assert.equal(sourcePresentation("need", {}, null).evidenceBasis, null);
+  assert.equal("evidenceBasis" in sourcePresentation("deals", row, null), false);
 });
 
 

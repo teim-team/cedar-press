@@ -27,6 +27,12 @@ test("replaced labels are gone, so a source is not named twice", () => {
   }
 });
 
+// Owner, 2026-09-27: gaming is not a Cedar Press collection, so the door
+// names none of its sources.
+test("no gaming source is named on the Cedar Press door", () => {
+  for (const label of SOURCE_ROTATION) assert.doesNotMatch(label, /gaming|casino|NIGC/i, label);
+});
+
 // The figure is measured (2026-10-06): the kinds of source the released
 // collections name, counted from pressSources.js. It never moves because
 // labels were added to this list, and it is never an unmeasured "700+".

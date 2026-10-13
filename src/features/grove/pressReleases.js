@@ -42,6 +42,14 @@
  * overlays the ledger entry for its version and can only describe a version
  * the ledger holds; a test holds that too.
  *
+ * WHAT A READER SEES IS THE DATASET AS IT STANDS
+ * The ledger is the internal record. What a reader sees, on What's New and in
+ * Cedar's answers, is one entry per collection: the version it is on, the date
+ * its data was refreshed and what it holds now (owner rule 2026-09-28: Updated
+ * dates, not release numbers, table counts or change history). Earlier
+ * versions are not shown and their anchors no longer resolve (decided
+ * 2026-10-08, takeover loop 1).
+ *
  * A RETIRED COLLECTION STAYS CITABLE
  * A collection the storefront stops selling keeps its releases in the ledger,
  * and they stay in the feed as read-only history: `#<id>-v0` still resolves,
@@ -70,6 +78,7 @@ import ledger from "../../../data/cedar/releases.json" with { type: "json" };
 
 import { PRESS_CATALOG_BY_ID } from "./pressCatalog.js";
 import { LAUNCH_COLLECTION, hasSample } from "./collection.js";
+import { downloadRecord } from "./customerTables.js";
 
 /**
  * How often a collection is maintained. The label is what a reader sees.
@@ -139,29 +148,22 @@ export function ledgerFor(id, source = ledger) {
 }
 
 /**
- * What a recorded release shipped, said for a reader, from its facts alone.
+ * What a collection holds today, said for a reader, from its ledger facts.
  *
- * Only the CURRENT release's example records are available to download. The
- * importer writes each sample to one unversioned path and the site serves
- * whatever is there, so an older release's sample is a fact about what
- * shipped then, not a file a reader can still take (Codex, PR #52).
+ * Only the current dataset's example records are available to download, and
+ * the count is the served download's (`sample_downloads.json`): the ledger
+ * records the sample the release produced (ten rows), while the customer
+ * table a reader takes holds 5 for Federal Register and 3 for PLOT.
  *
  * Reader wording (owner review, 2026-10-06): no "preview", "shelf",
  * "manifest" or "readiness". The sample is "example records", the word the
  * collection profile uses, and a release held back is "on hold" with the
  * number of reasons the ledger recorded.
  */
-function describe(record, { isFirst, isCurrent, served }) {
-  const lead = isFirst ? "First published on Cedar Press" : "Dataset updated";
-  const changed = [`${lead}: ${record.rowsLabel}.`];
-  if (record.preview) {
-    const n = record.preview.rows;
-    const examples = `${n} example ${n === 1 ? "record" : "records"}`;
-    changed.push(isCurrent && served
-      ? `${examples} ${n === 1 ? "is" : "are"} available to download.`
-      : isCurrent
-        ? `${examples} ${n === 1 ? "is" : "are"} not available to download yet.`
-        : `${examples} accompanied this update; the current update's examples have replaced ${n === 1 ? "it" : "them"}.`);
+function describe(record, examples) {
+  const changed = [`Current dataset: ${record.rowsLabel}.`];
+  if (examples) {
+    changed.push(`${examples} example ${examples === 1 ? "record is" : "records are"} available to download.`);
   } else {
     changed.push("No example records are available yet.");
   }
@@ -174,24 +176,30 @@ function describe(record, { isFirst, isCurrent, served }) {
   return changed;
 }
 
-/** One collection's history, newest first: the ledger, with notes overlaid. */
-function historyOf(id, currentVersion, source) {
-  const notes = RELEASE_NOTES[id] ?? {};
-  return ledgerFor(id, source).map((record, index) => {
-    const note = notes[record.version];
-    const standing = {
-      isFirst: index === 0,
-      isCurrent: record.version === currentVersion,
-      served: hasSample(id),
-    };
-    return Object.freeze({
-      version: record.version,
-      date: record.date,
-      kind: note?.kind ?? RELEASE_KIND.DATA,
-      ...(note?.note ? { note: note.note } : {}),
-      changed: Object.freeze(note?.changed ?? describe(record, standing)),
-    });
-  }).reverse();
+/**
+ * One collection's public history: a single entry, for the dataset as it
+ * stands (owner rule 2026-09-28: readers see Updated dates, not release
+ * numbers, table counts or change history; the ledger keeps the history).
+ *
+ * The entry carries the version the collection is on, so its anchor is the
+ * one the overview links to, and the date its data was refreshed rather than
+ * the date it was re-released: on 2026-10-06 every collection was re-released
+ * with no change to its data (commit 4f4bc0c). A retired collection keeps its
+ * last ledger entry, so a citation that named it still resolves.
+ */
+function historyOf(id, version, dataDate, source) {
+  const records = ledgerFor(id, source);
+  const record = version ? records.find((item) => item.version === version) : records.at(-1);
+  if (!record) return [];
+  const note = (RELEASE_NOTES[id] ?? {})[record.version];
+  const examples = version && hasSample(id) ? downloadRecord(id)?.rows ?? null : null;
+  return [Object.freeze({
+    version: record.version,
+    date: dataDate ?? record.date,
+    kind: note?.kind ?? RELEASE_KIND.DATA,
+    ...(note?.note ? { note: note.note } : {}),
+    changed: Object.freeze(note?.changed ?? describe(record, examples)),
+  })];
 }
 
 /**
@@ -217,7 +225,7 @@ export function buildReleases(source, launch) {
       refreshed: dataset.refreshed ?? null,
       cadence: DECLARED_CADENCE[dataset.id] ?? null,
       retired: false,
-      history: Object.freeze(historyOf(dataset.id, dataset.version, source)),
+      history: Object.freeze(historyOf(dataset.id, dataset.version, dataset.refreshed, source)),
     });
   }
   for (const [id, records] of Object.entries(source.releases)) {
@@ -229,7 +237,7 @@ export function buildReleases(source, launch) {
       updated: last.date,
       cadence: null,
       retired: true,
-      history: Object.freeze(historyOf(id, null, source)),
+      history: Object.freeze(historyOf(id, null, null, source)),
     });
   }
   return Object.freeze(releases);
@@ -390,5 +398,5 @@ export function connectedReleaseModel(payload) {
     releases[entry.id] = entry;
   }
   return { source: "verified_current", historyComplete: false, releases,
-    feed: buildFeed(releases), previewHistory: buildFeed(PREVIEW_RELEASES) };
+    feed: buildFeed(releases), previewHistory: [] };
 }

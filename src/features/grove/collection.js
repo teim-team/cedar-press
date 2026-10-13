@@ -129,19 +129,22 @@ const tracksForReaders = (descriptor) => {
 };
 
 /**
- * When each collection's DATA was last refreshed from the producer, which is
- * not the same date as `updated`.
+ * When each collection's DATA was last refreshed from the producer. This is
+ * the one date a reader sees for a collection, labelled "Updated", and the
+ * date its citation carries.
  *
- * `updated` is the release date the ledger records (data/cedar/releases.json).
- * On 2026-10-06 every collection was re-released with that date at the
- * owner's request, without a producer data refresh: the rows, samples and
- * release ids did not change. A reader needs three dates kept apart: when
- * the page was revised, when the data was refreshed, and what period the
- * records cover. This is the second, read from the manifest's provenance:
- * the producer refresh a collection was staged from
- * (`provenance.selected_refreshes[id].updated`), else the producer pin every
- * other collection was staged from (`provenance.updated`). Never typed. The
- * service reads the same fields (collections.py `_data_refreshed`).
+ * The release date the ledger records (data/cedar/releases.json) is kept as
+ * `released`, for checks against the ledger, and is never shown. On
+ * 2026-10-06 every collection was re-released with that date at the owner's
+ * request, without a producer data refresh: the rows, samples and release
+ * ids did not change, so showing it said the data changed when it had not.
+ * The date is read from the manifest's provenance: the producer refresh a
+ * collection was staged from (`provenance.selected_refreshes[id].updated`),
+ * else the producer pin every other collection was staged from
+ * (`provenance.updated`). Never typed, and never replaced by the release
+ * date: a manifest without a refresh date shows no date, and
+ * pressReleases.test.js requires one for every collection. The service
+ * reads the same fields (collections.py `_data_refreshed`).
  */
 function dataRefreshed(id) {
   const provenance = manifest.provenance ?? {};
@@ -161,8 +164,11 @@ export const LAUNCH_COLLECTION = deepFreeze(
     downloads: entry.descriptor.downloads,
     vintage: entry.descriptor.vintage,
     version: entry.descriptor.version,
-    updated: entry.descriptor.updated,
+    // The data date; `refreshed` is the same date under the name older
+    // callers read. `released` is the ledger's release date, never shown.
+    updated: dataRefreshed(entry.descriptor.id),
     refreshed: dataRefreshed(entry.descriptor.id),
+    released: entry.descriptor.updated,
     sources: entry.descriptor.sources,
     method: entry.descriptor.method,
   })),
@@ -381,10 +387,10 @@ export function collectionShort(dataset) {
   return STOREFRONT_SHORT[dataset.id] ?? dataset.shortName;
 }
 
-/** One line for the context strip: versions and the latest refresh date. */
+/** One line for the context strip: the latest data refresh date. */
 export function collectionContextLine() {
-  const updated = LAUNCH_COLLECTION.map((d) => d.updated).sort().slice(-1)[0];
-  return `Updated ${updated}`;
+  const updated = LAUNCH_COLLECTION.map((d) => d.updated).filter(Boolean).sort().at(-1);
+  return updated ? `Updated ${updated}` : "";
 }
 
 /**
@@ -527,7 +533,8 @@ export function collectionFindings() {
 /** A figure's basis line, derived so it cannot name a stale version. */
 function basisFor(datasetId, fallback) {
   const dataset = LAUNCH_COLLECTION.find((item) => item.id === datasetId);
-  return dataset ? `${collectionShort(dataset)}, updated ${dataset.updated}` : fallback;
+  if (!dataset) return fallback;
+  return dataset.updated ? `${collectionShort(dataset)}, updated ${dataset.updated}` : collectionShort(dataset);
 }
 
 /**

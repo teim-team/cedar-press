@@ -472,7 +472,7 @@
       "year": null,
       "date": null,
       "amount": null,
-      "source": null,
+      "source": "native_owner_source",
       "record_id": null,
       "subject": "enterprise_name",
       "superseded": null,
@@ -511,6 +511,7 @@
         "uei",
         "cage_code"
       ],
+      "source_fallback": "source_urls",
       "mapping_kind": "customer_table",
       "reviewed": true,
       "review_reason": "Presentation mapping of the collection's customer table (vendored customer_sheet rules, owner ruling 2026-10-04): its own record identifier, the explicit Cedar entity block and source-declared roles. This is not a new identity or ownership determination.",

@@ -15,7 +15,8 @@
 // figures rasterized from the SVG on screen, the lead photograph toned);
 // this module only lays out pages, which keeps it testable in node.
 
-import { BLOCK, TBN_PLANS_URL, TBN_URL } from "./pressArticles.js";
+import { BLOCK, TBN_URL } from "./pressArticles.js";
+import { CONTACT_EMAIL, EARLY_ACCESS_HREF, EARLY_ACCESS_LABEL } from "./appLink.js";
 
 const PAGE = { w: 612, h: 792, m: 54 };
 const NAVY = [9, 19, 43];
@@ -63,7 +64,8 @@ export function pdfFileName(article) {
 /**
  * The email a sharer starts from. A mailto link cannot carry an attachment,
  * so the body stands on its own: what the piece is, where to read it, and how
- * to get Cedar Press+. The PDF goes along through the system share sheet
+ * to ask for early access while enrollment is closed (the door's wording,
+ * 2026-10-06; see appLink.js). The PDF goes along through the system share sheet
  * where the browser has one, and is downloaded to attach by hand where not.
  */
 export function shareEmail(article, url) {
@@ -76,7 +78,8 @@ export function shareEmail(article, url) {
     "",
     `Read it on Cedar Press: ${url}`,
     "",
-    `Cedar Press+ is available through a Tribal Business News membership: ${TBN_PLANS_URL}`,
+    "Cedar Press will be available exclusively through a Tribal Business News membership. " +
+      `Enrollment is not open yet; request early access at ${CONTACT_EMAIL}.`,
   ].join("\n");
   return {
     subject,
@@ -272,7 +275,7 @@ export async function buildArticlePdf({ article, url, collections = [], lead = n
   // The subscribe card, navy, with its link on the whole card.
   ry += 12;
   font("normal", 9);
-  const pitch = doc.splitTextToSize("Cedar Press+ opens every collection behind this brief, through a Tribal Business News membership.", RAILW - 24);
+  const pitch = doc.splitTextToSize("Cedar Press+ will open every collection behind this brief, through a Tribal Business News membership. Enrollment is not open yet.", RAILW - 24);
   const cardH = 36 + pitch.length * 12.5 + 26;
   fill(NAVY);
   doc.roundedRect(RAILX, ry, RAILW, cardH, 6, 6, "F");
@@ -284,8 +287,8 @@ export async function buildArticlePdf({ article, url, collections = [], lead = n
   pitch.forEach((line, i) => doc.text(line, RAILX + 12, ry + 38 + i * 12.5));
   font("bold", 9.5);
   ink([95, 217, 204]);
-  doc.text("Subscribe now", RAILX + 12, ry + cardH - 14);
-  doc.link(RAILX, ry, RAILW, cardH, { url: TBN_PLANS_URL });
+  doc.text(EARLY_ACCESS_LABEL, RAILX + 12, ry + cardH - 14);
+  doc.link(RAILX, ry, RAILW, cardH, { url: EARLY_ACCESS_HREF });
   railBottom = ry + cardH + 8;
 
   // ── The text.
@@ -449,7 +452,7 @@ export async function buildArticlePdf({ article, url, collections = [], lead = n
   doc.text("The research, and the data behind it, on Cedar Press", M + 22, y + 52, { maxWidth: FULL - 44 });
   font("normal", 9.5);
   ink([200, 210, 225]);
-  doc.text("Not a subscriber? Cedar Press+ is available through a Tribal Business News membership.", M + 22, y + 72, { maxWidth: FULL - 44 });
+  doc.text("Not a subscriber? Cedar Press will be available through a Tribal Business News membership. Enrollment is not open yet.", M + 22, y + 72, { maxWidth: FULL - 44 });
   const btn = (label, href, x, primary) => {
     font("bold", 10);
     const w = doc.getTextWidth(label) + 32;
@@ -467,7 +470,7 @@ export async function buildArticlePdf({ article, url, collections = [], lead = n
     doc.link(x, y + 96, w, 30, { url: href });
     return w;
   };
-  const w1 = btn("Get Cedar Press+", TBN_PLANS_URL, M + 22, true);
+  const w1 = btn(EARLY_ACCESS_LABEL, EARLY_ACCESS_HREF, M + 22, true);
   btn("Open this brief on Cedar Press", url, M + 22 + w1 + 12, false);
   y += endH;
 

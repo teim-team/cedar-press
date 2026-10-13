@@ -84,8 +84,7 @@ export default function CedarPressWhatsNew() {
   const releaseState = useReleaseFeed(user, authLoading);
   const model = releaseState.data;
   const all = model?.feed ?? EMPTY_FEED;
-  const history = model?.previewHistory ?? EMPTY_FEED;
-  const anchors = useMemo(() => [...all, ...history], [all, history]);
+  const anchors = all;
   const current = model?.source === "verified_current";
   const [collection, setCollection] = useState("all");
   const [kind, setKind] = useState("all");
@@ -160,18 +159,14 @@ export default function CedarPressWhatsNew() {
               The ledger below is the page, and this was 60 words of preamble
               above it saying what a changelog is. What survives is the part a
               reader cannot infer from the rows: that methodology releases can
-              move figures somebody has already published, and that old
-              versions stay addressable. */}
+              move figures somebody has already published. Earlier versions
+              are not listed (owner rule 2026-09-28). */}
           <div className="cp-nh__say">
             <p className="cp-nh__sub">
               {!model ? "See the latest collection information available to your subscription." : current
                 ? "Current verified data available to your subscription."
-                : "Every collection update is recorded here with its date, so a figure can be checked against the data it came from."}
+                : "Each collection's current data, with the date it was last updated."}
             </p>
-            {model ? <p className="cp-nh__sub cp-nh__sub--use">
-              {current ? "Earlier update dates are kept for citations."
-                : "Use the update history to check an earlier citation."}
-            </p> : null}
           </div>
           {model && !current ? <dl className="cp-nh__pulse" aria-label="Update activity">
             <dt>Updates, last {activity.days} days</dt>
@@ -397,13 +392,6 @@ export default function CedarPressWhatsNew() {
         {/* Sponsorship rule 5: never in a filtered view. The slot rides the
             full feed only, and never an empty result. It sits after the feed
             and its control, which is where a page pauses. */}
-        {history.length ? <details className="cp-feed__detail" data-testid="public-preview-history">
-          <summary>Update history</summary>
-          <p>Earlier update dates remain available for citation.</p>
-          <ul>{history.map((entry) => <li key={entry.anchor} id={entry.anchor}>
-            <a href={`#${entry.anchor}`}>{entry.name}</a>: updated {formatUpdated(entry.date)}
-          </li>)}</ul>
-        </details> : null}
         {filtered || !model ? null : <PressAd slot={AD_SLOT.FEED} />}
 
         <PressFoot />

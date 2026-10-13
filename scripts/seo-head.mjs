@@ -20,8 +20,9 @@ import { coverageLabel } from "../src/features/grove/pressAccess.js";
 const ROOT = fileURLToPath(new URL("..", import.meta.url));
 const INDEX = `${ROOT}index.html`;
 // The release descriptor per collection: the name the download citation
-// carries and the Updated date, read from the manifest so the structured data
-// names the dataset the way its own files do.
+// carries, read from the manifest so the structured data names the dataset
+// the way its own files do. The date is not read from here: the descriptor's
+// `updated` is the release date, and readers see the data date (L1-U05).
 const RELEASE = Object.fromEntries(
   JSON.parse(readFileSync(`${ROOT}data/cedar/collections.manifest.json`, "utf8")).collections
     .map((entry) => [entry.id, entry.descriptor]),
@@ -96,7 +97,7 @@ export function datasets() {
     // file they hold finds the dataset it came from.
     alternateName: alternateNames(entry),
     description: `${entry.blurb} ${entry.linkage ?? ""}`.trim(),
-    dateModified: RELEASE[entry.id]?.updated ?? undefined,
+    dateModified: PRESS_RELEASES[entry.id]?.updated ?? undefined,
     url: `${SITE}/`,
     creator: { "@id": ORG },
     publisher: { "@id": ORG },

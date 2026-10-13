@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs";
 
 import { buildArticlePdf, pdfFileName, pdfText, shareEmail } from "./articlePdf.js";
 import { TBN_PLANS_URL } from "./pressArticles.js";
+import { CONTACT_EMAIL, EARLY_ACCESS_HREF } from "./appLink.js";
 
 const SERVER_ARTICLES = JSON.parse(readFileSync(new URL("../../../server/cedar_press/articles.json", import.meta.url), "utf8"));
 const hosted = SERVER_ARTICLES.filter((a) => a.hosted);
@@ -19,11 +20,16 @@ test("the file is named for the brief", () => {
   assert.equal(pdfFileName({}), "cedar-press-brief.pdf");
 });
 
-test("the share email names the brief, links it, and says how to get Cedar Press+", () => {
+// Enrollment is not open (2026-10-06): the email and the PDF ask for early
+// access, as the door does, and never send a reader to buy a plan that does
+// not exist yet.
+test("the share email names the brief, links it, and says how to ask for early access", () => {
   const { subject, body, href } = shareEmail(hosted[0], "https://cedarpress.ai/articles/x");
   assert.match(subject, /^Cedar Press: /);
   assert.ok(body.includes("https://cedarpress.ai/articles/x"));
-  assert.ok(body.includes(TBN_PLANS_URL));
+  assert.ok(body.includes(CONTACT_EMAIL));
+  assert.ok(body.includes("Enrollment is not open yet"));
+  assert.ok(!body.includes(TBN_PLANS_URL));
   assert.ok(href.startsWith("mailto:?subject="));
   assert.doesNotMatch(body, /\p{Extended_Pictographic}/u);
 });
@@ -38,9 +44,10 @@ test("every hosted brief builds a PDF", async () => {
     const bytes = new Uint8Array(await blob.arrayBuffer());
     assert.equal(new TextDecoder().decode(bytes.slice(0, 5)), "%PDF-", article.id);
     assert.ok(bytes.length > 3000, `${article.id}: ${bytes.length} bytes`);
-    // The subscribe link is a real link annotation, not just text.
+    // The early-access link is a real link annotation, not just text.
     const raw = new TextDecoder("latin1").decode(bytes);
-    assert.ok(raw.includes(TBN_PLANS_URL), `${article.id} does not link Cedar Press+`);
+    assert.ok(raw.includes(EARLY_ACCESS_HREF), `${article.id} does not link early access`);
+    assert.ok(!raw.includes(TBN_PLANS_URL), `${article.id} still links the subscribe page`);
   }
 });
 

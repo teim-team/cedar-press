@@ -13,7 +13,9 @@
  * websites, gaming licenses, facility capacity, BIA gaming compacts, gaming
  * payment records and gaming litigation) were removed on the owner's note of
  * 2026-09-27: gaming is not a Cedar Press collection, so a panel on the Cedar
- * Press door should not name its sources. Nothing counts this list: the
+ * Press door should not name its sources. Six that remained (NIGC revenue
+ * and enforcement, Class III compacts, state regulators, casino websites,
+ * facility registers) went on 2026-10-10 (L1-U09). Nothing counts this list: the
  * marquee's run time is its length, and the reach figure never depended on it.
  *
  * The parcel, assessor, deed, permit and environmental-review labels name
@@ -162,12 +164,6 @@ export const SOURCE_ROTATION = Object.freeze([
   "Center for Indian Country Development data",
   "Tribal Employment Rights Office registries",
   "DOL OLMS and state WARN notices",
-  "NIGC gross gaming revenue reports",
-  "NIGC enforcement actions and management contracts",
-  "BIA Class III gaming compacts",
-  "State gaming regulator reports",
-  "Casino and tribal enterprise websites",
-  "Gaming facility registers",
   "Tribal contractor directories",
   "Tribal certification notices",
   "State product and producer directories",

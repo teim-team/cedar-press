@@ -22,6 +22,8 @@
 //                       "https://portal.example/  (AS 45.55.139 filing)" is a
 //                       real source followed by commentary; the whole cell
 //                       is not an address, and used as an href it 404s.
+//   linkText(url)       a link's visible text, cut to 80 characters with an
+//                       ellipsis when it is longer.
 //   readerText(text)    the cell with internal paths and file names named
 //                       for what they are.
 //   isInternalProvenanceColumn(column)
@@ -40,6 +42,19 @@ const URL_TOKEN = /^https?:\/\/[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+(?::\d+)?(?:[/?#
 /** Whether the whole value is one well-formed address. */
 export function isWellFormedUrl(text) {
   return URL_TOKEN.test(String(text ?? "").trim());
+}
+
+/** The longest link text a record table shows, ellipsis included. */
+export const LINK_TEXT_MAX = 80;
+
+/**
+ * A link's visible text: the address without its scheme or "www.", cut to
+ * LINK_TEXT_MAX characters with an ellipsis. The cut and the ellipsis are
+ * decided on the text shown, so a shortened link always says it was shortened.
+ */
+export function linkText(url, max = LINK_TEXT_MAX) {
+  const shown = String(url ?? "").replace(/^https?:\/\/(www\.)?/i, "");
+  return shown.length > max ? `${shown.slice(0, max - 1)}…` : shown;
 }
 
 /** A scheme with nothing behind it ("https://"): a blank in the source, not a link. */

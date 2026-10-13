@@ -16,7 +16,7 @@
       ],
       "tag": "Original Research",
       "title": "The first nation-shared roster of individually owned Native businesses is in",
-      "dek": "White Earth Nation's TERO sent its certified Indian-owned business list in answer to a request through the office's public contact, the first roster in a consent-first dataset of the businesses no federal register counts.",
+      "dek": "White Earth Nation's TERO sent its certified Indian-owned business list in answer to a request through the office's public contact, the first roster in a dataset of the businesses no federal register counts.",
       "date": "August 2026",
       "byline": "Elijah S. Moreno",
       "minutes": 3
@@ -44,10 +44,10 @@
       "shelf": "standard",
       "coverage": {
         "kind": "series",
-        "from": 1994
+        "from": 2025
       },
       "blurb": "Federal Register notices and agency actions concerning tribes, Native organizations, lands, resources, recognition and other Indian Country matters. Follow published actions, consultations and comment periods across agencies and time.",
-      "linkage": "Notices matched to the tribes, lands and organizations they name, including entities that appear under former or variant names."
+      "linkage": "Documents are gathered by a broad search of the Federal Register. As such, inclusion is not a confirmed relationship with a Native entity. Consultation participants are linked to an entity where the notice names one."
     },
     {
       "id": "legislation",
@@ -139,10 +139,10 @@
       "shelf": "pro",
       "coverage": {
         "kind": "series",
-        "from": 1880
+        "from": 1909
       },
       "blurb": "Public records of energy and mineral production, revenues, royalties and related disbursements associated with tribal trust and restricted lands. Compare reported activity by commodity, Native entity, location and period.",
-      "linkage": "Production and disbursements matched to the nations and allottees they belong to."
+      "linkage": "Disbursements matched to the nations they belong to. Individual allottee detail is never published."
     },
     {
       "id": "owned",
@@ -154,7 +154,7 @@
         "captured": "2026-09-01"
       },
       "blurb": "Individually owned Native businesses identified through tribal TERO offices, commerce programs and other documented Native-business registries. Records preserve the issuing source, reported affiliation or certification, location and industry where available.",
-      "linkage": "Every listing carries the nation whose office certified it, appears only under that nation's stated terms, and is credited to the issuing TERO or commerce office."
+      "linkage": "Every listing includes the nation whose office certified it and is credited to the issuing TERO or commerce office."
     },
     {
       "id": "nonprofits",
@@ -195,54 +195,18 @@
     "funding": {
       "name": "Federal Funding to Indian Country",
       "version": "v4",
-      "updated": "2026-10-06",
+      "updated": "2026-10-01",
       "refreshed": "2026-10-01",
       "cadence": "Reviewed on a weekly schedule",
       "retired": false,
       "history": [
         {
           "version": "v4",
-          "date": "2026-10-06",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 640,942 observations.",
-            "10 example records are available to download."
-          ]
-        },
-        {
-          "version": "v3",
           "date": "2026-10-01",
           "kind": "data",
           "changed": [
-            "Dataset updated: 640,942 observations.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v2",
-          "date": "2026-09-26",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 3,646,750 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v1",
-          "date": "2026-09-04",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 3,646,750 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v0",
-          "date": "2026-09-02",
-          "kind": "data",
-          "changed": [
-            "First published on Cedar Press: 3,646,750 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
+            "Current dataset: 640,942 observations.",
+            "10 example records are available to download."
           ]
         }
       ]
@@ -250,54 +214,18 @@
     "federal-register": {
       "name": "Federal Register — Indian Affairs",
       "version": "v4",
-      "updated": "2026-10-06",
+      "updated": "2026-10-01",
       "refreshed": "2026-10-01",
       "cadence": "Reviewed on a weekly schedule",
       "retired": false,
       "history": [
         {
           "version": "v4",
-          "date": "2026-10-06",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 21,258 observations.",
-            "10 example records are available to download."
-          ]
-        },
-        {
-          "version": "v3",
           "date": "2026-10-01",
           "kind": "data",
           "changed": [
-            "Dataset updated: 21,258 observations.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v2",
-          "date": "2026-09-26",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 502,483 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v1",
-          "date": "2026-09-04",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 502,483 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v0",
-          "date": "2026-09-02",
-          "kind": "data",
-          "changed": [
-            "First published on Cedar Press: 502,483 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
+            "Current dataset: 21,258 observations.",
+            "5 example records are available to download."
           ]
         }
       ]
@@ -305,54 +233,18 @@
     "legislation": {
       "name": "Native Legislation and Votes",
       "version": "v4",
-      "updated": "2026-10-06",
+      "updated": "2026-10-01",
       "refreshed": "2026-10-01",
       "cadence": "Reviewed on a weekly schedule",
       "retired": false,
       "history": [
         {
           "version": "v4",
-          "date": "2026-10-06",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 3,064 observations.",
-            "10 example records are available to download."
-          ]
-        },
-        {
-          "version": "v3",
           "date": "2026-10-01",
           "kind": "data",
           "changed": [
-            "Dataset updated: 3,064 observations.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v2",
-          "date": "2026-09-26",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 206,354 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v1",
-          "date": "2026-09-04",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 206,354 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v0",
-          "date": "2026-09-02",
-          "kind": "data",
-          "changed": [
-            "First published on Cedar Press: 149,293 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
+            "Current dataset: 3,064 observations.",
+            "10 example records are available to download."
           ]
         }
       ]
@@ -360,54 +252,18 @@
     "deals": {
       "name": "Indian Country Deals",
       "version": "v4",
-      "updated": "2026-10-06",
+      "updated": "2026-10-01",
       "refreshed": "2026-10-01",
       "cadence": "Reviewed on a weekly schedule",
       "retired": false,
       "history": [
         {
           "version": "v4",
-          "date": "2026-10-06",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 978 observations.",
-            "10 example records are available to download."
-          ]
-        },
-        {
-          "version": "v3",
           "date": "2026-10-01",
           "kind": "data",
           "changed": [
-            "Dataset updated: 978 observations.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v2",
-          "date": "2026-09-26",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 2,662 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v1",
-          "date": "2026-09-04",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 2,662 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v0",
-          "date": "2026-09-02",
-          "kind": "data",
-          "changed": [
-            "First published on Cedar Press: 2,662 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
+            "Current dataset: 978 observations.",
+            "10 example records are available to download."
           ]
         }
       ]
@@ -415,54 +271,18 @@
     "nagpra": {
       "name": "NAGPRA Notices",
       "version": "v4",
-      "updated": "2026-10-06",
+      "updated": "2026-10-01",
       "refreshed": "2026-10-01",
       "cadence": "Reviewed on a weekly schedule",
       "retired": false,
       "history": [
         {
           "version": "v4",
-          "date": "2026-10-06",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 6,792 observations.",
-            "10 example records are available to download."
-          ]
-        },
-        {
-          "version": "v3",
           "date": "2026-10-01",
           "kind": "data",
           "changed": [
-            "Dataset updated: 6,792 observations.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v2",
-          "date": "2026-09-26",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 100,786 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v1",
-          "date": "2026-09-04",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 100,786 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v0",
-          "date": "2026-09-02",
-          "kind": "data",
-          "changed": [
-            "First published on Cedar Press: 72,302 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
+            "Current dataset: 6,792 observations.",
+            "10 example records are available to download."
           ]
         }
       ]
@@ -470,54 +290,18 @@
     "lobbying": {
       "name": "Native Federal Advocacy and Engagement",
       "version": "v4",
-      "updated": "2026-10-06",
+      "updated": "2026-10-01",
       "refreshed": "2026-10-01",
       "cadence": "Reviewed on a weekly schedule",
       "retired": false,
       "history": [
         {
           "version": "v4",
-          "date": "2026-10-06",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 27,825 observations.",
-            "10 example records are available to download."
-          ]
-        },
-        {
-          "version": "v3",
           "date": "2026-10-01",
           "kind": "data",
           "changed": [
-            "Dataset updated: 27,825 observations.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v2",
-          "date": "2026-09-26",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 264,478 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v1",
-          "date": "2026-09-04",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 264,478 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v0",
-          "date": "2026-09-02",
-          "kind": "data",
-          "changed": [
-            "First published on Cedar Press: 264,478 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
+            "Current dataset: 27,825 observations.",
+            "10 example records are available to download."
           ]
         }
       ]
@@ -525,54 +309,18 @@
     "contractors": {
       "name": "Native Federal Contractors",
       "version": "v4",
-      "updated": "2026-10-06",
+      "updated": "2026-10-01",
       "refreshed": "2026-10-01",
       "cadence": "Reviewed on a weekly schedule",
       "retired": false,
       "history": [
         {
           "version": "v4",
-          "date": "2026-10-06",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 841,002 observations.",
-            "10 example records are available to download."
-          ]
-        },
-        {
-          "version": "v3",
           "date": "2026-10-01",
           "kind": "data",
           "changed": [
-            "Dataset updated: 841,002 observations.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v2",
-          "date": "2026-09-26",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 3,345,971 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v1",
-          "date": "2026-09-04",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 3,345,971 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v0",
-          "date": "2026-09-02",
-          "kind": "data",
-          "changed": [
-            "First published on Cedar Press: 3,345,971 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
+            "Current dataset: 841,002 observations.",
+            "10 example records are available to download."
           ]
         }
       ]
@@ -580,54 +328,18 @@
     "subcontracting": {
       "name": "Native Federal Subcontracting",
       "version": "v4",
-      "updated": "2026-10-06",
+      "updated": "2026-10-01",
       "refreshed": "2026-10-01",
       "cadence": "Reviewed on a weekly schedule",
       "retired": false,
       "history": [
         {
           "version": "v4",
-          "date": "2026-10-06",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 70,054 observations.",
-            "10 example records are available to download."
-          ]
-        },
-        {
-          "version": "v3",
           "date": "2026-10-01",
           "kind": "data",
           "changed": [
-            "Dataset updated: 70,054 observations.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v2",
-          "date": "2026-09-26",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 90,479 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v1",
-          "date": "2026-09-04",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 90,479 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v0",
-          "date": "2026-09-02",
-          "kind": "data",
-          "changed": [
-            "First published on Cedar Press: 90,479 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
+            "Current dataset: 70,054 observations.",
+            "10 example records are available to download."
           ]
         }
       ]
@@ -635,64 +347,18 @@
     "owned": {
       "name": "Individual Native-Owned Businesses",
       "version": "v5",
-      "updated": "2026-10-06",
+      "updated": "2026-10-01",
       "refreshed": "2026-10-01",
       "cadence": "Reviewed on a weekly schedule",
       "retired": false,
       "history": [
         {
           "version": "v5",
-          "date": "2026-10-06",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 3,725 observations.",
-            "10 example records are available to download."
-          ]
-        },
-        {
-          "version": "v4",
-          "date": "2026-10-02",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 3,725 observations.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v3",
           "date": "2026-10-01",
           "kind": "data",
           "changed": [
-            "Dataset updated: 3,725 observations.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v2",
-          "date": "2026-09-26",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 5,930 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v1",
-          "date": "2026-09-04",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 5,930 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v0",
-          "date": "2026-09-02",
-          "kind": "data",
-          "changed": [
-            "First published on Cedar Press: row count unresolved.",
-            "No example records are available yet.",
-            "This update is on hold, for 3 recorded reasons."
+            "Current dataset: 3,725 observations.",
+            "10 example records are available to download."
           ]
         }
       ]
@@ -700,73 +366,18 @@
     "need": {
       "name": "Cedar Native Entity Enterprise Dataset (NEED)",
       "version": "v6",
-      "updated": "2026-10-06",
+      "updated": "2026-10-01",
       "refreshed": "2026-10-01",
       "cadence": "Reviewed on a weekly schedule",
       "retired": false,
       "history": [
         {
           "version": "v6",
-          "date": "2026-10-06",
+          "date": "2026-10-01",
           "kind": "data",
           "changed": [
-            "Dataset updated: 43 observations.",
+            "Current dataset: 43 observations.",
             "10 example records are available to download."
-          ]
-        },
-        {
-          "version": "v5",
-          "date": "2026-10-01",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 43 observations.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v4",
-          "date": "2026-10-01",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 27 observations.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v3",
-          "date": "2026-09-27",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 14,868 rows.",
-            "No example records are available yet.",
-            "This update is on hold, for 1 recorded reason."
-          ]
-        },
-        {
-          "version": "v2",
-          "date": "2026-09-26",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 14,868 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v1",
-          "date": "2026-09-04",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 14,868 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v0",
-          "date": "2026-09-02",
-          "kind": "data",
-          "changed": [
-            "First published on Cedar Press: 5,757 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
           ]
         }
       ]
@@ -774,54 +385,18 @@
     "natural-resources": {
       "name": "Tribal Natural Resource Revenue",
       "version": "v4",
-      "updated": "2026-10-06",
+      "updated": "2026-10-01",
       "refreshed": "2026-10-01",
       "cadence": "Reviewed on a weekly schedule",
       "retired": false,
       "history": [
         {
           "version": "v4",
-          "date": "2026-10-06",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 11,120 observations.",
-            "10 example records are available to download."
-          ]
-        },
-        {
-          "version": "v3",
           "date": "2026-10-01",
           "kind": "data",
           "changed": [
-            "Dataset updated: 11,120 observations.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v2",
-          "date": "2026-09-26",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 283,716 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v1",
-          "date": "2026-09-04",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 283,716 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v0",
-          "date": "2026-09-02",
-          "kind": "data",
-          "changed": [
-            "First published on Cedar Press: 283,716 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
+            "Current dataset: 11,120 observations.",
+            "10 example records are available to download."
           ]
         }
       ]
@@ -829,54 +404,18 @@
     "nonprofits": {
       "name": "Native Nonprofits",
       "version": "v4",
-      "updated": "2026-10-06",
+      "updated": "2026-10-01",
       "refreshed": "2026-10-01",
       "cadence": "Reviewed on a weekly schedule",
       "retired": false,
       "history": [
         {
           "version": "v4",
-          "date": "2026-10-06",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 89 observations.",
-            "10 example records are available to download."
-          ]
-        },
-        {
-          "version": "v3",
           "date": "2026-10-01",
           "kind": "data",
           "changed": [
-            "Dataset updated: 89 observations.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v2",
-          "date": "2026-09-26",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 131,090 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v1",
-          "date": "2026-09-04",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 131,090 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
-          ]
-        },
-        {
-          "version": "v0",
-          "date": "2026-09-02",
-          "kind": "data",
-          "changed": [
-            "First published on Cedar Press: 123,293 rows.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
+            "Current dataset: 89 observations.",
+            "10 example records are available to download."
           ]
         }
       ]
@@ -884,27 +423,18 @@
     "foundation-corporate-giving": {
       "name": "Foundation & Corporate Giving",
       "version": "v4",
-      "updated": "2026-10-06",
+      "updated": "2026-10-01",
       "refreshed": "2026-10-01",
       "cadence": "Reviewed on a weekly schedule",
       "retired": false,
       "history": [
         {
           "version": "v4",
-          "date": "2026-10-06",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 193 observations.",
-            "10 example records are available to download."
-          ]
-        },
-        {
-          "version": "v3",
           "date": "2026-10-01",
           "kind": "data",
           "changed": [
-            "First published on Cedar Press: 193 observations.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
+            "Current dataset: 193 observations.",
+            "10 example records are available to download."
           ]
         }
       ]
@@ -912,27 +442,18 @@
     "plot": {
       "name": "PLOT",
       "version": "v4",
-      "updated": "2026-10-06",
+      "updated": "2026-10-01",
       "refreshed": "2026-10-01",
       "cadence": "Reviewed on a weekly schedule",
       "retired": false,
       "history": [
         {
           "version": "v4",
-          "date": "2026-10-06",
-          "kind": "data",
-          "changed": [
-            "Dataset updated: 151,715 observations.",
-            "10 example records are available to download."
-          ]
-        },
-        {
-          "version": "v3",
           "date": "2026-10-01",
           "kind": "data",
           "changed": [
-            "First published on Cedar Press: 151,715 observations.",
-            "10 example records accompanied this update; the current update's examples have replaced them."
+            "Current dataset: 151,715 observations.",
+            "3 example records are available to download."
           ]
         }
       ]

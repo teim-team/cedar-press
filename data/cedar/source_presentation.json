@@ -162,6 +162,16 @@
         "last_seen"
       ]
     },
+    "need": {
+      "urls": [
+        "native_owner_source",
+        "source_urls"
+      ],
+      "evidenceBasis": {
+        "label": "Ownership evidence",
+        "field": "native_owner_basis"
+      }
+    },
     "natural-resources": {
       "systems": {
         "ONRR_NRRD_monthly_revenue": "U.S. Department of the Interior, Office of Natural Resources Revenue",

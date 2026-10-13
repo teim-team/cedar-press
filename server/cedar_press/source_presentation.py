@@ -168,7 +168,17 @@ def present(collection, row, component=None):
         ]
         if x
     )
+    # The kind of evidence behind the record's link (NEED: a company page or a
+    # federal identifier), so a reader can weigh the source.
+    basis_spec = spec.get("evidenceBasis")
+    basis = readable(row.get(basis_spec["field"])) if basis_spec else None
+    extra = (
+        {"evidenceBasis": {"label": basis_spec["label"], "text": basis} if basis else None}
+        if basis_spec
+        else {}
+    )
     return {
+        **extra,
         "publisher": publisher,
         "issuingAuthority": issuing_authority,
         "title": title,

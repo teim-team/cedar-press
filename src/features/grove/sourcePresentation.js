@@ -35,7 +35,7 @@ function sourceTitle(value) {
 /** Input is the already filtered public row, never internal evidence or a source contract. */
 export function sourcePresentation(collection, row, recordUrl) {
   const spec = SPECS[collection];
-  if (!spec || collection === "need" || collection === "gaming") return null;
+  if (!spec || collection === "gaming") return null;
   // Owner ruling 2026-10-04 (Elijah Moreno): a row's review or rights status is
   // provenance; it no longer suppresses the row's source citation.
   const family = collection === "plot" ? PLOT_SOURCES[text(row.source_id)] : null;
@@ -59,7 +59,11 @@ export function sourcePresentation(collection, row, recordUrl) {
   const originalDocumentSha256 = (spec.documentHashFields ?? []).map((name) => row[name])
     .find((value) => typeof value === "string" && /^[a-f0-9]{64}$/.test(value)) ?? null;
   const retrievedDate = (spec.retrievedFields ?? []).map((name) => text(row[name])).find(Boolean) ?? null;
+  // The kind of evidence behind the record's link (NEED: a company page or a
+  // federal identifier), so a reader can weigh the source.
+  const basis = spec.evidenceBasis ? text(row[spec.evidenceBasis.field]) : null;
   return {
+    ...(spec.evidenceBasis ? { evidenceBasis: basis ? { label: spec.evidenceBasis.label, text: basis } : null } : {}),
     publisher, issuingAuthority, title, titleBasis,
     url, reportingPeriod, periodText, eventDates, locators,
     publicationDate: (spec.publishedFields ?? [spec.published]).map((name) => text(row[name])).find(Boolean) ?? null,

@@ -1495,8 +1495,8 @@ test.describe("About this collection", () => {
     await expect(panel).toBeVisible();
     await expect(panel).toContainText("Awardees are matched to a Native entity");
     // The release facts a reader checks a figure against.
-    // The data refresh and the release are separate dates (2026-10-06).
-    for (const field of ["Data as of", "Released", "Coverage", "Example records"]) {
+    // One date, the data refresh; the release date is not shown (L1-U05).
+    for (const field of ["Updated", "Coverage", "Example records"]) {
       await expect(panel.locator("dt", { hasText: new RegExp(`^${field}$`) }).first()).toBeVisible();
     }
     // The unit of observation, in the codebook's own words: the sentence
@@ -2942,7 +2942,7 @@ test.describe("Methods", () => {
     await expect(page.locator(".cp-ur__item")).toHaveCount(3);
     await expect(page.locator(".cp-ur__item.is-by-design")).toHaveCount(2);
     await expect(page.locator(".cp-ur")).toContainText("Never a failed match");
-    await expect(page.locator(".cp-ur")).toContainText("not by failure");
+    await expect(page.locator(".cp-ur")).toContainText("noted in the record");
     // Codex, PR #79: the two phrases above come only from the intentional
     // statuses, so an empty "Still to do" card passed. Every card must carry
     // a real definition, and none may be the missing-definition fallback.

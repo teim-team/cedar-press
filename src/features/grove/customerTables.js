@@ -107,7 +107,7 @@ export const CUSTOMER_COLUMNS = Object.freeze({
   },
   native_owner_basis: {
     label: "Native owner basis",
-    meaning: "The kinds of evidence behind the Native owner, in plain words: a recorded ownership ruling, a register binding, the owner's own published page or a federal identifier chain.",
+    meaning: "The kinds of evidence behind the Native owner, in plain words: a recorded ownership ruling, a register binding, the owner's published page or a federal identifier chain.",
   },
   native_owner_source: {
     label: "Native owner source",

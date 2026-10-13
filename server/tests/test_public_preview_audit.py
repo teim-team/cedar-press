@@ -559,20 +559,13 @@ class PublicPreviewAuditTest(unittest.TestCase):
     def test_deals_method_describes_the_served_rows(self) -> None:
         deals = next(c for c in self.manifest["collections"] if c["id"] == "deals")
         method = deals["descriptor"]["method"]
-        self.assertIn("excerpted from the verified producer spreadsheet", method)
+        # The method describes the release, not the ten-row sample, so it
+        # names no sample composition for the sample file to contradict.
+        self.assertIn(
+            "This release includes deals verified by hand against their primary source.", method
+        )
+        self.assertNotIn("preview", method.lower())
         self.assertNotIn("contains ten selected events checked against primary sources", method)
-        with (ROOT / "data/cedar/samples/deals/spreadsheet__10.csv").open(
-            newline="", encoding="utf-8"
-        ) as handle:
-            rows = list(csv.DictReader(handle))
-        self.assertTrue(
-            all(row["deal_type"] == "Acquisition" for row in rows),
-            "the method prose names only acquisitions",
-        )
-        self.assertEqual(
-            Counter(row["entity_class"] for row in rows),
-            Counter({"Federally recognized tribe": 6, "Alaska Native Regional Corporation": 4}),
-        )
 
 
 if __name__ == "__main__":

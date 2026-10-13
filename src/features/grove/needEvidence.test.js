@@ -8,12 +8,21 @@ test("An empty NEED profile does not claim absence of underlying facts", () => {
   assert.match(attributionLabel({ profile_attribution: { kind: "related_enterprise" } }), /not assigned to the profile entity/);
 });
 
-test("Held, missing and unsafe-source facts never become visible evidence", () => {
+test("A fact's review status does not hide it (owner ruling 2026-10-04)", () => {
+  const row = { publication_status: "eligible", source_url: "https://example.org", hold_reason: "" };
+  const sections = evidenceSections({ status: "available", patent_observations: [
+    { ...row, observation_id: "rights", hold_reason: "rights" },
+    { ...row, observation_id: "held", publication_status: "held" },
+  ] });
+  assert.deepEqual(sections[0].items.map((item) => item.id), ["rights", "held"]);
+});
+
+test("Missing and unsafe-source facts never become visible evidence", () => {
   const row = { publication_status: "eligible", source_url: "https://example.org", hold_reason: "" };
   assert.deepEqual(evidenceSections({ status: "publication_held", patent_observations: [row] }), []);
   assert.deepEqual(evidenceSections(null), []);
   assert.deepEqual(evidenceSections({ status: "available", patent_observations: [
-    { ...row, hold_reason: "rights" }, { ...row, publication_status: "held" },
+    { ...row, source_url: "" }, { ...row, source_url: "http://example.org" },
     { ...row, source_url: "javascript:alert(1)" }, { ...row, source_url: "https://u:p@example.org" },
     { ...row, source_url: "invalid" },
     { ...row, source_url: "https://example.org/report?token=synthetic" },

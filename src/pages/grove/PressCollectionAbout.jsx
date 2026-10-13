@@ -133,11 +133,10 @@ export default function PressCollectionAbout({ entry, flagship, onClose, article
         {/* The header's facts, as fields. A reader checking a figure wants
             the release and the coverage before they want the prose. */}
         <dl className="cp-ab__facts">
-          {/* Two dates, kept apart (2026-10-06): when the data was last
-              refreshed from the producer, and when this release was issued.
-              Coverage, beside them, is the period the records span. */}
-          {launch.refreshed ? (<div><dt>Data as of</dt><dd>{formatUpdated(launch.refreshed)}</dd></div>) : null}
-          {launch.updated ? (<div><dt>Released</dt><dd>{formatUpdated(launch.updated)}</dd></div>) : null}
+          {/* One date: when the data was last refreshed from the producer
+              (collection.js `dataRefreshed`). The release date is not shown.
+              Coverage, beside it, is the period the records span. */}
+          {launch.updated ? (<div><dt>Updated</dt><dd>{formatUpdated(launch.updated)}</dd></div>) : null}
           {coverageLabel(catalog) ? (<div><dt>Coverage</dt><dd>{coverageLabel(catalog)}</dd></div>) : null}
           {sampleRows !== null ? (<div><dt>Example records</dt><dd>{sampleRows.toLocaleString("en-US")}</dd></div>) : null}
           <div><dt>Maintained</dt><dd>{MAINTENANCE.label}</dd></div>

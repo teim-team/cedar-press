@@ -57,12 +57,13 @@ export const NEED_ENRICHMENTS = Object.freeze({
 });
 
 /**
- * What the home page's example records are (owner, 2026-10-06): a curated
- * selection of real records (landingExamples.js), while the collections and
- * every download carry the release itself.
+ * What the home page's example records are (owner, 2026-10-10): records from
+ * each collection's served download, some chosen and ordered
+ * (landingExamples.js), while the collections and every download carry the
+ * release itself.
  */
 export const EXAMPLES_NOTE =
-  "The example records on the Cedar Press home page are a selection of real records chosen to show each collection clearly, and some come from beyond the current release. What you open in a collection and what you download is the release itself, record for record.";
+  "The example records on the Cedar Press home page come from each collection's current download, chosen to show the collection clearly. What you open in a collection and what you download is the release itself, record for record.";
 
 /**
  * The domains the collections are built out of. Each one has its own legal
