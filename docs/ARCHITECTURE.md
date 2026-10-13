@@ -24,8 +24,10 @@ read the same upstream, Lumecon-data, and neither reads the other.
                                                      └── src/features/grove/  (JavaScript)
 ```
 
-`data/cedar/collections.manifest.json` is generated, never hand-edited, and is
-the only source of collection values either implementation reads.
+`data/cedar/collections.manifest.json` is staged by that script and installed by
+hand, its descriptor prose reviewed at each refresh (`data/cedar/README.md`,
+"Refresh the served data"). It is the only source of collection values either
+implementation reads.
 `server/tests/test_collection.py` runs both implementations and compares them
 field by field; `server/tests/test_access.py` does the same for the access
 rules.
