@@ -1,9 +1,11 @@
 """D-U-N-S never ships, in any dataset, at any tier.
 
-docs/PUBLICATION_POLICY.md (2026-09-02): "Casino City and D-U-N-S are licensed
+The owner's ruling of 2026-09-02, now rule R03 of Lumecon-data's
+``docs/data-rules-catalogue.md``: "Casino City and D-U-N-S are licensed
 to Cedar for internal use and never ship, in any dataset, at any tier."
-docs/PUBLIC_DATASET_SPEC_2026-09-05.md: DUNS is used internally to reconcile
-historical records and is not published. The owner reaffirmed it on
+DUNS is used internally to reconcile historical records and is not published
+(the 2026-09-05 public dataset specification, at the tag
+``data-workspace-final``). The owner reaffirmed it on
 2026-10-04, keeping coverage statistics such as ``pct_with_duns``, which name
 no identifier.
 

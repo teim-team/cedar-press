@@ -6,8 +6,9 @@ earlier document, this one is later and wins; §7 lists every disagreement
 found so far rather than leaving them for someone to trip over.*
 
 Supersedes nothing outright. Read with `docs/IDENTIFIER_STANDARD.md` (the
-`cedar_uid` contract), `docs/CEDAR_BUSINESS_ID_DECISION_2026-09-06.md` and
-ADR-043 in `docs/ARCHITECTURE_DECISIONS.md`.
+`cedar_uid` contract). The 2026-09-06 Cedar Business ID decision
+(`docs/CEDAR_BUSINESS_ID_DECISION_2026-09-06.md`) and ADR-043
+(`docs/ARCHITECTURE_DECISIONS.md`) are at the tag `data-workspace-final`.
 
 ---
 
@@ -83,6 +84,11 @@ A `CB-…` identifies the business itself, **not**:
 
 Those are attributes or relationships recorded separately, with sources and
 dates.
+
+Each external identifier binds to the business with `valid_from`, `valid_to`
+and its evidence. A business with no external identifier is still a business,
+and a binding that overlaps another or carries no date stays unresolved rather
+than resolving to either business (rule 5 of the 2026-09-06 decision).
 
 Business identity stays stable when the name, DBA, location, NAICS,
 certification, owner, or registration changes. A dissolved or acquired business
@@ -177,7 +183,8 @@ must be inventoried and scoped, not globally joined or bulk-renamed.
 Cross-listing schools, colleges, CDFIs, nonprofits or businesses across collections
 is collection membership, not an identity merge. Same-legal-object claims require
 explicit evidence-gated relationships. Public affiliation wording and preservation
-of precise source assertions follow docs/PUBLICATION_POLICY.md.
+of precise source assertions follow the owner's affiliation ruling of 2026-09-23
+(`docs/PUBLICATION_POLICY.md`, at the tag `data-workspace-final`).
 
 ---
 

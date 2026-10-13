@@ -22,7 +22,7 @@ dependencies = [
   "uvicorn[standard]>=0.32",
   "pydantic>=2.9",
   # The shelf page is rendered here rather than in the browser; see
-  # docs/PYTHON_FIRST_SITE.md. Jinja2 over any of the Python-native web
+  # docs/PYTHON_FIRST_SITE.md (at the tag data-workspace-final). Jinja2 over any of the Python-native web
   # frameworks because it templates the stylesheet the client already has
   # instead of generating markup of its own.
   "jinja2>=3.1",

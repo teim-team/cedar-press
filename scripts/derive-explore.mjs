@@ -228,7 +228,7 @@ export function contractFor(columns, rows = []) {
   c.search = [...new Set([c.entity_name, ...observation].filter(Boolean))];
   // Collective scope and the link status, by their approved names only: the
   // population a record relates to is a different thing from the entity it
-  // names (docs/COLLECTIVE_SCOPE_DECISION_2026-09-05.md), and no older
+  // names (the owner's collective-scope decision, in docs/ARCHITECTURE.md), and no older
   // column is read as either.
   c.scopes = columns.includes("collective_scopes") ? "collective_scopes" : null;
   c.link_status = columns.includes("entity_link_status") ? "entity_link_status" : columns.includes("entity_link_statuses") ? "entity_link_statuses" : null;

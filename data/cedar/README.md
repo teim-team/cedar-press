@@ -1,8 +1,8 @@
 # Cedar data to Cedar Press
 
-This directory owns Cedar Press's tracked product metadata. See the
-[Havala packet](../../docs/HAVALA_INFRASTRUCTURE_REVIEW.md) for release proofs,
-fixed review ranges and limitations.
+This directory owns Cedar Press's tracked product metadata. The release proofs,
+fixed review ranges and limitations of 2026-09-24 to 26 are in
+`docs/HAVALA_INFRASTRUCTURE_REVIEW.md`, at the tag `data-workspace-final`.
 
 ## Add a collection to the governed release path
 
@@ -106,7 +106,7 @@ versioned data store; this repository retains the metadata for the release it se
 |---|---|---|---|
 | `codebook.json` | Curated field definitions; no JSON generator. `scripts/docs-markdown.mjs --kind codebook` generates its Markdown view, not this source. | `src/features/grove/explore.js` supplies headings/record meanings; codebook and guide generators; `server/tests/test_field_map.py` and Explore tests compare approved fields. | Commit the reviewed source. Definitions cannot be reconstructed from column names alone. Generated documentation is reproducible and freshness-checked. |
 | `collections.manifest.json` | `scripts/stage_verified_previews.py`, from verified Lumecon-data releases: it stages each collection's preview in a new directory, then installs the checked previews here with `--apply`. | `collection.js` and `server/cedar_press/collections.py`, then catalog, filters, sources, citations, downloads and API; Explore, guides, codebook, field-map, sample, release and SEO generators. | Commit the installed snapshot. A fresh product clone can serve and test it, but cannot regenerate it without the pinned Lumecon-data releases and the staging queue. |
-| `field_map.json` | Curated publication/column decisions under `docs/PUBLIC_DATASET_SPEC_2026-09-05.md`; no JSON generator. `scripts/docs-markdown.mjs --kind field-map` generates its two review documents. | `code/cedar_publication.py` applies it during `1137_customer_dataset_combine.py` exports; guide/field-map generators, Explore and Python field-map tests. | Commit reviewed decisions. A clone can test fixtures and sample compatibility; proving mappings on full customer files needs the full-data release job. Do not infer a decision for an undeclared column. |
+| `field_map.json` | Curated publication/column decisions under the owner's 2026-09-05 public dataset specification (`docs/PUBLIC_DATASET_SPEC_2026-09-05.md`, at the tag `data-workspace-final`); no JSON generator. `scripts/docs-markdown.mjs --kind field-map` generates its two review documents. | `code/cedar_publication.py` applies it during `1137_customer_dataset_combine.py` exports; guide/field-map generators, Explore and Python field-map tests. | Commit reviewed decisions. A clone can test fixtures and sample compatibility; proving mappings on full customer files needs the full-data release job. Do not infer a decision for an undeclared column. |
 | `releases.json` | `scripts/record-release.mjs`, using the manifest **and retained prior ledger**. | `src/features/grove/pressReleases.js`, release feed and citations, release tests; `scripts/dump.mjs --kind press` includes that catalog in the Python API snapshot. | Commit append-only release history. `--check` verifies current manifest/ledger consistency without rewriting history. The latest manifest cannot recreate superseded releases. |
 | `samples.published.json` | `scripts/measure-samples.mjs`, using the manifest plus Git index and matching public sample bytes. | `collection.js` and Python `collections.py` determine sample availability, then download/UI/API paths; sample and collection parity tests. | Commit the deterministic measured snapshot with its inputs. `--check` and `--selftest` distinguish committed, absent, untracked and unstaged samples. A file merely present on one machine is not a published sample. |
 

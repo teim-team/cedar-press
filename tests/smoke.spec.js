@@ -1287,7 +1287,7 @@ test.describe("Explore the collections", () => {
 
 test.describe("the table's default columns", () => {
   // Eleven flagships declare a 6-8 column view in their contract, chosen by
-  // the owner and recorded in docs/PUBLIC_DATASET_SPEC_2026-09-05.md. The
+  // the owner and written into each contract by scripts/derive-explore.mjs. The
   // viewer preferred the CODEBOOK, which is a dictionary of every column, so
   // `listed` was never empty and the declared view was never read: Prime
   // Contracting opened on 44 columns beginning with five raw ids.

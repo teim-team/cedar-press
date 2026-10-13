@@ -375,7 +375,8 @@ const STOREFRONT_SHORT = Object.freeze(
  * this side, and it was missing.
  *
  * It matters for exactly one collection today. NEED's descriptor short name
- * is a bare "NEED", and docs/NEED_RENAME_2026-09-10.md renamed the formal
+ * is a bare "NEED", and the owner's rename of 2026-09-10 (docs/NEED_RENAME_2026-09-10.md,
+ * at the tag data-workspace-final) renamed the formal
  * name to lead with Cedar precisely because a bare one reads as the
  * Minneapolis Fed's dataset. A basis line saying "NEED v1" under a figure is
  * where that ambiguity does the most damage, so it says "Cedar NEED v1".

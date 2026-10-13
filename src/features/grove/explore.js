@@ -400,7 +400,7 @@ export function rowEntities(row, contract, register = EMPTY_REGISTER) {
 // ── Collective scope ───────────────────────────────────────────────────────
 //
 // The population a record relates to, kept apart from the entities it names
-// (docs/COLLECTIVE_SCOPE_DECISION_2026-09-05.md). A scope is never an entity:
+// (the owner's collective-scope decision, in docs/ARCHITECTURE.md). A scope is never an entity:
 // it has no uid, it never fills the entity block, and a filter on an entity
 // never finds a scope row unless the reader asks for the broader group.
 

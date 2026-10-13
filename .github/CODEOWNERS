@@ -18,7 +18,6 @@
 # Accounts, sign-in, subscriptions and provisioning.
 /server/cedar_press/subscribers.py  @bkim28964 @ArihantSwainLumecon
 /server/cedar_press/migrations/     @bkim28964 @ArihantSwainLumecon
-/docs/SUBSCRIBERS.md                @bkim28964 @ArihantSwainLumecon
 
 # Research data: ingestion, the source registry and published data.
 /cedar_source_registry/             @Havala-Hanson @ArihantSwainLumecon

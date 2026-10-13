@@ -25,7 +25,8 @@ A SECOND SURFACE, RENDERED HERE
 ``GET /press/shelf`` returns HTML rather than JSON: the shelf page, composed
 by ``shelf.py`` from the same modules the JSON routes read and styled by the
 client's own stylesheets. It is the working half of
-``docs/PYTHON_FIRST_SITE.md`` — the demonstration that this service can
+the Python-first proposal of 2026-09-02 (``docs/PYTHON_FIRST_SITE.md``, at the
+tag ``data-workspace-final``) — the demonstration that this service can
 render the site, not only feed it. The React client is untouched and still
 serves the same page; the two run side by side on purpose.
 
@@ -139,8 +140,9 @@ _REPO = Path(__file__).resolve().parents[2]
 #: Mounted from the source tree rather than copied, which is the whole point:
 #: the Python page must go stale the moment a designer edits press.css, not
 #: keep serving a duplicate that agrees with nothing. A build would collect
-#: these the way Vite already does for ``dist/``; see
-#: ``docs/PYTHON_FIRST_SITE.md`` for what that step becomes.
+#: these the way Vite already does for ``dist/``; the Python-first proposal
+#: (``docs/PYTHON_FIRST_SITE.md``, at the tag ``data-workspace-final``) says
+#: what that step becomes.
 #:
 #: Missing directories are skipped rather than raised on: the package is
 #: installed with ``pip install -e server``, so a deployment that ships the
@@ -576,7 +578,8 @@ def press_shelf(
     """The shelf page, rendered as HTML by this service.
 
     The one route here that returns a page rather than a payload, and the
-    working half of ``docs/PYTHON_FIRST_SITE.md``: the same collection
+    working half of the Python-first proposal (``docs/PYTHON_FIRST_SITE.md``,
+    at the tag ``data-workspace-final``): the same collection
     descriptors, access rule, catalog copy and release history the JSON routes
     serve, composed by ``shelf.py`` and laid out by the client's own
     ``press.css``. Nothing on it is read from a JavaScript module.

@@ -17,7 +17,8 @@
  * lender and a consultant are indistinguishable from `@example.com`. Closing
  * that gap by sending addresses to an enrichment broker is a server-side
  * decision with legal and data-sovereignty consequences, not something a
- * browser does quietly to a reader — see docs/SUBSCRIBERS.md.
+ * browser does quietly to a reader — see server/README.md, "No third-party
+ * enrichment of subscribers".
  */
 
 /** The classes an address can place a reader in. */

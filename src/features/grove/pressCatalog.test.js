@@ -118,7 +118,8 @@ test("the structured data and the sitemap are generated from the catalog and are
 // on the wrong answer and the cross-language parity test was satisfied by it.
 
 test("NEED is named Cedar NEED everywhere a short name is shown", () => {
-  // docs/NEED_RENAME_2026-09-10.md: the Minneapolis Fed publishes a dataset
+  // The owner's rename of 2026-09-10 (docs/NEED_RENAME_2026-09-10.md, at the
+  // tag data-workspace-final): the Minneapolis Fed publishes a dataset
   // under close to this description, so a bare "Native Entity Enterprise
   // Dataset" invites a reader to assume ours is theirs. The formal name was
   // renamed to lead with Cedar for that reason. The short name is what every

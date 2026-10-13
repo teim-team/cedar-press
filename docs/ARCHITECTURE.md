@@ -64,9 +64,9 @@ git ls-files src/<dir>/grove                                   # files to move
 | | |
 |---|---|
 | Files to move | 189 — `features/grove` 141, `pages/grove` 45, `components/grove` 1, `styles/grove` 2 |
-| Path references to rewrite | 453, across 97 files |
+| Path references to rewrite | 441, across 93 files |
 | Referencing files inside `src/` | 56 — `pages/` 37, `features/` 15, `context/` 2, `components/` 1, `main.jsx` 1 |
-| Referencing files outside `src/` | 41 — `server/cedar_press/` 8, `scripts/` 8, `docs/` 12, `server/tests/` 5, `tests/` 3, `data/` 2, `.github/` 1, `.env.example` 1, `eslint.config.js` 1 |
+| Referencing files outside `src/` | 37 — `server/cedar_press/` 8, `scripts/` 8, `docs/` 8, `server/tests/` 5, `tests/` 3, `data/` 2, `.github/` 1, `.env.example` 1, `eslint.config.js` 1 |
 
 The reason this was deferred has expired. The table used to carry a fifth row
 — twelve files also touched by an open PR, which would each have become a
@@ -79,7 +79,7 @@ as its own commit — moving the four directories to `press/` and rewriting the
 references in one pass — for two reasons that are about review rather than
 about risk.
 
-First, "did all 453 references get rewritten?" is a question the build, the
+First, "did all 441 references get rewritten?" is a question the build, the
 suites and the smoke run answer, and not one a reader can answer from a diff.
 Folded into a change that also alters behaviour or prose, the rename hides
 that change instead of accompanying it.
@@ -186,7 +186,7 @@ teim-app or the Cedar engine serves a `/press/*` route, so that service is
 the server this client is built for. How the platform stores accounts and
 tiers, how it wires the Cedar engine, and what moving a subscriber into its
 Postgres would take (tables, the cookie across origins, the ledger, the error
-envelope) is measured in `docs/PLATFORM_INTEGRATION_2026-09-06.md`. `/press/profile` was the last gap
+envelope) was measured on 2026-09-06 (`docs/PLATFORM_INTEGRATION_2026-09-06.md`, at the tag `data-workspace-final`). `/press/profile` was the last gap
 (2026-09-05): it now reads and writes `reader_profiles` in the same SQLite
 store as the Cedar Points ledger, validated against the vocabulary
 `readerWork.js` offers (dumped into `_press_data.json` so the two cannot
@@ -490,10 +490,51 @@ bill about a class of entities, a program open to all Alaska Native
 Corporations: these records name no individual entity, and before 2026-09-05
 they were indistinguishable from records whose named party the resolver
 could not place. The owner's decision
-(`docs/COLLECTIVE_SCOPE_DECISION_2026-09-05.md`) settles how they are
+of 2026-09-05, recorded verbatim below, settles how they are
 represented, and its centre is a boundary: **a scope is a population, never
 an entity**. No `CE-XXXXX-CC` uid is minted for "all tribes", no entity class
 is added, and `cedar_uid` keeps meaning the canonical Native entity.
+
+### The owner's decision, 2026-09-05
+
+The proposal of 2026-09-05 (a reviewer's draft, not the owner's) suggested minting
+"All federally recognized tribes" and similar populations as entities in the
+identity register. The owner rejected that architectural centre and approved the
+feature on different terms:
+
+> Approve collective-scope classification and filtering.
+>
+> Do not mint ordinary CE-XXXXX-CC Cedar UIDs for "all tribes," state subsets, all ANCs, all NHOs, or general Indian Country relevance. Do not add "Collective scope" as a Native entity class.
+>
+> Keep cedar_uid and cedar_uids exclusively for entities admitted under the existing canonical Native entity rules. An actual intertribal organization is different from an abstract population.
+>
+> Add collective_scopes to affected public schemas. Use an explicit scope definition, relationship to the record, source evidence, and temporal and geographic interpretation. Keep this information separate from named-party identity and resolution status.
+>
+> A record can contain both named entities and collective scopes. It can also have a valid collective scope and unresolved named parties. A scope must never be a fallback for a failed entity match.
+>
+> Distinguish addressed audience, applicability, eligible class, aggregate measurement, and general subject matter. Do not infer universal relevance from generic tribal language.
+>
+> Implement scope-aware filtering in the shared query model, not only the viewer. Individual-entity inclusion of collective records is optional and off by default. Explain the match and preserve the existing record grain.
+>
+> Resolve membership using the source's definition and relevant date. Missing historical or geographic evidence produces unknown membership, not a guessed inclusion or exclusion. Version the definitions and evidence; versioned membership caches are permitted.
+>
+> Never allocate collective amounts to individual members through a filter or join. Collective context may coexist with a genuinely identified recipient, but cannot replace that recipient.
+>
+> Reconcile the proposed federally recognized population against the official BIA list before displaying a national membership count. Do not force a match by deleting or reclassifying entities without evidence.
+>
+> Keep one public dataset per collection. This change does not authorize row expansion, new customer datasets, revival of retired identifiers, or reassignment of existing Cedar UIDs.
+
+The reasoning the owner gave, in brief:
+
+- `cedar_uid` identifies the canonical Native entity; a scope describes a population. Putting a population in the register with a valid-looking uid would make every consumer remember an exception: a distinct-uid count would count it, a join could treat it as a recipient, and a record with a scope would look entity-resolved when no individual entity was identified.
+- A blank entity field is not inherently an error. The associated status explains it: no individual entity named, unresolved, or withheld. "Blank means unresolved, and only that" is rejected.
+- "Addresses a class" needs a relationship: addressed, applies to, eligible class, aggregate measured population, general subject matter. A consultation notice does not address every tribe merely because it concerns consultation; an invitation is not participation; an eligible class is not receipt. The statutory population is not interchangeable with the recognized-tribe list (*Yellen v. Confederated Tribes of the Chehalis Reservation*: ANCs qualified as Indian tribes under the incorporated ISDA definition for CARES Act Title V), and a generic NHO label is not a program's definition.
+- Membership cannot come from a generic state field or one universal date rule. Headquarters, trust land and service area are different predicates; an invitation, an ongoing program and a statute fix their populations at different dates. Missing evidence gives "unknown", never present membership as historical membership. "Computed, never stored" becomes: derived from a versioned definition and evidence, with versioned caches permitted.
+- The viewer keeps named records distinct from broader relevance: inclusion of collective records for an entity is off by default, every added result says why it appeared, a record matching through a name and a scope appears once, and the scope, the toggle and the version enter the shared query state so the viewer, the saved view, the download and the Cedar request agree.
+- Collective records can carry money: an appropriation for a class is a legitimate record whose amount belongs to the program, not to a synthetic recipient. A scope cannot occupy a recipient or owner identity field, and scope-based relevance cannot create entity-attributable dollars. A real recipient administering services for a broader population keeps its uid and carries the population as a scope.
+- The national count in the proposal (577) was the register's class totals; the official list of 2026-01-30 states 575. That is reconciled at uid level on the terminal before any count is shown, never forced by reclassifying entities.
+
+### What this repository does with it
 
 - `data/cedar/scopes.json` is the vocabulary: the scope codes and their
   definitions, the five relationships (addressed, applies_to,
@@ -529,7 +570,8 @@ is added, and `cedar_uid` keeps meaning the canonical Native entity.
 
 On 2026-09-06 the owner adopted a reviewer's proposal for a permanent
 business identifier separate from `cedar_uid`
-(`docs/CEDAR_BUSINESS_ID_DECISION_2026-09-06.md`, ADR-043). `CE-` keeps
+(`docs/CEDAR_BUSINESS_ID_DECISION_2026-09-06.md` and ADR-043, at the tag `data-workspace-final`;
+the current model is `docs/CEDAR_IDENTITY_SYSTEM_2026-09-13.md` §2). `CE-` keeps
 meaning the canonical Native institution; `CB-` names a distinct commercial
 business, whoever owns it. The id encodes nothing, never changes, and is
 never traded for a uid except by an adjudication that keeps both. Ownership
@@ -544,7 +586,7 @@ id. Nothing here mints or validates one yet.
 
 ## The public dataset specification
 
-`docs/PUBLIC_DATASET_SPEC_2026-09-05.md` is the owner's specification for
+`docs/PUBLIC_DATASET_SPEC_2026-09-05.md` (at the tag `data-workspace-final`) is the owner's specification for
 the customer files, the samples, the viewer and the researcher
 documentation, recorded verbatim in two parts: the cleanup brief and, later
 the same day, the exact public column specification with the identifier

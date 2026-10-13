@@ -106,7 +106,23 @@ No Codex, Copilot or CodeQL review thread exists on PR 132 or PR 149. Codex code
 
 ### Fact-check and research-readiness pass, 2026-10-02
 
-Recorded in [FACT_CHECK_2026-10-02.md](FACT_CHECK_2026-10-02.md). All 14 served public previews (`public/data/cedar/samples/*/spreadsheet__10.csv`) match the producer's pinned `sample_sha256` in `data/cedar/verified-preview-releases.json` byte for byte, so no served CSV was edited; data defects found in them are queued for the producer with row keys and evidence. Corrected in this repository: `data/cedar/collection_descriptors.json` was a 2026-09-02 (`v0`) copy carrying the pre-rename lobbying name, superseded row labels and no entries for Foundation & Corporate Giving or PLOT, and now mirrors the manifest's 14 descriptors; the Deals `method` prose claimed the served preview was the ten events checked on October 1, 2026, which describes the regression fixture from PR 149 rather than the served producer rows, and now describes both; the generated guides carry a per-column blank meaning, a units and formats statement, measured preview facts and the citation in the download's own form; the public meta description no longer claims every record is resolved to a Native entity. Remaining unresolved items and their owners are in the handoff's review queue.
+Recorded in `docs/FACT_CHECK_2026-10-02.md`, at the tag `data-workspace-final`; its open items are listed below. All 14 served public previews (`public/data/cedar/samples/*/spreadsheet__10.csv`) match the producer's pinned `sample_sha256` in `data/cedar/verified-preview-releases.json` byte for byte, so no served CSV was edited; data defects found in them are queued for the producer with row keys and evidence. Corrected in this repository: `data/cedar/collection_descriptors.json` was a 2026-09-02 (`v0`) copy carrying the pre-rename lobbying name, superseded row labels and no entries for Foundation & Corporate Giving or PLOT, and now mirrors the manifest's 14 descriptors; the Deals `method` prose claimed the served preview was the ten events checked on October 1, 2026, which describes the regression fixture from PR 149 rather than the served producer rows, and now describes both; the generated guides carry a per-column blank meaning, a units and formats statement, measured preview facts and the citation in the download's own form; the public meta description no longer claims every record is resolved to a Native entity. Open items from that pass's review queue (its fixed rows are in the file at the tag):
+
+- Deals `ANCSA-2014-001`: `research_note` still describes a mid-month placeholder day while `event_date` is `2014-05` at month precision; an editorial fix in the producer (low).
+- Foundation and Corporate Giving `FG-*` rows: `currency` is blank on the five `reviewed_disclosures` rows that carry `amount_exact_usd`, and `publication_status` is blank where `FF-*` rows read `observed`; the producer's contract for that component (unresolved).
+- Spine: `CE-000RA-MT` and `CE-001R2-8V` share the canonical name National Center for American Indian Enterprise Development; recorded in `data/spine/cedar_duplicate_name_review.json`, pending owner adjudication.
+- Deals served preview: whether the ten events reviewed on 2026-10-01 become the served sample (owner decision, Havala).
+- Funding, the Siletz repair: held; see "Source-side fixes, 2026-10-02" below.
+- The full spreadsheets were not re-measured; only the 140 preview rows and the manifest were.
+
+Not defects, recorded so they are not re-investigated: negative `obligations_usd` are
+de-obligations kept as recorded (dictionary); the `$0.00` funding transaction
+(`...12X1105_10.664_0003`) is a zero-dollar modification; `fiscal_year 2026` on a
+2025-12-24 subaward is the federal fiscal year; `registrant_id 400635921` is a post-2017
+LDA registrant id; `reporting_year 1999` filed 2000-02-14 is a year-end report; the
+contractor `award_id` duplicates are several transactions of one award (the key is
+`transaction_id`); `owned.cedar_uid` equals the certifying tribe by definition
+(`cedar_entity_role = certifying_authority`).
 
 ### Source-side fixes, 2026-10-02
 

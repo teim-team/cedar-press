@@ -272,7 +272,8 @@ export const PRESS_CATALOG = Object.freeze([
     shelf: "standard",
     // Series. Floor: min(introduced_date) in dist/customer/legislation.csv:
     // real bills of the 93rd Congress. Thin and gapped through the 1980s
-    // (docs/datasets/10_bills_votes.md records the interior gap at 1974), so
+    // (docs/datasets/10_bills_votes.md, at the tag data-workspace-final,
+    // records the interior gap at 1974), so
     // this is the year the record opens, not a dense series from 1973.
     coverage: Object.freeze({ kind: "series", from: 1973 }),
     blurb:
@@ -358,7 +359,8 @@ export const PRESS_CATALOG = Object.freeze([
     // it is a real boundary rather than the edge of a pull: FPDS carries the
     // Native business-type flags on FY1985 records with false on all of them,
     // so Native identification does not exist in the federal record before
-    // roughly FY2000 (docs/datasets/native-owned-businesses.md).
+    // roughly FY2000 (docs/datasets/02_contracting.md, at the tag
+    // data-workspace-final).
     coverage: Object.freeze({ kind: "series", from: 2000 }),
     blurb:
       "Federal contract transactions awarded directly to Native governments, Native-owned enterprises and Native organizations, including candidate records whose ownership attribution is still being established. Examine awarding agencies, recipients, industries, obligations, procurement mechanisms and set-asides.",
@@ -377,8 +379,8 @@ export const PRESS_CATALOG = Object.freeze([
     // dropped the subaward reporting threshold to $25,000 in October 2010, so
     // FSRS holds nothing before FY2010; the 51 rows dated earlier are filer
     // typos, every one of them filed in 2010 or later, and the flag exists to
-    // keep them out of exactly this claim. docs/datasets/02b_subcontracting.md:
-    // "They must never be counted as coverage." Excluding them moves the
+    // keep them out of exactly this claim. docs/datasets/02b_subcontracting.md
+    // (at the tag data-workspace-final): "They must never be counted as coverage." Excluding them moves the
     // floor to 2010 on the nose, which is the statutory floor.
     coverage: Object.freeze({ kind: "series", from: 2010 }),
     blurb:
@@ -414,8 +416,8 @@ export const PRESS_CATALOG = Object.freeze([
     // Roster, not a series, so it states no year to be covered from. Every
     // certifying office publishes who is certified NOW and none of them
     // archives a superseded list, so the collection is a capture rather than
-    // a span: docs/datasets/native-owned-businesses.md, "A CURRENT SNAPSHOT,
-    // not a series."
+    // a span: docs/datasets/native-owned-businesses.md (at the tag
+    // data-workspace-final), "A CURRENT SNAPSHOT, not a series."
     //
     // min(certification_start) is 1992, and it is not a coverage year: it is
     // one live certification that happens to have started early. Captured:
@@ -433,8 +435,8 @@ export const PRESS_CATALOG = Object.freeze([
     shelf: "pro",
     // Roster, not a series. The delivered file is the IRS Business Master
     // File register, one row per EIN, carrying each filer's LATEST period
-    // rather than a run of them: docs/datasets/06_nonprofit.md, "A monthly
-    // SNAPSHOT, not a series."
+    // rather than a run of them: docs/datasets/06_nonprofit.md (at the tag
+    // data-workspace-final), "A monthly SNAPSHOT, not a series."
     //
     // min(bmf_tax_period) is 1983, and it is one defunct filer's last return,
     // not the start of anything. The annual filings live in np_financials
@@ -454,7 +456,8 @@ export const PRESS_CATALOG = Object.freeze([
     id: "need",
     // "Cedar NEED", not "NEED", and for the reason the rename itself gives.
     //
-    // docs/NEED_RENAME_2026-09-10.md: the Minneapolis Fed publishes a dataset
+    // The owner's rename of 2026-09-10 (docs/NEED_RENAME_2026-09-10.md, at the
+    // tag data-workspace-final): the Minneapolis Fed publishes a dataset
     // under close to this description, so "a reader who meets a bare Native
     // Entity Enterprise Dataset may assume ours is theirs", and the formal
     // name therefore leads with Cedar, "the half a reader can attribute".

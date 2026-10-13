@@ -1,6 +1,7 @@
 """The server-rendered shelf: does Python actually render the site?
 
-``docs/PYTHON_FIRST_SITE.md`` claims the collection data, the access rule and
+The Python-first proposal (``docs/PYTHON_FIRST_SITE.md``, at the tag
+``data-workspace-final``) claims the collection data, the access rule and
 the catalog copy are already in Python and that a page can be built from them
 without reading a JavaScript module. This is the check on that claim, and it
 checks the parts that would make the claim hollow if they were faked:

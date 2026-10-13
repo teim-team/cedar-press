@@ -129,7 +129,8 @@ export const IDENTIFIERS = Object.freeze([
     id: "business",
     label: "Cedar business id",
     // SPECIFIED, NOT YET MINTED. The owner set this display form on
-    // 2026-09-13; docs/CEDAR_BUSINESS_ID_DECISION_2026-09-06.md carries a
+    // 2026-09-13; the 2026-09-06 decision (docs/CEDAR_BUSINESS_ID_DECISION_2026-09-06.md,
+    // at the tag data-workspace-final) carries a
     // check-character variant (CB-0001842-XQ) and the specification says a
     // check convention can come later, so the plain serial is what ships on
     // the page. No CB- exists in data/spine yet, which is why `live` is

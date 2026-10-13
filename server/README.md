@@ -25,6 +25,13 @@ cedar_press/
 and the JavaScript implementation and compare them — the collection values in
 the first, the access rules in the second — so the two cannot drift.
 
+`GET /press/shelf` is the one route that returns HTML: the shelf page, composed
+by `shelf.py` from the same modules the JSON routes read and styled by the
+client's own stylesheets. It is a demonstration that this service can render
+the site, from the Python-first proposal of 2026-09-02 (`docs/PYTHON_FIRST_SITE.md`,
+at the tag `data-workspace-final`); whether readers are meant to see it is an open
+question for the owner.
+
 ## Running it
 
 ```sh
@@ -43,7 +50,7 @@ uvicorn cedar_press.app:app --reload --port 8000
 | `CEDAR_PRESS_CODES` | Access codes as issued, keyed by code: `{"CODE": {"email": ..., "tier": ..., "expires": "YYYY-MM-DD"}}`. `expires` is optional. Empty by default, so a service started without a register activates nobody. |
 | `CEDAR_PRESS_ORIGINS` | Comma-separated origins allowed to send credentialed requests. |
 | `CEDAR_PRESS_INSECURE_COOKIE` | `1` in local development only: drops `Secure` so the cookie works over http. |
-| `CEDAR_PRESS_TRUST_PROXY` | `1` when the API sits behind a proxy that appends to `X-Forwarded-For` (the documented deployment: CloudFront in front of the API origin, `docs/HOSTNAMES.md`); `0` when clients connect directly. Sign-in and activation are rate limited per client address, so this decides what "client" means. Unset reads as `0` in development and is refused (503) in staging and production, because behind CloudFront `0` would key every subscriber to CloudFront's address and one stranger's wrong passwords would lock everyone out. |
+| `CEDAR_PRESS_TRUST_PROXY` | `1` when the API sits behind a proxy that appends to `X-Forwarded-For` (the intended deployment once the API is activated: CloudFront in front of the API origin, `docs/HOSTNAMES.md`); `0` when clients connect directly. Sign-in and activation are rate limited per client address, so this decides what "client" means. Unset reads as `0` in development and is refused (503) in staging and production, because behind CloudFront `0` would key every subscriber to CloudFront's address and one stranger's wrong passwords would lock everyone out. |
 | `CEDAR_PRESS_PROXY_HOPS` | With `CEDAR_PRESS_TRUST_PROXY=1`, how many trusted proxies append to `X-Forwarded-For`; default `1` (CloudFront). Set `2` if a load balancer sits between CloudFront and the service. The client is the entry that many places from the right; everything left of it is caller-written and ignored. Only correct when the service cannot be reached except through that chain. |
 
 ## Where the database goes
@@ -80,6 +87,20 @@ reset credentials or treat a public preview digest as a PostgreSQL password hash
 ruff check . && ruff format --check .
 python -m unittest discover -s tests -t .
 ```
+
+### No third-party enrichment of subscribers
+
+Subscriber addresses are not sent to an enrichment vendor (Clearbit, Apollo,
+ZoomInfo and the like) to buy back employer and job title, and that is not to be
+added without a deliberate decision. The list itself is sensitive: it names the
+tribal governments and lenders reading Cedar Press. Profiling Native readers
+through a broker contradicts the product's case for careful, sovereign handling of
+Indian Country's data; the inferred titles are worst at tribal governments and
+enterprises; and purchased personal data carries CCPA/CPRA and GDPR duties. If
+enrichment is still wanted, it runs server-side against organizations (the domain,
+not the person), is disclosed in the privacy policy, and is a platform decision
+made with counsel. The client's `subscriberProfile.js` classifies a reader's
+domain in the browser and goes no further.
 
 ## Shape the Research
 
@@ -184,7 +205,8 @@ The old client pin is refused after a catalog switch. Run
 `server/tests/release_download_rehearsal.py --store <root> --catalog <catalog>`
 with both existing packages for real local login, 401/403/200, exact download,
 stale-pin and byte-preserving rollback checks. See
-`docs/HAVALA_INFRASTRUCTURE_REVIEW.md` for exact revisions and results.
+`docs/HAVALA_INFRASTRUCTURE_REVIEW.md`, at the tag `data-workspace-final`, for exact revisions
+and results.
 
 ## Giving and PLOT component releases
 
@@ -342,3 +364,126 @@ not a runtime dependency of the Grove container. The producer commit in the
 application contract identifies the tested API pair, not an extra local service.
 Regenerate this lock from `server/pyproject.toml` with `uv lock --project server`
 when changing dependencies and rerun the pinned container and consumer tests.
+
+## Cedar Grove Gaming release pin
+
+Moved here on 2026-10-12 from `docs/GAMING_GROVE_INFRASTRUCTURE_NOTES.md` (2026-09-24,
+at the tag `data-workspace-final`). Its publication-hold step is gone since the owner
+rulings of 2026-10-04, and its issuance tests left with the data workspace. Who
+assigns Gaming ID ordinals is in the handoff on Cedar ID minting and Gaming ID
+issuance.
+
+### The pin
+
+`data/cedar/grove_release_pin.json`:
+
+```json
+{"schema_version": 1, "product": "cedar_grove", "pins": {
+  "gaming": {"catalog_id": "<64 hex>", "catalog_sha256": "<64 hex>",
+             "collection_id": "gaming", "release_id": "<64 hex>",
+             "manifest_sha256": "<64 hex>"}}}
+```
+
+- **Production is empty** (`"pins": {}`) until Cedar issues the Gaming IDs
+  and Lumecon builds a production release from the issued registry snapshot.
+  The route then answers `503 No released data is pinned for this collection
+  yet` and audits `not_pinned`. It never falls back to a sample, a local CSV,
+  a branch or a `current` pointer.
+- **It extends, not replaces, `CEDAR_GROVE_RELEASE_CATALOG`.** The variable
+  still names where the reviewed catalog's bytes are deployed. The pin says
+  which bytes they must be (`catalog_sha256` over the exact file and the
+  recomputed `catalog_id`) and which release inside them.
+- **One release, not per-table releases.** `collection_id` must equal the
+  collection ID. A pin naming `gaming--<table>` is refused. So is any catalog
+  that is not a Lumecon `collection_releases` catalog, such as a dataset
+  catalog of per-table releases. Cedar never assembles a collection from
+  unrelated table releases.
+- **Rehearsal releases are served only in an explicit nonproduction review;
+  synthetic ones never in a deployed server.** `repository.GROVE_SERVED_RELEASE_CLASSES`
+  is `{"production"}` and `GROVE_SERVE_SYNTHETIC` is `False`.
+  `CEDAR_GROVE_ENVIRONMENT=review` (the analogue of Lumecon-data's
+  `LUMECON_ENVIRONMENT=review`) adds `rehearsal`, and only when
+  `CEDAR_PRESS_ENVIRONMENT` is not `production`. Unset or `production` serves
+  production releases only. `review` in a production service, or any other
+  value, refuses every Grove download (fails closed, 503). Only the consumer
+  tests widen `GROVE_SERVE_SYNTHETIC`, for the synthetic rehearsal fixture.
+- **Rollback** is a revert of the pin PR. Because it is one release, every
+  component returns to its prior bytes together (atomic).
+
+### What the server checks, in order
+
+1. The collection is in the Grove declaration. The component is well formed
+   and is a field-map presentation entry of that collection. Otherwise the
+   request is refused before any read, and the audit redacts the component to
+   `unknown`.
+2. Session and current account tier: anonymous 401, press/press_pro 403, a
+   downgraded, removed or unreachable account refused before the pin is read.
+3. The pin is well formed and names the collection.
+4. The catalog bytes at `CEDAR_GROVE_RELEASE_CATALOG` hash to
+   `catalog_sha256`, `catalog_id` recomputes, and the product is
+   `cedar_grove` with `entitlement_required`. The catalog kind is
+   `collection_releases`, with exactly one entry for the collection. That
+   entry's `release_id`, `manifest_sha256` and
+   `manifest_path` (`/v1/collections/<id>/releases/<rid>/manifest`) equal the
+   pin.
+5. The collection manifest fetched from the Lumecon API hashes to
+   `manifest_sha256`. It names the pinned collection and release, has
+   `release_kind: collection` and product `cedar_grove`, and its
+   `release_class` and `synthetic` flag are served.
+   A `partitioned_components` declaration (bounded parts, e.g. payments)
+   must agree with its part entries in this manifest. Every part must be
+   present with the same record count and `records.jsonl` hash, and the
+   logical count must be their sum. Otherwise the whole release is refused.
+6. A logical partitioned component is assembled in manifest order into a
+   temporary disk spool, after each part passes the same contract checks.
+   Direct part requests remain refused. Every part has public/publishable rights,
+   redistribution, and `download_permitted: true`. Its field names, in order,
+   equal the field-map `order`, and each shipped field's `rights_class` equals
+   the contract's `metadata.field_rights`. Its primary key is within the header, and the count and
+   artifact size are bounded.
+7. The component bytes come from
+   `/v1/collections/<id>/releases/<rid>/components/<name>/download`. They
+   match the manifest's size and SHA-256, the record count
+   and schema, and the primary keys are nonblank and unique.
+
+For partitioned downloads, all parts must agree on fields and primary keys.
+A disk-backed unique-key index checks keys across the entire logical table.
+Every bounded part is verified before any response bytes are sent; a missing,
+restricted, malformed or tampered final part refuses the entire download.
+The successful response streams the verified spool in 64 KiB chunks and closes
+it on completion or disconnect. The response hash is the SHA-256 of the exact
+manifest-ordered concatenation; metadata exposes individual pinned part hashes.
+JSONL remains the internal and customer transport here; no CSV conversion is implied.
+This adapter does not itself establish scientific validity or production eligibility.
+
+The response is exact JSONL with `X-Cedar-Release`, `X-Cedar-SHA256`,
+`X-Cedar-Component`, `X-Cedar-Rows`, `X-Cedar-Citation`
+(`Cedar Grove gaming/<component>, release <id>`) and
+`Cache-Control: private, no-store`.
+
+### Tests
+
+- `server/tests/test_gaming_release.py`:
+  - `GamingConsumerBoundaryTest` runs without Lumecon. It checks the empty
+    production pin (fails closed, clear error), malformed and per-table pins,
+    entitlement decided before any pin, catalog or artifact read, redacted
+    component refusal, and the storefront unchanged.
+  - `ZeroCanonicalDuplicationTest` fails if a producer module, binding
+    register, component CSV or schema copy reappears.
+  - `PinnedLumeconReleaseTest` builds the synthetic fixture release with the
+    installed `lumecon-data gaming fixture-release`, plus a second, later
+    release. It serves them through Lumecon's own verification
+    (`verify_collection_release`, `collection_manifest_metadata`,
+    `read_collection_component`) in place of the network hop to Lumecon's
+    read-only API collection routes. It covers schema compatibility per component,
+    manifest/hash agreement, exact bytes, idempotent re-pinning, atomic
+    rollback, unavailable and mismatched releases, served bytes that differ
+    from the manifest (Cedar's own size/SHA-256 check), rehearsal refused in
+    production and served only under `CEDAR_GROVE_ENVIRONMENT=review`, and
+    refusal of per-table catalogs.
+- CI: job `gaming-release-consumer` in `.github/workflows/ci.yml`. It checks
+  out Lumecon-data at the exact pinned SHA with the read-only secret
+  `LUMECON_DATA_READ_TOKEN` (`persist-credentials: false`), fails unless
+  `git rev-parse HEAD` equals the pin, installs from that local checkout, and
+  fails naming the secret when it is absent. `gamingConsumerCi.test.js` (node suite)
+  lints those properties and shows each rule catching its own mutation.

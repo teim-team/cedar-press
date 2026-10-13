@@ -355,7 +355,8 @@ def collection_short(dataset: Any) -> str | None:
     both sides agreed on the wrong answer and the parity test was satisfied.
 
     It matters for one collection today. NEED's descriptor short name is a
-    bare "NEED", and ``docs/NEED_RENAME_2026-09-10.md`` renamed the formal
+    bare "NEED", and the owner's rename of 2026-09-10 (``docs/NEED_RENAME_2026-09-10.md``,
+    at the tag ``data-workspace-final``) renamed the formal
     name to lead with Cedar precisely because a bare one reads as the
     Minneapolis Fed's dataset. A basis line under a figure is where that
     ambiguity does the most damage.

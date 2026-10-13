@@ -131,7 +131,7 @@ export function renderMap() {
   p();
   p("## What this is");
   p();
-  p("The companion to the owner's exact public column specification (`docs/PUBLIC_DATASET_SPEC_2026-09-05.md`, addendum): for each flagship, every column its current sample header carries with one decision, the approved public header in the owner's exact order, the owner's default viewer selection, and a retirement entry for every competing entity identifier. The customer-file writer generates the export from this list (`code/1137_customer_dataset_combine.py` through `cedar_publication.apply_field_map`): it renames, drops what is internal or documented, fills the opening block from the register, builds the plural aligned arrays and the named rules, verifies every alias, orders the header exactly, and refuses a dataset that carries a column with no decision, an identifier awaiting adjudication, or a retired scheme's name in a shipped column or value. This pass changes columns, never rows, identities or publication eligibility.");
+  p("The companion to the owner's exact public column specification (`docs/PUBLIC_DATASET_SPEC_2026-09-05.md`, addendum, at the tag `data-workspace-final`): for each flagship, every column its current sample header carries with one decision, the approved public header in the owner's exact order, the owner's default viewer selection, and a retirement entry for every competing entity identifier. The customer-file writer generates the export from this list (`code/1137_customer_dataset_combine.py` through `cedar_publication.apply_field_map`): it renames, drops what is internal or documented, fills the opening block from the register, builds the plural aligned arrays and the named rules, verifies every alias, orders the header exactly, and refuses a dataset that carries a column with no decision, an identifier awaiting adjudication, or a retired scheme's name in a shipped column or value. This pass changes columns, never rows, identities or publication eligibility.");
   p();
   p("This dated map describes historical raw inputs, retained as private regression fixtures in `server/tests/fixtures/legacy-preview/`. Current public previews are already-projected, verified producer spreadsheets; this map is not reapplied to them. Their field definitions, record types, grains and pinned releases are in `docs/DATASET_CODEBOOK.md` and the collection guides.");
   p();
@@ -234,7 +234,7 @@ export function renderRetirement() {
   const p = (s = "") => lines.push(s);
   p("# Historical identifier retirement report");
   p();
-  p("Generated from `data/cedar/field_map.json` and the sample headers by `scripts/docs-markdown.mjs --kind field-map`; edit the map, not this file. Written 2026-09-05 under the retirement rule in `docs/PUBLIC_DATASET_SPEC_2026-09-05.md` (addendum): migrate, reconcile, verify, retire, regression-test.");
+  p("Generated from `data/cedar/field_map.json` and the sample headers by `scripts/docs-markdown.mjs --kind field-map`; edit the map, not this file. Written 2026-09-05 under the retirement rule in `docs/PUBLIC_DATASET_SPEC_2026-09-05.md` (addendum; at the tag `data-workspace-final`): migrate, reconcile, verify, retire, regression-test.");
   p();
   p("## The rule, as enforced");
   p();

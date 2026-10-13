@@ -67,30 +67,11 @@ stamp in Settings, which carries the commit the running bundle was built from.
 
 ### Historical OIDC failure, measured September 21
 
-Re-measured 2026-09-21 against the workflow's own run history, through run 113.
-The two AWS steps arrived with #87 (run 103, 20 September 04:19). Runs 103-108
-all failed earlier in the job — 103 at `ruff check server`, the rest at the
-Python gates — so the steps were skipped, not attempted. Run 109 is the first
-run in which they were reached. It failed, and so has **every run since**:
-109, 110, 111, 112, 113, with 113 (the #102 merge, 21 September 06:31) passing
-all fourteen preceding steps — lint, 267 node tests, 143 smoke tests, ruff, 265
-Python tests, `build:site`, artifact uploaded — before the same error:
-
-```
-Run aws-actions/configure-aws-credentials@v4
-  role-to-assume: arn:aws:iam::502309351676:role/cedarpress-site-deploy
-  aws-region: us-east-1
-  audience: sts.amazonaws.com
-Assuming role with OIDC          (x12, backing off over 2m06s)
-##[error]Could not assume role with OIDC: Not authorized to perform sts:AssumeRoleWithWebIdentity
-```
-
-At that checkpoint, `aws s3 sync` had not executed. The site's bucket contents
-therefore came from another publication path, and those merges had changed
-`main` without updating the site through this workflow. The GitHub Pages job was no substitute:
-`public/CNAME` claims `cedarpress.ai`, but the apex now resolves to CloudFront,
-so the Pages copy is published where nobody reaches it — and until the job split
-above, it was not even being published, because the failure below skipped it.
+From 20 to 21 September 2026 every deploy run that reached the AWS steps (runs
+109 to 113) failed at `aws-actions/configure-aws-credentials` with `Could not
+assume role with OIDC: Not authorized to perform sts:AssumeRoleWithWebIdentity`,
+so `aws s3 sync` never ran. The run-by-run record is in this file at the tag
+`data-workspace-final`.
 
 That failure required an AWS-side fix. STS refused the exchange before the
 role's permissions were consulted, narrowing the investigation to two causes:
