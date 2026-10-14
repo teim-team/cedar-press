@@ -5,8 +5,8 @@ statement of the identity model, extended by the owner on 2026-09-23. Where it d
 earlier document, this one is later and wins; §7 lists every disagreement
 found so far rather than leaving them for someone to trip over.*
 
-Supersedes nothing outright. Read with `docs/IDENTIFIER_STANDARD.md` (the
-`cedar_uid` contract). The 2026-09-06 Cedar Business ID decision
+Supersedes nothing outright. The `cedar_uid` contract, formerly in
+`docs/IDENTIFIER_STANDARD.md`, is at the end of §1. The 2026-09-06 Cedar Business ID decision
 (`docs/CEDAR_BUSINESS_ID_DECISION_2026-09-06.md`) and ADR-043
 (`docs/ARCHITECTURE_DECISIONS.md`) are at the tag `data-workspace-final`.
 
@@ -59,6 +59,61 @@ Role-specific column names, where the role matters:
 A `CE-…` is **not** an award ID, deal ID, contract number, filing number,
 Federal Register document ID, NAGPRA notice ID, bill ID, place ID, or person
 ID.
+
+### The `cedar_uid` contract
+
+Moved here from `docs/IDENTIFIER_STANDARD.md` on 2026-10-14. That file's
+earlier version, with how the contract was enforced in the retired data
+workspace, is at the tag `data-workspace-final`.
+
+    CE-00001-6S
+    │  │     └─ TWO check characters, from two independent weightings
+    │  └─ 5 chars, Crockford base32 (I, L, O, U are NOT in the alphabet)
+    └─ namespace
+
+**The check characters.** `O`, `I`, `L` and `U` cannot appear in a valid uid,
+so the `BANN 0 YEEL KON` class of transcription error is **unrepresentable**,
+not merely detectable.
+
+The two trailing characters come from two independent weightings, one linear,
+one quadratic, so an error that lands in the null space of the first is caught
+by the second. **Measured on the live register:**
+
+| error class | one check char | two check chars |
+|---|---:|---:|
+| single substitution | 95.5% (382/400) | **100% (1000/1000)** |
+| adjacent transposition | partial | **100% (579/579)** |
+
+The single-character version was built first and stress-tested the same hour;
+95.5% is what a mod-32 character gives you and it is not good enough for an
+identifier a customer transcribes. It was replaced before anything shipped:
+**the whole reason to decide this now is that it is free now and expensive
+later.**
+
+**The reclassification rule.** When an entity's class changes (recognition
+granted, restored, terminated, or a corporation reclassified):
+
+1. **`cedar_uid` never changes.** Not for any reason. Ever.
+2. `entity_class` and `class_since_basis` are updated on the register row, with
+   the citation (FR notice, court order) in the basis.
+3. **No row is rewritten in any dataset.** They carry `cedar_uid`; they are
+   already correct.
+
+A uid is **never reused**, even after an entity is retired.
+
+**The register.**
+
+- **`cedar_uid` is the only documented external join key.** Handles are
+  display identifiers.
+- **An old handle always resolves to the same uid.**
+- **A retired handle pointed at a different entity is refused.** Not a warning:
+  a reused handle resolves to the wrong entity in every downstream join and
+  nothing later can detect it.
+- **A uid is never dropped from the register.** An entity leaving the spine
+  keeps its row.
+
+A blank `cedar_uid` means the handle is not a known entity: never "no entity",
+and never guessed.
 
 ---
 
@@ -249,6 +304,22 @@ neither the register nor this specification supports. Corrected: enterprises are
 not the Cedar Business ID. The site briefly displayed `TBD-030:4033` as the
 Cedar business id; that has been corrected. When `CB-` is minted, the harmonized
 `entity_id` becomes a **link target**, not the identity.
+
+**7.5 `CEDAR-NEST-` and `NESTREL-` in published output.** §5 says "Existing
+issued IDs remain stable, including CEDAR-NEST and NESTREL". The owner's
+ruling of 2026-10-04 calls both outdated, and the customer tables remove them
+(the vendored rules in `server/cedar_press/customer_sheet.py`; see
+`server/README.md`). The ruling is about published output and does not say the
+IDs stop being stable inside the producer; §5 does not say which it meant.
+
+**7.6 Check characters on `CE-`.** §1's opening says the final characters "can
+serve as a validation/check component"; the `cedar_uid` contract at the end of
+§1 says a uid carries two check characters, always, over an alphabet without
+`I`, `L`, `O` and `U`. The vendored customer-table rules
+(`server/cedar_press/customer_sheet.py`, `CEDAR_ENTITY_ID`) accept any capital
+letter or digit and check neither character. All 1,916 published uids are
+valid, so nothing wrong is shown; the check is absent. **If the check
+characters are required, the vendored rules change with Lumecon-data's.**
 
 ---
 
