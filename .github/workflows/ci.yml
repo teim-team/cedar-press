@@ -47,10 +47,10 @@ jobs:
       - run: npm run lint
       # Every tracked generated file, re-rendered and compared with its
       # source: the codebook and field-map documents, the researcher guides,
-      # the explore contracts, the sample record, the release ledger, the
-      # structured data and the sitemap. Fails naming the file and the
-      # command that rewrites it. The Makefile lists the seven scripts, and
-      # the three data-workspace checks deliberately left out.
+      # the explore contracts, the Press snapshot the API serves, the sample
+      # record, the release ledger, the structured data and the sitemap.
+      # Fails naming the file and the command that rewrites it. The Makefile
+      # lists the six scripts.
       - run: make check-generated
       - run: npm run test
       # Smoke tests run a browser over the built site. Chromium only: these
@@ -109,13 +109,10 @@ jobs:
   # - `contents: read` only; triggered by `pull_request`, never
   #   `pull_request_target`, so a fork's code never runs with this secret.
   #
-  # The pinned commit is the pushed head of Lumecon-data PR #9
-  # (`codex/collection-release-closure`), or of the Gaming hardening branch
-  # stacked on it (`claude/gaming-release-hardening`) once that is pushed.
-  # Update LUMECON_DATA_SHA to the MERGED Lumecon commit in the same pull
-  # request that updates data/cedar/grove_release_pin.json (merge order:
-  # Lumecon-data #8, #9, the Lumecon Gaming hardening PR, cedar-press #122,
-  # then this consumer).
+  # The pinned commit is a merged Lumecon-data commit; the comment beside
+  # LUMECON_DATA_SHA names the producer pull request it came from. Move the
+  # pin only to a merged Lumecon commit, in the same pull request that
+  # changes what pairs with it (for example data/cedar/grove_release_pin.json).
   gaming-release-consumer:
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -212,7 +209,7 @@ jobs:
           raise SystemExit(0 if result.wasSuccessful() else 1)
           PY
 
-# Not a step: `ruff format --check server`. It would reformat 18 of 30
-# files today. That is a real cleanup with its own review, not something to
+# Not a step: `ruff format --check server`. It would reformat 21 of 88
+# files (ruff 0.17.0, 2026-10-14). That is a real cleanup with its own review, not something to
 # slip into a CI pass -- and adopting the gate while it is red teaches people
 # to ignore it.
