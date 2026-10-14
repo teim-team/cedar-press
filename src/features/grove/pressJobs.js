@@ -64,8 +64,8 @@
  * lists it, and nothing fails on it. Chips are the collections a sentence
  * actually names, never one added so a collection gets a turn.
  *
- * HOUSE STYLE: "and", never an ampersand, in every string here; the smoke
- * suite reads the rendered page.
+ * HOUSE STYLE: no em dash in any string here; the smoke suite reads the
+ * rendered page.
  */
 import { STOREFRONT_CATALOG } from "./pressCatalog.js";
 

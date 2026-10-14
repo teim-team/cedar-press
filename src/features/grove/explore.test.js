@@ -1206,18 +1206,18 @@ test("every collection has a researcher guide with the sections the specificatio
   for (const id of ids) {
     const text = readFileSync(`${dir}${id}.md`, "utf8");
     for (const section of SECTIONS) assert.ok(text.includes(`\n## ${section}\n`), `${id}: no "${section}" section`);
-    // The opening block is in every dictionary, and no retired identifier or metadata row is promised.
+    // A guide describes the download, which drops the producer's packaging columns.
     for (const column of ["record_type", "record_key", "record_grain"]) {
-      assert.ok(text.includes("| `" + column + "`"), `${id}: missing producer grain column ${column}`);
+      assert.ok(!text.includes("| `" + column + "`"), `${id}: lists the producer packaging column ${column}`);
     }
     // Cedar's retired identity schemes never appear in a guide's text (§1);
     // the federal DUNS-to-UEI transition may be named because it explains why CAGE is kept.
     assert.doesNotMatch(text, /\bneid\b|\bcicd\b/i, `${id}: names a retired identifier`);
     assert.match(text, /never as rows appended to the CSV/, id);
-    // A sampled flagship's dictionary lists its whole approved header.
+    // A sampled flagship's dictionary lists the download's whole header.
     const key = flagshipKey(id);
     if (key) {
-      const book = CURRENT_CODEBOOK[key];
+      const book = currentCodebookFor(key);
       for (const column of book.fields.map(f => f.column)) assert.ok(text.includes(`| \`${column}\``), `${id}: dictionary lacks ${column}`);
     }
   }

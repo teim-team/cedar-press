@@ -513,13 +513,22 @@ class PublicPreviewAuditTest(unittest.TestCase):
         self.assertEqual(s["ein_unresolved"], [])
         self.assertEqual(s["ein_duplicated"], [])
 
-    def test_collection_descriptors_mirror_the_manifest(self) -> None:
-        # The descriptors file was a 2026-09-02 copy with the pre-rename lobbying
-        # name and superseded row labels until 2026-10-02; this keeps it honest.
-        descriptors = json.loads(
-            (ROOT / "data/cedar/collection_descriptors.json").read_text(encoding="utf-8")
-        )
-        self.assertEqual(descriptors, [c["descriptor"] for c in self.manifest["collections"]])
+    def test_descriptor_counts_and_releases_match_the_receipts(self) -> None:
+        # The descriptors are edited by hand; their count and release must stay
+        # those of the verified release each collection serves. Their prose
+        # (tracks, sources, method) has no producer source and is not checked.
+        receipts = json.loads(
+            (ROOT / "data/cedar/verified-preview-releases.json").read_text(encoding="utf-8")
+        )["collections"]
+        for c in self.manifest["collections"]:
+            receipt = receipts[c["id"]]
+            with self.subTest(collection=c["id"]):
+                self.assertEqual(
+                    c["descriptor"]["rows_label"], f"{receipt['public_records']:,} observations"
+                )
+                self.assertEqual(c["cedar"]["n_rows"], receipt["public_records"])
+                self.assertEqual(c["cedar"]["release_id"], receipt["release_id"])
+                self.assertEqual(c["cedar"]["manifest_sha256"], receipt["manifest_sha256"])
 
     def test_preview_definitions_state_the_blank_convention_for_unevaluated_scope(self) -> None:
         # The spreadsheet's missing convention is a blank cell. The producer

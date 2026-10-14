@@ -33,7 +33,7 @@ Generated from `data/cedar/field_map.json` and the sample headers by `scripts/do
 | `owned` | `nation_id` | source-associated nation or authority context from source configuration or staging; not the business legal identity | Preserve internally as unvalidated source context; no automatic equivalence to certifying_authority_entity_id or cedar_uid. | internal_crosswalk | — | 0 |
 | `owned` | `business_entity_id` | the business as a register entity, where the identity system assigns one | kept as business_entity_id | object_id | — | 0 |
 
-The entries above describe historical raw transform inputs and their unresolved dispositions, not current producer release eligibility. Current NEED publication is restricted to its separately evidence-pinned reviewed base; the original held components are not admitted. Preserve evidence and issued IDs, and distinguish CE associations, business identities and source record keys.
+The entries above describe historical raw transform inputs and their unresolved dispositions, not current producer release eligibility. Preserve evidence and issued IDs, and distinguish CE associations, business identities and source record keys.
 
 ## Supporting tables
 

@@ -68,10 +68,6 @@ class OwnedDisplayName(unittest.TestCase):
         )
         owned = next(c for c in manifest["collections"] if c["id"] == "owned")
         self.assertEqual(owned["descriptor"]["name"], NEW)
-        descriptors = json.loads(
-            (ROOT / "data/cedar/collection_descriptors.json").read_text(encoding="utf-8")
-        )
-        self.assertEqual(next(d for d in descriptors if d["id"] == "owned")["name"], NEW)
         dump = (ROOT / "server/cedar_press/_press_data.json").read_text(encoding="utf-8")
         self.assertIn(f'"name": "{NEW}"', dump)
         catalog = (ROOT / "src/features/grove/pressCatalog.js").read_text(encoding="utf-8")

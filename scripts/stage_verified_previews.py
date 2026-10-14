@@ -667,8 +667,7 @@ def stage(repo, producer, queue_path, output, producer_commit, updated, *,
                  if refresh is not None else
                  "Inspect complete staged asset diff; replace stale data/cedar/samples subtree only within its checked absolute path, then re-render the customer tables (scripts/render_sample_downloads.py)."),
                 "Preserve Gaming exclusion and production pin files.",
-                "Refresh measure-samples, derive-explore and dump.mjs --kind press after explicitly staging reviewed assets; regenerate docs with docs-markdown.mjs --kind all.",
-                "Run collection/publication/preview tests and browser review before committing.",
+                "Continue with data/cedar/README.md, \"Refresh the served data\", from step 4: git add the samples, review the descriptors, then run the generators and checks it lists.",
             ],
         },
     )

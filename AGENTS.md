@@ -253,10 +253,11 @@ list, all of which this project has paid for:
 - **Self-verification is refused.** A completion claim carries re-executable
   commands, run by a different session (the workspace's `513_handoffs.py`
   ledger is at the tag `data-workspace-final`).
-- **The copy rules apply to every string a reader can see.** No ampersands
-  (grep both forms: `&amp;|[A-Za-z0-9] & [A-Za-z0-9]`); no em dashes in prose a
-  reader sees, though a `—` standing in for an empty table cell is typography and
-  is fine; and **Cedar is the AI economic analyst**, never an "AI assistant".
+- **The copy rules apply to every string a reader can see.** No em dashes in
+  prose a reader sees, though a `—` standing in for an empty table cell is
+  typography and is fine; and **Cedar is the AI economic analyst**, never an
+  "AI assistant". Ampersands are allowed (owner ruling 2026-10-13, Elijah
+  Moreno); the no-ampersand rule was retired.
 - **No year gating.** Every subscriber gets full coverage; no plan changes how
   far back a collection goes. Subscriber plans are handled on the Tribal
   Business News side. The year cap that once separated the tiers was retired

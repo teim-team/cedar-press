@@ -218,7 +218,7 @@ test("an unscoped Cedar panel offers one question per collection, varied by posi
 test("questions keep the house style", () => {
   for (const [id, jobs] of Object.entries(ALL_COLLECTION_JOBS)) {
     for (const item of [...jobs.questions, ...(jobs.cedar ?? [])]) {
-      assert.match(item.q, /^[A-Z][^&—]*\?$/, `${id}: "${item.q}" is not one plain question`);
+      assert.match(item.q, /^[A-Z][^—]*\?$/, `${id}: "${item.q}" is not one plain question`);
     }
   }
 });
@@ -344,14 +344,13 @@ test("every use case has a job from the shared vocabulary", () => {
 
 test("labels, outcomes and sentences keep the house style", () => {
   for (const audience of ALL) {
-    assert.doesNotMatch(audience.audience, /&/, `${audience.id}: "and", never an ampersand`);
-    assert.match(audience.outcome, /^[A-Z][^&—]*\.$/, `${audience.id}: the outcome is one plain sentence`);
-    assert.doesNotMatch(audience.explanation, /[—&]/, `${audience.id}: no em dash, no ampersand`);
+    assert.match(audience.outcome, /^[A-Z][^—]*\.$/, `${audience.id}: the outcome is one plain sentence`);
+    assert.doesNotMatch(audience.explanation, /—/, `${audience.id}: no em dash`);
     assert.doesNotMatch(audience.explanation, /\bimpact\b/i, `${audience.id}: "contribution", not "impact"`);
     assert.match(audience.explanation, /^[A-Z].*\.$/, `${audience.id}: complete sentences`);
     assert.ok(audience.collections.length >= MIN_COLLECTIONS && audience.collections.length <= 6, audience.id);
   }
-  for (const line of [ENTITY_JOBS.line]) assert.match(line, /^[A-Z][^&—]*\.$/, line);
+  for (const line of [ENTITY_JOBS.line]) assert.match(line, /^[A-Z][^—]*\.$/, line);
 });
 
 test("the layer names collections by id only: no second catalog", () => {
@@ -529,7 +528,7 @@ test("Priorities asks what should exist next: examples, ambitious, and nothing C
   assert.ok(expansions.length >= 2 && expansions.length < datasets.length, "the narrower asks stay the smaller set");
   const all = [...datasets.map((d) => d.text), ...research.descriptive, ...research.causal, ...expansions];
   for (const text of all) {
-    assert.doesNotMatch(text, /[&\u2014]/, text);
+    assert.doesNotMatch(text, /\u2014/, text);
     assert.doesNotMatch(text, /\bimpact\b/i, text);
     assert.doesNotMatch(text, /parcel|permit|land ownership|philanthrop|foundation|corporate giving|PLOT/i, `${text}: asks for a collection Cedar Press already carries`);
   }

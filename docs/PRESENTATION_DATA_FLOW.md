@@ -33,7 +33,7 @@ Review-only material does not become a public sample when a local count changes.
 
 | Responsibility | Authority or entry point |
 | --- | --- |
-| Public descriptor and sample import | scripts/stage_verified_previews.py (from verified Lumecon-data releases; writes the manifest and data/cedar/samples/, not served) |
+| Public descriptor and sample import | scripts/stage_verified_previews.py (stages verified Lumecon-data releases in a new directory, installed by hand; the order is in data/cedar/README.md, "Refresh the served data") |
 | Sample publication availability | scripts/measure-samples.mjs; measures committed bytes against the Git index |
 | Public sample tables (one customer table per collection) | scripts/render_sample_downloads.py; public/data/cedar/downloads/ and data/cedar/sample_downloads.json |
 | Public sample display contracts | scripts/derive-explore.mjs; reads the customer-table headers plus reviewed explore.overrides.json |

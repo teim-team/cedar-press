@@ -1,22 +1,25 @@
 // Maintained researcher documentation, with shared parsing, formatting and freshness gates.
 //   node scripts/docs-markdown.mjs --kind codebook|field-map|guides|all [--check]
-// Field-map reports retain historical raw fixtures; current guides use the installed release dictionary.
+// Field-map reports retain historical raw fixtures; current guides describe each collection's download:
+// its header, grain and column meanings as the site's reader shows them (codebookFor in explore.js).
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { assertReleasedDictionary, releasedBook } from "./release-docs.mjs";
 import { LAUNCH_COLLECTION } from "../src/features/grove/collection.js";
+import { codebookFor, loadCodebook } from "../src/features/grove/explore.js";
 const REPO = fileURLToPath(new URL("..", import.meta.url));
 const SAMPLES = REPO + "server/tests/fixtures/legacy-preview/samples/";
 const OUT_DIR = REPO + "docs/guides/";
 const readData = (name) => JSON.parse(readFileSync(REPO + "data/cedar/" + name, "utf8"));
+// codebookFor reads the codebook this loads.
+await loadCodebook();
 const esc = (s) => String(s ?? "").replace(/\|/g, "\\|").replace(/\r?\n/g, " ");
 let guideInputs;
 function guideData() {
   return guideInputs ??= {
     GUIDES: readData("guides.json"), MAP: readData("field_map.json"),
     CODEBOOK: readData("codebook.json"), MANIFEST: readData("collections.manifest.json"),
-    DESCRIPTORS: readData("collection_descriptors.json"),
   };
 }
 
@@ -146,7 +149,7 @@ export function renderMap() {
     }
   }
   p();
-  p("Counts are permitted source observations, not unique Native entities or businesses. A CE association identifies the role stated on its row; owner, certifier and business are not interchangeable. NEED exposes only its evidence-pinned reviewed base; other NEED components retain their publication holds.");
+  p("Counts are permitted source observations, not unique Native entities or businesses. A CE association identifies the role stated on its row; owner, certifier and business are not interchangeable.");
   p();
   p("**Decisions:**");
   p();
@@ -223,7 +226,7 @@ export function renderMap() {
   p("- Every `combine`: the sources are tested for agreement across the full table before one column replaces them; until then the sources stay in the workspace and the target is absent.");
   p("- Every `derive` marked owed: the editorial `research_note` for Deals, the date precision for the Federal Register, the names as published for Legislation and NAGPRA from the bridge.");
   p("- This historical Native-owned businesses map predates the current producer spreadsheet. The current row grain is a source certification or directory listing, not necessarily one unique business.");
-  p("- Historical NEED, Nonprofits and Funding transformation holds remain regression controls for those raw inputs. They do not describe the eligibility of a new producer release. NEED’s current exception is limited to the separately verified reviewed base and does not authorize the original held components.");
+  p("- Historical NEED, Nonprofits and Funding transformation holds remain regression controls for those raw inputs. They do not describe the eligibility of a new producer release.");
   p();
   return lines.join("\n") + "\n";
 }
@@ -260,7 +263,7 @@ export function renderRetirement() {
     }
   }
   p();
-  p("The entries above describe historical raw transform inputs and their unresolved dispositions, not current producer release eligibility. Current NEED publication is restricted to its separately evidence-pinned reviewed base; the original held components are not admitted. Preserve evidence and issued IDs, and distinguish CE associations, business identities and source record keys.");
+  p("The entries above describe historical raw transform inputs and their unresolved dispositions, not current producer release eligibility. Preserve evidence and issued IDs, and distinguish CE associations, business identities and source record keys.");
   p();
   p("## Supporting tables");
   p();
@@ -323,6 +326,14 @@ function sampleFor(collection) {
   return parseCsv(readFileSync(path, "utf8"));
 }
 
+/** The collection's served sample download, the file a reader receives. */
+function downloadFor(collection) {
+  const record = readData("sample_downloads.json").collections[collection];
+  const path = record?.path ? `${REPO}public${record.path}` : null;
+  if (!path || !existsSync(path)) return null;
+  return parseCsv(readFileSync(path, "utf8"));
+}
+
 function typeOf(column, values) {
   const { GUIDES } = guideData();
   const T = GUIDES.types;
@@ -372,8 +383,8 @@ function blankMeans(column, decision, type) {
 const TOKENS = /^(null|none|unknown|nan|n\/a|na|tbd|undisclosed)$/i;
 
 /**
- * What the preview itself shows, measured from its rows rather than typed:
- * record types and their counts, the columns blank on every row, the literal
+ * What the sample itself shows, measured from its rows rather than typed:
+ * the columns blank on every row, the literal
  * tokens present, and the money, date and date-time columns the unit and
  * format statements apply to. Re-measured on every render, so the guide
  * cannot describe a sample it no longer ships.
@@ -383,11 +394,6 @@ export function previewFacts(book, sample) {
   const T = GUIDES.types;
   const rows = sample.rows;
   const cell = (row, column) => String(row[column] ?? "").trim();
-  const recordTypes = new Map();
-  for (const row of rows) {
-    const kind = cell(row, "record_type") || "(blank)";
-    recordTypes.set(kind, (recordTypes.get(kind) ?? 0) + 1);
-  }
   const allBlank = [];
   const tokens = [];
   const typed = new Map();
@@ -409,7 +415,6 @@ export function previewFacts(book, sample) {
     .filter((column) => rows.some((row) => /^\d{4}-\d{2}$/.test(cell(row, column))));
   return {
     rowCount: rows.length,
-    recordTypes: [...recordTypes],
     allBlank,
     tokens,
     typed,
@@ -436,16 +441,16 @@ export function renderReleasedGuide(collection, book, entry, descriptor, sample)
   const names = (pattern) => book.fields.filter((field) => pattern.test(field.column)).map((field) => `\`${field.column}\``).join(", ");
   p(`# ${name}: a researcher's guide`);
   p();
-  p(`Collection \`${collection}\` · producer spreadsheet \`${entry.sample.table}\`${updated ? ` · Updated ${updated}` : ""}. Generated by \`scripts/docs-markdown.mjs --kind guides\` from the installed release manifest, its field dictionary and the served preview. The statements below describe that release.`);
+  p(`Collection \`${collection}\` · download \`${entry.sample.table}\`${updated ? ` · Updated ${updated}` : ""}. Generated by \`scripts/docs-markdown.mjs --kind guides\` from the installed release manifest, the download's field dictionary and the sample download. The statements below describe that release.`);
   p();
   p("## Purpose"); p();
-  p(`Use the ${name} spreadsheet to inspect source observations at their declared record type and grain, with the identifiers, sources and qualifications retained on each row.`);
+  p(`Use the ${name} download to inspect source observations at the grain stated below, with the identifiers, sources and qualifications retained on each row.`);
   p();
   p("## Population"); p();
   p(book.row);
   if (collection === "need") {
     p();
-    p("This preview covers only the reviewed public base identified by the installed release. It does not expose the held enterprise graph or establish ownership for the rest of NEED. A decision about one enterprise does not promote other enterprises or relationships.");
+    p("A decision about one enterprise's ownership does not settle any other enterprise or relationship.");
   }
   if (collection === "owned") {
     p();
@@ -455,10 +460,10 @@ export function renderReleasedGuide(collection, book, entry, descriptor, sample)
   p("## One row is"); p();
   p(book.row);
   p();
-  p("Read `record_type`, `record_key` and `record_grain` together. The key preserves the source record's identity; neither a repeated entity nor a matching name is a reason to collapse observations.");
+  p("Each row keeps its source record's own identifier; neither a repeated entity nor a matching name is a reason to collapse rows.");
   p();
   p("## Key identifiers"); p();
-  p(names(/(^record_key$|(?:^|_)(?:id|ids|uid|uids|uei|cage|ein|key|number)$|^cage_code$)/) || "Use the record key and identifiers defined in the dictionary below.");
+  p(names(/(^record_key$|(?:^|_)(?:id|ids|uid|uids|uei|cage|ein|key|number)$|^cage_code$)/) || "Use the identifiers defined in the dictionary below.");
   p();
   p("Identifiers identify the subject or relationship stated in their definition. Business, certifier, owner, recipient and source-record identifiers are not interchangeable. Identifier strings keep their leading zeros.");
   p();
@@ -467,14 +472,14 @@ export function renderReleasedGuide(collection, book, entry, descriptor, sample)
   p();
   const count = entry.sample.of;
   p(Number.isSafeInteger(count) && count >= 0
-    ? `**Rows in the installed spreadsheet:** ${count.toLocaleString("en-US")}. The served preview contains ${sample.rows.length.toLocaleString("en-US")} rows. A preview is not a representative population sample or a source-fact audit.`
-    : `The served preview contains ${sample.rows.length.toLocaleString("en-US")} rows; a full-spreadsheet count is not recorded in this manifest.`);
+    ? `**Rows in the full download:** ${count.toLocaleString("en-US")}. The sample download contains ${sample.rows.length.toLocaleString("en-US")} rows. A sample is not a representative population sample or a source-fact audit.`
+    : `The sample download contains ${sample.rows.length.toLocaleString("en-US")} rows; a full-download count is not recorded in this manifest.`);
   const table = entry.tables?.find((item) => item.table === entry.sample.table || item.name === entry.sample.table);
   if (table?.record_types && typeof table.record_types === "object") {
     const types = Object.entries(table.record_types).filter(([, count]) => Number.isSafeInteger(count) && count >= 0);
     if (types.length) {
       p();
-      p("Logical record types retained in this spreadsheet:");
+      p("The release behind this download combines these logical record types:");
       p();
       for (const [kind, count] of types) p(`- \`${esc(kind)}\`: ${count.toLocaleString("en-US")} observations.`);
     }
@@ -508,7 +513,7 @@ export function renderReleasedGuide(collection, book, entry, descriptor, sample)
   p("The installed manifest and field dictionary identify the release used here. Preserve source record keys and version qualifications when comparing releases. A changed sample does not establish that a source event changed.");
   p();
   p("## Field dictionary"); p();
-  p(`The ${book.fields.length} columns below follow the served spreadsheet header exactly. Types describe the sample's formatting; they do not infer missing values or revise the producer's field definitions.`);
+  p(`The ${book.fields.length} columns below follow the download's header exactly. Types describe the sample's formatting; they do not infer missing values or revise the producer's field definitions.`);
   p();
   p("| # | Column | Label | Definition | Type | Blank means |");
   p("|---|---|---|---|---|---|");
@@ -531,11 +536,11 @@ export function renderReleasedGuide(collection, book, entry, descriptor, sample)
   }
   p("- Identifiers, codes, FIPS and EIN values are text and keep their leading zeros.");
   p();
-  p("### Observed in the preview"); p();
-  p("Measured from the served preview rows when this guide was generated; a preview describes itself, not the full spreadsheet.");
+  p("### Observed in the sample"); p();
+  p("Measured from the sample download's rows when this guide was generated; a sample describes itself, not the full download.");
   p();
-  p(`- Preview rows: ${facts.rowCount.toLocaleString("en-US")}; record types present: ${facts.recordTypes.map(([kind, count]) => `\`${esc(kind)}\` (${count})`).join(", ") || "none"}.`);
-  p(`- Columns blank on every preview row (${facts.allBlank.length} of ${book.fields.length}): ${facts.allBlank.length ? facts.allBlank.map((c) => `\`${c}\``).join(", ") : "none"}. A column blank in the preview can be filled elsewhere in the spreadsheet; it is reported so a reader does not read the preview as the column's coverage.`);
+  p(`- Sample rows: ${facts.rowCount.toLocaleString("en-US")}.`);
+  p(`- Columns blank on every sample row (${facts.allBlank.length} of ${book.fields.length}): ${facts.allBlank.length ? facts.allBlank.map((c) => `\`${c}\``).join(", ") : "none"}. A column blank in the sample can be filled elsewhere in the full download; it is reported so a reader does not read the sample as the column's coverage.`);
   p(`- Literal tokens present as cell values: ${facts.tokens.length ? facts.tokens.map(({ column, token, count }) => `\`${esc(token)}\` in \`${column}\` (${count})`).join("; ") : "none"}. A token is the producer's declared value where the field definition above defines it; a token the definition does not define is a finding for the producer, never a value to recode.`);
   p();
   p("## Missing values"); p();
@@ -543,9 +548,8 @@ export function renderReleasedGuide(collection, book, entry, descriptor, sample)
   p();
   p("## Limitations"); p();
   p("- The spreadsheet and its sample retain the release's publication scope and field restrictions. A guide grants no additional access.");
-  p("- An absent or withheld name must not be reconstructed from aliases, other fields or source text.");
   p("- This dictionary documents fields; it does not verify every source fact, entity binding or historical relationship.");
-  p("- Record types and grains may overlap. The combined spreadsheet is not automatically an additive analytical table.");
+  p("- Rows can describe different kinds of observation at different grains; the download is not automatically an additive analytical table.");
   p();
   p("## Suitable analyses"); p();
   p("Inspect and compare observations within a declared record type, at the stated grain, using the row's source and qualifications. Count unique subjects only after identity and multiplicity are established.");
@@ -564,9 +568,9 @@ export function renderReleasedGuide(collection, book, entry, descriptor, sample)
   p();
   p(`**Cite as:** Lumecon, "${name}", Cedar Press collection, cedarpress.ai.${updated ? ` Updated ${updated}.` : ""} Accessed <date>.`);
   p();
-  p("This is the sentence every download of the collection carries. Cite the collection by its name and Updated date, never by a version label, file count or table count; add the record type and record key for a row-specific claim, and the exact release identifier above when a reviewer must reproduce the file.");
+  p("This is the sentence every download of the collection carries. Cite the collection by its name and Updated date, never by a version label, file count or table count; add the row's own identifier for a row-specific claim, and the exact release identifier above when a reviewer must reproduce the file.");
   p();
-  p(`**Method:** the preview is an excerpt of the installed producer spreadsheet. ${columns.has("source_url") ? "The source_url field and the dictionary's other source fields carry row-level provenance." : "Use the source fields defined in the dictionary for row-level provenance."}`);
+  p(`**Method:** the sample download is the release's preview rows, shaped by the same rules as every download of the collection. ${columns.has("source_url") ? "The source_url field and the dictionary's other source fields carry row-level provenance." : "Use the source fields defined in the dictionary for row-level provenance."}`);
   p();
   p("Dataset-level release details and citation belong here and in the manifest, never as rows appended to the CSV.");
   p();
@@ -576,29 +580,31 @@ export function renderReleasedGuide(collection, book, entry, descriptor, sample)
 // ── One guide ──────────────────────────────────────────────────────────────
 
 function guideFor(collection) {
-  const { GUIDES, MANIFEST, DESCRIPTORS, MAP, CODEBOOK } = guideData();
+  const { GUIDES, MANIFEST, MAP, CODEBOOK } = guideData();
   const prose = GUIDES.collections[collection];
   const entry = MANIFEST.collections.find((c) => c.id === collection);
-  const descriptor = DESCRIPTORS.find((d) => d.id === collection) ?? entry?.descriptor ?? {};
+  const descriptor = entry?.descriptor ?? {};
   const current = releasedBook(entry, CODEBOOK);
   if (current) {
-    const sample = sampleFor(collection);
-    if (!sample) throw new Error(`Missing installed spreadsheet sample: ${collection}`);
+    // The guide describes the file a reader downloads, not the producer's
+    // preview it is rendered from: its header and grain, as the reader shows them.
+    const download = downloadFor(collection);
+    if (!download) throw new Error(`Missing rendered sample download: ${collection}`);
     // Dated by the data refresh, as the downloads' citation is (L1-U05).
     const dataDate = LAUNCH_COLLECTION.find((item) => item.id === collection)?.updated ?? null;
-    return renderReleasedGuide(collection, current.book, entry, { ...descriptor, updated: dataDate }, sample);
+    return renderReleasedGuide(collection, codebookFor(current.key), entry, { ...descriptor, updated: dataDate }, download);
   }
   if (!prose) {
     throw new Error(`Missing authored guide or installed producer dictionary: ${collection}`);
   }
-  const version = entry?.descriptor?.version ?? descriptor.version ?? "v0";
-  const updated = entry?.descriptor?.updated ?? descriptor.updated ?? "";
-  const vintage = entry?.descriptor?.vintage ?? descriptor.vintage;
+  const version = descriptor.version ?? "v0";
+  const updated = descriptor.updated ?? "";
+  const vintage = descriptor.vintage;
   const mapKey = Object.keys(MAP.tables).find((k) => MAP.tables[k].collection === collection);
   const map = mapKey ? MAP.tables[mapKey] : null;
   const book = mapKey ? CODEBOOK.tables[mapKey] : null;
   const sample = sampleFor(collection);
-  const name = descriptor.name ?? entry?.descriptor?.name ?? collection;
+  const name = descriptor.name ?? collection;
   const lines = [];
   const p = (s = "") => lines.push(s);
   p(`# ${name}: a researcher's guide`);
@@ -765,7 +771,7 @@ function guideFor(collection) {
 }
 
 export function renderAll() {
-  const { GUIDES, DESCRIPTORS, MANIFEST } = guideData();
+  const { GUIDES, MANIFEST } = guideData();
   const collections = [...new Set([
     ...Object.keys(GUIDES.collections),
     ...MANIFEST.collections.map((entry) => entry.id),
@@ -778,7 +784,7 @@ export function renderAll() {
     "One guide per Cedar Press collection, generated by `scripts/docs-markdown.mjs --kind guides`. Installed producer spreadsheets use their manifest-selected dictionary and exact served header, with the release's record grains and qualifications. Collections without an installed producer spreadsheet retain the authored guide and compatibility field map. Edit the input contracts and regenerate; a test fails when these files are stale.",
     "",
     ...collections.map((c) => {
-      const d = MANIFEST.collections.find((x) => x.id === c)?.descriptor ?? DESCRIPTORS.find((x) => x.id === c) ?? {};
+      const d = MANIFEST.collections.find((x) => x.id === c)?.descriptor ?? {};
       return `- [${d.name ?? c}](${c}.md) (\`${c}\`)`;
     }),
     "",

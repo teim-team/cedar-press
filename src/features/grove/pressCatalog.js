@@ -327,10 +327,7 @@ export const PRESS_CATALOG = Object.freeze([
   }),
   Object.freeze({
     id: "foundation-corporate-giving",
-    // The owner keeps this name with its ampersand. It is the one ampersand
-    // the house style allows in visible copy, and `tests/smoke.spec.js`
-    // ("uses no ampersand in visible copy") exempts this exact name and
-    // nothing else.
+    // The owner's name for the collection, ampersand included (2026-09-27).
     short: "Foundation & Corporate Giving",
     name: "Foundation & Corporate Giving",
     // Owner, 2026-09-26: Cedar Press, which with PLOT in Cedar Press+ makes

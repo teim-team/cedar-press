@@ -5,16 +5,13 @@ import { previewFacts, renderReleasedGuide, SECTIONS } from "../../../scripts/do
 
 function fixture(collection = "funding") {
   const fields = [
-    { column: "record_type", label: "Record type", meaning: "The logical source record type." },
-    { column: "record_key", label: "Record key", meaning: "The source key serialized as JSON." },
-    { column: "record_grain", label: "Record grain", meaning: "One source observation at its declared grain." },
     { column: "business_source_id", label: "Business source ID", meaning: "The identifier issued by the listing source; not a certifying authority." },
     { column: "source_url", label: "Source URL", meaning: "The source page for this observation." },
   ];
   return {
     entry: { id: collection, sample: { table: `${collection}.csv`, path: `/data/cedar/samples/${collection}/spreadsheet__10.csv`, rows: 1, of: 27 }, tables: [] },
-    book: { collection, dataset: collection, row: "One permitted observation at its declared record_type and record_grain.", where: "Exact release fixture-release; one researcher spreadsheet.", fields },
-    sample: { columns: fields.map((field) => field.column), rows: [{ record_type: "reviewed_public_base", record_key: '["source-01"]', record_grain: "one reviewed source observation", business_source_id: "00012", source_url: "https://example.test/source" }] },
+    book: { collection, dataset: collection, row: "One source listing of a business.", where: "Exact release fixture-release; one researcher spreadsheet.", fields },
+    sample: { columns: fields.map((field) => field.column), rows: [{ business_source_id: "00012", source_url: "https://example.test/source" }] },
   };
 }
 
@@ -29,7 +26,7 @@ test("release dictionary selection follows the manifest's exact CSV table name",
 
 test("a reviewed-looking placeholder is not a substantive field definition", () => {
   const { book } = fixture();
-  book.fields[0].meaning = "Reviewed Cedar field contract: record_type";
+  book.fields[0].meaning = "Reviewed Cedar field contract: business_source_id";
   assert.throws(() => assertReleasedDictionary(book), /Substantive definition required/);
   book.fields[0].meaning = " ";
   assert.throws(() => assertReleasedDictionary(book), /Substantive definition required/);
@@ -53,13 +50,13 @@ test("dictionary order is bound to the served CSV rather than the compatibility 
   assert.throws(() => assertReleasedDictionary(book, { ...sample, columns: [...sample.columns, "invented"] }), /header exactly/);
 });
 
-test("a NEED guide documents the reviewed base and does not promise the held graph", () => {
+test("a NEED guide states what one ownership decision settles, and names no hold", () => {
   const { entry, book, sample } = fixture("need");
   const text = renderReleasedGuide("need", book, entry, {}, sample);
   for (const section of SECTIONS) assert.ok(text.includes(`\n## ${section}\n`), section);
   for (const column of sample.columns) assert.ok(text.includes(`| \`${column}\` |`), column);
-  assert.match(text, /only the reviewed public base/);
-  assert.match(text, /does not expose the held enterprise graph/);
+  assert.match(text, /does not settle any other enterprise or relationship/);
+  assert.doesNotMatch(text, /held enterprise graph|reviewed public base/);
   assert.match(text, /does not imply a direct owner/);
   assert.match(text, /27/);
   assert.doesNotMatch(text, /The opening block of every row/);
@@ -84,9 +81,6 @@ test("listing and subcontract guides retain distinct identity roles and observat
 
 function richFixture() {
   const fields = [
-    { column: "record_type", label: "Record type", meaning: "The logical source record type." },
-    { column: "record_key", label: "Record key", meaning: "The source key serialized as JSON." },
-    { column: "record_grain", label: "Record grain", meaning: "One source observation at its declared grain." },
     { column: "cedar_uid", label: "Cedar ID", meaning: "The canonical Native entity this record is associated with." },
     { column: "canonical_name", label: "Native entity", meaning: "That entity's register name." },
     { column: "amount_usd", label: "Amount", meaning: "The reported amount." },
@@ -100,22 +94,21 @@ function richFixture() {
     { column: "n_named", label: "Named", meaning: "How many parties the source names." },
   ];
   const rows = [
-    { record_type: "records", record_key: '["a"]', record_grain: "one event", cedar_uid: "CE-00001-6S", canonical_name: "Asa'carsarmiut Tribe", amount_usd: "5000", amount_usd_real2025: "6100.5", currency: "USD", event_date: "2020-02-05", event_date_precision: "day", filed_at: "2020-02-05T10:00:00-05:00", amount_basis: "purchase price", status: "paid", n_named: "2" },
-    { record_type: "records", record_key: '["b"]', record_grain: "one event", cedar_uid: "", canonical_name: "", amount_usd: "", amount_usd_real2025: "", currency: "", event_date: "2014-05", event_date_precision: "month", filed_at: "2014-05-01T00:00:00-04:00", amount_basis: "", status: "unknown", n_named: "0" },
-    { record_type: "corrections", record_key: '["c"]', record_grain: "one correction", cedar_uid: "", canonical_name: "", amount_usd: "", amount_usd_real2025: "", currency: "", event_date: "", event_date_precision: "unstated", filed_at: "2015-01-05T00:00:00-05:00", amount_basis: "Undisclosed", status: "null", n_named: "1" },
+    { cedar_uid: "CE-00001-6S", canonical_name: "Asa'carsarmiut Tribe", amount_usd: "5000", amount_usd_real2025: "6100.5", currency: "USD", event_date: "2020-02-05", event_date_precision: "day", filed_at: "2020-02-05T10:00:00-05:00", amount_basis: "purchase price", status: "paid", n_named: "2" },
+    { cedar_uid: "", canonical_name: "", amount_usd: "", amount_usd_real2025: "", currency: "", event_date: "2014-05", event_date_precision: "month", filed_at: "2014-05-01T00:00:00-04:00", amount_basis: "", status: "unknown", n_named: "0" },
+    { cedar_uid: "", canonical_name: "", amount_usd: "", amount_usd_real2025: "", currency: "", event_date: "", event_date_precision: "unstated", filed_at: "2015-01-05T00:00:00-05:00", amount_basis: "Undisclosed", status: "null", n_named: "1" },
   ];
   return {
     entry: { id: "deals", descriptor: { updated: "2026-10-01" }, sample: { table: "deals.csv", path: "/data/cedar/samples/deals/spreadsheet__10.csv", rows: 3, of: 978 }, tables: [] },
-    book: { collection: "deals", dataset: "Indian Country Deals", row: "One permitted observation at its declared record_type and record_grain.", where: "Exact release fixture-release; one researcher spreadsheet.", fields },
+    book: { collection: "deals", dataset: "Indian Country Deals", row: "One source-described deal or event.", where: "Exact release fixture-release; one researcher spreadsheet.", fields },
     sample: { columns: fields.map((field) => field.column), rows },
   };
 }
 
-test("the preview facts are measured from the rows, never typed", () => {
+test("the sample facts are measured from the rows, never typed", () => {
   const { book, sample } = richFixture();
   const facts = previewFacts(book, sample);
   assert.equal(facts.rowCount, 3);
-  assert.deepEqual(facts.recordTypes, [["records", 2], ["corrections", 1]]);
   assert.deepEqual(facts.allBlank, []);
   assert.deepEqual(facts.tokens, [
     { column: "amount_basis", token: "Undisclosed", count: 1 },
@@ -138,7 +131,7 @@ test("the guide states the citation in the download's form, with the Updated dat
   const text = renderReleasedGuide("deals", book, entry, { updated: "2026-10-01" }, sample);
   assert.match(text, /\*\*Cite as:\*\* Lumecon, "Indian Country Deals", Cedar Press collection, cedarpress\.ai\. Updated 2026-10-01\. Accessed <date>\./);
   assert.match(text, /never by a version label, file count or table count/);
-  assert.match(text, /producer spreadsheet `deals\.csv` · Updated 2026-10-01\./);
+  assert.match(text, /download `deals\.csv` · Updated 2026-10-01\./);
   assert.doesNotMatch(text, /\bv\d+\b/);
   // Without an Updated date the sentence is shorter, never "Updated ." with nothing after it.
   const bare = renderReleasedGuide("deals", book, { ...entry, descriptor: {} }, {}, sample);
@@ -159,7 +152,7 @@ test("blank meanings follow the column's type instead of one sentence for every 
   }
 });
 
-test("units, formats and the observed preview are stated from the measured facts", () => {
+test("units, formats and the observed sample are stated from the measured facts", () => {
   const { entry, book, sample } = richFixture();
   const text = renderReleasedGuide("deals", book, entry, {}, sample);
   assert.match(text, /### Units and formats/);
@@ -168,9 +161,9 @@ test("units, formats and the observed preview are stated from the measured facts
   assert.match(text, /The `currency` column states the reported currency/);
   assert.match(text, /Dates are ISO 8601 calendar dates \(YYYY-MM-DD\)\. Where a precision column \(`event_date_precision`\) states `month` or `year`/);
   assert.match(text, /Date-time columns \(`filed_at`\) carry their UTC offset/);
-  assert.match(text, /### Observed in the preview/);
-  assert.match(text, /Preview rows: 3; record types present: `records` \(2\), `corrections` \(1\)\./);
-  assert.match(text, /Columns blank on every preview row \(0 of 14\): none\./);
+  assert.match(text, /### Observed in the sample/);
+  assert.match(text, /Sample rows: 3\./);
+  assert.match(text, /Columns blank on every sample row \(0 of 11\): none\./);
   assert.match(text, /Literal tokens present as cell values: `Undisclosed` in `amount_basis` \(1\); `unknown` in `status` \(1\); `null` in `status` \(1\)\./);
   assert.match(text, /\| `amount_basis` \|[^\n]*\| text \| the source states none, or not applicable to this row \|/);
   // A spreadsheet with no money column says so rather than inventing a unit.

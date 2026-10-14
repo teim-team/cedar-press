@@ -159,6 +159,12 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install -e 'server[dev]' httpx2
+      # The one step that reads the producer's files rather than its package,
+      # so it runs before the checkout is removed: every served release
+      # receipt must be a release the producer built and verified, with the
+      # same manifest digest.
+      - name: Check the served release receipts against the producer
+        run: python scripts/check_receipts_against_producer.py --producer .lumecon-data
       # A regular (non-editable) install from the verified local checkout; the
       # checkout is then removed so the tests can only see the installed commit.
       - name: Install Lumecon-data from the verified checkout

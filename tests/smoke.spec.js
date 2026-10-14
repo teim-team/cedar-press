@@ -2409,58 +2409,11 @@ test.describe("the Cedar panel is the site's panel", () => {
 });
 
 test.describe("house style", () => {
-  // "No visible copy uses an ampersand" — implementation brief, acceptance
-  // criteria. Asserted against RENDERED TEXT rather than by grepping source,
-  // because the rule is about what a reader sees: `&amp;` in JSX and `&` in a
-  // string are the same character on the page and a grep for one misses the
-  // other.
-  //
-  // THE RULE IS ABOUT AUTHORED COPY, NOT ABOUT QUOTED NAMES.
-  //
-  // Two exemptions, and both were found by running this rather than by
-  // reasoning about it:
-  //
-  //   1. WITHDRAWN. "Native Federal Advocacy & Engagement" was exempted
-  //      here as a COLLECTION NAME out of the release manifest, on the
-  //      reasoning that rewriting it in the product would make the product
-  //      disagree with the release. The collection was then renamed at the
-  //      source — the manifest, the catalog, the descriptors and Grove all
-  //      say "and" now — so the exemption stopped protecting a name and
-  //      started hiding a straggler: the retired `code/1176_build_review_artifact.py`
-  //      was still writing the ampersand into the downloadable review page,
-  //      and this test was told not to look. The lesson is that an exemption
-  //      for a generated value has to be withdrawn when the value changes,
-  //      or the rule quietly stops being a rule.
-  //   2. "Quechan Tribe of the Fort Yuma Indian Reservation, California &
-  //      Arizona" is a CANONICAL ENTITY NAME from the register — the tribe's
-  //      name as the federal record states it. Editing a Nation's legal name
-  //      to satisfy a house style is not a copy fix; it is the product
-  //      asserting something the source does not say, which is the one thing
-  //      the whole identity layer exists to prevent.
-  //
-  //   3. "Foundation & Corporate Giving" is a COLLECTION NAME the owner keeps
-  //      with its ampersand (2026-09-27). It is exempted by exact name, not by
-  //      selector: the name is removed from the text before the check, so the
-  //      same line carrying any other ampersand still fails, and a variant
-  //      spelling ("Foundation &amp; Corporate Giving" rendered literally, or
-  //      "Foundations & Corporate Giving") is not exempt.
-  //
-  // So the table and the register's name cells are excluded by selector,
-  // which keeps the rule enforceable as new names arrive rather than needing
-  // a string added here every time one does.
-  // `.cp-ex__cards` is the phone's record surface — the same rows the desktop
-  // draws as a table. Missing it was the whole reason this test failed on the
-  // phone project and passed on desktop, which is a useful reminder that
-  // "visible copy" is per-composition, not per-page.
-  /**
-   * The one collection name allowed its ampersand (exemption 3 above). The
-   * only tolerance is whitespace after the ampersand, because the Methods
-   * ring sets a long name on two SVG lines ("Foundation &" / "Corporate
-   * Giving") and the text of two <tspan>s joins with no space between them.
-   */
-  // S&P is a company's legal name (the ratings source on the door's banner).
-  const AMPERSAND_EXEMPT = /Foundation &\s*Corporate Giving|\bS&P\b/g;
-
+  // Quoted names and the data tables carry source text (a Nation's legal
+  // name, a record as the source states it), which house style does not
+  // edit, so they are excluded by selector. `.cp-ex__cards` is the phone's
+  // record surface, the same rows the desktop draws as a table: "visible
+  // copy" is per composition, not per page.
   const QUOTED = [
     ".cp-ex__table",
     ".cp-ex__cards",
@@ -2481,22 +2434,30 @@ test.describe("house style", () => {
     { name: "Research access", path: "/research-access" },
     { name: "Tribal data request", path: "/tribal-data-request" },
   ]) {
-    test(`${name} uses no ampersand in visible copy`, async ({ page }) => {
+    // No em dash in prose a reader sees (AGENTS.md section 6); an em dash that
+    // is an element's whole text stands for an empty value, which is
+    // typography. Read per element, from the live page: a detached copy of
+    // the page has no layout, so its innerText is one line for the whole page
+    // and could not tell a lone dash from a dash in a sentence.
+    test(`${name} uses no em dash in visible copy`, async ({ page }) => {
       if (path !== "/" || name !== "the door") await signIn(page);
       await page.goto(path);
       await page.locator("main, .cp-door").first().waitFor();
-      let text = await page.evaluate((quoted) => {
-        // A detached clone, so removing the quoted subtrees to read the rest
-        // does not change the page the next assertion sees.
-        const body = document.body.cloneNode(true);
-        for (const node of body.querySelectorAll(quoted)) node.remove();
-        return body.innerText;
+      const texts = await page.evaluate((quoted) => {
+        const out = [];
+        for (const element of document.body.querySelectorAll("*")) {
+          if (element.closest(quoted) || element.closest("script, style, noscript")) continue;
+          const own = [...element.childNodes]
+            .filter((node) => node.nodeType === Node.TEXT_NODE)
+            .map((node) => node.data)
+            .join("")
+            .trim();
+          if (own) out.push(own);
+        }
+        return out;
       }, QUOTED);
-      const offending = text
-        .split("\n")
-        .map((line) => line.trim().replaceAll(AMPERSAND_EXEMPT, ""))
-        .filter((line) => line.includes("&"));
-      expect(offending, `ampersand in visible copy on ${path}`).toEqual([]);
+      const offending = texts.filter((text) => text.includes("\u2014") && text !== "\u2014");
+      expect(offending, `em dash in visible copy on ${path}`).toEqual([]);
     });
   }
 });
