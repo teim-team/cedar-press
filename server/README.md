@@ -13,12 +13,43 @@ Lumecon-data releases; the refresh order is in `data/cedar/README.md`.
 
 ```
 cedar_press/
-  app.py             the routes: HTTP concerns only
-  repository.py      where data comes from — the seam Postgres replaces
-  session.py         who is signed in; a signed, HTTP-only cookie
-  collections.py     the launch collection, ported from Cedar Grove's package
-  press_catalog.py   briefs and the citation register, likewise
-  claims.py          the claim-class discipline the findings are held to
+  routes and data
+    app.py                  the routes: HTTP concerns only
+    repository.py           where data comes from, the seam Postgres replaces;
+                            verifies a pinned release before any byte is served
+    spreadsheet.py          one customer CSV per collection, from the verified download path
+    customer_sheet.py       the customer table rules, vendored from Lumecon-data
+    governed_collections.py the added release targets (Giving, PLOT) and their column order
+    release_research.py     bounded research previews from hash-pinned producer packets
+    csv_safety.py           writes a cell a spreadsheet would run as a formula as text
+
+  what readers see
+    collections.py          the 14 storefront collections, ported from Cedar Grove's package
+    collection_profiles.py  the machine-readable data dictionary Cedar answers from
+    source_presentation.py  readable citations, naming original publishers, never file names
+    press_catalog.py        the tiers, the briefs and the citation register
+    protected_articles.py   subscriber article content, kept out of the public web build
+    claims.py               what may be said about a piece of evidence
+    plot_map.py             checks pinned PLOT map evidence and shapes its outlines
+    shelf.py, templates/    the HTML shelf page, GET /press/shelf
+
+  NEED
+    need_preview.py         admits the small committed NEED preview on exact proof
+    need_publication.py     NEED admission after the normal release verifier
+    need_profiles.py        NEED evidence on registered Native entity profiles
+
+  subscribers
+    session.py              who is signed in: a signed, HTTP-only cookie
+    subscribers.py          who holds a subscription, and which access code bought it
+    codes.py                checks an access code is real, unspent, unexpired and the reader's
+    ratelimit.py            rate limits on sign-in and activation
+    priorities.py           Shape the Research: Cedar Points, priorities and requests
+    db.py, migrate.py,      the Postgres connection, used when DATABASE_URL is set,
+      migrations/           and its migrations
+
+  other services
+    cedar_service.py        the client for Cedar, the AI economic analyst (the cedar repository)
+    grove_exchange.py       a local process interface for Cedar Grove's application
 ```
 
 `tests/test_collection.py` and `tests/test_access.py` each run both the Python
