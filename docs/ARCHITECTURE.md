@@ -54,16 +54,16 @@ git ls-files src/<dir>/grove                                   # files to move
 | | |
 |---|---|
 | Files to move | 189 — `features/grove` 141, `pages/grove` 45, `components/grove` 1, `styles/grove` 2 |
-| Path references to rewrite | 438, across 93 files |
+| Path references to rewrite | 431, across 92 files |
 | Referencing files inside `src/` | 56 — `pages/` 37, `features/` 15, `context/` 2, `components/` 1, `main.jsx` 1 |
-| Referencing files outside `src/` | 37 — `server/cedar_press/` 8, `scripts/` 8, `docs/` 8, `server/tests/` 5, `tests/` 3, `data/` 2, `.github/` 1, `.env.example` 1, `eslint.config.js` 1 |
+| Referencing files outside `src/` | 36 — `server/cedar_press/` 8, `scripts/` 8, `docs/` 7, `server/tests/` 5, `tests/` 3, `data/` 2, `.github/` 1, `.env.example` 1, `eslint.config.js` 1 |
 
 The reason this was deferred, open pull requests that touched the same files,
 has expired.
 
 It is a mechanical rename with no behaviour change, and it should land as its
 own commit: the four directories move to `press/` and the references are
-rewritten in one pass. The question "did all 438 references get rewritten?"
+rewritten in one pass. The question "did all 431 references get rewritten?"
 is one the build, the suites and the smoke run answer, and a reader cannot
 answer it from a diff. Prose (Markdown, comments, `.env.example`) is what no build sees,
 which is why `test_rename_plan.py` counts textual occurrences rather than
