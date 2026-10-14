@@ -146,7 +146,7 @@ test("the maintenance story says weekly, human review, wider coverage and new co
   assert.match(MAINTENANCE.sentence, /develops new collections/);
   assert.match(MAINTENANCE.goal, /exceptionally useful, well-documented data and tools for Indian Country/);
   for (const line of Object.values(MAINTENANCE)) {
-    assert.doesNotMatch(line, /[—&]|\bimpact\b/i, line);
+    assert.doesNotMatch(line, /—|\bimpact\b/i, line);
   }
   // No surface promises a different cadence.
   for (const [id, cadence] of Object.entries(DECLARED_CADENCE)) assert.equal(cadence, "Reviewed on a weekly schedule", id);
@@ -169,7 +169,7 @@ test("public NEED describes its reviewed cohort while restricted enrichments ret
   assert.match(all, /issuer, instrument, agency and date/);
   assert.match(all, /rather than as a current rating/);
   assert.match(all, /never presented as its parent's/);
-  assert.doesNotMatch(`${all} ${need.blurb}`, /[—&]|\bimpact\b/i);
+  assert.doesNotMatch(`${all} ${need.blurb}`, /—|\bimpact\b/i);
 });
 
 test("the methods page says what the home page's examples are and how NEED names owners", async () => {

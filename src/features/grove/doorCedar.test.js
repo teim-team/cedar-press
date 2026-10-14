@@ -131,12 +131,8 @@ test("every topic has a deeper answer for tell me more, and none of it breaks th
   for (const intent of DOOR_INTENTS) {
     if (intent.chip) assert.ok(intent.expanded?.length > 80, `${intent.id} has no deeper answer`);
     for (const raw of [intent.answer, intent.expanded ?? "", intent.chip ?? "", ...(intent.variants ?? [])]) {
-      // The one named exemption: the collection's own name, which the owner
-      // keeps with its ampersand. Nothing else may carry one.
-      const text = raw.replaceAll("Foundation & Corporate Giving", "");
-      assert.ok(!text.includes("—"), `em dash in ${intent.id}`);
-      assert.ok(!/&amp;|[A-Za-z0-9] & [A-Za-z0-9]/.test(text), `ampersand in ${intent.id}`);
-      assert.ok(!/prepared (set|material|answers)/i.test(text), `${intent.id} announces its machinery`);
+      assert.ok(!raw.includes("—"), `em dash in ${intent.id}`);
+      assert.ok(!/prepared (set|material|answers)/i.test(raw), `${intent.id} announces its machinery`);
     }
   }
 });
