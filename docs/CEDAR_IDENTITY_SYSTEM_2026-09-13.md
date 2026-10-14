@@ -173,6 +173,8 @@ Do not create per-script registries. Collection packages may mint only their
 declared record IDs. Source rows never populate cedar_uid through a bare assignment
 from tribe_id. Shared validators must reject wrong namespace/object type, duplicate
 keys, immutable binding reassignment and undeclared cross-collection joins.
+(`code/cedar_ids.py` is at the tag `data-workspace-final`: minting Cedar IDs
+passed to Lumecon-data's maintainers when the data workspace was retired.)
 
 Changing names, classification, source evidence or affiliation does not change
 stable IDs. Keep object bindings separate from mutable attributes. Derived samples
@@ -204,14 +206,19 @@ site can never teach a form by inventing an entity.
 
 ## 7. Disagreements with earlier documents
 
-Recorded rather than silently resolved. The terminal owns reconciling these in
-the ADR; the site follows this specification because it is the latest word.
+Recorded rather than silently resolved. Lumecon-data's maintainers, who mint
+the IDs, own reconciling these; the site follows this specification because
+it is the latest word.
 
 **7.1 Check characters on `CB-`.** ADR-043 says "the id carries the standard's
 two check characters over the uid's alphabet (`CB-0001842-XQ`)". This
 specification says the working format is `CB-0000001` and "a check-character
-convention can be added later". The site shows `CB-0000001`. **If ADR-043's
-form is the real one, say so and the site changes in one line.**
+convention can be added later". The site shows `CB-0000001`, and the code
+accepts only that form: the vendored customer-table rules
+(`server/cedar_press/customer_sheet.py`, `CEDAR_ID`) take `CB-` and seven
+digits, and would remove a value in ADR-043's form as an unmapped ID. Nothing
+mints a `CB-` yet, so the choice is still open. **If ADR-043's form is the
+real one, say so; the site and the vendored rules then change together.**
 
 **7.2 Cherokee Nation Businesses is a business. Corrected 2026-09-13.**
 
@@ -245,7 +252,7 @@ Cedar business id; that has been corrected. When `CB-` is minted, the harmonized
 
 ---
 
-## 8. What the terminal owns
+## 8. What Lumecon-data owns
 
 1. **Mint the `CB-` register.** Seed per ADR-043 (the NEED register is its
    largest seed; the 45 `Individually Native-owned business` entities keep

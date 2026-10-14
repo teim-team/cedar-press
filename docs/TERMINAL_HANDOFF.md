@@ -98,7 +98,7 @@ the owner's adjudication queue.
 
 ## 2026-10-04 Gaming columns follow the rights ruling
 
-Lumecon-data #17 (`019ded3`, now the Gaming consumer job's `LUMECON_DATA_SHA`)
+Lumecon-data #17 (`019ded3`, the Gaming consumer job's `LUMECON_DATA_SHA` when this was written)
 applies the owner ruling of 2026-10-04 to Gaming releases: a field-rights class
 is provenance, so a release ships every column of any class (projection rule
 `gaming-presented-fields-v2`) except personal data and a few columns whose
@@ -133,8 +133,8 @@ selects a Press product, tier or pin for Infrastructure.
 The corrected real Infrastructure release aeaf2aa17b50ff1edd45222fe4c8469f2cdb0f5f5fad9824ec6b118cb410c09b
 passed the isolated producer-metadata and shared-consumer rehearsal. Records has
 28,484 permitted rows, 30 examples and 41 fields. The other 13 components were
-refused according to existing holds, and the research packet was refused in
-production mode. Packet receipt SHA256:
+refused under the holds in force on 2026-10-03, before the owner rulings of
+2026-10-04, and the research packet was refused in production mode. Packet receipt SHA256:
 b2743050ae728dd63e4b7a000fa7c35ee6f533f0347f0b9b83726a5c6cab1f2a.
 This is review evidence, not deployment or new human approval. The packet currently
 contains zero map features; map serving and consumer re-pins remain unfinished.

@@ -22,8 +22,9 @@ No collection carries a publication hold (owner ruling 2026-10-04), so no previe
 
 Signed-in examples use the release research API. The record count shown beside a
 spreadsheet comes from its verified release metadata and must match the permitted
-record types for the same release. Unavailable or held groups do not become
-available because an older manifest records a count. Mixed record types retain
+record types for the same release. A group the release refuses, or one that
+fails verification, does not become available because an older manifest
+records a count. Mixed record types retain
 their grains and money meanings; a row count is never permission to add amounts.
 
 The public samples stay public only under their existing publication eligibility.
