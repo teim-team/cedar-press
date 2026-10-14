@@ -7,7 +7,7 @@ Round-half-away-from-zero is ratified and Claude owns its implementation. Codex 
 
 Elijah is only reviewing genuinely ambiguous identity, affiliation, or legal-object linkages where human judgment is required. Never place code defects, schemas, missing fields, tests, source refreshes, documentation, infrastructure, or other engineering work in his adjudication queue. Codex is a frontier coding model and must diagnose and fix those issues itself, validate the fix, and keep working. Only escalate when the repository and available authoritative sources cannot determine a linkage or when an actual product-policy choice belongs to the owner. A queue that asks Elijah to resolve engineering problems is a failed deliverable.
 
-*Operating guide for AI-agent sessions. Written 2026-07-31 from the full Q3 build conversation. Owner: Elijah Moreno.*
+*Operating guide for AI-agent sessions. This repository is Havala Hanson's (§5); the owner rulings below are Elijah Moreno's. Trimmed to its operating sections on 2026-10-12.*
 
 ---
 
@@ -44,14 +44,14 @@ in the former journal's 2026-10-04 entry, at the tag `data-workspace-final`.
 
 ## 1. What this repo owns
 
-This repository holds **two trees that were developed independently** and were
-joined on 2026-09-02 with `--allow-unrelated-histories`. Only three paths
-collided. Know which tree you are in before you start.
+This repository holds the subscriber-facing service. From 2026-09-02, when the
+two were joined with `--allow-unrelated-histories`, until 2026-10-12 it also
+held the Cedar data workspace, described below.
 
 **The subscriber-facing service.** Cedar Press at cedarpress.ai: a Vite + React
-static client with a FastAPI service alongside it, serving Overview, Articles,
-Data, What's new and Methods, plus `/tribal-data-request` and `/research-access`
-on their own URLs. Cedar Press is a Lumecon research publication, partnered
+static client with a FastAPI service alongside it, serving the Overview,
+Collections, Research Briefs, Priorities, What's new and Methods, plus
+`/tribal-data-request` and `/research-access` on their own URLs. Cedar Press is a Lumecon research publication, partnered
 with Tribal Business News: built by Lumecon and available exclusively through
 Tribal Business News, which handles subscriber plans (payment, renewals and
 issuance). There is no year gating: every subscriber gets full coverage.
@@ -72,9 +72,9 @@ filters and customer presentation. The journal that recorded it is at the same t
   exporter now own current pinned releases. The historical scripts that were
   under `code/` remain available, for their documented reproduction and
   adjudication roles, in git history at the tag `data-workspace-final`.
-- The economic model. That is `teim-engine`, whose reference data this workspace
-  reads under ADR-044 `reference_dataset` treatment — pinned, checksummed,
-  versioned, never `data_snapshot`.
+- The economic model. That is `teim-engine`, whose reference data the former
+  workspace read under ADR-044 `reference_dataset` treatment (pinned,
+  checksummed, versioned, never `data_snapshot`). Nothing in this tree reads it.
 - Product vocabulary and brand copy. That is `lumecon-website`, the North Star:
   where this repository and that one disagree about what something is called,
   that one wins.
@@ -101,10 +101,10 @@ a contract, not a label anyone reads; leave it alone.
 
 ## 3. Setup and checks
 
-Node 22 and Python 3.12, the versions CI uses. Two tools CI gets from
-elsewhere have to be installed by hand: `uv`, which `make audit-python` uses
-to resolve the server's dependencies (CI takes it from
-`astral-sh/setup-uv`), and `pre-commit`, which only `make hooks` needs:
+Node 22 and Python 3.12, the versions CI uses. Two tools have to be installed
+by hand: `uv`, which `make audit-python` uses to resolve the server's
+dependencies (CI takes it from `astral-sh/setup-uv`), and `pre-commit`, which
+only `make hooks` needs (CI does not run it):
 
 <!-- gate:setup -->
 ```bash
@@ -142,20 +142,15 @@ root: its `-s server/tests -t server` is why a bare
 importable` (`tests/` at the root is the Playwright smoke directory, not a
 Python package).
 
-**Verified 2026-10-02** (Linux, Node 22, Python 3.11), in the order above:
-`npm run lint` exits `0` · `make check-generated` reports all six generators
-current · `npm run test` reports `634 pass, 0 fail, 1 skipped` and a coverage
-floor met at 88.64 lines / 85.00 branches / 90.80 functions · `ruff check
-server` reports `All checks passed!` · `make test-python` reports `Ran 664
-tests`, 33 skipped, 85% coverage against the 77 floor, with five import
-errors and one failure that are Python 3.11 artifacts (`code/` scripts use
-3.12 f-string syntax and the writer census parses them with `ast`); on
-Python 3.12, which CI uses, the same suite was recorded green on 2026-10-02
-in `docs/REVIEW_STATUS.md` · `make audit-python` and `make audit-node` report
-no known vulnerabilities · `npm run build` completes; its chunk-size warning
-is pre-existing. The Playwright pair was not rerun on 2026-10-02; the hosted
-Checks run for the pushed head is the record for it. The 2026-09-24 figures
-this block replaced were `398 pass` and `Ran 265 tests`.
+**Verified 2026-10-14** (Linux, Node 22, Python 3.12, at `main` commit
+`78a80e3`), in the order above: `npm run lint` exits `0` · `make
+check-generated` reports every generator current · `npm run test` reports
+`704 pass, 0 fail, 1 skipped` and a coverage floor met at 89.43 lines / 85.51
+branches / 91.53 functions · `npm run test:smoke` reports 310 passed, 42
+skipped · `ruff check server` reports `All checks passed!` · `make
+test-python` reports `Ran 599 tests`, 36 skipped, 84% coverage against the 77
+floor · `make audit-python` and `make audit-node` report no known
+vulnerabilities · `npm run build` completes.
 
 **`py -3` is the Windows Python launcher.** On Linux and macOS, and in this
 repository's own CI, the equivalent is `python3` (or `python`).
@@ -164,14 +159,11 @@ repository's own CI, the equivalent is `python3` (or `python`).
 among them, and are kept at the tag `data-workspace-final`. New data work goes to
 Lumecon-data.
 
-**Not verified in this environment, and why:**
-
-- `npm run test:smoke` needs Playwright's browsers, which
-  `npx playwright install --with-deps chromium` installs once (it ran on
-  2026-09-23; see above). Note it **builds as well as tests**:
-  `playwright.config.js` starts the server with `npm run build` configured
-  with a throwaway demo account, which is why the deployed build is the last
-  step of the CI job and not this one.
+`npm run test:smoke` needs Playwright's browsers, which
+`npx playwright install --with-deps chromium` installs once. It **builds as
+well as tests**: `playwright.config.js` starts the server with `npm run build`
+configured with a throwaway demo account, which is why the deployed build is
+the last step of the CI job and not this one.
 
 ## 4. Branch, commit and review conventions
 
@@ -186,7 +178,8 @@ Lumecon-data.
   - **A person's commit carries no AI trailer**, including when an agent
     wrote the change with them in a session they were directing. The person
     reviewed the change and committed it, so the person is its author.
-  - **A commit an agent makes on its own**, for example an agent given a
+  - **A commit an agent makes on its own** (none are made while people make
+    the commits; see below), for example an agent given a
     task and left to work and commit unattended, ends with exactly the two
     trailer lines its session gives it, and no other trailer of that kind:
 
@@ -279,7 +272,7 @@ list, all of which this project has paid for:
 
 ## 7. How this doc gets updated
 
-Agents update this file as part of the work, in the same commit as the change.
+Agents update this file as part of the work, in the same change as the work.
 If you add an entry point, change a check command, move ownership, or discover
 that something here is wrong, fix it here — a stale operating doc is worse than
 no operating doc, because it is trusted.
@@ -300,7 +293,7 @@ One other place absorbs a specific kind of update, so it does not land here:
 | Repo | What it is | Relationship to this one |
 |---|---|---|
 | [`teim-app`](https://github.com/teim-team/teim-app) | The authenticated platform — Cedar Impact, Cedar Commons and Cedar Grove | Cedar Grove carries these collections into the full analysis environment |
-| [`teim-engine`](https://github.com/teim-team/teim-engine) | The model engine behind Cedar Impact (internal) | This workspace reads its reference data as `reference_dataset` per ADR-044 |
+| [`teim-engine`](https://github.com/teim-team/teim-engine) | The model engine behind Cedar Impact (internal) | The former workspace read its reference data as `reference_dataset` per ADR-044; nothing in this tree reads it |
 | [`cedar`](https://github.com/teim-team/cedar) | Cedar, the AI economic analyst, as a service | No runtime dependency in either direction |
 | [`lumecon-website`](https://github.com/teim-team/lumecon-website) | The public site, and the **North Star** for product vocabulary | Product names and their one-line definitions follow its `AGENTS.md` |
 | [`Lumecon-data`](https://github.com/teim-team/Lumecon-data) | The shared Python data foundation behind Cedar Press, Cedar Grove, Cedar and Cedar Impact | Owns current versioned builders, verification and researcher spreadsheet exports. Press consumes exact pins; the historical workspace scripts are at the tag `data-workspace-final` for reproduction and adjudication. |
