@@ -104,9 +104,15 @@ Out of scope:
 
 ## Posture
 
-- **No third-party runtime.** Brand fonts are self-hosted and the build ships
-  no analytics, tag managers or external scripts, so a page load makes no
-  request off-origin.
+- **No third-party runtime unless monitoring is configured.** Brand fonts are
+  self-hosted and the build ships no tag managers or external scripts. The one
+  optional third party is Datadog Real User Monitoring: its browser client is a
+  dependency, loaded only when a build is given both a Datadog application ID
+  and a client token (`VITE_DATADOG_*` in `.env.example`). The deploy workflow
+  (`.github/workflows/deploy.yml`) sets neither, so a page load from that build
+  makes no request off-origin. When configured, it reports errors, performance
+  and a few product events, with typed input masked and no email address sent
+  (the client's `telemetry.js`).
 - **No secrets in the bundle.** The client holds no keys. Every build-time
   value it carries is one that is safe to read: `VITE_APP_URL` and
   `VITE_API_URL` are public origins, the Datadog client token is a
@@ -153,6 +159,7 @@ Out of scope:
 ## Data
 
 Collections published through Cedar Press are built from public records and
-Lumecon's own research. Cedar Press does not collect analytics or behavioral
-data from readers. Correspondence sent to `contact@lumecon.ai` is handled by
+Lumecon's own research. Cedar Press collects no analytics or behavioral data
+from readers unless a build turns on the optional Datadog monitoring described
+under Posture, and the deploy workflow does not. Correspondence sent to `contact@lumecon.ai` is handled by
 the Lumecon team.
