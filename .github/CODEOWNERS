@@ -2,22 +2,29 @@
 # owners of every file a pull request touches. The LAST matching line wins, so
 # the specific areas below override the default at the top.
 #
-# Ari (ArihantSwainLumecon): backend platform.
-# Havala (Havala-Hanson): research and data. Ingested data should make sense,
-#   stay secure and be sustainable to maintain. Also security.
-# Brian (bkim28964): accounts, provisioning and entitlement. Also security.
+# Ownership as set by Elijah Moreno on 2026-10-04 (AGENTS.md section 5):
+# Havala (Havala-Hanson): team lead; this repository is hers, so she is on
+#   every path.
+# Kaylyn (kaylynhl): the interface users see, product behaviour and
+#   customer-facing copy.
+# Ari (ArihantSwainLumecon): backend and data pipelines.
+# Brian (bkim28964): accounts, access, payments, the database and
+#   dependencies. Also security.
 #
 # A code owner needs write access for their approval to count.
 
-# Default: the Cedar Press platform team.
-*                                   @ArihantSwainLumecon @Havala-Hanson
+# Default: the Cedar Press team.
+*                                   @Havala-Hanson @ArihantSwainLumecon
+
+# The web client: the interface and its copy.
+/src/                               @Havala-Hanson @kaylynhl
 
 # Backend service.
-/server/                            @ArihantSwainLumecon @bkim28964
+/server/                            @Havala-Hanson @ArihantSwainLumecon @bkim28964
 
 # Accounts, sign-in, subscriptions and provisioning.
-/server/cedar_press/subscribers.py  @bkim28964 @ArihantSwainLumecon
-/server/cedar_press/migrations/     @bkim28964 @ArihantSwainLumecon
+/server/cedar_press/subscribers.py  @bkim28964 @Havala-Hanson @ArihantSwainLumecon
+/server/cedar_press/migrations/     @bkim28964 @Havala-Hanson @ArihantSwainLumecon
 
 # Research data: ingestion, the source registry and published data.
 /cedar_source_registry/             @Havala-Hanson @ArihantSwainLumecon
