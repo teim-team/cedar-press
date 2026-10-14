@@ -66,7 +66,7 @@ git ls-files src/<dir>/grove                                   # files to move
 | | |
 |---|---|
 | Files to move | 189 — `features/grove` 141, `pages/grove` 45, `components/grove` 1, `styles/grove` 2 |
-| Path references to rewrite | 441, across 93 files |
+| Path references to rewrite | 442, across 93 files |
 | Referencing files inside `src/` | 56 — `pages/` 37, `features/` 15, `context/` 2, `components/` 1, `main.jsx` 1 |
 | Referencing files outside `src/` | 37 — `server/cedar_press/` 8, `scripts/` 8, `docs/` 8, `server/tests/` 5, `tests/` 3, `data/` 2, `.github/` 1, `.env.example` 1, `eslint.config.js` 1 |
 
@@ -81,7 +81,7 @@ as its own commit — moving the four directories to `press/` and rewriting the
 references in one pass — for two reasons that are about review rather than
 about risk.
 
-First, "did all 441 references get rewritten?" is a question the build, the
+First, "did all 442 references get rewritten?" is a question the build, the
 suites and the smoke run answer, and not one a reader can answer from a diff.
 Folded into a change that also alters behaviour or prose, the rename hides
 that change instead of accompanying it.
@@ -667,7 +667,10 @@ collection into `docs/guides/` from `data/cedar/guides.json` (the prose),
 the collection descriptor (purpose, sources, method), the field map (row
 unit, roles, approved header, what is owed, the retirement findings that
 stop the dataset) and the codebook (the field dictionary, with data types
-read off the sample and what a blank means). Every figure in the prose is
+read off the sample and what a blank means). A collection with an installed
+producer release is described by its download instead: the download's header,
+grain and column meanings as the site's reader shows them, with types read off
+the sample download. Every figure in the prose is
 quoted from a repository document named beside it; the finished public
 table is re-measured at release, which nothing here can do.
 
