@@ -91,8 +91,8 @@ class NeedProfiles(unittest.TestCase):
         self.assertEqual(result["status"], "available")
         self.assertEqual(len(result["related_enterprises"]), 1)
         self.assertTrue(all(result[key] == [] for key in profiles.COMPONENTS))
-        self.assertEqual(result["component_status"]["credit_rating_actions"], "publication_held")
-        self.assertIn("remain held", result["message"])
+        self.assertEqual(result["component_status"]["credit_rating_actions"], "not_deliverable")
+        self.assertIn("tenant-private or restricted-use", result["message"])
 
     def test_refused_relationships_do_not_block_exact_direct_issuer(self):
         result = self.serve(

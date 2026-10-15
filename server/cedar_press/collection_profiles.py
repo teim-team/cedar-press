@@ -224,8 +224,8 @@ def _spreadsheet_construction(dataset_id: str) -> dict[str, Any] | None:
             "establish ownership at a historical transaction date."
         ),
         "inclusion_rules": (
-            "The public spreadsheet contains only the components, rows and "
-            "fields admitted by the pinned producer release's publication gates."
+            "The spreadsheet holds only the tables, records and columns that "
+            "passed the publication checks in the release we use."
         ),
         "known_limitations": limits,
     }

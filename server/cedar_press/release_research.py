@@ -184,7 +184,9 @@ def packet(tier: str, collection: str, release_id: str, component: str | None = 
     fields = codebook.get("fields", [])
     names = {field["name"] for field in fields if field.get("permitted_review_preview")}
     if names != set(release["fields"]):
-        raise repository.FullReleaseUnavailable("Research fields are held or undeclared")
+        raise repository.FullReleaseUnavailable(
+            "Research fields are undeclared or differ from the release"
+        )
     verified = []
     for selected in sample:
         row = selected.get("row")

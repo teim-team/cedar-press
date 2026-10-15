@@ -547,7 +547,9 @@ def need_entity_evidence(
     response: Response,
     session: Session = Depends(require_session),
 ) -> dict:
-    """Sourced patent and rating observations, subject to the NEED publication hold."""
+    """Sourced patent and rating observations for a registered entity,
+    from the pinned NEED release.
+    """
     if not repository.may_download_full(session.tier, "need"):
         raise HTTPException(status_code=403, detail="Collection not included")
     try:
@@ -715,7 +717,7 @@ def release_research_preview(
         payload = release_research.packet(subscriber.tier, collection_id, release_id, component)
     except (repository.FullReleaseUnavailable, OSError, ValueError, KeyError, TypeError) as error:
         raise HTTPException(
-            status_code=503, detail="Pinned research preview unavailable or held"
+            status_code=503, detail="The research preview is currently unavailable or unverifiable."
         ) from error
     return JSONResponse(
         payload, headers={"Cache-Control": "private, no-store", "X-Cedar-Release": release_id}
@@ -860,11 +862,13 @@ def download(collection_id: str, session: Session = Depends(require_session)) ->
     try:
         csv = repository.collection_csv(collection_id)
     except repository.FullReleaseUnavailable as error:
+        # Nothing under collection_csv raises FullReleaseUnavailable since the
+        # 2026-10-04 ruling removed NEED's proof check, so this branch is unused.
         raise HTTPException(
             status_code=503,
             detail={
-                "code": "COLLECTION_HELD",
-                "message": "This collection is withheld from publication.",
+                "code": "SAMPLE_UNAVAILABLE",
+                "message": "This collection's sample could not be produced.",
             },
         ) from error
     if csv is None:

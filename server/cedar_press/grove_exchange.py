@@ -167,7 +167,7 @@ def response(request: dict, output_directory: Path | None = None) -> dict:
         return {
             "protocol_version": PROTOCOL_VERSION,
             "status": 503,
-            "error": "Pinned release unavailable or held",
+            "error": "The requested data are currently unavailable or unverifiable.",
         }
 
 

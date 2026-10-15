@@ -545,7 +545,7 @@ export function deriveRegister() {
     source: "data/spine/cedar_entity_names.csv, cedar_entity_types.csv, and cedar_identity_register.csv (as_of: its latest mint date)",
     note:
       "Each entity is [cedar_uid, name, class index into `classes`]. A null name is " +
-      `one the publication rule withholds (code/cedar_domain.py may_publish_individual_native_field); ` +
+      `one the publication rule withholds; ` +
       `since the owner ruling of 2026-10-02 every ${WITHHELD_CLASS} name publishes, so withheld_names is 0.`,
     withheld_names: withheld,
     as_of: asOf,

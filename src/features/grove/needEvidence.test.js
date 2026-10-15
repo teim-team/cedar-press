@@ -19,7 +19,7 @@ test("A fact's review status does not hide it (owner ruling 2026-10-04)", () => 
 
 test("Missing and unsafe-source facts never become visible evidence", () => {
   const row = { publication_status: "eligible", source_url: "https://example.org", hold_reason: "" };
-  assert.deepEqual(evidenceSections({ status: "publication_held", patent_observations: [row] }), []);
+  assert.deepEqual(evidenceSections({ status: "no_evidence", patent_observations: [row] }), []);
   assert.deepEqual(evidenceSections(null), []);
   assert.deepEqual(evidenceSections({ status: "available", patent_observations: [
     { ...row, source_url: "" }, { ...row, source_url: "http://example.org" },

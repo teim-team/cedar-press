@@ -143,7 +143,7 @@ def entity_evidence(cedar_uid: str) -> dict:
             # the first row. Preserve streaming when scanning other entities.
             yield from _component_rows(component, pin["release_id"])
         except repository.ComponentNotDeliverable:
-            result["component_status"][component] = "publication_held"
+            result["component_status"][component] = "not_deliverable"
         else:
             result["component_status"][component] = "permitted"
 
@@ -190,6 +190,9 @@ def entity_evidence(cedar_uid: str) -> dict:
                 "current ratings; an acquisition does not by itself prove a patent assignment."
             ),
         )
-    if "publication_held" in result["component_status"].values():
-        result["message"] += " Some NEED components remain held and are not shown."
+    if "not_deliverable" in result["component_status"].values():
+        result["message"] += (
+            " Some NEED tables are not included because they are tenant-private"
+            " or restricted-use."
+        )
     return result
