@@ -155,38 +155,18 @@ test("what is kept outside the identifiers is named", () => {
   assert.match(text, /source/i, "relationships must carry a source");
 });
 
-test("the coverage figures are the generated file's, to the digit", () => {
-  // Codex, PR #77: the page promised an organization's whole footprint while
-  // four collections sit far below the average. The measured figure is on the
-  // page now, and it is copied from a generated file, so it is exactly the
-  // kind of number that goes stale silently. It does not get to.
-  const doc = readFileSync(new URL("../../../docs/LINKAGE_COVERAGE.md", import.meta.url), "utf8");
-  const total = doc.match(/([\d,]+) of ([\d,]+) rows \(([\d.]+)%\) carry a resolved Cedar entity/);
-  assert.ok(total, "LINKAGE_COVERAGE.md no longer states its headline total in the expected shape");
-  const num = (text) => Number(text.replace(/,/g, ""));
-  assert.equal(LINKAGE_COVERAGE.linked, num(total[1]));
-  assert.equal(LINKAGE_COVERAGE.rows, num(total[2]));
-  // Codex, PR #78: comparing two static things stays green while both go
-  // stale. The generated file states the date it was measured, so a
-  // regeneration moves that date, this fails, and the figures get re-read.
-  const measured = doc.match(/Measured (\d{4}-\d{2}-\d{2})/);
-  assert.ok(measured, "LINKAGE_COVERAGE.md no longer states when it was measured");
-  assert.equal(LINKAGE_COVERAGE.measuredOn, measured[1], "the file was re-measured; re-read its figures");
-  // Both named extremes have to still be the extremes, or the page is holding
-  // up a spread that has moved.
-  const pcts = [...doc.matchAll(/^\| `[^`]+` \| `[^`]+` \|[^|]+\|[^|]+\| ([\d.]+)% \|/gm)].map((m) => Number(m[1]));
-  assert.ok(pcts.length >= 10, `expected the per-dataset table, found ${pcts.length} rows`);
-  assert.equal(Math.max(...pcts).toFixed(2) + "%", LINKAGE_COVERAGE.best.pct);
-  assert.equal(Math.min(...pcts).toFixed(2) + "%", LINKAGE_COVERAGE.worst.pct);
-  // The page no longer prints these figures (owner review, 2026-10-06: they
-  // were measured on thirteen collections and the shelf carries fourteen).
-  // It still has to name the spread rather than one flattering end: both the
-  // best-covered and the worst-covered collection stay in the note by name.
+test("the linkage note prints no figure and promises none", () => {
+  // The page prints no coverage figure (owner review, 2026-10-06), and no
+  // collection panel carries one, so neither text may print a figure or
+  // promise a per-collection one.
+  const text = `${LINKAGE_COVERAGE.note} ${LINKAGE_COVERAGE.caveat}`;
   assert.match(LINKAGE_COVERAGE.note, /varies by collection/);
-  assert.ok(LINKAGE_COVERAGE.note.includes(LINKAGE_COVERAGE.worst.label), "the note hides the worst-covered collection");
-  assert.ok(!/\d/.test(LINKAGE_COVERAGE.note), "the note prints a dated figure again");
-  assert.ok(!/\d/.test(LINKAGE_COVERAGE.caveat), "the caveat prints a dated figure again");
-  assert.ok(!/thirteen|fourteen|built collections/i.test(LINKAGE_COVERAGE.note + LINKAGE_COVERAGE.caveat));
+  // One low share means different things; the record-type example stays.
+  assert.ok(LINKAGE_COVERAGE.note.includes("Natural Resource Revenues"), "the note lost its example");
+  assert.ok(!/\d/.test(text), "the linkage text prints a dated figure again");
+  assert.ok(!/thirteen|fourteen|built collections/i.test(text));
+  assert.ok(!/its own figure|figure to quote|reports its own/i.test(text), "the text promises a figure no page shows");
+  assert.ok(!/mostly deliberate|mostly intentional/i.test(LINKAGE_COVERAGE.note));
 });
 
 test("the business card states the exception rather than overclaiming", () => {
@@ -246,63 +226,6 @@ test("a missing definition is visible rather than blank", () => {
   assert.match(missing, /Definition missing/);
   assert.match(missing, /this_status_does_not_exist/);
   assert.ok(missing.length > 20);
-});
-
-test("the unlinked split is derived from the generated table, not asserted", () => {
-  // Codex, PR #79: the page said the spread was "mostly deliberate", which
-  // counted two of three STATUS LABELS and let that stand for the rows. By row
-  // it is the other way round, and this recomputes it from the file.
-  const doc = readFileSync(new URL("../../../docs/LINKAGE_COVERAGE.md", import.meta.url), "utf8");
-  const rows = [...doc.matchAll(/^\| `([a-z-]+)` \| `[^`]+` \| ([\d,]+) \| ([\d,]+) \| [\d.]+% \| ([\d,]+) \| (.+?) \|$/gm)];
-  assert.ok(rows.length >= 10, `expected the per-dataset table, found ${rows.length} rows`);
-  const num = (text) => Number(text.replace(/,/g, ""));
-  let unlinked = 0;
-  let measuredUnlinked = 0;
-  let structural = 0;
-  let measuredFlagships = 0;
-  for (const [, , total, , unl, canCol] of rows) {
-    unlinked += num(unl);
-    // The last column names how many rows can carry an entity at all; the
-    // rest of that denominator structurally cannot. Codex, PR #80: it is
-    // present for four flagships and `-` for nine, and `-` is NOT MEASURED,
-    // not zero. A row without it contributes to `unlinked` and to nothing
-    // else — folding it into either side invents a measurement.
-    const can = canCol.match(/of ([\d,]+)/);
-    if (!can) continue;
-    measuredFlagships += 1;
-    measuredUnlinked += num(unl);
-    structural += num(total) - num(can[1]);
-  }
-  assert.ok(measuredFlagships > 0 && measuredFlagships < rows.length,
-    "the third denominator is now on every flagship or none; the copy assumes a subset");
-  assert.equal(LINKAGE_COVERAGE.unlinked, unlinked);
-  assert.equal(LINKAGE_COVERAGE.measuredUnlinked, measuredUnlinked);
-  assert.equal(LINKAGE_COVERAGE.structural, structural);
-  assert.equal(LINKAGE_COVERAGE.unresolved, measuredUnlinked - structural);
-  assert.equal(LINKAGE_COVERAGE.unmeasured, unlinked - measuredUnlinked);
-  // The two sides account for the measured population and nothing more. This
-  // is the assertion that fails if anyone reintroduces the cross-product.
-  assert.equal(
-    LINKAGE_COVERAGE.structural + LINKAGE_COVERAGE.unresolved,
-    LINKAGE_COVERAGE.measuredUnlinked,
-    "the split covers rows whose disposition was never measured",
-  );
-  assert.ok(
-    LINKAGE_COVERAGE.unmeasured > 0,
-    "every flagship is measured now; say so plainly instead of naming a remainder",
-  );
-  // The claim the page must not make again: most unlinked rows are NOT
-  // intentional. If that ever reverses, this fails and the copy gets rewritten.
-  assert.ok(
-    LINKAGE_COVERAGE.unresolved > LINKAGE_COVERAGE.structural,
-    "most unlinked rows are now structural; the note says the opposite",
-  );
-  // The note prints none of these figures now, but it keeps the point the
-  // split proved: one low share means two different things. Both collections
-  // are named, and the page never calls the unlinked records deliberate.
-  assert.ok(!/mostly deliberate|mostly intentional/i.test(LINKAGE_COVERAGE.note));
-  assert.ok(LINKAGE_COVERAGE.note.includes(LINKAGE_COVERAGE.mostlyStructural.label));
-  assert.ok(LINKAGE_COVERAGE.note.includes(LINKAGE_COVERAGE.mostlyUnresolved.label));
 });
 
 test("the prose keeps the brand lock", () => {

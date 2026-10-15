@@ -110,7 +110,7 @@ import { PressCedarFab } from "./PressCedarFab";
 import { PressFoot, PressMast } from "./PressChrome";
 
 const TRUST_ROW = [
-  "Documented methodology",
+  "Methods by collection",
   "Dated updates",
   "Human review",
   "Source register",
@@ -494,7 +494,7 @@ export default function CedarPressMethods() {
             <Chapter
               id="limits"
               title="What the collections cannot tell you."
-              claim="Coverage is measured and published with its reasons, a record can carry no entity by design, and Cedar does not infer what a nation has not said about its own."
+              claim="Coverage varies by collection, a record can carry no entity by design, and Cedar does not infer what a nation has not said about its own."
             >
               {/* Codex, PR #77: the linkage claim once promised the "whole
                   footprint". The note says coverage varies by collection and
@@ -503,7 +503,7 @@ export default function CedarPressMethods() {
               <p className="cp-msec__aside">
                 {LINKAGE_COVERAGE.note}
                 <Explain label="why there is no single coverage figure">
-                  <p><span className="cp-ex1__cap">Why each collection reports its own</span>{LINKAGE_COVERAGE.caveat}</p>
+                  <p><span className="cp-ex1__cap">Why there is no single figure</span>{LINKAGE_COVERAGE.caveat}</p>
                 </Explain>
               </p>
               {/* Two of these three are intentional and stay intentional however
