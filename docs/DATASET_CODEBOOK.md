@@ -20,7 +20,7 @@ Collection `funding` · table `federal_funding_transactions` · compatibility re
 
 **One row is:** One federal assistance transaction (a grant, loan, direct payment or insurance action) reported on USAspending, linked to the Native entity that received it.
 
-**Release or source location:** workspace dist/customer/funding.csv (the customer file, written by code/1137_customer_dataset_combine.py); the review copy is dist/review/spreadsheets/funding/federal_funding_transactions.csv; built by code/1135_full_dataset_review_bundle.py from the USAspending assistance archive.
+**Release or source location:** Retired data workspace, kept at the tag `data-workspace-final`: the customer file was dist/customer/funding.csv, written by code/1137_customer_dataset_combine.py, and the review copy dist/review/spreadsheets/funding/federal_funding_transactions.csv, built by code/1135_full_dataset_review_bundle.py from the USAspending assistance archive. Kept as a fallback source of column definitions (scripts/preview_definitions.py).
 
 **Fields (41):**
 
@@ -74,7 +74,7 @@ Collection `federal-register` · table `consultation_events` · compatibility re
 
 **One row is:** One tribal consultation event announced or reported in the Federal Register, one row per event and named participant (most events name no single tribe).
 
-**Release or source location:** workspace dist/customer/federal-register.csv (the customer file, written by code/1137_customer_dataset_combine.py); the review copy is dist/review/spreadsheets/federal-register/consultation_events.csv; built from Federal Register documents.
+**Release or source location:** Retired data workspace, kept at the tag `data-workspace-final`: the customer file was dist/customer/federal-register.csv, written by code/1137_customer_dataset_combine.py, and the review copy dist/review/spreadsheets/federal-register/consultation_events.csv, built from Federal Register documents. Kept as a fallback source of column definitions (scripts/preview_definitions.py).
 
 **Fields (34):**
 
@@ -121,7 +121,7 @@ Collection `legislation` · table `native_bills` · compatibility reference; not
 
 **One row is:** One bill in Congress that concerns Native nations or organizations, with the entities it names.
 
-**Release or source location:** workspace dist/customer/legislation.csv (the customer file, written by code/1137_customer_dataset_combine.py); the review copy is dist/review/spreadsheets/legislation/native_bills.csv; built from the Congress.gov API.
+**Release or source location:** Retired data workspace, kept at the tag `data-workspace-final`: the customer file was dist/customer/legislation.csv, written by code/1137_customer_dataset_combine.py, and the review copy dist/review/spreadsheets/legislation/native_bills.csv, built from the Congress.gov API. Kept as a fallback source of column definitions (scripts/preview_definitions.py).
 
 **Fields (30):**
 
@@ -164,7 +164,7 @@ Collection `deals` · table `deals_classified` · compatibility reference; not t
 
 **One row is:** One announced transaction or award involving a Native party: an acquisition, a financing, a grant, a partnership.
 
-**Release or source location:** workspace dist/customer/deals.csv (the customer file, written by code/1137_customer_dataset_combine.py); the review copy is dist/review/spreadsheets/deals/deals_classified.csv; assembled from announcements, filings and agency award lists.
+**Release or source location:** Retired data workspace, kept at the tag `data-workspace-final`: the customer file was dist/customer/deals.csv, written by code/1137_customer_dataset_combine.py, and the review copy dist/review/spreadsheets/deals/deals_classified.csv, assembled from announcements, filings and agency award lists. Kept as a fallback source of column definitions (scripts/preview_definitions.py).
 
 **Fields (38):**
 
@@ -215,7 +215,7 @@ Collection `nagpra` · table `nagpra_notices` · compatibility reference; not th
 
 **One row is:** One NAGPRA notice in the Federal Register (a notice of inventory completion or intent to repatriate), with the institution holding the remains or objects and the Native entities the notice names.
 
-**Release or source location:** workspace dist/customer/nagpra.csv (the customer file, written by code/1137_customer_dataset_combine.py); the review copy is dist/review/spreadsheets/nagpra/nagpra_notices.csv; built from Federal Register NAGPRA notices.
+**Release or source location:** Retired data workspace, kept at the tag `data-workspace-final`: the customer file was dist/customer/nagpra.csv, written by code/1137_customer_dataset_combine.py, and the review copy dist/review/spreadsheets/nagpra/nagpra_notices.csv, built from Federal Register NAGPRA notices. Kept as a fallback source of column definitions (scripts/preview_definitions.py).
 
 **Fields (52):**
 
@@ -280,7 +280,7 @@ Collection `lobbying` · table `native_entity_lobbying_disclosures` · compatibi
 
 **One row is:** One federal lobbying filing under the Lobbying Disclosure Act in which the client is a Native entity, one row per filing (amended filings appear once, as the current version).
 
-**Release or source location:** workspace dist/customer/lobbying.csv (the customer file, written by code/1137_customer_dataset_combine.py); the review copy is dist/review/spreadsheets/lobbying/native_entity_lobbying_disclosures.csv; built from the Senate LDA filings database.
+**Release or source location:** Retired data workspace, kept at the tag `data-workspace-final`: the customer file was dist/customer/lobbying.csv, written by code/1137_customer_dataset_combine.py, and the review copy dist/review/spreadsheets/lobbying/native_entity_lobbying_disclosures.csv, built from the Senate LDA filings database. Kept as a fallback source of column definitions (scripts/preview_definitions.py).
 
 **Fields (38):**
 
@@ -331,7 +331,7 @@ Collection `contractors` · table `prime_contracts` · compatibility reference; 
 
 **One row is:** One federal contract transaction (an award or a modification) to a firm owned by a Native entity, as reported to FPDS and published on USAspending.
 
-**Release or source location:** workspace dist/customer/contractors.csv (the customer file, written by code/1137_customer_dataset_combine.py); the review copy is dist/review/spreadsheets/contractors/prime_contracts.csv; built from the USAspending contract archive.
+**Release or source location:** Retired data workspace, kept at the tag `data-workspace-final`: the customer file was dist/customer/contractors.csv, written by code/1137_customer_dataset_combine.py, and the review copy dist/review/spreadsheets/contractors/prime_contracts.csv, built from the USAspending contract archive. Kept as a fallback source of column definitions (scripts/preview_definitions.py).
 
 **Fields (51):**
 
@@ -395,7 +395,7 @@ Collection `subcontracting` · table `subawards` · compatibility reference; not
 
 **One row is:** One reported federal subaward or version with source-attributed Native-entity associations. Those associations do not establish ownership at the action date.
 
-**Release or source location:** workspace dist/customer/subcontracting.csv (the customer file, written by code/1137_customer_dataset_combine.py); the review copy is dist/review/spreadsheets/subcontracting/subawards.csv; built from the USAspending FSRS subaward pull.
+**Release or source location:** Retired data workspace, kept at the tag `data-workspace-final`: the customer file was dist/customer/subcontracting.csv, written by code/1137_customer_dataset_combine.py, and the review copy dist/review/spreadsheets/subcontracting/subawards.csv, built from the USAspending FSRS subaward pull. Kept as a fallback source of column definitions (scripts/preview_definitions.py).
 
 **Fields (54):**
 
@@ -462,7 +462,7 @@ Collection `owned` · table `native_owned_businesses` · compatibility reference
 
 **One row is:** One business owned by a Native entity, in the register of such businesses.
 
-**Release or source location:** workspace dist/customer/owned.csv (the customer file, written by code/1137_customer_dataset_combine.py); the review copy is dist/review/spreadsheets/native-owned-businesses/native_owned_businesses.csv. NOT AUDITED: the sample is not in the repository yet; run scripts/import_cedar_manifest.py --audit after adding it.
+**Release or source location:** Retired data workspace, kept at the tag `data-workspace-final`: the customer file was dist/customer/owned.csv, written by code/1137_customer_dataset_combine.py, and the review copy dist/review/spreadsheets/native-owned-businesses/native_owned_businesses.csv. Kept as a fallback source of column definitions (scripts/preview_definitions.py).
 
 **Fields (32):**
 
@@ -507,7 +507,7 @@ Collection `need` · table `need_enterprises` · compatibility reference; not th
 
 **One row is:** One enterprise (a subsidiary, a joint venture, an affiliate) with the Native entity that owns or is affiliated with it and how.
 
-**Release or source location:** workspace dist/customer/need.csv (the customer file, written by code/1137_customer_dataset_combine.py); the review copy is dist/review/spreadsheets/need/need_enterprises.csv; built from owners' own subsidiary listings, annual reports and federal identifier records.
+**Release or source location:** Retired data workspace, kept at the tag `data-workspace-final`: the customer file was dist/customer/need.csv, written by code/1137_customer_dataset_combine.py, and the review copy dist/review/spreadsheets/need/need_enterprises.csv, built from owners' own subsidiary listings, annual reports and federal identifier records. Kept as a fallback source of column definitions (scripts/preview_definitions.py).
 
 **Fields (30):**
 
@@ -550,7 +550,7 @@ Collection `natural-resources` · table `resource_revenue` · compatibility refe
 
 **One row is:** One payment or distribution of natural-resource revenue (royalties, severance tax shares, reclamation distributions) to a Native entity.
 
-**Release or source location:** workspace dist/customer/natural-resources.csv (the customer file, written by code/1137_customer_dataset_combine.py); the review copy is dist/review/spreadsheets/natural-resources/resource_revenue.csv; built from federal and state revenue records.
+**Release or source location:** Retired data workspace, kept at the tag `data-workspace-final`: the customer file was dist/customer/natural-resources.csv, written by code/1137_customer_dataset_combine.py, and the review copy dist/review/spreadsheets/natural-resources/resource_revenue.csv, built from federal and state revenue records. Kept as a fallback source of column definitions (scripts/preview_definitions.py).
 
 **Fields (38):**
 
@@ -601,7 +601,7 @@ Collection `nonprofits` · table `np_orgs` · compatibility reference; not the m
 
 **One row is:** One nonprofit organization in the IRS Business Master File that is Native-led or tribally controlled, with the Native entity it is linked to.
 
-**Release or source location:** workspace dist/customer/nonprofits.csv (the customer file, written by code/1137_customer_dataset_combine.py); the review copy is dist/review/spreadsheets/nonprofits/np_orgs.csv; built from the IRS Exempt Organizations Business Master File and Native-led directories.
+**Release or source location:** Retired data workspace, kept at the tag `data-workspace-final`: the customer file was dist/customer/nonprofits.csv, written by code/1137_customer_dataset_combine.py, and the review copy dist/review/spreadsheets/nonprofits/np_orgs.csv, built from the IRS Exempt Organizations Business Master File and Native-led directories. Kept as a fallback source of column definitions (scripts/preview_definitions.py).
 
 **Fields (29):**
 
