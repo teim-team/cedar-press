@@ -163,6 +163,22 @@ class ReviewedNeedReleaseTest(unittest.TestCase):
         self.assertFalse(repository.may_download_full("press", "need"))
         self.assertFalse(repository.may_download_full("guest", "need"))
 
+    def test_reviewed_base_is_recognized_whatever_its_rights_flags(self):
+        # Owner ruling 2026-10-04: rights statuses are provenance and do not
+        # block publication. `internal_only` still marks a working table.
+        manifest, _, _ = self.reviewed_fixture()
+        entry = manifest["components"][policy.COMPONENT]
+        entry["download_permitted"] = False
+        entry["rights"] = {"publication_class": "restricted", "redistribution": False}
+        entry["metadata"]["publication_status"] = "source_limited"
+        self.assertTrue(policy.reviewed_base_permitted(manifest, policy.COMPONENT, entry))
+        self.assertEqual(
+            policy.descriptor_metadata(manifest, policy.COMPONENT)["publication_scope"],
+            "reviewed_public_base_only",
+        )
+        entry["metadata"]["internal_only"] = True
+        self.assertFalse(policy.reviewed_base_permitted(manifest, policy.COMPONENT, entry))
+
     def test_original_raw_components_and_legacy_sample_remain_refused_without_fetch(self):
         _, pin, _ = self.reviewed_fixture()
         with patch.object(
@@ -171,7 +187,7 @@ class ReviewedNeedReleaseTest(unittest.TestCase):
             repository.grove_full_release("need", pin["release_id"], component="enterprises")
             # The legacy preview is no longer held by the reviewed-base proof
             # (owner ruling 2026-10-04); "enterprises" above is still refused
-            # because the release itself marks it internal and restricted.
+            # because the release itself marks it internal_only.
         rows = repository.grove_release_metadata("need")
         available = [row for row in rows if row.get("record_count")]
         self.assertEqual([row["table_id"] for row in available], [policy.COMPONENT])

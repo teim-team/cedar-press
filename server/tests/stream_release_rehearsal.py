@@ -313,27 +313,28 @@ def run_one(item, output, temporary, timeout):
                         ),
                     )
                 )
-                permitted = all(
-                    entry.get("download_permitted", True)
-                    and entry["rights"].get("redistribution") is True
+                # The two refusals `repository.grove_component_contract` makes.
+                # Rights statuses are provenance (owner ruling 2026-10-04).
+                not_deliverable = any(
+                    entry["rights"].get("publication_class") == "tenant_private"
+                    or entry.get("metadata", {}).get("internal_only")
                     for _, entry in entries
                 )
-                if not permitted:
+                if not_deliverable:
                     if served["status"] != 503:
-                        raise AssertionError("Held component was not withheld")
+                        raise AssertionError("Tenant-private or internal-only component was served")
                     with patch.dict(os.environ, {"CEDAR_PRESS_ENVIRONMENT": "production"}):
                         refused = asyncio.run(stream_asgi(app, route, timeout=timeout))
                         if refused["status"] != 503:
-                            raise AssertionError("Production accepted a held review component")
+                            raise AssertionError("Production served a non-deliverable component")
                     results.append(
                         {
                             "component": component,
-                            "status": "rights-held",
+                            "status": "not-deliverable",
                             "expected": expected,
                             "anonymous": 401,
                             "wrong_tier": 403,
                             "production_refused": True,
-                            "download_permitted": False,
                             "tiers": {"grove": 503},
                         }
                     )

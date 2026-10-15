@@ -327,10 +327,8 @@ parts; the consumer ASGI send callback computes SHA-256, bytes and newline rows
 without storing the logical body. An independent streaming read checks the
 manifest-ordered local artifacts. Anonymous, wrong-tier and production controls
 remain active. An absent component is disclosed separately from a served one.
-Failures write per-collection receipts and the queue continues. The script still
-expects a component whose redistribution or download flag is off to be refused
-(`rights-held`); since the owner ruling of 2026-10-04 the API serves such a
-component, so the rehearsal fails on it until the script is updated.
+Failures write per-collection receipts and the queue continues. A tenant-private
+or internal-only component must be refused with a 503, as the API refuses it.
 
 Temporary files, SQLite scratch, and configurable caches must point at a drive
 with measured space. Progress is emitted by collection and every 64 MiB of HTTP
