@@ -1,6 +1,8 @@
 """Read-only inventory of local gaming-related CSVs; prints JSON lines to stdout.
 
-Usage: python scripts/audit_gaming_inventory.py "<data workspace>/data/clean"
+Usage: python scripts/audit_gaming_inventory.py "<directory of CSVs>"
+
+Written for the retired data workspace's data/clean, which is not in git.
 """
 
 import csv

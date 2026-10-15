@@ -5,7 +5,7 @@ from __future__ import annotations
 import re
 from typing import Any
 
-POLICY_HOLD = "NEED_PUBLICATION_QUARANTINE"
+PROOF_SUPERSEDES = "NEED_PUBLICATION_QUARANTINE"
 COMPONENT = "reviewed_public_base"
 SOURCE = "need-reviewed-public-base-evidence"
 VERSION = "need-reviewed-public-base-1"
@@ -82,7 +82,7 @@ def reviewed_base_permitted(manifest: dict[str, Any], name: str, entry: dict[str
         return False
     if (
         proof.get("scope") != "reviewed_public_base_only"
-        or proof.get("supersedes") != POLICY_HOLD
+        or proof.get("supersedes") != PROOF_SUPERSEDES
         or metadata.get("internal_only") is not False
         or not metadata_permits_publication(metadata)
         or entry.get("download_permitted") is not True

@@ -67,7 +67,7 @@ def _tables(collection, pin, manifest):
             continue
         try:
             descriptor = r._grove_component_release(pin, manifest, name, metadata_only=True)
-        except r.ComponentPublicationHeld:
+        except r.ComponentNotDeliverable:
             continue
         contract = manifest["components"][parts[0]]
         for part in parts:

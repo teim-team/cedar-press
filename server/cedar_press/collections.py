@@ -790,13 +790,14 @@ def with_native_owner(rows: list[list[str]]) -> list[list[str]]:
 def collection_csv(dataset_id: str) -> str | None:
     """The rows behind a dataset card's Download button.
 
-    The collection's flagship table, ten real rows of it, straight from
-    the retired ``code/1135_full_dataset_review_bundle.py``. This used to be the figure's
+    The collection's flagship table, ten real rows of it, from the sample
+    ``scripts/stage_verified_previews.py`` stages out of a verified Lumecon-data
+    release. This used to be the figure's
     own points -- five demonstration bars dressed as a release file. What
     downloads now is data.
 
-    ``None`` when the collection has no sample. One is in that state today and
-    ``sample_unavailable_reason`` says why; handing over a metadata file in
+    ``None`` when the collection has no sample. None is in that state today;
+    ``sample_unavailable_reason`` would say why; handing over a metadata file in
     place of the rows a tile promises is the failure this avoids.
 
     The citation is a column, never an extra observation. A downloaded file outlives the page it came

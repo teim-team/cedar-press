@@ -176,7 +176,7 @@ class ReleaseResearchTest(unittest.TestCase):
         with self.assertRaises(repository.FullReleaseUnavailable):
             self.read()
 
-    def test_rehashed_held_scope_and_changed_row_are_refused(self):
+    def test_rehashed_internal_scope_and_changed_row_are_refused(self):
         self.preview["scope"] = "internal_only"
         self.repin("reviewed_disclosures.preview.json", self.preview)
         with self.assertRaises(repository.FullReleaseUnavailable):

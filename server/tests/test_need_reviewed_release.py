@@ -43,7 +43,7 @@ class ReviewedNeedReleaseTest(unittest.TestCase):
         proof = {
             "version": policy.VERSION,
             "scope": "reviewed_public_base_only",
-            "supersedes": policy.POLICY_HOLD,
+            "supersedes": policy.PROOF_SUPERSEDES,
             "source_release_id": "a" * 64,
             "enterprise_sha256": "b" * 64,
             "register_sha256": "c" * 64,
@@ -95,7 +95,7 @@ class ReviewedNeedReleaseTest(unittest.TestCase):
         private = copy.deepcopy(entry)
         private["download_permitted"] = False
         private["rights"] = {"publication_class": "restricted", "redistribution": False}
-        private["metadata"] = {"internal_only": True, "publication_hold": policy.POLICY_HOLD}
+        private["metadata"] = {"internal_only": True, "publication_hold": policy.PROOF_SUPERSEDES}
         manifest["components"]["enterprises"] = private
         self.repin(manifest, pin)
         fetch = patch.object(
@@ -163,7 +163,7 @@ class ReviewedNeedReleaseTest(unittest.TestCase):
         self.assertFalse(repository.may_download_full("press", "need"))
         self.assertFalse(repository.may_download_full("guest", "need"))
 
-    def test_original_raw_components_and_legacy_sample_remain_held_without_fetch(self):
+    def test_original_raw_components_and_legacy_sample_remain_refused_without_fetch(self):
         _, pin, _ = self.reviewed_fixture()
         with patch.object(
             repository, "_release_response", side_effect=AssertionError("No held bytes")

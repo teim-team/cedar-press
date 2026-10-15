@@ -100,7 +100,7 @@ class InfrastructureReleaseTest(unittest.TestCase):
                     repository.grove_component_contract(
                         self.manifest(component, False), "infrastructure", component
                     )
-                except repository.ComponentPublicationHeld as error:
+                except repository.ComponentNotDeliverable as error:
                     self.fail(f"rights status held {component}: {error}")
                 except repository.FullReleaseUnavailable:
                     pass  # other contract checks may still apply to the fixture

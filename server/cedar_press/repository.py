@@ -2,8 +2,8 @@
 
 Every route reads through here, so the move from the ported modules to
 Postgres is one module's worth of change rather than a rewrite of the API.
-The shapes returned are the shapes the client already reads â€” see
-``src/features/grove/`` â€” because a repository that returns its own idea of a
+The shapes returned are the shapes the client already reads (see
+``src/features/grove/``), because a repository that returns its own idea of a
 collection just moves the translation somewhere less visible.
 
 The catalog, the citation register and the CSV shaping live in
@@ -130,8 +130,8 @@ def collections_for(tier: str) -> list[dict[str, Any]]:
 def may_open(tier: str, collection_id: str) -> bool:
     """Whether this plan includes this collection.
 
-    ``LAUNCH_COLLECTION`` is the storefront -- the twelve on
-    ``cedar_publication.STOREFRONT_SHELVES`` -- so a collection the Cedar data
+    ``LAUNCH_COLLECTION`` is the storefront -- the fourteen collections in
+    the manifest -- so a collection the Cedar data
     workspace placed on the ``grove`` shelf is refused to every tier here,
     including ``grove`` and ``tree``. That is the ruling and not an oversight:
     ``gaming`` "ships through Cedar Grove, not the Press storefront", and it
@@ -151,12 +151,12 @@ def may_open(tier: str, collection_id: str) -> bool:
         for dataset in launch.LAUNCH_COLLECTION
     ):
         return True
-    # Foundation & Corporate Giving and PLOT: live on their shelves like any
-    # other collection (owner, 2026-09-27), and presented by their record
-    # structure because no release file exists here. The plan that reaches
-    # the shelf includes them, on both sides of the language boundary
-    # (`canOpenDataset`); there is simply no file for the download route to
-    # hand over, and `sample_unavailable_reason` says so.
+    # A catalog collection presented by its record structure, with no release
+    # file: the plan that reaches its shelf includes it, on both sides of the
+    # language boundary (`canOpenDataset`), and `sample_unavailable_reason`
+    # says there is no file. No catalog entry is presented this way today:
+    # Foundation & Corporate Giving and PLOT, the two that were, are in
+    # `LAUNCH_COLLECTION` with release files, so this branch is unused.
     shelf = _structure_shelf(collection_id)
     return shelf is not None and _reaches(tier, shelf)
 
@@ -401,7 +401,7 @@ def _thaw(value: Any) -> Any:
 
     ``press_catalog`` deep-freezes its snapshot so no caller can edit the
     catalogue every later caller sees, which leaves nested values as
-    ``mappingproxy`` â€” a type the JSON serializer refuses. Copying at the top
+    ``mappingproxy``, a type the JSON serializer refuses. Copying at the top
     level only was not enough: an article's body and figures are nested, and
     the failure surfaced as a 500 on a route whose data was fine.
     """
@@ -443,7 +443,7 @@ class FullReleaseUnavailable(ValueError):
     """The pinned full file cannot be verified; never substitute a sample."""
 
 
-class ComponentPublicationHeld(FullReleaseUnavailable):
+class ComponentNotDeliverable(FullReleaseUnavailable):
     """An explicit component rights decision; never a transport or integrity failure."""
 
 
@@ -1274,7 +1274,7 @@ def grove_component_contract(
     if not isinstance(rights, dict):
         raise FullReleaseUnavailable("Malformed component rights")
     if rights.get("publication_class") == "tenant_private":
-        raise ComponentPublicationHeld("Component is not eligible for customer delivery")
+        raise ComponentNotDeliverable("Component is not eligible for customer delivery")
     # Owner ruling 2026-10-04 (Elijah Moreno): `publication_hold` and a review
     # `publication_status` (held, contested, unreviewed, withheld) no longer
     # withhold a component. `internal_only` and the two rights statuses
@@ -1282,7 +1282,7 @@ def grove_component_contract(
     # marks a working table that is not a customer product, as in
     # Lumecon-data's `publication.metadata_permits_publication`.
     if metadata.get("internal_only"):
-        raise ComponentPublicationHeld("Component metadata holds customer delivery")
+        raise ComponentNotDeliverable("Component metadata holds customer delivery")
     fields = contract.get("fields")
     if not isinstance(fields, list) or any(not isinstance(f, dict) for f in fields):
         raise FullReleaseUnavailable("Malformed component contract")
@@ -1497,7 +1497,7 @@ def grove_full_release(
 ):
     """One authorized component of the ONE pinned Lumecon release of a Grove collection.
 
-    Order: declared collection, offered component, publication hold, pin,
+    Order: declared collection, offered component, pin,
     pinned catalog bytes, pinned collection manifest, the component's embedded
     contract against the field map, then (unless ``metadata_only``) the exact
     component bytes. Any mismatch fails closed; nothing is substituted.
