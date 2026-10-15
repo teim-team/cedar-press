@@ -53,7 +53,9 @@ def reviewed_base_permitted(manifest: dict[str, Any], name: str, entry: dict[str
     published. By the owner's rulings of 2026-10-04 (Elijah Moreno), the
     reviewed-base proof no longer gates NEED, and source rights statuses
     (publication class, redistribution, download permission, publication
-    status) are provenance.
+    status) are provenance. Tenant-private data is a customer's own and is
+    still refused, as `repository` refuses it: the preview staging script and
+    `need_preview` have no other check.
     """
     if manifest.get("collection_id") != "need" or name != COMPONENT:
         return False
@@ -61,6 +63,17 @@ def reviewed_base_permitted(manifest: dict[str, Any], name: str, entry: dict[str
     contract = entry
     attestations = manifest.get("attestations")
     if not all(isinstance(value, dict) for value in (metadata, contract, attestations)):
+        return False
+    rights = contract.get("rights")
+    release_rights = manifest.get("rights")
+    if (
+        not isinstance(rights, dict)
+        or rights.get("publication_class") == "tenant_private"
+        or (
+            isinstance(release_rights, dict)
+            and release_rights.get("publication_class") == "tenant_private"
+        )
+    ):
         return False
     proof = metadata.get("reviewed_public_base")
     if not isinstance(proof, dict) or proof != attestations.get("reviewed_public_base"):

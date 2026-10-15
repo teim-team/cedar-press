@@ -179,6 +179,21 @@ class ReviewedNeedReleaseTest(unittest.TestCase):
         entry["metadata"]["internal_only"] = True
         self.assertFalse(policy.reviewed_base_permitted(manifest, policy.COMPONENT, entry))
 
+    def test_tenant_private_reviewed_base_is_refused(self):
+        # Tenant-private data is a customer's own: the reviewed-base check is
+        # the only gate the preview staging script applies, so it refuses it.
+        manifest, _, _ = self.reviewed_fixture()
+        entry = manifest["components"][policy.COMPONENT]
+        self.assertTrue(policy.reviewed_base_permitted(manifest, policy.COMPONENT, entry))
+        entry["rights"]["publication_class"] = "tenant_private"
+        self.assertFalse(policy.reviewed_base_permitted(manifest, policy.COMPONENT, entry))
+        entry["rights"]["publication_class"] = "publishable"
+        manifest["rights"] = {"publication_class": "tenant_private"}
+        self.assertFalse(policy.reviewed_base_permitted(manifest, policy.COMPONENT, entry))
+        del manifest["rights"]
+        entry["rights"] = None
+        self.assertFalse(policy.reviewed_base_permitted(manifest, policy.COMPONENT, entry))
+
     def test_original_raw_components_and_legacy_sample_remain_refused_without_fetch(self):
         _, pin, _ = self.reviewed_fixture()
         with patch.object(
