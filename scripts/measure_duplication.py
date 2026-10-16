@@ -62,7 +62,7 @@ PAIRS: tuple[Pair, ...] = (
         guarded_by="server/tests/test_collection.py",
     ),
     Pair(
-        subject="Claim discipline: the class taxonomy, verb tables and linter",
+        subject="Claim classes: the taxonomy a finding names",
         javascript=("src/features/grove/claims.js",),
         python=("server/cedar_press/claims.py",),
         guarded_by="nothing",
