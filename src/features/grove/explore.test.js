@@ -88,8 +88,10 @@ const PUBLIC = `${REPO}public`;
 // tests are what keep it, the codebook and the samples in step.
 const FIELD_MAP_JSON = JSON.parse(readFileSync(fileURLToPath(new URL("../../../data/cedar/field_map.json", import.meta.url)), "utf8"));
 const FIELD_MAP = FIELD_MAP_JSON.tables;
-const FIELD_MAP_DECISIONS = Object.keys(FIELD_MAP_JSON.decisions);
-const OPENING_BLOCK = Object.keys(FIELD_MAP_JSON.opening);
+// The decision and disposition vocabularies of the owner's 2026-09-05
+// specification; their definitions are at the tag data-workspace-final.
+const FIELD_MAP_DECISIONS = ["keep", "rename", "combine", "derive", "document", "internal", "withhold"];
+const FIELD_MAP_DISPOSITIONS = ["alias_verified", "internal_crosswalk", "retired_scheme", "object_id", "adjudicate"];
 const REGISTER = buildRegister(JSON.parse(readFileSync(`${PUBLIC}/data/cedar/register.json`, "utf8")));
 const PRESS = { workspace_tier: "press" };
 const PRO = { workspace_tier: "press_pro" };
@@ -825,8 +827,10 @@ test("CONTRACTS is the derived file, frozen, and the withheld tables are gone fr
 
 // ── The field map ──────────────────────────────────────────────────────────
 
-const OPENING_SINGULAR = FIELD_MAP_JSON.opening.singular;
-const OPENING_PLURAL = FIELD_MAP_JSON.opening.plural;
+// The opening block of the owner's specification: one canonical entity, or
+// (Legislation and NAGPRA) aligned JSON arrays of several.
+const OPENING_SINGULAR = ["cedar_uid", "canonical_name", "entity_class", "cedar_entity_role"];
+const OPENING_PLURAL = ["cedar_uids", "canonical_names", "entity_classes", "entity_roles", "entity_names_as_published"];
 // Mirrors cedar_publication.PROHIBITED_PUBLIC_COLUMN: a competing entity
 // identifier or build bookkeeping never reaches an approved header.
 const PROHIBITED_PUBLIC_COLUMN = /duns|neid|cicd|casino[ _-]?city|tribe_id|_candidate|proposed|resolver|built_date|fetched_date|retrieved_date|promoted_date|artifact_mtime/i;
@@ -848,11 +852,6 @@ test("the publish-time deals columns are read from the field map, not guessed", 
 });
 
 test("the field map decides every column of every sampled flagship in the owner's exact order, retires every competing identifier, and the codebook lists exactly what ships", () => {
-  const script = fileURLToPath(new URL("../../../scripts/docs-markdown.mjs", import.meta.url));
-  const run = spawnSync(process.execPath, [script, "--kind", "field-map", "--check"], { encoding: "utf8" });
-  assert.equal(run.status, 0, run.stderr || run.stdout);
-  assert.deepEqual(OPENING_SINGULAR, ["cedar_uid", "canonical_name", "entity_class", "cedar_entity_role"]);
-  assert.deepEqual(OPENING_PLURAL, ["cedar_uids", "canonical_names", "entity_classes", "entity_roles", "entity_names_as_published"]);
   // The owner's column counts, exactly; Funding is 39 because DUNS is retired,
   // and Federal Register is 34 because the producer now builds
   // consultation_record_key at write time (field_map.json, 6f620ec).
@@ -902,7 +901,7 @@ test("the field map decides every column of every sampled flagship in the owner'
       // Every competing identifier the sample carries has a retirement entry.
       if (/duns|neid|cicd|_candidate|proposed|existing_cedar_uid|(^|_)entity_id$/i.test(f.column) && !/_(basis|name|names)$/i.test(f.column)) {
         assert.ok(f.retire, `${key}.${f.column} names a competing identifier and has no retirement entry`);
-        assert.ok(Object.keys(FIELD_MAP_JSON.dispositions).includes(f.retire.disposition), `${key}.${f.column}: disposition`);
+        assert.ok(FIELD_MAP_DISPOSITIONS.includes(f.retire.disposition), `${key}.${f.column}: disposition`);
       }
     }
     const ships = new Map();

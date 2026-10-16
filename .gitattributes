@@ -1,8 +1,6 @@
 # Generated text is byte-compared by make check-generated on every OS.
 # Keep only these declared outputs LF; do not renormalize the data tree.
 docs/DATASET_CODEBOOK.md text eol=lf
-docs/FIELD_MAP_2026-09-05.md text eol=lf
-docs/IDENTIFIER_RETIREMENT_2026-09-05.md text eol=lf
 docs/guides/*.md text eol=lf
 index.html text eol=lf
 public/sitemap.xml text eol=lf

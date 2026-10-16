@@ -537,10 +537,10 @@ the pinned contract, and takes a flagship's column order for the researcher
 spreadsheet from it (`spreadsheet.py`). The staging script
 (`scripts/stage_verified_previews.py`) and `scripts/preview_definitions.py`
 read it when they build preview definitions.
-`scripts/docs-markdown.mjs --kind field-map` renders it into
-`docs/FIELD_MAP_2026-09-05.md` and `docs/IDENTIFIER_RETIREMENT_2026-09-05.md`,
-and `make check-generated` fails a stale document. `explore.test.js` holds the
-map, the codebook and the samples together.
+The two review documents once rendered from it (`FIELD_MAP_2026-09-05.md`
+and `IDENTIFIER_RETIREMENT_2026-09-05.md`) are at the tag
+`data-workspace-final`. `explore.test.js` holds the map, the codebook and the
+samples together.
 
 The retired writer that generated each customer header from the map
 (`code/cedar_publication.apply_field_map`, called by

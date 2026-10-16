@@ -74,8 +74,6 @@ hooks:
 #
 #   docs-markdown --kind codebook   docs/DATASET_CODEBOOK.md            from data/cedar/codebook.json
 #   derive-explore      data/cedar/explore.json             from the published customer tables
-#   docs-markdown --kind field-map  docs/FIELD_MAP_2026-09-05.md and
-#                       docs/IDENTIFIER_RETIREMENT_2026-09-05.md from data/cedar/field_map.json
 #   docs-markdown --kind guides     docs/guides/<collection>.md         from the downloads and data/cedar JSON
 #   dump --kind press   server/cedar_press/_press_data.json from the site's catalog, article and release modules
 #   measure-samples     data/cedar/samples.published.json   from the git index
