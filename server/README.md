@@ -13,12 +13,43 @@ Lumecon-data releases; the refresh order is in `data/cedar/README.md`.
 
 ```
 cedar_press/
-  app.py             the routes: HTTP concerns only
-  repository.py      where data comes from — the seam Postgres replaces
-  session.py         who is signed in; a signed, HTTP-only cookie
-  collections.py     the launch collection, ported from Cedar Grove's package
-  press_catalog.py   briefs and the citation register, likewise
-  claims.py          the claim-class discipline the findings are held to
+  routes and data
+    app.py                  the routes: HTTP concerns only
+    repository.py           where data comes from, the seam Postgres replaces;
+                            verifies a pinned release before any byte is served
+    spreadsheet.py          one customer CSV per collection, from the verified download path
+    customer_sheet.py       the customer table rules, vendored from Lumecon-data
+    governed_collections.py the added release targets (Giving, PLOT) and their column order
+    release_research.py     bounded research previews from hash-pinned producer packets
+    csv_safety.py           writes a cell a spreadsheet would run as a formula as text
+
+  what readers see
+    collections.py          the 14 storefront collections, ported from Cedar Grove's package
+    collection_profiles.py  the machine-readable data dictionary Cedar answers from
+    source_presentation.py  readable citations, naming original publishers, never file names
+    press_catalog.py        the tiers, the briefs and the citation register
+    protected_articles.py   subscriber article content, kept out of the public web build
+    claims.py               what may be said about a piece of evidence
+    plot_map.py             checks pinned PLOT map evidence and shapes its outlines
+    shelf.py, templates/    the HTML shelf page, GET /press/shelf
+
+  NEED
+    need_preview.py         admits the small committed NEED preview on exact proof
+    need_publication.py     NEED admission after the normal release verifier
+    need_profiles.py        NEED evidence on registered Native entity profiles
+
+  subscribers
+    session.py              who is signed in: a signed, HTTP-only cookie
+    subscribers.py          who holds a subscription, and which access code bought it
+    codes.py                checks an access code is real, unspent, unexpired and the reader's
+    ratelimit.py            rate limits on sign-in and activation
+    priorities.py           Shape the Research: Cedar Points, priorities and requests
+    db.py, migrate.py,      the Postgres connection, used when DATABASE_URL is set,
+      migrations/           and its migrations
+
+  other services
+    cedar_service.py        the client for Cedar, the AI economic analyst (the cedar repository)
+    grove_exchange.py       a local process interface for Cedar Grove's application
 ```
 
 `tests/test_collection.py` and `tests/test_access.py` each run both the Python
@@ -141,8 +172,7 @@ columns and labels stay internal. `spreadsheet.download` presents the pinned
 release this way after every byte check; `repository.collection_csv` presents
 the committed ten-row samples this way; `release_research` presents verified
 examples this way. Release bytes, hashes and the per-component JSONL routes are
-unchanged. The committed sample files and the Explore reader still use the
-earlier appended layout (Lumecon-data `docs/review-ledger.md`, 2026-10-04).
+unchanged.
 
 Native identity basis (owner request, 2026-10-04). The customer tables of
 `owned`, `contractors`, `subcontracting`, `funding`, `deals`, `need` and
@@ -182,8 +212,10 @@ Server-only configuration (never Vite/browser variables):
   Configuration validation is not proof of database availability or deployment readiness.
 
 Cedar enforces subscriber access before fetching data, checks catalog integrity,
-explicit release equality, schema, publication holds, rights, exact artifact
-bytes/hash, row count and primary keys. No matching or cleaning happens in the
+explicit release equality, schema, exact artifact bytes/hash, row count and
+primary keys. Rights are recorded as provenance (owner ruling 2026-10-04): a
+tenant-private release, which is a customer's own data, is refused, and no other
+rights status or publication hold stops a download. No matching or cleaning happens in the
 consumer. Missing, stale or malformed pins and service failures do not fall back
 to a sample. Unconfigured collections fail closed. Single artifacts and individual manifest parts are bounded
 at 256 MiB. Larger logical tables require the explicit development-only
@@ -211,11 +243,12 @@ and results.
 ## Giving and PLOT component releases
 
 `GET /press/release-collections` is the authenticated integration registry for
-the 15 collection targets: the original 12, Foundation and Corporate Giving,
-PLOT, and Gaming. Its tier-filtered entries have verified release metadata or
-an explicit missing/unavailable value. It supplies no invented samples or row
-counts. The existing original-12 storefront registry is preserved; this server
-surface does not claim the new collection pages are delivered.
+the 16 release targets: the 14 storefront collections (the original 12,
+Foundation and Corporate Giving, and PLOT) and the two Grove-only datasets,
+Gaming and Native Infrastructure. Its tier-filtered entries have verified release
+metadata or an explicit missing/unavailable value. It supplies no invented
+samples or row counts. The storefront's own registry, `GET /press/collections`,
+is separate and unchanged by it.
 
 | Collection | Minimum Press tier | Grove access | Components |
 | --- | --- | --- | --- |
@@ -237,8 +270,8 @@ and pin. They are separate from the original dataset catalog configuration so
 both formats can coexist. The committed shared pin is empty. Gaming keeps its
 existing Grove pin/catalog. A review requires `CEDAR_GROVE_ENVIRONMENT=review`
 with `CEDAR_PRESS_ENVIRONMENT=development`, matching the existing component
-review path; production refuses this setting. Source rights remain enforced
-even in review.
+review path; production refuses this setting. Source rights are provenance in
+review as in production: only tenant-private data is refused.
 
 Reproduce a saved real candidate without a server listener or child process:
 
@@ -252,16 +285,18 @@ The interpreter must have both Cedar and Lumecon importable. The command verifie
 the actual immutable candidate, writes an isolated review catalog/pin, calls both
 FastAPI applications in process, tests Press/Press+/Grove and production refusal,
 and writes `receipt.json`. It does not start a database or claim database proof.
-Use `foundation-corporate-giving` for Giving; the current real 14-row candidate
-has redistribution disabled, so all subscriber tiers correctly receive a hold.
+Use `foundation-corporate-giving` for Giving.
 
 Recovery verification on 2026-09-26 used real PLOT release
 `1d8a75617b4ee1749d65c7aacc344f9a228f7f2ea9081420bcd0547956fef3a6`:
 1,242 permit rows and 3,210 event rows matched their manifest checksums at both
 entitled tiers. Giving release
 `f65ea15d5f63ccd4ccb8b9425a744ab7e33f77e62ca66bb98a962fd4b81b6fac`
-was verified at 14 rows and download-held. These are rehearsal releases, not
-production eligibility or complete PLOT parcel/ownership coverage.
+was verified at 14 rows and download-held, because its redistribution flag was
+off. That result predates the owner ruling of 2026-10-04, under which the flag is
+provenance and no longer holds a download; the Giving candidate has not been
+re-run since. These are rehearsal releases, not production eligibility or
+complete PLOT parcel/ownership coverage.
 
 ### Replay the original collections and Gaming without collecting large bodies
 
@@ -291,8 +326,9 @@ Producer HTTP bodies are disk-spooled; the unchanged consumer verifies bounded
 parts; the consumer ASGI send callback computes SHA-256, bytes and newline rows
 without storing the logical body. An independent streaming read checks the
 manifest-ordered local artifacts. Anonymous, wrong-tier and production controls
-remain active. An absent component is disclosed separately from served or held
-components. Failures write per-collection receipts and the queue continues.
+remain active. An absent component is disclosed separately from a served one.
+Failures write per-collection receipts and the queue continues. A tenant-private
+or internal-only component must be refused with a 503, as the API refuses it.
 
 Temporary files, SQLite scratch, and configurable caches must point at a drive
 with measured space. Progress is emitted by collection and every 64 MiB of HTTP
@@ -330,10 +366,11 @@ Since projection rule `gaming-public-sources-v4` (owner ruling 2026-10-04:
 "Casino City data is not published; Gaming publishes from public sources") a
 Gaming row of `rights_class` `internal_vendor`, or naming Casino City or
 4wheeler, is not published; columns are unchanged, so no declaration changed.
-Component rights, proposed-ID review restrictions and
-Grove-only entitlement remain runtime gates. Internal tables remain unavailable.
-The stream rehearsal now refuses to resume an old two-table receipt as evidence
-for the complete declaration. It checks each component, including held responses.
+The release-class gate (a rehearsal
+release, built on proposed IDs, is served only in review) and Grove-only
+entitlement remain runtime gates. Tables marked `internal_only` remain
+unavailable. The stream rehearsal refuses to resume an old two-table receipt as
+evidence for the complete declaration, and checks each component.
 
 
 ### Verified download memory and lifetime
@@ -348,8 +385,8 @@ including decimal spellings, remain unchanged. Temporary storage closes on
 validation failure, response completion, disconnect and cancellation.
 
 Size temporary storage for concurrent verified downloads; the configured
-per-component limit still applies. This change does not clear a publication
-hold, promote a rehearsal release or certify upstream transforms as streaming.
+per-component limit still applies. This path does not promote a rehearsal
+release or certify upstream transforms as streaming.
 Reproduce with `python -m unittest server.tests.test_partitioned_release
 server.tests.test_gaming_release server.tests.test_shared_release_collections
 server.tests.test_grove_exchange` from the repository root, with `server` on
@@ -369,9 +406,10 @@ when changing dependencies and rerun the pinned container and consumer tests.
 
 Moved here on 2026-10-12 from `docs/GAMING_GROVE_INFRASTRUCTURE_NOTES.md` (2026-09-24,
 at the tag `data-workspace-final`). Its publication-hold step is gone since the owner
-rulings of 2026-10-04, and its issuance tests left with the data workspace. Who
-assigns Gaming ID ordinals is in the handoff on Cedar ID minting and Gaming ID
-issuance.
+rulings of 2026-10-04, and its issuance tests left with the data workspace. Minting
+Cedar IDs and issuing Gaming IDs have no home in this repository: both jobs were
+handed to Lumecon-data's maintainers when the data workspace was retired, and the
+issuing code is at the tag `data-workspace-final`.
 
 ### The pin
 
@@ -436,10 +474,12 @@ issuance.
    logical count must be their sum. Otherwise the whole release is refused.
 6. A logical partitioned component is assembled in manifest order into a
    temporary disk spool, after each part passes the same contract checks.
-   Direct part requests remain refused. Every part has public/publishable rights,
-   redistribution, and `download_permitted: true`. Its field names, in order,
-   equal the field-map `order`, and each shipped field's `rights_class` equals
-   the contract's `metadata.field_rights`. Its primary key is within the header, and the count and
+   Direct part requests remain refused. No part may be tenant-private; its
+   publication class, redistribution and `download_permitted` are recorded as
+   provenance and not checked (owner ruling 2026-10-04). Its field names, in
+   order, equal the field-map `order`, and each shipped field's `rights_class`
+   equals the contract's `metadata.field_rights` (the classes must agree; none
+   has to be public). Its primary key is within the header, and the count and
    artifact size are bounded.
 7. The component bytes come from
    `/v1/collections/<id>/releases/<rid>/components/<name>/download`. They

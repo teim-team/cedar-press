@@ -1,7 +1,7 @@
 """NEED evidence on registered Native entity profiles.
 
 A related Native entity never inherits a business's patents or debt rating.
-The collection publication gate applies before even reading a release pin.
+An entity must be in the register before a release pin is read.
 """
 
 from __future__ import annotations
@@ -142,8 +142,8 @@ def entity_evidence(cedar_uid: str) -> dict:
             # grove_full_release verifies all bytes and component rights before
             # the first row. Preserve streaming when scanning other entities.
             yield from _component_rows(component, pin["release_id"])
-        except repository.ComponentPublicationHeld:
-            result["component_status"][component] = "publication_held"
+        except repository.ComponentNotDeliverable:
+            result["component_status"][component] = "not_deliverable"
         else:
             result["component_status"][component] = "permitted"
 
@@ -190,6 +190,9 @@ def entity_evidence(cedar_uid: str) -> dict:
                 "current ratings; an acquisition does not by itself prove a patent assignment."
             ),
         )
-    if "publication_held" in result["component_status"].values():
-        result["message"] += " Some NEED components remain held and are not shown."
+    if "not_deliverable" in result["component_status"].values():
+        result["message"] += (
+            " Some NEED tables are not included because they are tenant-private"
+            " or restricted-use."
+        )
     return result

@@ -39,7 +39,7 @@ class GroveExchange(unittest.TestCase):
         self.assertEqual(len(result["collections"]), 16)
         self.assertNotIn("entity-register", [item["id"] for item in result["collections"]])
 
-    def test_held_need_download_and_enterprise_profile_never_escape(self):
+    def test_unpinned_need_download_and_non_cedar_profile_never_escape(self):
         with tempfile.TemporaryDirectory() as temporary:
             result = exchange.response(
                 self.request(

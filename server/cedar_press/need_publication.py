@@ -5,7 +5,7 @@ from __future__ import annotations
 import re
 from typing import Any
 
-POLICY_HOLD = "NEED_PUBLICATION_QUARANTINE"
+PROOF_SUPERSEDES = "NEED_PUBLICATION_QUARANTINE"
 COMPONENT = "reviewed_public_base"
 SOURCE = "need-reviewed-public-base-evidence"
 VERSION = "need-reviewed-public-base-1"
@@ -44,22 +44,18 @@ CLAIM_NULLABLE_FIELDS = frozenset(
 )
 
 
-def metadata_permits_publication(metadata: object) -> bool:
-    if not isinstance(metadata, dict):
-        return False
-    status = metadata.get("publication_status", "public")
-    return (
-        metadata.get("internal_only", False) is False
-        and isinstance(status, str)
-        and status in {"public", "publishable", "eligible"}
-    )
-
-
 def reviewed_base_permitted(manifest: dict[str, Any], name: str, entry: dict[str, Any]) -> bool:
     """Admit only the pinned reviewed base; never clear another NEED component.
 
     This checks an already verified manifest. It does not replace artifact,
     acquisition-receipt, row-review, entitlement or release-class verification.
+    It checks that the component is the reviewed base, not whether it may be
+    published. By the owner's rulings of 2026-10-04 (Elijah Moreno), the
+    reviewed-base proof no longer gates NEED, and source rights statuses
+    (publication class, redistribution, download permission, publication
+    status) are provenance. Tenant-private data is a customer's own and is
+    still refused, as `repository` refuses it: the preview staging script and
+    `need_preview` have no other check.
     """
     if manifest.get("collection_id") != "need" or name != COMPONENT:
         return False
@@ -67,6 +63,17 @@ def reviewed_base_permitted(manifest: dict[str, Any], name: str, entry: dict[str
     contract = entry
     attestations = manifest.get("attestations")
     if not all(isinstance(value, dict) for value in (metadata, contract, attestations)):
+        return False
+    rights = contract.get("rights")
+    release_rights = manifest.get("rights")
+    if (
+        not isinstance(rights, dict)
+        or rights.get("publication_class") == "tenant_private"
+        or (
+            isinstance(release_rights, dict)
+            and release_rights.get("publication_class") == "tenant_private"
+        )
+    ):
         return False
     proof = metadata.get("reviewed_public_base")
     if not isinstance(proof, dict) or proof != attestations.get("reviewed_public_base"):
@@ -82,10 +89,8 @@ def reviewed_base_permitted(manifest: dict[str, Any], name: str, entry: dict[str
         return False
     if (
         proof.get("scope") != "reviewed_public_base_only"
-        or proof.get("supersedes") != POLICY_HOLD
+        or proof.get("supersedes") != PROOF_SUPERSEDES
         or metadata.get("internal_only") is not False
-        or not metadata_permits_publication(metadata)
-        or entry.get("download_permitted") is not True
         or contract.get("dataset_id") != "need--" + COMPONENT
         or not isinstance(contract.get("source"), dict)
         or contract["source"].get("source_id") != SOURCE
@@ -139,21 +144,14 @@ def reviewed_base_permitted(manifest: dict[str, Any], name: str, entry: dict[str
     fields = contract.get("fields")
     if not isinstance(fields, list) or any(not isinstance(field, dict) for field in fields):
         return False
-    if (
-        tuple(field.get("name") for field in fields) != expected_fields
-        or any(
-            field.get("nullable") is not (field.get("name") in nullable_fields) for field in fields
-        )
-        or metadata.get("field_rights") != dict.fromkeys(expected_fields, "PUBLIC_DERIVED")
-        or next(field for field in fields if field["name"] == "publication_status").get(
+    return (
+        tuple(field.get("name") for field in fields) == expected_fields
+        and all(field.get("nullable") is (field.get("name") in nullable_fields) for field in fields)
+        and metadata.get("field_rights") == dict.fromkeys(expected_fields, "PUBLIC_DERIVED")
+        and next(field for field in fields if field["name"] == "publication_status").get(
             "allowed_values"
         )
-        != ["observed"]
-    ):
-        return False
-    rights = contract.get("rights")
-    return isinstance(rights, dict) and (
-        rights.get("redistribution") is True and rights.get("publication_class") == "publishable"
+        == ["observed"]
     )
 
 

@@ -11,13 +11,15 @@ An external issued-ID package does not establish consumer liveness; see the
 
 Database follow-ups from the 2026-10-06 landing-page work (a larger NEED
 release, an accurate Native Nonprofits count, the other populations once held)
-are under "Open follow-ups" below.
+are under "Open follow-ups" below, and the open items of the 2026-10-02
+fact-check under "Open items from the 2026-10-02 fact-check".
 
-The [current review status](REVIEW_STATUS.md) records the current cross-repository
-checkpoints, measured review results and remaining integration work. The dated
-[producer convergence checkpoint](https://github.com/teim-team/Lumecon-data/blob/bdb630841bc344872d79a444eadebcde61b21bb7/docs/cedar-convergence.md)
-retains the September 30 history; later October 1 results in the current status supersede it. Recheck the current PR and checkout before using a
-dated code SHA. Documentation branch links are navigation, never runtime data pins.
+The dated [producer convergence checkpoint](https://github.com/teim-team/Lumecon-data/blob/bdb630841bc344872d79a444eadebcde61b21bb7/docs/cedar-convergence.md)
+retains the September 30 history, and the dated
+[review status of 2026-10-02](https://github.com/teim-team/cedar-press/blob/data-workspace-final/docs/REVIEW_STATUS.md),
+at the tag `data-workspace-final`, the October 1 and 2 checkpoints. Recheck the
+current PR and checkout before using a dated code SHA. Documentation branch links
+are navigation, never runtime data pins.
 
 Lumecon-data builds and verifies immutable releases and the cohesive researcher
 spreadsheet. Cedar Press owns the shared Press/Grove consumer, publication filters,
@@ -80,6 +82,51 @@ In this repository, once those fixes land:
   fixes a binding: delete its entry there and the exclusion in
   `src/features/grove/showcase.js` together.
 
+## Open items from the 2026-10-02 fact-check
+
+Carried from docs/REVIEW_STATUS.md when that file was removed; its last version is
+in git history, and the fact-check (docs/FACT_CHECK_2026-10-02.md) is at the tag
+`data-workspace-final`.
+
+For the producer (Lumecon-data):
+
+- **Deals `ANCSA-2014-001`.** Its `research_note` still describes a mid-month
+  placeholder day while `event_date` is `2014-05` at month precision (low).
+- **Giving `FG-*` rows.** `currency` is blank on the five `reviewed_disclosures`
+  rows that carry `amount_exact_usd`, and `publication_status` is blank where `FF-*`
+  rows read `observed`; the component's contract settles it.
+- **The Siletz recipient repair.** Siletz Tribal Arts and Heritage Society is a
+  separate nonprofit, but two Federal Funding transactions (recipient UEI
+  `GJV4PJ8M5PC7`, award `ASST_NON_1896753-42-22_417`) project to the tribal
+  government. Applying it needs the uid they carry now, read off the projection; a
+  ruling that states the fact (a distinct recipient, not `not_native`); and the
+  evidence re-read (the society's [board page](https://siletzartsheritagesociety.org/board-of-directors/)
+  and the [USAspending award](https://www.usaspending.gov/award/ASST_NON_1896753-42-22_417)). No new
+  Cedar ID unless the owner admits the society to the register.
+- **The full spreadsheets were not re-measured** in that pass; only the 140 preview
+  rows and the manifest were.
+
+For the owner:
+
+- **One name, two entities.** `CE-000RA-MT` and `CE-001R2-8V` share the canonical
+  name National Center for American Indian Enterprise Development; the evidence and
+  the next sources are in `data/spine/cedar_duplicate_name_review.json`.
+- **The Deals served preview.** Whether the ten events reviewed on 2026-10-01 become
+  the served sample (Havala).
+- **Individually owned businesses, after the 2026-10-02 ruling.** Whether the TERO
+  rosters' `owner_name_raw`, `dba_name` and business street address follow the
+  ruling, and whether `owner_name`, `owner_tribal_affiliation_named` and
+  `self_description_sentence` publish under it, were left for the owner to confirm.
+
+Not defects, recorded so they are not re-investigated: negative `obligations_usd`
+are de-obligations kept as recorded; the `$0.00` funding transaction
+(`...12X1105_10.664_0003`) is a zero-dollar modification; `fiscal_year 2026` on a
+2025-12-24 subaward is the federal fiscal year; `registrant_id 400635921` is a
+post-2017 LDA registrant id; `reporting_year 1999` filed 2000-02-14 is a year-end
+report; the contractor `award_id` duplicates are several transactions of one award
+(the key is `transaction_id`); `owned.cedar_uid` equals the certifying tribe by
+definition (`cedar_entity_role = certifying_authority`).
+
 ## Preserved evidence and older instructions
 
 The [archived terminal checkpoints](handoffs/2026-10-01-terminal-history.md)
@@ -98,7 +145,7 @@ the owner's adjudication queue.
 
 ## 2026-10-04 Gaming columns follow the rights ruling
 
-Lumecon-data #17 (`019ded3`, now the Gaming consumer job's `LUMECON_DATA_SHA`)
+Lumecon-data #17 (`019ded3`, the Gaming consumer job's `LUMECON_DATA_SHA` when this was written)
 applies the owner ruling of 2026-10-04 to Gaming releases: a field-rights class
 is provenance, so a release ships every column of any class (projection rule
 `gaming-presented-fields-v2`) except personal data and a few columns whose
@@ -133,8 +180,8 @@ selects a Press product, tier or pin for Infrastructure.
 The corrected real Infrastructure release aeaf2aa17b50ff1edd45222fe4c8469f2cdb0f5f5fad9824ec6b118cb410c09b
 passed the isolated producer-metadata and shared-consumer rehearsal. Records has
 28,484 permitted rows, 30 examples and 41 fields. The other 13 components were
-refused according to existing holds, and the research packet was refused in
-production mode. Packet receipt SHA256:
+refused under the holds in force on 2026-10-03, before the owner rulings of
+2026-10-04, and the research packet was refused in production mode. Packet receipt SHA256:
 b2743050ae728dd63e4b7a000fa7c35ee6f533f0347f0b9b83726a5c6cab1f2a.
 This is review evidence, not deployment or new human approval. The packet currently
 contains zero map features; map serving and consumer re-pins remain unfinished.

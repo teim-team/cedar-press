@@ -23,9 +23,10 @@ figure's own ``demonstration`` flag rather than a hand-kept list of ids, so the
 two cannot disagree. The Owned collection's aggregates are real
 (nation-supplied) and are marked accordingly.
 
-WHAT THE TWELVE HAVE AND WHAT THEY DO NOT
+WHAT THE FOURTEEN HAVE AND WHAT THEY DO NOT
 Eight collections joined the shelf when Cedar's measured descriptors replaced
-the four hand-written ones. They carry real names, row counts, sources and
+the four hand-written ones, and Foundation & Corporate Giving and PLOT
+followed. They carry real names, row counts, sources and
 methods, and they carry no figures -- Cedar publishes no figure series -- so a
 statistics question about them is answered with "no published figures yet"
 rather than a number. ``_CONSTRUCTION`` below is hand-written methods copy and
@@ -223,8 +224,8 @@ def _spreadsheet_construction(dataset_id: str) -> dict[str, Any] | None:
             "establish ownership at a historical transaction date."
         ),
         "inclusion_rules": (
-            "The public spreadsheet contains only the components, rows and "
-            "fields admitted by the pinned producer release's publication gates."
+            "The spreadsheet holds only the tables, records and columns that "
+            "passed the publication checks in the release we use."
         ),
         "known_limitations": limits,
     }
@@ -240,11 +241,11 @@ def _catalog_entry(dataset_id: str) -> dict[str, Any] | None:
 
 
 def _catalog_profile(dataset_id: str) -> dict[str, Any] | None:
-    """A profile for a collection the catalog carries but the pilot does not.
+    """A profile for a collection the catalog carries but ``LAUNCH_COLLECTION`` does not.
 
-    The wider ladder (``pressCatalog.js``, dumped into ``_press_data.json``)
-    carries collections presented by their record structure (Foundation &
-    Corporate Giving and PLOT). Cedar can honestly answer what such a
+    No collection is in that state today: every catalog entry, Foundation &
+    Corporate Giving and PLOT included, is in ``LAUNCH_COLLECTION``. For a
+    collection presented by its record structure, Cedar can honestly answer what such a
     collection holds and how its records connect to Native entities and to
     the other collections — that is the catalog's own copy — but it states no
     figures for it, so every release-shaped field is ``None`` and the
@@ -284,8 +285,8 @@ def profile_for(dataset_id: str) -> dict[str, Any] | None:
     """The standardized profile, or ``None`` for an unknown collection."""
     dataset = next((d for d in LAUNCH_COLLECTION if d.id == dataset_id), None)
     if dataset is None:
-        # The pilot's four datasets carry releases; the rest of the ladder
-        # answers from its catalog entry.
+        # Every catalog collection is in LAUNCH_COLLECTION today, so this
+        # answers only for an id the catalog carries and the storefront does not.
         return _catalog_profile(dataset_id)
     construction = _spreadsheet_construction(dataset_id) or _CONSTRUCTION.get(dataset_id, {})
     # The eight collections that joined the shelf with Cedar's real descriptors

@@ -34,29 +34,17 @@ rules.
 
 ### Where the `grove/` paths came from
 
-The retired model was a pipeline: the data workspace fed Cedar Grove, and Cedar
-Grove published a slice of itself as Cedar Press. Under that model this client
-carried the platform's own modules and kept the platform's paths so that
-"re-syncing a module is a copy, not a translation" — which is why the code sits
-under `src/features/grove/`, `src/components/grove/`, `src/pages/grove/` and
-`src/styles/grove/`.
-
-The owner retired the model on 2026-09-02. Nothing re-syncs from Grove any
-more, so the paths no longer state a fact about the code; they are vestigial
-names. Note that `src/features/`, `src/components/` and `src/pages/` contain
-*only* a `grove/` directory each: every file under those paths is Cedar Press,
-and there is no Grove code in this repository to be distinguished from.
+Until 2026-09-02 this client carried Cedar Grove's modules under the
+platform's paths, so that re-syncing one was a copy. The owner retired that
+model then, and nothing re-syncs from Grove. The paths are vestigial names:
+`src/features/`, `src/components/` and `src/pages/` each hold only a `grove/`
+directory, and every file under the four `grove/` paths is Cedar Press.
 
 **The rename is a named next step, not done here.**
 
-The measurement below is re-derived on every test run and compared against
-this table by `server/tests/test_rename_plan.py` — every figure in it, the
-breakdowns included, and `test_rename_plan_gate.py` injects a stale one to
-prove that comparison fails when it should. So it cannot go stale quietly
-again. The first version of it was taken on `cedar-consolidated` at
-`05b438d` and left standing while the tree moved underneath it; by the time
-Codex checked, every row was wrong, and a number in a Markdown table is not
-compiled, not imported and not asserted by anything. Re-measured with:
+`server/tests/test_rename_plan.py` re-measures every figure in this table on
+each test run, the breakdowns included, and `test_rename_plan_gate.py` injects
+a stale figure to prove the comparison fails. Re-measured with:
 
 ```
 git grep -I -o -E '(features|pages|components|styles)/grove'   # references
@@ -66,43 +54,23 @@ git ls-files src/<dir>/grove                                   # files to move
 | | |
 |---|---|
 | Files to move | 189 — `features/grove` 141, `pages/grove` 45, `components/grove` 1, `styles/grove` 2 |
-| Path references to rewrite | 442, across 93 files |
+| Path references to rewrite | 431, across 92 files |
 | Referencing files inside `src/` | 56 — `pages/` 37, `features/` 15, `context/` 2, `components/` 1, `main.jsx` 1 |
-| Referencing files outside `src/` | 37 — `server/cedar_press/` 8, `scripts/` 8, `docs/` 8, `server/tests/` 5, `tests/` 3, `data/` 2, `.github/` 1, `.env.example` 1, `eslint.config.js` 1 |
+| Referencing files outside `src/` | 36 — `server/cedar_press/` 8, `scripts/` 8, `docs/` 7, `server/tests/` 5, `tests/` 3, `data/` 2, `.github/` 1, `.env.example` 1, `eslint.config.js` 1 |
 
-The reason this was deferred has expired. The table used to carry a fifth row
-— twelve files also touched by an open PR, which would each have become a
-rename/edit conflict — and #36, #37 and #38 are all merged. The row is gone
-rather than corrected, because a stale reason left standing beside a live
-decision is worse than no reason.
+The reason this was deferred, open pull requests that touched the same files,
+has expired.
 
-It is a mechanical rename with no behaviour change, and it should still land
-as its own commit — moving the four directories to `press/` and rewriting the
-references in one pass — for two reasons that are about review rather than
-about risk.
-
-First, "did all 442 references get rewritten?" is a question the build, the
-suites and the smoke run answer, and not one a reader can answer from a diff.
-Folded into a change that also alters behaviour or prose, the rename hides
-that change instead of accompanying it.
-
-Second, the rename reaches past the site, and part of what it touches no build
-would catch. What a build cannot see is prose — Markdown, comments, `.env.example` — which is why
-`test_rename_plan.py` counts textual occurrences rather than imports. On the
-day the four directories move, the same measurement turns into the stale-path
-sweep and names every file that still spells the old one.
-
-One precondition, found while re-measuring the rows above. `npm run test:smoke`
-is one of the three things that answer "did all 504 references get rewritten?",
-and until this commit it could answer for the wrong tree: `playwright.config.js`
-hardcoded port 4180 and kept `reuseExistingServer` on outside CI, so a run in
-one checkout attached to a preview server another checkout had left listening
-and reported on that build — silently, failing only the two tests that read
-`dist-site/` from disk. A rename verified by a suite that measured somebody
-else's tree is not verified. The config no longer reuses a server it did not
-start, and takes `CEDAR_PRESS_SMOKE_PORT` when two checkouts need to run at
-once; without it a busy port is now a loud `--strictPort` failure rather than a
-quiet pass on the wrong bundle.
+It is a mechanical rename with no behaviour change, and it should land as its
+own commit: the four directories move to `press/` and the references are
+rewritten in one pass. The question "did all 431 references get rewritten?"
+is one the build, the suites and the smoke run answer, and a reader cannot
+answer it from a diff. Prose (Markdown, comments, `.env.example`) is what no build sees,
+which is why `test_rename_plan.py` counts textual occurrences rather than
+imports; on the day the directories move, the same check names every file that
+still spells the old path. `playwright.config.js` does not reuse a server it
+did not start, so the smoke run measures its own checkout; set
+`CEDAR_PRESS_SMOKE_PORT` when two checkouts run it at once.
 
 ## Layout
 
@@ -270,18 +238,19 @@ Point the client at it with `VITE_API_URL=http://localhost:8000 npm run dev`.
 
 ## Deployment
 
-Pushes to `main` build and deploy to GitHub Pages via
-`.github/workflows/deploy.yml`, which runs lint, unit tests, the smoke suite
-and the API's own checks first. The custom domain is set in `public/CNAME`,
-and the build emits `404.html` alongside `index.html` so client-side routes
-resolve on a static host.
+Pushes to `main` build once and publish that build to GitHub Pages and to an
+S3 bucket behind CloudFront via `.github/workflows/deploy.yml`
+(`docs/HOSTNAMES.md`), which runs lint, unit tests, the smoke suite and the
+API's own checks first. The custom domain is set in `public/CNAME`, and the
+build emits `404.html` alongside `index.html` so client-side routes resolve on
+a static host.
 
-The build output is **`dist-site/`**, not vite's default `dist/`. The data
-workspace tracks 295 files under `dist/` and vite empties its output directory
-before every build, so sharing the name meant every `npm run build` deleted
-them. `build.outDir` in `vite.config.js` and `upload-pages-artifact`'s `path:`
-in the workflow have to move together; changing one alone publishes the data
-bundle, or nothing.
+The build output is **`dist-site/`**, not vite's default `dist/`: `dist/` was
+the retired data workspace's output directory, which may still exist in a
+checkout, and vite empties its output directory before every build.
+`build.outDir` in `vite.config.js` and the `path:` of the workflow's artifact
+steps have to move together; changing one alone publishes the wrong folder, or
+nothing.
 
 An operator sets exactly two things, both in repository settings rather than
 in code:
@@ -397,8 +366,8 @@ email addresses are never sent.
 
 ## Data and downloads
 
-`features/grove/collection.js` holds the launch collection's descriptors and
-figure specs, read from the manifest. `pressReleases.js` derives each
+`features/grove/collection.js` holds the descriptors and figure specs of the
+collections that have a release, read from the manifest. `pressReleases.js` derives each
 collection's release record from the same descriptor, so the version the
 What's New feed shows, the version a citation names and the version a
 download's filename carries are one value read from one place; the feed adds
@@ -412,36 +381,31 @@ provenance a reader loses on save.
 The card under the shelves (`pages/grove/PressExplore.jsx`) shows every
 collection's records through the same three filters: which entity, which kind
 of entity, which years. It can do that because no page knows a collection's
-column names. `data/cedar/explore.json` is a CONTRACT per table, derived from
-the sample header by `scripts/derive-explore.mjs`, that says which of the
+column names. `data/cedar/explore.json` is a CONTRACT per table, derived by
+`scripts/derive-explore.mjs` from each collection's customer table
+(`public/data/cedar/downloads/<collection>.csv`), that says which of the
 table's columns are the record id, the entity uid, the name, the type, the
 record's own subject, the year and what year means there (`year_basis`), the
 date, the amount and its basis, the source, supersession, and which columns
-make the one-line observation. Derivation by header is a PROPOSAL: a table is
-`reviewed` only where `data/cedar/explore.overrides.json` declares it so, with
-its reason, its `entity_role`, its `default_columns` and, where the table
-carries no source column but its identifiers determine one, a
-`source_builder`. The twelve flagships are declared. The importer re-runs the
-derivation after copying samples; `--check` fails a stale file and the suites
-run it. The entity register the pickers read is exported to
-`public/data/cedar/register.json` by the same script, with the names the
-publication rule withholds written null.
+make the one-line observation. Since 2026-10-04 every contract is a
+customer-table contract (`customerTableContract`), marked reviewed, and the
+few reviewed readings of a column carried over from the earlier producer
+previews are in the script (`CUSTOMER_PRESENTATION`).
+`data/cedar/explore.overrides.json` still wins where it speaks, but declares
+no table today: its 2026-09-05 declarations named tables the 2026-10-01
+release renamed, and were retired on 2026-10-02. The refresh steps run the
+derivation (`data/cedar/README.md`, "Refresh the served data"), and
+`make check-generated` and the node suite fail a stale file. The entity
+register the pickers read is exported to `public/data/cedar/register.json` by
+the same script.
 
-THE PUBLICATION RULE RUNS BEFORE A FILE IS PUBLIC. The importer
-(`withhold_samples`) strikes any sample that carries a field
-`may_publish_individual_native_field` withholds for an individually
-Native-owned firm: the table keeps its release facts and loses its
-`sample_path`, gaining `sample_withheld_why`. `--audit` applies the same rule
-to the committed manifest and deletes the files; on 2026-09-05 it struck six
-that were being served, when the rule withheld the firm's name absent
-recorded consent. Since the owner ruling of 2026-10-02 (a firm is a business
-entity whatever it is named after; its name, identifiers and business address
-are public business records) the rule publishes those fields, so the importer
-strikes nothing for them and re-admits the six on the next run; the machinery
-stays, reading the rule. Both suites scan every served sample for
-such a name. In the model a withheld register name is `withheld`, never a
-prompt to read the table's own name column, and the masked row is what the
-table, the record, the search and the export read.
+Until the owner ruling of 2026-10-02 (a firm is a business entity whatever it
+is named after; its name, identifiers and business address are public
+business records), the retired importer struck any sample that carried an
+individually Native-owned firm's name, and the register wrote those names
+null. The register now writes every name (`withheld_names: 0`, asserted in
+`explore.test.js`). In the model a withheld register name is `withheld`, never
+a prompt to read the table's own name column.
 
 `features/grove/explore.js` is the model. Everything the card shows is a
 function of one object, the CUT: entities, entity types, a year range, the
@@ -474,8 +438,8 @@ the raw values kept for the download. On a phone the records are a list
 steps aside while the viewer is on screen; the viewer's foot carries the
 Cedar action.
 
-Phase one, shipped: the viewer over the ten-row samples, static on Pages, the
-caption counting sample records and saying so, and what it is not showing
+Phase one, shipped: the viewer over the customer tables (three to ten rows
+each), static on Pages, the caption counting sample records and saying so, and what it is not showing
 (locked, no preview, unreachable, undated, superseded). Not shipped, and
 needing the API deployed: the full tables behind the same cut (a rows-and-
 facets endpoint with authorization on every request), Cedar answering from
@@ -491,50 +455,15 @@ A Federal Register notice addressed to every federally recognized tribe, a
 bill about a class of entities, a program open to all Alaska Native
 Corporations: these records name no individual entity, and before 2026-09-05
 they were indistinguishable from records whose named party the resolver
-could not place. The owner's decision
-of 2026-09-05, recorded verbatim below, settles how they are
-represented, and its centre is a boundary: **a scope is a population, never
-an entity**. No `CE-XXXXX-CC` uid is minted for "all tribes", no entity class
-is added, and `cedar_uid` keeps meaning the canonical Native entity.
-
-### The owner's decision, 2026-09-05
-
-The proposal of 2026-09-05 (a reviewer's draft, not the owner's) suggested minting
-"All federally recognized tribes" and similar populations as entities in the
-identity register. The owner rejected that architectural centre and approved the
-feature on different terms:
-
-> Approve collective-scope classification and filtering.
->
-> Do not mint ordinary CE-XXXXX-CC Cedar UIDs for "all tribes," state subsets, all ANCs, all NHOs, or general Indian Country relevance. Do not add "Collective scope" as a Native entity class.
->
-> Keep cedar_uid and cedar_uids exclusively for entities admitted under the existing canonical Native entity rules. An actual intertribal organization is different from an abstract population.
->
-> Add collective_scopes to affected public schemas. Use an explicit scope definition, relationship to the record, source evidence, and temporal and geographic interpretation. Keep this information separate from named-party identity and resolution status.
->
-> A record can contain both named entities and collective scopes. It can also have a valid collective scope and unresolved named parties. A scope must never be a fallback for a failed entity match.
->
-> Distinguish addressed audience, applicability, eligible class, aggregate measurement, and general subject matter. Do not infer universal relevance from generic tribal language.
->
-> Implement scope-aware filtering in the shared query model, not only the viewer. Individual-entity inclusion of collective records is optional and off by default. Explain the match and preserve the existing record grain.
->
-> Resolve membership using the source's definition and relevant date. Missing historical or geographic evidence produces unknown membership, not a guessed inclusion or exclusion. Version the definitions and evidence; versioned membership caches are permitted.
->
-> Never allocate collective amounts to individual members through a filter or join. Collective context may coexist with a genuinely identified recipient, but cannot replace that recipient.
->
-> Reconcile the proposed federally recognized population against the official BIA list before displaying a national membership count. Do not force a match by deleting or reclassifying entities without evidence.
->
-> Keep one public dataset per collection. This change does not authorize row expansion, new customer datasets, revival of retired identifiers, or reassignment of existing Cedar UIDs.
-
-The reasoning the owner gave, in brief:
-
-- `cedar_uid` identifies the canonical Native entity; a scope describes a population. Putting a population in the register with a valid-looking uid would make every consumer remember an exception: a distinct-uid count would count it, a join could treat it as a recipient, and a record with a scope would look entity-resolved when no individual entity was identified.
-- A blank entity field is not inherently an error. The associated status explains it: no individual entity named, unresolved, or withheld. "Blank means unresolved, and only that" is rejected.
-- "Addresses a class" needs a relationship: addressed, applies to, eligible class, aggregate measured population, general subject matter. A consultation notice does not address every tribe merely because it concerns consultation; an invitation is not participation; an eligible class is not receipt. The statutory population is not interchangeable with the recognized-tribe list (*Yellen v. Confederated Tribes of the Chehalis Reservation*: ANCs qualified as Indian tribes under the incorporated ISDA definition for CARES Act Title V), and a generic NHO label is not a program's definition.
-- Membership cannot come from a generic state field or one universal date rule. Headquarters, trust land and service area are different predicates; an invitation, an ongoing program and a statute fix their populations at different dates. Missing evidence gives "unknown", never present membership as historical membership. "Computed, never stored" becomes: derived from a versioned definition and evidence, with versioned caches permitted.
-- The viewer keeps named records distinct from broader relevance: inclusion of collective records for an entity is off by default, every added result says why it appeared, a record matching through a name and a scope appears once, and the scope, the toggle and the version enter the shared query state so the viewer, the saved view, the download and the Cedar request agree.
-- Collective records can carry money: an appropriation for a class is a legitimate record whose amount belongs to the program, not to a synthetic recipient. A scope cannot occupy a recipient or owner identity field, and scope-based relevance cannot create entity-attributable dollars. A real recipient administering services for a broader population keeps its uid and carries the population as a scope.
-- The national count in the proposal (577) was the register's class totals; the official list of 2026-01-30 states 575. That is reconciled at uid level on the terminal before any count is shown, never forced by reclassifying entities.
+could not place. The owner's decision of 2026-09-05
+(`docs/COLLECTIVE_SCOPE_DECISION_2026-09-05.md`, verbatim with its reasoning,
+at the tag `data-workspace-final`) settles how they are represented, and its
+centre is a boundary: **a scope is a population, never an entity**. No
+`CE-XXXXX-CC` uid is minted for "all tribes", no entity class is added, and
+`cedar_uid` keeps meaning the canonical Native entity. A record can carry both
+named entities and scopes, and a scope is never a fallback for a failed entity
+match. A scope never occupies a recipient or owner field, and scope-based
+relevance never makes dollars attributable to an entity.
 
 ### What this repository does with it
 
@@ -545,12 +474,13 @@ The reasoning the owner gave, in brief:
   column (a JSON array; `[]` evaluated and none; null not evaluated).
 - The field map declares `collective_scopes` on Legislation (built at write
   time from `bill_scope` and the class-level scope, relationship
-  `general_subject`) and on the Federal Register (owed by the terminal from
-  the source text, together with an `entity_link_status` of
-  `no_individual_named`, `resolved`, `unresolved` or `withheld`).
-- `cedar_publication.apply_field_map` validates every element against the
-  vocabulary, refuses a scope code in an identity field (`ScopeRefused`),
-  and never fills the entity block from a scope.
+  `general_subject`) and on the Federal Register (owed by the producer,
+  Lumecon-data, from the source text, together with an `entity_link_status`
+  of `no_individual_named`, `resolved`, `unresolved` or `withheld`).
+- The retired writer (`code/cedar_publication.apply_field_map`, at the tag
+  `data-workspace-final`) validated every element against the vocabulary and
+  refused a scope code in an identity field; customer tables are now built in
+  Lumecon-data.
 - The shared query model (`explore.js`) carries `scopes` and `broad` in the
   cut, so the permalink, the saved view, the caption, the download and the
   Cedar question agree. Selecting a scope finds the records covering it;
@@ -566,7 +496,8 @@ The reasoning the owner gave, in brief:
   says why in the viewer, and the reduced export carries `collective_scopes`
   beside the entity columns rather than inside them.
 - Nothing here displays a national membership count: the register's class
-  totals are reconciled against the official list on the terminal first.
+  totals have to be reconciled against the official BIA list in Lumecon-data
+  first.
 
 ## The Cedar Business ID: a second identity, kept apart from the uid
 
@@ -578,80 +509,51 @@ meaning the canonical Native institution; `CB-` names a distinct commercial
 business, whoever owns it. The id encodes nothing, never changes, and is
 never traded for a uid except by an adjudication that keeps both. Ownership
 is a dated relationship, registrations are attributes, name changes are
-aliases, and successors get new ids. The register is the terminal's to build,
-seeded from the NEED enterprises, the certified-firm directories, the
-contracting awardees and the deal parties. This repository's part comes
-after: a `cedar_business_id` column declared in the field map where a
-business is a party, the writer refusing a `CB-` id in an identity column,
-and the publication rule for individually owned businesses extended to the
-id. Nothing here mints or validates one yet.
+aliases, and successors get new ids. Minting the register is Lumecon-data's
+job (handed over when the data workspace was retired), seeded from the NEED
+enterprises, the certified-firm directories, the contracting awardees and the
+deal parties. Nothing mints a `CB-` yet. This repository checks only the
+form: the vendored customer-table rules (`server/cedar_press/customer_sheet.py`,
+`CEDAR_ID`) accept `CB-` and seven digits as a Cedar Business ID, and the NEED
+customer table has a `business_uid` column for it, blank until a register
+binds one.
 
 ## The public dataset specification
 
-`docs/PUBLIC_DATASET_SPEC_2026-09-05.md` (at the tag `data-workspace-final`) is the owner's specification for
-the customer files, the samples, the viewer and the researcher
-documentation, recorded verbatim in two parts: the cleanup brief and, later
-the same day, the exact public column specification with the identifier
-retirement rule (the addendum, which wins where they differ). What this
-repository carries of it:
+The owner's specification of 2026-09-05 for the customer files
+(`docs/PUBLIC_DATASET_SPEC_2026-09-05.md`, at the tag `data-workspace-final`)
+set an exact public column list for each flagship and a rule retiring the
+competing entity identifiers. Its field-by-field map stays, and this
+repository reads it.
 
-THE FIELD MAP. `data/cedar/field_map.json` is the field-by-field map
-behind the exact column lists: for each flagship, one decision per column
-of its current sample header (keep, rename, combine, derive, document,
-internal, withhold), the approved public header in the owner's exact order
-(`order`, opening with `cedar_uid`, `canonical_name`, `entity_class`,
-`cedar_entity_role`, or for Legislation and NAGPRA the plural block
-`cedar_uids`, `canonical_names`, `entity_classes`, `entity_roles`,
-`entity_names_as_published` as aligned JSON arrays, and ending with
-`research_note`), the owner's default viewer columns, the target columns
-built at write time by a named rule or owed, and a retirement entry for
-every competing entity identifier with what it identifies and its
-disposition. The column counts are the owner's exactly, except Funding at
-39: the list keeps `recipient_duns` and the retirement rule in the same
-addendum says not to publish DUNS, and the later rule wins. This pass
-changes columns, never rows, identities or eligibility.
-`scripts/docs-markdown.mjs --kind field-map` renders `docs/FIELD_MAP_2026-09-05.md`
-and `docs/IDENTIFIER_RETIREMENT_2026-09-05.md` (`--check` fails a stale
-document). The unsampled flagship (`owned`) carries its 32-column order as
-owed until its sample lands.
+THE FIELD MAP. `data/cedar/field_map.json` holds, per flagship, one decision
+per column, the approved public header in order (`order`, and
+`compatible_orders` for a newer release's column set), the default viewer
+columns and a retirement entry for every competing identifier. The API lists
+a Grove collection's components from its keys (`repository.grove_components`),
+serves a full release only when the release's header matches an entry's
+`order` or one of its `compatible_orders` and its rights classes agree with
+the pinned contract, and takes a flagship's column order for the researcher
+spreadsheet from it (`spreadsheet.py`). The staging script
+(`scripts/stage_verified_previews.py`) and `scripts/preview_definitions.py`
+read it when they build preview definitions.
+`scripts/docs-markdown.mjs --kind field-map` renders it into
+`docs/FIELD_MAP_2026-09-05.md` and `docs/IDENTIFIER_RETIREMENT_2026-09-05.md`,
+and `make check-generated` fails a stale document. `explore.test.js` holds the
+map, the codebook and the samples together.
 
-THE WRITER READS IT. The retired `code/cedar_publication.apply_field_map`
-(at the tag `data-workspace-final`; current customer tables are built in Lumecon-data) generates
-the customer header from the map: it verifies every alias of `cedar_uid`
-row by row, computes the named rules before the diagnostics they read are
-dropped (geography status, source system, the USAspending and congress.gov
-URLs, the activity id, the additional sources and institutions, the plural
-aligned arrays), drops what is internal or documented, renames in two
-phases so a chain cannot depend on order, fills the opening block from the
-register by uid (`data/spine/cedar_entity_names.csv`), writes the role as
-a constant or from the declared column, orders the header exactly and
-appends what the build synthesised. It REFUSES, as a `SystemExit` naming
-the columns: a flagship column with no decision (`UndecidedColumns`); an
-alias that disagrees with `cedar_uid` on any row (`AliasDisagreement`); a
-competing identifier the map marks `adjudicate` wherever it is populated
-(`UnadjudicatedIdentifier`); and a retired scheme's name in a shipped value
-or a prohibited name in the header (`RetiredIdentifierPresent`). It prints
-one retirement-report row per identifier with the rows affected.
-`1137_customer_dataset_combine.py` calls it after the deny lists and
-before writing. `server/tests/test_field_map.py`, removed with the writer,
-ran it over the sample files and asserted the three refusals the samples carry today (Funding's
-`attribution_status` value `cedar_neid`; NEED's
-`enterprise_existing_cedar_uid`; Nonprofits' `entity_id` and
-`cedar_spine_entity_id`, which disagree with `cedar_uid` on the same row).
-What the applier does NOT do is the terminal's, on the full table: the
-combine crosswalks, the editorial `research_note`, the names as published,
-the value-for-value verification of every rename, the proof that rows,
-totals and eligibility are unchanged.
+The retired writer that generated each customer header from the map
+(`code/cedar_publication.apply_field_map`, called by
+`code/1137_customer_dataset_combine.py`) is at the tag; customer tables are now
+built in Lumecon-data and rendered here by the vendored rules in
+`server/cedar_press/customer_sheet.py`.
 
-THE CODEBOOK IS THE DICTIONARY OF WHAT SHIPS. `data/cedar/codebook.json`
-lists, per flagship, exactly the columns the map ships under the names it
-gives them (`rename_to`; `combine_into` for a combine's sources, shown
-until the combined column exists) and the columns the writer builds at
-write time (`add`), the opening block first. `explore.test.js` holds the
-map, the codebook and the samples together, and fails if a prohibited
-identifier returns to an approved header. The default columns the viewer
-shows first are the owner's default viewer selection, mapped by the map to
-the sample's current names until the export carries the new ones.
+THE CODEBOOK. `data/cedar/codebook.json` is the dictionary of the producer
+previews' columns. The viewer describes each collection by its customer table:
+`codebookFor` (`explore.js`) takes the header and grain from
+`data/cedar/sample_downloads.json` and each column's meaning from the codebook,
+or from `customerTables.js` for the columns the customer-table rules add or
+rename.
 
 THE VIEWER READS BOTH SHAPES. A list cell may be pipe-separated (the
 samples today) or a JSON array (the approved schema); `listCell` reads

@@ -61,7 +61,7 @@ test("every repository path the handoff names exists", () => {
 });
 
 test("the handoff's other documents exist and point back", () => {
-  for (const doc of ["docs/CEDAR_IDENTITY_SYSTEM_2026-09-13.md", "docs/CEDAR_PRESS_SITE_2026-09-13.md"]) {
+  for (const doc of ["docs/CEDAR_IDENTITY_SYSTEM_2026-09-13.md"]) {
     assert.ok(existsSync(fileURLToPath(new URL(doc, root))), doc + " is gone");
   }
   for (const entry of ["README.md"]) {

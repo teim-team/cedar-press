@@ -1,11 +1,11 @@
 {
-  "_note": "The customer-facing structure of each collection's dataset: what one row is, and the columns a subscriber sees with a plain-English label and meaning. Written 2026-09-05 and kept in step with data/cedar/field_map.json, the field-by-field map behind the owner's exact column specification: every column here is one the map ships, under the name the map gives it (`rename_to`), one the writer builds at write time (`add`), or a combine's source shown until the combined column exists (`combine_into`); the first four (or, for Legislation and NAGPRA, five) are the specification's opening block. Meanings are read from the column names and ten rows of values and are to be confirmed by the terminal against the build scripts. Columns not listed stay in the workspace. The viewer reads this file: labels become headings, meanings become the record's definitions, and unlisted columns fold under Technical fields.",
+  "_note": "The customer-facing structure of each collection's dataset: what one row is, and the columns a subscriber sees, with a plain-English label and meaning. Each collection's entry keyed `<id>/<id>` describes its current release table; the twelve entries keyed by retired workspace tables are kept as a fallback source of column definitions for `scripts/preview_definitions.py`. The viewer reads this file: labels become headings, meanings become the record's definitions, and unlisted columns fold under Technical fields.",
   "tables": {
     "funding/federal_funding_transactions": {
       "collection": "funding",
       "dataset": "Federal Funding to Indian Country",
       "row": "One federal assistance transaction (a grant, loan, direct payment or insurance action) reported on USAspending, linked to the Native entity that received it.",
-      "where": "workspace dist/customer/funding.csv (the customer file, written by code/1137_customer_dataset_combine.py); the review copy is dist/review/spreadsheets/funding/federal_funding_transactions.csv; built by code/1135_full_dataset_review_bundle.py from the USAspending assistance archive.",
+      "where": "Retired data workspace, kept at the tag `data-workspace-final`: the customer file was dist/customer/funding.csv, written by code/1137_customer_dataset_combine.py, and the review copy dist/review/spreadsheets/funding/federal_funding_transactions.csv, built by code/1135_full_dataset_review_bundle.py from the USAspending assistance archive. Kept as a fallback source of column definitions (scripts/preview_definitions.py).",
       "fields": [
         {
           "column": "cedar_uid",
@@ -249,7 +249,7 @@
       "collection": "federal-register",
       "dataset": "Federal Register",
       "row": "One tribal consultation event announced or reported in the Federal Register, one row per event and named participant (most events name no single tribe).",
-      "where": "workspace dist/customer/federal-register.csv (the customer file, written by code/1137_customer_dataset_combine.py); the review copy is dist/review/spreadsheets/federal-register/consultation_events.csv; built from Federal Register documents.",
+      "where": "Retired data workspace, kept at the tag `data-workspace-final`: the customer file was dist/customer/federal-register.csv, written by code/1137_customer_dataset_combine.py, and the review copy dist/review/spreadsheets/federal-register/consultation_events.csv, built from Federal Register documents. Kept as a fallback source of column definitions (scripts/preview_definitions.py).",
       "fields": [
         {
           "column": "cedar_uid",
@@ -441,7 +441,7 @@
       "collection": "legislation",
       "dataset": "Legislation",
       "row": "One bill in Congress that concerns Native nations or organizations, with the entities it names.",
-      "where": "workspace dist/customer/legislation.csv (the customer file, written by code/1137_customer_dataset_combine.py); the review copy is dist/review/spreadsheets/legislation/native_bills.csv; built from the Congress.gov API.",
+      "where": "Retired data workspace, kept at the tag `data-workspace-final`: the customer file was dist/customer/legislation.csv, written by code/1137_customer_dataset_combine.py, and the review copy dist/review/spreadsheets/legislation/native_bills.csv, built from the Congress.gov API. Kept as a fallback source of column definitions (scripts/preview_definitions.py).",
       "fields": [
         {
           "column": "cedar_uids",
@@ -615,7 +615,7 @@
       "collection": "deals",
       "dataset": "Indian Country Deals",
       "row": "One announced transaction or award involving a Native party: an acquisition, a financing, a grant, a partnership.",
-      "where": "workspace dist/customer/deals.csv (the customer file, written by code/1137_customer_dataset_combine.py); the review copy is dist/review/spreadsheets/deals/deals_classified.csv; assembled from announcements, filings and agency award lists.",
+      "where": "Retired data workspace, kept at the tag `data-workspace-final`: the customer file was dist/customer/deals.csv, written by code/1137_customer_dataset_combine.py, and the review copy dist/review/spreadsheets/deals/deals_classified.csv, assembled from announcements, filings and agency award lists. Kept as a fallback source of column definitions (scripts/preview_definitions.py).",
       "fields": [
         {
           "column": "cedar_uid",
@@ -847,7 +847,7 @@
       "collection": "nagpra",
       "dataset": "NAGPRA",
       "row": "One NAGPRA notice in the Federal Register (a notice of inventory completion or intent to repatriate), with the institution holding the remains or objects and the Native entities the notice names.",
-      "where": "workspace dist/customer/nagpra.csv (the customer file, written by code/1137_customer_dataset_combine.py); the review copy is dist/review/spreadsheets/nagpra/nagpra_notices.csv; built from Federal Register NAGPRA notices.",
+      "where": "Retired data workspace, kept at the tag `data-workspace-final`: the customer file was dist/customer/nagpra.csv, written by code/1137_customer_dataset_combine.py, and the review copy dist/review/spreadsheets/nagpra/nagpra_notices.csv, built from Federal Register NAGPRA notices. Kept as a fallback source of column definitions (scripts/preview_definitions.py).",
       "fields": [
         {
           "column": "cedar_uids",
@@ -1131,7 +1131,7 @@
       "collection": "lobbying",
       "dataset": "Native Federal Advocacy and Engagement",
       "row": "One federal lobbying filing under the Lobbying Disclosure Act in which the client is a Native entity, one row per filing (amended filings appear once, as the current version).",
-      "where": "workspace dist/customer/lobbying.csv (the customer file, written by code/1137_customer_dataset_combine.py); the review copy is dist/review/spreadsheets/lobbying/native_entity_lobbying_disclosures.csv; built from the Senate LDA filings database.",
+      "where": "Retired data workspace, kept at the tag `data-workspace-final`: the customer file was dist/customer/lobbying.csv, written by code/1137_customer_dataset_combine.py, and the review copy dist/review/spreadsheets/lobbying/native_entity_lobbying_disclosures.csv, built from the Senate LDA filings database. Kept as a fallback source of column definitions (scripts/preview_definitions.py).",
       "fields": [
         {
           "column": "cedar_uid",
@@ -1349,7 +1349,7 @@
       "collection": "contractors",
       "dataset": "Native Federal Contractors",
       "row": "One federal contract transaction (an award or a modification) to a firm owned by a Native entity, as reported to FPDS and published on USAspending.",
-      "where": "workspace dist/customer/contractors.csv (the customer file, written by code/1137_customer_dataset_combine.py); the review copy is dist/review/spreadsheets/contractors/prime_contracts.csv; built from the USAspending contract archive.",
+      "where": "Retired data workspace, kept at the tag `data-workspace-final`: the customer file was dist/customer/contractors.csv, written by code/1137_customer_dataset_combine.py, and the review copy dist/review/spreadsheets/contractors/prime_contracts.csv, built from the USAspending contract archive. Kept as a fallback source of column definitions (scripts/preview_definitions.py).",
       "fields": [
         {
           "column": "cedar_uid",
@@ -1643,7 +1643,7 @@
       "collection": "subcontracting",
       "dataset": "Native Subcontracting",
       "row": "One reported federal subaward or version with source-attributed Native-entity associations. Those associations do not establish ownership at the action date.",
-      "where": "workspace dist/customer/subcontracting.csv (the customer file, written by code/1137_customer_dataset_combine.py); the review copy is dist/review/spreadsheets/subcontracting/subawards.csv; built from the USAspending FSRS subaward pull.",
+      "where": "Retired data workspace, kept at the tag `data-workspace-final`: the customer file was dist/customer/subcontracting.csv, written by code/1137_customer_dataset_combine.py, and the review copy dist/review/spreadsheets/subcontracting/subawards.csv, built from the USAspending FSRS subaward pull. Kept as a fallback source of column definitions (scripts/preview_definitions.py).",
       "fields": [
         {
           "column": "cedar_uid",
@@ -1952,7 +1952,7 @@
       "collection": "owned",
       "dataset": "Individual Native-Owned Businesses",
       "row": "One business owned by a Native entity, in the register of such businesses.",
-      "where": "workspace dist/customer/owned.csv (the customer file, written by code/1137_customer_dataset_combine.py); the review copy is dist/review/spreadsheets/native-owned-businesses/native_owned_businesses.csv. NOT AUDITED: the sample is not in the repository yet; run scripts/import_cedar_manifest.py --audit after adding it.",
+      "where": "Retired data workspace, kept at the tag `data-workspace-final`: the customer file was dist/customer/owned.csv, written by code/1137_customer_dataset_combine.py, and the review copy dist/review/spreadsheets/native-owned-businesses/native_owned_businesses.csv. Kept as a fallback source of column definitions (scripts/preview_definitions.py).",
       "fields": [
         {
           "column": "cedar_uid",
@@ -2130,7 +2130,7 @@
       "collection": "need",
       "dataset": "Native Enterprises",
       "row": "One enterprise (a subsidiary, a joint venture, an affiliate) with the Native entity that owns or is affiliated with it and how.",
-      "where": "workspace dist/customer/need.csv (the customer file, written by code/1137_customer_dataset_combine.py); the review copy is dist/review/spreadsheets/need/need_enterprises.csv; built from owners' own subsidiary listings, annual reports and federal identifier records.",
+      "where": "Retired data workspace, kept at the tag `data-workspace-final`: the customer file was dist/customer/need.csv, written by code/1137_customer_dataset_combine.py, and the review copy dist/review/spreadsheets/need/need_enterprises.csv, built from owners' own subsidiary listings, annual reports and federal identifier records. Kept as a fallback source of column definitions (scripts/preview_definitions.py).",
       "fields": [
         {
           "column": "cedar_uid",
@@ -2302,7 +2302,7 @@
       "collection": "natural-resources",
       "dataset": "Natural Resource Revenue",
       "row": "One payment or distribution of natural-resource revenue (royalties, severance tax shares, reclamation distributions) to a Native entity.",
-      "where": "workspace dist/customer/natural-resources.csv (the customer file, written by code/1137_customer_dataset_combine.py); the review copy is dist/review/spreadsheets/natural-resources/resource_revenue.csv; built from federal and state revenue records.",
+      "where": "Retired data workspace, kept at the tag `data-workspace-final`: the customer file was dist/customer/natural-resources.csv, written by code/1137_customer_dataset_combine.py, and the review copy dist/review/spreadsheets/natural-resources/resource_revenue.csv, built from federal and state revenue records. Kept as a fallback source of column definitions (scripts/preview_definitions.py).",
       "fields": [
         {
           "column": "cedar_uid",
@@ -2509,7 +2509,7 @@
       "collection": "nonprofits",
       "dataset": "Native Nonprofits",
       "row": "One nonprofit organization in the IRS Business Master File that is Native-led or tribally controlled, with the Native entity it is linked to.",
-      "where": "workspace dist/customer/nonprofits.csv (the customer file, written by code/1137_customer_dataset_combine.py); the review copy is dist/review/spreadsheets/nonprofits/np_orgs.csv; built from the IRS Exempt Organizations Business Master File and Native-led directories.",
+      "where": "Retired data workspace, kept at the tag `data-workspace-final`: the customer file was dist/customer/nonprofits.csv, written by code/1137_customer_dataset_combine.py, and the review copy dist/review/spreadsheets/nonprofits/np_orgs.csv, built from the IRS Exempt Organizations Business Master File and Native-led directories. Kept as a fallback source of column definitions (scripts/preview_definitions.py).",
       "fields": [
         {
           "column": "cedar_uid",

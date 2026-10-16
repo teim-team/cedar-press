@@ -245,7 +245,7 @@ class SharedCollectionReleaseTest(unittest.TestCase):
                 repository.grove_release_pin(collection)
             metadata = repository.grove_release_metadata(collection)
             if collection == "need":
-                # The collection-wide hold is checked before any pin is read.
+                # With no pin, NEED lists its components as unavailable.
                 self.assertTrue(metadata)
                 self.assertTrue(all(item["status"] == "unavailable" for item in metadata))
             else:
@@ -330,12 +330,12 @@ class SharedCollectionReleaseTest(unittest.TestCase):
         repository.grove_component_contract(manifest, "plot", "environmental_events")
         rights = manifest["components"]["environmental_events"]["rights"]
         rights["publication_class"] = "tenant_private"
-        with self.assertRaises(repository.ComponentPublicationHeld):
+        with self.assertRaises(repository.ComponentNotDeliverable):
             repository.grove_component_contract(manifest, "plot", "environmental_events")
         manifest["components"]["environmental_events"]["rights"] = "malformed"
         with self.assertRaises(repository.FullReleaseUnavailable) as raised:
             repository.grove_component_contract(manifest, "plot", "environmental_events")
-        self.assertNotIsInstance(raised.exception, repository.ComponentPublicationHeld)
+        self.assertNotIsInstance(raised.exception, repository.ComponentNotDeliverable)
 
     def test_component_metadata_holds_refuse_raw_and_csv_before_artifact_reads(self):
         manifest, pin, _ = self.fixture()
@@ -352,7 +352,7 @@ class SharedCollectionReleaseTest(unittest.TestCase):
             for metadata in holds:
                 with self.subTest(metadata=metadata):
                     contract["metadata"] = metadata
-                    with self.assertRaises(repository.ComponentPublicationHeld):
+                    with self.assertRaises(repository.ComponentNotDeliverable):
                         repository.grove_component_contract(
                             manifest, "plot", "environmental_events"
                         )
@@ -404,7 +404,7 @@ class SharedCollectionReleaseTest(unittest.TestCase):
                         repository.grove_component_contract(
                             manifest, "plot", "environmental_events"
                         )
-                    self.assertNotIsInstance(raised.exception, repository.ComponentPublicationHeld)
+                    self.assertNotIsInstance(raised.exception, repository.ComponentNotDeliverable)
                     for route in ("full-download", "spreadsheet-download"):
                         params = {"release_id": pin["release_id"]}
                         if route == "full-download":
@@ -557,7 +557,7 @@ class SharedCollectionReleaseTest(unittest.TestCase):
         self.assertNotIn("gaming", [entry["id"] for entry in response.json()["collections"]])
         self.assertEqual(response.headers["cache-control"], "private, no-store")
 
-    def test_matching_presentation_never_clears_held_or_missing_field_rights(self):
+    def test_matching_presentation_never_clears_incomplete_or_missing_field_rights(self):
         for collection in ("gaming", "plot", "foundation-corporate-giving", "need"):
             for rights in (
                 {"id": "PUBLIC_OFFICIAL", "secret": "INTERNAL_VENDOR"},

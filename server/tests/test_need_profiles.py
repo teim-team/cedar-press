@@ -62,7 +62,7 @@ class NeedProfiles(unittest.TestCase):
 
         def released(*args, **kwargs):
             if kwargs["component"] in held:
-                raise repository.ComponentPublicationHeld("Synthetic explicit rights hold")
+                raise repository.ComponentNotDeliverable("Synthetic explicit rights hold")
             if kwargs["component"] in broken:
                 raise repository.FullReleaseUnavailable("Synthetic transport or hash failure")
             rows = (
@@ -86,15 +86,15 @@ class NeedProfiles(unittest.TestCase):
             self.assertEqual(call.args, ("need", PIN))
         return result
 
-    def test_finite_component_release_keeps_relationships_without_exposing_held_facts(self):
+    def test_finite_component_release_keeps_relationships_without_exposing_refused_facts(self):
         result = self.serve(held=profiles.COMPONENTS)
         self.assertEqual(result["status"], "available")
         self.assertEqual(len(result["related_enterprises"]), 1)
         self.assertTrue(all(result[key] == [] for key in profiles.COMPONENTS))
-        self.assertEqual(result["component_status"]["credit_rating_actions"], "publication_held")
-        self.assertIn("remain held", result["message"])
+        self.assertEqual(result["component_status"]["credit_rating_actions"], "not_deliverable")
+        self.assertIn("tenant-private or restricted-use", result["message"])
 
-    def test_held_relationships_do_not_block_exact_direct_issuer(self):
+    def test_refused_relationships_do_not_block_exact_direct_issuer(self):
         result = self.serve(
             held=("profile_links",), records=[self.row(legal_subject_cedar_uid=UID)]
         )

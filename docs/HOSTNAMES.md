@@ -23,7 +23,7 @@ jobs**:
 
 | Job | Destination | Needs |
 | --- | --- | --- |
-| `build` | Gates, then `dist-site/` as two artifacts | — |
+| `build` | Gates, then `dist-site/` as one artifact | — |
 | `pages` | GitHub Pages, via `deploy-pages` | `build` |
 | `s3` | The bucket, then a CloudFront invalidation | `build` |
 

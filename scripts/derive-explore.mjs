@@ -53,7 +53,8 @@ const DOWNLOADS = `${PUBLIC}/data/cedar/downloads`;
 
 // Until 2026-10-02 the register withheld the name of every entity in this
 // class (null name, uid and class only), mirroring
-// the retired code/cedar_domain.py may_publish_individual_native_field, which released a
+// code/cedar_domain.py's may_publish_individual_native_field (retired; at the tag
+// data-workspace-final), which released a
 // name only on recorded OPTED_IN consent. Owner ruling 2026-10-02: a firm is
 // a business entity regardless of what it is named after, and its name,
 // identifiers and business address are public business records (SAM and
@@ -544,7 +545,7 @@ export function deriveRegister() {
     source: "data/spine/cedar_entity_names.csv, cedar_entity_types.csv, and cedar_identity_register.csv (as_of: its latest mint date)",
     note:
       "Each entity is [cedar_uid, name, class index into `classes`]. A null name is " +
-      `one the publication rule withholds (code/cedar_domain.py may_publish_individual_native_field); ` +
+      `one the publication rule withholds; ` +
       `since the owner ruling of 2026-10-02 every ${WITHHELD_CLASS} name publishes, so withheld_names is 0.`,
     withheld_names: withheld,
     as_of: asOf,

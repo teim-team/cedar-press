@@ -58,7 +58,7 @@ class SpreadsheetRoutes(unittest.TestCase):
             self.client.get(path, params={"release_id": pin["release_id"]}).status_code, 503
         )
 
-    def test_held_collection_and_revoked_account_never_reach_bytes(self):
+    def test_unpinned_need_and_revoked_account_never_reach_bytes(self):
         self.fixture()
         self.session("press_pro")
         with patch.object(repository, "_release_response", side_effect=AssertionError):

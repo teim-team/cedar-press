@@ -25,7 +25,7 @@ The authenticated evidence endpoint is
 infrastructure and is not an additional customer collection.
 NEED keeps its existing Press+ and Grove access. Its component declarations
 describe the producer's logical tables, including bounded partitions; they do
-not grant publication rights or add another collection to the fifteen targets.
+not grant publication rights or add another collection to the sixteen targets.
 
 The Grove application in `teim-team/teim-app` can use
 `python -m cedar_press.grove_exchange` as a local process interface after resolving
@@ -40,9 +40,10 @@ session or authenticate a browser request.
 | Section | What it holds |
 | --- | --- |
 | Overview | The service at a glance, with each section's current standing. |
-| Articles | Research Briefs: original research built from the collections. |
-| Data | The collections themselves — coverage, method and the release. |
-| What's new | Every release, dated and versioned, for tracing a cited figure. |
+| Collections | The collections themselves: coverage, method and the Updated date. |
+| Research Briefs | Original research built from the collections. |
+| Priorities | Where subscribers put their Cedar Points on research questions and data priorities. |
+| What's new | Each collection's Updated date and what it holds now. |
 | Methods | How collections are sourced, resolved and kept current. |
 
 Alongside these, `/tribal-data-request` carries the tribal data request
@@ -54,10 +55,10 @@ own URL, so either can be sent to a council office or a researcher directly.
 Fourteen collections, built and verified in `Lumecon-data` and served here as
 pinned releases. The counts below are the permitted observations in each
 collection's current producer spreadsheet, read from
-`data/cedar/collections.manifest.json` on 2026-10-02; they are mixed-grain
+`data/cedar/collections.manifest.json` on 2026-10-14; they are mixed-grain
 observation counts, not counts of unique people, businesses, awards or dollars,
 and the collections must not be added together. Every collection was Updated
-2026-10-01. The datasets are maintained with human review; the cadence is a
+2026-10-06. The datasets are maintained with human review; the cadence is a
 promise, not yet a measured interval.
 
 | Collection | Shelf | Observations | One row is |
@@ -145,7 +146,7 @@ the file.
   measure agreement with, not ground truth.
 
 The most recent structural fact-check of the served previews, the spine and
-the public text is `docs/FACT_CHECK_2026-10-02.md` (at the tag `data-workspace-final`; its open items are in `docs/REVIEW_STATUS.md`);
+the public text is `docs/FACT_CHECK_2026-10-02.md` (at the tag `data-workspace-final`; its open items are in `docs/TERMINAL_HANDOFF.md`, "Open items from the 2026-10-02 fact-check");
 `python3 server/tests/test_public_preview_audit.py --report` reproduces its measurements, and `make test-python` keeps its invariants firing.
 Its section 8 records what was then fixed at source on 2026-10-02: the register spelling
 of two ANCSA names (source renderings kept as aliases in `data/spine/cedar_entity_name_aliases.csv`),
@@ -181,18 +182,8 @@ npm run build:site # the build, then the three public pages prerendered to HTML
 npm run seo:check  # the structured data and sitemap are current with the catalog
 ```
 
-Checked 2026-10-02 on Linux, Node 22, Python 3.11: `npm run lint` clean;
-`make check-generated` current; `npm run test` 634 pass, 0 fail, 1 skipped,
-coverage 88.64 lines / 85.00 branches / 90.80 functions, floors met;
-`ruff check server` clean; `make test-python` ran 664 tests with 33 skipped
-and 85% coverage against the 77 floor, with five import errors and one
-failure that are Python 3.11 artifacts (`code/` scripts use 3.12 f-string
-syntax, and the writer census parses them), so the hosted run on Python 3.12
-is the record for that suite; `npm run build` completes (the chunk-size
-warning is pre-existing); `make audit-node` and `make audit-python` report no
-known vulnerabilities. `npm run test:smoke` was not rerun; the hosted Checks
-run covers it. The full list of checks CI runs, with how to run the API
-suite, is [`AGENTS.md`](AGENTS.md) §3.
+The full list of checks CI runs, how to run the API suite, the last recorded
+results and the configuration file are in [`AGENTS.md`](AGENTS.md) §2 and §3.
 
 The API is a FastAPI service in [`server/`](server/README.md); it serves every
 route the client calls, and pointing `VITE_API_URL` at it is the whole switch
@@ -200,7 +191,6 @@ from the standalone build to a connected one.
 
 [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) covers how the code is
 organized, how the client and the API fit together, and how to run the API.
-[`.env.example`](.env.example) lists every configuration value.
 
 ## Where this fits
 
@@ -228,17 +218,8 @@ here is that Cedar Grove is "the living evidence base for your organization's
 economy" (owner ruling 2026-09-13, replacing "the advanced data library"). The
 shared tier catalog in `src/workspaceTier.js` uses that definition.
 
-The Lumecon copy rules apply to every string a reader can see in the client.
-The two that catch people out:
-
-- **No em dashes in prose a reader sees.** A `—` standing in for an empty
-  table cell is typography, not prose, and is fine.
-- **Cedar is the AI economic analyst**, never an "AI assistant".
-
-Ampersands are allowed (owner ruling 2026-10-13); the no-ampersand rule was retired.
-
-`.teim-rd` is a CSS class root inherited from the product's design system. It
-is a contract, not a label anyone reads; leave it alone.
+The Lumecon copy rules apply to every string a reader can see in the client;
+they are in [`AGENTS.md`](AGENTS.md) §6.
 
 ## Security
 
@@ -259,24 +240,13 @@ Press consumes explicit release pins. Use these entry points:
 | | |
 |---|---|
 | Consumer continuation | [`docs/TERMINAL_HANDOFF.md`](docs/TERMINAL_HANDOFF.md): current workflow, maintained authorities and archived checkpoints. |
-| Historical workspace orientation | `START_HERE.md`, at the tag `data-workspace-final`; its dated counts and assignments are not current release evidence. |
 | Rules for agents working in it | [`AGENTS.md`](AGENTS.md) |
-| Current release evidence | [Producer convergence checkpoint](https://github.com/teim-team/Lumecon-data/blob/codex/convergence-packet-guard-20260928/docs/cedar-convergence.md) and its linked dependency ledger. The older `docs/DATASET_READINESS.md` and `docs/TWELVE_DATASET_PLAN.md`, which describe the historical workspace, are at the tag `data-workspace-final`. |
-| Past handoffs, kept as records | [`docs/handoffs/`](docs/handoffs/) keeps the two still cited; the rest are at the tag `data-workspace-final`. Each carries a banner saying what superseded it |
-| The dataset plans and the v2 spec | At the tag `data-workspace-final`, in `docs/plans/` |
-| Measured map of the collections | `docs/DATA_ARCHITECTURE.md`, generated by the retired workspace, is at the tag `data-workspace-final` |
-| Historical combined deliverables | `dist/customer/` preserves workspace CSVs, codebooks and notes; it is not the connected release authority. |
-| Build current researcher deliverables | The producer's installed `lumecon-data spreadsheet` command with explicit store, collection and release pins; see the [spreadsheet guide](https://github.com/teim-team/Lumecon-data/blob/codex/convergence-packet-guard-20260928/README.md#one-living-dataset-one-spreadsheet). The Press API consumes those verified releases. |
-| Historical workspace reproduction | The workspace scripts, `code/1137_customer_dataset_combine.py` and `code/846_session_audit.py` among them, are at the tag `data-workspace-final`. Their prior results are historical evidence, not current release acceptance. |
+| Current release evidence | [Producer convergence checkpoint](https://github.com/teim-team/Lumecon-data/blob/2443a354c02a33d2222394b25a540babe51307b8/docs/cedar-convergence.md) and its linked dependency ledger, at the Lumecon-data commit CI pins. |
+| Past handoffs, kept as records | [`docs/handoffs/`](docs/handoffs/) keeps the one still cited; the rest are at the tag `data-workspace-final`. It carries a banner saying what superseded it |
+| Build current researcher deliverables | The producer's installed `lumecon-data spreadsheet` command with explicit store, collection and release pins; see the [spreadsheet guide](https://github.com/teim-team/Lumecon-data/blob/2443a354c02a33d2222394b25a540babe51307b8/README.md#the-researcher-spreadsheet-and-how-to-cite-it). The Press API consumes those verified releases. |
+| Everything else the workspace held | Its orientation (`START_HERE.md`), dataset plans and v2 spec, readiness reports, the generated map of the collections (`docs/DATA_ARCHITECTURE.md`) and its scripts (`code/`) are at the tag `data-workspace-final`. Their dated results are historical evidence, not current release acceptance. |
 
-`py -3` is the Windows launcher; on Linux and macOS use `python3` (3.12, the
-version CI uses).
-
-The two trees were developed independently and share no history; the merge that
-brought them together is a deliberate `--allow-unrelated-histories` join, and
-only three paths collided. `docs/ARCHITECTURE.md` describes the **web client**;
-the generated map of the **data collections**, `docs/DATA_ARCHITECTURE.md`, is at
-the tag `data-workspace-final`.
+`docs/ARCHITECTURE.md` describes the **web client**.
 
 Source cards in previews and record pages distinguish the original publisher,
 registered dataset title, event description and original source link. Missing
@@ -295,7 +265,7 @@ pinned rollback; undeclared extra columns still refuse delivery.
 
 Public labels and citations use the collection name and its recorded Updated date. Version labels and internal file/table counts are not product descriptions or source counts. The authenticated spreadsheet-download route returns one CSV per collection through the same pinned, hash-verified download path (release pin, manifest digest and record counts). Source rights are recorded as provenance and do not block the download (owner ruling 2026-10-04). Existing component routes remain internal compatibility interfaces. Compatible columns align; conflicting definitions or units stay separate until reviewed, and record type/key/grain prevent accidental aggregation across observations. Preview extracts remain explicitly labeled as samples.
 
-Rebuild and inspect the real collection exports in the data workspace before publication. Review conflicting column definitions, duplicate keys, missing values and original-source provenance. Agents do not impose publication holds (owner ruling 2026-10-04). The code change itself does not rebuild the external data store or deploy the service.
+Rebuild and inspect the real collection exports in Lumecon-data before publication. Review conflicting column definitions, duplicate keys, missing values and original-source provenance. Agents do not impose publication holds (owner ruling 2026-10-04). The code change itself does not rebuild the external data store or deploy the service.
 
 ## Presentation maintenance
 
