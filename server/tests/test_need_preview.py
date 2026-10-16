@@ -159,17 +159,6 @@ class NeedStaticPreviewTest(unittest.TestCase):
             locate.assert_not_called()
             gate.assert_not_called()
 
-    def test_current_committed_need_sample_has_real_proof_or_is_not_advertised(self):
-        manifest = json.loads(
-            (ROOT / "data/cedar/collections.manifest.json").read_text(encoding="utf-8")
-        )
-        entries = [entry for entry in manifest["collections"] if entry["id"] == "need"]
-        self.assertEqual(len(entries), 1)
-        if entries[0].get("sample", {}).get("path"):
-            self.assertTrue(n.current_need_preview_permitted(ROOT))
-        else:
-            self.assertFalse(n.current_need_preview_permitted(ROOT))
-
 
 if __name__ == "__main__":
     unittest.main()

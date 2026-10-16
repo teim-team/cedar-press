@@ -429,16 +429,6 @@ def cedar_answer(question: str, collection_id: str) -> dict[str, str] | None:
     return collection_profiles.answer_from_profile(question, collection_id)
 
 
-def articles() -> list[dict[str, Any]]:
-    """Published briefs, newest first."""
-    return [_thaw(article) for article in press_catalog.ARTICLES]
-
-
-def citations() -> list[dict[str, Any]]:
-    """Every recorded public use of a collection. Empty until one lands."""
-    return [_thaw(entry) for entry in press_catalog.CITATIONS]
-
-
 class FullReleaseUnavailable(ValueError):
     """The pinned full file cannot be verified; never substitute a sample."""
 

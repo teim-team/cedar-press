@@ -201,7 +201,7 @@ class SharedCollectionReleaseTest(unittest.TestCase):
         # like any other collection's; the reviewed-base proof is not consulted.
         self.session("press_pro")
         with patch(
-            "cedar_press.need_preview.current_need_preview_permitted",
+            "cedar_press.need_preview.need_preview_permitted",
             side_effect=AssertionError("proof must not gate the preview"),
         ):
             response = self.client.get("/press/collections/need/download")

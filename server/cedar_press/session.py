@@ -48,12 +48,6 @@ def account_exists(email: str) -> bool:
     return subscribers.exists(email)
 
 
-def create_account(email: str, password: str, tier: str) -> Session:
-    """Internal activation helper; the caller must already verify its code."""
-    made = subscribers.create(email, password, tier)
-    return _issued_session(made.email)
-
-
 def forget_activated_for_tests() -> None:
     subscribers.forget_activated_for_tests()
 
@@ -204,15 +198,6 @@ def current_session(cedar_press_session: str | None = Cookie(default=None)) -> S
     """Current subscriber and entitlement; malformed/expired sessions refuse."""
     validate_auth_configuration()
     return _decode(cedar_press_session) if cedar_press_session else None
-
-
-def issue(session: Session, response: Response) -> Session:
-    """Internal trusted issuance; authentication belongs to the caller."""
-    validate_auth_configuration()
-    if not session.revision:
-        session = _issued_session(session.email)
-    _set_cookie(session, response)
-    return session
 
 
 def sign_in(email: str, password: str, response: Response) -> Session | None:
