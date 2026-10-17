@@ -533,14 +533,9 @@ class ZeroCanonicalDuplicationTest(unittest.TestCase):
         self.assertNotIn("docs/GAMING_GROVE_DATA_CONTRACT.md", files)
         self.assertEqual([f for f in files if f.startswith("schemas/gaming/")], [])
         self.assertNotIn("docs/GAMING_VP_DISPOSITIONS_2026-09-24.csv", files)
-        # No Grove component registration in the dataset contracts.
-        contracts = json.loads(
-            (ROOT / "docs/schema/dataset_contracts.json").read_text(encoding="utf-8")
-        )
-        gaming = [c for c in contracts["contracts"] if c["collection"] == "gaming"]
-        self.assertEqual(len(gaming), 1)
-        self.assertEqual([t["table"] for t in gaming[0]["tables"] if t.get("grove_component")], [])
-        self.assertEqual(len(gaming[0]["tables"]), gaming[0]["n_tables"])
+        # The retired workspace's dataset contracts, where Grove components were
+        # registered, are gone (kept at the tag data-workspace-final).
+        self.assertNotIn("docs/schema/dataset_contracts.json", files)
         # Build entry points: no Gaming producer command survives. The retired
         # workspace may be absent; if present it carries no Grove command.
         build_path = ROOT / "code/build.py"

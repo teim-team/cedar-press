@@ -5,11 +5,9 @@ who wrote the line, and breaks when the work moves to another machine or to
 CI. Living documents name places by role (``<cedar-press checkout>``,
 ``<checkpoint root>``) and code reads them from arguments or the environment.
 
-The file below predates this rule: the retired data workspace's script
-inventory, which the release-gap register still reads. The workspace's scripts,
-build logs and release artifacts that also carried such paths left the tree and
-are kept at the tag ``data-workspace-final``. The list may only shrink. A file
-that stops matching must leave it, so the baseline never hides a regression.
+The retired data workspace's scripts, build logs, release artifacts and script
+inventory that carried such paths left the tree and are kept at the tag
+``data-workspace-final``.
 """
 
 from __future__ import annotations
@@ -27,9 +25,6 @@ MACHINE_PATH = re.compile(
     r"|(?<![\w.])/home/[a-z][\w.-]*/"  # /home/name/ (Linux)
 )
 THIS_FILE = "server/tests/test_portable_paths.py"
-GRANDFATHERED = frozenset({
-    "docs/schema/inventory.json",
-})
 
 
 def _tracked() -> list[str] | None:
@@ -61,13 +56,7 @@ class PortablePathsTest(unittest.TestCase):
         names = _tracked()
         if names is None:
             self.skipTest("needs a git checkout to list tracked files")
-        offenders = _offenders(names)
-        self.assertEqual(sorted(offenders - GRANDFATHERED), [])
-        self.assertEqual(
-            sorted(GRANDFATHERED - offenders),
-            [],
-            "these files no longer carry a machine path; remove them from GRANDFATHERED",
-        )
+        self.assertEqual(sorted(_offenders(names)), [])
 
     def test_the_pattern_catches_each_platform_and_spares_placeholders(self):
         for machine in (
