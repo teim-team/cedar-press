@@ -1,5 +1,4 @@
 import { columnPlan as currentColumnPlan } from "./recordColumns.js";
-import { PRESENTATION_COLUMNS as currentPresentationColumns } from "./mixedSpreadsheet.js";
 // The Explore card's model, proven on the real samples and on planted rows.
 //
 // The contracts are derived, so the first thing to prove is that every table
@@ -146,7 +145,7 @@ test("every published table has a contract and every contract names real columns
         if (contract[field]) assert.ok(columns.includes(contract[field]), `${key}.${field} = ${contract[field]} is not a column`);
       }
       for (const column of [...contract.observation, ...(contract.default_columns ?? [])]) {
-        assert.ok(columns.includes(column) || (contract.mapping_kind === "producer_spreadsheet" && Object.hasOwn(currentPresentationColumns, column)), `${key}: ${column} is not a column`);
+        assert.ok(columns.includes(column), `${key}: ${column} is not a column`);
       }
     }
   }

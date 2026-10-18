@@ -53,8 +53,8 @@ git ls-files src/<dir>/grove                                   # files to move
 
 | | |
 |---|---|
-| Files to move | 186 — `features/grove` 139, `pages/grove` 44, `components/grove` 1, `styles/grove` 2 |
-| Path references to rewrite | 415, across 90 files |
+| Files to move | 184 — `features/grove` 137, `pages/grove` 44, `components/grove` 1, `styles/grove` 2 |
+| Path references to rewrite | 412, across 90 files |
 | Referencing files inside `src/` | 55 — `pages/` 36, `features/` 15, `context/` 2, `components/` 1, `main.jsx` 1 |
 | Referencing files outside `src/` | 35 — `server/cedar_press/` 8, `scripts/` 8, `docs/` 6, `server/tests/` 5, `tests/` 3, `data/` 2, `.github/` 1, `.env.example` 1, `eslint.config.js` 1 |
 
@@ -63,7 +63,7 @@ has expired.
 
 It is a mechanical rename with no behaviour change, and it should land as its
 own commit: the four directories move to `press/` and the references are
-rewritten in one pass. The question "did all 415 references get rewritten?"
+rewritten in one pass. The question "did all 412 references get rewritten?"
 is one the build, the suites and the smoke run answer, and a reader cannot
 answer it from a diff. Prose (Markdown, comments, `.env.example`) is what no build sees,
 which is why `test_rename_plan.py` counts textual occurrences rather than

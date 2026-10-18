@@ -55,16 +55,6 @@ export function sampleRecordCount(value) {
   return Number.isSafeInteger(value) && value >= 0 ? value : null;
 }
 
-/** Claim-scoped NEED keeps an affiliation counterpart separate from ownership. */
-export function reviewedNeedColumns(columns) {
-  if (!["enterprise_name", "owner_name", "ownership_extent", "evidence_pins"].every(column => columns.includes(column))) return null;
-  const counterpart = columns.includes("related_entity_name") ? "related_entity_name" : "owner_name";
-  return {
-    observation: [counterpart, "relationship_type", "ownership_extent"].filter(column => columns.includes(column)),
-    defaults: ["enterprise_name", counterpart, "relationship_type", "ownership_extent", "uei", "cage_code", "record_grain"].filter(column => columns.includes(column)),
-  };
-}
-
 /**
  * Text that was UTF-8, read as Windows-1252 and saved again ("CNSPÃ¢Â‚¬Â„¢S"
  * for "CNSP’S"), repaired for display. Applied only where the telltale

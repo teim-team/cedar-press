@@ -1,4 +1,3 @@
-import { PRESENTATION_COLUMNS } from "../../features/grove/mixedSpreadsheet.js";
 // REVIEW OWNER: Havala
 //
 // The record table, and the list it becomes on a phone.
@@ -39,13 +38,6 @@ import { readableCode, readerValueLabel, repairMojibake, unlinkedRecordSubject }
 import { COLUMN_FALLBACKS } from "../../features/grove/showcase.js";
 
 export function Human({ column, value, contract, item = null }) {
-  if (column === "__subject") return item?.entity?.withheld || item?.linkStatus === "withheld" ? WITHHELD_TEXT : item?.subject ?? item?.entity?.name ?? "Not provided";
-  if (column === "__observation") return item?.observation || "Not provided";
-  if (column === "__date") return item?.date ? <>{item.date}{item.dateBasis ? <small className="cp-ex__uid">{item.dateBasis}</small> : null}</> : "Not provided";
-  if (column === "__amount") {
-    const shown = reportedAmountText(item);
-    return shown ? <>{shown}{item.amountBasis ? <small className="cp-ex__uid">{item.amountBasis}</small> : null}</> : "Not provided";
-  }
   if ((column === contract?.source || column === SOURCE_LINK_COLUMN) && item?.sourceDetails) return <SourceCitation source={item.sourceDetails} compact />;
   if (["source_inbox", "source_files", "link_ledger_source_file", "source_dataset", "raw_path", "storage_path"].includes(column)) return "Retained in internal provenance";
   // A blank column whose fact the record carries in its reported form (a
@@ -69,7 +61,6 @@ export function Human({ column, value, contract, item = null }) {
   // description of the work.
   if (/^IGF::[A-Z]{2}::IGF$/.test(String(value).trim())) return "Not provided";
   const raw = repairMojibake(String(value));
-  if (column === "record_type" && contract?.row_type_contracts?.[raw]?.label) return contract.row_type_contracts[raw].label;
   if (/^[A-Za-z]:[\\/]|^file:\/\/|^\\\\/.test(raw)) return "Retained in internal provenance";
   if (isWellFormedUrl(raw)) {
     const url = safeSourceUrl(raw.trim());
@@ -223,10 +214,10 @@ export function Rows({ view, items, columns, sort, onSort, onActive, showAmount,
     ...(showAmount ? [["amount", "Amount"]] : []),
     ["source", "Source"],
   ];
-  const primaryColumn = columns[0] === "__subject" ? "__subject" : contract?.subject && columns[0] === contract.subject ? contract.subject : entityColumn;
+  const primaryColumn = contract?.subject && columns[0] === contract.subject ? contract.subject : entityColumn;
   const pinned = (c) => c === primaryColumn || c === contract?.entity_uid;
   // The built source link has no column in the file, so no codebook label.
-  const headLabel = (c) => PRESENTATION_COLUMNS[c] ?? labelFor(items[0]?.key, c);
+  const headLabel = (c) => labelFor(items[0]?.key, c);
   const heads = view === "table" ? columns.map((c) => [c, headLabel(c), pinned(c), c === contract?.entity_uid ? " cp-ex__pin--uid" : c === primaryColumn && contract?.entity_uid && columns.includes(contract.entity_uid) ? " cp-ex__pin--name" : ""]) : universal;
   return (
     // The wrapper exists for the edge fade: every cell paints its own

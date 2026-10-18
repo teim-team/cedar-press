@@ -655,7 +655,7 @@ function LockedCollection({ collection, onAbout }) {
   const upgrade = upgradeFor(entry);
   const release = LAUNCH_COLLECTION.find((item) => item.id === entry.id);
   const contract = flagship ? contractFor(flagship.key) : null;
-  const columns = (contract?.default_columns ?? []).slice(0, contract?.mapping_kind === "producer_spreadsheet" ? 8 : 6);
+  const columns = (contract?.default_columns ?? []).slice(0, 6);
   const columnLabel = (column) => labelFor(flagship.key, column);
   const rows = ROWS_BY_ID[entry.id];
 

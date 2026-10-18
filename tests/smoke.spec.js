@@ -1170,7 +1170,7 @@ test.describe("Explore the collections", () => {
           await expect(locked).toBeVisible();
           await expect(locked.locator(".cp-lock__say")).toContainText("Available with Cedar Press+");
           const contract = contractFor(table.key);
-          const columns = contract.default_columns.slice(0, contract.mapping_kind === "producer_spreadsheet" ? 8 : 6);
+          const columns = contract.default_columns.slice(0, 6);
           await expect(locked.locator("thead th")).toHaveText(columns.map((column) => labelFor(table.key, column)));
           await expect(locked.locator(".cp-ex__caption")).toContainText(release.rowsLabel);
           await expect(page.getByTestId("explore-record")).toHaveCount(0);
