@@ -56,7 +56,7 @@ export const EXCLUDED_EXAMPLES = Object.freeze({
  *                  only: no record is dropped as a duplicate.
  *   amountFirst    records that carry money first.
  */
-export const SHOWCASE_RULES = Object.freeze({
+const SHOWCASE_RULES = Object.freeze({
   contractors: Object.freeze({ requireEntity: true, positiveAmount: true, amountFirst: true }),
   subcontracting: Object.freeze({ requireEntity: true, spreadBy: Object.freeze(["subaward_number", "subcontractor_name", "prime_name"]), amountFirst: true }),
   funding: Object.freeze({ positiveAmount: true }),

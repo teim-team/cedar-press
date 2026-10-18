@@ -1,6 +1,6 @@
 /** Canonical public-door handoff; preview hosts keep their local test gate. */
 const PUBLIC_HOSTS = new Set(["cedarpress.ai", "www.cedarpress.ai"]);
-export const PRESS_WORKSPACE_ORIGIN = "https://app.cedarpress.ai";
+const PRESS_WORKSPACE_ORIGIN = "https://app.cedarpress.ai";
 
 export function workspaceSignInHref(location) {
   if (!location || location.protocol !== "https:" || !PUBLIC_HOSTS.has(location.hostname)) return null;

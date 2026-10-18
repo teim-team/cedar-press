@@ -13,11 +13,11 @@
  * This module holds the collection's descriptors, the findings the collection
  * currently supports (in the same claim shapes the organizational findings
  * use, so FindingsPanel renders them unchanged), the figure specs for the
- * Overview's chart cards, and the rows behind each dataset's download button.
+ * Overview's chart cards, and each dataset's preview sample.
  *
  * OUTPUTS
- * `LAUNCH_COLLECTION` descriptors, `collectionFindings()`, `COLLECTION_FIGURES`,
- * `collectionCsv()`, and the sample/table manifest each collection carries.
+ * `LAUNCH_COLLECTION` descriptors, `collectionFindings()`, `COLLECTION_FIGURES`
+ * and the sample/table manifest each collection carries.
  *
  * ONE SOURCE, TWO LANGUAGES
  * This file and `server/cedar_press/collections.py` read the same manifest,
@@ -52,10 +52,8 @@
  * drawn.
  */
 
-import { parseCsv, csvCell } from "./csv.js";
 import manifest from "../../../data/cedar/collections.manifest.json" with { type: "json" };
 import published from "../../../data/cedar/samples.published.json" with { type: "json" };
-import { codebookTables } from "./codebook.js";
 
 import { CLAIM_CLASS } from "./claims.js";
 // The storefront's own naming. `pressCatalog.js` imports nothing, so this is
@@ -213,7 +211,7 @@ const listWords = (items) =>
  * of, from the manifest's own `record_types` per table. Null for a
  * single-kind collection and for a collection whose count is not shown.
  */
-export const COUNT_NOTES = deepFreeze(
+const COUNT_NOTES = deepFreeze(
   Object.fromEntries(
     manifest.collections
       .filter((entry) => !COUNT_NOT_SHOWN.has(entry.id))
@@ -644,61 +642,10 @@ export function collectionCitation(datasetId, accessedOn = null) {
 }
 
 /**
- * The rows behind a dataset card's Download button.
- *
- * The collection's flagship table, ten real rows of it, straight from
- * the retired `code/1135_full_dataset_review_bundle.py`. This used to be the figure's own
- * points -- five demonstration bars dressed as a release file. What downloads
- * now is data.
- *
- * `null` when the collection has no sample. One is in that state today and
- * `sampleUnavailableReason` says why; handing over a metadata file in place of
- * the rows a tile promises is the failure this avoids, and `hasReleaseFile` in
- * pressDownload.js reads this to keep the tile honest.
- *
- * The citation is a column on each observation, never an extra data row. A downloaded file outlives the page it came
- * from, so the file itself must say what it is, whose work it is and how to
- * credit it; provenance that lives only in the UI is provenance the reader
- * loses on save.
- *
- * `sampleText` is the sample file's contents, which the browser fetches and
- * Node reads from disk. The bytes are not bundled: the twelve collections
- * carry 169 sample files and inlining them would put 1.4 MB of CSV into the
- * page for a button most readers never press.
- *
- * A current-release spreadsheet sample is checked against the codebook's
- * columns, so the caller awaits `loadCodebook()` (codebook.js) first;
- * `csvFor` in pressDownload.js does.
- */
-export function collectionCsv(datasetId, sampleText) {
-  const sample = SAMPLES[datasetId];
-  if (!sample?.path || sampleText == null) return null;
-  const { columns, rows } = parseCsv(sampleText);
-  if (sample.path.endsWith("/spreadsheet__10.csv")) {
-    // The current release replaces historical previews. A cached response
-    // with the old schema must not acquire a citation for the new release.
-    const table = sample.table;
-    const key = typeof table === "string" && table.endsWith(".csv")
-      ? `${datasetId}/${table.slice(0, -4)}` : null;
-    const expected = codebookTables()[key]?.fields?.map((field) => field.column);
-    if (!expected || columns.length !== expected.length
-        || expected.length !== sample.columns
-        || columns.some((column, index) => column !== expected[index])
-        || rows.length !== sample.rows) return null;
-  }
-  const citation = collectionCitation(datasetId) ?? "";
-  return [
-    [...columns, "cite_as"],
-    ...rows.map((row) => [...columns.map((name) => row[name]), citation]),
-  ].map((row) => row.map(csvCell).join(",")).join("\n");
-}
-
-/**
  * Whether a collection ships a preview file at all, without needing its bytes.
  *
- * `collectionCsv` needs the sample text, which a browser has to fetch. A tile
- * has to know whether to offer the download before it fetches anything, so
- * this answers from the manifest alone.
+ * A tile has to know whether to offer the download before it fetches
+ * anything, so this answers from the manifest alone.
  */
 export function hasSample(datasetId) {
   return Boolean(SAMPLES[datasetId]?.path);
@@ -739,15 +686,4 @@ export async function reviewedPreviewTextMatches(sampleText, sample, proof) {
   } catch {
     return false;
   }
-}
-
-/**
- * Exact-byte verification where a sample carries a reviewed-preview proof.
- * A NEED sample without one publishes like any other collection's (owner
- * ruling 2026-10-04: no NEED publication hold).
- */
-export async function sampleTextMatchesRelease(datasetId, sampleText) {
-  const proof = manifest.collections.find((entry) => entry.id === datasetId)?.verified_preview;
-  if (datasetId !== "need" || !proof) return true;
-  return reviewedPreviewTextMatches(sampleText, SAMPLES[datasetId], proof);
 }

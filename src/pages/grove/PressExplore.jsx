@@ -64,6 +64,7 @@ import {
   sortRows,
 } from "../../features/grove/explore.js";
 import { useSampleRows } from "../../features/grove/useSamples.js";
+import { REGISTER_PATH } from "../../features/grove/useRegister.js";
 import { recordHref, rememberReturn, takeReturn } from "../../features/grove/pressRecord.js";
 import { PRESS_METHODS_PATH } from "../../features/grove/pressRoutes.js";
 import { LAUNCH_COLLECTION } from "../../features/grove/collection.js";
@@ -92,7 +93,6 @@ import PressReadingKey from "./PressReadingKey.jsx";
 /** Row counts as the launch descriptors state them, keyed by collection. */
 const ROWS_BY_ID = Object.fromEntries(LAUNCH_COLLECTION.map((e) => [e.id, e.rowsLabel]));
 
-const REGISTER_PATH = "/data/cedar/register.json";
 const SAVED_KEY = "cp.explore.saved";
 const ALL = "__all__";
 const SUBSET = "__subset__";

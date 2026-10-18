@@ -7,7 +7,6 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 
-import { collectionCsv, LAUNCH_COLLECTION, hasSample, samplePath } from "./collection.js";
 import { csvCell, parseCsv, spreadsheetSafe } from "./csv.js";
 import { csvFor } from "./pressDownload.js";
 import { loadCodebook } from "./codebook.js";
@@ -37,26 +36,4 @@ test("the collection description download applies it", async () => {
   const values = parseCsv(csv).rows.map((row) => row.value);
   assert.ok(values.includes(`'${hostile}`), csv);
   assert.ok(values.includes("'\t=1+1"), csv);
-});
-
-// A real shipped sample with one cell made hostile, written back with plain
-// quoting so nothing but `collectionCsv` can neutralize it.
-const quoted = (value) => `"${String(value ?? "").replace(/"/g, '""')}"`;
-
-test("the preview download applies it", () => {
-  let checked = 0;
-  for (const { id } of LAUNCH_COLLECTION) {
-    if (!hasSample(id)) continue;
-    const text = readFileSync(new URL(`../../..${samplePath(id)}`, import.meta.url), "utf8");
-    const { columns, rows } = parseCsv(text);
-    if (!rows.length) continue;
-    rows[0][columns[0]] = "=1+1";
-    const hostile = [columns, ...rows.map((row) => columns.map((name) => row[name]))]
-      .map((row) => row.map(quoted).join(",")).join("\n");
-    const out = collectionCsv(id, hostile);
-    if (out == null) continue;
-    assert.equal(parseCsv(out).rows[0][columns[0]], "'=1+1", id);
-    checked += 1;
-  }
-  assert.ok(checked > 0, "at least one shipped preview was checked");
 });

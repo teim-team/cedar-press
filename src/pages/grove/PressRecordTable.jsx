@@ -100,7 +100,7 @@ function scopeLine(el) {
   return `${rel} ${scopeName(el.scope)}`;
 }
 
-export function EntityCell({ item, subjectFirst = false }) {
+function EntityCell({ item, subjectFirst = false }) {
   const { entities } = item.entity;
   const first = entities[0];
   const why = item.why ?? [];

@@ -25,7 +25,7 @@ import { createContext } from "react";
 
 export const AuthContext = createContext(null);
 
-export const SESSION_KEY = "cedar-press-session";
+const SESSION_KEY = "cedar-press-session";
 
 /** The stored session, or null when there is none to read. */
 export function readSession() {

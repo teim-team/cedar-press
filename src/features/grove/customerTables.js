@@ -27,7 +27,6 @@
 import downloads from "../../../data/cedar/sample_downloads.json" with { type: "json" };
 
 const RECORDS = Object.freeze(downloads.collections ?? {});
-const BY_PATH = new Map(Object.values(RECORDS).map((record) => [record.path, record]));
 
 /** The rendered customer table for a collection, or `null`. */
 export function downloadRecord(id) {
@@ -39,20 +38,10 @@ export function downloadPath(id) {
   return downloadRecord(id)?.path ?? null;
 }
 
-/** The record for a served path, or `null` when the path is not a customer table. */
-export function downloadRecordForPath(path) {
-  return BY_PATH.get(path) ?? null;
-}
-
-/** Every collection with a rendered customer table. */
-export function customerTableIds() {
-  return Object.keys(RECORDS);
-}
-
 const SHA256 = /^[a-f0-9]{64}$/;
 
 /** The lowercase hex SHA-256 of a string's UTF-8 bytes, or `null` where Web Crypto is absent. */
-export async function sha256Hex(text) {
+async function sha256Hex(text) {
   const subtle = globalThis.crypto?.subtle;
   if (!subtle || typeof text !== "string") return null;
   const digest = await subtle.digest("SHA-256", new TextEncoder().encode(text));

@@ -49,7 +49,6 @@
 import {
   createMatcher,
   followUpsFor as runtimeFollowUps,
-  freshMemory,
   resolveLocally,
 } from "./cedarConversation.js";
 import { LAUNCH_COLLECTION, countNote } from "./collection.js";
@@ -692,7 +691,7 @@ export const DOOR_AUDIENCES = Object.freeze([
 const MATCHER = createMatcher(DOOR_INTENTS, { outOfScopeTriggers: OUT_OF_SCOPE_TRIGGERS });
 
 /** The research desk, named once a reader has missed twice in a row. */
-export const RESEARCH_DESK = "contact@lumecon.ai";
+const RESEARCH_DESK = "contact@lumecon.ai";
 
 /**
  * What Cedar says when it has nothing for a question. It does not guess: it
@@ -713,7 +712,7 @@ export function missAnswer(question, nearest = [], handingOff = false) {
 }
 
 /** The door's configuration of the shared runtime. */
-export const DOOR_BANK = Object.freeze({
+const DOOR_BANK = Object.freeze({
   matcher: MATCHER,
   drillDownIds: new Set(["tell_me_more"]),
   affirmativeIds: new Set(["affirmative"]),
@@ -722,9 +721,6 @@ export const DOOR_BANK = Object.freeze({
   defaultFollowUps: FALLBACK_FOLLOW_UPS,
   miss: missAnswer,
 });
-
-/** The door's memory at open. */
-export const doorMemory = freshMemory;
 
 /**
  * One turn of the door's Cedar: the whole decision for a question against

@@ -149,10 +149,10 @@ def _counts(relative: str) -> tuple[int, int]:
     return len(lines), code
 
 
-def _compared_values() -> tuple[int, int, int]:
+def _compared_values() -> tuple[int, int]:
     """What ``test_collection.py`` compares, measured by running its own dump.
 
-    Returns ``(leaves, derived_leaves, csv_bytes)``.
+    Returns ``(leaves, derived_leaves)``.
 
     ``derived`` is the subset produced by two bodies of code rather than read
     from ``data/cedar/collections.manifest.json`` by both sides. Values both
@@ -194,12 +194,7 @@ def _compared_values() -> tuple[int, int, int]:
     }
     total = leaves(payload)
     derived = sum(leaves(v) for k, v in payload.items() if k not in from_manifest)
-    csv_bytes = sum(
-        len(text.encode("utf-8"))
-        for text in payload["csvs"].values()
-        if isinstance(text, str)
-    )
-    return total, derived, csv_bytes
+    return total, derived
 
 
 def main() -> int:
@@ -238,12 +233,11 @@ def main() -> int:
     )
     print()
 
-    total, derived, csv_bytes = _compared_values()
+    total, derived = _compared_values()
     print("WHAT THE COLLECTION PARITY TEST ACTUALLY COMPARES")
     print(f"  leaf values compared per CI run:            {total:,}")
     print(f"  of those, produced twice rather than read once: {derived:,}")
     print("  (the rest are read from the shared manifest by both sides)")
-    print(f"  download bytes compared byte-for-byte:      {csv_bytes:,}")
     print()
     print(
         f"  pairs with a cross-language test:  "

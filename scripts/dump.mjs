@@ -2,14 +2,12 @@
 //   node scripts/dump.mjs --kind access|collection|press [--check] [--target path]
 // Without --target the selected payload is printed; press --check uses its maintained snapshot.
 import { readFileSync, writeFileSync } from "node:fs";
-import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { EXCLUDED_COLLECTIONS, COLLECTION_FIGURES, LAUNCH_COLLECTION, UNMEASURED_FIELDS,
-  collectionCedarFacts, collectionCitation, collectionContextLine, collectionCsv,
+  collectionCedarFacts, collectionCitation, collectionContextLine,
   collectionFindings, collectionSample, collectionTables, figuresInShelfOrder,
-  hasSample, samplePath } from "../src/features/grove/collection.js";
-import { loadCodebook } from "../src/features/grove/codebook.js";
+} from "../src/features/grove/collection.js";
 import { PLAN_REACH, SHELF, canOpenDataset, canReadCedarPress, shelfReach } from "../src/features/grove/pressAccess.js";
 import { PRESS_CATALOG } from "../src/features/grove/pressCatalog.js";
 import { WORKSPACE_TIERS } from "../src/workspaceTier.js";
@@ -18,8 +16,6 @@ import { CITATIONS, REPORT_CITATION_HREF } from "../src/features/grove/pressCita
 import { COLLECTION_JOBS, cedarQuestions } from "../src/features/grove/pressJobs.js";
 import { PRESS_RELEASES } from "../src/features/grove/pressReleases.js";
 import { WORK_KINDS } from "../src/features/grove/readerWork.js";
-// The raw previews sit under the repository root (data/cedar/samples/), not public/.
-const REPO_ROOT = fileURLToPath(new URL("..", import.meta.url)).replace(/\/$/, "");
 const PRESS_TARGET = fileURLToPath(new URL("../server/cedar_press/_press_data.json", import.meta.url));
 
 function accessPayload() {
@@ -81,19 +77,6 @@ async function collectionPayload() {
 // is what would make this comparison flap at midnight.
 const ACCESSED = "1 January 2026";
 
-// collectionCsv checks a spreadsheet sample against the codebook, which the
-// browser loads on demand (src/features/grove/codebook.js); load it here too.
-await loadCodebook();
-const csvs = {};
-for (const dataset of LAUNCH_COLLECTION) {
-  if (!hasSample(dataset.id)) {
-    csvs[dataset.id] = null;
-    continue;
-  }
-  const text = await readFile(`${REPO_ROOT}${samplePath(dataset.id)}`, "utf8");
-  csvs[dataset.id] = collectionCsv(dataset.id, text);
-}
-
 const findings = collectionFindings();
 
 return {
@@ -129,7 +112,6 @@ return {
       ),
       samples: Object.fromEntries(LAUNCH_COLLECTION.map((d) => [d.id, collectionSample(d.id)])),
       tables: Object.fromEntries(LAUNCH_COLLECTION.map((d) => [d.id, collectionTables(d.id)])),
-      csvs,
     };
 }
 

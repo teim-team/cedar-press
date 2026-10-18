@@ -75,7 +75,7 @@ export function liveIdsOf(catalog = STOREFRONT_CATALOG) {
 }
 
 /** A live catalog entry by id, or null. Only ever reads the catalog it is handed. */
-export function liveCollection(id, catalog = STOREFRONT_CATALOG) {
+function liveCollection(id, catalog = STOREFRONT_CATALOG) {
   return catalog.find((entry) => entry.id === id) ?? null;
 }
 

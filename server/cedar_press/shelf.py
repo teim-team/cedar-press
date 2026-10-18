@@ -17,8 +17,8 @@ WHY THIS PAGE
     already knew.
 
 WHAT IT DELIBERATELY DOES NOT SHOW
-    The tier ladder's marketing copy -- each band's product name, price,
-    question and promise -- exists only in ``pressCatalog.js``'s
+    The tier ladder's marketing copy -- each band's product name, question
+    and promise -- exists only in ``pressCatalog.js``'s
     ``PRESS_TIERS``, which ``scripts/dump.mjs --kind press`` does not dump. It is not
     retyped here. Adding a seventh hand-maintained mirror to a page whose
     argument is that six is too many would refute the page. The template says

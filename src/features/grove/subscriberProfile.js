@@ -21,14 +21,6 @@
  * enrichment of subscribers".
  */
 
-/** The classes an address can place a reader in. */
-export const DOMAIN_CLASSES = Object.freeze([
-  "tribal_government",
-  "federal",
-  "academic",
-  "other",
-]);
-
 /** The domain half of an address, lowercased. */
 export function domainOf(email) {
   const at = String(email ?? "").lastIndexOf("@");

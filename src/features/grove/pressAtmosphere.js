@@ -16,22 +16,6 @@
  */
 
 /**
- * The section palette, in the order the reader meets it.
- *
- * Six steps rather than two, so a transition can be a shift in temperature
- * instead of a hard switch between the same two colours. `--paper` and
- * `--mist` are only a few degrees apart on purpose: the change should be felt
- * before it is noticed.
- */
-export const SURFACE = Object.freeze({
-  PAPER: "paper",
-  MIST: "mist",
-  PALE: "pale",
-  TEAL: "teal",
-  DEEP: "deep",
-});
-
-/**
  * Tracks how far a node has travelled through the viewport, as -1 to 1, and
  * writes it to a CSS custom property.
  *

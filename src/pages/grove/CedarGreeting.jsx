@@ -17,8 +17,8 @@ import { useCallback, useEffect, useState } from "react";
  * hides the launcher.
  */
 
-export const GREETING_KEY = "cedar-press-greeting-dismissed";
-export const GREETING_DELAY_MS = 1500;
+const GREETING_KEY = "cedar-press-greeting-dismissed";
+const GREETING_DELAY_MS = 1500;
 
 function dismissedThisVisit() {
   try {

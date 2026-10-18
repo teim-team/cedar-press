@@ -64,21 +64,3 @@ export const CedarIcon = (
     <path d="M19 3a14.4 14.4 0 0 1 0 18" />
   </svg>
 );
-
-/** A restrained institutional facade, for the Federal Reserve line. */
-export const InstitutionIcon = (
-  <svg {...glyph}>
-    <path d="M3.2 9.4 12 4.4l8.8 5" />
-    <path d="M5.4 10.2v7.4m4.3-7.4v7.4m4.6-7.4v7.4m4.3-7.4v7.4" />
-    <path d="M3.6 19.6h16.8" />
-  </svg>
-);
-
-/** A mortarboard, for the university line. */
-export const AcademicIcon = (
-  <svg {...glyph}>
-    <path d="M2.6 9.3 12 5.1l9.4 4.2-9.4 4.2z" />
-    <path d="M6.6 11.1v4.4c0 1.5 2.4 2.7 5.4 2.7s5.4-1.2 5.4-2.7v-4.4" />
-    <path d="M21.4 9.3v5.2" />
-  </svg>
-);

@@ -180,7 +180,7 @@ export const CUT_VERSION = 2;
 export const UNLINKED = "unlinked";
 
 /** The universal columns, in the order the cut view shows them. */
-export const UNIVERSAL = Object.freeze([
+const UNIVERSAL = Object.freeze([
   "entity", "entity_type", "collection", "date", "observation", "amount", "source",
 ]);
 
@@ -401,7 +401,7 @@ export function rowEntities(row, contract, register = EMPTY_REGISTER) {
 export const SCOPES = scopesJson;
 
 /** A scope code's definition, parameter stripped, or null when unknown. */
-export function scopeDefinition(code) {
+function scopeDefinition(code) {
   const [base] = String(code ?? "").split(":");
   return SCOPES.scopes[base] ?? null;
 }
@@ -412,7 +412,7 @@ export function scopeDefinition(code) {
  * malformed code in a permalink is dropped and said so, never kept as a
  * filter that can match nothing (Codex, PR #69).
  */
-export function validScopeCode(code) {
+function validScopeCode(code) {
   const [base, param] = String(code ?? "").split(":");
   const defn = SCOPES.scopes[base];
   if (!defn) return false;
@@ -544,13 +544,13 @@ export function rowAmount(row, contract) {
 }
 
 /** What the amount is: the row's own basis column, else the declared label. */
-export function rowAmountBasis(row, contract, collection = null) {
+function rowAmountBasis(row, contract, collection = null) {
   const qualifiers = [contract?.amount_basis, ...(contract?.amount_qualifiers ?? [])].filter(Boolean).map((field) => readerValueLabel(collection, field.split("__").at(-1), cell(row, field))).filter(Boolean);
   return [...new Set(qualifiers)].join(" · ") || contract?.amount_label || null;
 }
 
 /** Bounds remain bounds. An umbrella/program total is never a recipient amount. */
-export function rowAmountRange(row, contract) {
+function rowAmountRange(row, contract) {
   if (cell(row, contract?.amount_class).toLowerCase() !== "range") return null;
   const number = (field) => {
     const value = cell(row, field).replace(/[$,\s]/g, "");
@@ -656,7 +656,7 @@ export function declaresSource(contract) {
  */
 export const SOURCE_LINK_COLUMN = "__source";
 
-export function rowRecordId(row, contract) {
+function rowRecordId(row, contract) {
   return cell(row, contract?.record_id) || null;
 }
 
@@ -1152,7 +1152,7 @@ function names(cut, register) {
   });
 }
 
-export function scopeOf(cut) {
+function scopeOf(cut) {
   if (cut.table) {
     const [collection] = cut.table.split("/");
     return PRESS_CATALOG_BY_ID[collection]?.short ?? collection;

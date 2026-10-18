@@ -395,11 +395,6 @@ class TestCrossLanguageParity(unittest.TestCase):
 
     # -- the bytes a reader receives ---------------------------------------
 
-    def test_the_download_bytes_match(self) -> None:
-        for dataset in launch.LAUNCH_COLLECTION:
-            with self.subTest(dataset=dataset.id):
-                self.assertEqual(launch.collection_csv(dataset.id), self.js["csvs"][dataset.id])
-
     def test_every_download_keeps_a_citation_column(self) -> None:
         for dataset in launch.LAUNCH_COLLECTION:
             csv_text = launch.collection_csv(dataset.id)

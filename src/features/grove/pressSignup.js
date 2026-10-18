@@ -96,21 +96,6 @@ export function initialPressStep(storage, { signInRequested = false } = {}) {
   }
 }
 
-/**
- * Whether this browser has signed in to (or activated) a Cedar Press account
- * before. The gate's plans-or-log-in switch opens on the likely side: a
- * remembered account lands on Log in, everyone else sees the plans first.
- * Distinct from initialPressStep, which decides which sign-in screen opens,
- * not which side of the switch does.
- */
-export function hasPressAccount(storage) {
-  try {
-    return storage?.getItem(SEEN_KEY) === "1";
-  } catch {
-    return false;
-  }
-}
-
 /** Remember that this browser has activated, so the next visit opens on sign-in. */
 export function rememberPressAccount(storage) {
   try {

@@ -83,7 +83,7 @@ export function sampleLabel(id) {
 // The record, the paths and the digest check live in customerTables.js, the
 // one module every sample reader shares; re-exported here for the callers
 // that already read them from this file.
-export { downloadPath, downloadRecord, downloadTextMatches } from "./customerTables.js";
+export { downloadPath, downloadRecord } from "./customerTables.js";
 
 /**
  * The file for a collection: the shipped extract, or its own description.
@@ -157,7 +157,7 @@ export async function downloadCsv(entry) {
 }
 
 /** Hand the browser one text file to save. The Explore card's cut uses it too. */
-export function saveTextFile(name, text) {
+function saveTextFile(name, text) {
   saveBlob(name, new Blob([text], { type: "text/csv;charset=utf-8" }));
 }
 

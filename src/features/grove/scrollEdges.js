@@ -1,5 +1,3 @@
-import { useEffect, useRef, useState } from "react";
-
 // Which edges of a sideways-scrolling table still have content past them.
 //
 // WHY THIS IS A FUNCTION AND NOT A `data-end="1"` IN THE MARKUP.
@@ -45,49 +43,4 @@ export function edgeAttrs(metrics) {
     ...(start ? { "data-start": "" } : {}),
     ...(end ? { "data-end": "" } : {}),
   };
-}
-
-/**
- * Keep a scroller's edge attributes true, in React.
- *
- * Returns `[ref, attrs]`: put the ref on the scrolling element and spread the
- * attrs on its wrapper, which is the box the cue is painted on.
- *
- * It listens to `scroll` passively, and to the element's own resize, because
- * the answer changes when a column is shown or hidden without anybody
- * scrolling — which is exactly what the column picker does.
- */
-export function useScrollEdges() {
-  const ref = useRef(null);
-  const [attrs, setAttrs] = useState({});
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return undefined;
-    // Compare the rendered attribute set, not the object: this runs on every
-    // scroll frame and a new object each time would re-render the table.
-    let last = "";
-    const measure = () => {
-      const next = edgeAttrs(el);
-      const key = Object.keys(next).sort().join(",");
-      if (key !== last) {
-        last = key;
-        setAttrs(next);
-      }
-    };
-    measure();
-    el.addEventListener("scroll", measure, { passive: true });
-    // ResizeObserver is absent in jsdom and in older Safari; the listeners
-    // above still carry the common case, so this degrades rather than throws.
-    const ro = typeof ResizeObserver === "function" ? new ResizeObserver(measure) : null;
-    ro?.observe(el);
-    window.addEventListener("resize", measure);
-    return () => {
-      el.removeEventListener("scroll", measure);
-      ro?.disconnect();
-      window.removeEventListener("resize", measure);
-    };
-  }, []);
-
-  return [ref, attrs];
 }

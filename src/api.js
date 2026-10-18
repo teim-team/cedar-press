@@ -188,7 +188,7 @@ export function fetchReleaseCollections({ signal } = {}) {
   return request("/press/release-collections", { signal });
 }
 
-export function releaseDownloadUrl(collection, releaseId, component = null) {
+function releaseDownloadUrl(collection, releaseId, component = null) {
   if (!/^[a-z][a-z0-9-]{0,63}$/.test(collection || "") || collection === "gaming"
       || !/^[a-f0-9]{64}$/.test(releaseId || "")
       || (component !== null && !/^[a-z0-9][a-z0-9_]{0,59}$/.test(component))) return null;
@@ -319,8 +319,6 @@ export async function submitResearchRequest({ text, useCase, priorityId, support
     signal,
   });
 }
-
-export { ApiError };
 
 export function getNeedEntityEvidence(cedarUid, { signal } = {}) {
   return request(`/press/entities/${encodeURIComponent(cedarUid)}/need-evidence`, { signal });
