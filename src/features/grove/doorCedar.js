@@ -34,13 +34,6 @@
  * cannot drift from the collection it describes, and the day a release
  * changes the row count the door's answer changes with it.
  *
- * Foundation & Corporate Giving and PLOT are live like the others (owner,
- * 2026-09-27) and are presented by their record structure: their answers say
- * what each record holds (`pressRecordStructure.js`), how the records link
- * to Native entities, and how the collection reads beside the others (the
- * owner's own examples in `pressMethod.js`). No count, span or figure is
- * stated for either, because none is measured here.
- *
  * WHO IT IS FOR
  * The audience answers are the landing's use cases (`AUDIENCE_JOBS` in
  * `pressJobs.js`): the same twelve audiences, their outcomes and the
@@ -63,8 +56,7 @@ import { LAUNCH_COLLECTION, countNote } from "./collection.js";
 import { coverageLabel } from "./pressAccess.js";
 import { PRESS_CATALOG_BY_ID, PRESS_TIERS, STOREFRONT_CATALOG, spellCount } from "./pressCatalog.js";
 import { visibleAudiences } from "./pressJobs.js";
-import { ECOSYSTEM_EXAMPLES, MAINTENANCE, NEED_ENRICHMENTS } from "./pressMethod.js";
-import { recordStructure } from "./pressRecordStructure.js";
+import { MAINTENANCE, NEED_ENRICHMENTS } from "./pressMethod.js";
 import { formatUpdated, freshnessLine, recentlyUpdated } from "./pressReleases.js";
 import { REGISTRY_PROGRAMS } from "./pressSources.js";
 
@@ -102,29 +94,9 @@ function leadSentences(text, count) {
   return lead || clean;
 }
 
-/**
- * How a collection presented by its record structure reads beside the
- * others: the owner's own cross-collection example from Methods that names
- * it, so the door says nothing Methods does not.
- */
-const CONNECTION = Object.freeze({
-  plot: ECOSYSTEM_EXAMPLES.find((text) => text.includes("PLOT")) ?? null,
-  "foundation-corporate-giving": ECOSYSTEM_EXAMPLES.find((text) => text.startsWith("Foundation, corporate and bank giving")) ?? null,
-});
-
 /** One answer per collection, assembled from what the catalog holds. */
 function collectionAnswer(entry) {
   const tier = TIER_BY_SHELF[entry.shelf];
-  const structure = recordStructure(entry.id);
-  if (structure) {
-    // What it contains and how it connects, and no figure: no count, span
-    // or date is measured here for either of these two.
-    const lines = [entry.blurb, structure.summary];
-    if (entry.linkage) lines.push(entry.linkage);
-    if (CONNECTION[entry.id]) lines.push(CONNECTION[entry.id]);
-    if (tier) lines.push(`It is included in ${tier.name}.`);
-    return lines.join("\n\n");
-  }
   const descriptor = DESCRIPTOR[entry.id];
   const fresh = freshnessLine(entry.id);
   const lines = [entry.blurb];
@@ -153,13 +125,6 @@ function withoutPreviewSentences(text) {
 
 /** The deeper answer for a collection: how it is constructed, off its own method note. */
 function collectionExpanded(entry) {
-  if (recordStructure(entry.id)) {
-    return [
-      `Going deeper on ${entry.short || entry.name}: ${lowerFirst(entry.linkage ?? entry.blurb)}`,
-      `Open it in Cedar Press to see what each record holds, field by field, and the methods page sets out ` +
-        `how its records connect to the other collections.`,
-    ].join("\n\n");
-  }
   const descriptor = DESCRIPTOR[entry.id];
   // A method note can describe the public preview file ("This preview is
   // ...", "The public preview is ten rows ..."): bookkeeping about the

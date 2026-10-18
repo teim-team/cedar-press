@@ -244,9 +244,9 @@ def _catalog_profile(dataset_id: str) -> dict[str, Any] | None:
     """A profile for a collection the catalog carries but ``LAUNCH_COLLECTION`` does not.
 
     No collection is in that state today: every catalog entry, Foundation &
-    Corporate Giving and PLOT included, is in ``LAUNCH_COLLECTION``. For a
-    collection presented by its record structure, Cedar can honestly answer what such a
-    collection holds and how its records connect to Native entities and to
+    Corporate Giving and PLOT included, is in ``LAUNCH_COLLECTION``. For such
+    a collection, Cedar can honestly answer what it holds and how its records
+    connect to Native entities and to
     the other collections — that is the catalog's own copy — but it states no
     figures for it, so every release-shaped field is ``None`` and the
     limitations say so. No number is invented.

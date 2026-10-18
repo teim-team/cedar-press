@@ -37,7 +37,7 @@ from typing import Any
 from urllib.parse import urlparse
 from urllib.request import HTTPRedirectHandler, Request, build_opener
 
-from cedar_press import collection_profiles, governed_collections, need_publication, press_catalog
+from cedar_press import collection_profiles, governed_collections, need_publication
 from cedar_press import collections as launch
 
 #: Which shelf each plan reaches. Mirrors ``PLAN_REACH`` in
@@ -146,35 +146,10 @@ def may_open(tier: str, collection_id: str) -> bool:
     ``tests/test_access.py::TestNothingTheClientOpensIsRefused`` compares the
     two answers per tier and per collection in both directions.
     """
-    if any(
+    return any(
         dataset.id == collection_id and _reaches(tier, dataset.shelf)
         for dataset in launch.LAUNCH_COLLECTION
-    ):
-        return True
-    # A catalog collection presented by its record structure, with no release
-    # file: the plan that reaches its shelf includes it, on both sides of the
-    # language boundary (`canOpenDataset`), and `sample_unavailable_reason`
-    # says there is no file. No catalog entry is presented this way today:
-    # Foundation & Corporate Giving and PLOT, the two that were, are in
-    # `LAUNCH_COLLECTION` with release files, so this branch is unused.
-    shelf = _structure_shelf(collection_id)
-    return shelf is not None and _reaches(tier, shelf)
-
-
-def _structure_shelf(collection_id: str) -> str | None:
-    """The storefront shelf of a collection presented by its record structure.
-
-    ``None`` for every other collection, and for one placed off the
-    storefront: the grove shelf is never sold here, whatever the plan.
-    """
-    for entry in press_catalog.CATALOG:
-        if entry["id"] != collection_id:
-            continue
-        if (entry.get("coverage") or {}).get("kind") != "structure":
-            return None
-        shelf = entry.get("shelf")
-        return shelf if shelf in ("standard", "pro") else None
-    return None
+    )
 
 
 def is_grove_release(collection_id: str) -> bool:
@@ -304,14 +279,7 @@ def sample_unavailable_reason(collection_id: str) -> str | None:
     both with "No such collection" hides a real, named data problem behind a
     routing message.
     """
-    reason = launch.sample_unavailable_reason(collection_id)
-    if reason is None and _structure_shelf(collection_id) is not None:
-        return (
-            "This collection is presented by its record structure: what each "
-            "record holds is on its page, and there is no sample file to "
-            "download."
-        )
-    return reason
+    return launch.sample_unavailable_reason(collection_id)
 
 
 def download_name(collection_id: str) -> str:

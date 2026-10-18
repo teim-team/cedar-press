@@ -1,9 +1,7 @@
 /**
  * PURPOSE
  * The launch collection: the datasets Cedar Press sells that have a release.
- * Twelve of the catalog's fourteen do; Foundation & Corporate Giving and PLOT
- * are live on their shelves and presented by their record structure
- * (`STRUCTURE_ONLY`, below).
+ * All fourteen in the catalog do.
  *
  * This said "what the standalone Cedar Grove license reads", from the model in
  * which Cedar Grove published a slice of itself as Cedar Press. That model was
@@ -295,18 +293,7 @@ const TABLES = deepFreeze(
   ),
 );
 
-/**
- * Catalog collections with no release in the manifest: live on their shelves,
- * named, tiered, described and opened by plan like any other, and presented
- * by their record structure (`pressRecordStructure.js`) because there are no
- * sample rows here to show. Derived rather than listed, so it cannot disagree
- * with the manifest; the tests pin it to the two collections it is today and
- * fail when a release lands until the catalog entry's coverage is measured.
- */
 const RELEASED = new Set(manifest.collections.map((entry) => entry.id));
-export const STRUCTURE_ONLY = Object.freeze(
-  PRESS_CATALOG.filter((entry) => !RELEASED.has(entry.id)).map((entry) => entry.id),
-);
 
 /** Whether a collection has a release this repository serves. */
 export function isReleased(datasetId) {

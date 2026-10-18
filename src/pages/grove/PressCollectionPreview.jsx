@@ -35,9 +35,7 @@ import { useNarrow } from "../../features/grove/useNarrow.js";
 import { coverageLabel } from "../../features/grove/pressAccess";
 import { EARLY_ACCESS_HREF } from "../../features/grove/appLink.js";
 import { freshnessLine } from "../../features/grove/pressReleases";
-import { recordStructure } from "../../features/grove/pressRecordStructure.js";
 import { EVENT, track } from "../../features/grove/telemetry.js";
-import { RecordStructureCap, RecordStructureTable } from "./PressRecordStructure.jsx";
 import { TierName } from "./TierName";
 import PressReadingKey from "./PressReadingKey.jsx";
 
@@ -152,10 +150,6 @@ export default function CollectionPreview({ entry, tier, register }) {
   // who the record is about.
   const shownColumns = LANDING_EXAMPLES[entry.id]?.columns ?? (defaults.length ? defaults : all);
   const fresh = freshnessLine(entry.id);
-  // Presented by its record structure (Foundation & Corporate Giving, PLOT):
-  // the frame shows what each record holds, where another collection shows
-  // its sample records. No count, span or sample value is stated for it.
-  const structure = recordStructure(entry.id);
   const coverage = coverageLabel(entry);
   return (
     <div className="cp-pane" data-testid="collection-stage" data-collection={entry.id}>
@@ -171,14 +165,7 @@ export default function CollectionPreview({ entry, tier, register }) {
         <p className="cp-pane__blurb" title={entry.blurb}>{entry.blurb}</p>
       </div>
 
-      {structure ? (
-        <>
-          <RecordStructureCap collectionId={entry.id} />
-          <div className="cp-pane__records">
-            <RecordStructureTable collectionId={entry.id} name={entry.name} />
-          </div>
-        </>
-      ) : status === "ok" && items.length ? (
+      {status === "ok" && items.length ? (
         <>
           <p className="cp-pane__tablecap">
             {/* One clean dataset (owner, 2026-10-06): no table name, just
@@ -271,7 +258,7 @@ export default function CollectionPreview({ entry, tier, register }) {
 
       {/* No linkage sentence here: the owner took the entity-linkage claim
           off the door on 2026-09-04, and it still lives on /data. */}
-      {!structure && status === "ok" && table && !table.flagship ? (
+      {status === "ok" && table && !table.flagship ? (
         <p className="cp-pane__note">
           This preview uses a supporting table. Its records may have a different grain from
           the collection&rsquo;s main table.

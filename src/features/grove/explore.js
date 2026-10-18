@@ -55,7 +55,6 @@ import { codebookTables } from "./codebook.js";
 import { CUSTOMER_COLUMNS, CUSTOMER_COMPONENTS, CUSTOMER_RENAMES, downloadRecord } from "./customerTables.js";
 import { collectionCitation, collectionSample, collectionTables, sampleUnavailableReason } from "./collection.js";
 import { canOpenDataset } from "./pressAccess.js";
-import { recordStructure } from "./pressRecordStructure.js";
 import { safeSourceUrl, sourcePresentation } from "./sourcePresentation.js";
 import { PRESS_CATALOG_BY_ID, STOREFRONT_CATALOG } from "./pressCatalog.js";
 import { firstUrl } from "./readerValues.js";
@@ -235,17 +234,13 @@ export function flagshipKey(collectionId) {
 export function explorableCollections(user) {
   return STOREFRONT_CATALOG.map((entry) => {
     const tables = exploreTables(entry.id);
-    // A record-structure guide can accompany an admitted sample. A guide alone
-    // also explains the schema when there is no sample to preview.
-    const structure = recordStructure(entry.id);
     const flagship = tables.find((t) => t.flagship) ?? null;
     return {
       entry,
       open: canOpenDataset(user, entry),
       tables,
       flagship,
-      structure,
-      previewUnavailable: flagship || structure ? null : (sampleUnavailableReason(entry.id) ?? "No preview file for this collection's dataset."),
+      previewUnavailable: flagship ? null : (sampleUnavailableReason(entry.id) ?? "No preview file for this collection's dataset."),
     };
   });
 }

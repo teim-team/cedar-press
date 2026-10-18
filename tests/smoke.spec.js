@@ -1187,7 +1187,6 @@ test.describe("Explore the collections", () => {
       await page.goto("/?collection=" + id);
       const stage = page.locator('[data-testid="collection-stage"][data-collection="' + id + '"]');
       await expect(stage).toBeVisible();
-      await expect(stage.getByTestId("record-structure")).toHaveCount(0);
       // A phone opens on three records; the rest are behind "Show more".
       await stage.getByTestId("stage-record").first().waitFor();
       const more = stage.locator(".cp-pane__more");

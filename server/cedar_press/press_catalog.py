@@ -120,9 +120,7 @@ TBN_URL: str = _DATA["tbnUrl"]
 LUMECON_URL: str = _DATA["lumeconUrl"]
 
 #: The full collection ladder (``pressCatalog.js``): every collection the
-#: storefront sells, including the two presented by their record structure
-#: (coverage kind ``structure``: Foundation & Corporate Giving and PLOT).
-#: Cedar's profile layer reads this for the collections that ship no figures,
+#: storefront sells. Cedar's profile layer reads this for the collections that ship no figures,
 #: so a catalog entry can describe itself without a second hand-typed copy of
 #: its blurb.
 CATALOG = _frozen(_DATA["catalog"])

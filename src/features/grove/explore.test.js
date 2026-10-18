@@ -188,8 +188,7 @@ test("the flagship comes first among a collection's tables and locked shelves st
   const owned = standard.find((c) => c.entry.id === "owned");
   assert.equal(owned.flagship?.key, "owned/owned");
   assert.equal(owned.previewUnavailable, null);
-  // A collection presented by its record structure carries that structure,
-  // and is not a collection missing its preview.
+  // Foundation & Corporate Giving and PLOT have previews like the others.
   // Since 2026-10-04 each is one flat customer table: no record type to
   // dispatch on, and its own source column (customerTables.js).
   for (const id of ["plot", "foundation-corporate-giving"]) {

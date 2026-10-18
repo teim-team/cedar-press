@@ -213,22 +213,6 @@ const TIER_DECLARATIONS = Object.freeze([
  * definition, so it goes through the data workspace and a regenerated
  * release, not through this file. Until then the two blurbs stay as ruled.
  */
-/**
- * The coverage of a collection presented by its record structure: no release
- * in the manifest, so nothing has been measured.
- *
- * Not a year and not a capture date: a value in `coverage` is a claim to a
- * paying customer, and a collection with no measured file has no span to
- * claim. So no span is shown at all (`coverageLabel` returns null and every
- * surface leaves the line out rather than printing a placeholder), and where
- * a viewer would show sample records it shows what each record holds
- * (`pressRecordStructure.js`). The entry changes to a measured `series` or
- * `roster` in the change that adds its release to
- * `data/cedar/collections.manifest.json`; `collection.js` holds the two in
- * step.
- */
-export const STRUCTURE = Object.freeze({ kind: "structure" });
-
 /** Source-dated records with no independently established continuous span. */
 export const OBSERVATIONS = Object.freeze({ kind: "observations" });
 

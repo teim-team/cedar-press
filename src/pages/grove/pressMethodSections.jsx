@@ -464,8 +464,8 @@ export function MethodsByCollection() {
             <div>
               <h3 className="cp-mbc__name">{entry.name}</h3>
               {/* Version, span and cadence where the collection states them;
-                  one presented by its record structure states none, and the
-                  line is left out rather than left empty. */}
+                  a collection that states none leaves the line out rather
+                  than empty. */}
               {release || coverageLabel(entry) ? (
                 <p className="cp-mbc__meta">
                   {[release?.updated ? `Updated ${release.updated}` : "", coverageLabel(entry), release?.cadence].filter(Boolean).join(" · ")}
