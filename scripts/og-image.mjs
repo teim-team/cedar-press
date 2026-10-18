@@ -13,8 +13,10 @@
 //
 // Writes public/cedar-press-og-1200x630.png at 1200x630.
 import { chromium } from "@playwright/test";
-import { fileURLToPath } from "node:url";
-import { readFileSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const root = new URL("..", import.meta.url);
 const out = fileURLToPath(new URL("public/cedar-press-og-1200x630.png", root));
@@ -64,12 +66,20 @@ const html = `<!doctype html><meta charset="utf-8"><style>
   <div class="word">CEDAR PRESS</div>
 </div>`;
 
-const file = fileURLToPath(new URL("scratch-og.html", root));
+// The page goes in a temporary folder that is removed afterwards, even when
+// the screenshot fails, so a run leaves nothing in the checkout.
+const dir = mkdtempSync(join(tmpdir(), "cedar-og-"));
+const file = join(dir, "card.html");
 writeFileSync(file, html);
-const browser = await chromium.launch();
-const page = await browser.newPage({ viewport: { width: 1200, height: 630 }, deviceScaleFactor: 1 });
-await page.goto(`file://${file}`);
-await page.evaluate(() => document.fonts.ready);
-await page.locator(".card").screenshot({ path: out });
-await browser.close();
+let browser;
+try {
+  browser = await chromium.launch();
+  const page = await browser.newPage({ viewport: { width: 1200, height: 630 }, deviceScaleFactor: 1 });
+  await page.goto(pathToFileURL(file).href);
+  await page.evaluate(() => document.fonts.ready);
+  await page.locator(".card").screenshot({ path: out });
+} finally {
+  await browser?.close();
+  rmSync(dir, { recursive: true, force: true });
+}
 console.log(`wrote ${out}`);
