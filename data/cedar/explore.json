@@ -421,7 +421,7 @@
       "superseded": null,
       "superseded_by": null,
       "amount_basis": "measurement_status",
-      "year_basis": "calendar year of period start",
+      "year_basis": "calendar year in which the reported period starts",
       "observation": [
         "commodity",
         "resource_type",

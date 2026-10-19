@@ -340,6 +340,13 @@ const CUSTOMER_PRESENTATION = Object.freeze({
   },
 });
 
+// What the year filter reads in a customer table, in the table's own terms.
+// A reporting period filters on the calendar year it starts in.
+function customerYearBasis(c) {
+  if (c.date === "period_start") return "calendar year in which the reported period starts";
+  return c.year ? words(c.year) : c.date ? `calendar year of ${words(c.date)}` : null;
+}
+
 export function customerTableContract(columns, sampleRows = [], collection = null) {
   const c = contractFor(columns, sampleRows);
   c.record_id = customerRecordId(columns, sampleRows);
@@ -365,8 +372,7 @@ export function customerTableContract(columns, sampleRows = [], collection = nul
     c.year = null;
     c.date = "period_start";
   }
-  c.year_basis = c.year ? words(c.year) : c.date ? `calendar year of ${words(c.date)}` : null;
-  if (c.date === "period_start") c.year_basis = "calendar year in which the reported period starts";
+  c.year_basis = customerYearBasis(c);
   c.subject = pick(columns, [...RULES.subject, "subcontractor_name", "organization_name", "business_name", "recipient_name_reported"]);
   if (c.subject === c.entity_name) c.subject = null;
   c.amount = pick(columns, ["obligations_usd", "reported_amount_usd", "subaward_amount_usd", "amount_usd", "announced_value_usd", "amount_exact_usd"]);
@@ -387,7 +393,7 @@ export function customerTableContract(columns, sampleRows = [], collection = nul
   }
   const preset = CUSTOMER_PRESENTATION[collection] ?? {};
   Object.assign(c, preset);
-  if (!("year_basis" in preset)) c.year_basis = c.year ? words(c.year) : c.date ? `calendar year of ${words(c.date)}` : null;
+  if (!("year_basis" in preset)) c.year_basis = customerYearBasis(c);
   c.search = [...new Set([c.entity_name, ...(c.subject_candidates ?? [c.subject]), ...c.observation].filter(Boolean))];
   if (!CUSTOMER_PRESENTATION[collection]?.default_columns) c.default_columns = spreadsheetDefaultColumns(c, columns);
   c.mapping_kind = "customer_table";

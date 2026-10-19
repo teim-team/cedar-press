@@ -93,7 +93,6 @@ test("resource reporting periods do not become missing or invented payment dates
   const row = { payment_date: "", period_start: "2022-01-01", period_end: "2022-12-31", period_type: "calendar_year" };
   assert.equal(rowDate(row, c), "2022-01-01");
   assert.equal(rowYear(row, c), 2022);
-  // year_basis is not asserted: customerTableContract overwrites its period
-  // wording with "calendar year of period start", a known open defect.
+  assert.equal(c.year_basis, "calendar year in which the reported period starts");
   assert.equal(rowDate({ ...row, period_start: "", payment_date: "2023-03-04" }, c), null);
 });
