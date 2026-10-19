@@ -124,7 +124,7 @@ make check-generated
 npm run test
 npx playwright install --with-deps chromium
 npm run test:smoke
-pip install -e server[dev] httpx2 coverage pip-audit
+pip install -e server[dev]
 ruff check server
 make test-python
 make audit-python
