@@ -41,7 +41,10 @@ import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(fileURLToPath(new URL("..", import.meta.url)));
 
-export const TESTS = "src/features/grove/*.test.js";
+// Every test file under src/, so a test written beside the module it checks
+// runs wherever it sits: src/api.session.test.js went unrun for weeks under
+// the earlier pattern, src/features/grove/*.test.js (F-05).
+export const TESTS = "src/**/*.test.js";
 export const SCOPE = ["src/**/*.js", "scripts/*.mjs"];
 
 // Measured 2026-09-23 over 279 passing tests: 83.87 lines / 82.76 branches /
