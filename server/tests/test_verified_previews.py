@@ -97,10 +97,6 @@ class VerifiedPreviewTest(unittest.TestCase):
             preview.queue_items(bad)
 
 
-if __name__ == "__main__":
-    unittest.main()
-
-
 class MixedPreviewDefinitionTest(unittest.TestCase):
     """Admission uses actual component mappings and refuses invented definitions."""
 
@@ -258,3 +254,7 @@ class MixedPreviewDefinitionTest(unittest.TestCase):
         self.assertEqual(entry["tables"][0]["record_type_fields"], mapping)
         self.assertFalse(entry["full_files"]["served"])
         self.assertEqual(prior, {"id": "plot", "descriptor": {}, "cedar": {}})
+
+
+if __name__ == "__main__":
+    unittest.main()

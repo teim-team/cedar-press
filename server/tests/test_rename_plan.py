@@ -319,15 +319,15 @@ class TestTheRenamePlanIsStillTrue(unittest.TestCase):
     def test_no_old_path_survives_the_rename(self) -> None:
         """The check the rename needs, live before the rename happens.
 
-        Until the four directories move this asserts that they are still
-        there, which is what makes the rows above a measurement of something
-        real. The moment they move, the same measurement becomes the stale-path
+        Until the four directories move this is skipped, with the reason, so
+        a run does not count it as a check that passed. The moment they
+        move, the same measurement becomes the stale-path
         sweep: every Markdown line, generated document, comment and dotfile
         still naming an old path is listed by name, and none of those would
         fail a build, a suite or the smoke run on their own.
         """
         if any(_tracked_under(f"src/{d}/{_OLD_NAME}") for d in _DIRECTORIES):
-            return
+            self.skipTest("the rename has not happened: the old directories are still tracked")
         survivors = sorted({line.split(":", 1)[0] for line in _occurrences()})
         self.assertEqual(
             survivors,
