@@ -119,9 +119,9 @@ function watchConsole(page) {
 /**
  * Wait until an element has finished animating, before measuring it.
  *
- * The panels here slide in (`cp-dc-sheet` rises from `translateY(100%)`,
- * `cedar-rise` from 18px), and `toBeVisible()` is satisfied the moment the
- * animation starts. A `boundingBox()` taken then is of a box in motion: a
+ * The panels here slide in (`cp-dc-sheet` rises from `translateY(100%)`),
+ * and `toBeVisible()` is satisfied the moment the animation starts. A
+ * `boundingBox()` taken then is of a box in motion: a
  * full-screen panel measured 0.18s in reported `y = 292` on a 664px window,
  * which is not where it is and not where it lands. Assertions about geometry
  * have to come after the motion, or they describe a frame.

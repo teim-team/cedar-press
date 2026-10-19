@@ -1,5 +1,5 @@
 /* Design system for the Lumecon Economic Impact UI. Namespaced under .teim-rd. */
-/* Fonts (Inter, JetBrains Mono, Spectral) are self-hosted via src/styles/fonts.css. */
+/* Fonts (Inter, JetBrains Mono) are self-hosted via src/styles/fonts.css. */
 
 .teim-rd { --ink: #0A0F26; --ink-2: #353B5C; --muted: #6B6F8A;
   --teal: #0FB5A5; --teal-dark: #0A8A7E; --teal-tint: #f2faf8; --teal-line: rgba(15,181,165,0.35);
@@ -80,7 +80,6 @@
 .teim-rd .brand { display: flex; align-items: center; gap: 0.8rem; min-width: 0; }
 .teim-rd .brand img.seal { width: 40px; height: 40px; flex: none; }
 .teim-rd .word { font-family: var(--sans); font-weight: 700; font-size: 1.02rem; letter-spacing: 0.18em; padding-right: 0.08em; }
-.teim-rd .lumin { font-family: 'Spectral', serif; font-style: italic; font-weight: 500; color: var(--gold); }
 .teim-rd .tagline { font-size: 0.78rem; color: var(--muted); display: block; margin-top: 0.1rem; letter-spacing: 0; font-weight: 400; }
 .teim-rd .sep { width: 1px; height: 24px; background: var(--line); margin: 0 0.55rem; }
 

@@ -624,9 +624,8 @@ client, and a build without the service never shows a zero that means
 - **Both pointers.** Hover affordances have tap equivalents: on a coarse
   pointer the shelf's first tap opens the collection's description and the
   download moves into that panel.
-- **Themes.** The press pages hold the paper palette in both themes
-  (`.teim-rd--paper` re-pins the light tokens), so the document declares
-  `color-scheme: light`.
+- **Themes.** The press pages have one palette, the light one, and nothing
+  sets a dark theme, so the document declares `color-scheme: light`.
 - **Reveals.** Sections arrive on scroll through `useReveal`; anything behind
   one must still be present for a reader who does not scroll it.
 - **Accessibility.** A skip link opens every page and lands on its `main`;
