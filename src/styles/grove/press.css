@@ -858,9 +858,6 @@
  * over a fill that never applied. */
 .teim-rd .cp-band .cp-badge.is-on,
 .teim-rd .cp-band button.cp-badge--act:hover { border-color: var(--ink); }
-.teim-rd .cp-band .cp-badge.is-selected { background: var(--ink); border-color: var(--ink); }
-.teim-rd .cp-band .cp-badge.is-selected .cp-badge__cue,
-.teim-rd .cp-band .cp-badge.is-selected .cp-badge__name { color: #fff; }
 
 /* ── The reader ───────────────────────────────────────────────────────────
  * Spans both rows on the right, so it faces the squares rather than sitting
@@ -901,9 +898,7 @@
  * replaces the whole property, so dropping them would break the band's
  * arrival. */
 .teim-rd .cp-read { transition: opacity 0.5s ease, transform 0.5s ease, box-shadow 0.35s ease; }
-.teim-rd .cp-read.is-pulse { box-shadow: 0 0 0 3px var(--dteal); }
 .teim-rd .cp-band--fill .cp-read { background: rgba(10, 15, 38, 0.14); border-color: #fff; }
-.teim-rd .cp-band--fill .cp-read.is-pulse { box-shadow: 0 0 0 3px #fff; }
 .teim-rd .cp-band--fill .cp-read__cap { color: #fff; }
 .teim-rd .cp-band--fill .cp-read__name { color: #fff; }
 .teim-rd .cp-band--fill .cp-read__blurb { color: #fff; }
@@ -3190,9 +3185,6 @@ body[data-cp-explore-in-view] .teim-rd .cedar-widget .cp-greet { display: none; 
 .teim-rd .cp-ex__pick[open] .cp-ex__pickbtn { border-color: var(--dteal); }
 .teim-rd .cp-ex__panel { position: absolute; z-index: 30; top: calc(100% + 4px); left: 0; width: min(28rem, 90vw); max-height: 24rem; overflow: auto; padding: 0.7rem; border: 1px solid var(--line); background: var(--bg); box-shadow: 0 12px 30px rgba(10, 15, 38, 0.12); }
 .teim-rd .cp-ex__panel.is-right { left: auto; right: 0; }
-/* A selected tile stays lit while the viewer shows its collection. */
-.teim-rd .cp-badge.is-selected { box-shadow: 0 0 0 3px var(--teal); }
-.teim-rd .cp-band--fill .cp-badge.is-selected { box-shadow: 0 0 0 3px #fff; }
 /* While the viewer is on screen Cedar's floating launcher steps aside; the
  * viewer's own foot carries the Cedar action. The open panel is untouched. */
 /* ══ THE RAIL ═════════════════════════════════════════════════════════════
@@ -4175,10 +4167,6 @@ body[data-cp-preview-in-view] .teim-rd .cp-dc__fab { display: none; }
   .teim-rd .cp-mast--out .cp-mast__top { flex-wrap: wrap; }
   .teim-rd .cp-mast--out .cp-mast__of { flex: 1 0 100%; font-size: 0.66rem; line-height: 1.55; }
 }
-
-/* Nothing pointed at, nothing to say: the reader panel keeps its space in the
- * grid so the tiles do not jump when a pointer arrives, and draws no frame. */
-.teim-rd .cp-read.is-empty { border-color: transparent; background: none; box-shadow: none; }
 
 /* The viewer's secondary actions, on a phone. */
 .teim-rd .cp-ex__more { position: relative; }
