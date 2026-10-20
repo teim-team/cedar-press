@@ -3,8 +3,8 @@
 No network and no HTTP client: ``test_api.py`` already cannot run in this
 checkout (``fastapi.testclient`` needs ``httpx``, a dev extra), and the part
 worth pinning here is not that a POST succeeds — it is that the body Cedar
-Press sends is the body ``cedar/schemas/chat.py`` accepts and the body
-``teim-app/server/cedar/client.js`` sends. Those are the things that drift.
+Press sends is the body ``cedar/schemas/press.py`` accepts. That is the
+thing that drifts.
 """
 
 from __future__ import annotations
@@ -17,7 +17,7 @@ from cedar_press import cedar_service
 
 
 class TestTheContractFields(unittest.TestCase):
-    """``CedarMessageRequest`` is the authority; these are its required fields."""
+    """``PressMessageRequest`` is the authority; these are its required fields."""
 
     def payload(self, **overrides):
         base = {
@@ -34,9 +34,9 @@ class TestTheContractFields(unittest.TestCase):
 
     def test_it_carries_every_field_the_schema_requires(self):
         body = self.payload()
-        # requestId, user, project and message are required by the schema;
-        # threadId, projectContext and context are optional.
-        for key in ("version", "requestId", "user", "project", "message"):
+        # requestId, user, project, context and message are required by the schema;
+        # threadId is optional.
+        for key in ("version", "requestId", "user", "project", "context", "message"):
             self.assertIn(key, body)
         self.assertEqual(body["version"], cedar_service.CONTRACT_VERSION)
         self.assertEqual(body["user"]["id"], "reader@example.org")
@@ -108,7 +108,7 @@ class TestTheEnvironmentSurfaceMatchesTeimApp(unittest.TestCase):
 
     def test_the_path_is_overridable_and_always_rooted(self):
         with mock.patch.dict(os.environ, {"CEDAR_API_PATH": ""}):
-            self.assertEqual(cedar_service.chat_path(), "/api/v1/messages")
+            self.assertEqual(cedar_service.chat_path(), "/api/v1/press/messages")
         with mock.patch.dict(os.environ, {"CEDAR_API_PATH": "/v2/messages"}):
             self.assertEqual(cedar_service.chat_path(), "/v2/messages")
         # A path without its leading slash would concatenate into the host.
@@ -205,11 +205,11 @@ class TestAgainstTheRealSchema(unittest.TestCase):
 
         cedar = os.path.join(os.path.dirname(__file__), "..", "..", "..", "cedar")
         cedar = os.path.abspath(os.environ.get("CEDAR_REPO", cedar))
-        if not os.path.isfile(os.path.join(cedar, "schemas", "chat.py")):
+        if not os.path.isfile(os.path.join(cedar, "schemas", "press.py")):
             self.skipTest(f"no cedar checkout at {cedar}; set CEDAR_REPO")
         sys.path.insert(0, cedar)
         try:
-            from schemas.chat import CedarMessageRequest
+            from schemas.press import PressMessageRequest
         finally:
             sys.path.remove(cedar)
 
@@ -222,7 +222,7 @@ class TestAgainstTheRealSchema(unittest.TestCase):
             collection_name="Native Federal Contractors",
             pathname="/data",
         )
-        parsed = CedarMessageRequest.model_validate(body)
+        parsed = PressMessageRequest.model_validate(body)
         self.assertEqual(parsed.message.text, body["message"]["text"])
         self.assertEqual(parsed.project.name, "Native Federal Contractors")
 

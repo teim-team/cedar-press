@@ -294,7 +294,7 @@ One other place absorbs a specific kind of update, so it does not land here:
 |---|---|---|
 | [`teim-app`](https://github.com/teim-team/teim-app) | The authenticated platform — Cedar Impact, Cedar Commons and Cedar Grove | Cedar Grove carries these collections into the full analysis environment |
 | [`teim-engine`](https://github.com/teim-team/teim-engine) | The model engine behind Cedar Impact (internal) | The former workspace read its reference data as `reference_dataset` per ADR-044; nothing in this tree reads it |
-| [`cedar`](https://github.com/teim-team/cedar) | Cedar, the AI economic analyst, as a service | No runtime dependency in either direction |
+| [`cedar`](https://github.com/teim-team/cedar) | Cedar, the AI economic analyst, as a service | This service calls `POST /api/v1/press/messages`. Cedar does not call Cedar Press. |
 | [`lumecon-website`](https://github.com/teim-team/lumecon-website) | The public site, and the **North Star** for product vocabulary | Product names and their one-line definitions follow its `AGENTS.md` |
 | [`Lumecon-data`](https://github.com/teim-team/Lumecon-data) | The shared Python data foundation behind Cedar Press, Cedar Grove, Cedar and Cedar Impact | Owns current versioned builders, verification and researcher spreadsheet exports. Press consumes exact pins; the historical workspace scripts are at the tag `data-workspace-final` for reproduction and adjudication. |
 
