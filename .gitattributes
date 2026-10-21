@@ -13,3 +13,6 @@ data/cedar/verified-preview-releases.json -text
 data/cedar/field_map.json -text
 server/tests/fixtures/legacy-preview/** -text
 data/cedar/preview_definition_overrides.json text eol=lf
+
+# Sent to the host over SSM; CRLF would break bash.
+infra/deploy.sh text eol=lf
