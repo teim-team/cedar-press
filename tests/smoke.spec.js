@@ -135,8 +135,7 @@ async function settled(locator) {
 
 /** Sign in through the gate, the way a subscriber does. */
 async function signIn(page, account = ACCOUNT) {
-  await page.goto("/");
-  await page.getByRole("tab", { name: "Log in" }).click();
+  await page.goto("/login");
   await page.getByLabel("Email address").fill(account.email);
   await page.getByLabel("Password", { exact: true }).fill(account.password);
   await page.locator(".cp-gate__form").getByRole("button", { name: "Log in" }).click();
@@ -676,14 +675,14 @@ test.describe("the gate", () => {
     // back to the launcher a frame after the browser focused what was clicked,
     // so dismissing the sheet ate the click that dismissed it and the control
     // had to be clicked twice. The sheet is not modal; the click belongs to
-    // the control. `#cp-tab-signin` sits in the header, which the corner card
+    // the control. The Early access tab sits in the header, which the corner card
     // never covers.
     //
     // That premise holds at a desktop width and no longer holds on a phone,
     // where the panel is now the screen and there is no "outside" to click.
     // Both contracts are checked, because both are real: the phone's way out
     // is the close button, which is why it is 44px.
-    const behind = page.locator("#cp-tab-signin");
+    const behind = page.locator(".cp-door__tab--plans");
     await launcher.click();
     await expect(panel).toBeVisible();
     await settled(panel);
@@ -734,12 +733,13 @@ test.describe("the gate", () => {
 
   test("a wrong password is refused and says so", async ({ page }) => {
     await page.goto("/");
-    await page.getByRole("tab", { name: "Log in" }).click();
+    await page.locator("#cp-tab-signin").click();
+    await expect(page).toHaveURL(/\/login$/);
     await page.getByLabel("Email address").fill(ACCOUNT.email);
     await page.getByLabel("Password", { exact: true }).fill("not-the-password");
     await page.locator(".cp-gate__form").getByRole("button", { name: "Log in" }).click();
     await expect(page.getByRole("alert")).toBeVisible();
-    await expect(page.locator(".cp-split")).toBeVisible();
+    await expect(page).toHaveURL(/\/login$/);
   });
 
   // This asserted the opposite until 2026-09-02: that the panel explained it
@@ -758,10 +758,11 @@ test.describe("the gate", () => {
   //
   // What the copy said is still true and still written down where it is
   // load-bearing: pressDemoGate.js's docstring and SECURITY.md.
-  test("the sign-in panel offers a working form and no build meta-copy", async ({ page }) => {
+  test("the login page offers a working form and no build meta-copy", async ({ page }) => {
     await page.goto("/");
-    await page.getByRole("tab", { name: "Log in" }).click();
-    const panel = page.locator("#cp-panel-signin");
+    await page.locator("#cp-tab-signin").click();
+    await expect(page).toHaveURL(/\/login$/);
+    const panel = page.locator(".cp-login__card");
     await expect(panel.getByLabel("Email address")).toBeVisible();
     await expect(panel.getByLabel("Password", { exact: true })).toBeVisible();
     await expect(panel.getByRole("button", { name: "Log in" })).toBeVisible();

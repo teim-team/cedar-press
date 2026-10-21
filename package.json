@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:connected": "VITE_API_URL=http://localhost:5173/api VITE_APP_HOST=1 vite",
     "lint": "eslint .",
     "test": "npm run test:coverage",
     "test:coverage": "node scripts/coverage-gate.mjs",

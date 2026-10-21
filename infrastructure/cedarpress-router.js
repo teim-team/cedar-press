@@ -5,7 +5,8 @@ function handler(event) {
   var request = event.request;
   var host = request.headers.host.value;
   var uri = request.uri;
-  if (host === "www.cedarpress.ai") {
+  var apexLogin = host === "cedarpress.ai" && /^\/login\/?$/.test(uri);
+  if (host === "www.cedarpress.ai" || apexLogin) {
     var query = [];
     var values = request.querystring || {};
     Object.keys(values).forEach(function (key) {
@@ -16,11 +17,12 @@ function handler(event) {
         query.push(key + "=" + entry.value);
       });
     });
+    // The login page lives on the workspace host; the public door only links to it.
     return {
       statusCode: 301,
       statusDescription: "Moved Permanently",
       headers: {
-        location: { value: "https://cedarpress.ai" + uri + (query.length ? "?" + query.join("&") : "") },
+        location: { value: (apexLogin ? "https://app.cedarpress.ai" : "https://cedarpress.ai") + uri + (query.length ? "?" + query.join("&") : "") },
       },
     };
   }

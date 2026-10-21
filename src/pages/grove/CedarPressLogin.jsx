@@ -115,7 +115,13 @@ export default function CedarPressLogin() {
         </a>
         <div className="cp-login__card">
           {!PRESS_SIGN_IN_AVAILABLE ? (
-            <p className="cp-gate__fine" role="status">{PRESS_DEMO_UNCONFIGURED}</p>
+            <>
+              <h1 className="cp-login__h">Log in</h1>
+              <p className="cp-gate__fine" role="status">{PRESS_DEMO_UNCONFIGURED}</p>
+              {import.meta.env.DEV ? (
+                <p className="cp-gate__fine">This dev server is not connected to the API. Run <code>npm run dev:connected</code> with the API running (docs/CONNECTING.md).</p>
+              ) : null}
+            </>
           ) : signingIn ? (
             <>
               <h1 className="cp-login__h">Log in</h1>

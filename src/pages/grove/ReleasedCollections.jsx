@@ -92,27 +92,42 @@ export default function ReleasedCollections() {
   const parts = researchComponents(entry);
   const recordCount = spreadsheetRecordCount(entry);
   const spreadsheet = entry && spreadsheetDownloadUrl(entry.id, entry.spreadsheet, parts);
-  return <section className="cp-sec" aria-label="Collection spreadsheets">
-    <h2>Collection spreadsheets</h2>
-    {!entry ? <p role="status">{state.status === "loading" ? "Checking this account’s datasets…"
-      : state.status === "unreachable" ? <>The datasets could not be reached. Check the connection and try again. <button type="button" className="cp-retry" onClick={retry}>Retry</button></>
-        : "No dataset is available for this account."}</p> : <>
-      <label>Collection <select value={entry.id} onChange={(event) => { setChoice(event.target.value); setOpened(null); }}>
-        {state.entries.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
-      </select></label>
-      <h3>{entry.name}</h3>
-      <p>A living dataset in one spreadsheet, preserving each observation's type, period and original source. Each collection's About text says which records are not included.</p>
-      {recordCount !== null ? <p>{recordCount.toLocaleString("en-US")} observations in this spreadsheet. Record types have distinct grains; combine amounts only as the codebook permits.</p> : null}
-      {entry.updated ? <p>Updated {entry.updated}</p> : null}
-      {spreadsheet ? <a href={spreadsheet}>Download spreadsheet</a> : <p role="status">The spreadsheet is not available for this account yet.</p>}
-      {parts.some((part) => part.available) ? <details><summary>Examples, sources and definitions</summary>
-        <label>Record type <select value={opened || ""} onChange={(event) => setOpened(event.target.value)}>
-          <option value="" disabled>Choose records to inspect</option>
-          {parts.filter((part) => part.available).map((part) => <option key={part.component || entry.id} value={part.component || entry.id}>{part.label}</option>)}
-        </select></label>
-        {parts.filter((part) => part.available && opened === (part.component || entry.id)).map((part) =>
-          <ResearchRows key={`${entry.id}/${part.releaseId}/${part.component}`} collection={entry.id} part={part} />)}
-      </details> : null}
-    </>}
+  const notice = state.status === "loading" ? "Checking this account\u2019s collections\u2026"
+    : state.status === "unreachable" ? "The collections could not be reached. Check the connection and try again."
+      : state.status === "unavailable" ? "Collections are not available for this account right now."
+        : "No collections have been published for this account yet.";
+  return <section className="cp-sec cp-rel" aria-label="Collections">
+    <h1 className="cp-rel__title">Collections</h1>
+    {!entry ? <div className="cp-rel__card cp-rel__card--empty" role="status" aria-busy={state.status === "loading"}>
+      <p>{notice}</p>
+      {state.status === "unreachable" ? <button type="button" className="cp-btn cp-btn--primary" onClick={retry}>Retry</button> : null}
+    </div> : <div className="cp-rel__grid">
+      <nav className="cp-rel__rail" aria-label="Collections">
+        <ul>{state.entries.map((item) => <li key={item.id}>
+          <button type="button" aria-current={item.id === entry.id ? "true" : undefined}
+            onClick={() => { setChoice(item.id); setOpened(null); }}>{item.name}</button>
+        </li>)}</ul>
+      </nav>
+      <div className="cp-rel__card">
+        <h2 className="cp-rel__name">{entry.name}</h2>
+        <p className="cp-rel__lede">A living dataset in one spreadsheet, preserving each observation&rsquo;s type, period and original source. Each collection&rsquo;s About text says which records are not included.</p>
+        <dl className="cp-rel__facts">
+          {recordCount !== null ? <div><dt>Observations</dt><dd>{recordCount.toLocaleString("en-US")}</dd></div> : null}
+          {entry.updated ? <div><dt>Updated</dt><dd>{entry.updated}</dd></div> : null}
+        </dl>
+        {recordCount !== null ? <p className="cp-rel__fine">Record types have distinct grains; combine amounts only as the codebook permits.</p> : null}
+        {spreadsheet
+          ? <a className="cp-btn cp-btn--primary" href={spreadsheet}>Download spreadsheet</a>
+          : <p className="cp-rel__status" role="status">No spreadsheet release has been published for this collection yet.</p>}
+        {parts.some((part) => part.available) ? <details className="cp-rel__more"><summary>Examples, sources and definitions</summary>
+          <label>Record type <select value={opened || ""} onChange={(event) => setOpened(event.target.value)}>
+            <option value="" disabled>Choose records to inspect</option>
+            {parts.filter((part) => part.available).map((part) => <option key={part.component || entry.id} value={part.component || entry.id}>{part.label}</option>)}
+          </select></label>
+          {parts.filter((part) => part.available && opened === (part.component || entry.id)).map((part) =>
+            <ResearchRows key={`${entry.id}/${part.releaseId}/${part.component}`} collection={entry.id} part={part} />)}
+        </details> : null}
+      </div>
+    </div>}
   </section>;
 }

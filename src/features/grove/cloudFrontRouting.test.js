@@ -61,3 +61,10 @@ test("HEAD requests retain their method and known routes use the existing build 
   const pkg = JSON.parse(readFileSync(new URL("../../../package.json", import.meta.url), "utf8"));
   assert.match(pkg.scripts.build, /cp dist-site\/index\.html dist-site\/404\.html/);
 });
+
+test("the public site hands /login to the workspace host and nothing else moves", () => {
+  const result = handler(event("cedarpress.ai", "/login", { next: { value: "%2Fdata" } }));
+  assert.equal(result.statusCode, 301);
+  assert.equal(result.headers.location.value, "https://app.cedarpress.ai/login?next=%2Fdata");
+  assert.equal(handler(event("app.cedarpress.ai", "/login")).uri, "/404.html");
+});

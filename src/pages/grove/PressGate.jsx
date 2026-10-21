@@ -23,25 +23,16 @@
 //
 // Tribal Business News owns payment, renewals, upgrades and code issuance.
 // There is deliberately no "create account" here: an account exists because
-// an entitlement does. Activation is two steps: the access code and an
-// email address first, a password only once the code has been accepted.
-// Which screen opens is what this browser did last time.
-//
-// THREE STATES, AND THE COPY HAS TO MATCH
-// Connected, this form posts to the platform and the session is a signed,
-// HTTP-only cookie. Standalone with a preview account configured, the check
-// runs in the reader's browser. Standalone with nothing configured, there is
-// no form at all, because a form that can only fail is worse than a sentence
-// explaining why there is none.
+// an entitlement does. "Log in" goes to the login page (CedarPressLogin), which
+// holds the sign-in and the access-code activation.
 
 import { useEffect, useRef, useState } from "react";
 import { Link, Navigate, useLocation, useSearchParams } from "react-router";
 
-import { EARLY_ACCESS_HREF, EARLY_ACCESS_LABEL, contactHref } from "../../features/grove/appLink.js";
-import { isWorkspaceHost, loginRedirect, requestedSignIn, workspaceSignInHref } from "../../features/grove/pressSessionNavigation.js";
+import { EARLY_ACCESS_HREF, EARLY_ACCESS_LABEL } from "../../features/grove/appLink.js";
+import { isWorkspaceHost, loginRedirect, workspaceSignInHref } from "../../features/grove/pressSessionNavigation.js";
 import { useAuth } from "../../context/useAuth";
 import { useFadeIn } from "../../features/grove/useFadeIn";
-import { activatePressAccount, validatePressCode } from "../../api";
 import { coverageFrom } from "../../features/grove/pressAccess";
 import { LUMECON_TEAM_URL, LUMECON_URL, TBN_URL } from "../../features/grove/pressArticles";
 import { PRESS_TIERS, STOREFRONT_CATALOG, collectionsOnShelf } from "../../features/grove/pressCatalog";
@@ -50,24 +41,11 @@ import { formatUpdated, recentlyUpdated } from "../../features/grove/pressReleas
 import { SOURCE_REACH_UPDATED, SOURCE_ROTATION_ORDER } from "../../features/grove/sourceRotation.js";
 import { MAINTENANCE } from "../../features/grove/pressMethod.js";
 import {
+  PRESS_LOGIN_PATH,
   PRESS_METHODS_PATH,
   PRESS_REQUEST_PATH,
   PRESS_RESEARCH_PATH,
 } from "../../features/grove/pressRoutes";
-import {
-  PRESS_DEMO_UNCONFIGURED,
-  PRESS_SIGN_IN_AVAILABLE,
-} from "../../features/grove/pressDemoGate";
-import {
-  PRESS_ACTIVATION_AVAILABLE,
-  PRESS_STEP,
-  formatPressCode,
-  initialPressStep,
-  isPlausiblePressCode,
-  normalizePressCode,
-  pressSignupError,
-  rememberPressAccount,
-} from "../../features/grove/pressSignup";
 import { EVENT, track } from "../../features/grove/telemetry.js";
 import { useRegister } from "../../features/grove/useRegister.js";
 import { COLLECTION_ICONS } from "./pressCollectionIcons";
@@ -183,17 +161,6 @@ const PROOF_POINTS = [
   },
 ];
 
-function browserStorage() {
-  // Reading window.localStorage itself throws under a storage-denying policy
-  // (sandboxed iframe, blocked site data); the callers' fallbacks only help
-  // if this helper survives to hand them null.
-  try {
-    return typeof window === "undefined" ? null : window.localStorage;
-  } catch {
-    return null;
-  }
-}
-
 // The marketing door belongs to cedarpress.ai. On the workspace host a
 // signed-out visitor goes to the login page instead, and returns here after.
 export default function PressGate(props) {
@@ -203,13 +170,10 @@ export default function PressGate(props) {
 }
 
 function Door({ user }) {
-  const { login, logout, refreshSession } = useAuth();
+  const { logout } = useAuth();
   // The page reads as one long scroll on a phone, so its sections arrive as
   // they enter the viewport instead of standing there already.
   const fadeRoot = useFadeIn();
-  const [step, setStep] = useState(() => initialPressStep(browserStorage(), {
-    signInRequested: requestedSignIn(typeof window === "undefined" ? "" : window.location.search),
-  }));
   // Plans or sign-in, one at a time, or NEITHER ON ARRIVAL.
   //
   // This opened on "signin" for any browser that had signed in before, on the
@@ -219,13 +183,10 @@ function Door({ user }) {
   // form has decided for them what they came for, and the two tabs are
   // already sitting in the bar where a visitor looks for them. Nothing opens
   // until it is asked for.
-  const [panel, setPanel] = useState(() => requestedSignIn(typeof window === "undefined" ? "" : window.location.search) ? "signin" : null);
-  const workspaceSignIn = workspaceSignInHref(typeof window === "undefined" ? null : window.location);
-  const [code, setCode] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [pending, setPending] = useState(false);
-  const [error, setError] = useState(null);
+  const [panel, setPanel] = useState(null);
+  // The workspace's login page on the public site, this origin's own anywhere
+  // else (a dev server, a preview host).
+  const loginHref = workspaceSignInHref(typeof window === "undefined" ? null : window.location) ?? PRESS_LOGIN_PATH;
   // The source band moves until a reader stops it (WCAG 2.2.2): the button
   // beside its count pauses and resumes it, and reduced motion stills it.
 
@@ -338,73 +299,7 @@ function Door({ user }) {
     };
   }, [panel]);
 
-  const go = (next) => {
-    setStep(next);
-    setError(null);
-    setPending(false);
-  };
-
-  // Step one: the code and the address it was issued to. Nothing is created
-  // yet, so a wrong code costs a message rather than a half-made account.
-  const submitCode = async (event) => {
-    event.preventDefault();
-    setError(null);
-    if (!isPlausiblePressCode(code)) {
-      setError(
-        "That code does not look complete. It is 8 to 32 letters and digits, on your Tribal Business News confirmation.",
-      );
-      return;
-    }
-    setPending(true);
-    try {
-      await validatePressCode({ code: normalizePressCode(code), email });
-      setStep(PRESS_STEP.SET_PASSWORD);
-    } catch (err) {
-      setError(pressSignupError(err?.code, err?.message));
-    } finally {
-      setPending(false);
-    }
-  };
-
-  const submitPassword = async (event) => {
-    event.preventDefault();
-    setError(null);
-    setPending(true);
-    try {
-      await activatePressAccount({ code: normalizePressCode(code), email, password });
-      rememberPressAccount(browserStorage());
-      await refreshSession();
-    } catch (err) {
-      setError(pressSignupError(err?.code, err?.message));
-    } finally {
-      setPending(false);
-    }
-  };
-
-  const submitSignIn = async (event) => {
-    event.preventDefault();
-    setError(null);
-    setPending(true);
-    try {
-      await login({ email, password });
-      rememberPressAccount(browserStorage());
-    } catch (err) {
-      setError(err?.message || "That sign-in did not work. Check the address and password.");
-    } finally {
-      setPending(false);
-    }
-  };
-
   const toggle = (which) => setPanel((current) => (current === which ? null : which));
-  const openSignIn = () => {
-    if (workspaceSignIn) {
-      window.location.assign(workspaceSignIn);
-      return;
-    }
-    setPanel("signin");
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
   return (
     // .cp-split is the name the smoke suite knows the door by; the layout
     // is no longer a split.
@@ -443,19 +338,7 @@ function Door({ user }) {
               >
                 Early access
               </button>
-              {workspaceSignIn ? (
-                <a className="cp-btn cp-btn--primary" href={workspaceSignIn}>Log in</a>
-              ) : <button
-                type="button"
-                id="cp-tab-signin"
-                role="tab"
-                className="cp-btn cp-btn--primary"
-                aria-selected={panel === "signin"}
-                aria-controls="cp-panel-signin"
-                onClick={() => toggle("signin")}
-              >
-                Log in
-              </button>}
+              <a id="cp-tab-signin" className="cp-btn cp-btn--primary" href={loginHref}>Log in</a>
             </div>
           )}
         </div>
@@ -474,138 +357,6 @@ function Door({ user }) {
           </div>
         ) : null}
 
-        {!user && panel === "signin" ? (
-          <div id="cp-panel-signin" role="tabpanel" aria-labelledby="cp-tab-signin" className="cp-door__panel" ref={panelRef}>
-            {!PRESS_SIGN_IN_AVAILABLE ? (
-              // Standalone, provisioned with nothing. There is no account any
-              // password could match, so there is no form to offer one to.
-              <p className="cp-gate__fine" role="status">{PRESS_DEMO_UNCONFIGURED}</p>
-            ) : step === PRESS_STEP.SIGN_IN || !PRESS_ACTIVATION_AVAILABLE ? (
-              <>
-                <h2 className="cp-gate__sub">Log in with your email and password.</h2>
-                <form className="cp-gate__form" onSubmit={submitSignIn}>
-                  <input
-                    type="email"
-                    autoComplete="email"
-                    placeholder="Email address"
-                    aria-label="Email address"
-                    value={email}
-                    onChange={(event) => setEmail(event.target.value)}
-                    required
-                  />
-                  <input
-                    type="password"
-                    autoComplete="current-password"
-                    placeholder="Password"
-                    aria-label="Password"
-                    value={password}
-                    onChange={(event) => setPassword(event.target.value)}
-                    required
-                  />
-                  {error ? <p className="cp-gate__error" role="alert">{error}</p> : null}
-                  <button type="submit" className="cp-btn cp-btn--primary cp-btn--wide" disabled={pending}>
-                    {pending ? "Logging in" : "Log in"}
-                  </button>
-                </form>
-                <p className="cp-gate__aside">
-                  <a href={contactHref("Cedar Press password help")}>Forgot password?</a>
-                </p>
-                {/* The access-code flow only appears once its server routes
-                    exist; a form that ends at a 404 is worse than no form.
-                    Until then, subscriptions are provisioned and the login
-                    above is the whole way in. */}
-                {PRESS_ACTIVATION_AVAILABLE ? (
-                  <p className="cp-gate__aside">
-                    Have an access code?{" "}
-                    <button type="button" className="cp-split__linkbtn" onClick={() => go(PRESS_STEP.ACTIVATE)}>
-                      Activate Cedar Press
-                    </button>
-                  </p>
-                ) : (
-                  <p className="cp-gate__aside">
-                    New subscriber? Your account is set up with your Tribal Business News
-                    subscription, and your login details arrive by email.
-                  </p>
-                )}
-                {/* No build meta-copy on the door (owner, 2026-09-02). What it
-                    said is still true and still recorded where it is
-                    load-bearing: pressDemoGate.js's docstring and SECURITY.md. */}
-              </>
-            ) : step === PRESS_STEP.SET_PASSWORD ? (
-              <>
-                {/* The code is accepted by this point, so the only thing left is
-                    a password. Showing it earlier would have put four fields in
-                    front of someone who had not yet been told the code works. */}
-                <p className="cp-gate__ok" role="status">
-                  Code accepted for {email}. Choose a password to finish.
-                </p>
-                <form className="cp-gate__form" onSubmit={submitPassword}>
-                  <input
-                    type="password"
-                    autoComplete="new-password"
-                    placeholder="Choose a password"
-                    aria-label="Choose a password"
-                    minLength={12}
-                    value={password}
-                    onChange={(event) => setPassword(event.target.value)}
-                    required
-                  />
-                  {error ? <p className="cp-gate__error" role="alert">{error}</p> : null}
-                  <button type="submit" className="cp-btn cp-btn--primary cp-btn--wide" disabled={pending}>
-                    {pending ? "Activating" : "Activate Cedar Press"}
-                  </button>
-                </form>
-                <p className="cp-gate__aside">
-                  <button type="button" className="cp-split__linkbtn" onClick={() => go(PRESS_STEP.ACTIVATE)}>
-                    Use a different code
-                  </button>
-                </p>
-              </>
-            ) : (
-              <>
-                <h2 className="cp-gate__sub">Enter your access code to sign in.</h2>
-                <form className="cp-gate__form" onSubmit={submitCode}>
-                  <input
-                    type="text"
-                    inputMode="text"
-                    autoComplete="one-time-code"
-                    spellCheck={false}
-                    className="cp-code"
-                    placeholder="Access code"
-                    aria-label="Access code"
-                    value={code}
-                    onChange={(event) => setCode(event.target.value)}
-                    onBlur={() => setCode((current) => formatPressCode(current))}
-                    required
-                  />
-                  <input
-                    type="email"
-                    autoComplete="email"
-                    placeholder="Email address"
-                    aria-label="Email address"
-                    value={email}
-                    onChange={(event) => setEmail(event.target.value)}
-                    required
-                  />
-                  {error ? <p className="cp-gate__error" role="alert">{error}</p> : null}
-                  <button type="submit" className="cp-btn cp-btn--primary cp-btn--wide" disabled={pending}>
-                    {pending ? "Checking your code" : "Activate Cedar Press"}
-                  </button>
-                </form>
-                <p className="cp-gate__fine">
-                  Each Cedar Press access code is issued to one authorized user and may not be
-                  shared.
-                </p>
-                <p className="cp-gate__aside">
-                  Already set a password?{" "}
-                  <button type="button" className="cp-split__linkbtn" onClick={() => go(PRESS_STEP.SIGN_IN)}>
-                    Log in <span aria-hidden="true">&#8594;</span>
-                  </button>
-                </p>
-              </>
-            )}
-          </div>
-        ) : null}
       </header>
       <PressPreviewNotice />
 
@@ -640,9 +391,9 @@ function Door({ user }) {
                 {EARLY_ACCESS_LABEL} <span className="cp-btn__arrow" aria-hidden="true">&#8594;</span>
               </a>
               {user ? null : (
-                <button type="button" className="cp-btn cp-btn--quiet cp-btn--lg" onClick={openSignIn}>
+                <a className="cp-btn cp-btn--quiet cp-btn--lg" href={loginHref}>
                   Log in <span className="cp-btn__arrow" aria-hidden="true">&#8594;</span>
-                </button>
+                </a>
               )}
             </div>
           </div>
@@ -881,9 +632,9 @@ function Door({ user }) {
                 {EARLY_ACCESS_LABEL} <span className="cp-btn__arrow" aria-hidden="true">&#8594;</span>
               </a>
               {user ? null : (
-                <button type="button" className="cp-btn cp-btn--quiet cp-btn--lg" onClick={openSignIn}>
+                <a className="cp-btn cp-btn--quiet cp-btn--lg" href={loginHref}>
                   Log in <span className="cp-btn__arrow" aria-hidden="true">&#8594;</span>
-                </button>
+                </a>
               )}
             </div>
           </header>
