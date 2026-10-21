@@ -44,6 +44,12 @@ export default defineConfig({
   plugins: [react()],
   base: "/",
   build: { outDir: "dist-site" },
+  // The CSP allows only same-origin API calls, so locally the API is reached
+  // the way CloudFront serves it: /api/* with the prefix removed. Run the
+  // client with VITE_API_URL=http://localhost:5173/api.
+  server: {
+    proxy: { "/api": { target: "http://localhost:8000", rewrite: (path) => path.replace(/^\/api/, "") } },
+  },
   define: {
     __PRESS_BUILD_SHA__: JSON.stringify(process.env.PRESS_BUILD_SHA || gitSha()),
     __PRESS_BUILD_TIME__: JSON.stringify(new Date().toISOString()),

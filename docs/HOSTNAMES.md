@@ -2,8 +2,8 @@
 
 | Host | Serves |
 | --- | --- |
-| `cedarpress.ai` | The static client: the door, the tribal data request policy and research access, plus the gated app. |
-| `app.cedarpress.ai` | 301 to the same path on `cedarpress.ai` until the subscriber API has a host. |
+| `cedarpress.ai` | The marketing door, the tribal data request policy and research access. Log in goes to `app.cedarpress.ai/login`. |
+| `app.cedarpress.ai` | The workspace, the same static bundle. A signed-out visitor is sent to `/login?next=<path>` and returns there after signing in. The API is reached same-origin at `/api/*` (the content policy allows no other origin). |
 | `www.cedarpress.ai` | 301 to the same path on `cedarpress.ai`. |
 
 ## AWS (account `teim-prod`, us-east-1)

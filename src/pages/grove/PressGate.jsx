@@ -35,10 +35,10 @@
 // explaining why there is none.
 
 import { useEffect, useRef, useState } from "react";
-import { Link, useSearchParams } from "react-router";
+import { Link, Navigate, useLocation, useSearchParams } from "react-router";
 
 import { EARLY_ACCESS_HREF, EARLY_ACCESS_LABEL, contactHref } from "../../features/grove/appLink.js";
-import { requestedSignIn, workspaceSignInHref } from "../../features/grove/pressSessionNavigation.js";
+import { isWorkspaceHost, loginRedirect, requestedSignIn, workspaceSignInHref } from "../../features/grove/pressSessionNavigation.js";
 import { useAuth } from "../../context/useAuth";
 import { useFadeIn } from "../../features/grove/useFadeIn";
 import { activatePressAccount, validatePressCode } from "../../api";
@@ -194,7 +194,15 @@ function browserStorage() {
   }
 }
 
-export default function PressGate({ user }) {
+// The marketing door belongs to cedarpress.ai. On the workspace host a
+// signed-out visitor goes to the login page instead, and returns here after.
+export default function PressGate(props) {
+  const here = useLocation();
+  if (isWorkspaceHost(window.location)) return <Navigate to={loginRedirect(here)} replace />;
+  return <Door {...props} />;
+}
+
+function Door({ user }) {
   const { login, logout, refreshSession } = useAuth();
   // The page reads as one long scroll on a phone, so its sections arrive as
   // they enter the viewport instead of standing there already.

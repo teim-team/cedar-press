@@ -31,7 +31,7 @@ function handler(event) {
 
   if (host === "app.cedarpress.ai") {
     var path = uri.length > 1 && uri.endsWith("/") ? uri.slice(0, -1) : uri;
-    var pages = ["/", "/articles", "/data", "/settings", "/methods", "/whats-new", "/priorities", "/record",
+    var pages = ["/", "/login", "/articles", "/data", "/settings", "/methods", "/whats-new", "/priorities", "/record",
       "/tribal-data-request", "/research-access"];
     if (pages.indexOf(path) !== -1 || /^\/entity\/[^/]+$/.test(path) || /^\/articles\/[^/]+$/.test(path)) {
       // package.json copies this app shell before public-page prerendering.

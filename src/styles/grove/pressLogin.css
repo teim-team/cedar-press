@@ -1,0 +1,18 @@
+.teim-rd.cp-login {
+  --door-action-top: #0d8f83; --door-action-bottom: #086b62; --door-accent-light: #5fd9cc; --door-ink-3: #647279;
+  --door-shadow-control: 0 1px 2px rgba(10, 15, 38, 0.08); --door-ease: var(--cp-ease);
+  min-height: 100vh; display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); }
+.teim-rd .cp-login__side { display: flex; flex-direction: column; justify-content: center; gap: 1.2rem; padding: clamp(2rem, 6vw, 5rem); background: var(--dteal); color: #fff; }
+.teim-rd .cp-login__mark { width: 3rem; height: 3rem; object-fit: contain; filter: brightness(0) invert(1); }
+.teim-rd .cp-login__tag { margin: 0; font-family: var(--sans); font-weight: var(--weight-display); font-size: clamp(1.8rem, 3.4vw, 2.8rem); line-height: 1.1; letter-spacing: -0.02em; text-wrap: balance; }
+.teim-rd .cp-login__sub { margin: 0; max-width: 28rem; font-size: 1rem; line-height: 1.55; opacity: 0.85; }
+.teim-rd .cp-login__main { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.6rem; padding: 2rem 1rem; }
+.teim-rd .cp-login__brand { display: inline-flex; align-items: center; gap: 0.6rem; font-family: var(--sans); font-weight: var(--weight-display); font-size: 1.05rem; letter-spacing: var(--track-sub); text-transform: uppercase; color: var(--ink); text-decoration: none; }
+.teim-rd .cp-login__card { width: min(24rem, 100%); box-sizing: border-box; padding: 1.6rem 1.5rem 1.7rem; border: 1px solid var(--line); border-radius: 14px; background: var(--bg); }
+.teim-rd .cp-login__h { margin: 0 0 1rem; font-family: var(--sans); font-size: 1.4rem; font-weight: 700; letter-spacing: -0.015em; color: var(--ink); }
+.teim-rd .cp-login__back { margin: 0; font-size: 0.88rem; }
+.teim-rd .cp-login__back a { color: var(--dteal); }
+@media (max-width: 860px) {
+  .teim-rd.cp-login { grid-template-columns: minmax(0, 1fr); }
+  .teim-rd .cp-login__side { display: none; }
+}
