@@ -54,11 +54,10 @@ jobs:
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: "3.12"
-      - run: pip install -e server[dev] httpx2 coverage pip-audit
-      # `make audit-python` resolves the server's dependencies with uv before
-      # auditing them, rather than auditing this job's environment -- which
-      # also holds httpx2, coverage and pip-audit itself, none of which the
-      # server depends on.
+      - run: pip install -e server[dev]
+      # `make audit-python` resolves the server's declared dependencies with
+      # uv before auditing them, every extra included: the dev tools (ruff,
+      # httpx2, coverage, pip-audit) as well as postgres.
       - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
       - run: ruff check server
       # Through the Makefile, the same calls ci.yml makes -- and the

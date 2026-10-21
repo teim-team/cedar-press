@@ -93,17 +93,19 @@ class InfrastructureReleaseTest(unittest.TestCase):
 
     def test_owner_ruling_restricted_components_are_not_held_for_rights(self):
         # Owner ruling 2026-10-04 (Elijah Moreno): Lumecon transforms the data
-        # it publishes; source rights statuses are provenance, not a gate.
+        # it publishes; source rights statuses are provenance, not a gate. A
+        # restricted component gets the contract a permitted one gets, and any
+        # refusal, whatever its class, fails the test.
         for component in ("profiles", "housing", "datacenters"):
             with self.subTest(component=component):
-                try:
-                    repository.grove_component_contract(
-                        self.manifest(component, False), "infrastructure", component
-                    )
-                except repository.ComponentNotDeliverable as error:
-                    self.fail(f"rights status held {component}: {error}")
-                except repository.FullReleaseUnavailable:
-                    pass  # other contract checks may still apply to the fixture
+                permitted = repository.grove_component_contract(
+                    self.manifest(component, True), "infrastructure", component
+                )
+                restricted = repository.grove_component_contract(
+                    self.manifest(component, False), "infrastructure", component
+                )
+                # header, primary key and record count
+                self.assertEqual(restricted[1:4], permitted[1:4])
 
     def test_missing_component_refuses_without_substitute_rows(self):
         with self.assertRaisesRegex(repository.FullReleaseUnavailable, "not in the pinned release"):

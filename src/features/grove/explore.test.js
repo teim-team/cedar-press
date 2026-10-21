@@ -322,6 +322,9 @@ test("a bill's several entities are each an entity, deduplicated, and a year fal
   assert.equal(rowYear({ fiscal_year: "", action_date: "2007-12-05" }, funding), null);
   assert.equal(rowYear({ fiscal_year: "2008", action_date: "2007-12-05" }, funding), 2008);
   assert.equal(funding.year_basis, "federal fiscal year");
+  // A reporting period's year is the calendar year it starts in (F-87).
+  assert.equal(contractFor("natural-resources/natural-resources").year_basis,
+    "calendar year in which the reported period starts");
 });
 
 test("an amount that is blank or not a number is null, never zero", () => {

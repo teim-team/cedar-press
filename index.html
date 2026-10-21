@@ -97,10 +97,15 @@
          set as a header, so clickjacking protection has to come from a proxy
          or a host that can set one; and this cannot be report-only.
 
-         `connect-src` allows the API origin and Datadog's intake. Both are
-         configured at build time and neither is known here, so the wildcards
-         are on the subdomain rather than the scheme — https: alone would allow
-         every host on the web to be called. -->
+         `connect-src` allows the API origin and Datadog's browser intake.
+         The API origin is configured at build time and is not known here, so
+         its wildcard is on the subdomain rather than the scheme: https: alone
+         would allow every host on the web to be called. Datadog's SDK sends to
+         browser-intake-datadoghq.com for the US1 site, not to a subdomain of
+         datadoghq.com, so its hosts are named exactly: US1 (the default site,
+         src/config.js) and EU1. Another VITE_DATADOG_SITE, or turning on
+         Session Replay (which also needs worker-src blob:), needs this policy
+         changed; src/contentSecurityPolicy.test.js checks it. -->
     <meta
       http-equiv="Content-Security-Policy"
       content="default-src 'self';
@@ -111,7 +116,7 @@
                font-src 'self';
                style-src 'self' 'unsafe-inline';
                script-src 'self';
-               connect-src 'self' https://*.lumecon.ai https://*.datadoghq.com https://*.datadoghq.eu;
+               connect-src 'self' https://*.lumecon.ai https://browser-intake-datadoghq.com https://browser-intake-datadoghq.eu;
                frame-src 'none'"
     />
 
