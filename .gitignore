@@ -242,3 +242,9 @@ server/var/
 # `make audit-python` resolves the server dependencies here before auditing.
 .audit-requirements.txt
 !/data/cedar/infrastructure_component_contracts.json
+
+# Terraform working files; the lock file is committed.
+infra/terraform/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
