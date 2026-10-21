@@ -55,6 +55,25 @@ resource "aws_iam_role_policy" "app_runtime" {
   })
 }
 
+# AmazonSSMManagedInstanceCore grants ssm:GetParameter* on "*", so the allow above does not
+# narrow anything. An explicit deny keeps this host to its own parameters.
+resource "aws_iam_role_policy" "app_deny_other_parameters" {
+  name = "deny-other-parameters"
+  role = aws_iam_role.app.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Deny"
+      Action = ["ssm:GetParameter", "ssm:GetParameters", "ssm:GetParametersByPath"]
+      NotResource = [
+        "arn:aws:ssm:${var.aws_region}:${local.account_id}:parameter${local.prefix}",
+        "arn:aws:ssm:${var.aws_region}:${local.account_id}:parameter${local.prefix}/*"
+      ]
+    }]
+  })
+}
+
 # --- GitHub Actions deploy role (OIDC) ---
 
 resource "aws_iam_role" "github_actions" {
