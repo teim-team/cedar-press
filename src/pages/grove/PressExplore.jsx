@@ -64,6 +64,7 @@ import {
   sortRows,
 } from "../../features/grove/explore.js";
 import { useSampleRows } from "../../features/grove/useSamples.js";
+import { REGISTER_PATH } from "../../features/grove/useRegister.js";
 import { recordHref, rememberReturn, takeReturn } from "../../features/grove/pressRecord.js";
 import { PRESS_METHODS_PATH } from "../../features/grove/pressRoutes.js";
 import { LAUNCH_COLLECTION } from "../../features/grove/collection.js";
@@ -76,7 +77,6 @@ const DEFAULT_COLLECTION = "funding";
 import { Cards, Human, Rows } from "./PressRecordTable.jsx";
 import { columnPlan, short } from "../../features/grove/recordColumns.js";
 import { coverageLabel, upgradeFor } from "../../features/grove/pressAccess.js";
-import { RecordStructureCap, RecordStructureTable } from "./PressRecordStructure.jsx";
 import { articleHref, articlesDrawingOn } from "../../features/grove/pressArticles.js";
 import { EARLY_ACCESS_HREF } from "../../features/grove/appLink.js";
 import { useProtectedArticles } from "../../features/grove/useProtectedArticles.js";
@@ -93,7 +93,6 @@ import PressReadingKey from "./PressReadingKey.jsx";
 /** Row counts as the launch descriptors state them, keyed by collection. */
 const ROWS_BY_ID = Object.fromEntries(LAUNCH_COLLECTION.map((e) => [e.id, e.rowsLabel]));
 
-const REGISTER_PATH = "/data/cedar/register.json";
 const SAVED_KEY = "cp.explore.saved";
 const ALL = "__all__";
 const SUBSET = "__subset__";
@@ -570,17 +569,16 @@ function CollectionAtlas({ collections, query, onSelect }) {
             </tr>
           </thead>
           <tbody>
-            {visible.map(({ entry, open, flagship, structure, previewUnavailable }) => {
+            {visible.map(({ entry, open, flagship, previewUnavailable }) => {
               const release = LAUNCH_COLLECTION.find((item) => item.id === entry.id);
               const upgrade = upgradeFor(entry);
-              // A collection presented by its record structure opens by plan
-              // like any other; only a missing sample preview is its own state.
-              const unavailable = !flagship && !structure;
+              // Only a missing sample preview is its own state.
+              const unavailable = !flagship;
               const locked = !open && !unavailable;
               // No span and no row count for a collection that states none:
               // the cell is left empty rather than holding a placeholder.
               const coverage = coverageLabel(entry);
-              const rows = ROWS_BY_ID[entry.id] ?? (structure ? "" : "—");
+              const rows = ROWS_BY_ID[entry.id] ?? "—";
               // The data refresh, not the release date (2026-10-06).
               const updated = release?.refreshed ? formatUpdated(release.refreshed) : "";
               const access = (compact = false) => {
@@ -653,16 +651,12 @@ function InactiveCollectionToolbar({ entry, onAbout }) {
 }
 
 function LockedCollection({ collection, onAbout }) {
-  const { entry, flagship, structure } = collection;
+  const { entry, flagship } = collection;
   const upgrade = upgradeFor(entry);
   const release = LAUNCH_COLLECTION.find((item) => item.id === entry.id);
   const contract = flagship ? contractFor(flagship.key) : null;
-  // A collection presented by its record structure names its own fields in
-  // the locked frame, where another names its release's default columns.
-  const columns = structure
-    ? structure.fields.slice(0, 6).map((field) => field.name)
-    : (contract?.default_columns ?? []).slice(0, contract?.mapping_kind === "producer_spreadsheet" ? 8 : 6);
-  const columnLabel = (column) => (structure ? column.replace(/_/g, " ") : labelFor(flagship.key, column));
+  const columns = (contract?.default_columns ?? []).slice(0, 6);
+  const columnLabel = (column) => labelFor(flagship.key, column);
   const rows = ROWS_BY_ID[entry.id];
 
   return (
@@ -706,9 +700,7 @@ function LockedCollection({ collection, onAbout }) {
           </p>
           <p className="cp-lock__say">
             Available with <TierName name={upgrade.name} />.{" "}
-            {structure
-              ? "It opens on what each record holds and how the collection connects to the others."
-              : "The published preview, filters, and sample export are included together."}{" "}
+            The published preview, filters, and sample export are included together.{" "}
             <a href={EARLY_ACCESS_HREF}>
               Request early access to <TierName name={upgrade.name} /> <span aria-hidden="true">&#8594;</span>
             </a>
@@ -746,34 +738,6 @@ function UnavailableCollection({ collection, onAbout }) {
           <p className="cp-lock__say">
             This collection is listed for transparency. The current release does not offer a public preview or self-service table access.
           </p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/**
- * An open collection presented by its record structure (Foundation &
- * Corporate Giving, PLOT): the product's frame and bar, with what each
- * record holds where another collection's sample records sit. It reads as
- * the collection's own view, not as an absence: the fields, what each one
- * means, and how the collection connects to the others. No row count, year
- * span or sample value is shown, because none is stated for it.
- */
-function StructureCollection({ collection, onAbout }) {
-  const { entry } = collection;
-  return (
-    <div className="cp-lock cp-structview" data-testid="explore-structure" data-collection={entry.id}>
-      <div className="cp-ex__bar" role="group" aria-label="This collection">
-        <h1 className="cp-ex__title">{entry.name}</h1>
-        <AboutCollectionLink onOpen={onAbout} />
-      </div>
-      <div className="cp-ex__card">
-        <RecordStructureCap collectionId={entry.id} className="cp-structview__cap" />
-        <RecordStructureTable collectionId={entry.id} name={entry.name} />
-        <div className="cp-ex__foot">
-          <p className="cp-ex__caption">{entry.blurb}</p>
-          {entry.linkage ? <p className="cp-lock__say">{entry.linkage}</p> : null}
         </div>
       </div>
     </div>
@@ -865,9 +829,7 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
   // A collection can be in the catalog and on a reader's plan while its
   // publication rule still withholds the preview. That needs its own state:
   // it is neither a locked table nor an empty search result.
-  const unavailableSingle = [single, lockedSingle].find((collection) => collection && !collection.flagship && !collection.structure) ?? null;
-  // Open and presented by its record structure: the collection's own view.
-  const structureSingle = single && !single.flagship && single.structure ? single : null;
+  const unavailableSingle = [single, lockedSingle].find((collection) => collection && !collection.flagship) ?? null;
   const recordFiltersActive = Boolean(
     cut.entities?.length || cut.scopes?.length || cut.types !== null || cut.years || cut.q || cut.history,
   );
@@ -890,7 +852,7 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
       : collections.filter((c) => selected.includes(c.entry.id) && c.flagship).map((c) => c.flagship)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   ), [collections, selectedKey, tableKey]);
-  const noPreview = collections.filter((c) => selected.includes(c.entry.id) && !c.flagship && !c.structure);
+  const noPreview = collections.filter((c) => selected.includes(c.entry.id) && !c.flagship);
 
   const { rows, missing, columns, loading, retry: retrySamples } = useSampleRows(tables, register);
   const facets = useMemo(() => facetsOf(rows, register), [rows, register]);
@@ -1138,8 +1100,6 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
       <div className="cp-ex__in">
         {unavailableSingle ? (
           <UnavailableCollection collection={unavailableSingle} onAbout={() => write({ about: true })} />
-        ) : structureSingle ? (
-          <StructureCollection collection={structureSingle} onAbout={() => write({ about: true })} />
         ) : lockedSingle ? (
           <LockedCollection collection={lockedSingle} onAbout={() => write({ about: true })} />
         ) : (

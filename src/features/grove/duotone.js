@@ -20,7 +20,7 @@ export const DUOTONES = Object.freeze({
   slate: Object.freeze({ shadow: [23, 38, 48], highlight: [150, 163, 170] }),
 });
 
-export const DEFAULT_TONE = "teal";
+const DEFAULT_TONE = "teal";
 
 /** A known wash name, falling back to teal for anything else. */
 export function toneOf(name) {

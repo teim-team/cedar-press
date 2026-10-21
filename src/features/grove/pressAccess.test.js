@@ -5,7 +5,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { LAUNCH_COLLECTION, STRUCTURE_ONLY } from "./collection.js";
+import { LAUNCH_COLLECTION } from "./collection.js";
 import {
   NATIVE_LINKAGE,
   GROVE_INCLUDES,
@@ -191,17 +191,11 @@ test("the upgrade prompt names the product that actually opens the shelf", () =>
 // The other direction matters as much: a catalog entry with no descriptor
 // behind it is a collection the shelf sells and the API cannot serve, which
 // is what the Gaming Intelligence preview was.
-//
-// Two catalog entries have no release file here, and they are named: a
-// catalog entry with no release is allowed only with `coverage: STRUCTURE`,
-// so no span or count can ever be stated for it, and a release landing for
-// one fails this until its coverage is measured.
 test("all fourteen Press collections have measured previews and Gaming remains excluded", () => {
   const shipping = LAUNCH_COLLECTION.map(dataset => dataset.id).sort();
   assert.deepEqual(shipping, PRESS_CATALOG.map(entry => entry.id).sort());
   assert.equal(shipping.length, 14);
   assert.ok(!shipping.includes("gaming"));
-  assert.deepEqual([...STRUCTURE_ONLY], []);
   for (const dataset of LAUNCH_COLLECTION) assert.equal(dataset.shelf, PRESS_CATALOG_BY_ID[dataset.id].shelf);
 });
 
@@ -268,7 +262,7 @@ test("every series states a plausible year and every roster a capture date", () 
       assert.ok(from >= 1800, `${entry.id}: ${from}`);
       assert.ok(from <= thisYear, `${entry.id}: ${from}`);
       assert.equal(captured, undefined, `${entry.id} is a series with a capture date`);
-    } else if (kind === "structure" || kind === "observations") {
+    } else if (kind === "observations") {
       // Nothing measured: neither a year nor a capture date.
       assert.equal(from, undefined, `${entry.id} states a from year with no measurement`);
       assert.equal(captured, undefined, `${entry.id} states a capture date with no measurement`);

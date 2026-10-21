@@ -14,7 +14,8 @@ proved.
 
 WHAT REPLACES THIS
 The issuance table Tribal Business News writes to, and the subscriber table
-the account lands in. The seams are ``_register`` and ``_spent``: everything
+the account lands in. The seams are ``subscribers.find_code`` (the database,
+or ``CEDAR_PRESS_CODES`` without one) and ``_spent``: everything
 else — the checks, their order, the error codes the client already renders —
 stays as it is.
 
@@ -27,8 +28,6 @@ convenient.
 from __future__ import annotations
 
 import hmac
-import json
-import os
 import re
 from dataclasses import dataclass
 from datetime import date
@@ -87,41 +86,6 @@ class Issued:
             # into a permanent code is worse than the one that sends a
             # subscriber back to Tribal Business News.
             return True
-
-
-def _register() -> dict[str, Issued]:
-    """Issued codes, from ``CEDAR_PRESS_CODES``.
-
-    A JSON object::
-
-        {"TBN-2026-ABCD-1234": {"email": "reader@example.org",
-                                "tier": "press",
-                                "expires": "2027-01-31"}}
-
-    Empty by default, so a service started without a register activates
-    nobody.
-    """
-    raw = os.environ.get("CEDAR_PRESS_CODES", "").strip()
-    if not raw:
-        return {}
-    try:
-        parsed = json.loads(raw)
-    except json.JSONDecodeError:
-        return {}
-    issued: dict[str, Issued] = {}
-    for code, record in parsed.items():
-        if not isinstance(record, dict) or not record.get("email"):
-            continue
-        key = normalize(code)
-        if not key:
-            continue
-        issued[key] = Issued(
-            code=key,
-            email=str(record["email"]).strip().lower(),
-            tier=str(record.get("tier", "press")),
-            expires=(str(record["expires"]) if record.get("expires") else None),
-        )
-    return issued
 
 
 #: Codes spent in this process. The real one is a column on the issuance

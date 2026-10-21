@@ -1,15 +1,14 @@
 // Maintained researcher documentation, with shared parsing, formatting and freshness gates.
-//   node scripts/docs-markdown.mjs --kind codebook|field-map|guides|all [--check]
-// Field-map reports retain historical raw fixtures; current guides describe each collection's download:
+//   node scripts/docs-markdown.mjs --kind codebook|guides|all [--check]
+// The guides describe each collection's download:
 // its header, grain and column meanings as the site's reader shows them (codebookFor in explore.js).
-import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { assertReleasedDictionary, releasedBook } from "./release-docs.mjs";
 import { LAUNCH_COLLECTION } from "../src/features/grove/collection.js";
 import { codebookFor, loadCodebook } from "../src/features/grove/explore.js";
 const REPO = fileURLToPath(new URL("..", import.meta.url));
-const SAMPLES = REPO + "server/tests/fixtures/legacy-preview/samples/";
 const OUT_DIR = REPO + "docs/guides/";
 const readData = (name) => JSON.parse(readFileSync(REPO + "data/cedar/" + name, "utf8"));
 // codebookFor reads the codebook this loads.
@@ -92,196 +91,6 @@ export function render() {
   return lines.join("\n") + "\n";
 }
 
-
-/** Column names that name a competing entity identifier, in any table. */
-export const COMPETING_ID = /duns|neid|cicd|casino[ _-]?city|tribe_id|_candidate|proposed|resolver|(^|_)(native_)?entity_id$|resolved_(native_)?entity_id|existing_cedar_uid|_uid_candidate/i;
-/** A retired scheme's name inside a value; `_` and a word boundary both separate. */
-export const RETIRED_TOKEN = /(?<![a-z])(neid|cicd|casino[ _-]?city)(?![a-z])/i;
-
-function header(path) { return parseCsv(readFileSync(path, "utf8")).columns ?? []; }
-function sampleRows(collection, table) {
-  const path = SAMPLES + collection + "/" + table + "__10.csv";
-  return existsSync(path) ? parseCsv(readFileSync(path, "utf8")).rows : null;
-}
-
-/** Every supporting-table sample column that names a competing identifier. */
-export function scanSupportingTables(map) {
-  const flagships = new Set(Object.keys(map.tables).map((k) => `${k}__10.csv`));
-  const hits = [];
-  for (const collection of readdirSync(SAMPLES).sort()) {
-    const dir = `${SAMPLES}${collection}`;
-    let files;
-    try { files = readdirSync(dir).filter((f) => f.endsWith(".csv")).sort(); } catch { continue; }
-    for (const file of files) {
-      const key = `${collection}/${file}`;
-      if (flagships.has(key)) continue;
-      const cols = header(`${dir}/${file}`).filter((c) => COMPETING_ID.test(c));
-      if (cols.length) hits.push({ table: key.replace(/__10\.csv$/, ""), columns: cols });
-    }
-  }
-  return hits;
-}
-
-export function renderMap() {
-  const map = readData("field_map.json");
-  const manifest = readData("collections.manifest.json");
-  const byId = Object.fromEntries(manifest.collections.map((c) => [c.id, c]));
-  const lines = [];
-  const p = (s = "") => lines.push(s);
-  p("# Cedar Press datasets: historical field-by-field transform map");
-  p();
-  p("Generated from `data/cedar/field_map.json` by `scripts/docs-markdown.mjs --kind field-map`; edit the JSON, not this file. Written 2026-09-05.");
-  p();
-  p("## What this is");
-  p();
-  p("The companion to the owner's exact public column specification (`docs/PUBLIC_DATASET_SPEC_2026-09-05.md`, addendum, at the tag `data-workspace-final`): for each flagship, every column its current sample header carries with one decision, the approved public header in the owner's exact order, the owner's default viewer selection, and a retirement entry for every competing entity identifier. The customer-file writer generates the export from this list (`code/1137_customer_dataset_combine.py` through `cedar_publication.apply_field_map`): it renames, drops what is internal or documented, fills the opening block from the register, builds the plural aligned arrays and the named rules, verifies every alias, orders the header exactly, and refuses a dataset that carries a column with no decision, an identifier awaiting adjudication, or a retired scheme's name in a shipped column or value. This pass changes columns, never rows, identities or publication eligibility.");
-  p();
-  p("This dated map describes historical raw inputs, retained as private regression fixtures in `server/tests/fixtures/legacy-preview/`. Current public previews are already-projected, verified producer spreadsheets; this map is not reapplied to them. Their field definitions, record types, grains and pinned releases are in `docs/DATASET_CODEBOOK.md` and the collection guides.");
-  p();
-  p("## Current public spreadsheet previews");
-  p();
-  p("| Collection | Public file | Permitted observations | Record types |");
-  p("|---|---|---:|---|");
-  for (const collection of manifest.collections) {
-    for (const table of collection.tables ?? []) {
-      if (!table.sample_path || !table.record_types) continue;
-      p(`| ${esc(collection.name ?? collection.id)} | \`${esc(table.table)}\` | ${table.rows_published ?? table.rows_in ?? "—"} | ${Object.entries(table.record_types).map(([kind, count]) => `${esc(kind)}: ${count}`).join("; ")} |`);
-    }
-  }
-  p();
-  p("Counts are permitted source observations, not unique Native entities or businesses. A CE association identifies the role stated on its row; owner, certifier and business are not interchangeable.");
-  p();
-  p("**Decisions:**");
-  p();
-  for (const [name, meaning] of Object.entries(map.decisions)) p(`- \`${name}\`: ${meaning}`);
-  p();
-  p("**Retirement dispositions:**");
-  p();
-  for (const [name, meaning] of Object.entries(map.dispositions)) p(`- \`${name}\`: ${meaning}`);
-  p();
-  p("**The opening block:**");
-  p();
-  p(`Singular, for a record with one canonical Native entity association: ${map.opening.singular.map((c) => `\`${c}\``).join(", ")}. Plural, for Legislation and NAGPRA: ${map.opening.plural.map((c) => `\`${c}\``).join(", ")}, aligned JSON arrays.`);
-  p();
-  for (const name of [...map.opening.singular, ...map.opening.plural]) p(`- \`${name}\`: ${map.opening[name]}`);
-  p();
-  p(`**\`research_note\`:** ${map.research_note}`);
-  p();
-  p("## Column counts");
-  p();
-  p("| Dataset | Inspected columns | Public columns | Keep | Rename | Withhold | Combine | Derive | Document | Internal | Owed | Retirement entries |");
-  p("|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|");
-  for (const [key, t] of Object.entries(map.tables)) {
-    const count = (d) => t.fields.filter((f) => f.decision === d).length;
-    const owed = t.new.filter((n) => n.status === "pending").length;
-    p(`| \`${key}\` | ${t.columns_today ?? "no sample"} | ${t.columns_target} | ${count("keep")} | ${count("rename")} | ${count("withhold")} | ${count("combine")} | ${count("derive")} | ${count("document")} | ${count("internal")} | ${owed} | ${t.retire.length} |`);
-  }
-  p();
-  p("\"Public columns\" is the approved header including columns still owed; \"Owed\" counts the target columns the terminal builds from the full table (a combine crosswalk, an editorial note) and which are absent, never blank, until they exist. Funding ships 39 where the owner's list says 40: `recipient_duns` is retired under the rule in the same addendum.");
-  p();
-  p("## The datasets");
-  p();
-  for (const [key, t] of Object.entries(map.tables)) {
-    const collection = byId[t.collection];
-    p(`### ${collection?.name ?? t.collection} (\`${key}\`)`);
-    p();
-    p(`**Public file:** \`${t.public_file}\` · **One row is:** ${t.row}`);
-    p();
-    if (t.note) { p(`**Note:** ${t.note}`); p(); }
-    p(`**Entity role (\`cedar_entity_role\` / \`entity_roles\`):** ${t.entity_role}${t.primary_role ? ` · the primary list's role is *${t.primary_role}*` : ""}`);
-    if (t.entity_roles?.length) {
-      p();
-      p("Role-specific links on the row, each an entity of the record the viewer finds it by:");
-      p();
-      for (const r of t.entity_roles) p(`- \`${r.column}\`: ${r.role}${r.list ? " (several)" : ""}`);
-    }
-    p();
-    p(`**Approved header, exact order (${t.order.length}):** ${t.order.map((c) => `\`${c}\``).join(", ")}`);
-    p();
-    p(`**Default viewer:** ${t.default_viewer.map((c) => `\`${c}\``).join(", ")}`);
-    p();
-    if (t.fields.length) {
-      p(`**Every current column and its decision (${t.fields.length}):**`);
-      p();
-      p("| # | Column today | Decision | Ships as | Why | Spec |");
-      p("|---|---|---|---|---|---|");
-      t.fields.forEach((f, i) => {
-        const to = f.decision === "keep" || f.decision === "withhold" ? f.column : f.to ?? "";
-        const why = f.retire ? `${f.why} *Retirement: ${f.retire.disposition}.*` : f.why;
-        p(`| ${i + 1} | \`${f.column}\` | ${f.decision} | ${to ? `\`${to}\`` : "—"} | ${esc(why)} | ${f.spec ?? ""} |`);
-      });
-      p();
-    }
-    if (t.new.length) {
-      p(`**Target columns built at write time or owed (${t.new.length}):**`);
-      p();
-      p("| Column | From | Why | Status |");
-      p("|---|---|---|---|");
-      for (const n of t.new) p(`| \`${n.column}\` | ${esc(n.from)} | ${esc(n.why)} | ${n.status ?? "built at write time"} |`);
-      p();
-    }
-  }
-  p("## What is not decided here");
-  p();
-  p("- Every `combine`: the sources are tested for agreement across the full table before one column replaces them; until then the sources stay in the workspace and the target is absent.");
-  p("- Every `derive` marked owed: the editorial `research_note` for Deals, the date precision for the Federal Register, the names as published for Legislation and NAGPRA from the bridge.");
-  p("- This historical Native-owned businesses map predates the current producer spreadsheet. The current row grain is a source certification or directory listing, not necessarily one unique business.");
-  p("- Historical NEED, Nonprofits and Funding transformation holds remain regression controls for those raw inputs. They do not describe the eligibility of a new producer release.");
-  p();
-  return lines.join("\n") + "\n";
-}
-
-export function renderRetirement() {
-  const map = readData("field_map.json");
-  const lines = [];
-  const p = (s = "") => lines.push(s);
-  p("# Historical identifier retirement report");
-  p();
-  p("Generated from `data/cedar/field_map.json` and the sample headers by `scripts/docs-markdown.mjs --kind field-map`; edit the map, not this file. Written 2026-09-05 under the retirement rule in `docs/PUBLIC_DATASET_SPEC_2026-09-05.md` (addendum; at the tag `data-workspace-final`): migrate, reconcile, verify, retire, regression-test.");
-  p();
-  p("## The rule, as enforced");
-  p();
-  p("`cedar_uid` is Cedar's one cross-dataset identity. Every competing entity identifier in a flagship's header has a retirement entry in the map with what it identifies and its disposition. The writer (`cedar_publication.apply_field_map`) enforces the dispositions on every build: an `alias_verified` column is compared to `cedar_uid` on every row and the dataset is refused where they differ; an `adjudicate` column stops the dataset wherever it is populated, and is neither retained nor deleted; a `retired_scheme` name in any shipped value, or a prohibited name in the header, stops the dataset. The site's explore test suite fails if a prohibited identifier returns to any approved header, and the writer fails at build if one returns to a value.");
-  p();
-  p("`rows_affected` below is the count in the historical raw test fixture, not the current public preview or the current release. The historical writer prints its full-table disposition count on its own build. Current release field and identity contracts are documented in `docs/DATASET_CODEBOOK.md`.");
-  p();
-  p("## Flagship identifiers");
-  p();
-  p("| dataset | old_identifier | what_it_identified | cedar_uid_or_replacement | disposition | rows_affected (sample) | unresolved_count (sample) |");
-  p("|---|---|---|---|---|---:|---:|");
-  for (const [key, t] of Object.entries(map.tables)) {
-    const rows = t.fields.length ? sampleRows(t.collection, key.split("/")[1]) : null;
-    for (const r of t.retire) {
-      const affected = rows ? rows.filter((row) => (row[r.column] ?? "").trim()).length : "—";
-      let unresolved = 0;
-      if (rows && r.disposition === "adjudicate") unresolved = affected;
-      if (rows && r.disposition === "alias_verified") {
-        unresolved = rows.filter((row) => (row[r.column] ?? "").trim() && (row[t.entity_uid] ?? "").trim() && row[r.column].trim() !== row[t.entity_uid].trim()).length;
-      }
-      if (rows && r.value_level) unresolved = rows.filter((row) => RETIRED_TOKEN.test(row[r.column] ?? "")).length;
-      p(`| \`${t.collection}\` | \`${r.column}\` | ${esc(r.identifies)} | ${esc(r.replacement)} | ${r.disposition} | ${affected} | ${unresolved} |`);
-    }
-  }
-  p();
-  p("The entries above describe historical raw transform inputs and their unresolved dispositions, not current producer release eligibility. Preserve evidence and issued IDs, and distinguish CE associations, business identities and source record keys.");
-  p();
-  p("## Supporting tables");
-  p();
-  p("Supporting tables are not customer downloads, but the rule reaches the whole pipeline: every supporting-table sample column that names a competing identifier, for the terminal to migrate to `cedar_uid` or an object identifier, move to the identity layer, or adjudicate. The pattern is the same one the regression test applies to public headers.");
-  p();
-  const hits = scanSupportingTables(map);
-  p("| table | columns |");
-  p("|---|---|");
-  for (const h of hits) p(`| \`${h.table}\` | ${h.columns.map((c) => `\`${c}\``).join(", ")} |`);
-  p();
-  p(`${hits.length} supporting tables carry such a column in their samples. Columns whose name ends in \`_entity_id\` are listed because they may hold a Cedar uid under another name (an alias to verify) or a non-Cedar namespace (an object id to keep, as Natural Resources' payer and operator ids are); each needs the same determination the flagship columns received.`);
-  p();
-  p("## The rest of the pipeline");
-  p();
-  p("Measured with `git grep -il` on 2026-09-05, as the inventory of remaining dependencies, not as a claim they are all customer-facing: 84 files under `code/` mention DUNS, 43 mention the NEID scheme by name, 53 mention CICD, and 67 files across the repository mention Casino City. `code/843_retire_cicd_scheme.py` and `code/844_nuke_cicd.py` did the first retirement; `cedar_publication.translate_neid_values` still translates NEID tokens inside strings at load, which is the migration half of the rule and stays. Two sample files carry a retired scheme's name in a value: `funding/federal_funding_transactions` (`attribution_status`, above) and `deals/ownership_events` (`neid_join_status`, a supporting table).");
-  p();
-  return lines.join("\n") + "\n";
-}
 
 
 export const SECTIONS = [
@@ -744,7 +553,7 @@ function guideFor(collection) {
   const owed = (map?.new ?? []).filter((n) => n.status);
   const adjudicate = (map?.retire ?? []).filter((r) => r.disposition === "adjudicate" || r.value_level);
   if (adjudicate.length) {
-    p("Identifier retirement findings that stop this dataset until they are settled (see `docs/IDENTIFIER_RETIREMENT_2026-09-05.md`):");
+    p("Identifier retirement findings that stop this dataset until they are settled (the 2026-09-05 identifier retirement report is at the tag `data-workspace-final`):");
     p();
     for (const r of adjudicate) p(`- \`${r.column}\`: ${esc(r.identifies)} (${r.disposition}).`);
     p();
@@ -800,23 +609,19 @@ export function parseDocumentArguments(argv) {
   const seen = new Set();
   for (let i = 0; i < argv.length; i += 1) {
     const flag = argv[i];
-    if (!["--kind", "--check"].includes(flag) || seen.has(flag)) throw new Error("Use --kind codebook|field-map|guides|all [--check].");
+    if (!["--kind", "--check"].includes(flag) || seen.has(flag)) throw new Error("Use --kind codebook|guides|all [--check].");
     seen.add(flag);
     if (flag === "--check") check = true;
     else kind = argv[++i];
   }
-  if (!["codebook", "field-map", "guides", "all"].includes(kind)) throw new Error("Choose --kind codebook, field-map, guides or all.");
+  if (!["codebook", "guides", "all"].includes(kind)) throw new Error("Choose --kind codebook, guides or all.");
   return { kind, check };
 }
 
 export function renderDocuments(kind) {
   if (kind === "codebook") return { [REPO + "docs/DATASET_CODEBOOK.md"]: render() };
-  if (kind === "field-map") return {
-    [REPO + "docs/FIELD_MAP_2026-09-05.md"]: renderMap(),
-    [REPO + "docs/IDENTIFIER_RETIREMENT_2026-09-05.md"]: renderRetirement(),
-  };
   if (kind === "guides") return renderAll();
-  if (kind === "all") return Object.assign({}, renderDocuments("codebook"), renderDocuments("field-map"), renderDocuments("guides"));
+  if (kind === "all") return Object.assign({}, renderDocuments("codebook"), renderDocuments("guides"));
   throw new Error("Unknown document kind.");
 }
 

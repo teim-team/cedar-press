@@ -66,13 +66,7 @@ import { PRESS_SOURCES } from "./pressSources.js";
 /** Kinds of source behind the released collections. Counted, never typed. */
 export const RELEASED_SOURCE_KINDS = PRESS_SOURCES.filter((source) => !source.declared).length;
 
-export const SOURCE_REACH_CLAIM =
-  `Cedar Press collections are built from ${RELEASED_SOURCE_KINDS} kinds of public source, ` +
-  "including federal systems, filings and the registries nations and their enterprises publish.";
-
 export const SOURCE_REACH_FIGURE = String(RELEASED_SOURCE_KINDS);
-/** The unit the figure counts, said where the figure is shown. */
-export const SOURCE_REACH_UNIT = "kinds of source behind the collections";
 export const SOURCE_REACH_UPDATED = "2026-10-06";
 
 export const SOURCE_ROTATION = Object.freeze([

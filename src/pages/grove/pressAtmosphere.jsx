@@ -40,11 +40,3 @@ export function Contours({ className = "", strength = 1 }) {
     </svg>
   );
 }
-
-/** A faint ring, for a corner that would otherwise be flat colour. */
-export function Halo({ className = "", strength = 1 }) {
-  const ref = useParallax(strength);
-  return (
-    <span ref={ref} className={`cp-atmo cp-atmo--halo ${className}`} aria-hidden="true" />
-  );
-}

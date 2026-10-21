@@ -143,23 +143,3 @@ def need_preview_permitted(repo, collection, table, sample_path=None):
         csv.Error,
     ):
         return False
-
-
-def current_need_preview_permitted(repo):
-    """Check the declared current sample, never an arbitrary NEED file."""
-    try:
-        manifest = json.loads(
-            (Path(repo) / "data/cedar/collections.manifest.json").read_text(encoding="utf-8")
-        )
-        selected = [entry for entry in manifest["collections"] if entry.get("id") == "need"]
-        if len(selected) != 1:
-            return False
-        collection = selected[0]
-        tables = [
-            table
-            for table in collection["tables"]
-            if table.get("sample_path") == collection.get("sample", {}).get("path")
-        ]
-        return len(tables) == 1 and need_preview_permitted(repo, collection, tables[0])
-    except (OSError, ValueError, TypeError, KeyError, AttributeError):
-        return False

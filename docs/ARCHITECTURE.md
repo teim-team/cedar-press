@@ -53,17 +53,17 @@ git ls-files src/<dir>/grove                                   # files to move
 
 | | |
 |---|---|
-| Files to move | 189 — `features/grove` 141, `pages/grove` 45, `components/grove` 1, `styles/grove` 2 |
-| Path references to rewrite | 431, across 92 files |
-| Referencing files inside `src/` | 56 — `pages/` 37, `features/` 15, `context/` 2, `components/` 1, `main.jsx` 1 |
-| Referencing files outside `src/` | 36 — `server/cedar_press/` 8, `scripts/` 8, `docs/` 7, `server/tests/` 5, `tests/` 3, `data/` 2, `.github/` 1, `.env.example` 1, `eslint.config.js` 1 |
+| Files to move | 184 — `features/grove` 137, `pages/grove` 44, `components/grove` 1, `styles/grove` 2 |
+| Path references to rewrite | 411, across 90 files |
+| Referencing files inside `src/` | 55 — `pages/` 36, `features/` 15, `context/` 2, `components/` 1, `main.jsx` 1 |
+| Referencing files outside `src/` | 35 — `server/cedar_press/` 8, `scripts/` 8, `docs/` 6, `server/tests/` 5, `tests/` 3, `data/` 2, `.github/` 1, `.env.example` 1, `eslint.config.js` 1 |
 
 The reason this was deferred, open pull requests that touched the same files,
 has expired.
 
 It is a mechanical rename with no behaviour change, and it should land as its
 own commit: the four directories move to `press/` and the references are
-rewritten in one pass. The question "did all 431 references get rewritten?"
+rewritten in one pass. The question "did all 411 references get rewritten?"
 is one the build, the suites and the smoke run answer, and a reader cannot
 answer it from a diff. Prose (Markdown, comments, `.env.example`) is what no build sees,
 which is why `test_rename_plan.py` counts textual occurrences rather than
@@ -537,10 +537,10 @@ the pinned contract, and takes a flagship's column order for the researcher
 spreadsheet from it (`spreadsheet.py`). The staging script
 (`scripts/stage_verified_previews.py`) and `scripts/preview_definitions.py`
 read it when they build preview definitions.
-`scripts/docs-markdown.mjs --kind field-map` renders it into
-`docs/FIELD_MAP_2026-09-05.md` and `docs/IDENTIFIER_RETIREMENT_2026-09-05.md`,
-and `make check-generated` fails a stale document. `explore.test.js` holds the
-map, the codebook and the samples together.
+The two review documents once rendered from it (`FIELD_MAP_2026-09-05.md`
+and `IDENTIFIER_RETIREMENT_2026-09-05.md`) are at the tag
+`data-workspace-final`. `explore.test.js` holds the map, the codebook and the
+samples together.
 
 The retired writer that generated each customer header from the map
 (`code/cedar_publication.apply_field_map`, called by
@@ -624,9 +624,8 @@ client, and a build without the service never shows a zero that means
 - **Both pointers.** Hover affordances have tap equivalents: on a coarse
   pointer the shelf's first tap opens the collection's description and the
   download moves into that panel.
-- **Themes.** The press pages hold the paper palette in both themes
-  (`.teim-rd--paper` re-pins the light tokens), so the document declares
-  `color-scheme: light`.
+- **Themes.** The press pages have one palette, the light one, and nothing
+  sets a dark theme, so the document declares `color-scheme: light`.
 - **Reveals.** Sections arrive on scroll through `useReveal`; anything behind
   one must still be present for a reader who does not scroll it.
 - **Accessibility.** A skip link opens every page and lands on its `main`;

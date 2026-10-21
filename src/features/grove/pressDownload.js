@@ -48,7 +48,6 @@ import { downloadPath, downloadRecord, downloadTextMatches } from "./customerTab
 import { collectionCitation } from "./collection.js";
 import { spreadsheetSafe } from "./csv.js";
 import { coverageLabel } from "./pressAccess.js";
-import { recordStructure } from "./pressRecordStructure.js";
 
 // Every cell quoted, as this file has always been written, and spreadsheet-safe
 // by the one rule every CSV here shares (csv.js).
@@ -84,7 +83,7 @@ export function sampleLabel(id) {
 // The record, the paths and the digest check live in customerTables.js, the
 // one module every sample reader shares; re-exported here for the callers
 // that already read them from this file.
-export { downloadPath, downloadRecord, downloadTextMatches } from "./customerTables.js";
+export { downloadPath, downloadRecord } from "./customerTables.js";
 
 /**
  * The file for a collection: the shipped extract, or its own description.
@@ -105,11 +104,8 @@ export async function csvFor(entry, fetchText = defaultFetchText) {
     `Lumecon, "${entry.name}", Cedar Press collection, cedarpress.ai.`;
   // The label, not the year: a roster has no year, and an empty coverage
   // cell in a file that outlives the page reads as unknown rather than as
-  // "this is a roster". A collection presented by its record structure
-  // states no span, so the row is left out rather than left blank, and its
-  // fields follow, one row each.
+  // "this is a roster".
   const coverage = coverageLabel(entry);
-  const structure = recordStructure(entry.id);
   const rows = [
     ["field", "value"],
     ["collection", entry.name],
@@ -117,7 +113,6 @@ export async function csvFor(entry, fetchText = defaultFetchText) {
     ...(coverage ? [["coverage", coverage]] : []),
     ["contents", entry.blurb || ""],
     ["entity_linkage", entry.linkage || ""],
-    ...(structure ? structure.fields.map((item) => [`record_field: ${item.name}`, item.meaning]) : []),
     ["cite_as", citation],
   ];
   return {
@@ -151,9 +146,7 @@ async function defaultFetchText(path) {
  * collection's description, as `csvFor` decides.
  */
 export async function downloadCsv(entry) {
-  // A collection presented by its record structure has no file on the
-  // service; its description, fields included, is built here in both modes.
-  if (isConnected() && !recordStructure(entry.id)) {
+  if (isConnected()) {
     const { blob, filename } = await downloadCollection(entry.id);
     saveBlob(filename, blob);
     return;
@@ -164,7 +157,7 @@ export async function downloadCsv(entry) {
 }
 
 /** Hand the browser one text file to save. The Explore card's cut uses it too. */
-export function saveTextFile(name, text) {
+function saveTextFile(name, text) {
   saveBlob(name, new Blob([text], { type: "text/csv;charset=utf-8" }));
 }
 

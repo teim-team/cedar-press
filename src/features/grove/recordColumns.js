@@ -1,4 +1,3 @@
-import { PRESENTATION_COLUMNS } from "./mixedSpreadsheet.js";
 /**
  * PURPOSE
  * How a record table is laid out: the money format, a collection's short
@@ -42,31 +41,25 @@ export function columnPlan(tableKey, contract, tableColumns, rows = []) {
   // has no source column to show, so the table view showed no source at all
   // while the record page, reading `item.source`, did. The plan names a
   // column for it, and the table fills it from the same `rowSource`.
-  const built = Boolean(contract?.source_builder || contract?.row_type_contracts) && !has(contract?.source);
+  const built = Boolean(contract?.source_builder) && !has(contract?.source);
   const source = built ? SOURCE_LINK_COLUMN : contract?.source;
   const shown = (c) => c === SOURCE_LINK_COLUMN ? built : has(c);
   const lead = contract ? [contract.entity_uid, contract.entity_name, contract.entity_type].filter(has) : [];
   const roleFirst = contract
     ? [contract.entity_name, ...(contract.observation ?? []), contract.amount, contract.date, source].filter(shown)
     : [];
-  const declared = (contract?.default_columns ?? []).filter((column) => has(column) || (contract?.mapping_kind === "producer_spreadsheet" && Object.hasOwn(PRESENTATION_COLUMNS, column)));
+  const declared = (contract?.default_columns ?? []).filter((column) => has(column));
   // The codebook's order is a fallback for a table with no declared view;
   // it is not a reason to open on a column of Cedar's own file names.
   const listed = tableKey ? codebookColumns(tableKey, publicColumns).filter((c) => !isInternalProvenanceColumn(c)) : [];
-  // Producer spreadsheets and customer tables already declare the complete opening view, including
-  // role and amount qualifications. A union's sparse component source columns
-  // share the same dispatched source link that the record page uses.
-  const dispatchedSources = new Set(built
-    ? Object.values(contract?.row_type_contracts ?? {})
-      .flatMap((type) => [type.source, type.source_fallback]).filter(Boolean)
-    : []);
-  // A customer table's contract (derive-explore customerTableContract) also
-  // declares its complete opening view, so it opens on exactly that.
-  const reviewedView = ["producer_spreadsheet", "customer_table"].includes(contract?.mapping_kind);
+  // A customer table's contract (derive-explore customerTableContract)
+  // declares its complete opening view, including role and amount
+  // qualifications, so it opens on exactly that.
+  const reviewedView = contract?.mapping_kind === "customer_table";
   const defaults = reviewedView && declared.length
-    ? [...new Set([...declared.filter((column) => !dispatchedSources.has(column)), ...(built ? [SOURCE_LINK_COLUMN] : [])])]
+    ? [...new Set([...declared, ...(built ? [SOURCE_LINK_COLUMN] : [])])]
     : [...new Set([...roleFirst, ...(declared.length ? declared : listed)])];
-  const all = [...new Set([...lead, ...publicColumns, ...declared.filter((column) => Object.hasOwn(PRESENTATION_COLUMNS, column)), ...(built ? [SOURCE_LINK_COLUMN] : [])])];
+  const all = [...new Set([...lead, ...publicColumns, ...(built ? [SOURCE_LINK_COLUMN] : [])])];
   // The showcase's opening view (showcase.js): display defaults where the
   // declared view opens on blank or misleading columns, and never a column
   // blank in every example record.

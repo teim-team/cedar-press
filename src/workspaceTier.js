@@ -191,7 +191,3 @@ export function resolveTier(user) {
   }
   return "sprout";
 }
-
-export function getWorkspaceTierCopy(user) {
-  return WORKSPACE_TIERS[resolveTier(user)];
-}

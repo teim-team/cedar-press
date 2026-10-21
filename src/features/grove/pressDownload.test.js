@@ -15,7 +15,7 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 
-import { LAUNCH_COLLECTION, collectionSample, collectionCsv, hasSample, samplePath, reviewedPreviewTextMatches } from "./collection.js";
+import { LAUNCH_COLLECTION, collectionSample, hasSample, samplePath, reviewedPreviewTextMatches } from "./collection.js";
 import { csvFor, downloadPath, downloadRecord, hasReleaseFile, sampleLabel } from "./pressDownload.js";
 import { loadCodebook } from "./codebook.js";
 import { cutCsv, exploreTables, parseCsv as parseExplore, universalRows } from "./explore.js";
@@ -41,19 +41,18 @@ test("stale NEED cached rows cannot acquire the reviewed release citation", asyn
     return stale;
   });
   assert.equal(hasSample("need"), true);
-  assert.equal(collectionCsv("need", stale), null);
   assert.equal(calls, 1);
   assert.equal(result.name, "need-collection-description.csv");
   assert.doesNotMatch(result.csv, /old cached row|CEDAR-NEST-1/);
 });
 
-test("owner ruling 2026-10-04: NEED and Owned previews publish with no collection hold", async () => {
+test("owner ruling 2026-10-04: NEED and Owned downloads publish with no collection hold", async () => {
   for (const id of ["need", "owned"]) {
     assert.equal(hasSample(id), true, id);
     assert.ok(samplePath(id), id);
-    const text = await readRaw(samplePath(id));
-    const csv = collectionCsv(id, text);
-    assert.ok(csv, id);
+    const dataset = LAUNCH_COLLECTION.find((entry) => entry.id === id);
+    const { csv, name } = await csvFor(dataset, readSample);
+    assert.equal(name, `${id}.csv`, id);
     assert.doesNotMatch(csv, /publication_hold|publication_status,held/, id);
   }
 });
@@ -73,19 +72,10 @@ test("the reviewed finite NEED preview remains available", async () => {
   assert.equal(rows[0].length, downloadRecord("need").columns);
   assert.equal(rows[0].at(-1), "cite_as");
   assert.ok(rows.slice(1).every((row) => row.at(-1).includes("Cedar")));
-  // A stale schema with the same width also fails: column count alone is
-  // not evidence that cached bytes belong to this release.
-  const wrongHeader = source.replace("record_type", "legacy_record_type");
-  assert.notEqual(wrongHeader, source);
-  assert.equal(collectionCsv("need", wrongHeader), null);
   const matrix = parseCsv(source);
   while (matrix.at(-1)?.length === 1 && matrix.at(-1)[0] === "") matrix.pop();
   const encode = (records) => records.map((record) => record
     .map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(",")).join("\n");
-  const reordered = matrix.map((record) => [record[1], record[0], ...record.slice(2)]);
-  assert.equal(collectionCsv("need", encode(reordered)), null);
-  assert.equal(collectionCsv("need", encode(matrix.slice(0, -1))), null);
-  assert.equal(collectionCsv("need", encode([...matrix, matrix[1]])), null);
   const mutated = matrix.map((record) => [...record]);
   mutated[1][mutated[1].length - 1] = "STALE_NEED_CACHE_MARKER";
   const refused = await csvFor({ id: "need", name: "Cedar NEED" }, async () => encode(mutated));

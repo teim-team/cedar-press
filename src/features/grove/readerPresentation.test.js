@@ -32,6 +32,9 @@ test("reviewed labels preserve value semantics and never rewrite identifiers or 
   assert.equal(readerValueLabel("owned", "cedar_entity_role", "certifying_authority"), "Certifying authority");
   assert.equal(readerValueLabel("owned", "record_key", "certifying_authority"), "certifying_authority");
   assert.equal(readerValueLabel("need", "relationship_type", "candidate_relation"), "candidate_relation");
+  assert.equal(readerValueLabel("need", "relationship_type", "affiliated_with"), "Affiliated with");
+  assert.equal(readerValueLabel("need", "relationship_type", "subsidiary_of"), "Subsidiary of");
+  assert.equal(readerValueLabel("need", "enterprise_id", "owned_by"), "owned_by");
   assert.equal(readerValueLabel("need", "relationship_type", null), null);
 });
 

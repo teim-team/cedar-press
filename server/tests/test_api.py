@@ -489,16 +489,11 @@ class TestCatalog(unittest.TestCase):
 
     def test_every_released_catalog_collection_ships_with_a_version(self) -> None:
         # No released entry answers from its catalog copy alone, because every
-        # released entry has a descriptor behind it. The two presented by
-        # their record structure (coverage kind "structure") answer from the
-        # catalog and claim no version.
+        # released entry has a descriptor behind it.
         for entry in press_catalog.CATALOG:
             with self.subTest(collection=entry["id"]):
                 profile = client.get(f"/press/collections/{entry['id']}/profile").json()
-                if entry["coverage"]["kind"] == "structure":
-                    self.assertIsNone(profile["version"])
-                else:
-                    self.assertIsNotNone(profile["version"])
+                self.assertIsNotNone(profile["version"])
 
 
 class TestEntitlement(unittest.TestCase):

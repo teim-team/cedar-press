@@ -148,11 +148,7 @@ class TestAccessParity(unittest.TestCase):
         # The grove shelf is not on the storefront and so is not in the launch
         # collection at all; that side of the split is compared against the
         # manifest by ``TestGroveDivergence``.
-        # A catalog entry presented by its record structure is on its shelf
-        # and not in the launch collection, which holds release files;
-        # ``TestGroveDivergence`` holds that list to the manifest.
-        structure = set(self.js["structureOnly"])
-        storefront = {i: s for i, s in by_id.items() if s != "grove" and i not in structure}
+        storefront = {i: s for i, s in by_id.items() if s != "grove"}
         self.assertEqual({d.id: d.shelf for d in launch.LAUNCH_COLLECTION}, storefront)
 
     def test_the_same_collections_open_for_every_tier(self) -> None:
@@ -169,25 +165,10 @@ class TestAccessParity(unittest.TestCase):
         #
         # Sorted rather than in catalog order: `canOpen` is emitted sorted,
         # and the order the route serves in is pinned by ``test_collection``.
-        #
-        # The two presented by their record structure open by plan like any
-        # other collection on their shelf (owner, 2026-09-27) and have no
-        # release file for the collections route to serve, so they are the
-        # one named difference, and each must open for exactly the plans that
-        # reach its shelf.
-        structure = set(self.js["structureOnly"])
-        shelf_of = {i: s for s, ids in self.js["catalogByShelf"].items() for i in ids}
         for tier, ids in self.js["canOpen"].items():
             with self.subTest(tier=tier):
                 served = sorted(d["id"] for d in repository.collections_for(tier))
-                self.assertEqual(served, sorted(set(ids) - structure))
-                for collection_id in sorted(structure):
-                    self.assertEqual(
-                        collection_id in ids,
-                        repository._reaches(tier, shelf_of[collection_id]),
-                        f"{collection_id} must open for {tier!r} exactly when the plan "
-                        "reaches its shelf",
-                    )
+                self.assertEqual(served, ids)
 
     # -- who is sold the page ----------------------------------------------
 
@@ -354,9 +335,8 @@ class TestGroveDivergence(unittest.TestCase):
         # catalog used to carry a thirteenth on the grove shelf, previewed as
         # a Grove exclusive; that promise was withdrawn on 2026-09-04 because
         # the collection is still being built, so nothing sits on the grove
-        # shelf. Twelve have a release; Foundation & Corporate Giving and PLOT
-        # joined Cedar Press on 2026-09-27 and are presented by their record
-        # structure exactly because the manifest carries no release for them.
+        # shelf. All fourteen have a release, and a catalog entry without one
+        # fails here.
         catalog = self.js["catalogByShelf"]
         self.assertEqual(set(catalog), {"standard", "pro"})
         self.assertEqual(len(catalog["standard"]), 7)
@@ -364,9 +344,7 @@ class TestGroveDivergence(unittest.TestCase):
         storefront = sorted(catalog["standard"] + catalog["pro"])
         self.assertEqual(len(storefront), 14)
         released = sorted(d.id for d in launch.LAUNCH_COLLECTION)
-        self.assertEqual(self.js["structureOnly"], [])
-        self.assertEqual(sorted(set(storefront) - set(released)), self.js["structureOnly"])
-        self.assertEqual(sorted(set(storefront) - set(self.js["structureOnly"])), released)
+        self.assertEqual(storefront, released)
 
     def test_the_catalog_carries_nothing_the_workspace_excludes(self) -> None:
         # The manifest's `excluded` is the workspace's ruling: `gaming` on

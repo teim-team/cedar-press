@@ -119,9 +119,9 @@ function watchConsole(page) {
 /**
  * Wait until an element has finished animating, before measuring it.
  *
- * The panels here slide in (`cp-dc-sheet` rises from `translateY(100%)`,
- * `cedar-rise` from 18px), and `toBeVisible()` is satisfied the moment the
- * animation starts. A `boundingBox()` taken then is of a box in motion: a
+ * The panels here slide in (`cp-dc-sheet` rises from `translateY(100%)`),
+ * and `toBeVisible()` is satisfied the moment the animation starts. A
+ * `boundingBox()` taken then is of a box in motion: a
  * full-screen panel measured 0.18s in reported `y = 292` on a 664px window,
  * which is not where it is and not where it lands. Assertions about geometry
  * have to come after the motion, or they describe a frame.
@@ -1170,7 +1170,7 @@ test.describe("Explore the collections", () => {
           await expect(locked).toBeVisible();
           await expect(locked.locator(".cp-lock__say")).toContainText("Available with Cedar Press+");
           const contract = contractFor(table.key);
-          const columns = contract.default_columns.slice(0, contract.mapping_kind === "producer_spreadsheet" ? 8 : 6);
+          const columns = contract.default_columns.slice(0, 6);
           await expect(locked.locator("thead th")).toHaveText(columns.map((column) => labelFor(table.key, column)));
           await expect(locked.locator(".cp-ex__caption")).toContainText(release.rowsLabel);
           await expect(page.getByTestId("explore-record")).toHaveCount(0);
@@ -1187,7 +1187,6 @@ test.describe("Explore the collections", () => {
       await page.goto("/?collection=" + id);
       const stage = page.locator('[data-testid="collection-stage"][data-collection="' + id + '"]');
       await expect(stage).toBeVisible();
-      await expect(stage.getByTestId("record-structure")).toHaveCount(0);
       // A phone opens on three records; the rest are behind "Show more".
       await stage.getByTestId("stage-record").first().waitFor();
       const more = stage.locator(".cp-pane__more");

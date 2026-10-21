@@ -1,12 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { readFileSync } from "node:fs";
-
-import manifest from "../../../data/cedar/collections.manifest.json" with { type: "json" };
-import { spreadsheetContract, spreadsheetDefaultColumns } from "../../../scripts/derive-explore.mjs";
+import { spreadsheetDefaultColumns } from "../../../scripts/derive-explore.mjs";
 import { downloadRecord } from "./customerTables.js";
-import { CONTRACTS, SOURCE_LINK_COLUMN, labelFor, meaningFor, parseCsv, rowDate, rowSource } from "./explore.js";
+import { CONTRACTS, SOURCE_LINK_COLUMN, labelFor, meaningFor } from "./explore.js";
 import { DISPLAY_DEFAULTS } from "./showcase.js";
 import { columnPlan } from "./recordColumns.js";
 import { loadCodebook } from "./codebook.js";
@@ -15,7 +12,7 @@ import { loadCodebook } from "./codebook.js";
 await loadCodebook();
 
 const contractor = {
-  mapping_kind: "producer_spreadsheet",
+  mapping_kind: "customer_table",
   entity_name: "canonical_name",
   entity_uid: "cedar_uid",
   entity_role_column: "cedar_entity_role",
@@ -150,63 +147,11 @@ test("NEED keeps its reviewed enterprise and relationship columns, and opens on 
   assert.ok(!header.includes("enterprise_id"));
 });
 
-test("Federal Register keeps separate component dates and sources within the curated view", () => {
-  // The served table is the flat federal-action table: one date, one source.
+test("the served Federal Register table has one date and one source", () => {
   const served = CONTRACTS["federal-register/federal-register"];
   assert.equal(served.row_type_contracts ?? null, null);
   assert.equal(served.date, "publication_date");
   assert.equal(served.source, "source_url");
-  // The producer preview it is rendered from is a union of two components;
-  // its contract (derive-explore spreadsheetContract) still dispatches each
-  // row's date and source by record type.
-  const table = manifest.collections.find((c) => c.id === "federal-register").tables
-    .find((t) => t.table === "federal-register.csv");
-  const raw = parseCsv(readFileSync(new URL("../../.." + table.sample_path, import.meta.url), "utf8"));
-  const contract = spreadsheetContract(raw.columns, raw.rows, { collection: "federal-register", record_type_fields: table.record_type_fields });
-  assert.ok(contract?.row_type_contracts);
-  assert.ok(contract.default_columns.length <= 8);
-  assert.ok(contract.default_columns.includes("record_type"));
-  assert.equal(contract.row_type_contracts.consultation_participants.label, "Consultation participant");
-  assert.equal(contract.row_type_contracts.federal_actions.label, "Federal action");
-  for (const column of [
-    "notice_date", "publication_date",
-    "consultation_participants__source_url", "federal_actions__source_url",
-  ]) assert.ok(contract.default_columns.includes(column), column);
-  assert.ok(!contract.default_columns.includes("html_url"));
-  const plan = columnPlan("federal-register/federal-register", contract, [
-    ...contract.default_columns, "html_url",
-  ]);
-  assert.equal(plan.defaults.length, 7);
-  assert.equal(plan.defaults.filter((column) => column === SOURCE_LINK_COLUMN).length, 1);
-  for (const column of ["record_type", "notice_date", "publication_date"]) {
-    assert.ok(plan.defaults.includes(column), column);
-  }
-  for (const column of [
-    "consultation_participants__source_url", "federal_actions__source_url", "html_url",
-  ]) {
-    assert.ok(!plan.defaults.includes(column), column + ": sparse source column remains in opening view");
-    assert.ok(plan.all.includes(column), column + ": raw source column lost");
-  }
-  assert.ok(plan.all.includes(SOURCE_LINK_COLUMN));
-  const participant = {
-    record_type: "consultation_participants",
-    notice_date: "2024-01-02", publication_date: "1999-01-01",
-    consultation_participants__source_url: "https://www.federalregister.gov/documents/2024/01/02/2024-00001/example",
-    federal_actions__source_url: "https://www.govinfo.gov/content/pkg/FR-1999-01-01/pdf/example.pdf",
-  };
-  assert.equal(rowDate(participant, contract), participant.notice_date);
-  assert.equal(rowSource(participant, contract), participant.consultation_participants__source_url);
-  const action = { ...participant, record_type: "federal_actions" };
-  assert.equal(rowDate(action, contract), action.publication_date);
-  assert.equal(rowSource(action, contract), action.federal_actions__source_url);
-  action.federal_actions__source_url = "";
-  action.html_url = "https://www.federalregister.gov/documents/1999/01/01/1999-00001/example";
-  assert.equal(rowSource(action, contract), action.html_url);
-  // The one displayed source follows each row's own component contract.
-  // Federal-action HTML fallback must not become a consultation source.
-  assert.equal(rowSource({
-    ...participant, consultation_participants__source_url: "", html_url: action.html_url,
-  }, contract), null);
 });
 
 test("resource amounts keep measurement and sign qualifications together", () => {
@@ -229,11 +174,4 @@ test("a missing declared date still permits the existing declared year", () => {
     date: "absent_date", year: "fiscal_year", source: "source_url",
   }, ["fiscal_year", "source_url"]);
   assert.deepEqual(defaults, ["fiscal_year", "source_url"]);
-  const union = spreadsheetDefaultColumns({
-    row_type_contracts: {
-      first: { date: "absent_date", year: "source_year", source: "first_source" },
-      second: { date: "notice_date", year: "unused_year", source: "second_source" },
-    },
-  }, ["source_year", "notice_date", "unused_year", "first_source", "second_source"]);
-  assert.deepEqual(union, ["source_year", "notice_date", "first_source", "second_source"]);
 });

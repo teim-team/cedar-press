@@ -46,7 +46,7 @@ jobs:
       - run: npm ci
       - run: npm run lint
       # Every tracked generated file, re-rendered and compared with its
-      # source: the codebook and field-map documents, the researcher guides,
+      # source: the codebook document, the researcher guides,
       # the explore contracts, the Press snapshot the API serves, the sample
       # record, the release ledger, the structured data and the sitemap.
       # Fails naming the file and the command that rewrites it. The Makefile

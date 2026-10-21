@@ -111,7 +111,6 @@ const TIER_DECLARATIONS = Object.freeze([
     shelf: "standard",
     storefront: true,
     name: "Cedar Press",
-    price: 500,
     question: "See what's happening.",
     promise:
       "Follow the money, policy, transactions, institutions and public actions across Indian Country.",
@@ -125,7 +124,6 @@ const TIER_DECLARATIONS = Object.freeze([
     shelf: "pro",
     storefront: true,
     name: "Cedar Press+",
-    price: 1000,
     question: "Understand the systems behind it.",
     // The whole tier, said here rather than left to the question. "Systems"
     // says nothing about which collections arrive, and which collections
@@ -143,7 +141,6 @@ const TIER_DECLARATIONS = Object.freeze([
     shelf: "grove",
     storefront: false,
     name: "Cedar Grove",
-    price: 2500,
     question: "Investigate it yourself.",
     promise:
       "Every Cedar collection, every new one as it lands and the harmonized public data your work already runs on. Grove is where you visualize it, analyze it and put it in front of your whole organization.",
@@ -213,24 +210,8 @@ const TIER_DECLARATIONS = Object.freeze([
  * definition, so it goes through the data workspace and a regenerated
  * release, not through this file. Until then the two blurbs stay as ruled.
  */
-/**
- * The coverage of a collection presented by its record structure: no release
- * in the manifest, so nothing has been measured.
- *
- * Not a year and not a capture date: a value in `coverage` is a claim to a
- * paying customer, and a collection with no measured file has no span to
- * claim. So no span is shown at all (`coverageLabel` returns null and every
- * surface leaves the line out rather than printing a placeholder), and where
- * a viewer would show sample records it shows what each record holds
- * (`pressRecordStructure.js`). The entry changes to a measured `series` or
- * `roster` in the change that adds its release to
- * `data/cedar/collections.manifest.json`; `collection.js` holds the two in
- * step.
- */
-export const STRUCTURE = Object.freeze({ kind: "structure" });
-
 /** Source-dated records with no independently established continuous span. */
-export const OBSERVATIONS = Object.freeze({ kind: "observations" });
+const OBSERVATIONS = Object.freeze({ kind: "observations" });
 
 export const PRESS_CATALOG = Object.freeze([
   Object.freeze({
@@ -620,49 +601,6 @@ export const NATIVE_LINKAGE = Object.freeze({
 });
 
 /**
- * The public data Cedar Grove harmonizes alongside its own collections.
- *
- * Not Cedar collections and not sold separately: the reason a Grove licensee
- * stops keeping a folder of downloads is that the series they routinely need
- * for a grant report or a council packet are already joined to the Cedar
- * entities beside them. Listed on the shelf because a band showing one badge
- * misrepresents what the tier is.
- */
-export const GROVE_PUBLIC_DATA = Object.freeze([
-  Object.freeze({
-    id: "census",
-    short: "Census",
-    name: "Census and American Community Survey",
-    blurb:
-      "Population, housing, income and employment for tribal areas and the counties around them, joined to the same entities as the Cedar collections.",
-    kind: "public",
-  }),
-  Object.freeze({
-    id: "labor",
-    short: "Labor Statistics",
-    name: "Bureau of Labor Statistics",
-    blurb:
-      "Employment, wages and industry detail, on the geographies your reporting and grant applications ask for.",
-    kind: "public",
-  }),
-  Object.freeze({
-    id: "economy",
-    short: "Economic Data",
-    name: "Bureau of Economic Analysis",
-    blurb: "Output, income and industry accounts, harmonized to the same regions and years.",
-    kind: "public",
-  }),
-  Object.freeze({
-    id: "new-collections",
-    short: "New collections",
-    name: "Every collection Cedar builds next",
-    blurb:
-      "New Cedar collections land in Grove and stay there. Cedar Press carries what it carries; the roadmap arrives here.",
-    kind: "public",
-  }),
-]);
-
-/**
  * The earliest year any collection on a shelf reaches back to.
  *
  * Rosters are skipped rather than coerced: a roster states no year, and
@@ -713,32 +651,6 @@ export const GROVE_INCLUDES = Object.freeze([
     linkage:
       "Permitted observations retain source citations and role-specific entity links where reviewed. Businesses, certifying authorities, recipients and property observations remain distinct.",
   }),
-]);
-
-/**
- * What Grove is beyond the data, for the shelf that has to explain it.
- * Copy, not entitlement: nothing here decides what anyone can open.
- */
-/**
- * What Cedar Grove does, rather than what it contains.
- *
- * The contents argument is weak on its own, because a reader who has just
- * been shown fourteen collections already believes there is a lot of data. What
- * they cannot see from the shelf is that Grove analyses across all of it,
- * finds things nobody went looking for, opens to a whole organization at
- * once, and keeps growing as Lumecon builds. Every line here is a capability
- * that exists: visualization and cross-collection analysis, findings computed
- * from evidence rather than written by hand (findings.js and leads.js),
- * reproducible outputs (reproduce.js), and the dataset contract that makes
- * "every new one as it lands" a pipeline rather than a promise.
- */
-export const GROVE_CAPABILITIES = Object.freeze([
-  "Visualization and analysis across every collection at once, with nothing to export first",
-  "Findings surfaced from the data itself, including the ones nobody went looking for",
-  "Unlimited users on one licence, in an organization of any size",
-  "Context for your organization, so answers arrive in your terms",
-  "Every dataset Lumecon builds from here, and the public data behind our modeling of Indian Country, as each one lands",
-  "Extraction and reproducible outputs, so a number can be checked and cited",
 ]);
 
 /** The collections a tier's shelf carries, in catalog order. */

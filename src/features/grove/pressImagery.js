@@ -37,7 +37,7 @@
  */
 
 /** Where the copied files are served from. */
-export const SECTOR_IMAGE_DIR = "/press/sectors";
+const SECTOR_IMAGE_DIR = "/press/sectors";
 
 const SECTOR_SIZES = Object.freeze({ main: [1200, 800], sm: [600, 400], wide: [1500, 600] });
 const CONTEXT_SIZES = Object.freeze({ main: [840, 560], sm: [600, 400], wide: [1000, 400] });

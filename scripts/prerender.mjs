@@ -66,9 +66,12 @@ async function main() {
     for (const path of PAGES) {
       await page.goto(`http://localhost:${PORT}${path}`, { waitUntil: "networkidle" });
       // Ready when the route itself has set its canonical address, not when
-      // any heading exists.
+      // any heading exists, and nothing on the page is still loading: no
+      // element under #root carries aria-busy="true" (the door's sample, a
+      // lazy section's fallback). Network idle alone is not enough: under
+      // Playwright 1.64 the door was captured mid-load.
       const expected = `https://cedarpress.ai${path}`;
-      await page.waitForFunction((want) => document.querySelector('link[rel="canonical"]')?.getAttribute("href") === want && document.querySelector("#root h1"), expected, { timeout: 15_000 });
+      await page.waitForFunction((want) => document.querySelector('link[rel="canonical"]')?.getAttribute("href") === want && document.querySelector("#root h1") && !document.querySelector('#root [aria-busy="true"]'), expected, { timeout: 15_000 });
       // The head is the shell's (its asset links, policy and structured data
       // are what the build wrote); the root's markup and the page's own head
       // values come from the render: title, description, canonical, the

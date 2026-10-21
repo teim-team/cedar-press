@@ -1,46 +1,5 @@
 {
- "_note": "The field-by-field map behind the owner's exact public column specification (docs/PUBLIC_DATASET_SPEC_2026-09-05.md, addendum): for each flagship, one decision per column of its current sample header, the approved public header in exact order (`order`), the owner's default viewer columns, and a retirement entry for every competing entity identifier. Written 2026-09-05 against the ten-row samples in public/data/cedar/samples/; the terminal validates each rename value for value and each combine across the full table before applying it, and proves the pass changed columns and never rows, totals, identities or eligibility. code/cedar_publication.apply_field_map reads this file: it renames, drops what is internal or documented, fills the opening block from the register, builds the plural aligned arrays and the named derive rules, verifies every alias, refuses a column with no decision, an identifier awaiting adjudication or a retired scheme in a shipped value, and orders the header as `order` says. scripts/docs-markdown.mjs --kind field-map renders it as docs/FIELD_MAP_2026-09-05.md and docs/IDENTIFIER_RETIREMENT_2026-09-05.md; the tests keep it in step with the samples and the codebook.",
- "decisions": {
-  "keep": "Ships under its current name.",
-  "rename": "Ships under the name in `to`, value for value (the terminal verifies that on the full table).",
-  "combine": "Folds into the target field named in `to` through a documented value-level crosswalk; until the terminal has tested where the sources disagree, the sources stay in the workspace and the target is owed.",
-  "derive": "Its content reaches the customer file as the field named in `to`, built by the named rule at write time or owed; the column itself stays in the workspace.",
-  "document": "Leaves the file; what it says is stated once in the researcher guide or the release.",
-  "internal": "Stays in the workspace for reproducibility, matching and review; never ships.",
-  "withhold": "Ships as a column; cells are masked where the publication policy applies, never the column."
- },
- "dispositions": {
-  "alias_verified": "A second spelling of cedar_uid on the same row: the writer verifies equality on every row and refuses the dataset where they differ; then the alias is removed.",
-  "internal_crosswalk": "Identifies the entity for matching, reconciliation or historical joins only; absorbed into the identity layer and kept there, never published.",
-  "retired_scheme": "A retired identity scheme (CICD/NEID) or a value naming one; translated to cedar_uid where validated, refused where it still appears in a shipped column or value.",
-  "object_id": "Identifies a different legitimate research object (an award, a filing, an enterprise, a payer) and stays as that object's identifier; never replaced by cedar_uid.",
-  "adjudicate": "Its object cannot be settled from the row: the writer STOPS the dataset until it is adjudicated, and neither retains it nor deletes it."
- },
- "opening": {
-  "singular": [
-   "cedar_uid",
-   "canonical_name",
-   "entity_class",
-   "cedar_entity_role"
-  ],
-  "plural": [
-   "cedar_uids",
-   "canonical_names",
-   "entity_classes",
-   "entity_roles",
-   "entity_names_as_published"
-  ],
-  "cedar_uid": "The permanent identifier of the canonical Native entity the row is associated with. Never the record's own id; never several ids in one singular cell.",
-  "canonical_name": "That entity's name as the approved register spells it (data/spine/cedar_entity_names.csv, by uid), written at build time; withheld where the publication rule says so.",
-  "entity_class": "That entity's class as the register holds it, written at build time from the uid; never a scope, a source's own type or the record subject's kind.",
-  "cedar_entity_role": "Why the entity is on the row: recipient, owner, affiliate, client, participant, certifying authority or another supported relationship. A constant per table or read from a role column, as each table declares.",
-  "cedar_uids": "Plural block, Legislation and NAGPRA: the entities associated with the record, as a JSON array; a named but unresolved party has null here and its name in entity_names_as_published.",
-  "canonical_names": "Aligned with cedar_uids: the register names, JSON array.",
-  "entity_classes": "Aligned: the register classes, JSON array.",
-  "entity_roles": "Aligned: the role of each association (affiliated, consulted, repatriation recipient; named in the bill), JSON array. An entity in two roles occupies two positions.",
-  "entity_names_as_published": "Aligned: what the source called the entity, from the relationship evidence, JSON array; null until the terminal supplies it from the bridge. A register name is not proof of what the source said."
- },
- "research_note": "Every dataset ends with research_note: a concise factual qualification that changes interpretation, blank when unnecessary, never a dumping ground for removed columns. Built blank at write time; Deals' substantive Notes are converted into it by an editorial pass the map lists as owed.",
+ "_note": "The approved public column order and per-column decisions for each collection's flagship, from the owner's public dataset specification of 2026-09-05 (docs/PUBLIC_DATASET_SPEC_2026-09-05.md, at the tag data-workspace-final). The API reads `tables`: each entry's `collection`, `order` and `compatible_orders` (server/cedar_press/repository.py, spreadsheet.py). scripts/preview_definitions.py and scripts/stage_verified_previews.py read each field's `decision` and `to` when they stage previews: keep, rename and withhold reach the public header; combine, derive, document and internal do not. Each `retire` entry records a competing identifier's disposition (alias_verified, internal_crosswalk, retired_scheme, object_id or adjudicate). explore.test.js holds the map, the codebook and the legacy samples together. The vocabulary's 2026-09-05 definitions and the two review documents once rendered from this file are at the tag data-workspace-final; customer tables are now built in Lumecon-data and rendered here by server/cedar_press/customer_sheet.py.",
  "tables": {
   "funding/federal_funding_transactions": {
    "collection": "funding",

@@ -48,8 +48,8 @@ test("dump target paths preserve spaces and check never writes missing or stale 
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });
 
-test("all document outputs are exactly the three supported selections and remain current", () => {
-  const byKind = ["codebook", "field-map", "guides"].map(renderDocuments);
+test("all document outputs are exactly the two supported selections and remain current", () => {
+  const byKind = ["codebook", "guides"].map(renderDocuments);
   const all = renderDocuments("all");
   assert.deepEqual(all, Object.assign({}, ...byKind));
   assert.equal(Object.keys(all).length, byKind.reduce((count, files) => count + Object.keys(files).length, 0));

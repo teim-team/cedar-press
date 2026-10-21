@@ -55,7 +55,6 @@ import { codebookTables } from "./codebook.js";
 import { CUSTOMER_COLUMNS, CUSTOMER_COMPONENTS, CUSTOMER_RENAMES, downloadRecord } from "./customerTables.js";
 import { collectionCitation, collectionSample, collectionTables, sampleUnavailableReason } from "./collection.js";
 import { canOpenDataset } from "./pressAccess.js";
-import { recordStructure } from "./pressRecordStructure.js";
 import { safeSourceUrl, sourcePresentation } from "./sourcePresentation.js";
 import { PRESS_CATALOG_BY_ID, STOREFRONT_CATALOG } from "./pressCatalog.js";
 import { firstUrl } from "./readerValues.js";
@@ -181,7 +180,7 @@ export const CUT_VERSION = 2;
 export const UNLINKED = "unlinked";
 
 /** The universal columns, in the order the cut view shows them. */
-export const UNIVERSAL = Object.freeze([
+const UNIVERSAL = Object.freeze([
   "entity", "entity_type", "collection", "date", "observation", "amount", "source",
 ]);
 
@@ -235,17 +234,13 @@ export function flagshipKey(collectionId) {
 export function explorableCollections(user) {
   return STOREFRONT_CATALOG.map((entry) => {
     const tables = exploreTables(entry.id);
-    // A record-structure guide can accompany an admitted sample. A guide alone
-    // also explains the schema when there is no sample to preview.
-    const structure = recordStructure(entry.id);
     const flagship = tables.find((t) => t.flagship) ?? null;
     return {
       entry,
       open: canOpenDataset(user, entry),
       tables,
       flagship,
-      structure,
-      previewUnavailable: flagship || structure ? null : (sampleUnavailableReason(entry.id) ?? "No preview file for this collection's dataset."),
+      previewUnavailable: flagship ? null : (sampleUnavailableReason(entry.id) ?? "No preview file for this collection's dataset."),
     };
   });
 }
@@ -326,7 +321,6 @@ export function rowUids(row, contract) {
  * stays withheld whatever the table says.
  */
 export function rowEntities(row, contract, register = EMPTY_REGISTER) {
-  contract = contractForRow(row, contract);
   const uids = rowUids(row, contract);
   const ownName = cell(row, contract?.entity_name) || null;
   const ownType = cell(row, contract?.entity_type) || null;
@@ -407,7 +401,7 @@ export function rowEntities(row, contract, register = EMPTY_REGISTER) {
 export const SCOPES = scopesJson;
 
 /** A scope code's definition, parameter stripped, or null when unknown. */
-export function scopeDefinition(code) {
+function scopeDefinition(code) {
   const [base] = String(code ?? "").split(":");
   return SCOPES.scopes[base] ?? null;
 }
@@ -418,7 +412,7 @@ export function scopeDefinition(code) {
  * malformed code in a permalink is dropped and said so, never kept as a
  * filter that can match nothing (Codex, PR #69).
  */
-export function validScopeCode(code) {
+function validScopeCode(code) {
   const [base, param] = String(code ?? "").split(":");
   const defn = SCOPES.scopes[base];
   if (!defn) return false;
@@ -521,18 +515,7 @@ export function rowEntity(row, contract, register = EMPTY_REGISTER) {
  * date's calendar year, and the contract's `year_basis` says so.
  */
 
-/** Component-qualified meanings apply only to their declared record type. */
-function contractForRow(row, contract) {
-  if (!contract?.row_type_contracts) return contract;
-  const own = contract.row_type_contracts[cell(row, contract.record_type)];
-  // Unknown record kinds must not borrow another component's source or dates.
-  return own
-    ? { ...contract, ...own, row_type_contracts: null }
-    : { ...contract, source: null, source_fallback: null, source_builder: null, source_fields: {}, subject: null, entity_uid: null, entity_name: null, entity_type: null, entity_role_column: null, entity_roles: [], observation: [], amount: null, amount_basis: null, amount_lower: null, amount_upper: null, date: null, year: null, row_type_contracts: null };
-}
-
 export function rowYear(row, contract) {
-  contract = contractForRow(row, contract);
   if (contract?.year) {
     const year = cell(row, contract.year);
     return /^\d{4}(\.0+)?$/.test(year) ? Number.parseInt(year, 10) : null;
@@ -544,7 +527,6 @@ export function rowYear(row, contract) {
 
 /** The row's date, to the day where the table has one, else its year. */
 export function rowDate(row, contract) {
-  contract = contractForRow(row, contract);
   const date = cell(row, contract?.date);
   const day = /^(\d{4}-\d{2}-\d{2})/.exec(date);
   if (day) return day[1];
@@ -553,7 +535,6 @@ export function rowDate(row, contract) {
 }
 
 export function rowAmount(row, contract) {
-  contract = contractForRow(row, contract);
   if (cell(row, contract?.amount_class).toLowerCase() === "range") return null;
   if (!contract?.amount) return null;
   const raw = cell(row, contract.amount).replace(/[$,\s]/g, "");
@@ -563,15 +544,13 @@ export function rowAmount(row, contract) {
 }
 
 /** What the amount is: the row's own basis column, else the declared label. */
-export function rowAmountBasis(row, contract, collection = null) {
-  contract = contractForRow(row, contract);
+function rowAmountBasis(row, contract, collection = null) {
   const qualifiers = [contract?.amount_basis, ...(contract?.amount_qualifiers ?? [])].filter(Boolean).map((field) => readerValueLabel(collection, field.split("__").at(-1), cell(row, field))).filter(Boolean);
   return [...new Set(qualifiers)].join(" · ") || contract?.amount_label || null;
 }
 
 /** Bounds remain bounds. An umbrella/program total is never a recipient amount. */
-export function rowAmountRange(row, contract) {
-  contract = contractForRow(row, contract);
+function rowAmountRange(row, contract) {
   if (cell(row, contract?.amount_class).toLowerCase() !== "range") return null;
   const number = (field) => {
     const value = cell(row, field).replace(/[$,\s]/g, "");
@@ -660,7 +639,6 @@ export const SOURCE_BUILDER_KINDS = Object.freeze([
  * is the link and the rest stays in the record as data.
  */
 export function rowSource(row, contract) {
-  contract = contractForRow(row, contract);
   return safeSourceUrl(firstUrl(cell(row, contract?.source)))
     ?? safeSourceUrl(firstUrl(cell(row, contract?.source_fallback)))
     ?? safeSourceUrl(builtSource(row, contract));
@@ -668,7 +646,7 @@ export function rowSource(row, contract) {
 
 /** Whether the table says where a record's link comes from at all. */
 export function declaresSource(contract) {
-  return Boolean(contract?.source || contract?.source_builder || Object.values(contract?.row_type_contracts ?? {}).some(declaresSource));
+  return Boolean(contract?.source || contract?.source_builder);
 }
 
 /**
@@ -678,7 +656,7 @@ export function declaresSource(contract) {
  */
 export const SOURCE_LINK_COLUMN = "__source";
 
-export function rowRecordId(row, contract) {
+function rowRecordId(row, contract) {
   return cell(row, contract?.record_id) || null;
 }
 
@@ -712,7 +690,6 @@ const OBSERVATION_LIMIT = 180;
  * list separator. The full record is one click away, so this stops at 180.
  */
 export function observationOf(row, contract, collection = null) {
-  contract = contractForRow(row, contract);
   if (collection === "need") return clip(needObservation(row));
   const parts = [];
   for (const column of contract?.observation ?? []) {
@@ -796,7 +773,7 @@ export const WITHHELD_TEXT = "[name withheld]";
 export function universalRows(key, rows, register = EMPTY_REGISTER, contract = contractFor(key)) {
   const [collection] = key.split("/");
   return rows.map((raw, i) => {
-    const own = contractForRow(raw, contract);
+    const own = contract;
     // NEED's examples link to the ultimate Native owner the viewer adds to
     // them (exampleEnrichment.js); the published contract is left as is.
     const additions = CONTRACT_ADDITIONS[key];
@@ -1056,13 +1033,9 @@ function sortKey(item, by) {
     case "entity": return item.entity.name ?? item.entity.uid;
     case "entity_type": return item.entity.type;
     case "collection": return PRESS_CATALOG_BY_ID[item.collection]?.short ?? item.collection;
-    case "__subject": return item.subject ?? item.entity.name ?? item.entity.uid;
-    case "__date":
     case "date": return item.date;
     case "year": return item.year;
-    case "__amount":
     case "amount": return item.amount;
-    case "__observation":
     case "observation": return item.observation;
     case "source":
     case SOURCE_LINK_COLUMN: return item.source;
@@ -1179,7 +1152,7 @@ function names(cut, register) {
   });
 }
 
-export function scopeOf(cut) {
+function scopeOf(cut) {
   if (cut.table) {
     const [collection] = cut.table.split("/");
     return PRESS_CATALOG_BY_ID[collection]?.short ?? collection;

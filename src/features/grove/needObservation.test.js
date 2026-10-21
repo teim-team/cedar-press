@@ -1,15 +1,13 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { spreadsheetContract } from "../../../scripts/derive-explore.mjs";
+import { customerTableContract } from "../../../scripts/derive-explore.mjs";
 import { observationOf } from "./explore.js";
 
-const columns = ["record_type", "record_key", "record_grain", "enterprise_name",
-  "owner_name", "related_entity_name", "ownership_extent", "relationship_type",
-  "uei", "cage_code", "evidence_pins"];
-const contract = spreadsheetContract(columns);
+const columns = ["enterprise_name", "owner_name", "related_entity_name", "ownership_extent",
+  "relationship_type", "uei", "cage_code", "evidence_pins"];
+const contract = customerTableContract(columns, [], "need");
 const base = Object.freeze({
-  record_type: "reviewed_public_base", record_key: '["synthetic-enterprise"]',
-  record_grain: "One reviewed enterprise observation", enterprise_name: "Synthetic enterprise",
+  enterprise_name: "Synthetic enterprise",
   owner_name: "", related_entity_name: "", ownership_extent: "", relationship_type: "",
   uei: "SYNTHETIC001", cage_code: "SYN01", evidence_pins: "[]",
 });

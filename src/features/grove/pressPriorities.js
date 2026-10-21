@@ -16,8 +16,6 @@ import { MONTHS } from "./pressReleases.js";
 
 export const POINTS_PER_ACTIVE_MONTH = Object.freeze({ ...seed.rules.points_per_active_month });
 export const EXPIRY_MONTHS = seed.rules.expiry_months;
-export const POINTS_RULE = seed.rules.note;
-
 export const PRIORITY_TYPES = Object.freeze({
   research_question: Object.freeze({
     label: "Research question",
@@ -95,8 +93,6 @@ export const SEED_PRIORITIES = Object.freeze(
   seed.priorities.map((p) => Object.freeze({ ...p, status: p.status ?? "interest", points: 0, subscribers: 0 })),
 );
 
-export const SEED_PRIORITIES_BY_ID = Object.freeze(Object.fromEntries(SEED_PRIORITIES.map((p) => [p.id, p])));
-
 /** Most supported first, then most subscribers, then by title. */
 export function sortPriorities(list) {
   return [...list].sort((a, b) => b.points - a.points || b.subscribers - a.subscribers || a.title.localeCompare(b.title));
@@ -125,7 +121,7 @@ export function relatedness(query, priority) {
   return shared / Math.sqrt(q.size * p.size);
 }
 
-export const RELATED_THRESHOLD = 0.2;
+const RELATED_THRESHOLD = 0.2;
 
 /** The priorities a request reads as being about, best first, none below the threshold. */
 export function related(query, priorities = SEED_PRIORITIES, limit = 3) {

@@ -7,7 +7,7 @@
  * It is 400 kB minified, 35 kB brotli, and it used to be compiled into the
  * shared chunk every page loads before it mounts (400 of that chunk's 556 kB,
  * measured 2026-10-04), although only the record table (labels and
- * meanings), the column plan and the sample check in `collectionCsv` read it. The bundler now emits it as
+ * meanings) and the column plan read it. The bundler now emits it as
  * its own chunk, fetched the first time `loadCodebook()` is called.
  *
  * CONTRACT
@@ -16,13 +16,12 @@
  * next call (a Retry, or the next page) tries again.
  *
  * `codebookTables()` is the synchronous read the existing accessors keep
- * (`labelFor`, `meaningFor`, `codebookFor`, `codebookColumns` in explore.js,
- * `collectionCsv` in collection.js). Called before the load has finished it
+ * (`labelFor`, `meaningFor`, `codebookFor`, `codebookColumns` in explore.js).
+ * Called before the load has finished it
  * THROWS rather than answering "no codebook entry": that answer would be a
- * plausible wrong one (a heading built from the column name, a sample
- * refused as off-schema), and the surfaces that read it are gated on the load
- * instead -- the two routes in their lazy imports, the door's preview with
- * its sample, the download before it builds the file.
+ * plausible wrong one (a heading built from the column name), and the
+ * surfaces that read it are gated on the load instead -- the two routes in
+ * their lazy imports, the door's preview with its sample.
  */
 
 let tables = null;

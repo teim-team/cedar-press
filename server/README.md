@@ -27,9 +27,9 @@ cedar_press/
     collections.py          the 14 storefront collections, ported from Cedar Grove's package
     collection_profiles.py  the machine-readable data dictionary Cedar answers from
     source_presentation.py  readable citations, naming original publishers, never file names
-    press_catalog.py        the tiers, the briefs and the citation register
+    press_catalog.py        the tiers and the catalog
     protected_articles.py   subscriber article content, kept out of the public web build
-    claims.py               what may be said about a piece of evidence
+    claims.py               the claim classes a finding carries
     plot_map.py             checks pinned PLOT map evidence and shapes its outlines
     shelf.py, templates/    the HTML shelf page, GET /press/shelf
 

@@ -315,13 +315,13 @@ def _js_catalog_ids():
     Read from the source rather than the snapshot, because the snapshot is the
     thing under test and a test that reads its own subject proves nothing.
 
-    Bounded at the next `export const`, because `pressCatalog.js` declares two
-    more id-bearing arrays after it and the first version of this helper
-    swallowed both: `PRESS_TAXONOMY` (subject headings - policy, labor,
-    markets) and `GROVE_PUBLIC_DATA` (Cedar Grove's public-data library -
-    census, economy, public-finance). Neither is a Cedar Press dataset, and
-    counting them reported the service as eleven collections behind when it is
-    exactly level.
+    Bounded at the next `export const`, because `pressCatalog.js` declares more
+    id-bearing arrays after it and the first version of this helper
+    swallowed them: `PRESS_TAXONOMY` (subject headings - policy, labor,
+    markets) and, until L5-U10 removed it, `GROVE_PUBLIC_DATA` (Cedar Grove's
+    public-data library). Neither is a Cedar Press dataset, and counting them
+    reported the service as eleven collections behind when it was exactly
+    level.
     """
     import re as _re
     from pathlib import Path as _P

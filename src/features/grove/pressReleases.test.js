@@ -51,12 +51,7 @@ test("every released collection has a release and nothing else does", () => {
     Object.keys(PRESS_RELEASES).sort(),
     LAUNCH_COLLECTION.map((dataset) => dataset.id).sort(),
   );
-  for (const entry of PRESS_CATALOG) {
-    // The two presented by their record structure have no release in the
-    // manifest, and the feed does not invent one for them.
-    if (entry.coverage.kind === "structure") assert.equal(releaseFor(entry.id), null, `${entry.id} has a release it never shipped`);
-    else assert.ok(releaseFor(entry.id), `${entry.id} has no release`);
-  }
+  for (const entry of PRESS_CATALOG) assert.ok(releaseFor(entry.id), `${entry.id} has no release`);
 });
 
 // A reader citing a version from the feed must download that version: the

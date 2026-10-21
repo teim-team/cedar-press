@@ -144,7 +144,7 @@ function SectionMenu({ section }) {
 // A new key for new wording (owner, 2026-09-27): a reader who closed the old
 // "Private preview" note sees the early-access one once. The old key,
 // "cedar-press-private-preview-notice", is no longer read.
-export const PREVIEW_NOTICE_KEY = "cedar-press-early-access-soon-notice";
+const PREVIEW_NOTICE_KEY = "cedar-press-early-access-soon-notice";
 
 function previewNoticeIsDismissed() {
   try {

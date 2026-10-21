@@ -23,10 +23,10 @@
 import { useEffect } from "react";
 
 const SERVICE = "Cedar Press";
-export const SITE_ORIGIN = "https://cedarpress.ai";
+const SITE_ORIGIN = "https://cedarpress.ai";
 
 /** The description index.html ships for the door; the fallback for every page. */
-export const SITE_DESCRIPTION =
+const SITE_DESCRIPTION =
   "Trusted intelligence for Indian Country: maintained collections on federal funding, contracting, deals, policy, giving, land and Native enterprise ownership, with source records, declared row grains and separately documented Native entity associations. Built by Lumecon, available exclusively through Tribal Business News.";
 
 function setMeta(selector, attribute, content) {

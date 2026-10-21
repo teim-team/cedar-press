@@ -1,9 +1,7 @@
-"""Cedar Press: the tiers, the articles and the citation register.
+"""Cedar Press: the tiers and the catalog.
 
-Ported from ``src/features/grove/pressAccess.js``, ``pressArticles.js`` and
-``pressCitations.js``. Those three are one subject and are one module here,
-because none of them is large enough to earn its own file and a reader
-answering "what is Press?" should not have to open three.
+Ported from ``src/features/grove/pressAccess.js``; the catalog, releases and
+Cedar questions are read from the JavaScript's own data (below).
 
 **Cedar Press is a standalone product. Cedar Grove is a superset of it.**
 This module said the opposite three times, and one of those times was the file
@@ -28,9 +26,9 @@ justified them. They are vestigial names, not a dependency; the rename and its
 measured cost are set out in ``docs/ARCHITECTURE.md`` under "Where the
 ``grove/`` paths came from".
 
-**The article and citation data is transcribed, not retyped.**
+**The catalog data is transcribed, not retyped.**
 ``_press_data.json`` is written by ``scripts/dump.mjs --kind press`` from the
-JavaScript modules. Headlines and deks are editorial copy, so a retyped
+JavaScript modules. Names and blurbs are editorial copy, so a retyped
 character is a misquotation rather than a crash, which is the failure that
 would survive review::
 
@@ -68,12 +66,6 @@ tier -- ``tree`` was in ``SHELF_BY_TIER`` and missing from ``PLAN_REACH``, so a
 Tree subscriber was served twelve collections by the API and shown none of them
 in the browser -- because nothing compared the two maps.
 ``server/tests/test_access.py`` compares them now, key for key.
-
-PROTOTYPE LIMITATIONS
-The three articles are demonstration placeholders, one per launch dataset,
-written to be replaced by the real first Research Briefs. The citation register
-launches EMPTY on purpose: inventing entries would be fabricated proof, which
-is the thing the datasets exist to replace.
 """
 
 from __future__ import annotations
@@ -85,16 +77,13 @@ from types import MappingProxyType
 from typing import Any
 
 __all__ = [
-    "ARTICLES",
     "CATALOG",
-    "CITATIONS",
     "RELEASES",
     "LUMECON_URL",
     "PRESS_TIERS",
     "REPORT_CITATION_HREF",
     "TBN_URL",
     "can_read_cedar_press",
-    "citation_count_for",
 ]
 
 _DATA_PATH = Path(__file__).with_name("_press_data.json")
@@ -130,18 +119,8 @@ def _frozen(rows: list[dict[str, Any]]) -> tuple[Mapping[str, Any], ...]:
 TBN_URL: str = _DATA["tbnUrl"]
 LUMECON_URL: str = _DATA["lumeconUrl"]
 
-#: Article cards, newest first. Each names the dataset it draws from, so an
-#: article can never advertise data the page does not show.
-ARTICLES = _frozen(_DATA["articles"])
-
-#: Every known public use of a Cedar Press dataset, newest first. Empty until
-#: the first real citation lands; see the module docstring.
-CITATIONS = _frozen(_DATA["citations"])
-
 #: The full collection ladder (``pressCatalog.js``): every collection the
-#: storefront sells, including the two presented by their record structure
-#: (coverage kind ``structure``: Foundation & Corporate Giving and PLOT).
-#: Cedar's profile layer reads this for the collections that ship no figures,
+#: storefront sells. Cedar's profile layer reads this for the collections that ship no figures,
 #: so a catalog entry can describe itself without a second hand-typed copy of
 #: its blurb.
 CATALOG = _frozen(_DATA["catalog"])
@@ -188,14 +167,3 @@ def can_read_cedar_press(tier: str | None) -> bool:
     silently opening the page.
     """
     return tier in PRESS_TIERS
-
-
-def citation_count_for(dataset_id: str) -> int:
-    """How many registered citations name this dataset.
-
-    Counts by ``datasetId`` alone, not by version: a citation of any release of
-    a dataset is a citation of that dataset. Version is recorded on the entry
-    so a correction to a release can find the pieces that used it, which is a
-    different question from this one.
-    """
-    return sum(1 for c in CITATIONS if c.get("datasetId") == dataset_id)

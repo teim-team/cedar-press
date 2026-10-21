@@ -62,5 +62,4 @@ ignore = ["B008"]
 # repository rewraps is a line that has to be reconciled by hand the next time
 # the copy still maintained there changes. Line length is the only rule
 # relaxed; the ones that catch bugs stay on.
-"**/claims.py" = ["E501"]
 "**/collections.py" = ["E501"]

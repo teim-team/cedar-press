@@ -26,10 +26,11 @@
  * password must be one issued for this preview and used nowhere else.
  *
  * WHERE THE ACCOUNT COMES FROM
- * `VITE_PRESS_DEMO_ACCOUNTS`, read at build time, in the shape
- * `server/cedar_press/session.py` already reads `CEDAR_PRESS_ACCOUNTS` in —
- * and for the same stated reason, that no credential is committed to the
- * repository and a deployment without one authenticates nobody:
+ * `VITE_PRESS_DEMO_ACCOUNTS`, read at build time, in a shape of its own (the
+ * API's `CEDAR_PRESS_ACCOUNTS` records carry a PBKDF2 `password` instead,
+ * `server/cedar_press/subscribers.py`), and for the same stated reason as
+ * that variable: no credential is committed to the repository and a
+ * deployment without one authenticates nobody:
  *
  *     {"reader@example.org": {"salt": "…", "hash": "…", "tier": "press_pro"}}
  *

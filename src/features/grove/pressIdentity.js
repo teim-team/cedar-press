@@ -53,9 +53,6 @@
 
 import { SCOPES } from "./explore.js";
 
-/** The published register the test reads, and the app already fetches. */
-export const REGISTER_SOURCE = "data/cedar/register.json";
-
 /**
  * The two identifiers, as the page renders them.
  *

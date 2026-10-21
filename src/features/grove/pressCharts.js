@@ -33,7 +33,7 @@
  */
 
 /** The marks. Each maps to one renderer in components/grove/pressFigures. */
-export const CHART = Object.freeze({
+const CHART = Object.freeze({
   BARS: "bars",
   LINE: "line",
   HISTOGRAM: "histogram",
@@ -99,23 +99,9 @@ const RULE_BY_KIND = Object.freeze(
 );
 
 /** The rule for a mark, or null for a kind nobody has defined. */
-export function chartRule(kind) {
+function chartRule(kind) {
   return RULE_BY_KIND[kind] ?? null;
 }
-
-/**
- * What every figure has to carry underneath it, whatever the mark.
- *
- * A chart is a claim, and a claim without its assumptions is an assertion.
- * These are the assumptions a reader needs to argue with the figure rather
- * than take it on faith, which is the only kind of figure worth publishing.
- */
-export const FIGURE_REQUIREMENTS = Object.freeze([
-  "The collection and release it was drawn from, so the number can be reproduced.",
-  "What is counted and what is excluded, where either would surprise a reader.",
-  "Any choice that changes the shape: a bin width, a truncated axis, an inflation basis, a cut-off date.",
-  "Where the figure was built, which is Cedar Grove, and a route to build one.",
-]);
 
 /**
  * Whether a figure is publishable.

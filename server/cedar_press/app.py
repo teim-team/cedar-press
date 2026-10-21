@@ -859,18 +859,7 @@ def download(collection_id: str, session: Session = Depends(require_session)) ->
                 "message": "That collection is not included in this subscription.",
             },
         )
-    try:
-        csv = repository.collection_csv(collection_id)
-    except repository.FullReleaseUnavailable as error:
-        # Nothing under collection_csv raises FullReleaseUnavailable since the
-        # 2026-10-04 ruling removed NEED's proof check, so this branch is unused.
-        raise HTTPException(
-            status_code=503,
-            detail={
-                "code": "SAMPLE_UNAVAILABLE",
-                "message": "This collection's sample could not be produced.",
-            },
-        ) from error
+    csv = repository.collection_csv(collection_id)
     if csv is None:
         # A collection on the shelf whose preview Cedar cannot produce is a
         # named data problem, not a missing route, and the reader is told

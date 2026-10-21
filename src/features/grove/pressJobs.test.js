@@ -23,8 +23,7 @@ import { fileURLToPath } from "node:url";
 
 import codebookJson from "../../../data/cedar/codebook.json" with { type: "json" };
 import { PRESS_CATALOG, STOREFRONT_CATALOG } from "./pressCatalog.js";
-import { STRUCTURE_ONLY, isReleased } from "./collection.js";
-import { RECORD_STRUCTURE, RECORD_STRUCTURE_TITLE } from "./pressRecordStructure.js";
+import { isReleased } from "./collection.js";
 import { SECTOR_IMAGES, imageFile, imageSources } from "./pressImagery.js";
 import { BUILD_NEXT_QUESTION, BUILD_NEXT_STEPS, ECOSYSTEM_EXAMPLES } from "./pressMethod.js";
 import { PRIORITY_EXAMPLES } from "./pressPriorities.js";
@@ -165,9 +164,6 @@ test("every collection question rests on fields its codebook table holds", () =>
 });
 
 test("Giving and PLOT use verified release codebooks rather than a second imagined structure", () => {
-  assert.deepEqual([...STRUCTURE_ONLY], []);
-  assert.equal(RECORD_STRUCTURE_TITLE, "What each record holds");
-  assert.deepEqual(RECORD_STRUCTURE, {});
   for (const id of ["foundation-corporate-giving", "plot"]) {
     assert.ok(isReleased(id), id);
     const table = codebookTable(id);
