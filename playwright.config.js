@@ -7,7 +7,7 @@
 // builds first and serves the build (`dist-site`, per vite.config.js).
 import { defineConfig, devices } from "@playwright/test";
 
-import { ACCOUNTS_JSON } from "./tests/demoAccount.js";
+import { ACCOUNTS_JSON, SECRET } from "./tests/demoAccount.js";
 import { createHash } from "node:crypto";
 
 // The port the suite builds onto and serves from.
@@ -38,6 +38,10 @@ const PORT =
   || 41000
      + (parseInt(createHash("sha1").update(process.cwd()).digest("hex").slice(0, 8), 16) % 1000);
 
+// The API the suite signs in against, on a port of its own for the same
+// reason: it is started by this run and never adopted.
+const API_PORT = PORT + 1000;
+
 export default defineConfig({
   testDir: "./tests",
   // Smoke tests assert on a shared, read-only site: parallelism is safe and
@@ -60,7 +64,20 @@ export default defineConfig({
     // rather than two — these are smoke tests, not a compatibility matrix.
     { name: "phone", use: { ...devices["iPhone 13"], browserName: "chromium" } },
   ],
-  webServer: {
+  webServer: [{
+    command: `python3 -m uvicorn cedar_press.app:app --port ${API_PORT}`,
+    url: `http://localhost:${API_PORT}/health`,
+    // A fixture account and secret, signing nothing that outlives the run.
+    // Insecure cookies because the suite is served over http://localhost.
+    reuseExistingServer: false,
+    timeout: 60_000,
+    env: {
+      CEDAR_PRESS_SECRET: SECRET,
+      CEDAR_PRESS_INSECURE_COOKIE: "1",
+      CEDAR_PRESS_ORIGINS: `http://localhost:${PORT}`,
+      CEDAR_PRESS_ACCOUNTS: ACCOUNTS_JSON,
+    },
+  }, {
     // `build:site`, not `build`: the deployment prerenders the three public
     // pages after the build (scripts/prerender.mjs), and the suite tests the
     // deployment, static HTML included.
@@ -89,14 +106,13 @@ export default defineConfig({
     // The suite builds the deployment it means to test, rather than
     // inheriting whatever the machine happens to have configured.
     //
-    // Empty VITE_API_URL pins this to STANDALONE: with a developer's local
-    // API in the environment the same build would be CONNECTED, the gate
-    // would authenticate against a server these tests never started, and the
-    // failure would read as a broken page.
-    //
-    // The demo account is the suite's own throwaway (tests/demoAccount.js).
-    // Without one the standalone gate signs nobody in — correctly — and
-    // every test past the door would fail.
-    env: { VITE_API_URL: "", VITE_PRESS_DEMO_ACCOUNTS: ACCOUNTS_JSON },
-  },
+    // The build is CONNECTED, to the API above, through the same /api proxy
+    // the dev server uses, so the page and the API share one origin as they
+    // do behind CloudFront. VITE_API_URL is set here rather than inherited, so
+    // a developer's own environment cannot change what is tested.
+    env: {
+      VITE_API_URL: `http://localhost:${PORT}/api`,
+      CEDAR_PRESS_API_TARGET: `http://localhost:${API_PORT}`,
+    },
+  }],
 });

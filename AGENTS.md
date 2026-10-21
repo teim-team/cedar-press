@@ -122,9 +122,9 @@ npm ci
 npm run lint
 make check-generated
 npm run test
+pip install -e server[dev]
 npx playwright install --with-deps chromium
 npm run test:smoke
-pip install -e server[dev]
 ruff check server
 make test-python
 make audit-python
@@ -161,9 +161,10 @@ Lumecon-data.
 
 `npm run test:smoke` needs Playwright's browsers, which
 `npx playwright install --with-deps chromium` installs once. It **builds as
-well as tests**: `playwright.config.js` starts the server with `npm run build`
-configured with a throwaway demo account, which is why the deployed build is
-the last step of the CI job and not this one.
+well as tests**: `playwright.config.js` builds the site and starts it beside a
+throwaway copy of the API (fixture account in `tests/demoAccount.js`), which is
+why the server's dependencies are installed first and the deployed build is the
+last step of the CI job and not this one.
 
 ## 4. Branch, commit and review conventions
 

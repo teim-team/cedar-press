@@ -17,7 +17,7 @@ import { fileURLToPath } from "node:url";
 
 import { expect, test } from "@playwright/test";
 
-import { EMAIL, HASH, PASSWORD, PRESS_EMAIL } from "./demoAccount.js";
+import { EMAIL, PASSWORD, PRESS_EMAIL } from "./demoAccount.js";
 import { loadCodebook, parseCsv, rowSource, contractFor, exploreTables, labelFor, universalRows } from "../src/features/grove/explore.js";
 import { LAUNCH_COLLECTION, collectionCedarFacts } from "../src/features/grove/collection.js";
 import { coverageLabel } from "../src/features/grove/pressAccess.js";
@@ -64,9 +64,9 @@ import {
   visibleAudiences,
 } from "../src/features/grove/pressJobs.js";
 
-// The throwaway account playwright.config.js provisions into the build it
-// starts. It is not a credential and it opens nothing that is deployed
-// anywhere; see tests/demoAccount.js.
+// The throwaway accounts playwright.config.js gives the API it starts. They are
+// not credentials and open nothing that is deployed anywhere; see
+// tests/demoAccount.js.
 // `labelFor` reads the codebook, which the site loads on demand
 // (src/features/grove/codebook.js); the assertions that call it need it too.
 test.beforeAll(async () => { await loadCodebook(); });
@@ -757,7 +757,7 @@ test.describe("the gate", () => {
   // sign-in that actually works.
   //
   // What the copy said is still true and still written down where it is
-  // load-bearing: pressDemoGate.js's docstring and SECURITY.md.
+  // load-bearing: SECURITY.md.
   test("the login page offers a working form and no build meta-copy", async ({ page }) => {
     await page.goto("/");
     await page.locator("#cp-tab-signin").click();
@@ -1928,13 +1928,10 @@ test.describe("the door's use cases", () => {
     await expect(line.getByRole("link", { name: "Lumecon" })).toHaveCSS("color", "rgb(10, 127, 116)");
   });
 
-  // THE PREVIEW LOGIN. The named reviewer at Indian Country Media signs in to
-  // the standalone preview through this door's "Log in" tab, with an account
-  // the deploy provisions from a repository secret (pressDemoGate.test.js
-  // holds that wiring). This is the same path with the suite's own Cedar
-  // Press account, after the band was added above the strip: the door still
-  // opens the form and the form still lets the reviewer in.
-  test("the preview login still signs a Cedar Press reader in through the door", async ({ page }) => {
+  // A Cedar Press reader signs in through the door's "Log in" link and the
+  // login page, with the suite's own account, after the band was added above
+  // the strip: the link still goes to the form and the form still lets them in.
+  test("a Cedar Press reader still signs in through the door", async ({ page }) => {
     const errors = watchConsole(page);
     await page.goto("/");
     await expect(band(page)).toHaveCount(1);
@@ -2492,15 +2489,14 @@ test.describe("sponsorship", () => {
 });
 
 test.describe("the bundle", () => {
-  // The standalone gate is a demonstration gate and everything it reads is
-  // public. That is survivable only while what it reads is a DIGEST. Until
-  // 2026-09, this repository committed two preview accounts with their
-  // passwords in plaintext and every build shipped them — grep the deployed
-  // JavaScript and there they were.
+  // Until 2026-09 this repository committed two preview accounts with their
+  // passwords in plaintext and every build shipped them: grep the deployed
+  // JavaScript and there they were. The client has no accounts now, and the
+  // fixture's password must not reach a build.
   //
   // Read off disk rather than over HTTP so the check covers every emitted
   // chunk, including the lazily loaded ones no page in this suite opens.
-  test("carries the digest and not the password", async () => {
+  test("ships no password", async () => {
     const dir = fileURLToPath(new URL("../dist-site/", import.meta.url));
     const assets = await readdir(dir, { recursive: true, withFileTypes: true });
     const text = assets.filter(
@@ -2508,15 +2504,10 @@ test.describe("the bundle", () => {
     );
     expect(text.length, "nothing was built to check").toBeGreaterThan(0);
 
-    let digestSeen = false;
     for (const entry of text) {
       const body = await readFile(`${entry.parentPath}/${entry.name}`, "utf8");
       expect(body, `${entry.name} ships the plaintext password`).not.toContain(PASSWORD);
-      if (body.includes(HASH)) digestSeen = true;
     }
-    // Without this the test would pass just as happily against a build with
-    // no account configured at all, which proves nothing about the digest.
-    expect(digestSeen, "the configured digest is not in the build").toBe(true);
   });
 
   // Foundation & Corporate Giving and PLOT are published and live (owner,

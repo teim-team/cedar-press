@@ -22,7 +22,6 @@ test("availability findings follow each current public preview and measured coun
     const finding = needs.find((need) => need.id === `col-need-${dataset.id}-availability`);
     assert.equal(Boolean(finding), rowCountMissing || previewMissing, dataset.id);
     if (!finding) continue;
-    assert.equal(finding.demonstration, false);
     assert.ok(finding.text.startsWith(dataset.name + ": "));
     assert.equal(finding.text.includes("does not state a row count"), rowCountMissing);
     if (previewMissing) {
@@ -39,7 +38,6 @@ test("unmeasured vintages are named from the descriptors without guessing source
   const finding = collectionFindings().needs.find((need) => need.id === "col-need-vintage");
   assert.equal(Boolean(finding), missing.length > 0);
   if (!finding) return;
-  assert.equal(finding.demonstration, false);
   assert.ok(finding.text.includes("An update date does not establish the periods covered by every source."));
   if (missing.length !== LAUNCH_COLLECTION.length) {
     for (const dataset of missing) assert.ok(finding.text.includes(dataset.name));
@@ -47,16 +45,9 @@ test("unmeasured vintages are named from the descriptors without guessing source
   }
 });
 
-test("prototype backlogs and lead readiness cannot read as live research results", () => {
-  const { needs, narratives } = collectionFindings();
-  for (const id of ["col-need-closing", "col-need-fy26", "col-need-matches"]) {
-    const finding = needs.find((need) => need.id === id);
-    assert.equal(finding.demonstration, true, id);
-    assert.ok(finding.text.startsWith("Demonstration: "), id);
-  }
-  for (const lead of narratives) {
-    assert.equal(lead.demonstration, true, lead.id);
-    assert.ok(lead.name.startsWith("Demonstration: "), lead.id);
+test("no finding reads as a demonstration", () => {
+  for (const need of collectionFindings().needs) {
+    assert.ok(!need.text.startsWith("Demonstration"), need.id);
   }
 });
 

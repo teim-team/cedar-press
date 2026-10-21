@@ -11,7 +11,7 @@ import { activatePressAccount, validatePressCode } from "../../api";
 import { useAuth } from "../../context/useAuth";
 import { EARLY_ACCESS_HREF, EARLY_ACCESS_LABEL, contactHref } from "../../features/grove/appLink.js";
 import { canReadCedarPress } from "../../features/grove/pressAccess";
-import { PRESS_DEMO_UNCONFIGURED, PRESS_SIGN_IN_AVAILABLE } from "../../features/grove/pressDemoGate";
+import { isConnected } from "../../config.js";
 import { safeNext } from "../../features/grove/pressSessionNavigation.js";
 import {
   PRESS_ACTIVATION_AVAILABLE,
@@ -127,16 +127,16 @@ export default function CedarPressLogin() {
           <span>Cedar Press</span>
         </a>
         <div className="cp-login__card">
-          {!PRESS_SIGN_IN_AVAILABLE && !import.meta.env.DEV ? (
+          {!isConnected() && !import.meta.env.DEV ? (
             <>
               <h1 className="cp-login__h">Log in</h1>
-              <p className="cp-gate__fine" role="status">{PRESS_DEMO_UNCONFIGURED}</p>
+              <p className="cp-gate__fine" role="status">Sign-in is not available yet.</p>
             </>
           ) : signingIn ? (
             <>
               <h1 className="cp-login__h">Log in to Cedar Press</h1>
               <p className="cp-login__lede">Enter your work email and password to continue.</p>
-              {!PRESS_SIGN_IN_AVAILABLE ? (
+              {!isConnected() ? (
                 <p className="cp-gate__ok" role="status">
                   Dev server, not connected to the API, so signing in will fail. Run <code>npm run dev:connected</code> with the API running (docs/CONNECTING.md).
                 </p>

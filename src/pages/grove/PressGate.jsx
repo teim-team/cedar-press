@@ -11,7 +11,7 @@
 // conference learns what is inside by looking at it.
 //
 // Nothing in the frame is confidential: the ten-row samples ship in the
-// public bundle by design (pressDemoGate.js), and they are the whole of what
+// public bundle by design, and they are the whole of what
 // the frame can reach. The reader's own shelf (#catalog on /data) is never
 // rendered here, and the smoke suite holds the door to its absence.
 //

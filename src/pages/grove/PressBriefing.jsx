@@ -52,7 +52,7 @@ export default function PressBriefing({ releaseState }) {
           size of a lead — not a card in a grid of six. */}
       {lead ? (
         <article className="cp-brief__lead">
-          <span className="cp-brief__cap">{lead.demonstration ? "Demonstration" : lead.earlyAccess ? "Early access" : "The latest research"}</span>
+          <span className="cp-brief__cap">{lead.earlyAccess ? "Early access" : "The latest research"}</span>
           {/* THE LEAD HAS A PICTURE ON /articles AND HAD NONE HERE.
               The briefing brief is "one lead development", which is about how
               MANY things the page carries, not about stripping the one it

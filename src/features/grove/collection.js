@@ -55,7 +55,6 @@
 import manifest from "../../../data/cedar/collections.manifest.json" with { type: "json" };
 import published from "../../../data/cedar/samples.published.json" with { type: "json" };
 
-import { CLAIM_CLASS } from "./claims.js";
 // The storefront's own naming. `pressCatalog.js` imports nothing, so this is
 // a leaf dependency and cannot close a cycle.
 import { PRESS_CATALOG } from "./pressCatalog.js";
@@ -378,61 +377,12 @@ export function collectionContextLine() {
 }
 
 /**
- * What the collection supports today, in FindingsPanel's shapes.
- *
- * Supported findings are claim objects like the organizational layer's: class
- * and confidence held as separate dimensions, a basis naming the dataset, and
- * `fidelity: "direct"` because the collection measures what it names rather
- * than standing a wider geography in. "Needs" are the collection's own
- * honesty items: rows awaiting confirmation, releases still partial, and the
- * fields nothing has measured.
- *
- * Every supported finding carries `demonstration: true`. These read on the
- * same series COLLECTION_FIGURES draws, and Cedar publishes no figure series,
- * so none of them is a measured claim. They used to name versions in their
- * basis strings -- "Contractors v6", "Deals v9" -- that no release ever
- * carried; the basis is derived from the descriptor now, so it cannot name a
- * version that does not exist.
+ * The collection's own honesty items ("needs"): rows awaiting confirmation,
+ * releases still partial, and the fields nothing has measured. Each is derived
+ * from the descriptors, so none can name a version or a figure that does not
+ * exist.
  */
 export function collectionFindings() {
-  const basis = (datasetId, detail) => {
-    const dataset = LAUNCH_COLLECTION.find((item) => item.id === datasetId);
-    return `${collectionShort(dataset) ?? datasetId}, ${detail}`;
-  };
-
-  const supported = [
-    {
-      id: "col-contracting-up",
-      recipeId: null,
-      demonstration: true,
-      text: "Federal contracting to Native entities rose for a fourth straight quarter.",
-      basis: basis("contractors", "FPDS and USAspending."),
-      claimClass: CLAIM_CLASS.descriptive,
-      confidence: "high",
-      fidelity: "direct",
-    },
-    {
-      id: "col-deals-record",
-      recipeId: null,
-      demonstration: true,
-      text: "Announced deal volume in 2025 runs ahead of every prior year in the series.",
-      basis: basis("deals", "announced and closed labeled separately."),
-      claimClass: CLAIM_CLASS.descriptive,
-      confidence: "high",
-      fidelity: "direct",
-    },
-    {
-      id: "col-sector-lead",
-      recipeId: null,
-      demonstration: true,
-      text: "Energy and project finance lead 2025 announced transactions, ahead of hospitality.",
-      basis: basis("deals", "sector taxonomy."),
-      claimClass: CLAIM_CLASS.comparative,
-      confidence: "moderate",
-      fidelity: "direct",
-    },
-  ];
-
   const availabilityNeeds = LAUNCH_COLLECTION.flatMap((dataset) => {
     const facts = collectionCedarFacts(dataset.id);
     const sample = collectionSample(dataset.id);
@@ -446,7 +396,6 @@ export function collectionFindings() {
     return missing.length ? [{
       id: `col-need-${dataset.id}-availability`,
       text: `${dataset.name}: ${missing.join(" ")}`,
-      demonstration: false,
     }] : [];
   });
   const withoutVintage = LAUNCH_COLLECTION.filter(
@@ -458,67 +407,14 @@ export function collectionFindings() {
       ? "No collection states a vintage."
       : `A collection vintage is not stated for: ${withoutVintage.map((dataset) => dataset.name).join("; ")}.`)
       + " An update date does not establish the periods covered by every source.",
-    demonstration: false,
   }] : [];
 
   const needs = [
-    {
-      id: "col-need-closing",
-      text: "Demonstration: Three large announced deals await closing confirmation before they enter totals (Deals, primary source pending).",
-      demonstration: true,
-    },
-    {
-      id: "col-need-fy26",
-      text: "Demonstration: FY2026 assistance figures are partial until the Q1 release lands (Funding, USAspending publication lag).",
-      demonstration: true,
-    },
-    {
-      id: "col-need-matches",
-      text: "Demonstration: Two parent-entity matches are provisional pending SAM re-registration (Contractors, entity resolution queue).",
-      demonstration: true,
-    },
     ...availabilityNeeds,
     ...vintageNeeds,
   ];
 
-  const narratives = [
-    {
-      id: "col-lead-energy",
-      name: "Demonstration: Energy project financing expansion",
-      demonstration: true,
-      have: 3,
-      need: 3,
-      missing: [],
-      requires: [{ label: "Deal series" }, { label: "Sector taxonomy" }, { label: "Primary confirmations" }],
-    },
-    {
-      id: "col-lead-8a",
-      name: "Demonstration: 8(a) participation and award growth",
-      demonstration: true,
-      have: 3,
-      need: 3,
-      missing: [],
-      requires: [{ label: "Entity matches" }, { label: "Award histories" }, { label: "Certification lists" }],
-    },
-    {
-      id: "col-lead-assist",
-      name: "Demonstration: Assistance shifts under new appropriations",
-      demonstration: true,
-      have: 2,
-      need: 3,
-      missing: ["Q1 release"],
-      requires: [{ label: "Assistance records" }, { label: "Entity matches" }, { label: "Q1 release" }],
-    },
-  ];
-
-  return { supported, needs, narratives };
-}
-
-/** A figure's basis line, derived so it cannot name a stale version. */
-function basisFor(datasetId, fallback) {
-  const dataset = LAUNCH_COLLECTION.find((item) => item.id === datasetId);
-  if (!dataset) return fallback;
-  return dataset.updated ? `${collectionShort(dataset)}, updated ${dataset.updated}` : collectionShort(dataset);
+  return { needs };
 }
 
 /**
@@ -529,38 +425,11 @@ function basisFor(datasetId, fallback) {
  * `kind` picks the mark: quarterly bars, a leader-vs-others comparison, or a
  * two-series trend (the gray dashed series is the comparison line).
  *
- * `demonstration` says whether the points are a measurement. Cedar publishes
- * no figure series, so three of the four are placeholders and say so here
- * rather than only in a docstring.
+ * Only measured series belong here. Cedar publishes no figure series of its
+ * own, so the one entry is a roster a partner supplied, and a placeholder
+ * series is not added to fill a card.
  */
 export const COLLECTION_FIGURES = deepFreeze([
-  {
-    id: "deals",
-    title: "Announced deals by quarter",
-    basis: basisFor("deals", "Deals"),
-    kind: "bars",
-    demonstration: true,
-    points: [
-      { label: "Q2'25", value: 9 },
-      { label: "Q3'25", value: 12 },
-      { label: "Q4'25", value: 10 },
-      { label: "Q1'26", value: 16 },
-      { label: "Q2'26", value: 19 },
-    ],
-  },
-  {
-    id: "contractors",
-    title: "Top parents by obligations",
-    basis: basisFor("contractors", "Contractors"),
-    kind: "leader",
-    demonstration: true,
-    points: [
-      { label: "Parent entity A", value: 100 },
-      { label: "Parent entity B", value: 78 },
-      { label: "Parent entity C", value: 65 },
-      { label: "Parent entity D", value: 48 },
-    ],
-  },
   // The one measured figure on the page: White Earth Nation's TERO supplied
   // the roster on 2026-08-28 and these are its certification tiers. It is not
   // in the descriptor manifest because Cedar's descriptor emitter publishes no
@@ -575,20 +444,6 @@ export const COLLECTION_FIGURES = deepFreeze([
       { label: "1st preference", value: 17 },
       { label: "2nd preference", value: 4 },
       { label: "4th preference", value: 1 },
-    ],
-  },
-  {
-    id: "funding",
-    title: "Federal assistance, trend",
-    basis: basisFor("funding", "Funding"),
-    kind: "trend",
-    demonstration: true,
-    points: [
-      { label: "FY21", value: 52, compare: 44 },
-      { label: "FY22", value: 58, compare: 46 },
-      { label: "FY23", value: 55, compare: 45 },
-      { label: "FY24", value: 71, compare: 49 },
-      { label: "FY25", value: 84, compare: 52 },
     ],
   },
 ]);

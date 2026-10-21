@@ -41,8 +41,7 @@ class TestCurrentCollectionFindings(unittest.TestCase):
                 )
                 self.assertIn("does not state a row count", need.text)
                 self.assertNotIn("No preview", need.text)
-                self.assertFalse(need.demonstration)
-
+    
     def test_a_withheld_preview_keeps_its_actual_reason_without_denying_its_known_count(self):
         reason = "Only this source's unapproved private rows remain withheld."
         need = next(
@@ -52,7 +51,6 @@ class TestCurrentCollectionFindings(unittest.TestCase):
         )
         self.assertIn(reason, need.text)
         self.assertNotIn("row count", need.text)
-        self.assertFalse(need.demonstration)
 
     def test_missing_preview_has_an_explicit_fallback(self):
         need = next(
@@ -91,15 +89,9 @@ class TestCurrentCollectionFindings(unittest.TestCase):
         self.assertNotIn(owned.name, need.text)
         self.assertNotIn("No collection", need.text)
 
-    def test_prototype_backlog_and_leads_are_visible_demonstrations(self):
-        findings = launch.collection_findings()
-        for need in findings.needs:
-            if need.id in {"col-need-closing", "col-need-fy26", "col-need-matches"}:
-                self.assertTrue(need.demonstration)
-                self.assertTrue(need.text.startswith("Demonstration: "))
-        for lead in findings.narratives:
-            self.assertTrue(lead.demonstration)
-            self.assertTrue(lead.name.startswith("Demonstration: "))
+    def test_no_finding_reads_as_a_demonstration(self):
+        for need in launch.collection_findings().needs:
+            self.assertFalse(need.text.startswith("Demonstration"), need.id)
 
     def test_dated_white_earth_figure_is_not_recast_as_a_current_collection_total(self):
         figure = next(figure for figure in launch.COLLECTION_FIGURES if figure.id == "owned")

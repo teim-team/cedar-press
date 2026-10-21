@@ -40,16 +40,24 @@ function gitSha() {
 // Whatever else moves, these two must move together: `outDir` here and
 // `upload-pages-artifact`'s `path:` in .github/workflows/deploy.yml. Change
 // one alone and the deployment publishes nothing.
+const proxy = {
+  "/api": {
+    target: process.env.CEDAR_PRESS_API_TARGET || "http://localhost:8000",
+    rewrite: (path) => path.replace(/^\/api/, ""),
+  },
+};
+
 export default defineConfig({
   plugins: [react()],
   base: "/",
   build: { outDir: "dist-site" },
-  // The CSP allows only same-origin API calls, so locally the API is reached
-  // the way CloudFront serves it: /api/* with the prefix removed. Run the
-  // client with VITE_API_URL=http://localhost:5173/api.
-  server: {
-    proxy: { "/api": { target: "http://localhost:8000", rewrite: (path) => path.replace(/^\/api/, "") } },
-  },
+  // The CSP allows only same-origin API calls, so the API is reached the way
+  // CloudFront serves it: /api/* with the prefix removed. Locally that is this
+  // proxy, in front of the dev server and the preview alike; run the client
+  // with VITE_API_URL=http://localhost:5173/api. The smoke suite points the
+  // target at the API it starts.
+  server: { proxy },
+  preview: { proxy },
   define: {
     __PRESS_BUILD_SHA__: JSON.stringify(process.env.PRESS_BUILD_SHA || gitSha()),
     __PRESS_BUILD_TIME__: JSON.stringify(new Date().toISOString()),

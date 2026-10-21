@@ -53,17 +53,17 @@ git ls-files src/<dir>/grove                                   # files to move
 
 | | |
 |---|---|
-| Files to move | 187 — `features/grove` 137, `pages/grove` 45, `components/grove` 1, `styles/grove` 4 |
-| Path references to rewrite | 417, across 91 files |
-| Referencing files inside `src/` | 56 — `pages/` 37, `features/` 15, `context/` 2, `components/` 1, `main.jsx` 1 |
-| Referencing files outside `src/` | 35 — `server/cedar_press/` 8, `scripts/` 8, `docs/` 6, `server/tests/` 5, `tests/` 3, `data/` 2, `.github/` 1, `.env.example` 1, `eslint.config.js` 1 |
+| Files to move | 184 — `features/grove` 134, `pages/grove` 45, `components/grove` 1, `styles/grove` 4 |
+| Path references to rewrite | 407, across 86 files |
+| Referencing files inside `src/` | 55 — `pages/` 37, `features/` 15, `context/` 1, `components/` 1, `main.jsx` 1 |
+| Referencing files outside `src/` | 31 — `server/cedar_press/` 7, `scripts/` 7, `docs/` 6, `server/tests/` 5, `tests/` 2, `data/` 2, `.env.example` 1, `eslint.config.js` 1 |
 
 The reason this was deferred, open pull requests that touched the same files,
 has expired.
 
 It is a mechanical rename with no behaviour change, and it should land as its
 own commit: the four directories move to `press/` and the references are
-rewritten in one pass. The question "did all 417 references get rewritten?"
+rewritten in one pass. The question "did all 407 references get rewritten?"
 is one the build, the suites and the smoke run answer, and a reader cannot
 answer it from a diff. Prose (Markdown, comments, `.env.example`) is what no build sees,
 which is why `test_rename_plan.py` counts textual occurrences rather than
@@ -103,12 +103,13 @@ content sections; `What's new`, `Methods`, `Tribal data request` and
 `PressChrome.jsx` owns the masthead, its section nav and the footer, so the
 pages cannot drift apart.
 
-## Connected and standalone
+## Connected and public
 
-`config.js` decides which deployment this is: with `VITE_API_URL` set the
-client is connected to the platform API and its database; without it the
-client serves the bundled catalog, so the service can be demonstrated and
-reviewed on its own. Modules ask `isConnected()` rather than inferring the
+`config.js` decides what a page talks to: with `VITE_API_URL` set the client
+is connected to the platform API and its database, except on the public site
+(`cedarpress.ai`), which has no API and no signed-in readers. With no
+`VITE_API_URL` at all (a dev server, a bare build) nothing is connected and
+the login page says so. Modules ask `isConnected()` rather than inferring the
 answer from a failed request, so a network error never silently reads as
 "standalone" and shows fixtures in production.
 
@@ -257,11 +258,9 @@ in code:
 
 | Setting | Effect |
 | --- | --- |
-| `vars.VITE_API_URL` (repository **variable**) | Unset is standalone. Set it and the deployment is connected: real sessions, activation, the database as the source of truth. |
-| `secrets.VITE_PRESS_DEMO_ACCOUNTS` (repository **secret**) | The standalone preview account, as a salted digest. Unset means the build signs nobody in. Ignored entirely once `VITE_API_URL` is set. |
+| `vars.VITE_API_URL` (repository **variable**) | The API the workspace talks to, `https://app.cedarpress.ai/api`. Unset, nothing is connected: real sessions, activation and the database as the source of truth all need it. |
 
-Because the Pages deployment is standalone by default, the gate there offers
-sign-in only. Activation needs an API to validate a code against, and
+Activation needs an API to validate a code against, and
 `PRESS_ACTIVATION_AVAILABLE` follows `isConnected()` rather than a constant,
 so a build with nothing behind it cannot ask for a code it cannot check.
 
@@ -319,38 +318,21 @@ What this does not do: it does not publish records, entity pages or per-tribe
 pages to the open web. The collections stay behind the subscription, and a
 public page per Native entity is a product decision, not a build step.
 
-## The standalone sign-in
+## The public samples
 
-`features/grove/pressDemoGate.js` is the sign-in on a build with no API. It is
-a **demonstration gate, not access control**, and the module and the page copy
-both say so: a static site ships every byte it checks against, so a visitor
-who opens devtools can read the account record and delete the check. What it
-does is keep the preview shut to a casual visitor and let a named reviewer in.
-
-It is acceptable only because nothing behind it is confidential. The
-standalone bundle carries the catalog, the methods, the release history and
-one sample customer table per collection, up to ten rows
-(`public/data/cedar/downloads/<collection>.csv`); the collections are not in
-it. If that stops being true the deployment has to
-connect.
-
-Two properties make it defensible on its own terms. The account arrives as a
-salted SHA-256 digest, so no password is committed or bundled — the same
-reason `server/cedar_press/session.py` reads `CEDAR_PRESS_ACCOUNTS` from the
-environment. And a build configured with nothing authenticates nobody:
-`PRESS_DEMO_GATE_ACTIVE` is false, the gate renders a sentence instead of a
-form, and `verifyPressDemoAccount` returns null for every password.
-
-`isConnected()` turns it off. Connected, `AuthProvider` never consults it and
-`POST /auth/login` with the signed, HTTP-only cookie takes over.
+The public door shows real rows: one sample customer table per collection, up
+to ten rows (`public/data/cedar/downloads/<collection>.csv`), rendered from
+verified Lumecon-data releases. Nothing confidential is in the bundle; the
+collections are not. The signed-in viewer reads the same layout from the API
+(`GET /press/collections/{id}/download`), so what a subscriber sees has the
+shape of the sample, with whatever rows the API's data source holds.
 
 ## Access
 
 `features/grove/pressAccess.js` resolves a session's tier to what the client
 renders — which shelves open, which collections download. Entitlement is
 authoritative on the server, and the client model is written to answer
-identically. The demo gate's account is a standalone-only path: a connected
-deployment authenticates against the API and never reads it.
+identically.
 
 ## Telemetry
 

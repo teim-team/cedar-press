@@ -13,7 +13,6 @@ _CONTENT = Path(__file__).with_name("articles.json")
 CARD_FIELDS = (
     "id",
     "hosted",
-    "demonstration",
     "earlyAccess",
     "draft",
     "tone",
@@ -270,9 +269,7 @@ def reader_article(record, *, detail=False):
         result["href"] = _public_url(result["href"])
     if "image" in result:
         result["image"] = _image_url(result["image"])
-    if result.get("demonstration"):
-        result["kind"] = "Demonstration"
-    elif result.get("earlyAccess"):
+    if result.get("earlyAccess"):
         result["kind"] = "Early access"
     if detail:
         result["body"] = [_block(block) for block in record.get("body", [])]
@@ -288,11 +285,11 @@ def reader_article(record, *, detail=False):
 
 
 def article_cards():
-    return [reader_article(row) for row in _documents() if not row.get("demonstration")]
+    return [reader_article(row) for row in _documents()]
 
 
 def article_detail(slug):
     for row in _documents():
-        if row["id"] == slug and row.get("hosted") and not row.get("demonstration"):
+        if row["id"] == slug and row.get("hosted"):
             return reader_article(row, detail=True)
     return None

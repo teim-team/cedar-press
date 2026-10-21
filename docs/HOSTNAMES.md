@@ -59,10 +59,7 @@ aws s3 sync dist-site/assets s3://cedarpress-ai-site-502309351676/assets --delet
 aws cloudfront create-invalidation --distribution-id E3AEMUAUDGWNTQ --paths '/*'
 ```
 
-**`VITE_PRESS_DEMO_ACCOUNTS` has to be in the environment for that build.** It
-is a repository secret, so a local build without it is a site that signs nobody
-in — the standalone preview account is how the only people outside the team who
-have seen Cedar Press get through the door. Confirm afterwards against the build
+Confirm afterwards against the build
 stamp in Settings, which carries the commit the running bundle was built from.
 
 ### Historical OIDC failure, measured September 21

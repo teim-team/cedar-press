@@ -86,20 +86,7 @@ return {
       contextLine: collectionContextLine(),
       figures: COLLECTION_FIGURES,
       figureOrder: figuresInShelfOrder().map((figure) => figure.id),
-      findings: {
-        // `requires` is a list of `{label}` objects here and a list of strings
-        // in Python: the JavaScript shape is what FindingsPanel renders and
-        // the Python one is what a dataclass can hold. Flattened to the label
-        // so the comparison is of the content rather than of two renderers'
-        // conveniences -- the one place the two shapes legitimately differ,
-        // named here rather than silently skipped.
-        supported: findings.supported,
-        needs: findings.needs,
-        narratives: findings.narratives.map((lead) => ({
-          ...lead,
-          requires: lead.requires.map((item) => item.label),
-        })),
-      },
+      findings: { needs: findings.needs },
       citations: Object.fromEntries(
         LAUNCH_COLLECTION.map((d) => [d.id, collectionCitation(d.id, ACCESSED)]),
       ),

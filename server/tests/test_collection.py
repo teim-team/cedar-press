@@ -178,29 +178,17 @@ class TestCrossLanguageParity(unittest.TestCase):
             with self.subTest(figure=python.id):
                 self.assertIsInstance(python.demonstration, bool)
                 self.assertEqual(python.demonstration, javascript["demonstration"])
-        # Three of the four are placeholders and one is the nation-supplied
-        # roster. If that ever becomes "all real" it should be because figures
-        # arrived, not because a flag was flipped.
-        by_id = {f.id: f.demonstration for f in launch.COLLECTION_FIGURES}
-        self.assertFalse(by_id["owned"])
-        self.assertTrue(all(v for k, v in by_id.items() if k != "owned"))
-
-    def test_every_supported_finding_is_marked_demonstration(self) -> None:
-        # None of these rests on a measurement: they read on the figure series,
-        # and Cedar publishes none. The flag is in the data so a renderer can
-        # see it without reading a comment.
-        for finding in launch.collection_findings().supported:
-            with self.subTest(finding=finding.id):
-                self.assertTrue(finding.demonstration)
+        # The one figure is the nation-supplied roster. A placeholder series is
+        # not added to fill a card, so every entry here is a measurement.
+        self.assertEqual([f.id for f in launch.COLLECTION_FIGURES], ["owned"])
+        self.assertFalse(any(f.demonstration for f in launch.COLLECTION_FIGURES))
 
     def test_no_finding_or_figure_names_a_version_no_dataset_carries(self) -> None:
         # The basis strings used to say "Contractors v6" and "Deals v9", which
         # no release ever shipped. They are derived now; this pins that.
         live = {d.version for d in launch.LAUNCH_COLLECTION}
         stale = {"v4", "v6", "v9", "v0.1", "v4.2", "v9.0"} - live
-        texts = [f.basis for f in launch.COLLECTION_FIGURES] + [
-            f.basis for f in launch.collection_findings().supported
-        ]
+        texts = [f.basis for f in launch.COLLECTION_FIGURES]
         for text in texts:
             for version in stale:
                 with self.subTest(text=text, version=version):
@@ -223,14 +211,7 @@ class TestCrossLanguageParity(unittest.TestCase):
     def test_the_findings_match(self) -> None:
         findings = launch.collection_findings()
         js = self.js["findings"]
-        self.assertEqual(
-            [_camel(dataclasses.asdict(f)) for f in findings.supported], js["supported"]
-        )
         self.assertEqual([dataclasses.asdict(n) for n in findings.needs], js["needs"])
-        self.assertEqual(
-            [_listify(dataclasses.asdict(n)) for n in findings.narratives],
-            js["narratives"],
-        )
 
     def test_the_citations_match(self) -> None:
         for dataset in launch.LAUNCH_COLLECTION:
