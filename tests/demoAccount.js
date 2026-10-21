@@ -1,17 +1,8 @@
 /**
- * The accounts the smoke suite signs in with.
- *
- * `playwright.config.js` hands `ACCOUNTS_JSON` to the API it starts as
- * `CEDAR_PRESS_ACCOUNTS`, and `smoke.spec.js` types `EMAIL` and `PASSWORD`
- * into the login page. Without a database the API compares the password in
- * plain text (server/cedar_press/subscribers.py), which is why it is here.
- *
- * THE PASSWORD IS IN THIS FILE, ON PURPOSE, AND IT IS NOT A CREDENTIAL.
- * No deployment is configured with these accounts: they exist for the length
- * of a `npm run test:smoke`, in an API on a port of its own, and nowhere else.
- * A test that types a password has to know it, and reading a real one from the
- * environment would make the suite pass or fail depending on whose machine it
- * ran on.
+ * Fixture accounts for the smoke suite. `playwright.config.js` passes
+ * `ACCOUNTS_JSON` to the API it starts; the password is plain text because the
+ * API compares it that way without a database. Not a credential: no
+ * deployment is configured with it.
  */
 
 /** Unmistakably a fixture: `.invalid` can never be a real address (RFC 2606). */

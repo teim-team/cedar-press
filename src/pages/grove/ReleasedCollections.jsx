@@ -92,10 +92,11 @@ export default function ReleasedCollections() {
   const parts = researchComponents(entry);
   const recordCount = spreadsheetRecordCount(entry);
   const spreadsheet = entry && spreadsheetDownloadUrl(entry.id, entry.spreadsheet, parts);
-  const notice = state.status === "loading" ? "Checking this account\u2019s collections\u2026"
-    : state.status === "unreachable" ? "The collections could not be reached. Check the connection and try again."
-      : state.status === "unavailable" ? "Collections are not available for this account right now."
-        : "No collections have been published for this account yet.";
+  const notice = {
+    loading: "Checking this account\u2019s collections\u2026",
+    unreachable: "The collections could not be reached. Check the connection and try again.",
+    unavailable: "Collections are not available for this account right now.",
+  }[state.status] ?? "No collections have been published for this account yet.";
   return <section className="cp-sec cp-rel" aria-label="Collections">
     <h1 className="cp-rel__title">Collections</h1>
     {!entry ? <div className="cp-rel__card cp-rel__card--empty" role="status" aria-busy={state.status === "loading"}>

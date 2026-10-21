@@ -18,21 +18,7 @@ A local sign-in needs, on the API process:
 - `CEDAR_PRESS_INSECURE_COOKIE=1`: the cookie is otherwise `Secure`, and `http://localhost` drops it.
 - `CEDAR_PRESS_ACCOUNTS`: `{"you@example.invalid": {"password": "<plain text>", "tier": "press_pro"}}`. Plain text is correct without a database; the PBKDF2 form belongs to the Postgres backend.
 
-## What the client calls
-
-All paths are relative to `VITE_API_URL`; cookies carry the session (`credentials: "include"`). Contract: `src/api.js`.
-
-| Call | Used by |
-| --- | --- |
-| `GET /me`, `POST /auth/login`, `POST /auth/logout` | session, `/login` |
-| `POST /press/activation/validate`, `POST /press/activation` | access-code sign-up on `/login` |
-| `GET /press/release-collections` | Collections page: the rail, `release`, `spreadsheet` |
-| `GET /press/collections` | collection metadata |
-| `GET /press/collections/{id}/research?release_id=` | examples, sources, definitions |
-| `GET /press/collections/{id}/spreadsheet-download?release_id=` | spreadsheet download |
-| `GET /press/releases` | What's new, Overview "Updates" |
-| `GET /press/articles`, `GET /press/articles/{slug}` | Research Briefs |
-| `GET/POST /press/priorities*`, `GET /press/profile`, `POST /cedar/ask` | Priorities, settings, Cedar |
+The client's calls and their paths are in `src/api.js`.
 
 ## What "connected and empty" looks like
 

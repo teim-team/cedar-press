@@ -1,17 +1,8 @@
 /**
- * PURPOSE
- * The session context: who is signed in, and what their subscription
- * includes.
- *
- * The contract the pages read is { user, loading, login, logout,
- * refreshSession, sessionUnreachable, retrySession }. The session is the
- * platform API's (a signed, HTTP-only cookie); nothing about it is kept in
- * browser storage. The shape carries `workspace_tier` because
- * workspaceTier.js resolves entitlement from it.
- *
- * Subscriber accounts are provisioned through Tribal Business News; there is
- * deliberately no self-serve account creation here, because an account exists
- * because an entitlement does.
+ * The session context: { user, loading, login, logout, refreshSession,
+ * sessionUnreachable, retrySession }. The session is a signed HTTP-only
+ * cookie; nothing is kept in browser storage. There is no self-serve account
+ * creation: accounts exist because Tribal Business News issued an entitlement.
  */
 import { createContext } from "react";
 

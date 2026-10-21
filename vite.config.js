@@ -51,11 +51,8 @@ export default defineConfig({
   plugins: [react()],
   base: "/",
   build: { outDir: "dist-site" },
-  // The CSP allows only same-origin API calls, so the API is reached the way
-  // CloudFront serves it: /api/* with the prefix removed. Locally that is this
-  // proxy, in front of the dev server and the preview alike; run the client
-  // with VITE_API_URL=http://localhost:5173/api. The smoke suite points the
-  // target at the API it starts.
+  // The CSP allows only same-origin API calls, so /api/* is proxied with the
+  // prefix removed, as CloudFront serves it.
   server: { proxy },
   preview: { proxy },
   define: {
