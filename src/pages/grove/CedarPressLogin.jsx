@@ -4,7 +4,7 @@
 // lands here, and so does any signed-out visit to a page behind the gate, with
 // `?next=` carrying where the visitor was going. Activation is the sign-up:
 // Tribal Business News issues the code, and the password is chosen here.
-import { useEffect, useState } from "react";
+import { cloneElement, useEffect, useId, useState } from "react";
 import { Navigate, useSearchParams } from "react-router";
 
 import { activatePressAccount, validatePressCode } from "../../api";
@@ -26,7 +26,8 @@ import {
 import { useDocumentTitle } from "../../features/grove/useDocumentTitle";
 
 const MARK = "/brand/lumecon-logo-mark-teal.png";
-const MARKETING_URL = "https://cedarpress.ai";
+// The public site is another host in production; a dev server has only itself.
+const MARKETING_URL = import.meta.env.DEV ? "/" : "https://cedarpress.ai";
 
 const describeSignup = (err) => pressSignupError(err?.code, err?.message);
 
@@ -36,6 +37,16 @@ function browserStorage() {
   } catch {
     return null;
   }
+}
+
+function Field({ label, aside = null, children }) {
+  const id = useId();
+  return (
+    <div className="cp-login__field">
+      <div className="cp-login__row"><label htmlFor={id}>{label}</label>{aside}</div>
+      {cloneElement(children, { id })}
+    </div>
+  );
 }
 
 export default function CedarPressLogin() {
@@ -96,8 +107,10 @@ export default function CedarPressLogin() {
 
   const signingIn = step === PRESS_STEP.SIGN_IN || !PRESS_ACTIVATION_AVAILABLE;
   const emailField = (
-    <input type="email" autoComplete="email" placeholder="Email address" aria-label="Email address"
-      value={email} onChange={(event) => setEmail(event.target.value)} required />
+    <Field label="Work email">
+      <input type="email" autoComplete="email" placeholder="you@organization.org"
+        value={email} onChange={(event) => setEmail(event.target.value)} required />
+    </Field>
   );
   const errorLine = error ? <p className="cp-gate__error" role="alert">{error}</p> : null;
 
@@ -114,34 +127,38 @@ export default function CedarPressLogin() {
           <span>Cedar Press</span>
         </a>
         <div className="cp-login__card">
-          {!PRESS_SIGN_IN_AVAILABLE ? (
+          {!PRESS_SIGN_IN_AVAILABLE && !import.meta.env.DEV ? (
             <>
               <h1 className="cp-login__h">Log in</h1>
               <p className="cp-gate__fine" role="status">{PRESS_DEMO_UNCONFIGURED}</p>
-              {import.meta.env.DEV ? (
-                <p className="cp-gate__fine">This dev server is not connected to the API. Run <code>npm run dev:connected</code> with the API running (docs/CONNECTING.md).</p>
-              ) : null}
             </>
           ) : signingIn ? (
             <>
-              <h1 className="cp-login__h">Log in</h1>
+              <h1 className="cp-login__h">Log in to Cedar Press</h1>
+              <p className="cp-login__lede">Enter your work email and password to continue.</p>
+              {!PRESS_SIGN_IN_AVAILABLE ? (
+                <p className="cp-gate__ok" role="status">
+                  Dev server, not connected to the API, so signing in will fail. Run <code>npm run dev:connected</code> with the API running (docs/CONNECTING.md).
+                </p>
+              ) : null}
               <form className="cp-gate__form" onSubmit={submitSignIn}>
                 {emailField}
-                <input type="password" autoComplete="current-password" placeholder="Password" aria-label="Password"
-                  value={password} onChange={(event) => setPassword(event.target.value)} required />
+                <Field label="Password" aside={<a href={contactHref("Cedar Press password help")}>Forgot password?</a>}>
+                  <input type="password" autoComplete="current-password" value={password}
+                    onChange={(event) => setPassword(event.target.value)} required />
+                </Field>
                 {errorLine}
                 <button type="submit" className="cp-btn cp-btn--primary cp-btn--wide" disabled={pending}>
                   {pending ? "Logging in" : "Log in"}
                 </button>
               </form>
-              <p className="cp-gate__aside"><a href={contactHref("Cedar Press password help")}>Forgot password?</a></p>
               {PRESS_ACTIVATION_AVAILABLE ? (
-                <p className="cp-gate__aside">
-                  New to Cedar Press?{" "}
-                  <button type="button" className="cp-split__linkbtn" onClick={() => go(PRESS_STEP.ACTIVATE)}>
+                <>
+                  <p className="cp-login__or"><span>or</span></p>
+                  <button type="button" className="cp-btn cp-btn--quiet cp-btn--wide" onClick={() => go(PRESS_STEP.ACTIVATE)}>
                     Activate with an access code
                   </button>
-                </p>
+                </>
               ) : null}
             </>
           ) : step === PRESS_STEP.SET_PASSWORD ? (
@@ -149,9 +166,10 @@ export default function CedarPressLogin() {
               <h1 className="cp-login__h">Choose a password</h1>
               <p className="cp-gate__ok" role="status">Code accepted for {email}.</p>
               <form className="cp-gate__form" onSubmit={submitPassword}>
-                <input type="password" autoComplete="new-password" placeholder="Choose a password (12 or more characters)"
-                  aria-label="Choose a password" minLength={12} value={password}
-                  onChange={(event) => setPassword(event.target.value)} required />
+                <Field label="Choose a password">
+                  <input type="password" autoComplete="new-password" placeholder="12 or more characters"
+                    minLength={12} value={password} onChange={(event) => setPassword(event.target.value)} required />
+                </Field>
                 {errorLine}
                 <button type="submit" className="cp-btn cp-btn--primary cp-btn--wide" disabled={pending}>
                   {pending ? "Activating" : "Activate Cedar Press"}
@@ -165,10 +183,11 @@ export default function CedarPressLogin() {
             <>
               <h1 className="cp-login__h">Activate Cedar Press</h1>
               <form className="cp-gate__form" onSubmit={submitCode}>
-                <input type="text" autoComplete="one-time-code" spellCheck={false} className="cp-code"
-                  placeholder="Access code" aria-label="Access code" value={code}
-                  onChange={(event) => setCode(event.target.value)}
-                  onBlur={() => setCode((current) => formatPressCode(current))} required />
+                <Field label="Access code">
+                  <input type="text" autoComplete="one-time-code" spellCheck={false} className="cp-code"
+                    value={code} onChange={(event) => setCode(event.target.value)}
+                    onBlur={() => setCode((current) => formatPressCode(current))} required />
+                </Field>
                 {emailField}
                 {errorLine}
                 <button type="submit" className="cp-btn cp-btn--primary cp-btn--wide" disabled={pending}>
@@ -186,7 +205,7 @@ export default function CedarPressLogin() {
             </>
           )}
         </div>
-        <p className="cp-login__back"><a href={MARKETING_URL}>&larr; Back to cedarpress.ai</a></p>
+        <p className="cp-login__back"><a href={MARKETING_URL}>&larr; Back to Cedar Press</a></p>
       </main>
     </div>
   );

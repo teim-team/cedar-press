@@ -136,7 +136,7 @@ async function settled(locator) {
 /** Sign in through the gate, the way a subscriber does. */
 async function signIn(page, account = ACCOUNT) {
   await page.goto("/login");
-  await page.getByLabel("Email address").fill(account.email);
+  await page.getByLabel("Work email").fill(account.email);
   await page.getByLabel("Password", { exact: true }).fill(account.password);
   await page.locator(".cp-gate__form").getByRole("button", { name: "Log in" }).click();
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
@@ -735,7 +735,7 @@ test.describe("the gate", () => {
     await page.goto("/");
     await page.locator("#cp-tab-signin").click();
     await expect(page).toHaveURL(/\/login$/);
-    await page.getByLabel("Email address").fill(ACCOUNT.email);
+    await page.getByLabel("Work email").fill(ACCOUNT.email);
     await page.getByLabel("Password", { exact: true }).fill("not-the-password");
     await page.locator(".cp-gate__form").getByRole("button", { name: "Log in" }).click();
     await expect(page.getByRole("alert")).toBeVisible();
@@ -763,7 +763,7 @@ test.describe("the gate", () => {
     await page.locator("#cp-tab-signin").click();
     await expect(page).toHaveURL(/\/login$/);
     const panel = page.locator(".cp-login__card");
-    await expect(panel.getByLabel("Email address")).toBeVisible();
+    await expect(panel.getByLabel("Work email")).toBeVisible();
     await expect(panel.getByLabel("Password", { exact: true })).toBeVisible();
     await expect(panel.getByRole("button", { name: "Log in" })).toBeVisible();
     for (const gone of [/preview build/i, /not access control/i, /your own browser/i]) {
