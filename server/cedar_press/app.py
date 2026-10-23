@@ -55,7 +55,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import quote
 
-from fastapi import Depends, FastAPI, HTTPException, Request, Response
+from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, Request, Response
 from fastapi.exception_handlers import http_exception_handler
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
@@ -446,6 +446,89 @@ def _require_password_length(password: str) -> None:
                 "message": "Choose a password of at least 10 characters.",
             },
         )
+
+
+class ResetRequest(BaseModel):
+    email: str
+
+
+class ResetConfirm(BaseModel):
+    token: str
+    new_password: str
+
+
+#: Where the emailed link opens: the client's login page.
+_APP_URL = os.environ.get("CEDAR_PRESS_APP_URL", "http://localhost:5173").rstrip("/")
+_RESET_LOG = logging.getLogger("cedar_press.password_reset")
+
+
+def _send_reset_link(email: str, link: str) -> None:
+    # No mail provider is wired in yet, so development logs the link and
+    # `request_password_reset` refuses everywhere else.
+    _RESET_LOG.warning("Password reset link for %s: %s", email, link)
+
+
+@app.post("/auth/password-reset", status_code=204)
+def request_password_reset(
+    body: ResetRequest, request: Request, background: BackgroundTasks
+) -> None:
+    """Email a reset link if the address is a subscriber's.
+
+    The answer is the same either way, and the link is sent after the
+    response, so this cannot be used to ask whether somebody subscribes.
+    """
+    _require_auth_origin(request, "password reset")
+    _guard(request, "reset", ratelimit.LOGIN_ATTEMPTS)
+    if os.environ.get("CEDAR_PRESS_ENVIRONMENT", "development") != "development":
+        raise HTTPException(
+            status_code=503,
+            detail={
+                "code": "PASSWORD_RESET_UNAVAILABLE",
+                "message": (
+                    "Password reset by email is not available yet. Contact Cedar Press for help."
+                ),
+            },
+        )
+    address = body.email.strip().lower()
+    # Per address as well as per client, so nobody can flood one inbox.
+    if not ratelimit.allow(f"reset-email:{address}", attempts=3):
+        return
+    token = subscribers.issue_reset(address)
+    if token:
+        background.add_task(_send_reset_link, address, f"{_APP_URL}/login#reset={token}")
+
+
+@app.post("/auth/password-reset/confirm")
+def confirm_password_reset(
+    body: ResetConfirm, request: Request, response: Response
+) -> dict[str, object]:
+    """Set the new password from an emailed link and sign in on it.
+
+    The password hash is part of every session's revision, so this signs every
+    other device out.
+    """
+    _require_auth_origin(request, "password reset")
+    _guard(request, "reset-confirm", ratelimit.LOGIN_ATTEMPTS)
+    _require_password_length(body.new_password)
+    made = subscribers.redeem_reset(body.token, body.new_password)
+    if made is None:
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "code": "RESET_LINK_INVALID",
+                "message": "That reset link has expired or was already used. Request a new one.",
+            },
+        )
+    session = sign_in(made.email, body.new_password, response)
+    if session is None:
+        raise HTTPException(
+            status_code=409,
+            detail={
+                "code": "ACCOUNT_CHANGED",
+                "message": "Your account changed. Please sign in again.",
+            },
+        )
+    return session.as_payload()
 
 
 class CodeCheck(BaseModel):

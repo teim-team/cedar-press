@@ -35,6 +35,7 @@ import hmac
 import json
 import os
 import re
+import secrets
 import threading
 from dataclasses import dataclass
 
@@ -173,6 +174,8 @@ _activated: dict[str, tuple[str, str]] = {}
 _spent: set[str] = set()
 _session_revisions: dict[str, int] = {}
 _session_lock = threading.Lock()
+#: Reset token hash -> (email, expires at).
+_resets: dict[str, tuple[str, dt.datetime]] = {}
 
 
 def _env_accounts() -> dict[str, tuple[str, str]]:
@@ -221,6 +224,7 @@ def _env_codes() -> dict[str, dict[str, object]]:
 def forget_activated_for_tests() -> None:
     _activated.clear()
     _spent.clear()
+    _resets.clear()
     with _session_lock:
         _session_revisions.clear()
 
@@ -397,6 +401,85 @@ def link_platform_account(email: str) -> bool:
         )
         > 0
     )
+
+
+# ── password resets ─────────────────────────────────────────────────────────
+
+RESET_LIFETIME = dt.timedelta(hours=1)
+
+
+def _reset_hash(token: str) -> str:
+    return hashlib.sha256(token.encode("utf-8")).hexdigest()
+
+
+def issue_reset(email: str) -> str | None:
+    """A single-use reset token for this subscriber, or None if there is none.
+
+    Only the token's hash is stored, so reading the table resets nobody.
+    """
+    found = find(email)
+    if found is None:
+        return None
+    token = secrets.token_urlsafe(32)
+    expires = dt.datetime.now(dt.timezone.utc) + RESET_LIFETIME
+    if db.configured():
+        db.execute(
+            "INSERT INTO cedar_press_password_resets (token_hash, email, expires_at)"
+            " VALUES (%s, %s, %s)",
+            (_reset_hash(token), found.email, expires),
+        )
+    else:
+        _resets[_reset_hash(token)] = (found.email, expires)
+    return token
+
+
+def redeem_reset(token: str, password: str) -> Subscriber | None:
+    """Set a new password from a reset token.
+
+    Spends the token and every other outstanding one for the same address, so
+    an older email in the inbox stops working too. None when the token is
+    unknown, expired or already used.
+    """
+    key = _reset_hash(token or "")
+    if not db.configured():
+        entry = _resets.pop(key, None)
+        if entry is None or entry[1] <= dt.datetime.now(dt.timezone.utc):
+            return None
+        found = find(entry[0])
+        if found is None:
+            return None
+        for other in [k for k, (email, _) in _resets.items() if email == found.email]:
+            del _resets[other]
+        return create(found.email, password, found.tier)
+
+    hashed = hash_password(password)
+    with db.pool().connection() as conn, conn.cursor() as cur:
+        cur.execute(
+            "UPDATE cedar_press_password_resets SET used_at = now()"
+            " WHERE token_hash = %s AND used_at IS NULL AND expires_at > now()"
+            " RETURNING email",
+            (key,),
+        )
+        claimed = cur.fetchone()
+        if claimed is None:
+            conn.rollback()
+            return None
+        cur.execute(
+            "UPDATE cedar_press_subscribers SET password_hash = %s, updated_at = now()"
+            " WHERE email = %s RETURNING email, tier, account_id",
+            (hashed, claimed["email"]),
+        )
+        made = cur.fetchone()
+        if made is None:
+            conn.rollback()
+            return None
+        cur.execute(
+            "UPDATE cedar_press_password_resets SET used_at = now()"
+            " WHERE email = %s AND used_at IS NULL",
+            (made["email"],),
+        )
+        conn.commit()
+    return Subscriber(made["email"], made["tier"], made["account_id"])
 
 
 # ── access codes ────────────────────────────────────────────────────────────

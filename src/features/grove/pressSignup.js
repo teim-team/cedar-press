@@ -43,6 +43,10 @@ export const PRESS_STEP = Object.freeze({
   SET_PASSWORD: "set-password",
   /** A reader who has already activated. */
   SIGN_IN: "sign-in",
+  /** Asking for a password reset link by email. */
+  FORGOT: "forgot",
+  /** Choosing a new password from an emailed reset link. */
+  RESET: "reset",
 });
 
 /**

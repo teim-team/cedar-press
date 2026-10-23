@@ -54,6 +54,7 @@ from cedar_press import (
     press_catalog,  # noqa: E402
     ratelimit,  # noqa: E402
     repository,  # noqa: E402
+    subscribers,  # noqa: E402
 )
 from cedar_press import collections as launch  # noqa: E402
 from cedar_press import session as session_module  # noqa: E402
@@ -186,6 +187,102 @@ class TestPasswordChange(unittest.TestCase):
         response = client.post(
             "/auth/password",
             json={"current_password": "correct-horse", "new_password": self.NEW},
+            headers={"origin": "https://evil.example"},
+        )
+        self.assertEqual(response.status_code, 403)
+
+
+class TestPasswordReset(unittest.TestCase):
+    NEW = "a-new-long-password"
+
+    def setUp(self) -> None:
+        client.cookies.clear()
+        ratelimit.reset_for_tests()
+        session_module.forget_activated_for_tests()
+        self.addCleanup(session_module.forget_activated_for_tests)
+        self.sent: list[tuple[str, str]] = []
+        patcher = mock.patch(
+            "cedar_press.app._send_reset_link", lambda email, link: self.sent.append((email, link))
+        )
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def ask(self, email: str = "reader@example.org"):
+        return client.post("/auth/password-reset", json={"email": email})
+
+    def token(self) -> str:
+        self.assertEqual(self.ask().status_code, 204)
+        return self.sent[-1][1].split("#reset=", 1)[1]
+
+    def confirm(self, token: str, new: str = NEW):
+        return client.post(
+            "/auth/password-reset/confirm", json={"token": token, "new_password": new}
+        )
+
+    def test_an_unknown_address_gets_the_same_answer_and_no_email(self) -> None:
+        self.assertEqual(self.ask("nobody@example.org").status_code, 204)
+        self.assertEqual(self.sent, [])
+
+    def test_the_link_opens_the_login_page(self) -> None:
+        self.ask(" Reader@Example.org ")
+        email, link = self.sent[0]
+        self.assertEqual(email, "reader@example.org")
+        self.assertRegex(link, r"/login#reset=[\w-]{40,}$")
+
+    def test_the_link_sets_the_password_and_signs_in(self) -> None:
+        other = TestClient(app)
+        other.post("/auth/login", json={"email": "reader@example.org", "password": "correct-horse"})
+        response = self.confirm(self.token())
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["email"], "reader@example.org")
+        self.assertEqual(client.get("/me").status_code, 200)
+        self.assertEqual(other.get("/me").status_code, 401)
+        client.cookies.clear()
+        self.assertEqual(sign_in().status_code, 401)
+        self.assertEqual(sign_in(password=self.NEW).status_code, 200)
+
+    def test_a_link_works_once(self) -> None:
+        token = self.token()
+        self.assertEqual(self.confirm(token).status_code, 200)
+        response = self.confirm(token, "another-long-password")
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()["code"], "RESET_LINK_INVALID")
+
+    def test_using_one_link_spends_the_older_ones(self) -> None:
+        older = self.token()
+        self.assertEqual(self.confirm(self.token()).status_code, 200)
+        self.assertEqual(self.confirm(older, "another-long-password").status_code, 400)
+
+    def test_an_expired_link_is_refused(self) -> None:
+        with mock.patch.object(subscribers, "RESET_LIFETIME", -subscribers.RESET_LIFETIME):
+            token = self.token()
+        self.assertEqual(self.confirm(token).status_code, 400)
+        self.assertEqual(sign_in().status_code, 200)
+
+    def test_a_short_password_is_refused_and_keeps_the_link(self) -> None:
+        token = self.token()
+        response = self.confirm(token, "short")
+        self.assertEqual(response.json()["code"], "PASSWORD_TOO_SHORT")
+        self.assertEqual(self.confirm(token).status_code, 200)
+
+    def test_one_inbox_gets_at_most_three_links(self) -> None:
+        for _ in range(5):
+            self.assertEqual(self.ask().status_code, 204)
+        self.assertEqual(len(self.sent), 3)
+
+    def test_it_refuses_where_no_email_can_be_sent(self) -> None:
+        with mock.patch("cedar_press.app.validate_auth_configuration"), mock.patch.dict(
+            os.environ, {"CEDAR_PRESS_ENVIRONMENT": "production"}
+        ):
+            response = self.ask()
+        self.assertEqual(response.status_code, 503)
+        self.assertEqual(response.json()["code"], "PASSWORD_RESET_UNAVAILABLE")
+        self.assertEqual(self.sent, [])
+
+    def test_an_unrelated_origin_is_refused(self) -> None:
+        response = client.post(
+            "/auth/password-reset",
+            json={"email": "reader@example.org"},
             headers={"origin": "https://evil.example"},
         )
         self.assertEqual(response.status_code, 403)

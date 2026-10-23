@@ -5,9 +5,9 @@
 // `?next=` carrying where the visitor was going. Activation is the sign-up:
 // Tribal Business News issues the code, and the password is chosen here.
 import { cloneElement, useEffect, useId, useState } from "react";
-import { Navigate, useSearchParams } from "react-router";
+import { Navigate, useLocation, useNavigate, useSearchParams } from "react-router";
 
-import { activatePressAccount, validatePressCode } from "../../api";
+import { activatePressAccount, confirmPasswordReset, requestPasswordReset, validatePressCode } from "../../api";
 import { useAuth } from "../../context/useAuth";
 import { EARLY_ACCESS_HREF, EARLY_ACCESS_LABEL, contactHref } from "../../features/grove/appLink.js";
 import { canReadCedarPress } from "../../features/grove/pressAccess";
@@ -44,22 +44,42 @@ export default function CedarPressLogin() {
   const { user, loading, login, refreshSession } = useAuth();
   const [params] = useSearchParams();
   const next = safeNext(params.get("next"));
-  const [step, setStep] = useState(PRESS_STEP.SIGN_IN);
+  const location = useLocation();
+  const navigate = useNavigate();
+  // The emailed link carries the token in the fragment, which never reaches a server log.
+  const linkedToken = new URLSearchParams(location.hash.slice(1)).get("reset");
+  const [resetToken, setResetToken] = useState(linkedToken);
+  const [step, setStep] = useState(linkedToken ? PRESS_STEP.RESET : PRESS_STEP.SIGN_IN);
   const [code, setCode] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState(null);
+  const [resetSent, setResetSent] = useState(false);
+
+  // A link opened in a tab already on this page changes only the fragment, so
+  // the page does not remount and the initial state above never sees it.
+  if (linkedToken && linkedToken !== resetToken) {
+    setResetToken(linkedToken);
+    setStep(PRESS_STEP.RESET);
+    setError(null);
+  }
 
   useEffect(() => {
     document.head.querySelector('meta[name="robots"]')?.setAttribute("content", "noindex");
   }, []);
+
+  // The token is held in state, so it can leave the address bar and history.
+  useEffect(() => {
+    if (linkedToken) navigate({ pathname: location.pathname, search: location.search }, { replace: true });
+  }, [linkedToken, location.pathname, location.search, navigate]);
 
   if (!loading && canReadCedarPress(user)) return <Navigate to={next} replace />;
 
   const go = (to) => {
     setStep(to);
     setError(null);
+    setResetSent(false);
   };
 
   const run = (action, describe = (err) => err?.message) => async (event) => {
@@ -92,6 +112,16 @@ export default function CedarPressLogin() {
     await activatePressAccount({ code: normalizePressCode(code), email, password });
     await refreshSession();
   }, describeSignup);
+
+  const submitForgot = run(async () => {
+    await requestPasswordReset({ email });
+    setResetSent(true);
+  });
+
+  const submitReset = run(async () => {
+    await confirmPasswordReset({ token: resetToken, newPassword: password });
+    await refreshSession();
+  });
 
   const signingIn = step === PRESS_STEP.SIGN_IN || !PRESS_ACTIVATION_AVAILABLE;
   const emailField = (
@@ -131,7 +161,9 @@ export default function CedarPressLogin() {
               ) : null}
               <form className="cp-gate__form" onSubmit={submitSignIn}>
                 {emailField}
-                <Field label="Password" aside={<a href={contactHref("Cedar Press password help")}>Forgot password?</a>}>
+                <Field label="Password" aside={PRESS_ACTIVATION_AVAILABLE
+                  ? <button type="button" className="cp-split__linkbtn" onClick={() => go(PRESS_STEP.FORGOT)}>Forgot password?</button>
+                  : <a href={contactHref("Cedar Press password help")}>Forgot password?</a>}>
                   <input type="password" autoComplete="current-password" value={password}
                     onChange={(event) => setPassword(event.target.value)} required />
                 </Field>
@@ -148,6 +180,47 @@ export default function CedarPressLogin() {
                   </button>
                 </>
               ) : null}
+            </>
+          ) : step === PRESS_STEP.FORGOT ? (
+            <>
+              <h1 className="cp-login__h">Reset your password</h1>
+              {resetSent ? (
+                <p className="cp-gate__ok" role="status">
+                  If {email} has a Cedar Press account, a reset link is on its way. The link works once, within an hour.
+                </p>
+              ) : (
+                <>
+                  <p className="cp-login__lede">Enter your work email and we will send you a link to choose a new password.</p>
+                  <form className="cp-gate__form" onSubmit={submitForgot}>
+                    {emailField}
+                    {errorLine}
+                    <button type="submit" className="cp-btn cp-btn--primary cp-btn--wide" disabled={pending}>
+                      {pending ? "Sending" : "Send reset link"}
+                    </button>
+                  </form>
+                </>
+              )}
+              <p className="cp-gate__aside">
+                <button type="button" className="cp-split__linkbtn" onClick={() => go(PRESS_STEP.SIGN_IN)}>Back to log in</button>
+              </p>
+              <p className="cp-gate__aside"><a href={contactHref("Cedar Press password help")}>Contact us for help</a></p>
+            </>
+          ) : step === PRESS_STEP.RESET ? (
+            <>
+              <h1 className="cp-login__h">Choose a new password</h1>
+              <form className="cp-gate__form" onSubmit={submitReset}>
+                <Field label="New password">
+                  <input type="password" autoComplete="new-password" placeholder="10 or more characters"
+                    minLength={10} value={password} onChange={(event) => setPassword(event.target.value)} required />
+                </Field>
+                {errorLine}
+                <button type="submit" className="cp-btn cp-btn--primary cp-btn--wide" disabled={pending}>
+                  {pending ? "Saving" : "Save and log in"}
+                </button>
+              </form>
+              <p className="cp-gate__aside">
+                <button type="button" className="cp-split__linkbtn" onClick={() => go(PRESS_STEP.FORGOT)}>Request a new link</button>
+              </p>
             </>
           ) : step === PRESS_STEP.SET_PASSWORD ? (
             <>

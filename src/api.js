@@ -160,6 +160,18 @@ export async function changePassword({ currentPassword, newPassword }) {
   }));
 }
 
+/** Email a reset link. Answers the same whether or not the address has an account. */
+export async function requestPasswordReset({ email }) {
+  return request("/auth/password-reset", { method: "POST", body: { email } });
+}
+
+export async function confirmPasswordReset({ token, newPassword }) {
+  return requireSessionPayload(await request("/auth/password-reset/confirm", {
+    method: "POST",
+    body: { token, new_password: newPassword },
+  }));
+}
+
 /* ── Activation ──────────────────────────────────────────────────────── */
 
 export async function validatePressCode({ code, email }) {
