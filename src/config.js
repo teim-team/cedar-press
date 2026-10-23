@@ -39,7 +39,7 @@ export const API_URL = String(raw).trim().replace(/\/+$/, "");
 
 // The public site has no API of its own: its visitors are never signed in, and
 // the one bundle that serves it also serves the workspace.
-const PUBLIC_HOSTS = new Set(["cedarpress.ai", "www.cedarpress.ai"]);
+export const PUBLIC_HOSTS = new Set(["cedarpress.ai", "www.cedarpress.ai"]);
 
 /** Whether this page talks to the platform API. */
 export function isConnected() {

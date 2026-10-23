@@ -24,7 +24,7 @@ path nothing runs is the same defect as a docstring: a claim with no body.
 Both sides read ``data/cedar/collections.manifest.json``, so the descriptors
 cannot differ by construction. That is not a reason to skip comparing them --
 it is the reason to compare everything else too, because the derived strings,
-the figures, the findings, the citations and the download bytes are still two
+the figures, the citations and the download bytes are still two
 bodies of code that can disagree while reading identical inputs.
 
 If ``node`` is unavailable the test FAILS rather than skipping. A parity check
@@ -183,7 +183,12 @@ class TestCrossLanguageParity(unittest.TestCase):
         self.assertEqual([f.id for f in launch.COLLECTION_FIGURES], ["owned"])
         self.assertFalse(any(f.demonstration for f in launch.COLLECTION_FIGURES))
 
-    def test_no_finding_or_figure_names_a_version_no_dataset_carries(self) -> None:
+    def test_dated_white_earth_figure_is_not_recast_as_a_current_collection_total(self) -> None:
+        figure = next(figure for figure in launch.COLLECTION_FIGURES if figure.id == "owned")
+        self.assertEqual(figure.basis, "White Earth Nation TERO roster, supplied 2026-08-28")
+        self.assertEqual([point.value for point in figure.points], [17, 4, 1])
+
+    def test_no_figure_names_a_version_no_dataset_carries(self) -> None:
         # The basis strings used to say "Contractors v6" and "Deals v9", which
         # no release ever shipped. They are derived now; this pins that.
         live = {d.version for d in launch.LAUNCH_COLLECTION}
@@ -207,11 +212,6 @@ class TestCrossLanguageParity(unittest.TestCase):
 
     def test_the_figure_order_matches(self) -> None:
         self.assertEqual([f.id for f in launch.figures_in_shelf_order()], self.js["figureOrder"])
-
-    def test_the_findings_match(self) -> None:
-        findings = launch.collection_findings()
-        js = self.js["findings"]
-        self.assertEqual([dataclasses.asdict(n) for n in findings.needs], js["needs"])
 
     def test_the_citations_match(self) -> None:
         for dataset in launch.LAUNCH_COLLECTION:

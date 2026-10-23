@@ -315,7 +315,7 @@ def authenticate(email: str, password: str) -> Subscriber | None:
 
 
 def create(email: str, password: str, tier: str) -> Subscriber:
-    """Add a subscriber. Used by activation, which has already spent a code."""
+    """Add a subscriber, or replace an existing one's password and tier."""
     address = (email or "").strip().lower()
     if tier not in TIERS:
         raise ValueError(f"tier must be one of {TIERS}")

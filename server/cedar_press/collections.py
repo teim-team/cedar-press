@@ -10,10 +10,8 @@ twelve because Grove carries all the datasets, not because Press is a view of
 Grove. Where the two diverge is recorded in ``EXCLUDED_COLLECTIONS`` and
 compared against the Cedar data workspace by ``server/tests/test_access.py``.
 
-This module holds the collection's descriptors, the findings the collection
-currently supports (in the same claim shapes the organizational findings use,
-so a renderer built for one renders the other unchanged), the figure specs for
-the Overview's chart cards, and the rows behind each dataset's download button.
+This module holds the collection's descriptors, the figure specs for the
+Overview's chart cards, and the rows behind each dataset's download button.
 
 ONE SOURCE, TWO LANGUAGES
     Both implementations read ``data/cedar/collections.manifest.json``. They
@@ -73,14 +71,11 @@ __all__ = [
     "UNMEASURED_FIELDS",
     "CollectionDataset",
     "CollectionFigure",
-    "CollectionFindings",
-    "CollectionNeed",
     "FigurePoint",
     "collection_cedar_facts",
     "collection_citation",
     "collection_context_line",
     "collection_csv",
-    "collection_findings",
     "collection_sample",
     "collection_tables",
     "figures_in_shelf_order",
@@ -370,79 +365,6 @@ def collection_context_line() -> str:
     """One line for the context strip: the latest data refresh date."""
     dates = sorted(d.updated for d in LAUNCH_COLLECTION if d.updated)
     return f"Updated {dates[-1]}" if dates else ""
-
-
-@dataclass(frozen=True)
-class CollectionNeed:
-    """An honesty item: a row awaiting confirmation or a release still partial."""
-
-    id: str
-    text: str
-
-
-@dataclass(frozen=True)
-class CollectionFindings:
-    """What the collection Overview renders: the honesty items."""
-
-    needs: tuple[CollectionNeed, ...]
-
-
-def collection_findings() -> CollectionFindings:
-    """The collection's own honesty items, derived from the descriptors.
-
-    Each says something the manifest states: a release without a row count, a
-    collection with no preview file, a missing vintage. None can name a
-    version or a figure that does not exist.
-    """
-
-    availability_needs = []
-    for dataset in LAUNCH_COLLECTION:
-        facts = collection_cedar_facts(dataset.id) or {}
-        sample = collection_sample(dataset.id) or {}
-        missing = []
-        rows = facts.get("n_rows")
-        if type(rows) is not int or not 0 <= rows <= 2**53 - 1:
-            missing.append("The current release does not state a row count.")
-        if not sample.get("path"):
-            missing.append(
-                sample_unavailable_reason(dataset.id)
-                or "No preview file is published for the current release."
-            )
-        if missing:
-            availability_needs.append(
-                CollectionNeed(
-                    id=f"col-need-{dataset.id}-availability",
-                    text=f"{dataset.name}: {' '.join(missing)}",
-                )
-            )
-    without_vintage = [
-        dataset
-        for dataset in LAUNCH_COLLECTION
-        if not isinstance(dataset.vintage, str) or not dataset.vintage.strip()
-    ]
-    vintage_needs = []
-    if without_vintage:
-        vintage_text = (
-            "No collection states a vintage."
-            if len(without_vintage) == len(LAUNCH_COLLECTION)
-            else "A collection vintage is not stated for: "
-            + "; ".join(dataset.name for dataset in without_vintage)
-            + "."
-        )
-        vintage_needs.append(
-            CollectionNeed(
-                id="col-need-vintage",
-                text=vintage_text
-                + " An update date does not establish the periods covered by every source.",
-            )
-        )
-
-    needs = (
-        *availability_needs,
-        *vintage_needs,
-    )
-
-    return CollectionFindings(needs=needs)
 
 
 @dataclass(frozen=True)

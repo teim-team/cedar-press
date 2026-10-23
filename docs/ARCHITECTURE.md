@@ -53,9 +53,9 @@ git ls-files src/<dir>/grove                                   # files to move
 
 | | |
 |---|---|
-| Files to move | 184 — `features/grove` 134, `pages/grove` 45, `components/grove` 1, `styles/grove` 4 |
-| Path references to rewrite | 407, across 86 files |
-| Referencing files inside `src/` | 55 — `pages/` 37, `features/` 15, `context/` 1, `components/` 1, `main.jsx` 1 |
+| Files to move | 177 — `features/grove` 129, `pages/grove` 44, `components/grove` 1, `styles/grove` 3 |
+| Path references to rewrite | 402, across 84 files |
+| Referencing files inside `src/` | 53 — `pages/` 36, `features/` 14, `context/` 1, `components/` 1, `main.jsx` 1 |
 | Referencing files outside `src/` | 31 — `server/cedar_press/` 7, `scripts/` 7, `docs/` 6, `server/tests/` 5, `tests/` 2, `data/` 2, `.env.example` 1, `eslint.config.js` 1 |
 
 The reason this was deferred, open pull requests that touched the same files,
@@ -63,7 +63,7 @@ has expired.
 
 It is a mechanical rename with no behaviour change, and it should land as its
 own commit: the four directories move to `press/` and the references are
-rewritten in one pass. The question "did all 407 references get rewritten?"
+rewritten in one pass. The question "did all 402 references get rewritten?"
 is one the build, the suites and the smoke run answer, and a reader cannot
 answer it from a diff. Prose (Markdown, comments, `.env.example`) is what no build sees,
 which is why `test_rename_plan.py` counts textual occurrences rather than
@@ -141,7 +141,7 @@ The API compresses (`GZipMiddleware`, over 1 kB): `/press/collections` is
 
 | Endpoint | Purpose |
 | --- | --- |
-| `GET /me`, `POST /auth/login`, `POST /auth/logout` | The session |
+| `GET /me`, `POST /auth/login`, `POST /auth/logout`, `POST /auth/password` | The session |
 | `POST /press/activation`, `/press/activation/validate` | Subscription activation |
 | `GET /press/collections` | The catalog this subscription can see |
 | `GET /press/releases` | Release history |

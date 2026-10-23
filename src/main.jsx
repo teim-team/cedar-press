@@ -12,7 +12,6 @@ import "./styles/redesign.css";
 import "./styles/grove/press.css";
 import "./styles/grove/pressPreviewNotice.css";
 import "./styles/grove/pressLogin.css";
-import "./styles/grove/pressReleased.css";
 
 import { AuthProvider } from "./context/AuthProvider.jsx";
 import { startTelemetry } from "./features/grove/telemetry.js";

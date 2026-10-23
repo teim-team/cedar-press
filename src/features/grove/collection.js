@@ -10,14 +10,12 @@
  * Press is a view of Grove. `EXCLUDED_COLLECTIONS` records where the two
  * diverge.
  *
- * This module holds the collection's descriptors, the findings the collection
- * currently supports (in the same claim shapes the organizational findings
- * use, so FindingsPanel renders them unchanged), the figure specs for the
+ * This module holds the collection's descriptors, the figure specs for the
  * Overview's chart cards, and each dataset's preview sample.
  *
  * OUTPUTS
- * `LAUNCH_COLLECTION` descriptors, `collectionFindings()`, `COLLECTION_FIGURES`
- * and the sample/table manifest each collection carries.
+ * `LAUNCH_COLLECTION` descriptors, `COLLECTION_FIGURES` and the sample/table
+ * manifest each collection carries.
  *
  * ONE SOURCE, TWO LANGUAGES
  * This file and `server/cedar_press/collections.py` read the same manifest,
@@ -374,47 +372,6 @@ export function collectionShort(dataset) {
 export function collectionContextLine() {
   const updated = LAUNCH_COLLECTION.map((d) => d.updated).filter(Boolean).sort().at(-1);
   return updated ? `Updated ${updated}` : "";
-}
-
-/**
- * The collection's own honesty items ("needs"): rows awaiting confirmation,
- * releases still partial, and the fields nothing has measured. Each is derived
- * from the descriptors, so none can name a version or a figure that does not
- * exist.
- */
-export function collectionFindings() {
-  const availabilityNeeds = LAUNCH_COLLECTION.flatMap((dataset) => {
-    const facts = collectionCedarFacts(dataset.id);
-    const sample = collectionSample(dataset.id);
-    const missing = [];
-    if (!Number.isSafeInteger(facts?.n_rows) || facts.n_rows < 0) {
-      missing.push("The current release does not state a row count.");
-    }
-    if (!sample?.path) {
-      missing.push(sampleUnavailableReason(dataset.id) || "No preview file is published for the current release.");
-    }
-    return missing.length ? [{
-      id: `col-need-${dataset.id}-availability`,
-      text: `${dataset.name}: ${missing.join(" ")}`,
-    }] : [];
-  });
-  const withoutVintage = LAUNCH_COLLECTION.filter(
-    (dataset) => typeof dataset.vintage !== "string" || !dataset.vintage.trim(),
-  );
-  const vintageNeeds = withoutVintage.length ? [{
-    id: "col-need-vintage",
-    text: (withoutVintage.length === LAUNCH_COLLECTION.length
-      ? "No collection states a vintage."
-      : `A collection vintage is not stated for: ${withoutVintage.map((dataset) => dataset.name).join("; ")}.`)
-      + " An update date does not establish the periods covered by every source.",
-  }] : [];
-
-  const needs = [
-    ...availabilityNeeds,
-    ...vintageNeeds,
-  ];
-
-  return { needs };
 }
 
 /**

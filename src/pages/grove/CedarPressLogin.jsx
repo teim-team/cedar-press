@@ -17,11 +17,9 @@ import {
   PRESS_ACTIVATION_AVAILABLE,
   PRESS_STEP,
   formatPressCode,
-  initialPressStep,
   isPlausiblePressCode,
   normalizePressCode,
   pressSignupError,
-  rememberPressAccount,
 } from "../../features/grove/pressSignup";
 import { useDocumentTitle } from "../../features/grove/useDocumentTitle";
 
@@ -30,14 +28,6 @@ const MARK = "/brand/lumecon-logo-mark-teal.png";
 const MARKETING_URL = import.meta.env.DEV ? "/" : "https://cedarpress.ai";
 
 const describeSignup = (err) => pressSignupError(err?.code, err?.message);
-
-function browserStorage() {
-  try {
-    return window.localStorage;
-  } catch {
-    return null;
-  }
-}
 
 function Field({ label, aside = null, children }) {
   const id = useId();
@@ -54,7 +44,7 @@ export default function CedarPressLogin() {
   const { user, loading, login, refreshSession } = useAuth();
   const [params] = useSearchParams();
   const next = safeNext(params.get("next"));
-  const [step, setStep] = useState(() => initialPressStep(browserStorage(), { signInRequested: true }));
+  const [step, setStep] = useState(PRESS_STEP.SIGN_IN);
   const [code, setCode] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -87,7 +77,6 @@ export default function CedarPressLogin() {
 
   const submitSignIn = run(async () => {
     const session = await login({ email, password });
-    rememberPressAccount(browserStorage());
     if (!canReadCedarPress(session)) throw new Error("This account does not include Cedar Press.");
   });
 
@@ -101,7 +90,6 @@ export default function CedarPressLogin() {
 
   const submitPassword = run(async () => {
     await activatePressAccount({ code: normalizePressCode(code), email, password });
-    rememberPressAccount(browserStorage());
     await refreshSession();
   }, describeSignup);
 
@@ -167,8 +155,8 @@ export default function CedarPressLogin() {
               <p className="cp-gate__ok" role="status">Code accepted for {email}.</p>
               <form className="cp-gate__form" onSubmit={submitPassword}>
                 <Field label="Choose a password">
-                  <input type="password" autoComplete="new-password" placeholder="12 or more characters"
-                    minLength={12} value={password} onChange={(event) => setPassword(event.target.value)} required />
+                  <input type="password" autoComplete="new-password" placeholder="10 or more characters"
+                    minLength={10} value={password} onChange={(event) => setPassword(event.target.value)} required />
                 </Field>
                 {errorLine}
                 <button type="submit" className="cp-btn cp-btn--primary cp-btn--wide" disabled={pending}>

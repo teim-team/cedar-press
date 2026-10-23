@@ -6,7 +6,7 @@ import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { EXCLUDED_COLLECTIONS, COLLECTION_FIGURES, LAUNCH_COLLECTION, UNMEASURED_FIELDS,
   collectionCedarFacts, collectionCitation, collectionContextLine,
-  collectionFindings, collectionSample, collectionTables, figuresInShelfOrder,
+  collectionSample, collectionTables, figuresInShelfOrder,
 } from "../src/features/grove/collection.js";
 import { PLAN_REACH, SHELF, canOpenDataset, canReadCedarPress, shelfReach } from "../src/features/grove/pressAccess.js";
 import { PRESS_CATALOG } from "../src/features/grove/pressCatalog.js";
@@ -77,8 +77,6 @@ async function collectionPayload() {
 // is what would make this comparison flap at midnight.
 const ACCESSED = "1 January 2026";
 
-const findings = collectionFindings();
-
 return {
       launchCollection: LAUNCH_COLLECTION,
       unmeasuredFields: UNMEASURED_FIELDS,
@@ -86,7 +84,6 @@ return {
       contextLine: collectionContextLine(),
       figures: COLLECTION_FIGURES,
       figureOrder: figuresInShelfOrder().map((figure) => figure.id),
-      findings: { needs: findings.needs },
       citations: Object.fromEntries(
         LAUNCH_COLLECTION.map((d) => [d.id, collectionCitation(d.id, ACCESSED)]),
       ),

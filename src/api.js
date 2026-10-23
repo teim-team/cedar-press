@@ -14,8 +14,8 @@
  * as `{ code, message }` and are rethrown as an Error with `code` attached,
  * which is the shape pressSignup.pressSignupError already reads.
  *
- * Every request has a deadline (`REQUEST_TIMEOUT_MS`, longer for the two
- * calls whose server side waits on another service). A request that misses
+ * Every request has a deadline (`REQUEST_TIMEOUT_MS`, longer for the
+ * call whose server side waits on Cedar). A request that misses
  * it rejects with code `TIMEOUT`, and a dropped connection with `NETWORK`;
  * `isUnreachable(error)` is how a page tells either from a refusal, so it
  * can offer a Retry instead of a verdict. Before the deadline, a stalled
@@ -39,13 +39,11 @@ class ApiError extends Error {
 export const REQUEST_TIMEOUT_MS = 15_000;
 
 /**
- * Cedar's own deadline is 45 s (`CEDAR_TIMEOUT_MS` in cedar_service.py) and
- * the data service's 30 s (`CEDAR_PRESS_DATA_TIMEOUT_SECONDS`), so the calls
- * that wait on them wait longer here; a client deadline shorter than the
- * server's would abandon answers that were on their way.
+ * Cedar's own deadline is 45 s (`CEDAR_TIMEOUT_MS` in cedar_service.py), so
+ * the call that waits on it waits longer here; a client deadline shorter than
+ * the server's would abandon answers that were on their way.
  */
 export const CEDAR_TIMEOUT_MS = 60_000;
-export const RESEARCH_TIMEOUT_MS = 45_000;
 
 /** Whether an error means the service was not reached in time, not that it refused. */
 export function isUnreachable(error) {
@@ -155,6 +153,13 @@ export async function logout() {
   return request("/auth/logout", { method: "POST" });
 }
 
+export async function changePassword({ currentPassword, newPassword }) {
+  return requireSessionPayload(await request("/auth/password", {
+    method: "POST",
+    body: { current_password: currentPassword, new_password: newPassword },
+  }));
+}
+
 /* ── Activation ──────────────────────────────────────────────────────── */
 
 export async function validatePressCode({ code, email }) {
@@ -182,33 +187,6 @@ export async function saveProfile(profile) {
 /** Collections the signed-in subscription can see, with their shelf and reach. */
 export async function fetchCollections({ signal } = {}) {
   return request("/press/collections", { signal });
-}
-
-export function fetchReleaseCollections({ signal } = {}) {
-  return request("/press/release-collections", { signal });
-}
-
-function releaseDownloadUrl(collection, releaseId, component = null) {
-  if (!/^[a-z][a-z0-9-]{0,63}$/.test(collection || "") || collection === "gaming"
-      || !/^[a-f0-9]{64}$/.test(releaseId || "")
-      || (component !== null && !/^[a-z0-9][a-z0-9_]{0,59}$/.test(component))) return null;
-  const query = new URLSearchParams({ release_id: releaseId });
-  if (component) query.set("component", component);
-  return `${API_URL}/press/collections/${collection}/full-download?${query}`;
-}
-
-export function spreadsheetDownloadUrl(collection, metadata, parts) {
-  if (metadata?.kind !== "spreadsheet" || metadata.format !== "csv"
-      || !parts.some((part) => part.available && part.releaseId === metadata.release_id)
-      || !releaseDownloadUrl(collection, metadata.release_id)) return null;
-  return `${API_URL}/press/collections/${collection}/spreadsheet-download?${new URLSearchParams({ release_id: metadata.release_id })}`;
-}
-
-export function fetchReleaseResearch(collection, releaseId, component = null, { signal } = {}) {
-  if (!releaseDownloadUrl(collection, releaseId, component)) return Promise.reject(new Error("Invalid release"));
-  const query = new URLSearchParams({ release_id: releaseId });
-  if (component) query.set("component", component);
-  return request(`/press/collections/${collection}/research?${query}`, { signal, timeoutMs: RESEARCH_TIMEOUT_MS });
 }
 
 /** Release history: what changed in each collection, newest first. */

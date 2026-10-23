@@ -174,19 +174,12 @@ function Door({ user }) {
   // The page reads as one long scroll on a phone, so its sections arrive as
   // they enter the viewport instead of standing there already.
   const fadeRoot = useFadeIn();
-  // Plans or sign-in, one at a time, or NEITHER ON ARRIVAL.
-  //
-  // This opened on "signin" for any browser that had signed in before, on the
-  // theory that a returning visitor came back to get in. The owner's note,
-  // 2026-09-14: the panel is the first thing on the page every time and it
-  // covers what is behind it. A door that greets a returning reader with a
-  // form has decided for them what they came for, and the two tabs are
-  // already sitting in the bar where a visitor looks for them. Nothing opens
-  // until it is asked for.
-  const [panel, setPanel] = useState(null);
+  // Closed on arrival: the panel covers what is behind it, so it opens only
+  // when asked for (owner, 2026-09-14).
+  const [plansOpen, setPlansOpen] = useState(false);
   // The workspace's login page on the public site, this origin's own anywhere
   // else (a dev server, a preview host).
-  const loginHref = workspaceSignInHref(typeof window === "undefined" ? null : window.location) ?? PRESS_LOGIN_PATH;
+  const loginHref = workspaceSignInHref(window.location) ?? PRESS_LOGIN_PATH;
   // The source band moves until a reader stops it (WCAG 2.2.2): the button
   // beside its count pauses and resumes it, and reduced motion stills it.
 
@@ -285,11 +278,11 @@ function Door({ user }) {
     };
   }, []);
   useEffect(() => {
-    if (!panel) return undefined;
-    const onKey = (event) => { if (event.key === "Escape") setPanel(null); };
+    if (!plansOpen) return undefined;
+    const onKey = (event) => { if (event.key === "Escape") setPlansOpen(false); };
     const onDown = (event) => {
       if (panelRef.current?.contains(event.target) || tabsRef.current?.contains(event.target)) return;
-      setPanel(null);
+      setPlansOpen(false);
     };
     document.addEventListener("keydown", onKey);
     document.addEventListener("mousedown", onDown);
@@ -297,9 +290,8 @@ function Door({ user }) {
       document.removeEventListener("keydown", onKey);
       document.removeEventListener("mousedown", onDown);
     };
-  }, [panel]);
+  }, [plansOpen]);
 
-  const toggle = (which) => setPanel((current) => (current === which ? null : which));
   return (
     // .cp-split is the name the smoke suite knows the door by; the layout
     // is no longer a split.
@@ -332,9 +324,9 @@ function Door({ user }) {
                 id="cp-tab-plans"
                 role="tab"
                 className="cp-btn cp-btn--quiet cp-door__tab--plans"
-                aria-selected={panel === "plans"}
+                aria-selected={plansOpen}
                 aria-controls="cp-panel-plans"
-                onClick={() => toggle("plans")}
+                onClick={() => setPlansOpen((open) => !open)}
               >
                 Early access
               </button>
@@ -343,7 +335,7 @@ function Door({ user }) {
           )}
         </div>
 
-        {!user && panel === "plans" ? (
+        {!user && plansOpen ? (
           <div id="cp-panel-plans" role="tabpanel" aria-labelledby="cp-tab-plans" className="cp-door__panel" ref={panelRef}>
             {/* Enrollment is not open yet (2026-10-06), so this panel asks
                 for early access rather than sending a visitor to buy a

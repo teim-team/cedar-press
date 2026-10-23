@@ -12,6 +12,7 @@ import { useCallback, useEffect, useState } from "react";
 import { contactHref } from "../../features/grove/appLink.js";
 import { Link } from "react-router";
 
+import { changePassword } from "../../api";
 import { useAuth } from "../../context/useAuth";
 import { usePriorities } from "../../features/grove/usePriorities.js";
 import { PressInfluence } from "./PressInfluence";
@@ -105,6 +106,77 @@ function WorkCard() {
   );
 }
 
+function PlanCard({ currentId }) {
+  const plans = PRESS_TIERS.filter((entry) => entry.storefront);
+  return (
+    <section className="cp-set__card cp-fade" aria-label="Plans">
+      <span className="cp-set__cap">Plans</span>
+      <ul className="cp-set__links cp-set__links--flat">
+        {plans.map((plan) => (
+          <li key={plan.id}>
+            <b><TierName name={plan.name} />{plan.id === currentId ? " (current)" : ""}</b>
+            <span>{plan.question}</span>
+          </li>
+        ))}
+      </ul>
+      <p className="cp-set__fine">
+        Changing plans online is not available yet. Until it is, plan changes go through
+        Tribal Business News.
+      </p>
+    </section>
+  );
+}
+
+function PasswordCard() {
+  const [current, setCurrent] = useState("");
+  const [next, setNext] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState(null);
+  const [done, setDone] = useState(false);
+
+  const submit = async (event) => {
+    event.preventDefault();
+    setBusy(true);
+    setError(null);
+    setDone(false);
+    try {
+      await changePassword({ currentPassword: current, newPassword: next });
+      setCurrent("");
+      setNext("");
+      setDone(true);
+    } catch (failure) {
+      setError(failure.message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <section className="cp-set__card cp-fade" aria-label="Password">
+      <span className="cp-set__cap">Password</span>
+      <p className="cp-set__body">
+        Changing your password signs you out on every other device.
+      </p>
+      <form className="cp-set__form" onSubmit={submit}>
+        <label className="cp-who__label" htmlFor="cp-pw-current">Current password</label>
+        <input id="cp-pw-current" type="password" autoComplete="current-password"
+          value={current} onChange={(event) => setCurrent(event.target.value)} required />
+        <label className="cp-who__label" htmlFor="cp-pw-new">New password</label>
+        <input id="cp-pw-new" type="password" autoComplete="new-password" minLength={10}
+          placeholder="10 or more characters"
+          value={next} onChange={(event) => setNext(event.target.value)} required />
+        {error ? <p className="cp-gate__error" role="alert">{error}</p> : null}
+        {done ? <p className="cp-gate__ok" role="status">Password changed.</p> : null}
+        <div className="cp-set__acts">
+          <button type="submit" className="gv-btn gv-btn--quiet" disabled={busy}>
+            {busy ? "Saving" : "Change password"}
+          </button>
+        </div>
+      </form>
+    </section>
+  );
+}
+
 export default function CedarPressSettings() {
   useDocumentTitle("Settings");
   const { user, loading, logout } = useAuth();
@@ -181,6 +253,8 @@ export default function CedarPressSettings() {
             </div>
           </section>
 
+          <PlanCard currentId={tierId} />
+          <PasswordCard />
           <WorkCard />
         </div>
 

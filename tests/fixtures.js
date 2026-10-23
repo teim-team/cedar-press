@@ -10,6 +10,12 @@ export const test = base.extend({
     await context.route("**/api/**", (route) =>
       route.continue({ headers: { ...route.request().headers(), "x-forwarded-for": ip } }),
     );
+    // Logout revokes every session on the account, and the parallel tests
+    // share the fixture accounts, so a real one signs out whatever else is running.
+    await context.route("**/api/auth/logout", async (route) => {
+      await context.clearCookies();
+      await route.fulfill({ status: 204 });
+    });
     await provide(context);
   },
 });
@@ -24,7 +30,7 @@ export function articlesDown(page) {
 /** A current release feed with three collections, which the fixture API (no release builds) cannot serve. */
 export function releasesFeed(page) {
   const releases = ["funding", "deals", "federal-register"].map((id, i) => {
-    const version = String(i + 1).repeat(64).replace(/[^a-f0-9]/g, "a");
+    const version = String(i + 1).repeat(64);
     return {
       id, version, updated: null, retired: false, record_count: 1000 + i,
       history: [{ version, date: null, date_basis: "not_recorded", kind: "data", changed: ["Collection updated."] }],

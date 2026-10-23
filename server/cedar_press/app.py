@@ -385,10 +385,67 @@ def logout(
 ) -> None:
     # CORS governs response access, not whether a simple cross-site POST runs.
     # Reject an unrelated browser origin before account-wide revocation.
+    _require_auth_origin(request, "sign-out")
+    sign_out(response, session)
+
+
+def _require_auth_origin(request: Request, action: str) -> None:
     origin = request.headers.get("origin")
     if origin is not None and origin not in _AUTH_ORIGINS:
-        raise HTTPException(status_code=403, detail="Untrusted sign-out origin.")
-    sign_out(response, session)
+        raise HTTPException(status_code=403, detail=f"Untrusted {action} origin.")
+
+
+class PasswordChange(BaseModel):
+    current_password: str
+    new_password: str
+
+
+@app.post("/auth/password")
+def change_password(
+    change: PasswordChange,
+    request: Request,
+    response: Response,
+    session: Session = Depends(require_session),
+) -> dict[str, object]:
+    """Replace the password and keep only this device signed in.
+
+    The password hash is part of every session's revision, so the write signs
+    every other device out; this one is re-issued a cookie on the new password.
+    """
+    _require_auth_origin(request, "password")
+    _guard(request, "password", ratelimit.LOGIN_ATTEMPTS)
+    found = subscribers.authenticate(session.email, change.current_password)
+    if found is None:
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "code": "INVALID_CREDENTIALS",
+                "message": "Your current password is not correct.",
+            },
+        )
+    _require_password_length(change.new_password)
+    subscribers.create(found.email, change.new_password, found.tier)
+    renewed = sign_in(found.email, change.new_password, response)
+    if renewed is None:
+        raise HTTPException(
+            status_code=409,
+            detail={
+                "code": "ACCOUNT_CHANGED",
+                "message": "Your account changed. Please sign in again.",
+            },
+        )
+    return renewed.as_payload()
+
+
+def _require_password_length(password: str) -> None:
+    if len(password) < 10:
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "code": "PASSWORD_TOO_SHORT",
+                "message": "Choose a password of at least 10 characters.",
+            },
+        )
 
 
 class CodeCheck(BaseModel):
@@ -472,14 +529,7 @@ def activate(activation: Activation, request: Request, response: Response) -> di
         raise _refuse(error)
     if account_exists(issued.email):
         raise _refuse(codes.EMAIL_IN_USE)
-    if len(activation.password) < 10:
-        raise HTTPException(
-            status_code=400,
-            detail={
-                "code": "PASSWORD_TOO_SHORT",
-                "message": "Choose a password of at least 10 characters.",
-            },
-        )
+    _require_password_length(activation.password)
 
     # ONE TRANSACTION WHERE THERE IS A DATABASE TO HAVE ONE IN.
     # This used to create the account and then mark the code spent, in that

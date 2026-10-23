@@ -20,9 +20,9 @@ A local sign-in needs, on the API process:
 
 The client's calls and their paths are in `src/api.js`.
 
-## What "connected and empty" looks like
+## With no data source
 
-With the API up and no data source, sign-in works and every page renders, but `GET /press/releases` returns `"releases": []` and each entry in `/press/release-collections` has `"release": null`. The Collections page then lists the collections and says no spreadsheet release has been published for each. That is deliberate: connected mode never falls back to sample records.
+With the API up and no data source, sign-in works and every page renders. `GET /press/releases` returns `"releases": []` and each entry in `/press/release-collections` has `"release": null`. The Collections viewer still lists every collection and shows the example records that `/press/collections/{id}/download` serves for the subscriber's plan, labelled as example records.
 
 ## What turns it on
 
