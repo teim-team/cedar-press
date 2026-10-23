@@ -441,45 +441,24 @@ def redeem_reset(token: str, password: str) -> Subscriber | None:
     unknown, expired or already used.
     """
     key = _reset_hash(token or "")
-    if not db.configured():
-        entry = _resets.pop(key, None)
-        if entry is None or entry[1] <= dt.datetime.now(dt.timezone.utc):
-            return None
-        found = find(entry[0])
-        if found is None:
-            return None
-        for other in [k for k, (email, _) in _resets.items() if email == found.email]:
-            del _resets[other]
-        return create(found.email, password, found.tier)
-
-    hashed = hash_password(password)
-    with db.pool().connection() as conn, conn.cursor() as cur:
-        cur.execute(
+    if db.configured():
+        row = db.one(
             "UPDATE cedar_press_password_resets SET used_at = now()"
-            " WHERE token_hash = %s AND used_at IS NULL AND expires_at > now()"
+            " WHERE used_at IS NULL AND email = (SELECT email FROM cedar_press_password_resets"
+            " WHERE token_hash = %s AND used_at IS NULL AND expires_at > now())"
             " RETURNING email",
             (key,),
         )
-        claimed = cur.fetchone()
-        if claimed is None:
-            conn.rollback()
-            return None
-        cur.execute(
-            "UPDATE cedar_press_subscribers SET password_hash = %s, updated_at = now()"
-            " WHERE email = %s RETURNING email, tier, account_id",
-            (hashed, claimed["email"]),
-        )
-        made = cur.fetchone()
-        if made is None:
-            conn.rollback()
-            return None
-        cur.execute(
-            "UPDATE cedar_press_password_resets SET used_at = now()"
-            " WHERE email = %s AND used_at IS NULL",
-            (made["email"],),
-        )
-        conn.commit()
-    return Subscriber(made["email"], made["tier"], made["account_id"])
+        email = row and row["email"]
+    else:
+        email, expires = _resets.pop(key, (None, None))
+        if email and expires > dt.datetime.now(dt.timezone.utc):
+            for other in [k for k, (e, _) in _resets.items() if e == email]:
+                del _resets[other]
+        else:
+            email = None
+    found = email and find(email)
+    return create(found.email, password, found.tier) if found else None
 
 
 # ── access codes ────────────────────────────────────────────────────────────

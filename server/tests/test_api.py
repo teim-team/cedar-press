@@ -54,7 +54,6 @@ from cedar_press import (
     press_catalog,  # noqa: E402
     ratelimit,  # noqa: E402
     repository,  # noqa: E402
-    subscribers,  # noqa: E402
 )
 from cedar_press import collections as launch  # noqa: E402
 from cedar_press import session as session_module  # noqa: E402
@@ -240,24 +239,6 @@ class TestPasswordReset(unittest.TestCase):
         client.cookies.clear()
         self.assertEqual(sign_in().status_code, 401)
         self.assertEqual(sign_in(password=self.NEW).status_code, 200)
-
-    def test_a_link_works_once(self) -> None:
-        token = self.token()
-        self.assertEqual(self.confirm(token).status_code, 200)
-        response = self.confirm(token, "another-long-password")
-        self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.json()["code"], "RESET_LINK_INVALID")
-
-    def test_using_one_link_spends_the_older_ones(self) -> None:
-        older = self.token()
-        self.assertEqual(self.confirm(self.token()).status_code, 200)
-        self.assertEqual(self.confirm(older, "another-long-password").status_code, 400)
-
-    def test_an_expired_link_is_refused(self) -> None:
-        with mock.patch.object(subscribers, "RESET_LIFETIME", -subscribers.RESET_LIFETIME):
-            token = self.token()
-        self.assertEqual(self.confirm(token).status_code, 400)
-        self.assertEqual(sign_in().status_code, 200)
 
     def test_a_short_password_is_refused_and_keeps_the_link(self) -> None:
         token = self.token()

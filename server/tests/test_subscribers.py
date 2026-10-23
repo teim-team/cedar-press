@@ -17,6 +17,7 @@ import pathlib
 import sys
 import unittest
 from pathlib import Path
+from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
@@ -162,12 +163,8 @@ class _Backend:
         self.assertIsNotNone(subscribers.authenticate("reader@example.org", "a-reset-password"))
 
     def test_an_expired_reset_token_is_refused(self) -> None:
-        lifetime = subscribers.RESET_LIFETIME
-        subscribers.RESET_LIFETIME = -lifetime
-        try:
+        with mock.patch.object(subscribers, "RESET_LIFETIME", -subscribers.RESET_LIFETIME):
             token = subscribers.issue_reset("reader@example.org")
-        finally:
-            subscribers.RESET_LIFETIME = lifetime
         self.assertIsNone(subscribers.redeem_reset(token, "a-reset-password"))
         self.assertIsNotNone(subscribers.authenticate("reader@example.org", "correct-horse"))
 
