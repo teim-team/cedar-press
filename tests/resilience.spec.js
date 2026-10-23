@@ -9,16 +9,22 @@
 // The connected-only half (the API deadline behind the session check, an
 // article and the spreadsheet list) runs no browser here, because this suite
 // builds standalone; src/features/grove/apiTimeout.test.js holds it.
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures.js";
+
+import { EMAIL, PASSWORD } from "./demoAccount.js";
 
 // The sample tables every reader fetches: one customer table per collection.
 const SAMPLES = "**/data/cedar/downloads/**";
+// What a signed-in viewer reads: the subscriber's own table from the API.
+const VIEWER_ROWS = "**/api/press/collections/*/download**";
 
 /** A signed-in Cedar Press+ reader, as the standalone gate stores one. */
 async function signedIn(page) {
-  await page.addInitScript(() => {
-    localStorage.setItem("cedar-press-session", JSON.stringify({ email: "smoke@cedar-press.invalid", workspace_tier: "press_pro" }));
-  });
+  await page.goto("/login");
+  await page.getByLabel("Work email").fill(EMAIL);
+  await page.getByLabel("Password", { exact: true }).fill(PASSWORD);
+  await page.locator(".cp-gate__form").getByRole("button", { name: "Log in" }).click();
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("Know what’s shaping Indian Country");
 }
 
 test("the door's preview says a failed sample failed, and Retry reads it again", async ({ page }) => {
@@ -48,13 +54,13 @@ test("the door's preview reads the sample again when the browser is back online"
 
 test("the viewer does not call a failed read an empty result", async ({ page }) => {
   await signedIn(page);
-  await page.route(SAMPLES, (route) => route.abort("internetdisconnected"));
+  await page.route(VIEWER_ROWS, (route) => route.abort("internetdisconnected"));
   await page.goto("/data?c=funding");
   const empty = page.locator(".cp-ex__empty");
   await expect(empty).toContainText("The preview records could not be loaded");
   await expect(empty).not.toContainText("Widen a filter");
 
-  await page.unroute(SAMPLES);
+  await page.unroute(VIEWER_ROWS);
   await empty.getByRole("button", { name: "Retry" }).click();
   await expect(page.getByTestId("explore-record").first()).toBeVisible();
 });

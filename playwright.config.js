@@ -74,6 +74,7 @@ export default defineConfig({
     env: {
       CEDAR_PRESS_SECRET: SECRET,
       CEDAR_PRESS_INSECURE_COOKIE: "1",
+      CEDAR_PRESS_TRUST_PROXY: "1",
       CEDAR_PRESS_ORIGINS: `http://localhost:${PORT}`,
       CEDAR_PRESS_ACCOUNTS: ACCOUNTS_JSON,
     },
