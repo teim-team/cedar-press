@@ -88,7 +88,11 @@ resource "aws_iam_role" "github_actions" {
       Condition = {
         StringEquals = {
           "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
-          "token.actions.githubusercontent.com:sub" = "repo:${var.github_repo}:environment:${var.environment}"
+          "token.actions.githubusercontent.com:sub" = [
+            "repo:${var.github_repo}:ref:refs/heads/main",
+            # This repo issues the immutable form of the subject (org and repo IDs inside).
+            "repo:${var.github_repo_immutable}:ref:refs/heads/main",
+          ]
         }
       }
     }]
@@ -120,6 +124,11 @@ resource "aws_iam_role_policy" "github_actions_deploy" {
           "ecr:DescribeImages"
         ]
         Resource = aws_ecr_repository.api.arn
+      },
+      {
+        Effect   = "Allow"
+        Action   = ["ec2:DescribeInstances"]
+        Resource = "*"
       },
       {
         Effect = "Allow"
