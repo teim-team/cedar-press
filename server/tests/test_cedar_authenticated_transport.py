@@ -100,7 +100,7 @@ class TestConversationHandles(unittest.TestCase):
             )
         self.assertEqual(calls[0][1]["threadId"], calls[1][1]["threadId"])
         self.assertNotEqual(second.thread_id, calls[1][1]["threadId"])
-        self.assertEqual(calls[0][0].full_url, "https://cedar.internal/api/v1/messages")
+        self.assertEqual(calls[0][0].full_url, "https://cedar.internal/api/v1/press/messages")
         self.assertEqual(calls[0][0].get_header("Authorization"), "Bearer synthetic-internal-key")
         self.assertEqual(calls[0][1]["user"]["id"], self.scope["email"])
         self.assertFalse(calls[0][1]["context"]["pressContext"]["retrieval"]["available"])

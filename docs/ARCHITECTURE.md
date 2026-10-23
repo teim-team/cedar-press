@@ -172,11 +172,10 @@ and tries them in this order:
    `source: "profile"` and a `basis` naming the release, which the panel
    prints under the answer.
 2. **Cedar.** Anything the profiles cannot answer goes to the service in the
-   `cedar` repository — `POST {CEDAR_BASE_URL}/api/v1/messages`, bearer
-   `CEDAR_INTERNAL_API_KEY`, contract `1.0.0`, the same contract
-   `teim-app/server/cedar/client.js` speaks. `server/cedar_press/cedar_service.py`
+   `cedar` repository: `POST {CEDAR_BASE_URL}/api/v1/press/messages`, bearer
+   `CEDAR_INTERNAL_API_KEY`, contract `1.0.0`. `server/cedar_press/cedar_service.py`
    is that client; `server/tests/test_cedar_service.py` validates the body
-   against `cedar/schemas/chat.py` itself when that checkout is present.
+   against `cedar/schemas/press.py` itself when that checkout is present.
 
 Past both it refuses (`501 NOT_ANSWERABLE`) and names the research desk, and
 an unreachable Cedar is `503 CEDAR_UNAVAILABLE` rather than a made-up answer.
@@ -189,16 +188,16 @@ so a panel is one conversation.
 Unset `CEDAR_BASE_URL` (or no `CEDAR_INTERNAL_API_KEY`) means Cedar is not
 wired into this deployment; the profiles still answer and the rest refuses.
 
-The variables are teim-app's, not a second spelling of them — same names,
-same defaults, same `CEDAR_ENABLED` semantics, so one service with two
-callers is configurable from one set. Pinned by `test_cedar_service.py`.
+The variables are teim-app's names, not a second spelling of them, with the
+same `CEDAR_ENABLED` semantics. The chat path default is the Press route.
+`CEDAR_API_PATH` overrides it. Pinned by `test_cedar_service.py`.
 
 | Variable | Purpose |
 | --- | --- |
 | `CEDAR_BASE_URL` | Where the Cedar service is. Unset disables the second answerer. |
 | `CEDAR_INTERNAL_API_KEY` | The bearer token `cedar/api/deps.require_internal_key` checks. `CEDAR_API_KEY` is read as a fallback. |
 | `CEDAR_ENABLED` | Off only for the literal `"false"`; unset is on. |
-| `CEDAR_API_PATH` | Endpoint override. Default `/api/v1/messages`. |
+| `CEDAR_API_PATH` | Endpoint override. Default `/api/v1/press/messages`. |
 | `CEDAR_TIMEOUT_MS` | How long a reader waits. Default `45000` — shorter than teim-app's `120000`, because a reader is watching this panel. |
 
 The client side is `src/pages/grove/PressCedarFab.jsx`. It and the door's
