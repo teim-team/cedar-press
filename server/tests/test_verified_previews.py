@@ -96,6 +96,118 @@ class VerifiedPreviewTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "exact lowercase"):
             preview.queue_items(bad)
 
+    def _bundle_manifest(self, collection_id="funding", release_id=None, manifest_sha256=None):
+        return {
+            "collection_id": collection_id,
+            "release_id": "a" * 64 if release_id is None else release_id,
+            "manifest_sha256": "b" * 64 if manifest_sha256 is None else manifest_sha256,
+            "columns": [{"name": "record_id", "type": "string"}],
+            "search_fields": [],
+            "row_count": 1,
+            "customer_sheet_transform_version": "customer-sheet-2026-10-04.5",
+            "content_sha256": "c" * 64,
+        }
+
+    def test_gaming_is_not_asked_for_a_bundle(self):
+        self.assertIsNone(preview.retrieval_bundle_manifest(object(), "gaming", "a" * 64))
+        preview.require_retrieval_bundle(object(), "gaming", "a" * 64, "b" * 64)
+
+    def test_bundle_manifest_path_is_outside_collections(self):
+        store = Path("/store")
+        path = preview.retrieval_bundle_manifest(store, "funding", "a" * 64)
+        self.assertEqual(
+            path,
+            store / "retrieval-bundles" / "funding" / ("a" * 64) / "manifest.json",
+        )
+        self.assertNotIn("collections", path.parts)
+
+    def test_matching_writer_manifest_is_accepted(self):
+        with TemporaryDirectory() as temporary:
+            store = Path(temporary)
+            release_id = "a" * 64
+            manifest = self._bundle_manifest()
+            path = store / "retrieval-bundles" / "funding" / release_id / "manifest.json"
+            preview.write_json(path, manifest)
+            preview.require_retrieval_bundle(store, "funding", release_id, "b" * 64)
+
+    def test_missing_bundle_manifest_names_the_check(self):
+        with TemporaryDirectory() as temporary:
+            store = Path(temporary)
+            with self.assertRaisesRegex(
+                ValueError, "funding: retrieval bundle manifest is missing"
+            ):
+                preview.require_retrieval_bundle(store, "funding", "a" * 64, "b" * 64)
+
+    def test_table_without_a_manifest_is_missing(self):
+        with TemporaryDirectory() as temporary:
+            store = Path(temporary)
+            directory = store / "retrieval-bundles" / "funding" / ("a" * 64)
+            directory.mkdir(parents=True)
+            (directory / "table.csv").write_bytes(b"record_id\nr1\n")
+            with self.assertRaisesRegex(
+                ValueError, "funding: retrieval bundle manifest is missing"
+            ):
+                preview.require_retrieval_bundle(store, "funding", "a" * 64, "b" * 64)
+
+    def test_partial_directory_is_not_the_bundle_manifest(self):
+        with TemporaryDirectory() as temporary:
+            store = Path(temporary)
+            release_id = "a" * 64
+            partial = store / "retrieval-bundles" / "funding" / (release_id + ".partial")
+            preview.write_json(partial / "manifest.json", self._bundle_manifest())
+            with self.assertRaisesRegex(
+                ValueError, "funding: retrieval bundle manifest is missing"
+            ):
+                preview.require_retrieval_bundle(store, "funding", release_id, "b" * 64)
+
+    def test_unreadable_bundle_manifest_names_the_check(self):
+        with TemporaryDirectory() as temporary:
+            store = Path(temporary)
+            release_id = "a" * 64
+            path = store / "retrieval-bundles" / "funding" / release_id / "manifest.json"
+            path.parent.mkdir(parents=True)
+            path.write_text("[", encoding="utf-8")
+            with self.assertRaisesRegex(
+                ValueError, "funding: retrieval bundle manifest is unreadable"
+            ):
+                preview.require_retrieval_bundle(store, "funding", release_id, "b" * 64)
+            preview.write_json(path, ["not", "an", "object"])
+            with self.assertRaisesRegex(
+                ValueError, "funding: retrieval bundle manifest is unreadable"
+            ):
+                preview.require_retrieval_bundle(store, "funding", release_id, "b" * 64)
+
+    def test_invalid_utf8_bundle_manifest_names_the_check(self):
+        with TemporaryDirectory() as temporary:
+            store = Path(temporary)
+            release_id = "a" * 64
+            path = store / "retrieval-bundles" / "funding" / release_id / "manifest.json"
+            path.parent.mkdir(parents=True)
+            path.write_bytes(b"\xff")
+            with self.assertRaisesRegex(
+                ValueError, "funding: retrieval bundle manifest is unreadable"
+            ):
+                preview.require_retrieval_bundle(store, "funding", release_id, "b" * 64)
+
+    def test_bundle_pin_fields_must_match_the_queue_item(self):
+        cases = (
+            ("collection_id", "deals", "funding: retrieval bundle collection_id differs"),
+            ("release_id", "d" * 64, "funding: retrieval bundle release_id differs"),
+            ("manifest_sha256", "e" * 64, "funding: retrieval bundle manifest_sha256 differs"),
+        )
+        for key, value, message in cases:
+            with self.subTest(key=key), TemporaryDirectory() as temporary:
+                store = Path(temporary)
+                release_id = "a" * 64
+                manifest = self._bundle_manifest()
+                manifest[key] = value
+                preview.write_json(
+                    store / "retrieval-bundles" / "funding" / release_id / "manifest.json",
+                    manifest,
+                )
+                with self.assertRaisesRegex(ValueError, message):
+                    preview.require_retrieval_bundle(store, "funding", release_id, "b" * 64)
+
 
 class MixedPreviewDefinitionTest(unittest.TestCase):
     """Admission uses actual component mappings and refuses invented definitions."""
