@@ -4,6 +4,10 @@
 The queue is an array of exactly 15 objects:
   collection, release, store, manifest_sha256
 Optional expected_public_rows binds an independently measured public-row count.
+A storefront collection is staged only when
+<store>/retrieval-bundles/<collection>/<release>/manifest.json
+matches that queue item's collection, release, and manifest_sha256.
+Gaming is not asked for a bundle. A refused stage writes no READY.json.
 Run with both producer src/ and Press server/ on PYTHONPATH. TEMP/TMP must point
 to the bounded review volume. Output must be a new directory.
 """
@@ -89,6 +93,43 @@ def queue_items(value):
     if set(by_id) != EXPECTED:
         raise ValueError("Queue must pin all 15 collections exactly once")
     return by_id
+
+
+def retrieval_bundle_manifest(store, collection_id, release_id):
+    """The published bundle manifest, or None for Gaming.
+
+    Gaming is currently outside of retrieval for the time being. 
+    """
+    if collection_id == "gaming":
+        return None
+    return Path(store) / "retrieval-bundles" / collection_id / release_id / "manifest.json"
+
+
+def require_retrieval_bundle(store, collection_id, release_id, manifest_sha256):
+    """Refuse a storefront pin whose published retrieval bundle disagrees.
+
+    Compares collection_id, release_id, and manifest_sha256 only. A directory
+    named ``<release_id>.partial`` is not the bundle. table.csv is not opened.
+    """
+    path = retrieval_bundle_manifest(store, collection_id, release_id)
+    if path is None:
+        return
+    if not path.is_file():
+        raise ValueError(f"{collection_id}: retrieval bundle manifest is missing")
+    try:
+        payload = read_json(path)
+    except (OSError, json.JSONDecodeError, UnicodeDecodeError) as error:
+        raise ValueError(f"{collection_id}: retrieval bundle manifest is unreadable") from error
+    if not isinstance(payload, dict):
+        raise ValueError(f"{collection_id}: retrieval bundle manifest is unreadable")
+    expected = (
+        ("collection_id", collection_id),
+        ("release_id", release_id),
+        ("manifest_sha256", manifest_sha256),
+    )
+    for key, value in expected:
+        if payload.get(key) != value:
+            raise ValueError(f"{collection_id}: retrieval bundle {key} differs")
 
 
 def read_preview(content, metadata, layout):
@@ -462,6 +503,7 @@ def stage(repo, producer, queue_path, output, producer_commit, updated, *,
     for cid in sorted(selected_queue):
         item = queue[cid]
         store = Path(item["store"])
+        require_retrieval_bundle(store, cid, item["release"], item["manifest_sha256"])
         release, manifest_sha = dbload.load_manifest(store, cid, item["release"])
         if (
             manifest_sha != item["manifest_sha256"]
