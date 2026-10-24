@@ -449,11 +449,11 @@ def _require_password_length(password: str) -> None:
 
 
 class ResetRequest(BaseModel):
-    email: str
+    email: str = Field(max_length=254)
 
 
 class ResetConfirm(BaseModel):
-    token: str
+    token: str = Field(max_length=128)
     new_password: str
 
 

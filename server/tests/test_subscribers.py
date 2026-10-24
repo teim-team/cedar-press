@@ -156,10 +156,11 @@ class _Backend:
         subscribers.redeem_reset(subscribers.issue_reset("one@bank.example"), "a-reset-password")
         self.assertEqual(subscribers.account_id_for("one@bank.example"), "acct-bank")
 
-    def test_redeeming_a_reset_spends_the_older_tokens(self) -> None:
+    def test_a_new_reset_token_replaces_the_older_one(self) -> None:
         older = subscribers.issue_reset("reader@example.org")
-        subscribers.redeem_reset(subscribers.issue_reset("reader@example.org"), "a-reset-password")
+        newer = subscribers.issue_reset("Reader@Example.org")
         self.assertIsNone(subscribers.redeem_reset(older, "another-password"))
+        self.assertIsNotNone(subscribers.redeem_reset(newer, "a-reset-password"))
         self.assertIsNotNone(subscribers.authenticate("reader@example.org", "a-reset-password"))
 
     def test_an_expired_reset_token_is_refused(self) -> None:

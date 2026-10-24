@@ -246,6 +246,10 @@ class TestPasswordReset(unittest.TestCase):
         self.assertEqual(response.json()["code"], "PASSWORD_TOO_SHORT")
         self.assertEqual(self.confirm(token).status_code, 200)
 
+    def test_an_over_long_address_is_refused(self) -> None:
+        self.assertEqual(self.ask("a" * 250 + "@example.org").status_code, 422)
+        self.assertEqual(self.sent, [])
+
     def test_one_inbox_gets_at_most_three_links(self) -> None:
         for _ in range(5):
             self.assertEqual(self.ask().status_code, 204)

@@ -174,7 +174,7 @@ _activated: dict[str, tuple[str, str]] = {}
 _spent: set[str] = set()
 _session_revisions: dict[str, int] = {}
 _session_lock = threading.Lock()
-#: Reset token hash -> (email, expires at).
+#: Email -> (reset token hash, expires at): one live link per address.
 _resets: dict[str, tuple[str, dt.datetime]] = {}
 
 
@@ -415,48 +415,49 @@ def _reset_hash(token: str) -> str:
 def issue_reset(email: str) -> str | None:
     """A single-use reset token for this subscriber, or None if there is none.
 
-    Only the token's hash is stored, so reading the table resets nobody.
+    Only the token's hash is stored, so reading the table resets nobody. A new
+    token replaces any outstanding one, so an older email in the inbox stops
+    working.
     """
     found = find(email)
     if found is None:
         return None
+    address = found.email.lower()
     token = secrets.token_urlsafe(32)
     expires = dt.datetime.now(dt.timezone.utc) + RESET_LIFETIME
     if db.configured():
         db.execute(
             "INSERT INTO cedar_press_password_resets (token_hash, email, expires_at)"
-            " VALUES (%s, %s, %s)",
-            (_reset_hash(token), found.email, expires),
+            " VALUES (%s, %s, %s)"
+            " ON CONFLICT (email) WHERE used_at IS NULL DO UPDATE SET"
+            " token_hash = EXCLUDED.token_hash, expires_at = EXCLUDED.expires_at,"
+            " created_at = now()",
+            (_reset_hash(token), address, expires),
         )
     else:
-        _resets[_reset_hash(token)] = (found.email, expires)
+        _resets[address] = (_reset_hash(token), expires)
     return token
 
 
 def redeem_reset(token: str, password: str) -> Subscriber | None:
     """Set a new password from a reset token.
 
-    Spends the token and every other outstanding one for the same address, so
-    an older email in the inbox stops working too. None when the token is
-    unknown, expired or already used.
+    None when the token is unknown, expired or already used.
     """
     key = _reset_hash(token or "")
     if db.configured():
         row = db.one(
             "UPDATE cedar_press_password_resets SET used_at = now()"
-            " WHERE used_at IS NULL AND email = (SELECT email FROM cedar_press_password_resets"
-            " WHERE token_hash = %s AND used_at IS NULL AND expires_at > now())"
+            " WHERE token_hash = %s AND used_at IS NULL AND expires_at > now()"
             " RETURNING email",
             (key,),
         )
         email = row and row["email"]
     else:
-        email, expires = _resets.pop(key, (None, None))
-        if email and expires > dt.datetime.now(dt.timezone.utc):
-            for other in [k for k, (e, _) in _resets.items() if e == email]:
-                del _resets[other]
-        else:
-            email = None
+        now = dt.datetime.now(dt.timezone.utc)
+        email = next((e for e, (h, x) in _resets.items() if h == key and x > now), None)
+        if email:
+            del _resets[email]
     found = email and find(email)
     return create(found.email, password, found.tier) if found else None
 
