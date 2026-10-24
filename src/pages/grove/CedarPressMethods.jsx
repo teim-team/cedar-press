@@ -69,7 +69,7 @@ import { Link } from "react-router";
 import { contactHref } from "../../features/grove/appLink.js";
 
 
-import { PRESS_DATA_PATH, PRESS_PRIORITIES_PATH, PRESS_REQUEST_PATH, PRESS_WHATS_NEW_PATH } from "../../features/grove/pressRoutes";
+import { PRESS_DATA_PATH, PRESS_REQUEST_PATH } from "../../features/grove/pressRoutes";
 import { collectionCitation } from "../../features/grove/collection";
 import { REPORT_CITATION_HREF } from "../../features/grove/pressCitations";
 import { PRESS_CATALOG } from "../../features/grove/pressCatalog";
@@ -529,20 +529,14 @@ export default function CedarPressMethods() {
             </Chapter>
 
             {/* Owner, 2026-09-26: how a question becomes a collection. The
-                owner's question leads, the six stages follow, and the way in
-                is Priorities, where subscribers ask. */}
+                owner's question leads and the six stages follow. */}
             <Chapter
               id="next"
               title="How Cedar decides what to build next."
-              claim="Priorities, Nations' requests and Cedar's own research all start in the same place, and go through the same stages before anything is released."
+              claim="Nations' requests and Cedar's own research start in the same place, and go through the same stages before anything is released."
             >
               <p className="cp-bnx__q">{BUILD_NEXT_QUESTION}</p>
               <BuildNextRail />
-              <Acts>
-                <Link className="cp-ch__act" to={PRESS_PRIORITIES_PATH}>
-                  Help set the research agenda <span aria-hidden="true">&#8594;</span>
-                </Link>
-              </Acts>
             </Chapter>
 
             <Chapter
@@ -566,9 +560,6 @@ export default function CedarPressMethods() {
                 ) : null;
               })()}
               <Acts>
-                <Link className="cp-ch__act" to={PRESS_WHATS_NEW_PATH}>
-                  See every release <span aria-hidden="true">&#8594;</span>
-                </Link>
                 <a className="cp-ch__act" href={REPORT_CITATION_HREF}>
                   Report a citation <span aria-hidden="true">&#8594;</span>
                 </a>

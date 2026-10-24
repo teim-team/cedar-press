@@ -205,14 +205,12 @@ const GENERAL_INTENTS = [
       `resolved to the nations, corporations and organizations the records belong to.\n\n` +
       `A federal contract names the company that won it but not the nation that owns the company, so ` +
       `Cedar does the work between the record and the entity, publishes what it could not resolve, and keeps the ` +
-      `collections current as new material arrives. Alongside the data there is original research, ` +
-      `starting with a brief on individually owned Native businesses, a release history and a methods reference.`,
+      `collections current as new material arrives. Alongside the data there is a methods reference.`,
     expanded:
       `Going deeper: the collections are one product rather than ${COUNT} downloads. Every one keys to the ` +
       `same entity layer, so a nation's contracts, awards, deals, notices and subsidiaries read as one ` +
       `nation across all of them, and a figure you cite reproduces because the update history preserves changes.\n\n` +
-      `Research briefs are written from the collections, the release history says what changed and when, and ` +
-      `the methods page states the inclusion rules and the known gaps for each collection.`,
+      `The methods page states the inclusion rules and the known gaps for each collection.`,
   },
   {
     id: "collections",
@@ -347,8 +345,7 @@ const GENERAL_INTENTS = [
       `Going deeper: there is no year gating. Every subscriber gets every year Cedar holds of each collection; ` +
       `the only difference between the two plans is which collections arrive. ${PRESS?.name} is ` +
       `${names(STANDARD)}. ${PRESS_PRO?.name} adds ${names(PRO)}.\n\n` +
-      `Each collection downloads as a CSV that cites itself, and the same reader opens the briefs, the ` +
-      `release history and the methods reference.`,
+      `Each collection downloads as a CSV that cites itself, and the same reader opens the methods reference.`,
     links: ["plans", "request", "research"],
   },
   {

@@ -35,26 +35,19 @@ function initialsOf(email) {
 
 import { LUMECON_URL, TBN_URL } from "../../features/grove/pressArticles";
 import {
-  PRESS_ARTICLES_PATH,
   PRESS_DATA_PATH,
   PRESS_METHODS_PATH,
-  PRESS_PRIORITIES_PATH,
   PRESS_PATH,
   PRESS_REQUEST_PATH,
   PRESS_SETTINGS_PATH,
-  PRESS_WHATS_NEW_PATH,
 } from "../../features/grove/pressRoutes";
 
-// The order the owner set, 2026-09-14: the collections are the product, the
-// briefs are what Cedar wrote from them, and Priorities is where a subscriber
-// changes what comes next. What's new and Methods are reference, so they
-// follow. The same order runs in the hub tiles and the footer, because three
-// navigations in three orders is three different maps of one site.
+// The site is streamlined to what it holds today: the Overview, the
+// collections, and Methods as their reference. Research Briefs, Priorities
+// and What's new were removed in the redesign. The same order runs in the
+// footer, because two navigations in two orders is two maps of one site.
 const NAV = [
   { id: "data", label: "Collections", to: PRESS_DATA_PATH },
-  { id: "articles", label: "Research Briefs", to: PRESS_ARTICLES_PATH },
-  { id: "priorities", label: "Priorities", to: PRESS_PRIORITIES_PATH },
-  { id: "whats-new", label: "What’s new", to: PRESS_WHATS_NEW_PATH },
   { id: "methods", label: "Methods", to: PRESS_METHODS_PATH },
 ];
 
@@ -326,19 +319,6 @@ export function PressMast({ section = null }) {
 }
 
 /**
- * The way out of a leaf page, back to the section that holds it. The nav
- * above covers the sections themselves; this is for a piece inside one,
- * where "the list I came from" is a different answer than "the section".
- */
-export function PressBack({ label = "All of Cedar Press", to = PRESS_PATH }) {
-  return (
-    <Link className="cp-ar__back cp-back" to={to}>
-      <span aria-hidden="true">&#8592;</span> {label}
-    </Link>
-  );
-}
-
-/**
  * The footer: the whole map, then who publishes it, then the promise.
  *
  * One footer, navy, on every page — pages that ended in white dissolved
@@ -365,14 +345,10 @@ export function PressFoot({ flush = false, nav = true }) {
           {nav ? (
             <>
               <Link to={PRESS_DATA_PATH}>Collections</Link>
-              <Link to={PRESS_ARTICLES_PATH}>Research Briefs</Link>
-              <Link to={PRESS_PRIORITIES_PATH}>Priorities</Link>
-              <Link to={PRESS_WHATS_NEW_PATH}>What&rsquo;s new</Link>
               <Link to={PRESS_METHODS_PATH}>Methods</Link>
               <Link to={PRESS_SETTINGS_PATH}>Settings</Link>
-              {/* Contact came off the hub's six doors when Priorities took
-                  its place. It is a mail link rather than a section, and this
-                  is where a reader looks for one. */}
+              {/* A mail link rather than a section, and this is where a
+                  reader looks for one. */}
               <a href={contactHref("Cedar Press")}>Contact</a>
             </>
           ) : null}

@@ -31,16 +31,12 @@ test("nothing is sold, so every slot resolves to no creative", () => {
   }
 });
 
-// One invitation per page, never more. A hosted article carries four slots,
-// and four "advertise here" panels down one piece reads as a publication
-// nobody buys. This is the rule that keeps the unsold state from doing that,
+// One invitation per page, never more. Several "advertise here" panels down
+// one page reads as a publication nobody buys. This is the rule that keeps the unsold state from doing that,
 // so it is pinned to the pages rather than trusted to the slot list.
 test("no page carries more than one invitation", () => {
   const pages = [
     "CedarPress.jsx",
-    "CedarPressArticle.jsx",
-    "CedarPressArticles.jsx",
-    "CedarPressWhatsNew.jsx",
   ];
   for (const name of pages) {
     const src = page(name);
@@ -103,16 +99,6 @@ test("no sponsorship reaches a trust surface or the way in", () => {
 // as a sponsor of the collection.
 test("no sponsorship reaches the shelves", () => {
   assert.ok(!page("PressShelf.jsx").includes("PressAd"));
-});
-
-// Rule 1 again, at the seam that is easiest to get wrong. The article page
-// sells three slots, and the temptation is to put one inside the block that
-// offers the data. Nothing may sit between a reader and a download.
-test("the article page sells the rail and the end, never the data block", () => {
-  const src = page("CedarPressArticle.jsx");
-  const dataBlock = src.slice(src.indexOf("cp-ar__data"));
-  assert.ok(!dataBlock.includes("PressAd"), "a slot sits inside the underlying-data block");
-  assert.ok(src.includes("AD_SLOT.ARTICLE_RAIL"), "the rail carries no slot");
 });
 
 test("every slot says where it is and what fits, for the media kit", () => {

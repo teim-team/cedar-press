@@ -92,9 +92,7 @@ async function chooseAudience(page, index) {
 
 /** The pages behind the gate, by the route a reader reaches them at. */
 const SECTIONS = [
-  { name: "Articles", path: "/articles" },
   { name: "Collections", path: "/data" },
-  { name: "What's new", path: "/whats-new" },
   { name: "Methods", path: "/methods" },
   { name: "Settings", path: "/settings" },
 ];
@@ -140,9 +138,7 @@ async function signIn(page, account = ACCOUNT) {
   await page.getByLabel("Email address").fill(account.email);
   await page.getByLabel("Password", { exact: true }).fill(account.password);
   await page.locator(".cp-gate__form").getByRole("button", { name: "Log in" }).click();
-  await expect(page.getByRole("heading", { level: 1 })).toContainText(
-    "Know what’s shaping Indian Country",
-  );
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Overview");
 }
 
 test("reviewed NEED businesses remain individually named on phones and use readable ownership labels", async ({ page }, testInfo) => {
@@ -441,9 +437,9 @@ test.describe("the gate", () => {
     // `undefined`, and an article id that is not hosted rendered a masthead
     // with no reader at all and stood 12px shorter than the rest.
     for (const path of [
-      "/", "/data", "/articles", "/whats-new", "/methods", "/priorities", "/settings",
+      "/", "/data", "/methods", "/settings",
       "/research-access", "/tribal-data-request", "/record",
-      "/entity/CE-001CC-8N", "/articles/not-a-piece-we-host",
+      "/entity/CE-001CC-8N",
     ]) {
       await page.goto(path);
       await page.locator(".cp-mast").waitFor();
@@ -503,7 +499,7 @@ test.describe("the gate", () => {
     // above the product, addressed to somebody already inside it. Owner,
     // 2026-09-20: it should only be on the landing page.
     await signIn(page);
-    for (const path of ["/data", "/data?c=funding", "/entity/CE-001CC-8N", "/methods", "/whats-new"]) {
+    for (const path of ["/data", "/data?c=funding", "/entity/CE-001CC-8N", "/methods"]) {
       await page.goto(path);
       await expect(page.getByTestId("press-preview-note")).toHaveCount(0);
     }
@@ -784,14 +780,11 @@ test.describe("the subscriber's path", () => {
     const errors = watchConsole(page);
     await signIn(page);
 
-    // The offline briefing keeps release navigation and account controls,
-    // while its research slot truthfully reports the absent protected API.
-    await expect(page.locator(".cp-brief__lead")).toBeVisible();
-    await expect(page.getByTestId("brief-article-unavailable")).toContainText(
-      "Research articles are unavailable on this connection.",
-    );
-    await expect(page.locator(".cp-brief__img")).toHaveCount(0);
+    // The briefing is the collections' updates and one collection to
+    // explore; the research box came off it in the redesign.
+    await expect(page.locator(".cp-brief__lead")).toHaveCount(0);
     await expect(page.locator(".cp-brief__signals a")).toHaveCount(3);
+    await expect(page.locator(".cp-brief__signals a").first()).toHaveAttribute("href", /^\/data\?c=/);
     await expect(page.locator(".cp-brief__coll")).toBeVisible();
     await expect(page.getByRole("button", { name: /Ask Cedar what changed/ })).toBeVisible();
     await expect(page.locator(".cp-close__head")).toContainText("Nothing here is a snapshot");
@@ -816,6 +809,21 @@ test.describe("the subscriber's path", () => {
       expect(errors).toEqual([]);
     });
   }
+
+  // The redesign kept three sections. The pages it removed have no route, so
+  // an old link or bookmark lands on the overview rather than a blank page.
+  test("the nav is Overview, Collections and Methods, and removed pages land on the overview", async ({ page }) => {
+    const errors = watchConsole(page);
+    await signIn(page);
+    // The wide nav, or on a phone the section menu: one or the other is drawn.
+    await expect(page.locator(".cp-nav__item, .cp-navm__item")).toHaveText(["Overview", "Collections", "Methods"]);
+    for (const path of ["/articles", "/articles/brief-owned", "/priorities", "/whats-new"]) {
+      await page.goto(path);
+      await expect(page).toHaveURL(/\/$/);
+      await expect(page.locator(".cp-brief")).toBeVisible();
+    }
+    expect(errors).toEqual([]);
+  });
 
   test("a collection hands over a file with its citation", async ({ page }) => {
     // The product is that readers download things. If this breaks, nothing
@@ -2016,9 +2024,6 @@ test.describe("the product copy reads the jobs layer", () => {
   test("the signed-in homepage, its briefing, and the entity page's actions", async ({ page }) => {
     const errors = watchConsole(page);
     await signIn(page);
-    await expect(page.locator(".cp-hero__deck")).toHaveText(
-      "Compare peers, follow funding and business activity, spot changes worth investigating and trace the evidence behind them.",
-    );
     const caps = await page.locator(".cp-brief__cap").allInnerTexts();
     expect(caps.map((c) => c.toLowerCase())).toEqual(expect.arrayContaining(["updates", "explore the records"]));
     expect(caps.join(" ")).not.toMatch(/worth watching|open today|insight|opportunit/i);
@@ -2162,56 +2167,6 @@ test.describe("the record page", () => {
     await expect(page.getByTestId("entity-head")).toContainText(/published previews/);
     // And the way back is the record it was opened from.
     await expect(page.getByRole("link", { name: "Back to the record" })).toBeVisible();
-    expect(errors).toEqual([]);
-  });
-});
-
-test.describe("Shape the research", () => {
-  test("the priorities page lists both kinds, says the counting needs the service, and the profile carries the card", async ({ page }) => {
-    // This build has no service, so no point is counted and no point can be
-    // placed; the page and the profile say exactly that rather than showing
-    // a zero that means "unknown".
-    const errors = watchConsole(page);
-    await signIn(page);
-    await page.goto("/priorities");
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Help set the research agenda.");
-    // Points inform the agenda and do not decide it, said in the deck itself.
-    await expect(page.locator(".cp-mh__sub")).toContainText("do not decide it");
-    // The owner's examples, visibly examples and not a roadmap, with causal
-    // research questions told apart from descriptive ones.
-    const examples = page.getByTestId("priority-examples");
-    await expect(examples).toContainText("Examples, not a roadmap");
-    await expect(examples.locator(".cp-pri__exkind")).toHaveCount(2);
-    await expect(examples.locator(".cp-pri__exkind").nth(1)).toContainText("Causal");
-    // The narrower asks are smaller than the ambitious ones.
-    const small = await examples.locator(".cp-pri__exsmall li").first().evaluate((el) => parseFloat(getComputedStyle(el).fontSize));
-    const lead = await examples.locator(".cp-pri__exlist li").first().evaluate((el) => parseFloat(getComputedStyle(el).fontSize));
-    expect(small).toBeLessThan(lead);
-    await expect(page.getByTestId("priorities-research_question").getByTestId("priority").first()).toBeVisible();
-    await expect(page.getByTestId("priorities-dataset").getByTestId("priority").first()).toBeVisible();
-    // The influence card carries the "no service" sentence; the note under it
-    // says what the list is, given that. It used to repeat "not connected" a
-    // second time in the same column.
-    await expect(page.getByTestId("influence")).toContainText("not connected");
-    await expect(page.getByTestId("priorities-static")).toContainText("Support cannot be placed here");
-    // Eleven cards reading "0 points · 0 subscribers" is a product nobody
-    // uses; with no service those zeros are not measurements, so the row says
-    // who does the counting instead.
-    await expect(page.getByTestId("priority-total").first()).toContainText("Support is counted by the Cedar Press service");
-    // Writing anything is the point of the page, so the box leads it and the
-    // use case is a free field rather than a menu of seven guesses.
-    await expect(page.getByRole("textbox", { name: "What you would use it for" })).toBeVisible();
-    // The request form reads the words against the list before sending.
-    await page.getByLabel("Tell Cedar what you need").fill("I wish you had a dataset showing which tribal enterprises own which subsidiaries");
-    await expect(page.getByTestId("request-match")).toContainText("Tribal enterprise ownership and subsidiary relationships");
-    await expect(page.getByRole("button", { name: "Submit my specific use case" })).toBeDisabled();
-    // The profile's card and the homepage block.
-    await page.goto("/settings");
-    await expect(page.getByTestId("influence")).toContainText("Your research influence");
-    await expect(page.getByTestId("influence")).toContainText("not connected");
-    await page.goto("/");
-    await expect(page.getByTestId("priorities-block")).toContainText("Subscriber research priorities");
-    await expect(page.getByTestId("priorities-block")).toContainText("not yet counted");
     expect(errors).toEqual([]);
   });
 });
@@ -2428,7 +2383,6 @@ test.describe("house style", () => {
     { name: "the overview", path: "/" },
     { name: "Collections", path: "/data" },
     { name: "Methods", path: "/methods" },
-    { name: "What's new", path: "/whats-new" },
     { name: "Settings", path: "/settings" },
     { name: "Research access", path: "/research-access" },
     { name: "Tribal data request", path: "/tribal-data-request" },
@@ -2467,9 +2421,6 @@ test.describe("sponsorship", () => {
   // exists to be believed and carries no inventory at any price.
   for (const { name, path, expected } of [
     { name: "the overview", path: "/", expected: 1 },
-    { name: "Articles", path: "/articles", expected: 1 },
-    { name: "an unavailable article", path: "/articles/brief-owned", expected: 0 },
-    { name: "What's new", path: "/whats-new", expected: 1 },
     { name: "Methods", path: "/methods", expected: 0 },
   ]) {
     test(`${name} carries ${expected} invitation(s)`, async ({ page }) => {
@@ -2687,22 +2638,21 @@ test.describe("the stylesheet", () => {
     // THE HUB GRID IS GONE WITH THE HUB. This measured that six tiles stayed
     // laid out as a grid rather than collapsing into full-width blocks —
     // the failure a truncated stylesheet produces. The briefing has the same
-    // exposure and the same tell: it is two columns on a wide screen, and a
-    // stylesheet that did not survive gives one column of stacked blocks.
+    // exposure and the same tell: its two blocks share a row on a wide
+    // screen, and a stylesheet that did not survive stacks them.
     const shape = await page.evaluate(() => {
-      const brief = document.querySelector(".cp-brief");
-      const lead = document.querySelector(".cp-brief__lead");
       const side = document.querySelector(".cp-brief__side");
+      const [first, second] = side.querySelectorAll(":scope > .cp-brief__block");
       return {
-        width: brief.getBoundingClientRect().width,
-        leadWidth: lead.getBoundingClientRect().width,
+        width: side.getBoundingClientRect().width,
+        firstWidth: first.getBoundingClientRect().width,
         sameRow:
-          Math.abs(lead.getBoundingClientRect().top - side.getBoundingClientRect().top) < 8,
+          Math.abs(first.getBoundingClientRect().top - second.getBoundingClientRect().top) < 8,
       };
     });
-    // The lead and its margin share a row, and neither owns the whole of it.
+    // The two blocks share a row, and neither owns the whole of it.
     expect(shape.sameRow).toBe(true);
-    expect(shape.leadWidth).toBeLessThan(shape.width);
+    expect(shape.firstWidth).toBeLessThan(shape.width);
   });
 });
 
@@ -3043,59 +2993,7 @@ test.describe("the first screen", () => {
   });
 });
 
-test.describe("the loop between the records and the journalism", () => {
-  // This suite deliberately builds without an API. Subscriber bodies and
-  // protected research links must stay unavailable in that mode. Successful
-  // delivery, authorization, figure shapes and PDF content are covered by
-  // server/tests/test_protected_articles.py and the article module tests.
-  test("offline collection profiles do not revive static demonstration articles", async ({ page }) => {
-    const errors = watchConsole(page);
-    await signIn(page);
-    await page.goto("/data?c=deals&about=1");
-    await expect(page.locator(".cp-ab")).toBeVisible();
-    await expect(page.locator(".cp-ex__wrote")).toHaveCount(0);
-    await expect(page.locator(".cp-ab__read")).toHaveCount(0);
-    await expect(page.getByRole("heading", { name: "Research built from this collection" })).toHaveCount(0);
-    expect(errors).toEqual([]);
-  });
-
-  test("Research Briefs preserves sign-in and explains that the article service is unavailable", async ({ page }) => {
-    const errors = watchConsole(page);
-    await signIn(page);
-    await page.goto("/articles");
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Research Briefs.");
-    await expect(page.getByRole("status")).toContainText("Articles are unavailable on this connection.");
-    await expect(page.locator(".cp-briefgrid .cp-art--square")).toHaveCount(0);
-    await expect(page.locator(".cp-acct")).toBeVisible();
-    expect(errors).toEqual([]);
-  });
-
-  test("an offline article never falls back to bundled bodies, highlights or figures", async ({ page }) => {
-    const errors = watchConsole(page);
-    await signIn(page);
-    for (const id of ["brief-owned", "two-tribes-one-building", "brief-deals"]) {
-      await page.goto("/articles/" + id);
-      await expect(page.getByRole("status")).toContainText("Articles are unavailable on this connection.");
-      await expect(page.locator(".cp-ar__body, .cp-ar__hero, .cp-ar__highlights, .cp-ar__fig")).toHaveCount(0);
-      await expect(page.getByRole("link", { name: /All Research Briefs/ })).toBeVisible();
-    }
-    expect(errors).toEqual([]);
-  });
-
-  test("an unavailable article cannot download a PDF and still lets the reader sign out", async ({ page }) => {
-    const errors = watchConsole(page);
-    await signIn(page);
-    await page.goto("/articles/brief-owned");
-    await expect(page.getByRole("status")).toContainText("Articles are unavailable on this connection.");
-    await expect(page.getByRole("group", { name: "Share this brief" })).toHaveCount(0);
-    await expect(page.getByRole("button", { name: "Download PDF" })).toHaveCount(0);
-    await page.locator(".cp-acct > summary").click();
-    await page.getByRole("button", { name: "Sign out" }).click();
-    await expect(page.locator(".cp-split")).toBeVisible();
-    await expect(page.locator(".cp-ar__body")).toHaveCount(0);
-    expect(errors).toEqual([]);
-  });
-
+test.describe("an entity leads into its records", () => {
   // The third way in: an entity's profile reads ten sample rows per table,
   // and each collection heading on it opens the release itself — carrying
   // BOTH the collection and the entity, so it lands narrowed to what the
@@ -3171,20 +3069,6 @@ test.describe("layout", () => {
 test.describe("dead ends", () => {
   // Each of these was a control that led nowhere, or a sentence that
   // described something the page did not have (walkthrough, 2026-09-23).
-  test("the Priorities page does not link to itself from its own card", async ({ page }) => {
-    await signIn(page);
-    await page.goto("/priorities");
-    const card = page.getByTestId("influence");
-    await expect(card).toBeVisible();
-    await expect(card.getByRole("link", { name: /Shape the research/ })).toHaveCount(0);
-  });
-
-  test("Settings still links from the card to the Priorities page", async ({ page }) => {
-    await signIn(page);
-    await page.goto("/settings");
-    await expect(page.getByTestId("influence").getByRole("link", { name: /Shape the research/ })).toHaveCount(1);
-  });
-
   test("a record that is not in the preview offers one way back, not two", async ({ page }) => {
     await signIn(page);
     await page.goto("/record");

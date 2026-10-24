@@ -216,15 +216,6 @@ export async function fetchReleases({ signal } = {}) {
   return request("/press/releases", { signal });
 }
 
-/** Published briefs. */
-export async function fetchArticles({ signal } = {}) {
-  return request("/press/articles", { signal });
-}
-
-export async function fetchArticle(slug, { signal } = {}) {
-  return request("/press/articles/" + encodeURIComponent(slug), { signal });
-}
-
 /**
  * A collection's release file. Returns a Blob rather than parsed rows: the
  * file is what the subscriber is taking, and re-serializing it here would
@@ -282,41 +273,6 @@ export async function askCedar({ question, collectionId, threadId, pathname, sig
     body: { question, surface: "cedar-press", collectionId, threadId, pathname },
     signal,
     timeoutMs: CEDAR_TIMEOUT_MS,
-  });
-}
-
-// ── Shape the Research ──────────────────────────────────────────────────
-
-/** Every priority with its points and subscriber count, most supported first. */
-export async function fetchPriorities({ signal } = {}) {
-  return request("/press/priorities", { signal });
-}
-
-/** What this subscription has and has done; the service credits the month first, once. */
-export async function fetchInfluence({ signal } = {}) {
-  return request("/press/influence", { signal });
-}
-
-/** Put points on a priority (positive) or take them back (negative). */
-export async function movePoints({ priorityId, points, signal }) {
-  return request(`/press/priorities/${encodeURIComponent(priorityId)}/points`, {
-    method: "POST",
-    body: { points },
-    signal,
-  });
-}
-
-/** The priorities a request reads as being about, as the service reads it. */
-export async function fetchRelatedPriorities({ text, signal } = {}) {
-  return request(`/press/priorities/related?q=${encodeURIComponent(text ?? "")}`, { signal });
-}
-
-/** A subscriber's own words, beside the priority they are about, with a point on it if asked. */
-export async function submitResearchRequest({ text, useCase, priorityId, supportPoints = 0, signal }) {
-  return request("/press/requests", {
-    method: "POST",
-    body: { text, use_case: useCase || null, priority_id: priorityId || null, support_points: supportPoints },
-    signal,
   });
 }
 

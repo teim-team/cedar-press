@@ -529,11 +529,6 @@ export const PRESS_TAXONOMY = Object.freeze([
   }),
 ]);
 
-/** The subject group a collection belongs to, for its own page's masthead. */
-export function groupOf(id) {
-  return PRESS_TAXONOMY.find((group) => group.collections.includes(id)) ?? null;
-}
-
 export const PRESS_CATALOG_BY_ID = Object.freeze(
   Object.fromEntries(PRESS_CATALOG.map((entry) => [entry.id, entry])),
 );

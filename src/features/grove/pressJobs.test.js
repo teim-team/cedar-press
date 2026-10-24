@@ -26,7 +26,6 @@ import { PRESS_CATALOG, STOREFRONT_CATALOG } from "./pressCatalog.js";
 import { isReleased } from "./collection.js";
 import { SECTOR_IMAGES, imageFile, imageSources } from "./pressImagery.js";
 import { BUILD_NEXT_QUESTION, BUILD_NEXT_STEPS, ECOSYSTEM_EXAMPLES } from "./pressMethod.js";
-import { PRIORITY_EXAMPLES } from "./pressPriorities.js";
 import { catalogDescription } from "../../../scripts/seo-head.mjs";
 import {
   ALL_COLLECTION_JOBS,
@@ -517,20 +516,6 @@ test("the time-savings sentence appears exactly once, on Research access", () =>
   assert.deepEqual(where, ["pages/grove/CedarPressResearchAccess.jsx"]);
 });
 
-test("Priorities asks what should exist next: examples, ambitious, and nothing Cedar Press already carries", () => {
-  const { datasets, research, expansions } = PRIORITY_EXAMPLES;
-  assert.deepEqual(datasets.map((d) => d.theme), ["Infrastructure", "Capital access", "Housing", "Healthcare", "Energy", "Workforce"]);
-  assert.ok(research.descriptive.length >= 2 && research.causal.length >= 2);
-  assert.ok(expansions.length >= 2 && expansions.length < datasets.length, "the narrower asks stay the smaller set");
-  const all = [...datasets.map((d) => d.text), ...research.descriptive, ...research.causal, ...expansions];
-  for (const text of all) {
-    assert.doesNotMatch(text, /\u2014/, text);
-    assert.doesNotMatch(text, /\bimpact\b/i, text);
-    assert.doesNotMatch(text, /parcel|permit|land ownership|philanthrop|foundation|corporate giving|PLOT/i, `${text}: asks for a collection Cedar Press already carries`);
-  }
-  for (const text of research.causal) assert.match(text, /^(Did|Does|How much|Why|What caused)/, `${text} does not read as causal`);
-});
-
 test("Methods says how Cedar decides what to build next, from the owner's question", () => {
   assert.equal(BUILD_NEXT_QUESTION, "What important question can I not answer today?");
   assert.deepEqual(BUILD_NEXT_STEPS.map((step) => step.label), [
@@ -546,3 +531,4 @@ test("Methods says how Cedar decides what to build next, from the owner's questi
   assert.match(src, /Unjoined files can be searched\. Identified records can be counted, compared and\s+traced across sources\./);
   assert.doesNotMatch(src, /A model reading/);
 });
+

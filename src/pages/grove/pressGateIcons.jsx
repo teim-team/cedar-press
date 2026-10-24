@@ -38,18 +38,6 @@ export const InsightsIcon = (
   </svg>
 );
 
-/** A source document, sealed: methods and review standing behind a finding. */
-export const CredibleResearchIcon = (
-  <svg {...glyph}>
-    <path d="M5 3.5h8l4.5 4.5v4.4" />
-    <path d="M13 3.5V8h4.5" />
-    <path d="M5 3.5v17h5.4" />
-    <path d="M8 9h3M8 12.5h4" />
-    <path d="M17 14.2l3.4 1.3v2.7c0 1.9-1.4 3.4-3.4 4.1-2-.7-3.4-2.2-3.4-4.1v-2.7z" />
-    <path d="M15.6 18.3l1 1 2.2-2.3" />
-  </svg>
-);
-
 /**
  * Cedar. Concentric arcs opening from a node, echoing the Lumecon mark's
  * rings: something answering across the collections, in the brand's own

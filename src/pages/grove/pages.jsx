@@ -3,7 +3,7 @@
  * The pages, and how each arrives.
  *
  * The reader (CedarPress) is the gate and the overview, the first screen for
- * everyone, so it ships in the first bundle. The other nine are behind a
+ * everyone, so it ships in the first bundle. The others are behind a
  * click and are fetched when first opened: shipping them up front made a
  * visitor on a slow connection wait for the Methods reference and the
  * Explore viewer before the sign-in form could paint. Measured at 400 kbps
@@ -28,13 +28,9 @@ export { default as CedarPress } from "./CedarPress.jsx";
 export { default as CedarPressResearchAccess } from "./CedarPressResearchAccess.jsx";
 export { default as CedarPressTribalRequest } from "./CedarPressTribalRequest.jsx";
 
-export const CedarPressArticles = lazy(() => import("./CedarPressArticles.jsx"));
 export const CedarPressData = lazy(() => import("./CedarPressData.jsx"));
-export const CedarPressArticle = lazy(() => import("./CedarPressArticle.jsx"));
 export const CedarPressMethods = lazy(() => import("./CedarPressMethods.jsx"));
 export const CedarPressSettings = lazy(() => import("./CedarPressSettings.jsx"));
-export const CedarPressPriorities = lazy(() => import("./CedarPressPriorities.jsx"));
-export const CedarPressWhatsNew = lazy(() => import("./CedarPressWhatsNew.jsx"));
 // The record and the entity: both reached from inside the Collections page,
 // both reading the same samples the viewer does, and neither on the path to
 // the first paint.

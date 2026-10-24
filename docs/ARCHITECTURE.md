@@ -53,9 +53,9 @@ git ls-files src/<dir>/grove                                   # files to move
 
 | | |
 |---|---|
-| Files to move | 184 — `features/grove` 137, `pages/grove` 44, `components/grove` 1, `styles/grove` 2 |
-| Path references to rewrite | 411, across 90 files |
-| Referencing files inside `src/` | 55 — `pages/` 36, `features/` 15, `context/` 2, `components/` 1, `main.jsx` 1 |
+| Files to move | 167 — `features/grove` 128, `pages/grove` 37, `components/grove` 0, `styles/grove` 2 |
+| Path references to rewrite | 344, across 81 files |
+| Referencing files inside `src/` | 46 — `pages/` 29, `features/` 14, `context/` 2, `components/` 0, `main.jsx` 1 |
 | Referencing files outside `src/` | 35 — `server/cedar_press/` 8, `scripts/` 8, `docs/` 6, `server/tests/` 5, `tests/` 3, `data/` 2, `.github/` 1, `.env.example` 1, `eslint.config.js` 1 |
 
 The reason this was deferred, open pull requests that touched the same files,
@@ -63,7 +63,7 @@ has expired.
 
 It is a mechanical rename with no behaviour change, and it should land as its
 own commit: the four directories move to `press/` and the references are
-rewritten in one pass. The question "did all 411 references get rewritten?"
+rewritten in one pass. The question "did all 344 references get rewritten?"
 is one the build, the suites and the smoke run answer, and a reader cannot
 answer it from a diff. Prose (Markdown, comments, `.env.example`) is what no build sees,
 which is why `test_rename_plan.py` counts textual occurrences rather than
@@ -96,10 +96,12 @@ from that module rather than writing a string.
 
 ## Pages
 
-The overview states what the service is and indexes the sections, with each
-section's standing read from the catalog. `Articles` and `Data` are the two
-content sections; `What's new`, `Methods`, `Tribal data request` and
+The overview states what the service is and what moved in the collections,
+read from the release record. `Data` (Collections) is the one content
+section and `Methods` its reference; `Settings`, `Tribal data request` and
 `Research access` stand alone so each URL can be sent to someone directly.
+Research Briefs, Priorities and What's new were removed from the client in the 2026-10 redesign;
+any other path redirects to the overview.
 `PressChrome.jsx` owns the masthead, its section nav and the footer, so the
 pages cannot drift apart.
 
@@ -581,11 +583,9 @@ A Cedar Press subscription earns Cedar Points for using the product and
 spends them on what Cedar should research or build next. The rule and the
 ledger are `server/cedar_press/priorities.py`; the endpoints are in `app.py`
 (`/press/priorities`, `/press/priorities/related`, `/press/influence`,
-`/press/priorities/{id}/points`, `/press/requests`); the client is
-`features/grove/pressPriorities.js` (the seed, the words, the same
-related-priority search), `features/grove/usePriorities.js` (the reads),
-`pages/grove/CedarPressPriorities.jsx` (the page), `pages/grove/PressInfluence.jsx`
-(the profile's card) and `pages/grove/PressPrioritiesBlock.jsx` (the homepage).
+`/press/priorities/{id}/points`, `/press/requests`). The web client no
+longer calls them: its Priorities page, profile card and homepage block were
+removed in the 2026-10 redesign. The service side below is unchanged.
 
 THE RULE. The SUBSCRIPTION (not each seat) earns points once per calendar
 month, the first time anyone on it signs in that month: Cedar Press 1, Cedar

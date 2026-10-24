@@ -37,9 +37,7 @@ import {
   buildReleases,
   formatUpdated,
   freshnessLine,
-  latestRelease,
   ledgerFor,
-  recentActivity,
   recentlyUpdated,
   releaseFor,
 } from "./pressReleases.js";
@@ -272,7 +270,6 @@ test("each collection shows one entry, for the dataset as it stands", () => {
     const [entry] = history;
     assert.equal(entry.kind, RELEASE_KIND.DATA);
     assert.equal(entry.version, dataset.version, dataset.id);
-    assert.equal(latestRelease(dataset.id).version, dataset.version, dataset.id);
     // What the collection holds now, never a summed count of earlier tables.
     assert.match(entry.changed[0], /^Current dataset: [\d,]+ observations\.$/, `${dataset.id}: ${entry.changed[0]}`);
     // The example count is the served download's, not the ledger's sample.
@@ -326,22 +323,6 @@ test("the feed is newest first, indexed and uniquely anchored", () => {
   assert.equal(RELEASE_FEED.length, Object.values(PRESS_RELEASES).reduce((n, r) => n + r.history.length, 0));
 });
 
-test("the activity summary counts the feed and nothing else", () => {
-  const newest = RELEASE_FEED[0].date;
-  const day = 86400000;
-  const dayAfter = new Date(new Date(newest).getTime() + day);
-  const inWindow = RELEASE_FEED.filter((e) => new Date(e.date).getTime() >= dayAfter.getTime() - 30 * day);
-  const recent = recentActivity(30, dayAfter);
-  assert.equal(recent.releases, inWindow.length);
-  assert.equal(recent.collections, new Set(inWindow.map((e) => e.id)).size);
-  assert.equal(recent.methodology, inWindow.filter((e) => e.kind === RELEASE_KIND.METHOD).length);
-  assert.equal(recent.latest, newest);
-  // Long after the last release the window is empty and the latest date stands.
-  const later = recentActivity(30, new Date(new Date(newest).getTime() + 400 * day));
-  assert.equal(later.releases, 0);
-  assert.equal(later.latest, newest);
-});
-
 test("recently updated is deterministic when releases share a day", () => {
   const first = recentlyUpdated(3).map((r) => r.id);
   const again = recentlyUpdated(3).map((r) => r.id);
@@ -364,8 +345,6 @@ test("dates are spelled one way everywhere", () => {
   assert.ok(releaseFor("funding").refreshed <= releaseFor("funding").updated,
             "data cannot be refreshed after the release that carries it");
   assert.equal(freshnessLine("not-a-collection"), "");
-  assert.equal(latestRelease("need").version, releaseFor("need").version);
-  assert.equal(latestRelease("not-a-collection"), null);
 });
 
 
@@ -406,11 +385,3 @@ test("invalid live response cannot masquerade as a release feed", () => {
   for (const value of invalid) assert.throws(() => connectedReleaseModel(value));
 });
 
-test("activity excludes undated current entries and future dates", () => {
-  const current = connectedReleaseModel(currentFixture()).feed[0];
-  const activity = recentActivity(30, new Date("2026-10-03T12:00:00Z"), [
-    { ...current, date: "2026-12-01" }, current, { ...current, date: "2026-10-01" },
-  ]);
-  assert.equal(activity.releases, 1);
-  assert.equal(activity.latest, "2026-10-01");
-});

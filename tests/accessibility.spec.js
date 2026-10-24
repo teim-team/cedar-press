@@ -134,21 +134,6 @@ test.describe("headings and announcements", () => {
     await expect(page.getByTestId("collection-stage").getByRole("heading", { level: 3 })).toHaveCount(0);
   });
 
-  test("the priorities lists sit under level-two headings", async ({ page }) => {
-    await signedIn(page);
-    await page.goto("/priorities");
-    for (const type of ["research_question", "dataset"]) {
-      await expect(page.getByTestId(`priorities-${type}`).getByRole("heading", { level: 2 })).toHaveCount(1);
-    }
-  });
-
-  test("an article that is not available still has a page heading", async ({ page }) => {
-    await signedIn(page);
-    await page.goto("/articles/brief-owned");
-    await expect(page.getByRole("status")).toContainText("Articles are unavailable");
-    await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);
-  });
-
   test("a failed sample read is announced by the live region that said it was loading", async ({ page }) => {
     let release;
     const held = new Promise((resolve) => { release = resolve; });

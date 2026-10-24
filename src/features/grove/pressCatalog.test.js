@@ -16,7 +16,6 @@ import {
   STOREFRONT_CATALOG,
   STOREFRONT_SHELVES,
   collectionsOnShelf,
-  groupOf,
   isOnStorefront,
   shelfCount,
   spellCount,
@@ -77,10 +76,6 @@ test("the taxonomy is a partition of the storefront", () => {
   const placed = PRESS_TAXONOMY.flatMap((group) => group.collections);
   assert.equal(new Set(placed).size, placed.length, "a collection is in two groups");
   assert.deepEqual([...placed].sort(), STOREFRONT_CATALOG.map((entry) => entry.id).sort());
-  for (const entry of STOREFRONT_CATALOG) {
-    assert.ok(groupOf(entry.id), `${entry.id} has no subject group`);
-  }
-  assert.equal(groupOf("not-a-collection"), null);
   for (const group of PRESS_TAXONOMY) {
     assert.ok(group.name && group.lede, group.id);
     assert.ok(group.collections.length > 0, `${group.id} is empty`);
