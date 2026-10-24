@@ -205,6 +205,11 @@ class TestTheRenameGateFires(unittest.TestCase):
         asking `git ls-files` whether anything is still tracked under the old
         directories, so the only honest way to reach that branch is to move
         them and re-index.
+
+        Only the directories the repository still has: the components one
+        emptied when the 2026-10 redesign removed its one file, and git
+        tracks no empty directory. Each one that does exist must be in the
+        copy.
         """
         moves = [
             (
@@ -212,6 +217,7 @@ class TestTheRenameGateFires(unittest.TestCase):
                 self.root / "src" / directory / _NEW_NAME,
             )
             for directory in _DIRECTORIES
+            if (_REPO / "src" / directory / _OLD_NAME).is_dir()
         ]
         for source, target in moves:
             self.assertTrue(source.is_dir(), f"{source} is not in the copy")
