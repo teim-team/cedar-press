@@ -11,7 +11,7 @@ import { Link } from "react-router";
 import { contactHref } from "../../features/grove/appLink.js";
 
 import { LUMECON_URL, TBN_URL } from "../../features/grove/pressArticles";
-import { PRESS_METHODS_PATH, PRESS_PATH } from "../../features/grove/pressRoutes";
+import { PRESS_PATH } from "../../features/grove/pressRoutes";
 import { useAuth } from "../../context/useAuth";
 import { canReadCedarPress } from "../../features/grove/pressAccess";
 import { researchExamples } from "../../features/grove/pressJobs";

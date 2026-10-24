@@ -66,7 +66,6 @@ import {
 import { useSampleRows } from "../../features/grove/useSamples.js";
 import { REGISTER_PATH } from "../../features/grove/useRegister.js";
 import { recordHref, rememberReturn, takeReturn } from "../../features/grove/pressRecord.js";
-import { PRESS_METHODS_PATH } from "../../features/grove/pressRoutes.js";
 import { LAUNCH_COLLECTION } from "../../features/grove/collection.js";
 import { formatUpdated } from "../../features/grove/pressReleases.js";
 import { downloadCsv, hasReleaseFile, sampleLabel, saveZip } from "../../features/grove/pressDownload.js";
@@ -77,9 +76,7 @@ const DEFAULT_COLLECTION = "funding";
 import { Cards, Human, Rows } from "./PressRecordTable.jsx";
 import { columnPlan, short } from "../../features/grove/recordColumns.js";
 import { coverageLabel, upgradeFor } from "../../features/grove/pressAccess.js";
-import { articleHref, articlesDrawingOn } from "../../features/grove/pressArticles.js";
 import { EARLY_ACCESS_HREF } from "../../features/grove/appLink.js";
-import { useProtectedArticles } from "../../features/grove/useProtectedArticles.js";
 import { EVENT, track } from "../../features/grove/telemetry.js";
 import { useNarrow } from "../../features/grove/useNarrow.js";
 import PressCollectionRail from "./PressCollectionRail.jsx";
@@ -460,65 +457,6 @@ function YearRange({ cut, bounds, basis, onChange }) {
  * opened it from.
  */
 /**
- * WHAT WAS WRITTEN FROM THIS COLLECTION.
- *
- * Owner, 2026-09-20: "maybe articles that have used those data sets get
- * populated... because we have links to the data sets on the article page.
- * But that feedback loop seems helpful."
- *
- * It is the same `draws` the article page already reads, followed the other
- * way (`articlesDrawingOn`). Until now the product pointed one way only: a
- * brief offered its data, and the data said nothing about the brief written
- * from it — which is the half of the loop that brings a subscriber who came
- * for records back to the journalism.
- *
- * It sits in the caption row rather than in a band of its own, so the loop
- * costs the records no height on a page whose whole point is the records. A
- * piece that runs on Tribal Business News opens there and says so; one
- * hosted here opens here.
- */
-function WrittenFrom({ collectionId, onMore, articles }) {
-  const pieces = articlesDrawingOn(collectionId, articles);
-  if (!pieces.length) return null;
-  // ONE, NOT ALL OF THEM. Two headlines in this row pushed it onto a second
-  // line, which on a page whose whole point is the records is a row of
-  // recommendations taking space from the thing being recommended. The rest
-  // are listed in the collection's own profile, where a reader asking what
-  // has been written from this collection is already looking.
-  const [lead] = pieces;
-  const rest = pieces.length - 1;
-  const away = !lead.hosted;
-  // The title truncates; the arrow does not. Both inside one ellipsis box and
-  // the arrow is the first thing to disappear, which reads as a broken link
-  // rather than a shortened headline.
-  const label = (
-    <>
-      <span className="cp-ex__wrotetitle">Read: {lead.title}</span>
-      <span aria-hidden="true">{away ? "\u2197" : "\u2192"}</span>
-    </>
-  );
-  const note = () => track(EVENT.articleOpened, { article: lead.id, dataset: collectionId });
-  return (
-    <>
-      {away ? (
-        <a className="cp-ex__wrote" href={articleHref(lead)} target="_blank" rel="noreferrer" onClick={note}>
-          {label}
-        </a>
-      ) : (
-        <Link className="cp-ex__wrote" to={articleHref(lead)} onClick={note}>
-          {label}
-        </Link>
-      )}
-      {rest ? (
-        <button type="button" className="cp-ex__clear cp-ex__wrotemore" onClick={onMore} title={`${rest} more piece${rest === 1 ? "" : "s"} built from this collection`}>
-          +{rest} more
-        </button>
-      ) : null}
-    </>
-  );
-}
-
-/**
  * The three declarations the collection makes about its own numbers, shut.
  *
  * They were a line above the table, then a line on a desktop and a
@@ -779,8 +717,6 @@ function SampleDownload({ entry }) {
 }
 
 export default function PressExplore({ user, pick = null, onActive = () => {}, onSelected = () => {} }) {
-  const articleState = useProtectedArticles(user);
-  const articles = articleState.data?.articles ?? [];
   const [params, setParams] = useSearchParams();
   const navigate = useNavigate();
   const cut = useMemo(() => decodeCut(params.toString()), [params]);
@@ -1081,7 +1017,6 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
           the whole screen on a phone. */}
       {cut.about && (single || lockedSingle) ? (
         <PressCollectionAbout
-          articles={articles}
           entry={(single ?? lockedSingle).entry}
           flagship={(single ?? lockedSingle).flagship}
           onClose={() => write({ about: false })}
@@ -1332,7 +1267,6 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
             >
               Ask Cedar <span aria-hidden="true">&#8594;</span>
             </button>
-            {single ? <WrittenFrom collectionId={single.entry.id} onMore={() => write({ about: true })} articles={articles} /> : null}
             {!atlas ? <span className="cp-ex__pages" title={`${PAGE_SIZE} records a page`}>
               <button type="button" className="cp-ex__clear" disabled={paged.page <= 1} onClick={() => write({ page: paged.page - 1 })} aria-label="Previous page">&#8249;</button>
               {/* Short, because this sits in a status bar that has to hold

@@ -96,10 +96,12 @@ from that module rather than writing a string.
 
 ## Pages
 
-The overview states what the service is and indexes the sections, with each
-section's standing read from the catalog. `Articles` and `Data` are the two
-content sections; `What's new`, `Methods`, `Tribal data request` and
+The overview states what the service is and what moved in the collections,
+read from the release record. `Data` (Collections) is the one content
+section and `Methods` its reference; `Settings`, `Tribal data request` and
 `Research access` stand alone so each URL can be sent to someone directly.
+Research Briefs, Priorities and What's new were removed from the client in the 2026-10 redesign;
+any other path redirects to the overview.
 `PressChrome.jsx` owns the masthead, its section nav and the footer, so the
 pages cannot drift apart.
 
@@ -581,11 +583,9 @@ A Cedar Press subscription earns Cedar Points for using the product and
 spends them on what Cedar should research or build next. The rule and the
 ledger are `server/cedar_press/priorities.py`; the endpoints are in `app.py`
 (`/press/priorities`, `/press/priorities/related`, `/press/influence`,
-`/press/priorities/{id}/points`, `/press/requests`); the client is
-`features/grove/pressPriorities.js` (the seed, the words, the same
-related-priority search), `features/grove/usePriorities.js` (the reads),
-`pages/grove/CedarPressPriorities.jsx` (the page), `pages/grove/PressInfluence.jsx`
-(the profile's card) and `pages/grove/PressPrioritiesBlock.jsx` (the homepage).
+`/press/priorities/{id}/points`, `/press/requests`). The web client no
+longer calls them: its Priorities page, profile card and homepage block were
+removed in the 2026-10 redesign. The service side below is unchanged.
 
 THE RULE. The SUBSCRIPTION (not each seat) earns points once per calendar
 month, the first time anyone on it signs in that month: Cedar Press 1, Cedar

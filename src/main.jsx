@@ -16,23 +16,17 @@ import { AuthProvider } from "./context/AuthProvider.jsx";
 import { startTelemetry } from "./features/grove/telemetry.js";
 import {
   CedarPress,
-  CedarPressArticle,
-  CedarPressArticles,
   CedarPressData,
   CedarPressEntity,
   CedarPressMethods,
-  CedarPressPriorities,
   CedarPressRecord,
   CedarPressResearchAccess,
   CedarPressSettings,
   CedarPressTribalRequest,
-  CedarPressWhatsNew,
   PageArriving,
 } from "./pages/grove/pages.jsx";
 import { PageBoundary } from "./pages/grove/PageBoundary.jsx";
 import {
-  PRESS_ARTICLES_PATH,
-  PRESS_ARTICLE_PATH,
   PRESS_DATA_PATH,
   PRESS_ENTITY_PATH,
   PRESS_METHODS_PATH,
@@ -40,9 +34,7 @@ import {
   PRESS_RECORD_PATH,
   PRESS_REQUEST_PATH,
   PRESS_RESEARCH_PATH,
-  PRESS_PRIORITIES_PATH,
   PRESS_SETTINGS_PATH,
-  PRESS_WHATS_NEW_PATH,
 } from "./features/grove/pressRoutes.js";
 
 // Errors and performance go to Datadog when a deployment configures it;
@@ -60,15 +52,11 @@ createRoot(document.getElementById("root")).render(
         <Suspense fallback={<PageArriving />}>
         <Routes>
           <Route path={PRESS_PATH} element={<CedarPress />} />
-          <Route path={PRESS_ARTICLES_PATH} element={<CedarPressArticles />} />
           <Route path={PRESS_DATA_PATH} element={<CedarPressData />} />
           <Route path={PRESS_METHODS_PATH} element={<CedarPressMethods />} />
           <Route path={PRESS_REQUEST_PATH} element={<CedarPressTribalRequest />} />
           <Route path={PRESS_RESEARCH_PATH} element={<CedarPressResearchAccess />} />
-          <Route path={PRESS_WHATS_NEW_PATH} element={<CedarPressWhatsNew />} />
           <Route path={PRESS_SETTINGS_PATH} element={<CedarPressSettings />} />
-          <Route path={PRESS_PRIORITIES_PATH} element={<CedarPressPriorities />} />
-          <Route path={PRESS_ARTICLE_PATH} element={<CedarPressArticle />} />
           <Route path={PRESS_RECORD_PATH} element={<CedarPressRecord />} />
           <Route path={PRESS_ENTITY_PATH} element={<CedarPressEntity />} />
           <Route path="*" element={<Navigate to={PRESS_PATH} replace />} />

@@ -89,7 +89,7 @@ test("the session check times out too, rather than reading as signed out", async
 test("a body that stalls after the headers is held to the same deadline", async (t) => {
   t.mock.timers.enable({ apis: ["setTimeout"] });
   await withFetch(stalledBodyFetch(), async () => {
-    const state = track(api.fetchArticle("a-brief"));
+    const state = track(api.fetchReleases());
     await flush();
     await flush();
     assert.equal(state.settled, false);

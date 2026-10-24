@@ -39,11 +39,8 @@ session or authenticate a browser request.
 
 | Section | What it holds |
 | --- | --- |
-| Overview | The service at a glance, with each section's current standing. |
+| Overview | What moved in the collections, with the latest updates. |
 | Collections | The collections themselves: coverage, method and the Updated date. |
-| Research Briefs | Original research built from the collections. |
-| Priorities | Where subscribers put their Cedar Points on research questions and data priorities. |
-| What's new | Each collection's Updated date and what it holds now. |
 | Methods | How collections are sourced, resolved and kept current. |
 
 Alongside these, `/tribal-data-request` carries the tribal data request

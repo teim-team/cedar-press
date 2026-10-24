@@ -50,8 +50,10 @@ held the Cedar data workspace, described below.
 
 **The subscriber-facing service.** Cedar Press at cedarpress.ai: a Vite + React
 static client with a FastAPI service alongside it, serving the Overview,
-Collections, Research Briefs, Priorities, What's new and Methods, plus
-`/tribal-data-request` and `/research-access` on their own URLs. Cedar Press is a Lumecon research publication, partnered
+Collections and Methods, plus Settings, and `/tribal-data-request` and
+`/research-access` on their own URLs. Research Briefs, Priorities and What's
+new were removed from the client in the 2026-10 redesign; their API endpoints remain
+in `server/`. Cedar Press is a Lumecon research publication, partnered
 with Tribal Business News: built by Lumecon and available exclusively through
 Tribal Business News, which handles subscriber plans (payment, renewals and
 issuance). There is no year gating: every subscriber gets full coverage.

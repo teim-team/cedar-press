@@ -19,8 +19,7 @@
  *    access carry no inventory at any price. Those pages exist to be believed.
  * 3. Never on the way in. The gate is a sign-in.
  * 4. Editorial adjacency only, and inside a region rather than between two.
- *    A unit sits under the articles, inside the release feed, or under a
- *    collection's download, where a reader is already reading.
+ *    A unit sits where a reader is already reading.
  * 5. Never in a filtered view. Somebody who has narrowed the reader to Data
  *    is working, and the answer to "show me my collections" is the
  *    collections.
@@ -37,9 +36,8 @@
  * an invisible slot cannot tell them the space exists.
  *
  * So an unsold slot marked `house` renders the invitation instead. The rest
- * still render nothing, and that distinction is the whole point: a hosted
- * article carries four slots, and four "advertise here" panels down one piece
- * reads as a publication nobody buys. One per page, never more.
+ * still render nothing. One per page, never more: several "advertise here"
+ * panels down one page reads as a publication nobody buys.
  *
  * Rules 1 through 3 below are unchanged and apply to the invitation exactly
  * as they apply to a booked unit. A house panel is a sponsorship unit; it
@@ -54,13 +52,6 @@
 /** The slots, by id. A unit may only appear in one of these. */
 export const AD_SLOT = Object.freeze({
   OVERVIEW: "overview",
-  BRIEFS: "briefs",
-  FEED: "feed",
-  ARTICLE_RAIL: "article-rail",
-  ARTICLE_RAIL_LOWER: "article-rail-lower",
-  ARTICLE_RAIL_END: "article-rail-end",
-  ARTICLE_INLINE: "article-inline",
-  ARTICLE_END: "article-end",
 });
 
 /**
@@ -70,13 +61,9 @@ export const AD_SLOT = Object.freeze({
  * layout: a `strip` runs the width of the region it is in, a `box` holds its
  * own ratio in a rail beside the text.
  *
- * THE ARTICLE PAGE IS THE INVENTORY
- * Four of the six slots sit on a hosted article, and that is the point of
- * hosting a piece here rather than on Tribal Business News. An article has
- * a rail, which the reader does not; it has an audience you can count and report; and it has a
- * subject, so a buyer can choose federal contracting or natural resources rather than
- * buying the whole product. The rail units sit beside the text and never
- * inside it.
+ * ONE SLOT, ON THE OVERVIEW
+ * The briefs, release-feed and hosted-article slots went with those pages in
+ * the 2026-10 redesign, which leaves the overview's strip.
  *
  * ONE UNIT PER PAGE, AND FEW PAGES
  * The collection slot went with the per-collection pages: a tile downloads
@@ -100,72 +87,6 @@ export const AD_SLOTS = Object.freeze([
     height: "5.6rem",
     house: true,
     note: "The first page a subscriber lands on, under the six sections and inside that region rather than on the seam below it. Never beside a figure: the overview names no numbers.",
-  }),
-  Object.freeze({
-    id: AD_SLOT.BRIEFS,
-    name: "Briefs strip",
-    where: "Cedar Press reader, under the articles and inside their section",
-    size: "728 × 90",
-    shape: "strip",
-    height: "5.6rem",
-    house: true,
-    note: "The only unit on the reader, and it sits in the editorial region rather than on the seam between two of them.",
-  }),
-  Object.freeze({
-    id: AD_SLOT.FEED,
-    name: "Feed unit",
-    where: "What's new, after the first page of releases",
-    size: "728 × 90",
-    shape: "strip",
-    height: "5.6rem",
-    house: true,
-    note: "Inside the feed, at the point a reader chooses to keep going.",
-  }),
-  Object.freeze({
-    id: AD_SLOT.ARTICLE_RAIL,
-    name: "Article rail",
-    where: "A hosted article, top of the rail beside the text",
-    size: "300 × 250",
-    shape: "box",
-    ratio: "300 / 250",
-    house: true,
-    note: "Sticks with the reader down the piece. Contextual: the article names its subject and its collections.",
-  }),
-  Object.freeze({
-    id: AD_SLOT.ARTICLE_RAIL_LOWER,
-    name: "Article rail, lower",
-    where: "A hosted article, below the data panel in the rail",
-    size: "300 × 600",
-    shape: "box",
-    ratio: "300 / 600",
-    note: "The half page. Deep in the rail, where a reader who is still reading has earned the impression.",
-  }),
-  Object.freeze({
-    id: AD_SLOT.ARTICLE_RAIL_END,
-    name: "Article rail, end",
-    where: "A hosted article, foot of the rail",
-    size: "300 × 250",
-    shape: "box",
-    ratio: "300 / 250",
-    note: "Only on the longest pieces. The rail is sticky, so this is the unit still beside the text when a reader is most of the way down.",
-  }),
-  Object.freeze({
-    id: AD_SLOT.ARTICLE_INLINE,
-    name: "Article inline",
-    where: "A hosted article, in the text before its second section",
-    size: "728 × 90",
-    shape: "strip",
-    height: "5.6rem",
-    note: "Inside the read, at a section break, never between a paragraph and the figure it introduces.",
-  }),
-  Object.freeze({
-    id: AD_SLOT.ARTICLE_END,
-    name: "Article end",
-    where: "A hosted article, after the body and before the data it draws on",
-    size: "728 × 90",
-    shape: "strip",
-    height: "5.6rem",
-    note: "The end of the read. It sits above the underlying-data block, never between that block and the download.",
   }),
 ]);
 

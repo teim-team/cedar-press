@@ -95,16 +95,10 @@ export const EVENT = Object.freeze({
   shelfDownloadedAll: "press.shelf_downloaded_all",
   lockedCollectionTapped: "press.locked_collection_tapped",
   upgradeOpened: "press.upgrade_opened",
-  articleOpened: "press.article_opened",
-  // A brief shared from its page: as a PDF, by email, or as a link.
-  articleShared: "press.article_shared",
   cedarAsked: "press.cedar_asked",
   // The Explore card: a cut narrowed (which filters, never which entity),
   // downloaded as a file, or kept on the reader's device.
   exploreCut: "press.explore_cut",
   exploreDownloaded: "press.explore_downloaded",
   exploreSaved: "press.explore_saved",
-  // Shape the Research: points moved (never which priority) and a request sent.
-  priorityAllocated: "press.priority_allocated",
-  researchRequested: "press.research_requested",
 });

@@ -62,7 +62,7 @@ test("the viewer does not call a failed read an empty result", async ({ page }) 
 test("a page whose code did not arrive offline loads itself when the connection returns", async ({ page, context }) => {
   await signedIn(page);
   await page.goto("/");
-  await expect(page.getByRole("heading", { level: 1 })).toContainText("Know what");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Overview");
   await context.setOffline(true);
   // A client-side navigation to a route whose chunk has not been fetched.
   await page.evaluate(() => {

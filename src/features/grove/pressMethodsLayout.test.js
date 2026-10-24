@@ -75,7 +75,6 @@ test("the citation chapter prints the form every record page and download use", 
   assert.match(PAGE, /import \{ collectionCitation \} from "\.\.\/\.\.\/features\/grove\/collection"/);
   assert.match(PAGE, /collectionCitation\(entry\.id, accessed\)/);
   assert.match(PAGE, /href=\{REPORT_CITATION_HREF\}/);
-  assert.match(PAGE, /to=\{PRESS_WHATS_NEW_PATH\}/);
 });
 
 // Every link into the Methods page names a chapter that exists. The chapters

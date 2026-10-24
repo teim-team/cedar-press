@@ -250,13 +250,8 @@ export function releaseFor(id, releases = PRESS_RELEASES) {
   return releases[id] ?? null;
 }
 
-/** The most recent release entry, which is what a collection page leads with. */
-export function latestRelease(id, releases = PRESS_RELEASES) {
-  return releaseFor(id, releases)?.history?.[0] ?? null;
-}
-
 /** The abbreviated months the feed spells dates with; the priorities page reads them too. */
-export const MONTHS = Object.freeze([
+const MONTHS = Object.freeze([
   "Jan.", "Feb.", "Mar.", "Apr.", "May", "June",
   "July", "Aug.", "Sept.", "Oct.", "Nov.", "Dec.",
 ]);
@@ -326,28 +321,6 @@ export function buildFeed(releases) {
 }
 
 export const RELEASE_FEED = buildFeed(PRESS_RELEASES);
-
-/**
- * The feed's activity over a trailing window: how many releases landed, how
- * many collections they touched, how many changed methodology, and the date
- * of the newest release overall.
- *
- * Computed from the release log itself, never typed into copy, so the number
- * always carries its denominator — a bare "16 releases" reads as all-time,
- * this month or the current filter, and each of those is a different claim.
- * `today` is injectable so tests do not depend on the wall clock.
- */
-export function recentActivity(days = 30, today = new Date(), feed = RELEASE_FEED) {
-  const cutoff = today.getTime() - days * 86400000;
-  const inWindow = feed.filter((entry) => entry.date && new Date(entry.date).getTime() >= cutoff && new Date(entry.date).getTime() <= today.getTime());
-  return {
-    days,
-    releases: inWindow.length,
-    collections: new Set(inWindow.map((entry) => entry.id)).size,
-    methodology: inWindow.filter((entry) => entry.kind === RELEASE_KIND.METHOD).length,
-    latest: feed.find((entry) => entry.date && new Date(entry.date).getTime() <= today.getTime())?.date ?? null,
-  };
-}
 
 /**
  * The collections that changed most recently, newest first. Drives the

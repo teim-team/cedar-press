@@ -73,7 +73,6 @@ import { useRegister } from "../../features/grove/useRegister.js";
 import { COLLECTION_ICONS } from "./pressCollectionIcons";
 import {
   CedarIcon,
-  CredibleResearchIcon,
   InsightsIcon,
   OriginalCollectionsIcon,
 } from "./pressGateIcons";
@@ -146,7 +145,8 @@ const TIER_OF = Object.fromEntries(SHELVES.flatMap(({ tier, entries }) => entrie
 // nothing about the one thing that distinguishes the collections. Revert this
 // pillar if that ruling was meant to cover the claim and not only the wording.
 // Owner copy, 2026-10-06: each block a distinct purpose (usable data,
-// connected information, original research, guided exploration). The old
+// connected information, guided exploration). The original-research block
+// came off in the 2026-10 redesign with Research Briefs. The old
 // blocks repeated the sourcing and matching story the section already tells,
 // claimed "every row" carries an entity (a record about Indian Country
 // broadly need not), and promised Cedar would answer any question with the
@@ -164,16 +164,6 @@ const PROOF_POINTS = [
     label: "Follow connections across collections",
     body: "Connect a nation\u2019s enterprises with their contracts, funding and transactions. Read those relationships alongside broader policy and economic records to understand individual organizations and the developments shaping Indian Country.",
     icon: InsightsIcon,
-  },
-  {
-    id: "credible",
-    label: "Research grounded in the collections",
-    // Owner copy narrowed 2026-10-06: the public brief catalog
-    // (`PRESS_ARTICLES`) holds one brief, the Native-owned business roster,
-    // so the block says research briefs start there rather than promising a
-    // shelf across funding, enterprise activity and policy.
-    body: "Read original research briefs, starting with the first nation-shared roster of individually owned Native businesses. Follow the findings back to their evidence and use the underlying collections to investigate your own questions.",
-    icon: CredibleResearchIcon,
   },
   {
     id: "cedar",
@@ -604,9 +594,7 @@ export default function PressGate({ user }) {
       {/* ── The hero: the promise, and beside it the product ─────────── */}
       <section className="cp-hero3" aria-label="Cedar Press">
         <div className="cp-hero3__in">
-          {/* Two messages, on purpose: the door sells the asset, the
-              signed-in overview keeps the editorial "Know what's shaping
-              Indian Country." The headline spans both columns on a wide
+          {/* The headline spans both columns on a wide
               screen (owner, 2026-10-07: it was squeezed into the copy
               column with the whole width free beside it). */}
           <h1 className="cp-hero3__title cp-fade">
@@ -864,7 +852,7 @@ export default function PressGate({ user }) {
               Available exclusively through <span>Tribal Business News.</span>
             </h2>
             <p className="cp-ways__lede">
-              A Cedar Press membership will open the collections, the research briefs and Cedar.
+              A Cedar Press membership will open the collections and Cedar.
               Enrollment is not open yet, so request early access and we will be in touch. Two
               other relationships need no subscription at all.
             </p>

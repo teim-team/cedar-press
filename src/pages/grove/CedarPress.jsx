@@ -11,10 +11,9 @@
 // The reader used to be one long page carrying everything; then it was six
 // tiles opening six doors, which is the masthead's nav bar restated
 // underneath itself. It is a briefing now (`PressBriefing`): the newest
-// research, the three newest releases, the collection that just moved and
-// one question about it, then the subscriber priorities and the maintenance
-// promise. Every line of it is read from the release record and the article
-// list rather than written, so it cannot fall out of step with the product.
+// releases, the collection that just moved and one question about it, then
+// the maintenance promise. Every line of it is read from the release record
+// rather than written, so it cannot fall out of step with the product.
 //
 // Built from the design system's own tokens (index.css base, redesign.css
 // retheme, then press.css, imported once in main.jsx in that order).
@@ -27,7 +26,7 @@ import { canReadCedarPress } from "../../features/grove/pressAccess";
 import { AD_SLOT } from "../../features/grove/pressAds";
 import { useDocumentTitle } from "../../features/grove/useDocumentTitle";
 import { PRESS_CATALOG_BY_ID } from "../../features/grove/pressCatalog";
-import { anchorOf, formatUpdated, latestRelease, recentlyUpdated } from "../../features/grove/pressReleases";
+import { formatUpdated, recentlyUpdated } from "../../features/grove/pressReleases";
 import { MAINTENANCE } from "../../features/grove/pressMethod.js";
 import { Contours } from "./pressAtmosphere";
 import { PressCedarFab } from "./PressCedarFab";
@@ -35,11 +34,10 @@ import { PressFoot, PressMast } from "./PressChrome";
 import PressAd from "./PressAd";
 import { LAUNCH_COLLECTION } from "../../features/grove/collection";
 import { openCedarQuestions } from "../../features/grove/pressJobs";
-import { PRESS_WHATS_NEW_PATH } from "../../features/grove/pressRoutes";
+import { PRESS_DATA_PATH } from "../../features/grove/pressRoutes";
 import PressGate from "./PressGate";
 import PressBriefing from "./PressBriefing";
 import { useReleaseFeed } from "../../features/grove/useReleaseFeed.js";
-import PressPrioritiesBlock from "./PressPrioritiesBlock";
 
 export default function CedarPress() {
   // The door is the one page every visitor and every crawler reaches.
@@ -94,23 +92,10 @@ export default function CedarPress() {
               resolution and ongoing updates — an argument for buying a
               product the reader has already bought. Ask Cedar stays, because
               it is the one thing here that is not a door. */}
-          {/* THE HEADLINE, AND THEN THE BRIEFING THAT ANSWERS IT.
-              The deck under it read "Browse the collections, read the
-              research, and ask Cedar about any of it" — a description of the
-              navigation bar, three inches under the navigation bar. The Ask
-              Cedar button went with it: the briefing's own question is
-              scoped to a collection and therefore answerable, and the
-              launcher is on every page regardless. What is left is the
-              premise, at the size of a premise rather than of a poster. */}
-          <section className="cp-hero cp-hero--brief cp-fade">
-            <h1>Know what&rsquo;s shaping Indian Country.</h1>
-            {/* Owner, 2026-09-26: what a subscriber does here, in one line
-                under the premise. */}
-            <p className="cp-hero__deck">
-              Compare peers, follow funding and business activity, spot changes worth
-              investigating and trace the evidence behind them.
-            </p>
-          </section>
+          {/* The visible headline and its deck came off in the 2026-10
+              redesign: the page opens on what moved. The page still has one
+              level-one heading, for screen readers and the document outline. */}
+          <h1 className="sr-only">Overview</h1>
           {/* THE BRIEFING, WHERE THE NAVIGATION USED TO BE REPEATED.
               `PressHub` drew six cards — Collections, Research Briefs,
               Priorities, What's new, Methods, Plans — which is the masthead's
@@ -119,7 +104,6 @@ export default function CedarPress() {
               know is what moved. Every line of the briefing is read from the
               release record and the article list, so it cannot go stale. */}
           <PressBriefing releaseState={releaseState} />
-          <PressPrioritiesBlock user={user} />
         </div>
 
         {/* Screen two: the close and the footer, as one ending. The ending is
@@ -144,29 +128,23 @@ export default function CedarPress() {
               </p>
             </div>
             {/* The three most recently changed collections, read from the
-                release record, each a door into What's New at that release's
-                permalink, and a fourth line into the whole feed. The claim
+                release record, each a door into that collection, and a fourth
+                line into all of them. The claim
                 beside them is that the collections keep moving; a reader who
                 wants to check it should be one click from the evidence. */}
             <ul className="cp-new">
               {!releaseState.data ? <li role="status">{releaseState.status === "loading" ? "Loading collection updates…" : "Collection updates are unavailable."}</li> : null}
-              {recentlyUpdated(3, releases).map((release) => {
-                const latest = latestRelease(release.id, releases);
-                const to = latest
-                  ? `${PRESS_WHATS_NEW_PATH}#${anchorOf({ id: release.id, version: latest.version })}`
-                  : PRESS_WHATS_NEW_PATH;
-                return (
-                  <li className="cp-new__item" key={release.id}>
-                    <Link className="cp-new__link" to={to}>
-                      <b>{PRESS_CATALOG_BY_ID[release.id]?.name ?? release.id}</b>
-                      <span className="cp-new__date">{release.updated ? `Updated ${formatUpdated(release.updated)}` : "Current verified data"}</span>
-                    </Link>
-                  </li>
-                );
-              })}
+              {recentlyUpdated(3, releases).map((release) => (
+                <li className="cp-new__item" key={release.id}>
+                  <Link className="cp-new__link" to={`${PRESS_DATA_PATH}?c=${release.id}`}>
+                    <b>{PRESS_CATALOG_BY_ID[release.id]?.name ?? release.id}</b>
+                    <span className="cp-new__date">{release.updated ? `Updated ${formatUpdated(release.updated)}` : "Current verified data"}</span>
+                  </Link>
+                </li>
+              ))}
               <li className="cp-new__item cp-new__more">
-                <Link className="cp-new__link" to={PRESS_WHATS_NEW_PATH}>
-                  View collection updates <span aria-hidden="true">&#8594;</span>
+                <Link className="cp-new__link" to={PRESS_DATA_PATH}>
+                  View all collections <span aria-hidden="true">&#8594;</span>
                 </Link>
               </li>
             </ul>

@@ -13,8 +13,6 @@ import { contactHref } from "../../features/grove/appLink.js";
 import { Link } from "react-router";
 
 import { useAuth } from "../../context/useAuth";
-import { usePriorities } from "../../features/grove/usePriorities.js";
-import { PressInfluence } from "./PressInfluence";
 import { useFadeIn } from "../../features/grove/useFadeIn";
 import { canReadCedarPress } from "../../features/grove/pressAccess";
 import { loadWork, saveWork, workOptions } from "../../features/grove/readerWork.js";
@@ -112,7 +110,6 @@ export default function CedarPressSettings() {
   useScrollToTop("settings");
   // Sitewide arrival language.
   const fadeRoot = useFadeIn();
-  const { influence, status: influenceStatus } = usePriorities({ user });
 
   if (!loading && !entitled) {
     return (
@@ -186,11 +183,6 @@ export default function CedarPressSettings() {
 
         <h2 className="cp-set__group">Research and support</h2>
         <div className="cp-set cp-set--support cp-fade">
-          {/* Where the account's influence lives: what this subscription has
-              earned by using the product, where it put it, and what it asked
-              for. The page is worth visiting for this, not only for billing. */}
-          <PressInfluence influence={influence} tier={tierId} status={influenceStatus} />
-
           {/* Links out to public programs, not features of the account: both
               pages work with or without a subscription, and the gate and
               footer name them to non-subscribers too. This card is the
