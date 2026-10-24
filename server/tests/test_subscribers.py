@@ -17,6 +17,7 @@ import pathlib
 import sys
 import unittest
 from pathlib import Path
+from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
@@ -62,7 +63,9 @@ class _Backend:
             os.environ.pop("CEDAR_PRESS_ACCOUNTS", None)
             os.environ.pop("CEDAR_PRESS_CODES", None)
             db.migrate()
-            db.execute("TRUNCATE cedar_press_subscribers, cedar_press_codes")
+            db.execute(
+                "TRUNCATE cedar_press_subscribers, cedar_press_codes, cedar_press_password_resets"
+            )
             for email, tier in (("reader@example.org", "press"), ("pro@example.org", "press_pro")):
                 subscribers.create(email, "correct-horse", tier)
             for seat in ("one@bank.example", "two@bank.example"):
@@ -138,6 +141,33 @@ class _Backend:
     def test_an_unknown_code_is_refused(self) -> None:
         self.assertIsNone(subscribers.redeem("TBN4-NOPE-NOPE", "whatever"))
         self.assertIsNone(subscribers.redeem("", "whatever"))
+
+    def test_a_reset_token_sets_the_password_once(self) -> None:
+        self.assertIsNone(subscribers.issue_reset("stranger@example.org"))
+        token = subscribers.issue_reset("pro@example.org")
+        made = subscribers.redeem_reset(token, "a-reset-password")
+        self.assertEqual((made.email, made.tier), ("pro@example.org", "press_pro"))
+        self.assertIsNotNone(subscribers.authenticate("pro@example.org", "a-reset-password"))
+        self.assertIsNone(subscribers.authenticate("pro@example.org", "correct-horse"))
+        self.assertIsNone(subscribers.redeem_reset(token, "again-a-password"))
+        self.assertIsNone(subscribers.redeem_reset("", "again-a-password"))
+
+    def test_a_reset_keeps_the_seat_on_its_subscription(self) -> None:
+        subscribers.redeem_reset(subscribers.issue_reset("one@bank.example"), "a-reset-password")
+        self.assertEqual(subscribers.account_id_for("one@bank.example"), "acct-bank")
+
+    def test_a_new_reset_token_replaces_the_older_one(self) -> None:
+        older = subscribers.issue_reset("reader@example.org")
+        newer = subscribers.issue_reset("Reader@Example.org")
+        self.assertIsNone(subscribers.redeem_reset(older, "another-password"))
+        self.assertIsNotNone(subscribers.redeem_reset(newer, "a-reset-password"))
+        self.assertIsNotNone(subscribers.authenticate("reader@example.org", "a-reset-password"))
+
+    def test_an_expired_reset_token_is_refused(self) -> None:
+        with mock.patch.object(subscribers, "RESET_LIFETIME", -subscribers.RESET_LIFETIME):
+            token = subscribers.issue_reset("reader@example.org")
+        self.assertIsNone(subscribers.redeem_reset(token, "a-reset-password"))
+        self.assertIsNotNone(subscribers.authenticate("reader@example.org", "correct-horse"))
 
 
 class TestEnvironmentBackend(_Backend, unittest.TestCase):

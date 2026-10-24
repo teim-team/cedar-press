@@ -2,23 +2,14 @@
  * The session provider.
  *
  * Its own file because a module that exports both a component and the
- * constants beside it breaks fast refresh; the context and the preview
- * account records live in authContext.js, and this holds only the component.
+ * constants beside it breaks fast refresh; the context lives in
+ * authContext.js, and this holds only the component.
  *
- * TWO MODES, ONE CONTRACT
- * Connected, the session is the platform's: `/me` on mount, `/auth/login`
- * to sign in, cookies carrying it, and the subscription's tier arriving
- * from the database. Standalone, the same contract is served by the demo
- * gate in `features/grove/pressDemoGate.js` so the service can be
- * demonstrated and reviewed on its own. Pages never learn which mode they
- * are in — they read `user`, `loading`, `login`, `logout` and
- * `refreshSession` either way — so connecting a deployment is configuration,
- * not a rewrite.
- *
- * The two never run at once. `isConnected()` is the discriminator, here as
- * everywhere: connected, the demo gate is not consulted and its accounts are
- * not even active, so pointing a deployment at the API is what turns the
- * demonstration gate off.
+ * The session is the platform's: `/me` on mount, `/auth/login` to sign in,
+ * cookies carrying it, and the subscription's tier arriving from the
+ * database. Where there is no API to ask (the public site, or a dev server
+ * with no `VITE_API_URL`) nobody is signed in, and there is nothing to wait
+ * for.
  *
  * WHEN THE SERVICE DOES NOT ANSWER
  * The session check has a deadline (api.js). An unreachable service is not
@@ -33,29 +24,19 @@ import { createPortal } from "react-dom";
 
 import * as api from "../api.js";
 import { isConnected } from "../config.js";
-import { verifyPressDemoAccount } from "../features/grove/pressDemoGate.js";
 import { EVENT, identify, track, trackError } from "../features/grove/telemetry.js";
-import {
-  AuthContext,
-  clearStoredSession,
-  readSession,
-  storeSession,
-} from "./authContext.js";
+import { AuthContext } from "./authContext.js";
 
 export function AuthProvider({ children }) {
-  // Connected, nothing is known until /me answers; standalone, the stored
-  // session is known synchronously and the gate must not flash.
-  const [user, setUser] = useState(() => (isConnected() ? null : readSession()));
+  // Connected, nothing is known until /me answers.
+  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(() => isConnected());
   // The last check did not reach the service (timeout or dropped connection).
   const [sessionUnreachable, setSessionUnreachable] = useState(false);
   const [retrying, setRetrying] = useState(false);
 
   const refreshSession = useCallback(async () => {
-    if (!isConnected()) {
-      setUser(readSession());
-      return;
-    }
+    if (!isConnected()) return;
     try {
       const session = await api.fetchSession();
       setUser(session);
@@ -120,42 +101,23 @@ export function AuthProvider({ children }) {
 
   const login = useCallback(async ({ email, password }) => {
     const normalized = String(email || "").trim().toLowerCase();
-    if (isConnected()) {
-      try {
-        const session = await api.login({ email: normalized, password });
-        setSessionUnreachable(false);
-        setUser(session);
-        identify(session);
-        track(EVENT.signedIn, { tier: session?.workspace_tier });
-        return session;
-      } catch (error) {
-        track(EVENT.signInFailed, { code: error?.code });
-        throw error;
-      }
+    try {
+      const session = await api.login({ email: normalized, password });
+      setSessionUnreachable(false);
+      setUser(session);
+      identify(session);
+      track(EVENT.signedIn, { tier: session?.workspace_tier });
+      return session;
+    } catch (error) {
+      track(EVENT.signInFailed, { code: error?.code });
+      throw error;
     }
-    // Standalone: the demo gate. It returns null for every failure, the
-    // unconfigured build included — a deployment provisioned with no account
-    // has nothing for any password to match, and this is where that becomes
-    // true rather than merely documented.
-    const session = await verifyPressDemoAccount({ email: normalized, password });
-    if (!session) {
-      track(EVENT.signInFailed, { code: "INVALID_CREDENTIALS" });
-      throw new Error(
-        "That sign-in did not work. Check the address and password on your Cedar Press confirmation.",
-      );
-    }
-    storeSession(session);
-    setUser(session);
-    identify(session);
-    track(EVENT.signedIn, { tier: session.workspace_tier });
-    return session;
   }, []);
 
   const logout = useCallback(async () => {
     if (isConnected()) {
       await api.logout().catch((error) => trackError(error, { at: "logout" }));
     }
-    clearStoredSession();
     setSessionUnreachable(false);
     setUser(null);
     identify(null);

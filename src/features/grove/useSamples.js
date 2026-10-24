@@ -22,6 +22,8 @@
 // dropped request emptied the viewer until a reload (sampleFetch.js).
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import { downloadCollection } from "../../api.js";
+import { isConnected } from "../../config.js";
 import { EMPTY_REGISTER, parseCsv, universalRows } from "./explore.js";
 import { fetchSampleText, onBackOnline } from "./sampleFetch.js";
 import { enrichSample } from "./exampleEnrichment.js";
@@ -42,6 +44,12 @@ export function viewerItems(key, parsed, register = EMPTY_REGISTER) {
  * the raw column order per table; whether anything is still in flight; and
  * `retry`, which fetches the failed ones again.
  */
+// Connected, the table is the API's own customer table, the same layout the
+// bundled samples were rendered in; its digest is the service's to vouch for.
+const readTable = (t) => (isConnected()
+  ? downloadCollection(t.key.split("/")[0]).then(({ blob }) => blob.text())
+  : fetchSampleText(t.path, { sha256: t.sha256 }));
+
 export function useSampleRows(tables, register = EMPTY_REGISTER) {
   const [loaded, setLoaded] = useState(() => new Map());
   const [failed, setFailed] = useState(() => new Set());
@@ -50,7 +58,7 @@ export function useSampleRows(tables, register = EMPTY_REGISTER) {
   useEffect(() => {
     for (const t of tables) {
       if (loaded.has(t.path) || failed.has(t.path) || pending.current.has(t.path)) continue;
-      const promise = fetchSampleText(t.path, { sha256: t.sha256 })
+      const promise = readTable(t)
         .then((text) => enrichSample(t.key.split("/")[0], parseCsv(text)))
         .then(
           (parsed) => {

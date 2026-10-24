@@ -23,8 +23,9 @@ export default defineConfig([
   // A gate that is green in CI and red on every developer's machine is a gate
   // people stop running, and the divergence hid the real question: no tracked
   // JavaScript outside `src/`, `tests/` and `scripts/` exists, so nothing that
-  // ships is being un-linted by this line.
-  globalIgnores(["dist", "dist-site", "data", ".claude"]),
+  // ships is being un-linted by this line. A local Python virtualenv is the
+  // same case: coverage installs its HTML report's JavaScript inside it.
+  globalIgnores(["dist", "dist-site", "data", ".claude", "**/.venv"]),
   {
     files: ["**/*.{js,jsx}"],
     extends: [

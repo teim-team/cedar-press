@@ -135,6 +135,144 @@ class TestSession(unittest.TestCase):
         self.assertEqual(client.get("/me").status_code, 401)
 
 
+class TestPasswordChange(unittest.TestCase):
+    NEW = "a-new-long-password"
+
+    def setUp(self) -> None:
+        client.cookies.clear()
+        ratelimit.reset_for_tests()
+        session_module.forget_activated_for_tests()
+        self.addCleanup(session_module.forget_activated_for_tests)
+
+    def change(self, current: str = "correct-horse", new: str = NEW):
+        return client.post(
+            "/auth/password", json={"current_password": current, "new_password": new}
+        )
+
+    def test_it_needs_a_session(self) -> None:
+        self.assertEqual(self.change().status_code, 401)
+
+    def test_the_new_password_signs_in_and_the_old_one_does_not(self) -> None:
+        sign_in()
+        self.assertEqual(self.change().status_code, 200)
+        self.assertEqual(client.get("/me").status_code, 200)
+        client.cookies.clear()
+        self.assertEqual(sign_in().status_code, 401)
+        self.assertEqual(sign_in(password=self.NEW).status_code, 200)
+
+    def test_another_device_is_signed_out(self) -> None:
+        other = TestClient(app)
+        other.post("/auth/login", json={"email": "reader@example.org", "password": "correct-horse"})
+        sign_in()
+        self.change()
+        self.assertEqual(other.get("/me").status_code, 401)
+
+    def test_a_wrong_current_password_changes_nothing(self) -> None:
+        sign_in()
+        response = self.change(current="wrong")
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()["code"], "INVALID_CREDENTIALS")
+        client.cookies.clear()
+        self.assertEqual(sign_in().status_code, 200)
+
+    def test_a_short_new_password_is_refused(self) -> None:
+        sign_in()
+        response = self.change(new="short")
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()["code"], "PASSWORD_TOO_SHORT")
+
+    def test_an_unrelated_origin_is_refused(self) -> None:
+        sign_in()
+        response = client.post(
+            "/auth/password",
+            json={"current_password": "correct-horse", "new_password": self.NEW},
+            headers={"origin": "https://evil.example"},
+        )
+        self.assertEqual(response.status_code, 403)
+
+
+class TestPasswordReset(unittest.TestCase):
+    NEW = "a-new-long-password"
+
+    def setUp(self) -> None:
+        client.cookies.clear()
+        ratelimit.reset_for_tests()
+        session_module.forget_activated_for_tests()
+        self.addCleanup(session_module.forget_activated_for_tests)
+        self.sent: list[tuple[str, str]] = []
+        patcher = mock.patch(
+            "cedar_press.app._send_reset_link", lambda email, link: self.sent.append((email, link))
+        )
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def ask(self, email: str = "reader@example.org"):
+        return client.post("/auth/password-reset", json={"email": email})
+
+    def token(self) -> str:
+        self.assertEqual(self.ask().status_code, 204)
+        return self.sent[-1][1].split("#reset=", 1)[1]
+
+    def confirm(self, token: str, new: str = NEW):
+        return client.post(
+            "/auth/password-reset/confirm", json={"token": token, "new_password": new}
+        )
+
+    def test_an_unknown_address_gets_the_same_answer_and_no_email(self) -> None:
+        self.assertEqual(self.ask("nobody@example.org").status_code, 204)
+        self.assertEqual(self.sent, [])
+
+    def test_the_link_opens_the_login_page(self) -> None:
+        self.ask(" Reader@Example.org ")
+        email, link = self.sent[0]
+        self.assertEqual(email, "reader@example.org")
+        self.assertRegex(link, r"/login#reset=[\w-]{40,}$")
+
+    def test_the_link_sets_the_password_and_signs_in(self) -> None:
+        other = TestClient(app)
+        other.post("/auth/login", json={"email": "reader@example.org", "password": "correct-horse"})
+        response = self.confirm(self.token())
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["email"], "reader@example.org")
+        self.assertEqual(client.get("/me").status_code, 200)
+        self.assertEqual(other.get("/me").status_code, 401)
+        client.cookies.clear()
+        self.assertEqual(sign_in().status_code, 401)
+        self.assertEqual(sign_in(password=self.NEW).status_code, 200)
+
+    def test_a_short_password_is_refused_and_keeps_the_link(self) -> None:
+        token = self.token()
+        response = self.confirm(token, "short")
+        self.assertEqual(response.json()["code"], "PASSWORD_TOO_SHORT")
+        self.assertEqual(self.confirm(token).status_code, 200)
+
+    def test_an_over_long_address_is_refused(self) -> None:
+        self.assertEqual(self.ask("a" * 250 + "@example.org").status_code, 422)
+        self.assertEqual(self.sent, [])
+
+    def test_one_inbox_gets_at_most_three_links(self) -> None:
+        for _ in range(5):
+            self.assertEqual(self.ask().status_code, 204)
+        self.assertEqual(len(self.sent), 3)
+
+    def test_it_refuses_where_no_email_can_be_sent(self) -> None:
+        with mock.patch("cedar_press.app.validate_auth_configuration"), mock.patch.dict(
+            os.environ, {"CEDAR_PRESS_ENVIRONMENT": "production"}
+        ):
+            response = self.ask()
+        self.assertEqual(response.status_code, 503)
+        self.assertEqual(response.json()["code"], "PASSWORD_RESET_UNAVAILABLE")
+        self.assertEqual(self.sent, [])
+
+    def test_an_unrelated_origin_is_refused(self) -> None:
+        response = client.post(
+            "/auth/password-reset",
+            json={"email": "reader@example.org"},
+            headers={"origin": "https://evil.example"},
+        )
+        self.assertEqual(response.status_code, 403)
+
+
 class TestCatalog(unittest.TestCase):
     def setUp(self) -> None:
         client.cookies.clear()

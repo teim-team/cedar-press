@@ -750,6 +750,8 @@
   background-position: right 0.75rem center;
 }
 .teim-rd .cp-set__form select { font: inherit; font-size: 0.95rem; min-height: 44px; padding: 0.5rem 2.2rem 0.5rem 0.7rem; border: 1px solid var(--line); border-radius: 10px; background-color: var(--bg); color: var(--ink); }
+.teim-rd .cp-set__form input { font: inherit; font-size: 0.95rem; min-height: 44px; padding: 0.5rem 0.7rem; margin-bottom: 0.6rem; border: 1px solid var(--line); border-radius: 10px; background-color: var(--bg); color: var(--ink); }
+.teim-rd .cp-set__form input:focus,
 .teim-rd .cp-set__form select:focus { outline: 2px solid var(--teal); outline-offset: 1px; border-color: var(--teal); }
 .teim-rd .cp-who__label { font-family: var(--mono); font-size: 0.70rem; font-weight: 700; letter-spacing: 0.11em; text-transform: uppercase; color: var(--dteal); }
 .teim-rd .cp-set__body { font-size: 0.97rem; line-height: 1.6; color: var(--ink-2); margin: 0 0 1.1rem; }
