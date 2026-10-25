@@ -109,7 +109,10 @@ removes its database afterward; it does not depend on volume initialization SQL.
 [`server/DATABASE.md`](server/DATABASE.md) for connection details.
 The account foundation is additive: legacy subscribers remain the runtime
 credential and access authority while migration 003 synchronizes identity,
-billing membership and legacy grants. `sessions_revoked_at` owns explicit
+billing membership and legacy grants. The consolidated migration creates
+legacy/complimentary access grants and separates membership provenance from
+effective roles directly. Legacy email edits and implicit identity linking are refused; verified
+linking and reassignment require dedicated future flows. `sessions_revoked_at` owns explicit
 session revocation; ordinary `updated_at` changes do not revoke cookies.
 `make db-test` also rehearses this migration and its failure rollback. The
 subscriber-storage CI job builds `server/Dockerfile.test` and runs that same

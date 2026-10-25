@@ -107,7 +107,7 @@ and production. Existing passwords, accounts and subscription tiers are preserve
 old cookies without lifecycle claims require a fresh sign-in.
 
 The account foundation migration adds stable identity UUIDs, provider identities,
-billing accounts, membership and entitlement records alongside the legacy
+billing accounts, membership provenance and explicit access grants alongside the legacy
 subscriber store. Legacy activation synchronizes them transactionally. Existing
 credentials and authorization continue through the subscriber adapter; new unpaid
 identities gain no access. Email verification, registration and Stripe billing
