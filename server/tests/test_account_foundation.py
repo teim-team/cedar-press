@@ -75,10 +75,10 @@ class TestAccountFoundation(unittest.TestCase):
             for key, value in before.items():
                 self.assertEqual(value, after[key], key)
             self.assertEqual(after["sessions_revoked_at"], before["updated_at"])
-            self.assertIsNotNone(after["identity_id"])
             self.assertIsNotNone(subscribers.authenticate(before["email"], "existing-password"))
         # Legacy points grouping is preserved as data, not promoted into group accounts.
-        for relation in ("cedar_press_billing_accounts", "cedar_press_membership_grants",
+        for relation in ("cedar_press_users", "cedar_press_billing_accounts",
+                         "cedar_press_membership_grants",
                          "cedar_press_account_members"):
             self.assertIsNone(db.one("SELECT to_regclass(%s) AS t", (relation,))["t"])
         self.assertIsNone(db.one("SELECT to_regclass('cedar_press_entitlements') AS t")["t"])
@@ -89,7 +89,7 @@ class TestAccountFoundation(unittest.TestCase):
             ["press", "press_pro"],
         )
         self.assertEqual(db.query(
-            "SELECT * FROM cedar_press_users WHERE email_verified_at IS NOT NULL"
+            "SELECT * FROM cedar_press_subscribers WHERE email_verified_at IS NOT NULL"
         ), [])
 
     def test_unpaid_identity_does_not_authenticate_or_gain_access(self):
@@ -97,7 +97,8 @@ class TestAccountFoundation(unittest.TestCase):
         user = accounts.create_user(" Unpaid@Example.org ")
         self.assertEqual(user["email"], "unpaid@example.org")
         self.assertIsNone(user["email_verified_at"])
-        self.assertIsNone(subscribers.find(user["email"]))
+        self.assertIsNone(subscribers.find(user["email"]).tier)
+        self.assertIsNone(subscribers.authenticate(user["email"], "anything"))
         self.assertEqual(db.query(
             "SELECT * FROM cedar_press_access_grants WHERE user_id = %s", (user["id"],)
         ), [])
@@ -115,7 +116,7 @@ class TestAccountFoundation(unittest.TestCase):
             db.migrate()
         self.assertEqual(caught.exception.diag.constraint_name,
                          "cedar_press_subscriber_normalized_email")
-        self.assertIsNone(db.one("SELECT to_regclass('cedar_press_users') AS t")["t"])
+        self.assertIsNone(db.one("SELECT to_regclass('cedar_press_login_identities') AS t")["t"])
         self.assertIsNone(db.one(
             "SELECT filename FROM cedar_press_migrations"
             " WHERE filename = '003_account_foundation.sql'"
@@ -135,13 +136,13 @@ class TestAccountFoundation(unittest.TestCase):
         )
         grant = db.one(
             "SELECT * FROM cedar_press_access_grants WHERE user_id = %s AND revoked_at IS NULL",
-            (row["identity_id"],)
+            (row["id"],)
         )
         self.assertEqual(grant["tier"], "press_pro")
         with self.assertRaisesRegex(self.psycopg.errors.RaiseException,
-                                    "legacy_identity_rebinding_forbidden"):
+                                    "account_identity_immutable"):
             db.execute(
-                "UPDATE cedar_press_subscribers SET identity_id = gen_random_uuid()"
+                "UPDATE cedar_press_subscribers SET id = gen_random_uuid()"
                 " WHERE email = 'new@example.org'"
             )
         # A failed legacy writer rolls back the identity created by its trigger too.
@@ -151,13 +152,13 @@ class TestAccountFoundation(unittest.TestCase):
                 " VALUES ('rollback@example.org', 'rollback', 'invalid')"
             )
         self.assertIsNone(db.one(
-            "SELECT id FROM cedar_press_users WHERE email = 'rollback@example.org'"
+            "SELECT id FROM cedar_press_subscribers WHERE email = 'rollback@example.org'"
         ))
-        db.execute("DELETE FROM cedar_press_subscribers WHERE email = 'new@example.org'")
+        db.execute("UPDATE cedar_press_subscribers SET tier = NULL WHERE email = 'new@example.org'")
         self.assertIsNotNone(db.one(
             "SELECT revoked_at FROM cedar_press_access_grants WHERE user_id = %s"
             " ORDER BY starts_at DESC LIMIT 1",
-            (row["identity_id"],),
+            (row["id"],),
         )["revoked_at"])
 
     def test_billing_updates_keep_sessions_and_explicit_logout_revokes(self):
@@ -173,7 +174,7 @@ class TestAccountFoundation(unittest.TestCase):
 
     def test_google_subject_cannot_belong_to_two_users(self):
         db.migrate()
-        users = db.query("SELECT id FROM cedar_press_users ORDER BY email")
+        users = db.query("SELECT id FROM cedar_press_subscribers ORDER BY email")
         db.execute(
             "INSERT INTO cedar_press_login_identities(user_id, provider, subject)"
             " VALUES (%s, 'google', 'stable-provider-subject')", (users[0]["id"],)
@@ -184,52 +185,36 @@ class TestAccountFoundation(unittest.TestCase):
                 " VALUES (%s, 'google', 'stable-provider-subject')", (users[1]["id"],)
             )
 
-    def test_explicit_identity_insert_and_implicit_email_link_are_refused(self):
+    def test_single_account_identity_and_existing_account_activation_refusal(self):
         db.migrate()
-        identity = db.one("SELECT identity_id FROM cedar_press_subscribers LIMIT 1")["identity_id"]
-        with self.assertRaisesRegex(self.psycopg.errors.RaiseException,
-                                    "legacy_identity_insert_forbidden"):
-            db.execute(
-                "INSERT INTO cedar_press_subscribers(email, account_id, tier, identity_id)"
-                " VALUES ('another@example.org', 'another', 'press', %s)", (identity,)
-            )
         user = accounts.create_user("unverified@example.org")
-        with self.assertRaises(self.psycopg.errors.UniqueViolation):
-            subscribers.create(user["email"], "must-not-link", "press")
-        self.assertIsNone(subscribers.find(user["email"]))
+        with self.assertRaises(self.psycopg.errors.UniqueViolation) as caught:
+            db.execute(
+                "INSERT INTO cedar_press_subscribers(id, email, account_id, tier)"
+                " VALUES (%s, 'another@example.org', 'another', NULL)", (user["id"],)
+            )
+        self.assertEqual(caught.exception.diag.constraint_name, "cedar_press_subscribers_pkey")
         subscribers.issue_code("EXISTING-IDENTITY-123", user["email"], "press")
         with self.assertRaises(subscribers.AlreadySubscribed):
-            subscribers.redeem("EXISTING-IDENTITY-123", "must-not-link")
+            subscribers.redeem("EXISTING-IDENTITY-123", "must-not-reset")
         self.assertFalse(subscribers.find_code("EXISTING-IDENTITY-123").spent)
-        # Even with the bridge disabled, the one-to-one database constraint fires.
-        db.execute("ALTER TABLE cedar_press_subscribers DISABLE TRIGGER"
-                   " cedar_press_legacy_subscriber_bridge")
-        try:
-            with self.assertRaises(self.psycopg.errors.UniqueViolation) as caught:
-                db.execute(
-                    "INSERT INTO cedar_press_subscribers(email, account_id, tier, identity_id)"
-                    " VALUES ('another@example.org', 'another', 'press', %s)", (identity,)
-                )
-            self.assertEqual(caught.exception.diag.constraint_name,
-                             "cedar_press_subscriber_identity_unique")
-        finally:
-            db.execute("ALTER TABLE cedar_press_subscribers ENABLE TRIGGER"
-                       " cedar_press_legacy_subscriber_bridge")
+        self.assertIsNone(subscribers.find(user["email"]).password_hash)
+        self.assertIsNone(subscribers.find(user["email"]).tier)
 
     def test_google_identity_cannot_follow_an_unverified_legacy_email_edit(self):
         db.migrate()
         identity = db.one(
-            "SELECT identity_id FROM cedar_press_subscribers WHERE email = 'one@example.org'"
-        )["identity_id"]
+            "SELECT id FROM cedar_press_subscribers WHERE email = 'one@example.org'"
+        )["id"]
         db.execute(
             "INSERT INTO cedar_press_login_identities(user_id, provider, subject)"
             " VALUES (%s, 'google', 'alice-subject')", (identity,)
         )
         with self.assertRaisesRegex(self.psycopg.errors.RaiseException,
-                                    "legacy_email_change_requires_verified_flow"):
+                                    "account_email_change_requires_verified_flow"):
             db.execute("UPDATE cedar_press_subscribers SET email = 'bob@example.org'"
                        " WHERE email = 'one@example.org'")
-        self.assertEqual(db.one("SELECT email FROM cedar_press_users WHERE id = %s",
+        self.assertEqual(db.one("SELECT email FROM cedar_press_subscribers WHERE id = %s",
                                 (identity,))["email"], "one@example.org")
         self.assertIsNone(subscribers.find("bob@example.org"))
 
@@ -237,8 +222,8 @@ class TestAccountFoundation(unittest.TestCase):
         db.migrate()
         subscribers.create("seat@example.org", "existing-password", "press")
         identity = db.one(
-            "SELECT identity_id FROM cedar_press_subscribers WHERE email = 'seat@example.org'"
-        )["identity_id"]
+            "SELECT id FROM cedar_press_subscribers WHERE email = 'seat@example.org'"
+        )["id"]
         old_grant = db.one("SELECT * FROM cedar_press_access_grants WHERE user_id = %s",
                            (identity,))
         complimentary = db.one(
@@ -261,7 +246,8 @@ class TestAccountFoundation(unittest.TestCase):
         subscribers.create("seat@example.org", "existing-password", "press_pro")
         self.assertEqual(db.one("SELECT count(*) AS n FROM cedar_press_access_grants"
                                 " WHERE user_id = %s AND source = 'legacy'", (identity,))["n"], 2)
-        db.execute("DELETE FROM cedar_press_subscribers WHERE email = 'seat@example.org'")
+        db.execute("UPDATE cedar_press_subscribers SET tier = NULL"
+                   " WHERE email = 'seat@example.org'")
         self.assertEqual(db.query("SELECT id FROM cedar_press_access_grants"
                                   " WHERE user_id = %s AND source = 'legacy'"
                                   " AND revoked_at IS NULL", (identity,)), [])
@@ -276,12 +262,14 @@ class TestAccountFoundation(unittest.TestCase):
                    " WHERE email = 'one@example.org'", (subscribers.hash_password("changed"),))
         self.assertNotEqual(subscribers.find("one@example.org").session_revision, before)
         self.assertIsNone(session._decode(cookie))
-        for account in (None, "  "):
-            with self.subTest(account=account), self.assertRaisesRegex(
-                self.psycopg.errors.RaiseException, "legacy_account_id_required"
-            ):
-                db.execute("UPDATE cedar_press_subscribers SET account_id = %s"
-                           " WHERE email = 'one@example.org'", (account,))
+        with self.assertRaises(self.psycopg.errors.NotNullViolation):
+            db.execute("UPDATE cedar_press_subscribers SET account_id = NULL"
+                       " WHERE email = 'one@example.org'")
+        with self.assertRaises(self.psycopg.errors.CheckViolation) as caught:
+            db.execute("UPDATE cedar_press_subscribers SET account_id = '  '"
+                       " WHERE email = 'one@example.org'")
+        self.assertEqual(caught.exception.diag.constraint_name,
+                         "cedar_press_subscriber_account_required")
 
     def test_paid_access_cannot_be_duplicated_in_explicit_grants(self):
         db.migrate()
@@ -297,8 +285,24 @@ class TestAccountFoundation(unittest.TestCase):
         db.migrate()
         first = accounts.create_user("first@example.org")
         second = accounts.create_user("second@example.org")
-        db.execute("UPDATE cedar_press_users SET stripe_customer_id = 'cus_test_individual'"
+        db.execute("UPDATE cedar_press_subscribers SET stripe_customer_id = 'cus_test_individual'"
                    " WHERE id = %s", (first["id"],))
         with self.assertRaises(self.psycopg.errors.UniqueViolation):
-            db.execute("UPDATE cedar_press_users SET stripe_customer_id = 'cus_test_individual'"
+            db.execute("UPDATE cedar_press_subscribers"
+                       " SET stripe_customer_id = 'cus_test_individual'"
                        " WHERE id = %s", (second["id"],))
+
+    def test_grant_history_prevents_accidental_account_deletion(self):
+        db.migrate()
+        with self.assertRaises(self.psycopg.errors.ForeignKeyViolation):
+            db.execute("DELETE FROM cedar_press_subscribers WHERE email = 'one@example.org'")
+        self.assertIsNotNone(subscribers.find("one@example.org"))
+
+    def test_disabling_then_restoring_legacy_access_does_not_revive_old_cookies(self):
+        db.migrate()
+        cookie = session._encode(session.Session("one@example.org", "press"))
+        db.execute("UPDATE cedar_press_subscribers SET tier = NULL WHERE email = 'one@example.org'")
+        self.assertIsNone(session._decode(cookie))
+        db.execute("UPDATE cedar_press_subscribers SET tier = 'press'"
+                   " WHERE email = 'one@example.org'")
+        self.assertIsNone(session._decode(cookie))

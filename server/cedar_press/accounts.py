@@ -1,7 +1,8 @@
-"""Persistent identity and billing foundation, independent of paid access.
+"""Account creation in the existing subscriber store, independent of paid access.
 
 No public registration or provider-token handling lives here. Existing passwords
-and subscriber authorization remain in subscribers.py during the additive bridge.
+and subscriber authorization remain in subscribers.py until subscription-based
+access is implemented.
 """
 
 from __future__ import annotations
@@ -21,9 +22,9 @@ def create_user(email: str) -> dict[str, object]:
     if not db.configured():
         raise RuntimeError("Account creation requires PostgreSQL")
     row = db.one(
-        "INSERT INTO cedar_press_users (email) VALUES (%s)"
+        "INSERT INTO cedar_press_subscribers (email, account_id, tier) VALUES (%s, %s, NULL)"
         " RETURNING id, email, email_verified_at, created_at",
-        (address,),
+        (address, address),
     )
     assert row is not None
     return row

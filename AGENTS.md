@@ -107,15 +107,12 @@ The test runner creates a fresh database, applies application migrations, and
 removes its database afterward; it does not depend on volume initialization SQL.
 `make db-shell` inspects persistent development records. See
 [`server/DATABASE.md`](server/DATABASE.md) for connection details.
-The account foundation is additive: legacy subscribers remain the runtime
-credential and access authority while migration 003 synchronizes identity,
-individual legacy access grants. Only individual accounts are supported: Stripe
-customers belong directly to users, with no billing-account or membership tables.
-Existing points grouping remains legacy data, not a group subscription feature.
+Migration 003 extends `cedar_press_subscribers` as the sole account store,
+adding verification and Stripe customer fields. Google identities and individual
+access grants reference its existing UUID; there is no parallel users table or
+group billing model. A null tier disables legacy access while retaining the
+account and grant history. `sessions_revoked_at` owns explicit session revocation.
 Sign-in and activation do not automatically link teim-app accounts.
-Legacy email edits and implicit identity linking are refused; verified
-linking and reassignment require dedicated future flows. `sessions_revoked_at` owns explicit
-session revocation; ordinary `updated_at` changes do not revoke cookies.
 `make db-test` also rehearses this migration and its failure rollback. The
 subscriber-storage CI job builds `server/Dockerfile.test` and runs that same
 command, refusing skipped contracts. Production uses `server/Dockerfile`.

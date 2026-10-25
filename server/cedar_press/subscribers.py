@@ -56,7 +56,7 @@ class AlreadySubscribed(Exception):
 @dataclass(frozen=True)
 class Subscriber:
     email: str
-    tier: str
+    tier: str | None
     account_id: str
     password_hash: str | None = None
     session_revision: str = ""
@@ -479,8 +479,6 @@ def redeem(code: str, password: str) -> Subscriber | None:
     account = account_id_for(found.email)
     hashed = hash_password(password)
 
-    from psycopg.errors import UniqueViolation
-
     with db.pool().connection() as conn, conn.cursor() as cur:
         cur.execute(
             "UPDATE cedar_press_codes SET spent_at = now(), spent_by = %s"
@@ -498,20 +496,11 @@ def redeem(code: str, password: str) -> Subscriber | None:
         # the old one. The caller checks `exists` first; this is the half of
         # it that also holds when two requests race, because the check and
         # the insert are not the same instant.
-        try:
-            cur.execute(
-                "INSERT INTO cedar_press_subscribers (email, account_id, tier, password_hash)"
-                " VALUES (%s, %s, %s, %s) ON CONFLICT (email) DO NOTHING",
-                (found.email, account, found.tier, hashed),
-            )
-        except UniqueViolation as error:
-            if error.diag.constraint_name != "cedar_press_users_email_key":
-                raise
-            # An unpaid identity (or a concurrently created one) must use a
-            # verified linking flow. Preserve the code and return the existing
-            # account error rather than leaking a database failure to the UI.
-            conn.rollback()
-            raise AlreadySubscribed(found.email) from error
+        cur.execute(
+            "INSERT INTO cedar_press_subscribers (email, account_id, tier, password_hash)"
+            " VALUES (%s, %s, %s, %s) ON CONFLICT (email) DO NOTHING",
+            (found.email, account, found.tier, hashed),
+        )
         if cur.rowcount == 0:
             conn.rollback()
             raise AlreadySubscribed(found.email)

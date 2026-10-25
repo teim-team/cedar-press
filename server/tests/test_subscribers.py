@@ -63,7 +63,7 @@ class _Backend:
             os.environ.pop("CEDAR_PRESS_CODES", None)
             db.migrate()
             db.execute(
-                "TRUNCATE cedar_press_subscribers, cedar_press_codes, cedar_press_users,"
+                "TRUNCATE cedar_press_subscribers, cedar_press_codes,"
                 " cedar_press_login_identities, cedar_press_access_grants"
             )
             for email, tier in (("reader@example.org", "press"), ("pro@example.org", "press_pro")):
@@ -414,9 +414,7 @@ class TestAStandaloneDatabase(unittest.TestCase):
             "SELECT conname FROM pg_constraint WHERE conrelid ="
             " 'cedar_press_subscribers'::regclass AND contype = 'f'"
         )
-        self.assertEqual([k["conname"] for k in keys], [
-            "cedar_press_subscribers_identity_id_fkey",
-        ])
+        self.assertEqual(keys, [])
         # And the service works: a code, an activation, a sign-in.
         subscribers.issue_code("TBN5-SOLO-0001", "alone@example.org", "press_pro")
         made = subscribers.redeem("TBN5-SOLO-0001", "correct-horse-battery")

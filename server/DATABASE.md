@@ -56,78 +56,42 @@ the legacy access-code integration and do not define the billing roadmap.
 The Terraform deployment uses a dedicated PostgreSQL database; sharing a
 database with teim-app remains an optional compatibility arrangement.
 
-Cedar Press supports individual accounts at launch. Migration
-`003_account_foundation.sql` adds only these three account tables:
+Cedar Press supports individual accounts. Migration `003_account_foundation.sql`
+extends the existing `cedar_press_subscribers` account table instead of creating
+a parallel users table:
 
 | Table | Purpose |
 | --- | --- |
-| `cedar_press_users` | Stable user UUID, email verification and optional unique Stripe customer ID |
-| `cedar_press_login_identities` | Google provider subject linked to one user |
-| `cedar_press_access_grants` | Per-user legacy or complimentary access, with revocation history |
+| `cedar_press_subscribers` | Existing UUID, email and password hash, plus verification, Stripe customer and session revision fields |
+| `cedar_press_login_identities` | Google sign-in subject linked directly to the account UUID |
+| `cedar_press_access_grants` | Individual legacy or complimentary access, including revocation history |
 
-There are no billing-account, membership or organization-role tables. Future
-subscriptions, invoices and payments will belong directly to a user. The Stripe
-customer ID is stored on that user; it is not a credential or proof of payment.
+Existing account IDs, password hashes, timestamps and Cedar Points grouping are
+preserved. There are no group accounts, memberships, `identity_id` column or
+identity synchronization triggers. Future subscriptions and payment records will
+reference the existing account UUID. Registration, Google sign-in and Stripe
+billing flows are not implemented yet.
 
-This is an additive rollout. Existing subscribers remain the runtime password
-and authorization authority. Their identity and legacy grant are backfilled and
-synchronized in the same transaction as legacy activation or provisioning.
-Deleting a subscriber revokes only legacy access; independent complimentary
-access remains intact. No migration marks an email verified, merges platform
-credentials, creates a Stripe subscription or guesses payment history.
+A null legacy tier represents an account without legacy access. Code redemption
+creates the account and legacy grant in the same transaction; duplicate-account
+redemption leaves the code unspent and does not replace credentials. Tier changes
+close the previous legacy grant and create a new one. Setting the tier to null
+revokes legacy grants while preserving the account, Google identity and independent
+complimentary grants. Existing runtime access checks still use the legacy tier.
+Accounts with grant history cannot be accidentally hard-deleted through the foreign
+key; deliberate account deletion is a separate future lifecycle flow.
 
-The existing subscriber `account_id` and Cedar Points grouping are preserved
-as legacy data. They do not create group billing accounts, memberships or shared
-paid access. Two legacy readers with the same grouping still have independent
-user identities, Stripe customer references and access grants.
+Password, binding and access-disable changes advance `sessions_revoked_at`.
+Ordinary timestamps and changes between active tiers do not sign users out.
+Sign-in and activation do not automatically link teim-app accounts. Raw email or
+UUID reassignment is refused until a verified account-management flow exists.
 
-Do not truncate subscriber tables outside disposable tests: TRUNCATE bypasses
-row deletion triggers. Future registration and billing adapters must explicitly
-replace this bridge before the legacy subscriber writer is retired.
-
-Password hashes remain unchanged in `cedar_press_subscribers`; public registration,
-unpaid sign-in, Google authorization and subscription-based access are subsequent
-changes. `accounts.create_user` is an internal persistence primitive only; creating
-an identity alone grants no subscriber access.
-
-`sessions_revoked_at` starts at the previous `updated_at`, preserving cookie
-revisions. Logout advances it explicitly. Password and account
-group changes advance the revocation field through the database bridge as well
-as invalidating their existing signed claims;
-ordinary `updated_at` and tier changes do not log readers out. Tier changes are
-read on every request. Deploy the new session writer on all workers together:
-an older worker's logout only changes `updated_at`.
-
-Explicit access grants cover only legacy and complimentary access. Stripe
-subscriptions and payment history are not implemented yet; paid access will be
-derived from subscription records rather than duplicated in this table. Grant
-changes close the old record and create a new record, preserving its dates and
-revocation. An unchanged legacy update does not create another grant. Legacy
-subscribers currently have no expiration or disabled-status column; their existing
-runtime checks remain authoritative until cutover.
-
-The subscriber identity is one-to-one, enforced by a unique constraint. Ordinary
-legacy inserts cannot supply an identity UUID or attach a preexisting user merely
-because an email matches. Existing subscriber upserts retain their current UUID.
-Raw legacy email changes are refused: verified email renames and seat reassignments
-need separate authenticated operations, which are not implemented yet. Google
-identities are never silently transferred to another person. Empty account IDs are
-refused in addition to the original non-null constraint.
-
-This unmerged PR contains one account-foundation migration, 003.
-Fresh databases and databases at 002 apply 003 directly. Bootstrap assigns identity
-IDs and the session revision before installing runtime triggers. Existing password
-hashes, grouping and timestamps are preserved. The original repository schema
-has no `updated_at` update trigger; tests assert exact timestamp and cookie
-preservation. Custom deployment triggers need their own migration rehearsal.
-
-Databases that ran an earlier branch draft need deliberate local reconciliation;
-changing the migration file alone does not change an already-applied schema.
-The local development database had no account-foundation rows. Its empty draft
-foundation was replaced transactionally with the individual-account schema,
-while retaining the original subscriber, code, research and points tables and
-verifying their records were unchanged. Shared deployments must not rewrite an
-already-applied migration this way.
+`accounts.create_user` creates an internal unpaid account with no password or
+access grant. New public registration and unpaid sign-in are subsequent changes.
+This unmerged PR uses one account-foundation migration. Databases that ran earlier
+branch drafts require local reconciliation; editing an applied migration file alone
+does not change their schema. The local empty draft tables were replaced
+transactionally, retaining the original application records and migration ledger.
 
 The migrations are transactional. Roll back the application only after
 ending outstanding sessions, since old and new logout writers differ. Do not drop

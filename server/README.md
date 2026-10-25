@@ -100,21 +100,15 @@ repository root and run the existing migration command in `DATABASE.md`.
 
 Sessions expire after 14 days. Every authenticated request re-reads the subscriber
 and current Press tier; removed subscribers and changed credentials or account
-bindings invalidate existing cookies. Logout advances the subscriber's persistent
-dedicated `sessions_revoked_at` revision, ending that email's sessions on all devices without ending
-other seats' sessions. A stable server-only signing secret is required in staging
+bindings invalidate existing cookies. Logout advances `sessions_revoked_at`,
+ending that user's sessions on all devices. A stable server-only signing secret is required in staging
 and production. Existing passwords, accounts and subscription tiers are preserved;
 old cookies without lifecycle claims require a fresh sign-in.
 
-The account foundation migration adds stable user UUIDs, Google identities,
-per-user Stripe customer references and individual access grants alongside the
-legacy subscriber store. Group billing and memberships are not part of this model. Legacy activation synchronizes them transactionally. Existing
-credentials and authorization continue through the subscriber adapter; new unpaid
-identities gain no access. Email verification, registration and Stripe billing
-arrive in subsequent changes. Cedar Press owns direct billing, renewals and
-upgrades (Brian Kim, 2026-10-25); older TBN-only payment descriptions refer to
-the legacy code flow. See [DATABASE.md](DATABASE.md) for the migration bridge,
-deployment considerations and Docker test commands.
+The account foundation extends the existing subscriber account with verification
+and Stripe customer fields. Google identities and access grants reference its UUID.
+Registration, Google sign-in and direct billing are not implemented yet. See
+[DATABASE.md](DATABASE.md) for schema and local Docker setup.
 
 The static browser preview gate is a separate login authority. Enabling
 `VITE_API_URL` does not migrate its accounts. Before switching an existing site,
