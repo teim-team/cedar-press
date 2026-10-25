@@ -10,10 +10,8 @@ twelve because Grove carries all the datasets, not because Press is a view of
 Grove. Where the two diverge is recorded in ``EXCLUDED_COLLECTIONS`` and
 compared against the Cedar data workspace by ``server/tests/test_access.py``.
 
-This module holds the collection's descriptors, the findings the collection
-currently supports (in the same claim shapes the organizational findings use,
-so a renderer built for one renders the other unchanged), the figure specs for
-the Overview's chart cards, and the rows behind each dataset's download button.
+This module holds the collection's descriptors, the figure specs for the
+Overview's chart cards, and the rows behind each dataset's download button.
 
 ONE SOURCE, TWO LANGUAGES
     Both implementations read ``data/cedar/collections.manifest.json``. They
@@ -63,7 +61,6 @@ from typing import Any
 # The storefront's own naming. `press_catalog` reads a committed snapshot and
 # imports nothing from this package, so it is a leaf and cannot close a cycle.
 from cedar_press import csv_safety, press_catalog
-from cedar_press.claims import CLAIM_CLASS
 
 __all__ = [
     "COLLECTION_FIGURES",
@@ -74,16 +71,11 @@ __all__ = [
     "UNMEASURED_FIELDS",
     "CollectionDataset",
     "CollectionFigure",
-    "CollectionFindings",
-    "CollectionLead",
-    "CollectionNeed",
-    "CollectionSupported",
     "FigurePoint",
     "collection_cedar_facts",
     "collection_citation",
     "collection_context_line",
     "collection_csv",
-    "collection_findings",
     "collection_sample",
     "collection_tables",
     "figures_in_shelf_order",
@@ -376,203 +368,6 @@ def collection_context_line() -> str:
 
 
 @dataclass(frozen=True)
-class CollectionSupported:
-    """A finding the collection supports, in the organizational claim shape."""
-
-    id: str
-    text: str
-    basis: str
-    claim_class: str
-    confidence: str
-    fidelity: str
-    #: Whether the series behind this finding is demonstration data. True on
-    #: every finding here: Cedar publishes no figure series, so none of these
-    #: rests on a measurement. Carried in the data rather than in a comment,
-    #: because a renderer cannot read a comment.
-    demonstration: bool = True
-    recipe_id: str | None = None
-
-
-@dataclass(frozen=True)
-class CollectionNeed:
-    """An honesty item: a row awaiting confirmation or a release still partial."""
-
-    id: str
-    text: str
-    demonstration: bool = False
-
-
-@dataclass(frozen=True)
-class CollectionLead:
-    """A story lead and the evidence it rests on, in the narrative shape."""
-
-    id: str
-    name: str
-    have: int
-    need: int
-    missing: tuple[str, ...]
-    requires: tuple[str, ...]
-    demonstration: bool = True
-
-
-@dataclass(frozen=True)
-class CollectionFindings:
-    """The three feeds the collection Overview renders, together."""
-
-    supported: tuple[CollectionSupported, ...]
-    needs: tuple[CollectionNeed, ...]
-    narratives: tuple[CollectionLead, ...]
-
-
-def collection_findings() -> CollectionFindings:
-    """What the collection supports today, in the findings shapes.
-
-    Class and confidence are held as separate dimensions, the basis names the
-    dataset, and fidelity is ``direct`` because the collection measures what it
-    names rather than standing a wider geography in.
-
-    Every supported finding here is ``demonstration=True``. These read on the
-    same series ``COLLECTION_FIGURES`` draws, and Cedar publishes no figure
-    series, so none of them is a measured claim. They kept version numbers in
-    their basis strings -- "Contractors v6", "Deals v9" -- that no release ever
-    carried; the basis is derived from the descriptor now, so it cannot name a
-    version that does not exist.
-    """
-
-    def basis(dataset_id: str, detail: str) -> str:
-        dataset = _dataset_for(dataset_id)
-        name = collection_short(dataset) if dataset else dataset_id
-        return f"{name}, {detail}"
-
-    supported = (
-        CollectionSupported(
-            id="col-contracting-up",
-            text="Federal contracting to Native entities rose for a fourth straight quarter.",
-            basis=basis("contractors", "FPDS and USAspending."),
-            claim_class=CLAIM_CLASS.descriptive,
-            confidence="high",
-            fidelity="direct",
-        ),
-        CollectionSupported(
-            id="col-deals-record",
-            text="Announced deal volume in 2025 runs ahead of every prior year in the series.",
-            basis=basis("deals", "announced and closed labeled separately."),
-            claim_class=CLAIM_CLASS.descriptive,
-            confidence="high",
-            fidelity="direct",
-        ),
-        CollectionSupported(
-            id="col-sector-lead",
-            text="Energy and project finance lead 2025 announced transactions, ahead of hospitality.",
-            basis=basis("deals", "sector taxonomy."),
-            claim_class=CLAIM_CLASS.comparative,
-            confidence="moderate",
-            fidelity="direct",
-        ),
-    )
-
-    availability_needs = []
-    for dataset in LAUNCH_COLLECTION:
-        facts = collection_cedar_facts(dataset.id) or {}
-        sample = collection_sample(dataset.id) or {}
-        missing = []
-        rows = facts.get("n_rows")
-        if type(rows) is not int or not 0 <= rows <= 2**53 - 1:
-            missing.append("The current release does not state a row count.")
-        if not sample.get("path"):
-            missing.append(
-                sample_unavailable_reason(dataset.id)
-                or "No preview file is published for the current release."
-            )
-        if missing:
-            availability_needs.append(
-                CollectionNeed(
-                    id=f"col-need-{dataset.id}-availability",
-                    text=f"{dataset.name}: {' '.join(missing)}",
-                )
-            )
-    without_vintage = [
-        dataset
-        for dataset in LAUNCH_COLLECTION
-        if not isinstance(dataset.vintage, str) or not dataset.vintage.strip()
-    ]
-    vintage_needs = []
-    if without_vintage:
-        vintage_text = (
-            "No collection states a vintage."
-            if len(without_vintage) == len(LAUNCH_COLLECTION)
-            else "A collection vintage is not stated for: "
-            + "; ".join(dataset.name for dataset in without_vintage)
-            + "."
-        )
-        vintage_needs.append(
-            CollectionNeed(
-                id="col-need-vintage",
-                text=vintage_text
-                + " An update date does not establish the periods covered by every source.",
-            )
-        )
-
-    needs = (
-        CollectionNeed(
-            id="col-need-closing",
-            text=(
-                "Demonstration: Three large announced deals await closing confirmation "
-                "before they enter totals (Deals, primary source pending)."
-            ),
-            demonstration=True,
-        ),
-        CollectionNeed(
-            id="col-need-fy26",
-            text=(
-                "Demonstration: FY2026 assistance figures are partial until the Q1 "
-                "release lands (Funding, USAspending publication lag)."
-            ),
-            demonstration=True,
-        ),
-        CollectionNeed(
-            id="col-need-matches",
-            text=(
-                "Demonstration: Two parent-entity matches are provisional pending SAM "
-                "re-registration (Contractors, entity resolution queue)."
-            ),
-            demonstration=True,
-        ),
-        *availability_needs,
-        *vintage_needs,
-    )
-
-    narratives = (
-        CollectionLead(
-            id="col-lead-energy",
-            name="Demonstration: Energy project financing expansion",
-            have=3,
-            need=3,
-            missing=(),
-            requires=("Deal series", "Sector taxonomy", "Primary confirmations"),
-        ),
-        CollectionLead(
-            id="col-lead-8a",
-            name="Demonstration: 8(a) participation and award growth",
-            have=3,
-            need=3,
-            missing=(),
-            requires=("Entity matches", "Award histories", "Certification lists"),
-        ),
-        CollectionLead(
-            id="col-lead-assist",
-            name="Demonstration: Assistance shifts under new appropriations",
-            have=2,
-            need=3,
-            missing=("Q1 release",),
-            requires=("Assistance records", "Entity matches", "Q1 release"),
-        ),
-    )
-
-    return CollectionFindings(supported=supported, needs=needs, narratives=narratives)
-
-
-@dataclass(frozen=True)
 class FigurePoint:
     """One mark on a figure; ``compare`` is the gray dashed comparison series."""
 
@@ -588,9 +383,9 @@ class CollectionFigure:
     ``kind`` picks the mark: quarterly bars, a leader-vs-others comparison, or
     a two-series trend (``compare`` is the gray dashed comparison line).
 
-    ``demonstration`` says whether the points are a measurement. Cedar
-    publishes no figure series, so three of the four are placeholders and say
-    so here rather than only in a docstring.
+    Only measured series belong here. Cedar publishes no figure series of its
+    own, so the one entry is a roster a partner supplied, and a placeholder
+    series is not added to fill a card.
     """
 
     id: str
@@ -601,44 +396,7 @@ class CollectionFigure:
     points: tuple[FigurePoint, ...] = field(default_factory=tuple)
 
 
-def _basis_for(dataset_id: str, fallback: str) -> str:
-    """A figure's basis line, derived so it cannot name a stale version."""
-    dataset = _dataset_for(dataset_id)
-    if dataset is None:
-        return fallback
-    if not dataset.updated:
-        return collection_short(dataset)
-    return f"{collection_short(dataset)}, updated {dataset.updated}"
-
-
 COLLECTION_FIGURES: tuple[CollectionFigure, ...] = (
-    CollectionFigure(
-        id="deals",
-        title="Announced deals by quarter",
-        basis=_basis_for("deals", "Deals"),
-        kind="bars",
-        demonstration=True,
-        points=(
-            FigurePoint(label="Q2'25", value=9),
-            FigurePoint(label="Q3'25", value=12),
-            FigurePoint(label="Q4'25", value=10),
-            FigurePoint(label="Q1'26", value=16),
-            FigurePoint(label="Q2'26", value=19),
-        ),
-    ),
-    CollectionFigure(
-        id="contractors",
-        title="Top parents by obligations",
-        basis=_basis_for("contractors", "Contractors"),
-        kind="leader",
-        demonstration=True,
-        points=(
-            FigurePoint(label="Parent entity A", value=100),
-            FigurePoint(label="Parent entity B", value=78),
-            FigurePoint(label="Parent entity C", value=65),
-            FigurePoint(label="Parent entity D", value=48),
-        ),
-    ),
     # The one measured figure on the page: White Earth Nation's TERO supplied
     # the roster on 2026-08-28 and these are its certification tiers. It is
     # not in the descriptor manifest because Cedar's descriptor emitter
@@ -653,20 +411,6 @@ COLLECTION_FIGURES: tuple[CollectionFigure, ...] = (
             FigurePoint(label="1st preference", value=17),
             FigurePoint(label="2nd preference", value=4),
             FigurePoint(label="4th preference", value=1),
-        ),
-    ),
-    CollectionFigure(
-        id="funding",
-        title="Federal assistance, trend",
-        basis=_basis_for("funding", "Funding"),
-        kind="trend",
-        demonstration=True,
-        points=(
-            FigurePoint(label="FY21", value=52, compare=44),
-            FigurePoint(label="FY22", value=58, compare=46),
-            FigurePoint(label="FY23", value=55, compare=45),
-            FigurePoint(label="FY24", value=71, compare=49),
-            FigurePoint(label="FY25", value=84, compare=52),
         ),
     ),
 )

@@ -105,7 +105,7 @@ test("the caller's own abort is not a timeout, and reaches the fetch", async (t)
   const calls = [];
   await withFetch(hangingFetch(calls), async () => {
     const controller = new AbortController();
-    const state = track(api.fetchReleaseCollections({ signal: controller.signal }));
+    const state = track(api.fetchReleases({ signal: controller.signal }));
     await flush();
     controller.abort();
     await flush();
@@ -114,26 +114,19 @@ test("the caller's own abort is not a timeout, and reaches the fetch", async (t)
   });
 });
 
-test("Cedar and the research preview wait as long as the services behind them", async (t) => {
+test("Cedar waits as long as the service behind it", async (t) => {
   t.mock.timers.enable({ apis: ["setTimeout"] });
   await withFetch(hangingFetch(), async () => {
     const cedar = track(api.askCedar({ question: "What changed?" }));
-    const research = track(api.fetchReleaseResearch("funding", "a".repeat(64)));
     await flush();
     t.mock.timers.tick(api.REQUEST_TIMEOUT_MS);
     await flush();
     assert.equal(cedar.settled, false, "Cedar's own deadline is 45 s; 15 s would abandon live answers");
-    assert.equal(research.settled, false);
-    t.mock.timers.tick(api.RESEARCH_TIMEOUT_MS - api.REQUEST_TIMEOUT_MS);
-    await flush();
-    assert.equal(research.error?.code, "TIMEOUT");
-    assert.equal(cedar.settled, false);
-    t.mock.timers.tick(api.CEDAR_TIMEOUT_MS - api.RESEARCH_TIMEOUT_MS);
+    t.mock.timers.tick(api.CEDAR_TIMEOUT_MS - api.REQUEST_TIMEOUT_MS);
     await flush();
     assert.equal(cedar.error?.code, "TIMEOUT");
   });
   assert.ok(api.CEDAR_TIMEOUT_MS > 45_000);
-  assert.ok(api.RESEARCH_TIMEOUT_MS > 30_000);
 });
 
 test("an answer in time is returned, and its deadline is cleared", async (t) => {
@@ -149,14 +142,14 @@ test("an answer in time is returned, and its deadline is cleared", async (t) => 
 
 test("refusals keep their own code, and only no-answer reads as unreachable", async () => {
   await withFetch(async () => Response.json({ code: "NOT_INCLUDED", message: "Not on this plan." }, { status: 403 }), async () => {
-    await assert.rejects(api.fetchReleaseCollections(), (error) => {
+    await assert.rejects(api.fetchReleases(), (error) => {
       assert.equal(error.code, "NOT_INCLUDED");
       assert.equal(api.isUnreachable(error), false);
       return true;
     });
   });
   await withFetch(async () => { throw new TypeError("Failed to fetch"); }, async () => {
-    await assert.rejects(api.fetchReleaseCollections(), (error) => api.isUnreachable(error) && error.code === "NETWORK");
+    await assert.rejects(api.fetchReleases(), (error) => api.isUnreachable(error) && error.code === "NETWORK");
   });
   assert.equal(api.isUnreachable(null), false);
 });

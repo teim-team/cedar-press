@@ -13,14 +13,9 @@
  * Activation is two steps on purpose. Step one asks for the code and an email
  * address and nothing else, so the first screen is two fields rather than
  * four. A password is only worth choosing once the code has been accepted.
- *
- * Which screen opens is what this browser did last time. Someone who has
- * already activated should not be asked for a code they have spent.
  */
 
 import { isConnected } from "../../config.js";
-
-const SEEN_KEY = "lumecon.press.hasAccount";
 
 /**
  * Whether the activation flow may be offered at all.
@@ -48,6 +43,10 @@ export const PRESS_STEP = Object.freeze({
   SET_PASSWORD: "set-password",
   /** A reader who has already activated. */
   SIGN_IN: "sign-in",
+  /** Asking for a password reset link by email. */
+  FORGOT: "forgot",
+  /** Choosing a new password from an emailed reset link. */
+  RESET: "reset",
 });
 
 /**
@@ -74,35 +73,6 @@ export function isPlausiblePressCode(raw) {
 export function formatPressCode(raw) {
   const code = normalizePressCode(raw);
   return code.replace(/(.{4})(?=.)/g, "$1-");
-}
-
-/**
- * Which screen to open with. A browser that has activated opens on sign-in;
- * everything else opens on activation, because someone arriving from a Tribal
- * Business News confirmation has a code in hand and no account yet.
- */
-export function initialPressStep(storage, { signInRequested = false } = {}) {
-  // An explicit login link also works on a new host/browser with no local hint.
-  if (signInRequested) return PRESS_STEP.SIGN_IN;
-  // With no server routes behind activation, sign-in is the only screen the
-  // gate may open on; the storage hint matters again when activation ships.
-  if (!PRESS_ACTIVATION_AVAILABLE) return PRESS_STEP.SIGN_IN;
-  try {
-    return storage?.getItem(SEEN_KEY) === "1" ? PRESS_STEP.SIGN_IN : PRESS_STEP.ACTIVATE;
-  } catch {
-    // Private browsing and blocked storage both throw here. Activation is the
-    // safe default: it is the screen that can still reach the other in a click.
-    return PRESS_STEP.ACTIVATE;
-  }
-}
-
-/** Remember that this browser has activated, so the next visit opens on sign-in. */
-export function rememberPressAccount(storage) {
-  try {
-    storage?.setItem(SEEN_KEY, "1");
-  } catch {
-    // Nothing to do: the gate still works, it just opens on activation again.
-  }
 }
 
 /**

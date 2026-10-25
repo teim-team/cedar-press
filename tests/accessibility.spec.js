@@ -2,16 +2,22 @@
 // accessibility pass (axe-core 4.13 plus keyboard walks, at 375 and 1280 px).
 // Each test names the defect it holds closed; each was checked by breaking
 // the fix and watching the test fail.
-import { expect, test } from "@playwright/test";
+import { articlesDown, expect, test } from "./fixtures.js";
+
+import { EMAIL, PASSWORD } from "./demoAccount.js";
 
 // The sample tables every reader fetches: one customer table per collection.
 const SAMPLES = "**/data/cedar/downloads/**";
+// What a signed-in viewer reads: the subscriber's own table from the API.
+const VIEWER_ROWS = "**/api/press/collections/*/download**";
 
 /** A signed-in Cedar Press+ reader, as the standalone gate stores one. */
 async function signedIn(page) {
-  await page.addInitScript(() => {
-    localStorage.setItem("cedar-press-session", JSON.stringify({ email: "smoke@cedar-press.invalid", workspace_tier: "press_pro" }));
-  });
+  await page.goto("/login");
+  await page.getByLabel("Work email").fill(EMAIL);
+  await page.getByLabel("Password", { exact: true }).fill(PASSWORD);
+  await page.locator(".cp-gate__form").getByRole("button", { name: "Log in" }).click();
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("Know what’s shaping Indian Country");
 }
 
 /** Wait for a focus move scheduled on the next animation frame. */
@@ -143,6 +149,7 @@ test.describe("headings and announcements", () => {
   });
 
   test("an article that is not available still has a page heading", async ({ page }) => {
+    await articlesDown(page);
     await signedIn(page);
     await page.goto("/articles/brief-owned");
     await expect(page.getByRole("status")).toContainText("Articles are unavailable");
@@ -165,7 +172,7 @@ test.describe("headings and announcements", () => {
 
   test("the viewer's failed read is announced", async ({ page }) => {
     await signedIn(page);
-    await page.route(SAMPLES, (route) => route.abort("internetdisconnected"));
+    await page.route(VIEWER_ROWS, (route) => route.abort("internetdisconnected"));
     await page.goto("/data?c=funding");
     await expect(page.locator('.cp-ex__empty[role="status"]')).toContainText("could not be loaded");
   });

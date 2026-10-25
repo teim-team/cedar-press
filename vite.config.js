@@ -40,10 +40,21 @@ function gitSha() {
 // Whatever else moves, these two must move together: `outDir` here and
 // `upload-pages-artifact`'s `path:` in .github/workflows/deploy.yml. Change
 // one alone and the deployment publishes nothing.
+const proxy = {
+  "/api": {
+    target: process.env.CEDAR_PRESS_API_TARGET || "http://localhost:8000",
+    rewrite: (path) => path.replace(/^\/api/, ""),
+  },
+};
+
 export default defineConfig({
   plugins: [react()],
   base: "/",
   build: { outDir: "dist-site" },
+  // The CSP allows only same-origin API calls, so /api/* is proxied with the
+  // prefix removed, as CloudFront serves it.
+  server: { proxy },
+  preview: { proxy },
   define: {
     __PRESS_BUILD_SHA__: JSON.stringify(process.env.PRESS_BUILD_SHA || gitSha()),
     __PRESS_BUILD_TIME__: JSON.stringify(new Date().toISOString()),

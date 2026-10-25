@@ -22,6 +22,8 @@
  */
 
 export const PRESS_PATH = "/";
+/** The workspace host's sign-in and activation page. */
+export const PRESS_LOGIN_PATH = "/login";
 /** The briefs' own front page: the newest leads, the rest stack beside it. */
 export const PRESS_ARTICLES_PATH = "/articles";
 /** The shelves: what each collection holds, and the release downloads. */

@@ -212,7 +212,7 @@ function Picker({ label, value, children, testId }) {
   );
 }
 
-function EntityPicker({ cut, facets, register, onChange }) {
+function EntityPicker({ cut, facets, register, settling, onChange }) {
   const [q, setQ] = useState("");
   const chosen = new Set(cut.entities);
   const needle = q.trim().toLowerCase();
@@ -249,7 +249,8 @@ function EntityPicker({ cut, facets, register, onChange }) {
         <span className="cp-ex__fine">{facets.keyed} of {facets.total} preview records are linked to an entity</span>
         {chosen.size ? <button type="button" className="cp-ex__clear" onClick={() => onChange([])}>All entities</button> : null}
       </div>
-      <ul className="cp-ex__list">
+      {/* Rows arrive collection by collection, and each one reorders this list; a click landing mid-load picked a neighbour. */}
+      {settling ? <p className="cp-ex__fine">Loading entities…</p> : <ul className="cp-ex__list">
         {inRows.map((e) => (
           <li key={e.uid}>
             <label>
@@ -271,7 +272,7 @@ function EntityPicker({ cut, facets, register, onChange }) {
           </li>
         ))}
         {!inRows.length && !elsewhere.length ? <li className="cp-ex__fine">No entity matches.</li> : null}
-      </ul>
+      </ul>}
     </Picker>
   );
 }
@@ -1062,7 +1063,7 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
 
   const filters = (
     <>
-      <EntityPicker cut={cut} facets={facets} register={register} onChange={(entities) => narrowTo({ entities })} />
+      <EntityPicker cut={cut} facets={facets} register={register} settling={settling} onChange={(entities) => narrowTo({ entities })} />
       {facets.scopes.length || cut.scopes?.length ? <ScopePicker cut={cut} facets={facets} onChange={(next) => narrowTo(next)} /> : null}
       <TypePicker cut={cut} facets={facets} register={register} onChange={(types) => narrowTo({ types })} />
       <YearRange cut={cut} bounds={facets.years} basis={yearBasis} onChange={(years) => narrowTo({ years })} />

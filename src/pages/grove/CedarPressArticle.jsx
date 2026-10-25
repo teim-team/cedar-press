@@ -601,11 +601,7 @@ export default function CedarPressArticle() {
             </ul>
           </div>
 
-          {article.demonstration ? (
-            <p className="cp-ar__herocap" role="note">
-              Demonstration article. Its findings and chart values are invented layout examples.
-            </p>
-          ) : article.earlyAccess ? (
+          {article.earlyAccess ? (
             <p className="cp-ar__herocap" role="note">
               Early access draft. Findings are preliminary and subject to change.
             </p>

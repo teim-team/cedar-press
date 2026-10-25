@@ -1,39 +1,17 @@
 // The Cedar Press way in. A code is the only thing standing between a Tribal
-// Business News subscriber and an account, so the shape check and the mode
-// memory are pinned rather than eyeballed.
+// Business News subscriber and an account, so the shape check is pinned
+// rather than eyeballed.
 
 import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
   PRESS_ACTIVATION_AVAILABLE,
-  PRESS_STEP,
   formatPressCode,
-  initialPressStep,
   isPlausiblePressCode,
   normalizePressCode,
   pressSignupError,
-  rememberPressAccount,
 } from "./pressSignup.js";
-
-function fakeStorage(initial = {}) {
-  const store = { ...initial };
-  return {
-    getItem: (k) => (k in store ? store[k] : null),
-    setItem: (k, v) => {
-      store[k] = String(v);
-    },
-  };
-}
-
-const throwingStorage = {
-  getItem() {
-    throw new Error("blocked");
-  },
-  setItem() {
-    throw new Error("blocked");
-  },
-};
 
 test("a code normalizes past case, spaces and hyphens", () => {
   assert.equal(normalizePressCode("tbn4-9k2m-x7qd"), "TBN49K2MX7QD");
@@ -57,28 +35,12 @@ test("display grouping never changes what the code is", () => {
 });
 
 // Activation follows connectivity, because only a connected build can reach
-// the routes that validate a code. A standalone build — which is what
-// cedarpress.ai serves, a static site with no backend — must open on
-// sign-in for every browser: a code screen with nothing behind it takes a
-// subscriber's code and tells them their membership does not work.
+// the routes that validate a code. A code screen with nothing behind it takes
+// a subscriber's code and tells them their membership does not work.
 //
 // This suite runs with no VITE_API_URL, so it is the standalone case.
-test("standalone, every browser opens on sign-in", () => {
-  assert.equal(PRESS_ACTIVATION_AVAILABLE, false, "standalone must not offer activation");
-  assert.equal(initialPressStep(fakeStorage()), PRESS_STEP.SIGN_IN);
-});
-
-test("a browser that has activated opens on sign-in", () => {
-  const storage = fakeStorage();
-  rememberPressAccount(storage);
-  assert.equal(initialPressStep(storage), PRESS_STEP.SIGN_IN);
-});
-
-// Private browsing throws on both calls; the gate still has to render.
-test("blocked storage still renders a screen rather than throwing", () => {
-  assert.equal(initialPressStep(throwingStorage), PRESS_STEP.SIGN_IN);
-  assert.doesNotThrow(() => rememberPressAccount(throwingStorage));
-  assert.equal(initialPressStep(undefined), PRESS_STEP.SIGN_IN);
+test("standalone, activation is not offered", () => {
+  assert.equal(PRESS_ACTIVATION_AVAILABLE, false);
 });
 
 // Each failure needs a different next step, so they must not collapse.
