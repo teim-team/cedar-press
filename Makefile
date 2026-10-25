@@ -11,7 +11,7 @@ db-migrate:
 	docker compose run --rm tools
 
 db-test:
-	docker compose run --rm tools python -m unittest tests.test_subscribers tests.test_priorities tests.test_account_foundation tests.test_auth_session_lifecycle
+	docker compose run --rm -e DATABASE_URL= tools python scripts/test_database.py
 
 db-shell:
 	docker compose exec db psql -U cedar_local -d cedar_press

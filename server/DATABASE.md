@@ -12,7 +12,10 @@ make db-shell
 ```
 
 Docker Desktop must be running. PostgreSQL 16 listens on `127.0.0.1:55432`.
-The tools container uses Python 3.12 and installs the server's development and
+Local setup files `docker-compose.yml` and `init.local.sql` live at the repository root.
+The test image uses `server/Dockerfile.test`, beside the production Dockerfile,
+with the repository root as its build context.
+The test tools container uses Python 3.12, Node 22 and Git, and installs the server's development and
 PostgreSQL dependencies. Rebuild it after dependency changes with
 `docker compose build tools`.
 
@@ -32,7 +35,11 @@ The named Docker volume preserves records across container restarts and
 tests truncate their tables and must never target the development database.
 Initialization creates the test database and its optional platform-user fixture
 only when the volume is first created. `make db-test` exercises the existing
-subscriber and points contracts, including standalone database migration.
+subscriber, account, session, points and release-download contracts, including
+standalone database migration. Any skipped test fails this command. The subscriber
+storage CI workflow builds the same `server/Dockerfile.test` and runs `make db-test`
+against a fresh disposable Docker volume. `server/Dockerfile` remains the
+production API image; the test image is not deployed.
 
 `make db-migrate` applies migrations to the development database; repeat it to
 check that no migration is applied twice. `make db-shell` opens SQL access to

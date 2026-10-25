@@ -109,7 +109,9 @@ The account foundation is additive: legacy subscribers remain the runtime
 credential and access authority while migration 003 synchronizes identity,
 billing membership and legacy grants. `sessions_revoked_at` owns explicit
 session revocation; ordinary `updated_at` changes do not revoke cookies.
-`make db-test` also rehearses this migration and its failure rollback.
+`make db-test` also rehearses this migration and its failure rollback. The
+subscriber-storage CI job builds `server/Dockerfile.test` and runs that same
+command, refusing skipped contracts. Production uses `server/Dockerfile`.
 
 Node 22 and Python 3.12, the versions CI uses. Two tools have to be installed
 by hand: `uv`, which `make audit-python` uses to resolve the server's
