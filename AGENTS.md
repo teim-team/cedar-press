@@ -107,7 +107,7 @@ The test runner creates a fresh database, applies application migrations, and
 removes its database afterward; it does not depend on volume initialization SQL.
 `make db-shell` inspects persistent development records. See
 [`server/DATABASE.md`](server/DATABASE.md) for connection details.
-Migration 003 extends `cedar_press_subscribers` as the sole account store,
+Migration 004 extends `cedar_press_subscribers` as the sole account store,
 adding verification and Stripe customer fields. Google identities and individual
 access grants reference its existing UUID; there is no parallel users table or
 group billing model. A null tier disables legacy access while retaining the
@@ -116,6 +116,14 @@ Sign-in and activation retain the existing optional teim-app account linking.
 `make db-test` also rehearses this migration and its failure rollback. The
 subscriber-storage CI job builds `server/Dockerfile.test` and runs that same
 command, refusing skipped contracts. Production uses `server/Dockerfile`.
+
+Docker Engine or Docker Desktop with Compose v2 is required for the database
+targets. Verify the Docker prerequisite before running them:
+
+<!-- gate:prerequisites -->
+```bash
+docker --version
+```
 
 Node 22 and Python 3.12, the versions CI uses. Two tools have to be installed
 by hand: `uv`, which `make audit-python` uses to resolve the server's

@@ -1,6 +1,6 @@
 # The database
 
-See the [schema ERD](#schema-erd) for the tables defined by migrations 001–003.
+See the [schema ERD](#schema-erd) for the tables defined by migrations 001–004.
 
 ## Local Docker database
 
@@ -58,7 +58,7 @@ the legacy access-code integration and do not define the billing roadmap.
 The Terraform deployment uses a dedicated PostgreSQL database; sharing a
 database with teim-app remains an optional compatibility arrangement.
 
-Cedar Press supports individual accounts. Migration `003_account_foundation.sql`
+Cedar Press supports individual accounts. Migration `004_account_foundation.sql`
 extends the existing `cedar_press_subscribers` account table instead of creating
 a parallel users table:
 
@@ -213,7 +213,7 @@ the month is already earned — and still reports 2.
 
 ## Schema ERD
 
-Current PostgreSQL schema after migrations 001–003. `cedar_press_subscribers`
+Current PostgreSQL schema after migrations 001–004. `cedar_press_subscribers`
 is the sole account table. Connections show database foreign keys only; dotted
 lines are non-identifying relationships. `users` is an optional external teim-app
 table, not a second Cedar Press user table. Its foreign key is installed only
@@ -328,4 +328,4 @@ Google identities are unique by `(provider, subject)` and `(user_id, provider)`.
 At most one unrevoked legacy access grant exists per account. Subscriber emails
 also have a normalized unique index. The Cedar Points ledger records points,
 not money; Stripe subscription, invoice, payment and refund tables are not yet
-implemented. See migration 003 for account-security and legacy-grant triggers.
+implemented. See migration 004 for account-security and legacy-grant triggers.

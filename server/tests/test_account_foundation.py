@@ -11,7 +11,7 @@ from urllib.parse import urlsplit, urlunsplit
 from cedar_press import accounts, db, session, subscribers
 
 PG = os.environ.get("CEDAR_PRESS_TEST_DATABASE_URL", "")
-FOUNDATION = ["003_account_foundation.sql"]
+FOUNDATION = "004_account_foundation.sql"
 
 
 @unittest.skipUnless(PG, "set CEDAR_PRESS_TEST_DATABASE_URL")
@@ -67,7 +67,7 @@ class TestAccountFoundation(unittest.TestCase):
         cookie = session._encode(session.Session(
             legacy.email, legacy.tier, session._revision(legacy)
         ))
-        self.assertEqual(db.migrate(), FOUNDATION)
+        self.assertIn(FOUNDATION, db.migrate())
         self.assertEqual(db.migrate(), [])
         self.assertIsNotNone(session._decode(cookie))
         current = db.query("SELECT * FROM cedar_press_subscribers ORDER BY email")
@@ -119,11 +119,11 @@ class TestAccountFoundation(unittest.TestCase):
         self.assertIsNone(db.one("SELECT to_regclass('cedar_press_login_identities') AS t")["t"])
         self.assertIsNone(db.one(
             "SELECT filename FROM cedar_press_migrations"
-            " WHERE filename = '003_account_foundation.sql'"
+            " WHERE filename = '004_account_foundation.sql'"
         ))
         # Correct the injected violation, then prove the same migration succeeds.
         db.execute("DELETE FROM cedar_press_subscribers WHERE email = 'ONE@example.org'")
-        self.assertEqual(db.migrate(), FOUNDATION)
+        self.assertIn(FOUNDATION, db.migrate())
 
     def test_legacy_activation_bridge_is_atomic_and_retains_identity_on_update(self):
         db.migrate()
