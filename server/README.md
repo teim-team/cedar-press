@@ -108,7 +108,7 @@ old cookies without lifecycle claims require a fresh sign-in.
 The account foundation extends the existing subscriber account with verification
 and Stripe customer fields. Google identities and access grants reference its UUID.
 Registration, Google sign-in and direct billing are not implemented yet. See
-[DATABASE.md](DATABASE.md) for schema and local Docker setup.
+[DATABASE.md](DATABASE.md) for the [schema ERD](DATABASE.md#schema-erd) and local Docker setup.
 
 The static browser preview gate is a separate login authority. Enabling
 `VITE_API_URL` does not migrate its accounts. Before switching an existing site,

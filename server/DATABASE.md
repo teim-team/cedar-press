@@ -1,5 +1,7 @@
 # The database
 
+See the [schema ERD](#schema-erd) for the tables defined by migrations 001–003.
+
 ## Local Docker database
 
 Run from the repository root:
@@ -207,3 +209,121 @@ database by earning in one process and reading in another:
 
 Run it twice. The first run credits 2 and reports 2; the second credits 0 —
 the month is already earned — and still reports 2.
+
+## Schema ERD
+
+Current PostgreSQL schema after migrations 001–003. `cedar_press_subscribers`
+is the sole account table. Connections show database foreign keys only; dotted
+lines are non-identifying relationships. `users` is an optional external teim-app
+table, not a second Cedar Press user table. Its foreign key is installed only
+when that table exists during migration 001. Automatic linking is disabled.
+
+```mermaid
+erDiagram
+    cedar_press_subscribers ||..o{ cedar_press_login_identities : "id to user_id; cascade delete"
+    cedar_press_subscribers ||..o{ cedar_press_access_grants : "id to user_id; NO ACTION delete"
+    users |o..o| cedar_press_subscribers : "optional platform user_id"
+
+    cedar_press_subscribers {
+        uuid id PK
+        text email UK
+        text account_id "Legacy Cedar Points key"
+        text tier "Nullable; press or press_pro"
+        text password_hash "Nullable; never plaintext"
+        uuid user_id FK,UK "Nullable external teim-app ID"
+        timestamptz created_at
+        timestamptz updated_at
+        timestamptz email_verified_at "Nullable"
+        text stripe_customer_id UK "Nullable"
+        timestamptz sessions_revoked_at
+    }
+    cedar_press_login_identities {
+        uuid id PK
+        uuid user_id FK
+        text provider "google"
+        text subject "Unique with provider"
+        timestamptz created_at
+    }
+    cedar_press_access_grants {
+        uuid id PK
+        uuid user_id FK
+        text tier "press or press_pro"
+        text source "legacy or complimentary"
+        timestamptz starts_at
+        timestamptz ends_at "Nullable"
+        timestamptz revoked_at "Nullable"
+    }
+    cedar_press_codes {
+        text code PK
+        text email
+        text tier
+        date expires_on "Nullable"
+        timestamptz spent_at "Nullable"
+        text spent_by "Nullable"
+        timestamptz created_at
+    }
+    cedar_press_reader_profiles {
+        text email PK
+        text work "Nullable"
+        timestamptz updated_at
+    }
+    cedar_press_priorities {
+        text id PK
+        text type
+        text title
+        text description
+        text status
+        text created_by "Nullable"
+        text published_output "Nullable"
+        text evolved_from "Nullable"
+        timestamptz created_at
+    }
+    cedar_press_ledger {
+        bigint id PK
+        text account_id
+        text user_id "Nullable; text, not account UUID"
+        int amount
+        text reason
+        text priority_id "Nullable"
+        text month "Nullable"
+        timestamptz created_at
+    }
+    cedar_press_allocations {
+        text account_id PK "Composite primary key"
+        text priority_id PK "Composite primary key"
+        int points
+        timestamptz created_at
+        timestamptz updated_at
+    }
+    cedar_press_requests {
+        bigint id PK
+        text account_id
+        text user_id "Nullable; text, not account UUID"
+        text text
+        text priority_id "Nullable"
+        text use_case "Nullable"
+        text status
+        timestamptz created_at
+    }
+    cedar_press_migrations {
+        text filename PK
+        timestamptz applied_at
+    }
+    users {
+        uuid id PK "External table; other columns omitted"
+    }
+```
+
+Application-level references without database foreign keys:
+
+| Fields | Reference |
+| --- | --- |
+| Codes `email` and `spent_by`; reader profiles `email` | Subscriber email |
+| Ledger, allocations and requests `account_id` | Legacy subscriber `account_id`; not unique per subscriber |
+| Ledger, allocations and requests `priority_id`; priorities `evolved_from` | Priority ID |
+
+Google identities are unique by `(provider, subject)` and `(user_id, provider)`.
+At most one unrevoked legacy access grant exists per account. Subscriber emails
+also have a normalized unique index. The Cedar Points ledger records points,
+not money; Stripe subscription, invoice, payment and refund tables are not yet
+implemented. See migration 003 for account-security and legacy-grant triggers.
