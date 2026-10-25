@@ -106,16 +106,6 @@ class ProtectedArticleTests(unittest.TestCase):
                 {"id": "a", "body": [{"kind": "html", "text": "<script>"}]}, detail=True
             )
 
-    def test_demonstrations_stay_out_of_the_subscriber_library(self):
-        self.assertTrue(
-            all(not row.get("demonstration") for row in protected_articles.article_cards())
-        )
-        self.as_tier("press_pro")
-        for slug in ("brief-deals", "brief-contractors", "brief-funding"):
-            with self.subTest(slug=slug):
-                self.assertIsNone(protected_articles.article_detail(slug))
-                self.assertEqual(self.client.get("/press/articles/" + slug).status_code, 404)
-
     def test_image_sources_and_block_variants_are_projected(self):
         record = {
             "id": "all-blocks",

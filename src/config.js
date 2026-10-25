@@ -37,9 +37,16 @@ const raw = import.meta.env?.VITE_API_URL ?? "";
 /** The platform API's origin, without a trailing slash. Empty when standalone. */
 export const API_URL = String(raw).trim().replace(/\/+$/, "");
 
-/** Whether this deployment talks to the platform API. */
+// The public site has no API of its own: its visitors are never signed in, and
+// the one bundle that serves it also serves the workspace.
+export const PUBLIC_HOSTS = new Set(["cedarpress.ai", "www.cedarpress.ai"]);
+
+/** Whether this page talks to the platform API. */
 export function isConnected() {
-  return API_URL !== "";
+  return API_URL !== ""
+    && !PUBLIC_HOSTS.has(globalThis.location?.hostname)
+    // scripts/prerender.mjs renders the public pages with this set.
+    && !globalThis.__CEDAR_PRERENDER__;
 }
 
 /**

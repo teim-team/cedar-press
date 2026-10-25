@@ -145,6 +145,7 @@ applied.
 | ----------------------------- | ------------------------------------------------------- |
 | `cedar_press_subscribers`     | who holds a subscription, on which tier, and their hash  |
 | `cedar_press_codes`           | codes Tribal Business News issued, and when each was spent |
+| `cedar_press_password_resets` | hashed, single-use password reset tokens and their expiry |
 | `cedar_press_priorities`      | the editorial catalogue, re-seeded from the owner's file |
 | `cedar_press_ledger`          | append-only Cedar Points: why each point came or went    |
 | `cedar_press_allocations`     | the derived totals per priority                          |

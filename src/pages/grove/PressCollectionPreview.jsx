@@ -7,9 +7,9 @@
 // A marketing page stages a screenshot of the product beside its promise.
 // Cedar Press has something better than a screenshot: the product is rows,
 // and the real sample rows of every collection's table already ship with the site
-// (public/data/cedar/downloads/<id>.csv, the customer tables), public by design — see
-// pressDemoGate.js: nothing in the bundle is confidential, and the samples
-// are the whole of what a visitor can reach. So the pane shows six of them,
+// (public/data/cedar/downloads/<id>.csv, the customer tables), public by design:
+// nothing in the bundle is confidential, and the samples are the whole of what
+// a visitor can reach. So the pane shows six of them,
 // through the same contracts and the same row shape the viewer on /data
 // uses (`universalRows`), with the caption saying exactly what they are:
 // six of ten sample records, of however many the release holds. Nothing

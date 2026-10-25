@@ -2,8 +2,8 @@
 
 | Host | Serves |
 | --- | --- |
-| `cedarpress.ai` | The static client: the door, the tribal data request policy and research access, plus the gated app. |
-| `app.cedarpress.ai` | 301 to the same path on `cedarpress.ai` until the subscriber API has a host. |
+| `cedarpress.ai` | The marketing door, the tribal data request policy and research access. Log in goes to `app.cedarpress.ai/login`. |
+| `app.cedarpress.ai` | The workspace, the same static bundle. A signed-out visitor is sent to `/login?next=<path>` and returns there after signing in. The API is reached same-origin at `/api/*` (the content policy allows no other origin). |
 | `www.cedarpress.ai` | 301 to the same path on `cedarpress.ai`. |
 
 ## AWS (account `teim-prod`, us-east-1)
@@ -59,10 +59,7 @@ aws s3 sync dist-site/assets s3://cedarpress-ai-site-502309351676/assets --delet
 aws cloudfront create-invalidation --distribution-id E3AEMUAUDGWNTQ --paths '/*'
 ```
 
-**`VITE_PRESS_DEMO_ACCOUNTS` has to be in the environment for that build.** It
-is a repository secret, so a local build without it is a site that signs nobody
-in — the standalone preview account is how the only people outside the team who
-have seen Cedar Press get through the door. Confirm afterwards against the build
+Confirm afterwards against the build
 stamp in Settings, which carries the commit the running bundle was built from.
 
 ### Historical OIDC failure, measured September 21

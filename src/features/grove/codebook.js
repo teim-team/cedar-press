@@ -27,7 +27,11 @@
 let tables = null;
 let pending = null;
 
-const importCodebook = () => import("../../../data/cedar/codebook.json", { with: { type: "json" } });
+// Node needs the json attribute; vite's dev server serves the file as a script,
+// which a browser refuses when the attribute asks for json.
+const importCodebook = () => (import.meta.env?.DEV
+  ? import("../../../data/cedar/codebook.json")
+  : import("../../../data/cedar/codebook.json", { with: { type: "json" } }));
 
 /**
  * The codebook's tables, loading them on the first call. `load` is the

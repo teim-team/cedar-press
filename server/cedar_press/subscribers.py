@@ -35,6 +35,7 @@ import hmac
 import json
 import os
 import re
+import secrets
 import threading
 from dataclasses import dataclass
 
@@ -173,6 +174,8 @@ _activated: dict[str, tuple[str, str]] = {}
 _spent: set[str] = set()
 _session_revisions: dict[str, int] = {}
 _session_lock = threading.Lock()
+#: Email -> (reset token hash, expires at): one live link per address.
+_resets: dict[str, tuple[str, dt.datetime]] = {}
 
 
 def _env_accounts() -> dict[str, tuple[str, str]]:
@@ -221,6 +224,7 @@ def _env_codes() -> dict[str, dict[str, object]]:
 def forget_activated_for_tests() -> None:
     _activated.clear()
     _spent.clear()
+    _resets.clear()
     with _session_lock:
         _session_revisions.clear()
 
@@ -315,7 +319,7 @@ def authenticate(email: str, password: str) -> Subscriber | None:
 
 
 def create(email: str, password: str, tier: str) -> Subscriber:
-    """Add a subscriber. Used by activation, which has already spent a code."""
+    """Add a subscriber, or replace an existing one's password and tier."""
     address = (email or "").strip().lower()
     if tier not in TIERS:
         raise ValueError(f"tier must be one of {TIERS}")
@@ -389,6 +393,65 @@ def link_platform_account(email: str) -> bool:
         )
         > 0
     )
+
+
+# ── password resets ─────────────────────────────────────────────────────────
+
+RESET_LIFETIME = dt.timedelta(hours=1)
+
+
+def _reset_hash(token: str) -> str:
+    return hashlib.sha256(token.encode("utf-8")).hexdigest()
+
+
+def issue_reset(email: str) -> str | None:
+    """A single-use reset token for this subscriber, or None if there is none.
+
+    Only the token's hash is stored, so reading the table resets nobody. A new
+    token replaces any outstanding one, so an older email in the inbox stops
+    working.
+    """
+    found = find(email)
+    if found is None:
+        return None
+    address = found.email.lower()
+    token = secrets.token_urlsafe(32)
+    expires = dt.datetime.now(dt.timezone.utc) + RESET_LIFETIME
+    if db.configured():
+        db.execute(
+            "INSERT INTO cedar_press_password_resets (token_hash, email, expires_at)"
+            " VALUES (%s, %s, %s)"
+            " ON CONFLICT (email) WHERE used_at IS NULL DO UPDATE SET"
+            " token_hash = EXCLUDED.token_hash, expires_at = EXCLUDED.expires_at,"
+            " created_at = now()",
+            (_reset_hash(token), address, expires),
+        )
+    else:
+        _resets[address] = (_reset_hash(token), expires)
+    return token
+
+
+def redeem_reset(token: str, password: str) -> Subscriber | None:
+    """Set a new password from a reset token.
+
+    None when the token is unknown, expired or already used.
+    """
+    key = _reset_hash(token or "")
+    if db.configured():
+        row = db.one(
+            "UPDATE cedar_press_password_resets SET used_at = now()"
+            " WHERE token_hash = %s AND used_at IS NULL AND expires_at > now()"
+            " RETURNING email",
+            (key,),
+        )
+        email = row and row["email"]
+    else:
+        now = dt.datetime.now(dt.timezone.utc)
+        email = next((e for e, (h, x) in _resets.items() if h == key and x > now), None)
+        if email:
+            del _resets[email]
+    found = email and find(email)
+    return create(found.email, password, found.tier) if found else None
 
 
 # ── access codes ────────────────────────────────────────────────────────────

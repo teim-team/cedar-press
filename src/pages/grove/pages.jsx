@@ -44,6 +44,7 @@ export const CedarPressRecord = lazy(() =>
   Promise.all([import("./CedarPressRecord.jsx"), loadCodebook()]).then(([page]) => page),
 );
 export const CedarPressEntity = lazy(() => import("./CedarPressEntity.jsx"));
+export const CedarPressLogin = lazy(() => import("./CedarPressLogin.jsx"));
 
 /**
  * What a reader sees for the moment a page's code is on its way: the paper

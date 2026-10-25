@@ -55,7 +55,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import quote
 
-from fastapi import Depends, FastAPI, HTTPException, Request, Response
+from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, Request, Response
 from fastapi.exception_handlers import http_exception_handler
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
@@ -385,10 +385,150 @@ def logout(
 ) -> None:
     # CORS governs response access, not whether a simple cross-site POST runs.
     # Reject an unrelated browser origin before account-wide revocation.
+    _require_auth_origin(request, "sign-out")
+    sign_out(response, session)
+
+
+def _require_auth_origin(request: Request, action: str) -> None:
     origin = request.headers.get("origin")
     if origin is not None and origin not in _AUTH_ORIGINS:
-        raise HTTPException(status_code=403, detail="Untrusted sign-out origin.")
-    sign_out(response, session)
+        raise HTTPException(status_code=403, detail=f"Untrusted {action} origin.")
+
+
+class PasswordChange(BaseModel):
+    current_password: str
+    new_password: str
+
+
+@app.post("/auth/password")
+def change_password(
+    change: PasswordChange,
+    request: Request,
+    response: Response,
+    session: Session = Depends(require_session),
+) -> dict[str, object]:
+    """Replace the password and keep only this device signed in.
+
+    The password hash is part of every session's revision, so the write signs
+    every other device out; this one is re-issued a cookie on the new password.
+    """
+    _require_auth_origin(request, "password")
+    _guard(request, "password", ratelimit.LOGIN_ATTEMPTS)
+    found = subscribers.authenticate(session.email, change.current_password)
+    if found is None:
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "code": "INVALID_CREDENTIALS",
+                "message": "Your current password is not correct.",
+            },
+        )
+    _require_password_length(change.new_password)
+    subscribers.create(found.email, change.new_password, found.tier)
+    renewed = sign_in(found.email, change.new_password, response)
+    if renewed is None:
+        raise HTTPException(
+            status_code=409,
+            detail={
+                "code": "ACCOUNT_CHANGED",
+                "message": "Your account changed. Please sign in again.",
+            },
+        )
+    return renewed.as_payload()
+
+
+def _require_password_length(password: str) -> None:
+    if len(password) < 10:
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "code": "PASSWORD_TOO_SHORT",
+                "message": "Choose a password of at least 10 characters.",
+            },
+        )
+
+
+class ResetRequest(BaseModel):
+    email: str = Field(max_length=254)
+
+
+class ResetConfirm(BaseModel):
+    token: str = Field(max_length=128)
+    new_password: str
+
+
+#: Where the emailed link opens: the client's login page.
+_APP_URL = os.environ.get("CEDAR_PRESS_APP_URL", "http://localhost:5173").rstrip("/")
+_RESET_LOG = logging.getLogger("cedar_press.password_reset")
+
+
+def _send_reset_link(email: str, link: str) -> None:
+    # No mail provider is wired in yet, so development logs the link and
+    # `request_password_reset` refuses everywhere else.
+    _RESET_LOG.warning("Password reset link for %s: %s", email, link)
+
+
+@app.post("/auth/password-reset", status_code=204)
+def request_password_reset(
+    body: ResetRequest, request: Request, background: BackgroundTasks
+) -> None:
+    """Email a reset link if the address is a subscriber's.
+
+    The answer is the same either way, and the link is sent after the
+    response, so this cannot be used to ask whether somebody subscribes.
+    """
+    _require_auth_origin(request, "password reset")
+    _guard(request, "reset", ratelimit.LOGIN_ATTEMPTS)
+    if os.environ.get("CEDAR_PRESS_ENVIRONMENT", "development") != "development":
+        raise HTTPException(
+            status_code=503,
+            detail={
+                "code": "PASSWORD_RESET_UNAVAILABLE",
+                "message": (
+                    "Password reset by email is not available yet. Contact Cedar Press for help."
+                ),
+            },
+        )
+    address = body.email.strip().lower()
+    # Per address as well as per client, so nobody can flood one inbox.
+    if not ratelimit.allow(f"reset-email:{address}", attempts=3):
+        return
+    token = subscribers.issue_reset(address)
+    if token:
+        background.add_task(_send_reset_link, address, f"{_APP_URL}/login#reset={token}")
+
+
+@app.post("/auth/password-reset/confirm")
+def confirm_password_reset(
+    body: ResetConfirm, request: Request, response: Response
+) -> dict[str, object]:
+    """Set the new password from an emailed link and sign in on it.
+
+    The password hash is part of every session's revision, so this signs every
+    other device out.
+    """
+    _require_auth_origin(request, "password reset")
+    _guard(request, "reset-confirm", ratelimit.LOGIN_ATTEMPTS)
+    _require_password_length(body.new_password)
+    made = subscribers.redeem_reset(body.token, body.new_password)
+    if made is None:
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "code": "RESET_LINK_INVALID",
+                "message": "That reset link has expired or was already used. Request a new one.",
+            },
+        )
+    session = sign_in(made.email, body.new_password, response)
+    if session is None:
+        raise HTTPException(
+            status_code=409,
+            detail={
+                "code": "ACCOUNT_CHANGED",
+                "message": "Your account changed. Please sign in again.",
+            },
+        )
+    return session.as_payload()
 
 
 class CodeCheck(BaseModel):
@@ -472,14 +612,7 @@ def activate(activation: Activation, request: Request, response: Response) -> di
         raise _refuse(error)
     if account_exists(issued.email):
         raise _refuse(codes.EMAIL_IN_USE)
-    if len(activation.password) < 10:
-        raise HTTPException(
-            status_code=400,
-            detail={
-                "code": "PASSWORD_TOO_SHORT",
-                "message": "Choose a password of at least 10 characters.",
-            },
-        )
+    _require_password_length(activation.password)
 
     # ONE TRANSACTION WHERE THERE IS A DATABASE TO HAVE ONE IN.
     # This used to create the account and then mark the code spent, in that
