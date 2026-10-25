@@ -64,8 +64,7 @@ class _Backend:
             db.migrate()
             db.execute(
                 "TRUNCATE cedar_press_subscribers, cedar_press_codes, cedar_press_users,"
-                " cedar_press_login_identities, cedar_press_membership_grants,"
-                " cedar_press_billing_accounts, cedar_press_access_grants"
+                " cedar_press_login_identities, cedar_press_access_grants"
             )
             for email, tier in (("reader@example.org", "press"), ("pro@example.org", "press_pro")):
                 subscribers.create(email, "correct-horse", tier)

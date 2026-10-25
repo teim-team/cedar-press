@@ -56,36 +56,34 @@ the legacy access-code integration and do not define the billing roadmap.
 The Terraform deployment uses a dedicated PostgreSQL database; sharing a
 database with teim-app remains an optional compatibility arrangement.
 
-Migration `003_account_foundation.sql` creates the final account model directly:
+Cedar Press supports individual accounts at launch. Migration
+`003_account_foundation.sql` adds only these three account tables:
 
 | Table | Purpose |
 | --- | --- |
-| `cedar_press_users` | Stable identity UUID and email verification state, independent of payment |
-| `cedar_press_login_identities` | Google provider subject linked to an identity |
-| `cedar_press_billing_accounts` | Billing UUID, optional Stripe customer, existing points grouping |
-| `cedar_press_membership_grants` | Source-specific memberships and roles |
-| `cedar_press_account_members` (view) | Effective membership and highest granted role |
-| `cedar_press_access_grants` | Legacy or complimentary access, with revocation history |
+| `cedar_press_users` | Stable user UUID, email verification and optional unique Stripe customer ID |
+| `cedar_press_login_identities` | Google provider subject linked to one user |
+| `cedar_press_access_grants` | Per-user legacy or complimentary access, with revocation history |
+
+There are no billing-account, membership or organization-role tables. Future
+subscriptions, invoices and payments will belong directly to a user. The Stripe
+customer ID is stored on that user; it is not a credential or proof of payment.
 
 This is an additive rollout. Existing subscribers remain the runtime password
-and authorization authority. Their identity, membership and legacy grant are
-backfilled and synchronized by a database trigger in the same transaction as
-legacy activation or provisioning. Deleting a subscriber revokes the legacy
-grant and removes only legacy-sourced membership while retaining the identity.
-Manual, Stripe and preexisting membership grants survive legacy changes.
-Membership provenance and effective permission are separate: the view computes
-the effective role from the remaining grants. Bootstrap memberships are explicitly sourced as `legacy` and grant only the
-`member` role. No legacy writer can create an owner role. The `preexisting` source
-is retained for memberships preserved from earlier local branch revisions; a
-fresh migration does not create memberships with unknown provenance.
+and authorization authority. Their identity and legacy grant are backfilled and
+synchronized in the same transaction as legacy activation or provisioning.
+Deleting a subscriber revokes only legacy access; independent complimentary
+access remains intact. No migration marks an email verified, merges platform
+credentials, creates a Stripe subscription or guesses payment history.
+
+The existing subscriber `account_id` and Cedar Points grouping are preserved
+as legacy data. They do not create group billing accounts, memberships or shared
+paid access. Two legacy readers with the same grouping still have independent
+user identities, Stripe customer references and access grants.
+
 Do not truncate subscriber tables outside disposable tests: TRUNCATE bypasses
 row deletion triggers. Future registration and billing adapters must explicitly
 replace this bridge before the legacy subscriber writer is retired.
-
-No migration marks an email verified, infers billing ownership, merges platform
-credentials, creates a Stripe subscription or guesses payment history. Existing
-members migrate with role `member`, including single-seat accounts. Future billing
-enrollment establishes ownership through an authenticated flow.
 
 Password hashes remain unchanged in `cedar_press_subscribers`; public registration,
 unpaid sign-in, Google authorization and subscription-based access are subsequent
@@ -116,19 +114,20 @@ need separate authenticated operations, which are not implemented yet. Google
 identities are never silently transferred to another person. Empty account IDs are
 refused in addition to the original non-null constraint.
 
-This unmerged PR consolidates its earlier 003/004 drafts into one migration.
+This unmerged PR contains one account-foundation migration, 003.
 Fresh databases and databases at 002 apply 003 directly. Bootstrap assigns identity
 IDs and the session revision before installing runtime triggers. Existing password
 hashes, grouping and timestamps are preserved. The original repository schema
 has no `updated_at` update trigger; tests assert exact timestamp and cookie
 preservation. Custom deployment triggers need their own migration rehearsal.
 
-Do not merely delete migration-history entries on databases that ran an earlier
-branch draft. Verify schema equivalence first, or use a fresh disposable database.
-The local development database was reconciled by comparing the combined migration
-schema with its already-applied 003/004 schema and verifying all application rows
-were unchanged before removing the obsolete 004 history entry. This is a local
-branch consolidation, not a migration rewrite for a deployed shared database.
+Databases that ran an earlier branch draft need deliberate local reconciliation;
+changing the migration file alone does not change an already-applied schema.
+The local development database had no account-foundation rows. Its empty draft
+foundation was replaced transactionally with the individual-account schema,
+while retaining the original subscriber, code, research and points tables and
+verifying their records were unchanged. Shared deployments must not rewrite an
+already-applied migration this way.
 
 The migrations are transactional. Roll back the application only after
 ending outstanding sessions, since old and new logout writers differ. Do not drop

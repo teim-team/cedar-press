@@ -77,11 +77,10 @@ class TestAccountFoundation(unittest.TestCase):
             self.assertEqual(after["sessions_revoked_at"], before["updated_at"])
             self.assertIsNotNone(after["identity_id"])
             self.assertIsNotNone(subscribers.authenticate(before["email"], "existing-password"))
-        self.assertEqual(db.one("SELECT count(*) AS n FROM cedar_press_billing_accounts")["n"], 1)
-        self.assertEqual(db.one("SELECT count(*) AS n FROM cedar_press_account_members")["n"], 2)
-        self.assertEqual(db.query(
-            "SELECT source, role FROM cedar_press_membership_grants ORDER BY user_id"
-        ), [{"source": "legacy", "role": "member"}] * 2)
+        # Legacy points grouping is preserved as data, not promoted into group accounts.
+        for relation in ("cedar_press_billing_accounts", "cedar_press_membership_grants",
+                         "cedar_press_account_members"):
+            self.assertIsNone(db.one("SELECT to_regclass(%s) AS t", (relation,))["t"])
         self.assertIsNone(db.one("SELECT to_regclass('cedar_press_entitlements') AS t")["t"])
         self.assertEqual(
             [r["tier"] for r in db.query(
@@ -139,10 +138,6 @@ class TestAccountFoundation(unittest.TestCase):
             (row["identity_id"],)
         )
         self.assertEqual(grant["tier"], "press_pro")
-        self.assertEqual(db.one(
-            "SELECT count(*) AS n FROM cedar_press_account_members WHERE user_id = %s",
-            (row["identity_id"],),
-        )["n"], 1)
         with self.assertRaisesRegex(self.psycopg.errors.RaiseException,
                                     "legacy_identity_rebinding_forbidden"):
             db.execute(
@@ -164,9 +159,6 @@ class TestAccountFoundation(unittest.TestCase):
             " ORDER BY starts_at DESC LIMIT 1",
             (row["identity_id"],),
         )["revoked_at"])
-        self.assertEqual(db.query(
-            "SELECT * FROM cedar_press_account_members WHERE user_id = %s", (row["identity_id"],)
-        ), [])
 
     def test_billing_updates_keep_sessions_and_explicit_logout_revokes(self):
         db.migrate()
@@ -241,7 +233,7 @@ class TestAccountFoundation(unittest.TestCase):
                                 (identity,))["email"], "one@example.org")
         self.assertIsNone(subscribers.find("bob@example.org"))
 
-    def test_legacy_changes_keep_independent_membership_and_grant_history(self):
+    def test_legacy_changes_preserve_grant_history_and_complimentary_access(self):
         db.migrate()
         subscribers.create("seat@example.org", "existing-password", "press")
         identity = db.one(
@@ -249,18 +241,15 @@ class TestAccountFoundation(unittest.TestCase):
         )["identity_id"]
         old_grant = db.one("SELECT * FROM cedar_press_access_grants WHERE user_id = %s",
                            (identity,))
-        db.execute(
-            "INSERT INTO cedar_press_membership_grants(account_id, user_id, source, role)"
-            " VALUES (%s, %s, 'manual', 'owner')", (old_grant["account_id"], identity)
+        complimentary = db.one(
+            "INSERT INTO cedar_press_access_grants(user_id, tier, source)"
+            " VALUES (%s, 'press_pro', 'complimentary') RETURNING id", (identity,)
         )
         db.execute("UPDATE cedar_press_subscribers SET account_id = 'new-account',"
                    " tier = 'press_pro'"
                    " WHERE email = 'seat@example.org'")
-        kept = db.one("SELECT role FROM cedar_press_account_members"
-                      " WHERE account_id = %s AND user_id = %s",
-                      (old_grant["account_id"], identity))
-        self.assertEqual(kept["role"], "owner")
         grants = db.query("SELECT * FROM cedar_press_access_grants WHERE user_id = %s"
+                          " AND source = 'legacy'"
                           " ORDER BY starts_at", (identity,))
         self.assertEqual(len(grants), 2)
         self.assertEqual(grants[0]["id"], old_grant["id"])
@@ -271,20 +260,13 @@ class TestAccountFoundation(unittest.TestCase):
         # An unchanged legacy upsert must not manufacture another grant.
         subscribers.create("seat@example.org", "existing-password", "press_pro")
         self.assertEqual(db.one("SELECT count(*) AS n FROM cedar_press_access_grants"
-                                " WHERE user_id = %s", (identity,))["n"], 2)
-        db.execute(
-            "INSERT INTO cedar_press_membership_grants(account_id, user_id, source, role)"
-            " VALUES (%s, %s, 'manual', 'owner')", (grants[1]["account_id"], identity)
-        )
+                                " WHERE user_id = %s AND source = 'legacy'", (identity,))["n"], 2)
         db.execute("DELETE FROM cedar_press_subscribers WHERE email = 'seat@example.org'")
-        self.assertEqual(db.one("SELECT role FROM cedar_press_account_members"
-                                " WHERE account_id = %s AND user_id = %s",
-                                (old_grant["account_id"], identity))["role"], "owner")
-        self.assertEqual(db.one("SELECT role FROM cedar_press_account_members"
-                                " WHERE account_id = %s AND user_id = %s",
-                                (grants[1]["account_id"], identity))["role"], "owner")
         self.assertEqual(db.query("SELECT id FROM cedar_press_access_grants"
-                                  " WHERE user_id = %s AND revoked_at IS NULL", (identity,)), [])
+                                  " WHERE user_id = %s AND source = 'legacy'"
+                                  " AND revoked_at IS NULL", (identity,)), [])
+        self.assertIsNone(db.one("SELECT revoked_at FROM cedar_press_access_grants WHERE id = %s",
+                                 (complimentary["id"],))["revoked_at"])
 
     def test_password_writes_revoke_sessions_and_missing_accounts_are_rejected(self):
         db.migrate()
@@ -306,7 +288,17 @@ class TestAccountFoundation(unittest.TestCase):
         grant = db.one("SELECT * FROM cedar_press_access_grants LIMIT 1")
         with self.assertRaises(self.psycopg.errors.CheckViolation) as caught:
             db.execute(
-                "INSERT INTO cedar_press_access_grants(account_id, user_id, tier, source)"
-                " VALUES (%s, %s, 'press', 'stripe')", (grant["account_id"], grant["user_id"])
+                "INSERT INTO cedar_press_access_grants(user_id, tier, source)"
+                " VALUES (%s, 'press', 'stripe')", (grant["user_id"],)
             )
         self.assertEqual(caught.exception.diag.constraint_name, "cedar_press_access_grant_source")
+
+    def test_stripe_customer_belongs_to_one_individual_user(self):
+        db.migrate()
+        first = accounts.create_user("first@example.org")
+        second = accounts.create_user("second@example.org")
+        db.execute("UPDATE cedar_press_users SET stripe_customer_id = 'cus_test_individual'"
+                   " WHERE id = %s", (first["id"],))
+        with self.assertRaises(self.psycopg.errors.UniqueViolation):
+            db.execute("UPDATE cedar_press_users SET stripe_customer_id = 'cus_test_individual'"
+                       " WHERE id = %s", (second["id"],))

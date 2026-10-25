@@ -106,9 +106,9 @@ other seats' sessions. A stable server-only signing secret is required in stagin
 and production. Existing passwords, accounts and subscription tiers are preserved;
 old cookies without lifecycle claims require a fresh sign-in.
 
-The account foundation migration adds stable identity UUIDs, provider identities,
-billing accounts, membership provenance and explicit access grants alongside the legacy
-subscriber store. Legacy activation synchronizes them transactionally. Existing
+The account foundation migration adds stable user UUIDs, Google identities,
+per-user Stripe customer references and individual access grants alongside the
+legacy subscriber store. Group billing and memberships are not part of this model. Legacy activation synchronizes them transactionally. Existing
 credentials and authorization continue through the subscriber adapter; new unpaid
 identities gain no access. Email verification, registration and Stripe billing
 arrive in subsequent changes. Cedar Press owns direct billing, renewals and
