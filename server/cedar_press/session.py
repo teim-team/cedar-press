@@ -1,7 +1,7 @@
 """Signed subscriber sessions backed by the existing subscriber store.
 
 PostgreSQL deployments persist accounts and account-wide session revocation.
-Logout advances the subscriber's existing updated_at revision, invalidating all
+Logout advances the subscriber's dedicated revocation revision, invalidating all
 sessions for that account without adding a session table. Preview mode remains
 process-local; it is not evidence of durable authentication.
 
@@ -87,7 +87,7 @@ def _configuration_required() -> None:
 
 def _revision(subscriber: subscribers.Subscriber) -> str:
     # Password and account changes invalidate a token even if an external
-    # account writer forgot to advance updated_at. The tier is read afresh,
+    # account writer forgot to advance the revocation revision. The tier is read afresh,
     # never trusted from the cookie; unversioned downgrades apply immediately.
     material = json.dumps(
         [
@@ -114,7 +114,7 @@ def _lookup(email: str, password: str) -> Session | None:
     found = subscribers.authenticate(email, password)
     if found is None:
         return None
-    # Linking updates the subscriber revision. It must finish before issuing
+    # Resolve the platform binding before issuing
     # the token, not after the login route has already set its cookie.
     subscribers.link_platform_account(found.email)
     current = subscribers.find(found.email)

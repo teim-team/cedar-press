@@ -152,6 +152,12 @@ def migrate() -> list[str]:
                 conn.commit()
                 ran.append(path.name)
             return ran
+        except BaseException:
+            # A failed migration leaves the transaction aborted. Roll back
+            # before unlocking so cleanup preserves the original invariant
+            # error and the pooled session never retains its advisory lock.
+            conn.rollback()
+            raise
         finally:
             cur.execute(
                 "SELECT pg_advisory_unlock(%s)", (int.from_bytes(b"cpress", "big") % 2**31,)

@@ -242,7 +242,7 @@ def find(email: str) -> Subscriber | None:
         return None
     if db.configured():
         row = db.one(
-            "SELECT email, tier, account_id, password_hash, updated_at"
+            "SELECT email, tier, account_id, password_hash, sessions_revoked_at"
             " FROM cedar_press_subscribers WHERE lower(email) = %s",
             (address,),
         )
@@ -253,7 +253,7 @@ def find(email: str) -> Subscriber | None:
             row["tier"],
             row["account_id"],
             row["password_hash"],
-            _session_revision(row["updated_at"]),
+            _session_revision(row["sessions_revoked_at"]),
         )
     if address in _activated:
         password, tier = _activated[address]
@@ -275,8 +275,8 @@ def revoke_sessions(email: str) -> bool:
     if db.configured():
         return (
             db.execute(
-                "UPDATE cedar_press_subscribers SET updated_at ="
-                " GREATEST(clock_timestamp(), updated_at + interval '1 microsecond')"
+                "UPDATE cedar_press_subscribers SET sessions_revoked_at ="
+                " GREATEST(clock_timestamp(), sessions_revoked_at + interval '1 microsecond')"
                 " WHERE lower(email) = %s",
                 (address,),
             )
@@ -350,7 +350,9 @@ def bind_user(email: str, user_id: str) -> bool:
         return False
     return (
         db.execute(
-            "UPDATE cedar_press_subscribers SET user_id = %s, updated_at = now()"
+            "UPDATE cedar_press_subscribers SET user_id = %s, updated_at = now(),"
+            " sessions_revoked_at = GREATEST(clock_timestamp(),"
+            " sessions_revoked_at + interval '1 microsecond')"
             " WHERE lower(email) = %s",
             (user_id, (email or "").strip().lower()),
         )
@@ -389,7 +391,9 @@ def link_platform_account(email: str) -> bool:
         return False
     return (
         db.execute(
-            "UPDATE cedar_press_subscribers s SET user_id = u.id, updated_at = now()"
+            "UPDATE cedar_press_subscribers s SET user_id = u.id, updated_at = now(),"
+            " sessions_revoked_at = GREATEST(clock_timestamp(),"
+            " s.sessions_revoked_at + interval '1 microsecond')"
             " FROM users u"
             " WHERE lower(s.email) = %s AND lower(u.email) = lower(s.email)"
             " AND s.user_id IS DISTINCT FROM u.id",

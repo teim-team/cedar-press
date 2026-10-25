@@ -53,8 +53,9 @@ static client with a FastAPI service alongside it, serving the Overview,
 Collections, Research Briefs, Priorities, What's new and Methods, plus
 `/tribal-data-request` and `/research-access` on their own URLs. Cedar Press is a Lumecon research publication, partnered
 with Tribal Business News: built by Lumecon and available exclusively through
-Tribal Business News, which handles subscriber plans (payment, renewals and
-issuance). There is no year gating: every subscriber gets full coverage.
+Tribal Business News. Cedar Press handles account creation, direct Stripe billing,
+renewals and upgrades (Brian Kim, 2026-10-25). There is no year gating: every
+subscriber gets full coverage.
 
 **The former Cedar data workspace.** Its historical acquisition, adjudication and
 reproduction scripts left the tree and are kept in git history at the tag
@@ -64,8 +65,6 @@ filters and customer presentation. The journal that recorded it is at the same t
 
 **Does not own:**
 
-- Subscriber plans: payment, renewals and access-code issuance. Those belong
-  to Tribal Business News, whose involvement is with Cedar Press only.
 - The shared data foundation. That is
   [`Lumecon-data`](https://github.com/teim-team/Lumecon-data), the separate
   data repository decided on 2026-09-21. Its installed builders and spreadsheet
@@ -100,6 +99,17 @@ scripts that wrote it.
 a contract, not a label anyone reads; leave it alone.
 
 ## 3. Setup and checks
+
+Local PostgreSQL and a browser database viewer run through `make db-up`.
+`make db-migrate` applies the existing migrations; `make db-test` exercises
+subscriber and points contracts against a separate disposable test database.
+`make db-shell` inspects persistent development records. See
+[`server/DATABASE.md`](server/DATABASE.md) for connection details.
+The account foundation is additive: legacy subscribers remain the runtime
+credential and access authority while migration 003 synchronizes identity,
+billing membership and legacy grants. `sessions_revoked_at` owns explicit
+session revocation; ordinary `updated_at` changes do not revoke cookies.
+`make db-test` also rehearses this migration and its failure rollback.
 
 Node 22 and Python 3.12, the versions CI uses. Two tools have to be installed
 by hand: `uv`, which `make audit-python` uses to resolve the server's
@@ -265,10 +275,14 @@ list, all of which this project has paid for:
   describes Cedar Press as a prototype or a pilot. Something that is not real
   yet is labelled plainly for what it does today and tracked as a gap, never
   called a prototype. Pilots run as ordinary accounts or access codes, not a
-  separate code path. Payment for Cedar Press is owned by Tribal Business News
-  today (`server/cedar_press/codes.py`); Lumecon's side is codes and
-  entitlement. Lumecon's own Stripe account, with Brian Kim and Kaylyn Lee as
-  admins, carries Cedar Grove payments: teim-team/teim-app#186.
+  separate code path. Cedar Press owns direct Stripe billing and subscriber accounts (Brian Kim,
+  2026-10-25). Annual early-access prices are $500 for Cedar Press and $1,000
+  for Cedar Press+, retained while the subscription remains active. New
+  subscriptions from January 1, 2027 cost $1,000/$2,000 annually. The approved
+  Summit promotion discounts the first year by $100 and then renews at the
+  early-access rate. Resubscription after a subscription ends uses current
+  pricing. Existing access codes remain a compatibility path, separate from
+  Stripe promotion codes.
 
 ## 7. How this doc gets updated
 

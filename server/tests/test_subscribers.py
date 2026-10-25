@@ -411,7 +411,9 @@ class TestAStandaloneDatabase(unittest.TestCase):
             "SELECT conname FROM pg_constraint WHERE conrelid ="
             " 'cedar_press_subscribers'::regclass AND contype = 'f'"
         )
-        self.assertEqual(keys, [])
+        self.assertEqual([k["conname"] for k in keys], [
+            "cedar_press_subscribers_identity_id_fkey",
+        ])
         # And the service works: a code, an activation, a sign-in.
         subscribers.issue_code("TBN5-SOLO-0001", "alone@example.org", "press_pro")
         made = subscribers.redeem("TBN5-SOLO-0001", "correct-horse-battery")

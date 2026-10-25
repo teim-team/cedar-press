@@ -1,0 +1,51 @@
+name: cedar-press-local
+
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: cedar_local
+      POSTGRES_PASSWORD: local_development_only
+      POSTGRES_DB: cedar_press
+    ports:
+      - "127.0.0.1:55432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./infrastructure/local/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cedar_local -d cedar_press"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+
+  adminer:
+    image: adminer:5
+    ports:
+      - "127.0.0.1:8081:8080"
+    environment:
+      ADMINER_DEFAULT_SERVER: db
+    depends_on:
+      db:
+        condition: service_healthy
+
+  tools:
+    build:
+      context: .
+      dockerfile: infrastructure/local/Dockerfile
+    profiles: [tools]
+    working_dir: /workspace
+    volumes:
+      - .:/workspace:ro
+    environment:
+      PYTHONPATH: /workspace/server
+      PYTHONDONTWRITEBYTECODE: "1"
+      RUFF_CACHE_DIR: /tmp/ruff-cache
+      DATABASE_URL: postgresql://cedar_local:local_development_only@db:5432/cedar_press
+      CEDAR_PRESS_TEST_DATABASE_URL: postgresql://cedar_local:local_development_only@db:5432/cedar_press_test
+    depends_on:
+      db:
+        condition: service_healthy
+    command: [python, -m, cedar_press.migrate]
+
+volumes:
+  postgres-data:

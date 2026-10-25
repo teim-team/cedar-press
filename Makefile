@@ -1,5 +1,21 @@
 .PHONY: lint test test-node test-python audit audit-node audit-python hooks check check-generated
 
+.PHONY: db-up db-stop db-migrate db-test db-shell
+db-up:
+	docker compose up -d --wait db adminer
+
+db-stop:
+	docker compose stop
+
+db-migrate:
+	docker compose run --rm tools
+
+db-test:
+	docker compose run --rm tools python -m unittest tests.test_subscribers tests.test_priorities tests.test_account_foundation tests.test_auth_session_lifecycle
+
+db-shell:
+	docker compose exec db psql -U cedar_local -d cedar_press
+
 # One place that names each gate, so the command a contributor runs and the
 # command CI runs cannot drift apart. `deploy.yml` runs the same list before
 # it ships, and `ci.yml` runs it on a pull request.

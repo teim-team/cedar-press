@@ -1,5 +1,94 @@
 # The database
 
+## Local Docker database
+
+Run from the repository root:
+
+```sh
+make db-up
+make db-migrate
+make db-test
+make db-shell
+```
+
+Docker Desktop must be running. PostgreSQL 16 listens on `127.0.0.1:55432`.
+The tools container uses Python 3.12 and installs the server's development and
+PostgreSQL dependencies. Rebuild it after dependency changes with
+`docker compose build tools`.
+
+For a host-run API, set
+`DATABASE_URL=postgresql://cedar_local:local_development_only@127.0.0.1:55432/cedar_press`.
+These credentials are for local development only.
+
+Open http://localhost:8081 for Adminer. Choose PostgreSQL, server `db`, username
+`cedar_local`, password `local_development_only`, database `cedar_press`.
+This lets you inspect subscriber records and the Cedar Points transaction ledger.
+Payment, invoice, refund and webhook history will be added with the billing
+implementation; the current schema has no Stripe transaction tables. Local
+Stripe testing will use sandbox payments, persisted in this development database.
+
+The named Docker volume preserves records across container restarts and
+`make db-stop`. `cedar_press_test` is a separate disposable database: existing
+tests truncate their tables and must never target the development database.
+Initialization creates the test database and its optional platform-user fixture
+only when the volume is first created. `make db-test` exercises the existing
+subscriber and points contracts, including standalone database migration.
+
+`make db-migrate` applies migrations to the development database; repeat it to
+check that no migration is applied twice. `make db-shell` opens SQL access to
+that database. Do not remove the volume if you want to keep local transactions.
+
+## Account foundation and direct billing
+
+Cedar Press owns account creation, Stripe billing, renewals and upgrades
+(Brian Kim, 2026-10-25). Older TBN-only payment descriptions below describe
+the legacy access-code integration and do not define the billing roadmap.
+The Terraform deployment uses a dedicated PostgreSQL database; sharing a
+database with teim-app remains an optional compatibility arrangement.
+
+Migration `003_account_foundation.sql` adds:
+
+| Table | Purpose |
+| --- | --- |
+| `cedar_press_users` | Stable identity UUID and email verification state, independent of payment |
+| `cedar_press_login_identities` | Google provider subject linked to an identity |
+| `cedar_press_billing_accounts` | Billing UUID, optional Stripe customer, existing points grouping |
+| `cedar_press_account_members` | Explicit account membership and billing role |
+| `cedar_press_entitlements` | Per-user access grants, source, dates and revocation |
+
+This is an additive rollout. Existing subscribers remain the runtime password
+and authorization authority. Their identity, membership and legacy grant are
+backfilled and synchronized by a database trigger in the same transaction as
+legacy activation or provisioning. Deleting a subscriber revokes the legacy
+grant and removes that account membership while retaining the identity.
+Do not truncate subscriber tables outside disposable tests: TRUNCATE bypasses
+row deletion triggers. Future registration and billing adapters must explicitly
+replace this bridge before the legacy subscriber writer is retired.
+
+No migration marks an email verified, infers billing ownership, merges platform
+credentials, creates a Stripe subscription or guesses payment history. Existing
+members migrate with role `member`, including single-seat accounts. Future billing
+enrollment establishes ownership through an authenticated flow.
+
+Password hashes remain unchanged in `cedar_press_subscribers`; public registration,
+unpaid sign-in, Google authorization and new entitlement enforcement are subsequent
+changes. `accounts.create_user` is an internal persistence primitive only; creating
+an identity alone grants no subscriber access.
+
+`sessions_revoked_at` starts at the previous `updated_at`, preserving cookie
+revisions. Logout and platform binding advance it explicitly. Password and account
+group changes still invalidate sessions through their existing signed claims;
+ordinary `updated_at` and tier changes do not log readers out. Tier changes are
+read on every request. Deploy the new session writer on all workers together:
+an older worker's logout only changes `updated_at`.
+
+The migration is transactional and additive. Roll back the application only after
+ending outstanding sessions, since old and new logout writers differ. Do not drop
+foundation tables or rerun historical migration SQL manually. Rehearse the changes
+with `make db-test`, which creates isolated pre-migration databases and verifies
+credential/cookie preservation, unpaid access refusal, provider uniqueness,
+atomic legacy provisioning and explicit session revocation.
+
 Cedar Press runs with or without one, and the switch is `DATABASE_URL` — the
 same variable teim-app reads, so one deployment configures both services by
 setting it once.

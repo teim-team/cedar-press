@@ -31,7 +31,7 @@ class TestSessionLifecycle(unittest.TestCase):
             "tier": "press_pro",
             "account_id": "account-fixture",
             "password_hash": self.password_hash,
-            "updated_at": datetime(2026, 10, 1, tzinfo=timezone.utc),
+            "sessions_revoked_at": datetime(2026, 10, 1, tzinfo=timezone.utc),
         }
         self.lookups = 0
         self.revocations = 0
@@ -59,17 +59,19 @@ class TestSessionLifecycle(unittest.TestCase):
     def read(self, sql, params=None):
         if "to_regclass" in sql:
             return None
-        self.assertIn("updated_at", sql)
+        self.assertIn("sessions_revoked_at", sql)
         self.lookups += 1
         if self.row is None or params != (self.row["email"],):
             return None
         return dict(self.row)
 
     def write(self, sql, params=None):
-        self.assertIn("GREATEST(clock_timestamp(), updated_at + interval '1 microsecond')", sql)
+        self.assertIn(
+            "GREATEST(clock_timestamp(), sessions_revoked_at + interval '1 microsecond')", sql
+        )
         if self.row is None or params != (self.row["email"],):
             return 0
-        self.row["updated_at"] += timedelta(microseconds=1)
+        self.row["sessions_revoked_at"] += timedelta(microseconds=1)
         self.revocations += 1
         return 1
 
@@ -164,8 +166,8 @@ class TestSessionLifecycle(unittest.TestCase):
 
     def test_equivalent_database_timezones_keep_the_same_session_revision(self):
         cookie = self.cookie()
-        instant = self.row["updated_at"]
-        self.row["updated_at"] = instant.astimezone(timezone(timedelta(hours=-7)))
+        instant = self.row["sessions_revoked_at"]
+        self.row["sessions_revoked_at"] = instant.astimezone(timezone(timedelta(hours=-7)))
         self.assertIsNotNone(session._decode(cookie))
         self.assertEqual(
             subscribers.find("reader@example.org").session_revision,
@@ -173,15 +175,20 @@ class TestSessionLifecycle(unittest.TestCase):
         )
 
     def test_naive_database_revision_is_refused_without_guessing_a_timezone(self):
-        self.row["updated_at"] = self.row["updated_at"].replace(tzinfo=None)
+        self.row["sessions_revoked_at"] = self.row["sessions_revoked_at"].replace(tzinfo=None)
         with self.assertRaisesRegex(ValueError, "timezone-aware"):
             subscribers.find("reader@example.org")
+
+    def test_ordinary_account_update_does_not_revoke_a_session(self):
+        cookie = self.cookie()
+        self.row["updated_at"] = datetime(2026, 10, 2, tzinfo=timezone.utc)
+        self.assertIsNotNone(session._decode(cookie))
 
     def test_password_account_or_revision_changes_invalidate_existing_cookie(self):
         for field, value in (
             ("password_hash", "a-reset-password-hash"),
             ("account_id", "another-account"),
-            ("updated_at", datetime(2026, 10, 2, tzinfo=timezone.utc)),
+            ("sessions_revoked_at", datetime(2026, 10, 2, tzinfo=timezone.utc)),
         ):
             with self.subTest(field=field):
                 cookie = self.cookie()
@@ -213,7 +220,7 @@ class TestSessionLifecycle(unittest.TestCase):
     def test_login_signs_after_platform_link_revision_change(self):
         def link(email):
             self.assertEqual(email, self.row["email"])
-            self.row["updated_at"] += timedelta(microseconds=1)
+            self.row["sessions_revoked_at"] += timedelta(microseconds=1)
             return True
 
         with mock.patch.object(subscribers, "link_platform_account", side_effect=link):
