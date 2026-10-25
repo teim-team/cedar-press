@@ -204,8 +204,8 @@ class TestPostgresBackend(_Backend, unittest.TestCase):
         )
         self.assertEqual(str(row["user_id"]), str(user["id"]))
 
-    def test_the_binding_happens_by_itself_at_sign_in(self) -> None:
-        """`link_platform_account` is what the login route calls, in one statement."""
+    def test_the_optional_legacy_link_helper(self) -> None:
+        """The helper remains available but sign-in does not call it."""
         # `users` is teim-app's, so this makes and unmakes exactly its own row
         # rather than truncating a table it does not own.
         db.execute("DELETE FROM users WHERE email = %s", ("pro@example.org",))

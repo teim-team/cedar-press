@@ -91,7 +91,7 @@ changes. `accounts.create_user` is an internal persistence primitive only; creat
 an identity alone grants no subscriber access.
 
 `sessions_revoked_at` starts at the previous `updated_at`, preserving cookie
-revisions. Logout and platform binding advance it explicitly. Password and account
+revisions. Logout advances it explicitly. Password and account
 group changes advance the revocation field through the database bridge as well
 as invalidating their existing signed claims;
 ordinary `updated_at` and tier changes do not log readers out. Tier changes are

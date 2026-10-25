@@ -350,9 +350,7 @@ def bind_user(email: str, user_id: str) -> bool:
         return False
     return (
         db.execute(
-            "UPDATE cedar_press_subscribers SET user_id = %s, updated_at = now(),"
-            " sessions_revoked_at = GREATEST(clock_timestamp(),"
-            " sessions_revoked_at + interval '1 microsecond')"
+            "UPDATE cedar_press_subscribers SET user_id = %s, updated_at = now()"
             " WHERE lower(email) = %s",
             (user_id, (email or "").strip().lower()),
         )
@@ -363,16 +361,8 @@ def bind_user(email: str, user_id: str) -> bool:
 def link_platform_account(email: str) -> bool:
     """Tie this subscription to the teim-app account at the same address.
 
-    Called on sign-in and on activation, because those are the two moments
-    the service is certain who is at the keyboard, and because the order the
-    two accounts appear in is not ours to choose: a Tribal Business News
-    subscriber may activate a press code months before they ever open the
-    platform, or the other way round. Binding on every sign-in means whichever
-    comes second still finds the first.
-
-    One statement, so a sign-in costs one no-op UPDATE rather than a lookup
-    and a write: `IS DISTINCT FROM` makes a subscription that is already bound
-    — the overwhelming majority — touch nothing.
+    Legacy compatibility helper only. Sign-in and activation do not call it;
+    standalone Cedar Press does not automatically link platform accounts.
 
     Returns whether a binding was made. False is the ordinary answer: no
     database, no `users` table (Cedar Press pointed at a database of its own),
@@ -391,9 +381,7 @@ def link_platform_account(email: str) -> bool:
         return False
     return (
         db.execute(
-            "UPDATE cedar_press_subscribers s SET user_id = u.id, updated_at = now(),"
-            " sessions_revoked_at = GREATEST(clock_timestamp(),"
-            " s.sessions_revoked_at + interval '1 microsecond')"
+            "UPDATE cedar_press_subscribers s SET user_id = u.id, updated_at = now()"
             " FROM users u"
             " WHERE lower(s.email) = %s AND lower(u.email) = lower(s.email)"
             " AND s.user_id IS DISTINCT FROM u.id",

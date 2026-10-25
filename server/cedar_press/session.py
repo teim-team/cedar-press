@@ -114,17 +114,15 @@ def _lookup(email: str, password: str) -> Session | None:
     found = subscribers.authenticate(email, password)
     if found is None:
         return None
-    # Resolve the platform binding before issuing
-    # the token, not after the login route has already set its cookie.
-    subscribers.link_platform_account(found.email)
+    # Re-read before issuance so a concurrent password change cannot bless
+    # the old password with a new session revision.
     current = subscribers.find(found.email)
     if (
         current is None
         or current.tier not in subscribers.TIERS
         or current.password_hash != found.password_hash
     ):
-        # A password reset racing the link step must not bless an old password
-        # with the new revision. A later revision change invalidates normally.
+        # A later revision change invalidates the issued token normally.
         return None
     return Session(current.email, current.tier, _revision(current))
 

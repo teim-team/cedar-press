@@ -217,26 +217,25 @@ class TestSessionLifecycle(unittest.TestCase):
         self.assertEqual(self.revocations, 0)
         self.assertIsNotNone(session._decode(cookie))
 
-    def test_login_signs_after_platform_link_revision_change(self):
-        def link(email):
-            self.assertEqual(email, self.row["email"])
-            self.row["sessions_revoked_at"] += timedelta(microseconds=1)
-            return True
-
-        with mock.patch.object(subscribers, "link_platform_account", side_effect=link):
+    def test_login_does_not_automatically_link_platform_accounts(self):
+        with mock.patch.object(subscribers, "link_platform_account") as link:
             response = Response()
             signed_in = session.sign_in("reader@example.org", "correct-horse", response)
+        link.assert_not_called()
         self.assertIsNotNone(signed_in)
         self.assertIsNotNone(session._decode(session._encode(signed_in)))
         self.assertIn("HttpOnly", response.headers["set-cookie"])
 
-    def test_password_reset_during_link_is_not_issued_a_new_revision(self):
-        def reset(_email):
+    def test_password_reset_before_issuance_is_not_issued_a_new_revision(self):
+        authenticate = subscribers.authenticate
+
+        def reset(email, password):
+            authenticated = authenticate(email, password)
             self.row["password_hash"] = "a-new-password-hash"
-            return True
+            return authenticated
 
         response = Response()
-        with mock.patch.object(subscribers, "link_platform_account", side_effect=reset):
+        with mock.patch.object(subscribers, "authenticate", side_effect=reset):
             signed_in = session.sign_in("reader@example.org", "correct-horse", response)
         self.assertIsNone(signed_in)
         self.assertNotIn("set-cookie", response.headers)
