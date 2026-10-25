@@ -12,7 +12,7 @@ make db-shell
 ```
 
 Docker Desktop must be running. PostgreSQL 16 listens on `127.0.0.1:55432`.
-Local setup files `docker-compose.yml` and `init.local.sql` live at the repository root.
+Local services are defined in the root `docker-compose.yml`.
 The test image uses `server/Dockerfile.test`, beside the production Dockerfile,
 with the repository root as its build context.
 The test tools container uses Python 3.12, Node 22 and Git, and installs the server's development and
@@ -31,10 +31,13 @@ implementation; the current schema has no Stripe transaction tables. Local
 Stripe testing will use sandbox payments, persisted in this development database.
 
 The named Docker volume preserves records across container restarts and
-`make db-stop`. `cedar_press_test` is a separate disposable database: existing
-tests truncate their tables and must never target the development database.
-Initialization creates the test database and its optional platform-user fixture
-only when the volume is first created. `make db-test` exercises the existing
+`make db-stop`. Each `make db-test` invocation creates a uniquely named disposable
+database, creates the optional platform-user compatibility fixture, applies the
+real application migrations, and drops that database afterward. Tests truncate
+their own tables and never target the development database. The runner uses
+`CEDAR_PRESS_TEST_DATABASE_ADMIN_URL` only to create and remove its database;
+it sets `CEDAR_PRESS_TEST_DATABASE_URL` to the new database before loading tests.
+No volume initialization script is needed. `make db-test` exercises the existing
 subscriber, account, session, points and release-download contracts, including
 standalone database migration. Any skipped test fails this command. The subscriber
 storage CI workflow builds the same `server/Dockerfile.test` and runs `make db-test`

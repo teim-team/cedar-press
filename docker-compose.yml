@@ -11,7 +11,6 @@ services:
       - "127.0.0.1:55432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
-      - ./init.local.sql:/docker-entrypoint-initdb.d/init.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U cedar_local -d cedar_press"]
       interval: 2s
@@ -41,7 +40,7 @@ services:
       PYTHONDONTWRITEBYTECODE: "1"
       RUFF_CACHE_DIR: /tmp/ruff-cache
       DATABASE_URL: postgresql://cedar_local:local_development_only@db:5432/cedar_press
-      CEDAR_PRESS_TEST_DATABASE_URL: postgresql://cedar_local:local_development_only@db:5432/cedar_press_test
+      CEDAR_PRESS_TEST_DATABASE_ADMIN_URL: postgresql://cedar_local:local_development_only@db:5432/cedar_press
     depends_on:
       db:
         condition: service_healthy

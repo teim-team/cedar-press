@@ -103,6 +103,8 @@ a contract, not a label anyone reads; leave it alone.
 Local PostgreSQL and a browser database viewer run through `make db-up`.
 `make db-migrate` applies the existing migrations; `make db-test` exercises
 subscriber and points contracts against a separate disposable test database.
+The test runner creates a fresh database, applies application migrations, and
+removes its database afterward; it does not depend on volume initialization SQL.
 `make db-shell` inspects persistent development records. See
 [`server/DATABASE.md`](server/DATABASE.md) for connection details.
 The account foundation is additive: legacy subscribers remain the runtime
