@@ -112,7 +112,7 @@ adding verification and Stripe customer fields. Google identities and individual
 access grants reference its existing UUID; there is no parallel users table or
 group billing model. A null tier disables legacy access while retaining the
 account and grant history. `sessions_revoked_at` owns explicit session revocation.
-Sign-in and activation do not automatically link teim-app accounts.
+Sign-in and activation retain the existing optional teim-app account linking.
 `make db-test` also rehearses this migration and its failure rollback. The
 subscriber-storage CI job builds `server/Dockerfile.test` and runs that same
 command, refusing skipped contracts. Production uses `server/Dockerfile`.

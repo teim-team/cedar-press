@@ -361,8 +361,8 @@ def bind_user(email: str, user_id: str) -> bool:
 def link_platform_account(email: str) -> bool:
     """Tie this subscription to the teim-app account at the same address.
 
-    Legacy compatibility helper only. Sign-in and activation do not call it;
-    standalone Cedar Press does not automatically link platform accounts.
+    Called after password authentication during sign-in and activation. It is
+    a no-op when the optional teim-app users table or matching account is absent.
 
     Returns whether a binding was made. False is the ordinary answer: no
     database, no `users` table (Cedar Press pointed at a database of its own),

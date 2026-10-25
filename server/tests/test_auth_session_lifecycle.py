@@ -217,12 +217,19 @@ class TestSessionLifecycle(unittest.TestCase):
         self.assertEqual(self.revocations, 0)
         self.assertIsNotNone(session._decode(cookie))
 
-    def test_login_does_not_automatically_link_platform_accounts(self):
-        with mock.patch.object(subscribers, "link_platform_account") as link:
+    def test_login_links_platform_account_before_issuing_session(self):
+        old_cookie = self.cookie()
+
+        def bind(_email):
+            self.row["sessions_revoked_at"] += timedelta(microseconds=1)
+            return True
+
+        with mock.patch.object(subscribers, "link_platform_account", side_effect=bind) as link:
             response = Response()
             signed_in = session.sign_in("reader@example.org", "correct-horse", response)
-        link.assert_not_called()
+        link.assert_called_once_with("reader@example.org")
         self.assertIsNotNone(signed_in)
+        self.assertIsNone(session._decode(old_cookie))
         self.assertIsNotNone(session._decode(session._encode(signed_in)))
         self.assertIn("HttpOnly", response.headers["set-cookie"])
 

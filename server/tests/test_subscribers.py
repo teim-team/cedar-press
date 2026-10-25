@@ -204,8 +204,10 @@ class TestPostgresBackend(_Backend, unittest.TestCase):
         )
         self.assertEqual(str(row["user_id"]), str(user["id"]))
 
-    def test_the_optional_legacy_link_helper(self) -> None:
-        """The helper remains available but sign-in does not call it."""
+    def test_platform_binding_happens_at_sign_in(self) -> None:
+        """Sign-in binds an existing platform account before issuing the cookie."""
+        from fastapi import Response
+
         # `users` is teim-app's, so this makes and unmakes exactly its own row
         # rather than truncating a table it does not own.
         db.execute("DELETE FROM users WHERE email = %s", ("pro@example.org",))
@@ -215,7 +217,11 @@ class TestPostgresBackend(_Backend, unittest.TestCase):
             ("pro@example.org",),
         )
         # The platform account appeared second; the next sign-in finds it.
-        self.assertTrue(subscribers.link_platform_account("PRO@Example.org "))
+        old_cookie = session._encode(session.Session("pro@example.org", "press_pro"))
+        signed_in = session.sign_in("PRO@Example.org ", "correct-horse", Response())
+        self.assertIsNotNone(signed_in)
+        self.assertIsNone(session._decode(old_cookie))
+        self.assertIsNotNone(session._decode(session._encode(signed_in)))
         row = db.one(
             "SELECT user_id FROM cedar_press_subscribers WHERE email = %s",
             ("pro@example.org",),

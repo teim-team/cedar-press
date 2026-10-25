@@ -85,7 +85,7 @@ key; deliberate account deletion is a separate future lifecycle flow.
 
 Password, binding and access-disable changes advance `sessions_revoked_at`.
 Ordinary timestamps and changes between active tiers do not sign users out.
-Sign-in and activation do not automatically link teim-app accounts. Raw email or
+Sign-in and activation retain the existing optional teim-app account linking. Raw email or
 UUID reassignment is refused until a verified account-management flow exists.
 
 `accounts.create_user` creates an internal unpaid account with no password or
@@ -216,7 +216,8 @@ Current PostgreSQL schema after migrations 001–003. `cedar_press_subscribers`
 is the sole account table. Connections show database foreign keys only; dotted
 lines are non-identifying relationships. `users` is an optional external teim-app
 table, not a second Cedar Press user table. Its foreign key is installed only
-when that table exists during migration 001. Automatic linking is disabled.
+when that table exists during migration 001. Password-authenticated sign-in and
+activation link a matching platform account before issuing the session cookie.
 
 ```mermaid
 erDiagram
