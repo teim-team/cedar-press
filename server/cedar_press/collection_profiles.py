@@ -610,13 +610,14 @@ def answer_from_profile(question: str, dataset_id: str) -> dict[str, str] | None
         # PROSE, NOT A FIELD DUMP.
         #
         # Owner review, 2026-09-20: "Keep answers direct and human. Do not
-        # make Cedar lead with system language." This used to read
-        # "... Unit of observation: One federal assistance award (grant,
-        # loan, ...). Coverage from 2007 to present. Sources: USAspending
-        # ..." — the profile's own column headings, read aloud. The facts
-        # are the same facts; they are said the way a person would say them,
-        # and the release the answer came from is already printed under it
-        # by the panel, so the sources line does not have to carry it.
+        # make Cedar lead with system language." The answer is said the way
+        # a person would say it, not as the profile's own column headings
+        # read aloud. The description quotes the manifest: what the
+        # collection tracks, then its sources, then its method, in that
+        # order. The unit-of-observation sentence and the coverage sentence
+        # still follow them. The release the answer came from is already
+        # printed under it by the panel, so the sources do not have to
+        # carry it.
         parts = [_sentence(profile["description"])]
         for key in ("primary_sources", "method"):
             text = profile.get(key)
