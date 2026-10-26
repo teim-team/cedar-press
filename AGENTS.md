@@ -134,8 +134,8 @@ separately named Stripe products; older price IDs remain recognized through
 Billing uses `BillingService`, `GuestCheckoutService` and `BillingReconciler`,
 with `StripeGateway` for Stripe calls. Shared account email delivery lives in
 `cedar_press.account_email`, outside the billing package.
-FastAPI dependencies share one lazy gateway; `StripeGateway(client=...)` accepts
-an injected SDK client. `AccountSetupService` handles activation and leased email
+FastAPI dependencies share one `StripeGateway`, which creates its SDK client on
+first use or accepts an injected client through `StripeGateway(client=...)`. `AccountSetupService` handles activation and leased email
 delivery (migration 009), outside SQL transactions. Webhooks run off the event
 loop and refresh affected objects; the repair CLI reconciles full history.
 Billing management targets an owned subscription, including repeat purchases.

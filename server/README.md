@@ -115,7 +115,8 @@ credentials and sign in normally.
 The `cedar_press.billing` package uses `BillingService`, `GuestCheckoutService` and `BillingReconciler`,
 with `StripeGateway` for Stripe calls. Shared account email delivery lives in
 `cedar_press.account_email`, outside the billing package.
-Dependencies share one lazy gateway; tests can inject `StripeGateway(client=...)`.
+Dependencies share one `StripeGateway`; its client initializes on first use.
+Tests can inject `StripeGateway(client=...)`.
 `AccountSetupService` handles activation and retryable email delivery.
 Google sign-in remains separate work. See
 [DATABASE.md](DATABASE.md) for the [schema ERD](DATABASE.md#schema-erd) and local Docker setup.

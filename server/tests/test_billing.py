@@ -327,7 +327,7 @@ class TestBillingPolicy(unittest.TestCase):
             mock.patch.dict(os.environ, {"CEDAR_PRESS_STRIPE_MODE": "live"}),
             self.assertRaises(BillingError),
         ):
-            StripeGateway()
+            _ = StripeGateway().client
 
     def test_signed_webhook_signature_and_version_checked_before_processing(self):
         from cedar_press.app import app
@@ -560,9 +560,10 @@ class TestBillingPostgres(unittest.TestCase):
 
     def test_replacement_does_not_create_checkout_when_original_is_processing(self):
         self.billing.checkout(self.user["email"], "press")
-        with mock.patch.object(
-            self.gateway, "expire_checkout", return_value={"status": "complete"}
-        ), self.assertRaises(BillingError) as error:
+        with (
+            mock.patch.object(self.gateway, "expire_checkout", return_value={"status": "complete"}),
+            self.assertRaises(BillingError) as error,
+        ):
             self.billing.checkout(self.user["email"], "press_pro", replace_open=True)
         self.assertEqual(error.exception.code, "CHECKOUT_PROCESSING")
         self.assertEqual(db.one("SELECT count(*) AS n FROM cedar_press_checkout_attempts")["n"], 1)

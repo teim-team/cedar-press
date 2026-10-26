@@ -13,6 +13,7 @@ from urllib.parse import parse_qs, urlsplit
 
 import stripe
 
+from cedar_press.billing.dependencies import create_billing_services
 from cedar_press.billing.policy import BillingError
 from cedar_press.billing.stripe_gateway import API_VERSION, StripeGateway
 from tests.test_billing import PRICE_MAP, SETTINGS, price_data
@@ -210,6 +211,35 @@ class TestStripeGateway(unittest.TestCase):
             gateway = StripeGateway(client=client)
             self.assertEqual(gateway.price("price_stub"), {"id": "price_stub", "currency": "usd"})
         client.v1.prices.retrieve.assert_called_once_with("price_stub")
+
+    def test_default_client_is_created_once_on_first_use(self):
+        with mock.patch("stripe.StripeClient") as client_factory:
+            client_factory.return_value.v1.prices.retrieve.return_value = {"id": "price_stub"}
+            gateway = StripeGateway()
+            client_factory.assert_not_called()
+            self.assertEqual(gateway.price("price_stub"), {"id": "price_stub"})
+            self.assertFalse(gateway.livemode)
+            self.assertEqual(gateway.price("price_stub"), {"id": "price_stub"})
+            client_factory.assert_called_once()
+            self.assertEqual(client_factory.call_args.kwargs["stripe_version"], API_VERSION)
+
+    def test_composition_shares_one_gateway_without_requiring_stripe_configuration(self):
+        with mock.patch.dict(os.environ, {"CEDAR_PRESS_STRIPE_SECRET_KEY": ""}):
+            services = create_billing_services()
+            self.assertIsInstance(services.billing.gateway, StripeGateway)
+            self.assertIs(services.billing.gateway, services.guest.gateway)
+            self.assertIs(services.billing.gateway, services.reconciler.gateway)
+            with self.assertRaises(BillingError):
+                _ = services.billing.gateway.livemode
+            database = mock.Mock()
+            database.one.return_value = {
+                "id": "user",
+                "email": "reader@example.invalid",
+                "stripe_customer_id": None,
+            }
+            database.query.return_value = []
+            services = create_billing_services(database=database)
+            self.assertFalse(services.billing.summary("reader@example.invalid")["available"])
 
     def test_sdk_resources_are_converted_and_pagination_is_followed(self):
         self.assertEqual(self.gateway.price("price_fixture")["currency"], "usd")

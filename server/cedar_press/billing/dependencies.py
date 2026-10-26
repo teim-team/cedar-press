@@ -9,7 +9,7 @@ from cedar_press.billing.contracts import BillingGateway, EmailSender
 from cedar_press.billing.guest_checkout import GuestCheckoutService
 from cedar_press.billing.reconciler import BillingReconciler
 from cedar_press.billing.service import BillingService
-from cedar_press.billing.stripe_gateway import LazyStripeGateway
+from cedar_press.billing.stripe_gateway import StripeGateway
 
 
 @dataclass(frozen=True)
@@ -28,7 +28,7 @@ def create_billing_services(
     clock=None,
     database=db,
 ) -> BillingServices:
-    gateway = gateway if gateway is not None else LazyStripeGateway()
+    gateway = gateway if gateway is not None else StripeGateway()
     sender = email_sender or AccountEmailSender()
     setup = AccountSetupService(sender, database=database)
     guest = GuestCheckoutService(

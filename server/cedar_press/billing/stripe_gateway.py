@@ -37,23 +37,34 @@ def stripe_url(value: str) -> str:
 
 
 class StripeGateway:
+    """Stripe operations with an injected client or one initialized on first use."""
+
     def __init__(self, client: stripe.StripeClient | None = None):
-        mode = os.environ.get("CEDAR_PRESS_STRIPE_MODE", "test")
-        if mode not in {"test", "live"}:
+        self._client = client
+        self._mode = os.environ.get("CEDAR_PRESS_STRIPE_MODE", "test")
+
+    @property
+    def client(self):
+        if self._mode not in {"test", "live"}:
             raise unavailable()
-        self.livemode = mode == "live"
-        if client is not None:
-            self.client = client
-            return
-        key = os.environ.get("CEDAR_PRESS_STRIPE_SECRET_KEY", "")
-        if not key.startswith((f"sk_{mode}_", f"rk_{mode}_")):
-            raise unavailable()
-        self.client = stripe.StripeClient(
-            key,
-            stripe_version=API_VERSION,
-            max_network_retries=1,
-            http_client=stripe.RequestsClient(timeout=10),
-        )
+        if self._client is None:
+            key = os.environ.get("CEDAR_PRESS_STRIPE_SECRET_KEY", "")
+            if not key.startswith((f"sk_{self._mode}_", f"rk_{self._mode}_")):
+                raise unavailable()
+            self._client = stripe.StripeClient(
+                key,
+                stripe_version=API_VERSION,
+                max_network_retries=1,
+                http_client=stripe.RequestsClient(timeout=10),
+            )
+        return self._client
+
+    @property
+    def livemode(self):
+        # Availability checks must still validate credentials before exposing
+        # checkout actions, even though construction itself needs no Stripe key.
+        _ = self.client
+        return self._mode == "live"
 
     def rows(self, response):
         return [plain(item) for item in response.auto_paging_iter()]
@@ -279,15 +290,3 @@ class StripeGateway:
                 },
             }
         return stripe_url(self.client.v1.billing_portal.sessions.create(params).url)
-
-
-class LazyStripeGateway:
-    """One request-scoped client, initialized only when billing is used."""
-
-    def __init__(self):
-        self._gateway = None
-
-    def __getattr__(self, name):
-        if self._gateway is None:
-            self._gateway = StripeGateway()
-        return getattr(self._gateway, name)
