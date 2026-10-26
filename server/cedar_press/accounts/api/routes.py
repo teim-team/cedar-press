@@ -9,7 +9,7 @@ from urllib.parse import urlencode
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, Response
 
-from cedar_press import codes, ratelimit, subscribers
+from cedar_press import codes, ratelimit
 from cedar_press.accounts.api.dependencies import (
     _guard,
     _require_auth_origin,
@@ -27,6 +27,7 @@ from cedar_press.accounts.api.schemas import (
     ResetRequest,
 )
 from cedar_press.accounts.errors import AccountError
+from cedar_press.accounts.services import subscribers
 from cedar_press.accounts.services.email import AccountEmailSender
 from cedar_press.accounts.services.sessions import (
     Session,

@@ -19,8 +19,9 @@ from urllib.parse import urlsplit, urlunsplit
 import stripe
 from fastapi.testclient import TestClient
 
-from cedar_press import db, subscribers
+from cedar_press import db
 from cedar_press.accounts.services import sessions as session
+from cedar_press.accounts.services import subscribers
 from cedar_press.billing.adapters.stripe import API_VERSION, StripeAdapter, stripe_url
 from cedar_press.billing.api.dependencies import create_billing_services, get_billing_services
 from cedar_press.billing.errors import BillingError

@@ -135,7 +135,8 @@ Billing uses `BillingService`, `CheckoutService` and `BillingReconciler`,
 with `StripeAdapter` in `billing/adapters/stripe.py` for Stripe calls.
 Both packages keep HTTP routes, schemas and dependencies under `api/`, application
 services under `services/`, and domain records in `models.py`. Accounts owns
-authentication, sessions, setup links and email transport. Billing owns purchase delivery tracking in `billing/services/purchase_email.py`.
+authentication, sessions, setup links and email transport. Subscriber storage lives
+in `accounts/services/subscribers.py`. Billing owns purchase delivery tracking in `billing/services/purchase_email.py`.
 FastAPI dependencies share one `StripeAdapter`, which creates its SDK client on
 first use or accepts an injected client through `StripeAdapter(client=...)`.
 `AccountSetupService` handles account activation; `PurchaseEmailService` handles

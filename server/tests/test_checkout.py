@@ -10,8 +10,9 @@ from urllib.parse import parse_qs, urlsplit
 import stripe
 from fastapi.testclient import TestClient
 
-from cedar_press import accounts, db, ratelimit, subscribers
+from cedar_press import accounts, db, ratelimit
 from cedar_press.accounts.errors import AccountError
+from cedar_press.accounts.services import subscribers
 from cedar_press.accounts.services.email import AccountEmailSender
 from cedar_press.billing.api.dependencies import create_billing_services
 from cedar_press.billing.errors import BillingError

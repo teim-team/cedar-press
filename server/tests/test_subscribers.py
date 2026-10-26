@@ -21,8 +21,9 @@ from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from cedar_press import codes, db, subscribers
+from cedar_press import codes, db
 from cedar_press.accounts.services import sessions as session
+from cedar_press.accounts.services import subscribers
 
 PG = os.environ.get("CEDAR_PRESS_TEST_DATABASE_URL", "").strip()
 

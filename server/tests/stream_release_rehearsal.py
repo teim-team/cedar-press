@@ -143,7 +143,8 @@ def run_one(item, output, temporary, timeout):
     from lumecon_data.catalog import build_catalog
     from lumecon_data.collection import collection_dir
 
-    from cedar_press import repository, subscribers
+    from cedar_press import repository
+    from cedar_press.accounts.services import subscribers
     from cedar_press.accounts.services.sessions import Session, current_session
     from cedar_press.app import app
 

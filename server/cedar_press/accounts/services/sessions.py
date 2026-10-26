@@ -21,8 +21,9 @@ from hashlib import sha256
 
 from fastapi import Cookie, HTTPException, Response
 
-from cedar_press import ratelimit, subscribers
+from cedar_press import ratelimit
 from cedar_press.accounts.models import Session
+from cedar_press.accounts.services import subscribers
 
 COOKIE = "cedar_press_session"
 MAX_AGE = 60 * 60 * 24 * 14

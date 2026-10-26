@@ -72,10 +72,10 @@ from cedar_press import (
     release_research,
     repository,
     shelf,
-    subscribers,
 )
 from cedar_press.accounts.api.dependencies import auth_origins, require_account
 from cedar_press.accounts.api.routes import router as accounts_router
+from cedar_press.accounts.services import subscribers
 from cedar_press.accounts.services.sessions import (
     Session,
     account_id_for,

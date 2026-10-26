@@ -15,8 +15,9 @@ from unittest import mock
 from fastapi import HTTPException, Response
 from fastapi.testclient import TestClient
 
-from cedar_press import db, subscribers
+from cedar_press import db
 from cedar_press.accounts.services import sessions as session
+from cedar_press.accounts.services import subscribers
 
 
 class TestSessionLifecycle(unittest.TestCase):

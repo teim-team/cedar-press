@@ -39,8 +39,9 @@ cedar_press/
     need_profiles.py        NEED evidence on registered Native entity profiles
 
   subscribers
-    session.py              who is signed in: a signed, HTTP-only cookie
-    subscribers.py          who holds a subscription, and which access code bought it
+    accounts/services/
+      sessions.py           who is signed in: a signed, HTTP-only cookie
+      subscribers.py        subscriber persistence, credentials and legacy access
     codes.py                checks an access code is real, unspent, unexpired and the reader's
     ratelimit.py            rate limits on sign-in and activation
     priorities.py           Shape the Research: Cedar Points, priorities and requests
@@ -92,7 +93,7 @@ modules today. When the collections move into Postgres it answers from there
 and `app.py` does not change — routes hold HTTP concerns and no data access
 of their own, which is what keeps that swap to one module.
 
-`subscribers.py` already persists subscribers and access codes when `DATABASE_URL`
+`accounts/services/subscribers.py` already persists subscribers and access codes when `DATABASE_URL`
 is configured. Redemption spends the code and creates its subscriber in one
 PostgreSQL transaction. The environment-backed account/code fallback is for
 development; staging and production refuse it. Install the PostgreSQL extra

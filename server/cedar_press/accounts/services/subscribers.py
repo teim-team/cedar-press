@@ -22,7 +22,7 @@ when — if — a platform account appears. `bind_user` is that moment.
 
 WHY THE PASSWORD RULE IS NOT IN HERE.
 This module answers "is this address a subscriber, and on which tier".
-`session.py` still owns the cookie, the signature and the comparison, so
+`sessions.py` still owns the cookie, the signature and the comparison, so
 there is one place that decides whether somebody is signed in. What changed
 is where it looks the subscriber up.
 """

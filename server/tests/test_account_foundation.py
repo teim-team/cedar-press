@@ -8,8 +8,9 @@ import uuid
 from unittest import mock
 from urllib.parse import urlsplit, urlunsplit
 
-from cedar_press import accounts, db, subscribers
+from cedar_press import accounts, db
 from cedar_press.accounts.services import sessions as session
+from cedar_press.accounts.services import subscribers
 
 PG = os.environ.get("CEDAR_PRESS_TEST_DATABASE_URL", "")
 FOUNDATION = "004_account_foundation.sql"

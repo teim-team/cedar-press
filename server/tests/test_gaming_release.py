@@ -44,7 +44,8 @@ try:
     from fastapi.testclient import TestClient
 
     from cedar_press import collections as launch
-    from cedar_press import repository, subscribers
+    from cedar_press import repository
+    from cedar_press.accounts.services import subscribers
     from cedar_press.accounts.services.sessions import Session, current_session
     from cedar_press.app import app
 

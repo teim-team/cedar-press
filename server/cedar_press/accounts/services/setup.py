@@ -3,8 +3,9 @@
 import hashlib
 import secrets
 
-from cedar_press import db, subscribers
+from cedar_press import db
 from cedar_press.accounts.errors import AccountError
+from cedar_press.accounts.services import subscribers
 
 
 def token_hash(token):

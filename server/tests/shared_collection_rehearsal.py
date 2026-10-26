@@ -26,7 +26,8 @@ def main():
     from lumecon_data.api import create_app
     from lumecon_data.collection import build_collection_catalog, verify_collection_release
 
-    from cedar_press import repository, subscribers
+    from cedar_press import repository
+    from cedar_press.accounts.services import subscribers
     from cedar_press.accounts.services.sessions import Session, current_session
     from cedar_press.app import app
 
