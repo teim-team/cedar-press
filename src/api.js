@@ -168,6 +168,16 @@ export async function saveAccountProfile({ name }) {
   return request("/auth/profile", { method: "PATCH", body: { name } });
 }
 
+/** Email a confirmation link to the new address; nothing changes until it is opened. */
+export async function requestEmailChange({ newEmail, password }) {
+  return request("/auth/email-change", { method: "POST", body: { new_email: newEmail, password } });
+}
+
+/** Apply a confirmed change. Every session ends, this one included. */
+export async function confirmEmailChange({ token }) {
+  return request("/auth/email-change/confirm", { method: "POST", body: { token } });
+}
+
 /** Email a reset link. Answers the same whether or not the address has an account. */
 export async function requestPasswordReset({ email, next = "/" }) {
   return request("/auth/password-reset", { method: "POST", body: { email, next } });

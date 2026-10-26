@@ -34,6 +34,38 @@ test("settings shows the profile and saves a name", async ({ page }) => {
   expect(saved).toEqual({ name: "Ada Reader" });
 });
 
+test("settings sends an email change for confirmation", async ({ page }) => {
+  await account(page);
+  let sent;
+  await page.route("**/api/auth/email-change", async (route) => {
+    sent = route.request().postDataJSON();
+    await route.fulfill({ status: 202, json: null });
+  });
+  await page.goto("/settings");
+  const profile = page.getByRole("region", { name: "Profile", exact: true });
+  await profile.getByText("Change email").click();
+  await profile.getByLabel("New email").fill("new@cedar-press.invalid");
+  await profile.getByLabel("Current password").fill("a-long-password");
+  await profile.getByRole("button", { name: "Send confirmation link", exact: true }).click();
+  await expect(profile.getByRole("status")).toContainText("new@cedar-press.invalid");
+  expect(sent).toEqual({ new_email: "new@cedar-press.invalid", password: "a-long-password" });
+});
+
+test("the emailed link confirms the change and asks for a fresh sign-in", async ({ page }) => {
+  await page.route("**/api/me", (route) => route.fulfill({ status: 401, json: { detail: "Not signed in." } }));
+  let confirmed;
+  await page.route("**/api/auth/email-change/confirm", async (route) => {
+    confirmed = route.request().postDataJSON();
+    await route.fulfill({ json: { email: "new@cedar-press.invalid" } });
+  });
+  await page.goto("/login#email-change=synthetic-change");
+  await expect(page).toHaveURL(/\/login$/);
+  await page.getByRole("button", { name: "Confirm new email", exact: true }).click();
+  await expect(page.getByRole("status")).toContainText("Your sign-in email is now new@cedar-press.invalid");
+  await expect(page.getByLabel("Work email")).toHaveValue("new@cedar-press.invalid");
+  expect(confirmed).toEqual({ token: "synthetic-change" });
+});
+
 test("unpaid account can choose annual billing and submit a discount", async ({ page }) => {
   await account(page);
   let submitted;

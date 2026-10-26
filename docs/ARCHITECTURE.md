@@ -53,9 +53,9 @@ git ls-files src/<dir>/grove                                   # files to move
 
 | | |
 |---|---|
-| Files to move | 168 — `features/grove` 120, `pages/grove` 44, `styles/grove` 4 |
-| Path references to rewrite | 358, across 80 files |
-| Referencing files inside `src/` | 50 — `pages/` 36, `features/` 12, `context/` 1, `main.jsx` 1 |
+| Files to move | 168 — `features/grove` 120, `pages/grove` 45, `styles/grove` 3 |
+| Path references to rewrite | 363, across 81 files |
+| Referencing files inside `src/` | 51 — `pages/` 37, `features/` 12, `context/` 1, `main.jsx` 1 |
 | Referencing files outside `src/` | 30 — `server/cedar_press/` 6, `scripts/` 7, `docs/` 6, `server/tests/` 5, `tests/` 2, `data/` 2, `.env.example` 1, `eslint.config.js` 1 |
 
 The reason this was deferred, open pull requests that touched the same files,
@@ -63,7 +63,7 @@ has expired.
 
 It is a mechanical rename with no behaviour change, and it should land as its
 own commit: the three directories move to `press/` and the references are
-rewritten in one pass. The question "did all 358 references get rewritten?"
+rewritten in one pass. The question "did all 363 references get rewritten?"
 is one the build, the suites and the smoke run answer, and a reader cannot
 answer it from a diff. Prose (Markdown, comments, `.env.example`) is what no build sees,
 which is why `test_rename_plan.py` counts textual occurrences rather than
@@ -142,6 +142,8 @@ The API compresses (`GZipMiddleware`, over 1 kB): `/press/collections` is
 | --- | --- |
 | `GET /me`, `POST /auth/login`, `POST /auth/logout`, `POST /auth/password` | The session |
 | `GET`, `PATCH /auth/profile` | The account's name, join date and email verification |
+| `POST /auth/email-change`, `/auth/email-change/confirm` | Change the sign-in email, confirmed from the new inbox |
+| `GET /health` | Liveness, and the database connection when one is configured (503 if it is unreachable) |
 | `GET /press/collections` | The catalog this subscription can see |
 | `GET /press/releases` | Release history |
 | `GET /press/collections/:id/download` | A release file, served as a blob |

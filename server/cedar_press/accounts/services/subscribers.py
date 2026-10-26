@@ -249,21 +249,26 @@ def authenticate(email: str, password: str) -> Subscriber | None:
             verify_password(password, _DUMMY_HASH)
         return None
     if db.configured():
-        if not verify_password(password, found.password_hash):
-            return None
-        if int(found.password_hash.split("$")[1]) < _ROUNDS:
-            # Sign-in is the only time the password is in hand to re-derive an
-            # older, cheaper hash. Conditional on the hash just verified, so a
-            # password changed in the same instant is never overwritten.
-            upgraded = db.execute(
-                "UPDATE cedar_press_subscribers SET password_hash = %s, updated_at = now()"
-                " WHERE lower(email) = %s AND password_hash = %s",
-                (hash_password(password), found.email, found.password_hash),
-            )
-            if upgraded:
-                return find(found.email)
-        return found
+        return found if verify_password(password, found.password_hash) else None
     return found if hmac.compare_digest(found.password_hash or "", password) else None
+
+
+def upgrade_hash(found: Subscriber, password: str) -> Subscriber:
+    """Re-derive an older, cheaper hash from a password just verified.
+
+    Sign-in only: a new hash ends every session, so a password check made
+    inside a signed-in request must not trigger it. Conditional on the hash
+    just verified, so a password changed in the same instant is never
+    overwritten.
+    """
+    if not db.configured() or int(found.password_hash.split("$")[1]) >= _ROUNDS:
+        return found
+    upgraded = db.execute(
+        "UPDATE cedar_press_subscribers SET password_hash = %s, updated_at = now()"
+        " WHERE lower(email) = %s AND password_hash = %s",
+        (hash_password(password), found.email, found.password_hash),
+    )
+    return (find(found.email) or found) if upgraded else found
 
 
 def create(email: str, password: str, tier: str) -> Subscriber:
@@ -299,10 +304,6 @@ def change_password(email: str, password: str) -> Subscriber | None:
         return find(address) if changed else None
     found = find(address)
     return create(address, password, found.tier) if found else None
-
-
-def exists(email: str) -> bool:
-    return find(email) is not None
 
 
 def bind_user(email: str, user_id: str) -> bool:
@@ -473,7 +474,89 @@ def set_display_name(email: str, name: str | None) -> None:
             "UPDATE cedar_press_subscribers SET display_name = %s WHERE lower(email) = %s",
             (name, address),
         )
-    elif name is None:
-        _names.pop(address, None)
     else:
         _names[address] = name
+
+
+# ── email changes ───────────────────────────────────────────────────────────
+
+
+class EmailChangeUnavailable(Exception):
+    """Changing a sign-in address needs the account database."""
+
+
+def issue_email_change(email: str, new_email: str) -> str | None:
+    """A single-use token that moves this account to ``new_email``.
+
+    None when the new address already holds an account; the caller answers
+    the same either way, so the form cannot be used to ask who subscribes.
+    A new request replaces any outstanding one.
+    """
+    if not db.configured():
+        raise EmailChangeUnavailable
+    target = (new_email or "").strip().lower()
+    if db.one("SELECT 1 FROM cedar_press_subscribers WHERE lower(btrim(email)) = %s", (target,)):
+        return None
+    token = secrets.token_urlsafe(32)
+    db.execute(
+        "INSERT INTO cedar_press_email_changes (token_hash, user_id, new_email, expires_at)"
+        " SELECT %s, id, %s, %s FROM cedar_press_subscribers WHERE lower(email) = %s"
+        " ON CONFLICT (user_id) WHERE used_at IS NULL DO UPDATE SET"
+        " token_hash = EXCLUDED.token_hash, new_email = EXCLUDED.new_email,"
+        " expires_at = EXCLUDED.expires_at, created_at = now()",
+        (
+            _reset_hash(token),
+            target,
+            dt.datetime.now(dt.timezone.utc) + RESET_LIFETIME,
+            (email or "").strip().lower(),
+        ),
+    )
+    return token
+
+
+def redeem_email_change(token: str, on_change=None) -> tuple[str, str] | None:
+    """Move the account to its confirmed address: ``(old, new)``, or None.
+
+    Every session ends, since the address is part of each cookie. The reader's
+    declared work moves with it and outstanding reset links for the old
+    address die. ``on_change(customer_id, new_email)`` runs inside the
+    transaction, so a billing record that cannot follow rolls the change back
+    rather than leaving the two disagreeing.
+    """
+    if not db.configured():
+        raise EmailChangeUnavailable
+    with db.pool().connection() as conn, conn.cursor() as cur:
+        cur.execute(
+            "UPDATE cedar_press_email_changes c SET used_at = now()"
+            " FROM cedar_press_subscribers s"
+            " WHERE c.token_hash = %s AND c.used_at IS NULL AND c.expires_at > now()"
+            " AND s.id = c.user_id RETURNING s.id, s.email, s.stripe_customer_id, c.new_email",
+            (_reset_hash(token or ""),),
+        )
+        row = cur.fetchone()
+        if not row:
+            return None
+        old, new = row["email"], row["new_email"]
+        cur.execute(
+            "SELECT 1 FROM cedar_press_subscribers WHERE lower(btrim(email)) = %s", (new,)
+        )
+        if cur.fetchone():
+            conn.rollback()
+            return None
+        # The account guard (migration 010) refuses an address change outside this flow.
+        cur.execute("SET LOCAL cedar_press.verified_email_change = 'on'")
+        cur.execute(
+            "UPDATE cedar_press_subscribers SET email = %s, email_verified_at = now(),"
+            " updated_at = now() WHERE id = %s",
+            (new, row["id"]),
+        )
+        cur.execute("DELETE FROM cedar_press_reader_profiles WHERE email = %s", (new,))
+        cur.execute(
+            "UPDATE cedar_press_reader_profiles SET email = %s WHERE email = %s", (new, old)
+        )
+        cur.execute(
+            "DELETE FROM cedar_press_password_resets WHERE email = %s AND used_at IS NULL", (old,)
+        )
+        if on_change and row["stripe_customer_id"]:
+            on_change(row["stripe_customer_id"], new)
+    return old, new

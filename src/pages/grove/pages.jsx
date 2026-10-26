@@ -27,6 +27,7 @@ export { default as CedarPress } from "./CedarPress.jsx";
 // small (about a kilobyte gzipped each).
 export { default as CedarPressResearchAccess } from "./CedarPressResearchAccess.jsx";
 export { default as CedarPressTribalRequest } from "./CedarPressTribalRequest.jsx";
+export { CedarPressPrivacy, CedarPressTerms } from "./CedarPressLegal.jsx";
 
 export const CedarPressData = lazy(() => import("./CedarPressData.jsx"));
 export const CedarPressMethods = lazy(() => import("./CedarPressMethods.jsx"));

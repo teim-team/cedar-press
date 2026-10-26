@@ -63,6 +63,7 @@ class _Backend:
             db.migrate()
             db.execute(
                 "TRUNCATE cedar_press_subscribers, cedar_press_password_resets,"
+                " cedar_press_email_changes, cedar_press_reader_profiles,"
                 " cedar_press_login_identities, cedar_press_access_grants,"
                 " cedar_press_account_setup_links, cedar_press_account_email_deliveries,"
                 " cedar_press_checkout_attempts, cedar_press_checkouts,"
@@ -189,6 +190,7 @@ class TestPostgresBackend(_Backend, unittest.TestCase):
             (older, "reader@example.org"),
         )
         self.assertIsNone(subscribers.authenticate("reader@example.org", "wrong"))
+        self.assertIsNotNone(subscribers.authenticate("reader@example.org", "correct-horse"))
         self.assertEqual(subscribers.find("reader@example.org").password_hash, older)
         from fastapi import Response
 
@@ -198,6 +200,61 @@ class TestPostgresBackend(_Backend, unittest.TestCase):
         current = f"pbkdf2${subscribers._ROUNDS}$"
         self.assertTrue(subscribers.find("reader@example.org").password_hash.startswith(current))
         self.assertIsNotNone(subscribers.authenticate("reader@example.org", "correct-horse"))
+
+    def test_an_email_change_moves_the_account_once_and_signs_it_out(self) -> None:
+        cookie = session._encode(session.Session("reader@example.org", "press"))
+        db.execute(
+            "INSERT INTO cedar_press_reader_profiles (email, work) VALUES (%s, 'research')",
+            ("reader@example.org",),
+        )
+        reset = subscribers.issue_reset("reader@example.org")
+        token = subscribers.issue_email_change("reader@example.org", " New@Example.org ")
+        self.assertEqual(
+            subscribers.redeem_email_change(token), ("reader@example.org", "new@example.org")
+        )
+        self.assertIsNone(subscribers.find("reader@example.org"))
+        self.assertEqual(subscribers.find("new@example.org").tier, "press")
+        self.assertIsNotNone(subscribers.authenticate("new@example.org", "correct-horse"))
+        self.assertTrue(subscribers.profile("new@example.org")["email_verified"])
+        self.assertIsNone(session._decode(cookie))
+        self.assertEqual(
+            db.one("SELECT work FROM cedar_press_reader_profiles WHERE email = %s",
+                   ("new@example.org",))["work"],
+            "research",
+        )
+        self.assertIsNone(subscribers.redeem_reset(reset, "a-reset-password"))
+        self.assertIsNone(subscribers.redeem_email_change(token))
+
+    def test_an_email_change_cannot_take_an_address_in_use(self) -> None:
+        self.assertIsNone(subscribers.issue_email_change("reader@example.org", "PRO@example.org"))
+        token = subscribers.issue_email_change("reader@example.org", "later@example.org")
+        subscribers.create("later@example.org", "correct-horse", "press")
+        self.assertIsNone(subscribers.redeem_email_change(token))
+        self.assertIsNotNone(subscribers.find("reader@example.org"))
+
+    def test_a_billing_failure_rolls_the_email_change_back(self) -> None:
+        db.execute(
+            "UPDATE cedar_press_subscribers SET stripe_customer_id = 'cus_test' WHERE email = %s",
+            ("reader@example.org",),
+        )
+        token = subscribers.issue_email_change("reader@example.org", "new@example.org")
+
+        def refuse(customer, email):
+            raise RuntimeError("billing is down")
+
+        with self.assertRaises(RuntimeError):
+            subscribers.redeem_email_change(token, refuse)
+        self.assertIsNotNone(subscribers.find("reader@example.org"))
+        updated = []
+        subscribers.redeem_email_change(token, lambda *call: updated.append(call))
+        self.assertEqual(updated, [("cus_test", "new@example.org")])
+        self.assertIsNotNone(subscribers.find("new@example.org"))
+
+    def test_an_expired_email_change_is_refused(self) -> None:
+        with mock.patch.object(subscribers, "RESET_LIFETIME", -subscribers.RESET_LIFETIME):
+            token = subscribers.issue_email_change("reader@example.org", "new@example.org")
+        self.assertIsNone(subscribers.redeem_email_change(token))
+        self.assertIsNotNone(subscribers.find("reader@example.org"))
 
     def test_a_subscription_survives_a_restart(self) -> None:
         # The whole reason this module exists. `reset_for_tests` drops the

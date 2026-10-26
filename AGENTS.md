@@ -140,7 +140,8 @@ in `accounts/services/subscribers.py`. Billing owns purchase delivery tracking i
 FastAPI dependencies share one `StripeAdapter`, which creates its SDK client on
 first use or accepts an injected client through `StripeAdapter(client=...)`.
 `AccountSetupService` handles account activation; `PurchaseEmailService` handles
-leased purchase email delivery (migration 009), outside SQL transactions. Webhooks
+leased purchase email delivery (migration 009), outside SQL transactions. Migration 010
+adds confirmed email changes, which also update the Stripe customer. Webhooks
 run off the event
 loop and refresh affected objects; the repair CLI reconciles full history.
 Billing management targets an owned subscription, including repeat purchases.

@@ -8,7 +8,7 @@ import { AccountPage } from "./AccountPage.jsx";
 import { cloneElement, useEffect, useId, useState } from "react";
 import { Link, Navigate, useLocation, useNavigate, useSearchParams } from "react-router";
 
-import { confirmPasswordReset, requestPasswordReset } from "../../api";
+import { confirmEmailChange, confirmPasswordReset, requestPasswordReset } from "../../api";
 import { useAuth } from "../../context/useAuth";
 import { contactHref } from "../../features/grove/appLink.js";
 import { canReadCedarPress } from "../../features/grove/pressAccess";
@@ -27,7 +27,7 @@ const PITCH = [
   "Downloadable spreadsheets",
 ];
 
-const STEP = Object.freeze({ SIGN_IN: "sign-in", FORGOT: "forgot", RESET: "reset" });
+const STEP = Object.freeze({ SIGN_IN: "sign-in", FORGOT: "forgot", RESET: "reset", EMAIL_CHANGE: "email-change" });
 
 function Field({ label, aside = null, children }) {
   const id = useId();
@@ -47,9 +47,13 @@ export default function CedarPressLogin() {
   const location = useLocation();
   const navigate = useNavigate();
   // The emailed link carries the token in the fragment, which never reaches a server log.
-  const linkedToken = new URLSearchParams(location.hash.slice(1)).get("reset");
+  const fragment = new URLSearchParams(location.hash.slice(1));
+  const linkedToken = fragment.get("reset");
+  const linkedChange = fragment.get("email-change");
   const [resetToken, setResetToken] = useState(linkedToken);
-  const [step, setStep] = useState(linkedToken ? STEP.RESET : STEP.SIGN_IN);
+  const [changeToken, setChangeToken] = useState(linkedChange);
+  const [step, setStep] = useState(linkedToken ? STEP.RESET : linkedChange ? STEP.EMAIL_CHANGE : STEP.SIGN_IN);
+  const [notice, setNotice] = useState(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [pending, setPending] = useState(false);
@@ -63,6 +67,11 @@ export default function CedarPressLogin() {
     setStep(STEP.RESET);
     setError(null);
   }
+  if (linkedChange && linkedChange !== changeToken) {
+    setChangeToken(linkedChange);
+    setStep(STEP.EMAIL_CHANGE);
+    setError(null);
+  }
 
   useEffect(() => {
     document.head.querySelector('meta[name="robots"]')?.setAttribute("content", "noindex");
@@ -70,15 +79,16 @@ export default function CedarPressLogin() {
 
   // The token is held in state, so it can leave the address bar and history.
   useEffect(() => {
-    if (linkedToken) navigate({ pathname: location.pathname, search: location.search }, { replace: true });
-  }, [linkedToken, location.pathname, location.search, navigate]);
+    if (linkedToken || linkedChange) navigate({ pathname: location.pathname, search: location.search }, { replace: true });
+  }, [linkedToken, linkedChange, location.pathname, location.search, navigate]);
 
-  if (!loading && user) return <Navigate to={canReadCedarPress(user) ? next : "/settings"} replace />;
+  if (!loading && user && step !== STEP.EMAIL_CHANGE) return <Navigate to={canReadCedarPress(user) ? next : "/settings"} replace />;
 
   const go = (to) => {
     setStep(to);
     setError(null);
     setResetSent(false);
+    setNotice(null);
   };
 
   const run = (action, describe = (err) => err?.message) => async (event) => {
@@ -109,6 +119,14 @@ export default function CedarPressLogin() {
     await refreshSession();
   });
 
+  const submitEmailChange = run(async () => {
+    const { email: changed } = await confirmEmailChange({ token: changeToken });
+    await refreshSession();
+    setEmail(changed);
+    go(STEP.SIGN_IN);
+    setNotice(`Your sign-in email is now ${changed}. Sign in with it.`);
+  });
+
   const signingIn = step === STEP.SIGN_IN || !isConnected();
   const emailField = (
     <Field label="Work email">
@@ -130,6 +148,7 @@ export default function CedarPressLogin() {
             <>
               <h1 className="cp-login__h">Welcome back.</h1>
               <p className="cp-login__lede">Sign in to Cedar Press.</p>
+              {notice ? <p className="cp-gate__ok" role="status">{notice}</p> : null}
               {!isConnected() ? (
                 <p className="cp-gate__ok" role="status">
                   Dev server, not connected to the API, so signing in will fail. Run <code>npm run dev:connected</code> with the API running (docs/CONNECTING.md).
@@ -148,7 +167,7 @@ export default function CedarPressLogin() {
                   {pending ? "Signing in" : "Sign in"}
                 </button>
               </form>
-              <p className="cp-login__terms">By continuing, you agree to our Terms of Service and acknowledge our Privacy Policy.</p>
+              <p className="cp-login__terms">By continuing, you agree to our <Link to="/terms">Terms of Service</Link> and acknowledge our <Link to="/privacy">Privacy Policy</Link>.</p>
             </>
           ) : step === STEP.FORGOT ? (
             <>
@@ -173,6 +192,20 @@ export default function CedarPressLogin() {
                 <button type="button" className="cp-split__linkbtn" onClick={() => go(STEP.SIGN_IN)}>Back to log in</button>
               </p>
               <p className="cp-gate__aside"><a href={contactHref("Cedar Press password help")}>Contact us for help</a></p>
+            </>
+          ) : step === STEP.EMAIL_CHANGE ? (
+            <>
+              <h1 className="cp-login__h">Confirm your new email</h1>
+              <p className="cp-login__lede">
+                This makes the address that received the link your Cedar Press sign-in. You will be
+                signed out everywhere and sign in again with it.
+              </p>
+              <form className="cp-gate__form" onSubmit={submitEmailChange}>
+                {errorLine}
+                <button type="submit" className="cp-btn cp-btn--primary cp-btn--wide" disabled={pending}>
+                  {pending ? "Confirming" : "Confirm new email"}
+                </button>
+              </form>
             </>
           ) : (
             <>

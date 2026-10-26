@@ -34,3 +34,12 @@ class AccountSetup(ResetConfirm):
 class ProfileChange(BaseModel):
     name: str | None = Field(default=None, max_length=120)
 
+
+class EmailChange(BaseModel):
+    new_email: str = Field(max_length=254, pattern=r"^\s*[^@\s]+@[^@\s]+\.[^@\s]+\s*$")
+    password: str
+
+
+class EmailChangeConfirm(BaseModel):
+    token: str = Field(max_length=256)
+

@@ -1,6 +1,6 @@
 # The database
 
-See the [schema ERD](#schema-erd) for the tables defined by migrations 001–009.
+See the [schema ERD](#schema-erd) for the tables defined by migrations 001–010.
 
 ## Local Docker database
 
@@ -126,6 +126,10 @@ The confirmation page can resend its own paid account email, limited to three
 requests per 15 minutes. Migration 009 adds leased email delivery and hashed setup links.
 SMTP runs outside transactions; failed resends preserve earlier unexpired links.
 Webhook retries or the reconciliation command retry pending deliveries.
+Migration 010 adds confirmed email changes: a hashed one-hour link goes to the
+new address, and redeeming it moves the account, ends every session and updates
+the Stripe customer in one transaction. The account guard still refuses any
+other change of address.
 Only hashed browser and email tokens are stored; neither the browser's Checkout
 return nor its reservation cookie can establish account ownership.
 
@@ -221,6 +225,7 @@ applied.
 | `cedar_press_account_setup_links` | hashed, expiring setup links bound to account and email |
 | `cedar_press_account_email_deliveries` | delivery attempts and leases per paid checkout |
 | `cedar_press_password_resets` | hashed, single-use password reset tokens and their expiry |
+| `cedar_press_email_changes`   | hashed, single-use links that move an account to a confirmed new address |
 | `cedar_press_priorities`      | the editorial catalogue, re-seeded from the owner's file |
 | `cedar_press_ledger`          | append-only Cedar Points: why each point came or went    |
 | `cedar_press_allocations`     | the derived totals per priority                          |
@@ -288,7 +293,7 @@ the month is already earned — and still reports 2.
 
 ## Schema ERD
 
-Current PostgreSQL schema after migrations 001–009. `cedar_press_subscribers`
+Current PostgreSQL schema after migrations 001–010. `cedar_press_subscribers`
 is the sole account table. Connections show database foreign keys only; dotted
 lines are non-identifying relationships. `users` is an optional external teim-app
 table, not a second Cedar Press user table. Its foreign key is installed only
@@ -305,6 +310,7 @@ erDiagram
     cedar_press_subscribers ||..o{ cedar_press_checkout_attempts : user_id
     cedar_press_subscribers |o..o{ cedar_press_checkouts : "user_id after payment"
     cedar_press_subscribers ||..o{ cedar_press_account_setup_links : user_id
+    cedar_press_subscribers ||..o{ cedar_press_email_changes : "id to user_id; cascade delete"
     cedar_press_checkouts ||..o| cedar_press_account_email_deliveries : checkout_id
     cedar_press_subscriptions ||..o{ cedar_press_invoices : subscription_id
     cedar_press_payments ||..o{ cedar_press_refunds : payment_id
@@ -346,6 +352,14 @@ erDiagram
         text email
         timestamptz expires_at
         timestamptz used_at
+        timestamptz created_at
+    }
+    cedar_press_email_changes {
+        text token_hash PK
+        uuid user_id FK
+        text new_email
+        timestamptz expires_at
+        timestamptz used_at "Nullable"
         timestamptz created_at
     }
     cedar_press_account_email_deliveries {

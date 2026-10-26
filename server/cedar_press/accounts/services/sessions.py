@@ -102,6 +102,7 @@ def _lookup(email: str, password: str) -> Session | None:
     found = subscribers.authenticate(email, password)
     if found is None:
         return None
+    found = subscribers.upgrade_hash(found, password)
     # Complete the existing platform binding before capturing the cookie revision.
     subscribers.link_platform_account(found.email)
     # Re-read before issuance so a concurrent password change cannot bless

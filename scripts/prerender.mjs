@@ -4,8 +4,9 @@
 //
 //     npm run build && node scripts/prerender.mjs
 //
-// Only the three pages a visitor reaches without a subscription: the door,
-// the tribal data request policy and research access. Everything behind the
+// Only the pages a visitor reaches without a subscription: the door, the
+// tribal data request policy, research access, the terms and the privacy
+// policy. Everything behind the
 // gate is left as the app shell, which is what a crawler should get there.
 // React mounts over the rendered markup and replaces it with the same tree.
 //
@@ -24,7 +25,7 @@ const PORT = Number(process.env.CEDAR_PRESS_PRERENDER_PORT) || 41999;
 // server's SPA fallback would serve the prerendered door for any route not
 // yet captured, and a readiness wait on `#root h1` would be satisfied by the
 // wrong page.
-const PAGES = ["/tribal-data-request", "/research-access", "/"];
+const PAGES = ["/tribal-data-request", "/research-access", "/terms", "/privacy", "/"];
 
 async function waitFor(url, tries = 60) {
   for (let i = 0; i < tries; i += 1) {

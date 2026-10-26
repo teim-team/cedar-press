@@ -81,6 +81,20 @@ class TestSession(unittest.TestCase):
     def test_health_needs_no_session(self) -> None:
         self.assertEqual(client.get("/health").status_code, 200)
 
+    def test_health_reports_the_database_when_there_is_one(self) -> None:
+        from cedar_press import db
+
+        with mock.patch.object(db, "configured", return_value=True):
+            with mock.patch.object(db, "pool"):
+                response = client.get("/health")
+                self.assertEqual((response.status_code, response.json()["database"]), (200, "ok"))
+            refusing = mock.Mock(**{"connection.side_effect": OSError("connection refused")})
+            with mock.patch.object(db, "pool", return_value=refusing), \
+                    self.assertLogs("cedar_press.health", "ERROR"):
+                response = client.get("/health")
+                self.assertEqual(response.status_code, 503)
+                self.assertEqual(response.json()["database"], "unreachable")
+
     def test_reading_without_a_session_is_refused(self) -> None:
         for path in ("/me", "/press/collections"):
             with self.subTest(path=path):
@@ -144,6 +158,37 @@ class TestAccountProfile(unittest.TestCase):
     def test_a_name_over_the_column_limit_is_refused(self) -> None:
         sign_in()
         self.assertEqual(client.patch("/auth/profile", json={"name": "x" * 121}).status_code, 422)
+
+
+class TestEmailChange(unittest.TestCase):
+    def setUp(self) -> None:
+        client.cookies.clear()
+        ratelimit.reset_for_tests()
+        session_module.forget_activated_for_tests()
+        self.addCleanup(session_module.forget_activated_for_tests)
+
+    def ask(self, new_email="new@example.org", password="correct-horse"):
+        return client.post(
+            "/auth/email-change", json={"new_email": new_email, "password": password}
+        )
+
+    def test_it_needs_a_session_and_the_password(self) -> None:
+        self.assertEqual(self.ask().status_code, 401)
+        sign_in()
+        response = self.ask(password="wrong")
+        self.assertEqual((response.status_code, response.json()["code"]),
+                         (400, "INVALID_CREDENTIALS"))
+
+    def test_the_same_or_a_malformed_address_is_refused(self) -> None:
+        sign_in()
+        self.assertEqual(self.ask("Reader@Example.org").json()["code"], "EMAIL_UNCHANGED")
+        self.assertEqual(self.ask("not-an-address").status_code, 422)
+
+    def test_without_a_database_it_says_so(self) -> None:
+        sign_in()
+        self.assertEqual(self.ask().json()["code"], "EMAIL_CHANGE_UNAVAILABLE")
+        response = client.post("/auth/email-change/confirm", json={"token": "x"})
+        self.assertEqual(response.json()["code"], "EMAIL_CHANGE_UNAVAILABLE")
 
 
 class TestPasswordChange(unittest.TestCase):

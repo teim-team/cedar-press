@@ -12,7 +12,6 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router";
 import "./index.css";
 import "./styles/redesign.css";
 import "./styles/grove/press.css";
-import "./styles/grove/pressPreviewNotice.css";
 import "./styles/grove/pressLogin.css";
 
 import { AuthProvider } from "./context/AuthProvider.jsx";
@@ -25,8 +24,10 @@ import {
   CedarPressMethods,
   CedarPressPriorities,
   CedarPressRecord,
+  CedarPressPrivacy,
   CedarPressResearchAccess,
   CedarPressSettings,
+  CedarPressTerms,
   CedarPressTribalRequest,
   CedarPressWhatsNew,
   PageArriving,
@@ -40,9 +41,11 @@ import {
   PRESS_PATH,
   PRESS_RECORD_PATH,
   PRESS_REQUEST_PATH,
+  PRESS_PRIVACY_PATH,
   PRESS_RESEARCH_PATH,
   PRESS_PRIORITIES_PATH,
   PRESS_SETTINGS_PATH,
+  PRESS_TERMS_PATH,
   PRESS_WHATS_NEW_PATH,
 } from "./features/grove/pressRoutes.js";
 
@@ -68,6 +71,8 @@ createRoot(document.getElementById("root")).render(
           <Route path={PRESS_METHODS_PATH} element={<CedarPressMethods />} />
           <Route path={PRESS_REQUEST_PATH} element={<CedarPressTribalRequest />} />
           <Route path={PRESS_RESEARCH_PATH} element={<CedarPressResearchAccess />} />
+          <Route path={PRESS_TERMS_PATH} element={<CedarPressTerms />} />
+          <Route path={PRESS_PRIVACY_PATH} element={<CedarPressPrivacy />} />
           <Route path={PRESS_WHATS_NEW_PATH} element={<CedarPressWhatsNew />} />
           <Route path={PRESS_SETTINGS_PATH} element={<CedarPressSettings />} />
           <Route path={PRESS_PRIORITIES_PATH} element={<CedarPressPriorities />} />

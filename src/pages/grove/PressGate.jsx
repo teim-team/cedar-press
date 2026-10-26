@@ -16,7 +16,7 @@
 // rendered here, and the smoke suite holds the door to its absence.
 //
 // The page below the hero changes material the way the marketing site
-// does: a navy passage with the licensed photograph and the four pillars,
+// does: a navy passage with the licensed photograph and the three pillars,
 // then the ways in on white, then a short foot. "Subscribe" and "Sign in"
 // sit top right, where a visitor looks for them, and each opens a small
 // panel under the bar; the page underneath stays the page.
@@ -41,8 +41,10 @@ import { MAINTENANCE } from "../../features/grove/pressMethod.js";
 import {
   PRESS_LOGIN_PATH,
   PRESS_METHODS_PATH,
+  PRESS_PRIVACY_PATH,
   PRESS_REQUEST_PATH,
   PRESS_RESEARCH_PATH,
+  PRESS_TERMS_PATH,
 } from "../../features/grove/pressRoutes";
 import { EVENT, track } from "../../features/grove/telemetry.js";
 import { useRegister } from "../../features/grove/useRegister.js";
@@ -51,7 +53,6 @@ import CollectionPreview from "./PressCollectionPreview";
 import PressCollectionRail from "./PressCollectionRail.jsx";
 import PressDoorCedar from "./PressDoorCedar";
 import PressAudienceExample from "./PressAudienceExample";
-import { PressPreviewNotice } from "./PressChrome";
 import { TierName } from "./TierName";
 import { useTicker } from "../../features/grove/useTicker";
 
@@ -333,7 +334,6 @@ function Door({ user }) {
         ) : null}
 
       </header>
-      <PressPreviewNotice />
 
       {/* ── The hero: the promise, and beside it the product ─────────── */}
       <section className="cp-hero3" aria-label="Cedar Press">
@@ -585,7 +585,8 @@ function Door({ user }) {
 
       <footer className="cp-door__foot cp-fade">
         <span>
-          Built by <a href={LUMECON_URL} target="_blank" rel="noreferrer">Lumecon</a>.
+          Built by <a href={LUMECON_URL} target="_blank" rel="noreferrer">Lumecon</a>.{" "}
+          <Link to={PRESS_TERMS_PATH}>Terms</Link> · <Link to={PRESS_PRIVACY_PATH}>Privacy</Link>
         </span>
         <button
           type="button"

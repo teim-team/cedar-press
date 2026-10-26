@@ -12,7 +12,7 @@ import { useCallback, useEffect, useState } from "react";
 import { LUMECON_URL, contactHref } from "../../features/grove/appLink.js";
 import { Link } from "react-router";
 
-import { changePassword, fetchAccountProfile, saveAccountProfile } from "../../api";
+import { changePassword, fetchAccountProfile, requestEmailChange, saveAccountProfile } from "../../api";
 import { useAuth } from "../../context/useAuth";
 import { usePriorities } from "../../features/grove/usePriorities.js";
 import { PressInfluence } from "./PressInfluence";
@@ -107,6 +107,54 @@ function WorkCard() {
 }
 
 
+function EmailChangeForm() {
+  const [newEmail, setNewEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState(null);
+  const [sentTo, setSentTo] = useState(null);
+
+  const submit = async (event) => {
+    event.preventDefault();
+    setBusy(true);
+    setError(null);
+    try {
+      await requestEmailChange({ newEmail, password });
+      setSentTo(newEmail.trim());
+      setPassword("");
+    } catch (failure) {
+      setError(failure.message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <details className="cp-set__more">
+      <summary>Change email</summary>
+      <form className="cp-set__form" onSubmit={submit}>
+        <label className="cp-who__label" htmlFor="cp-email-new">New email</label>
+        <input id="cp-email-new" type="email" autoComplete="email" maxLength={254}
+          value={newEmail} onChange={(event) => setNewEmail(event.target.value)} required />
+        <label className="cp-who__label" htmlFor="cp-email-password">Current password</label>
+        <input id="cp-email-password" type="password" autoComplete="current-password"
+          value={password} onChange={(event) => setPassword(event.target.value)} required />
+        {error ? <p className="cp-gate__error" role="alert">{error}</p> : null}
+        {sentTo ? (
+          <p className="cp-gate__ok" role="status">
+            If {sentTo} can be used, a confirmation link is on its way there. Your email changes when you open it.
+          </p>
+        ) : null}
+        <div className="cp-set__acts">
+          <button type="submit" className="gv-btn gv-btn--quiet" disabled={busy}>
+            {busy ? "Sending" : "Send confirmation link"}
+          </button>
+        </div>
+      </form>
+    </details>
+  );
+}
+
 function ProfileCard({ user, tier, onSignOut }) {
   const [profile, setProfile] = useState(null);
   const [name, setName] = useState("");
@@ -169,6 +217,7 @@ function ProfileCard({ user, tier, onSignOut }) {
           <dd>{tier ? <TierName name={tier.name} /> : "No current paid access"}</dd>
         </div>
       </dl>
+      <EmailChangeForm />
       <div className="cp-set__acts">
         <button type="button" className="gv-btn gv-btn--quiet" onClick={onSignOut}>
           Sign out

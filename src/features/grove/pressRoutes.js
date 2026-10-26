@@ -36,6 +36,11 @@ export const PRESS_REQUEST_PATH = "/tribal-data-request";
  * arrive from a citation or a colleague, not from inside the product.
  */
 export const PRESS_RESEARCH_PATH = "/research-access";
+/** The Terms of Service and the Privacy Policy: public, prerendered. */
+export const PRESS_TERMS_PATH = "/terms";
+export const PRESS_PRIVACY_PATH = "/privacy";
+/** When either was last changed; the sitemap reads it too. */
+export const LEGAL_UPDATED = "2026-10-26";
 
 /** A collection's own page. The reader leads here rather than handing over a
  *  file inline, because a subject is worth more than a download. */

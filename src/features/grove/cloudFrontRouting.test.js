@@ -11,7 +11,7 @@ function event(host, uri, querystring = {}) {
 
 test("workspace login and all registered app route families serve the app shell without redirect", () => {
   for (const uri of ["/", "/login", "/subscribe", "/create-account", "/data", "/settings/", "/methods", "/whats-new", "/priorities", "/record",
-    "/entity/CE-000001", "/research-access", "/tribal-data-request"]) {
+    "/entity/CE-000001", "/research-access", "/tribal-data-request", "/terms", "/privacy"]) {
     const input = event("app.cedarpress.ai", uri, { signin: { value: "1" } });
     const result = handler(input);
     assert.equal(result, input.request);

@@ -65,6 +65,7 @@ from pydantic import BaseModel, Field
 
 from cedar_press import (
     cedar_service,
+    db,
     need_profiles,
     press_catalog,
     priorities,
@@ -207,8 +208,20 @@ def require_session(session: Session = Depends(require_account)) -> Session:
 
 
 @app.get("/health")
-def health() -> dict[str, str]:
-    return {"status": "ok"}
+def health(response: Response) -> dict[str, str]:
+    if not db.configured():
+        return {"status": "ok"}
+    try:
+        # Seconds, not the pool's thirty: a probe that hangs is no answer.
+        with db.pool().connection(timeout=3) as conn:
+            conn.execute("SELECT 1")
+    except Exception:
+        # A 503 here fails the deploy's health gate, which rolls back rather
+        # than swapping in a container that cannot reach its subscribers.
+        logging.getLogger("cedar_press.health").exception("Database check failed")
+        response.status_code = 503
+        return {"status": "unavailable", "database": "unreachable"}
+    return {"status": "ok", "database": "ok"}
 
 
 @app.exception_handler(HTTPException)

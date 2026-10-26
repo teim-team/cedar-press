@@ -34,7 +34,7 @@ function handler(event) {
   if (host === "app.cedarpress.ai") {
     var path = uri.length > 1 && uri.endsWith("/") ? uri.slice(0, -1) : uri;
     var pages = ["/", "/login", "/subscribe", "/create-account", "/data", "/settings", "/methods", "/whats-new", "/priorities", "/record",
-      "/tribal-data-request", "/research-access"];
+      "/tribal-data-request", "/research-access", "/terms", "/privacy"];
     if (pages.indexOf(path) !== -1 || /^\/entity\/[^/]+$/.test(path)) {
       // package.json copies this app shell before public-page prerendering.
       // S3 serves the existing object with 200; unknown routes keep their 404.

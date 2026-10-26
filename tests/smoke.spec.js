@@ -203,26 +203,20 @@ async function openDoorCedar(page) {
   await page.locator(".cp-pane__act--btn").first().click();
 }
 
-test.describe("the gate", () => {
-  test("the early access note names the summit and gives an access contact", async ({ page }) => {
-    await page.goto("/");
-    const notice = page.getByTestId("press-preview-note");
-    await expect(notice).toBeVisible();
-    await expect(notice.locator("b")).toHaveText("Early access");
-    await expect(notice.locator(".cp-preview__copy")).toHaveText(
-      "Early access is available soon for attendees of the Great Lakes Tribal Economic Summit. Questions? contact@lumecon.ai",
-    );
-    await expect(notice).not.toContainText("elijah");
-    await expect(notice.getByRole("link", { name: "contact@lumecon.ai" }))
-      .toHaveAttribute("href", /^mailto:contact@lumecon\.ai\?subject=Cedar%20Press%20early%20access/);
-    // The way out is a close control, not a "Continue →" pill. A reader who
-    // does not want to continue anywhere still has to be able to shut it.
-    await notice.getByRole("button", { name: "Close this notice" }).click();
-    await expect(notice).toHaveCount(0);
-    await page.reload();
-    await expect(page.getByTestId("press-preview-note")).toHaveCount(0);
-  });
+test("the terms and the privacy policy are public and linked from sign-in and the door", async ({ page }) => {
+  for (const [path, title] of [["/terms", "Terms of Service"], ["/privacy", "Privacy Policy"]]) {
+    await page.goto(path);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(title);
+  }
+  await page.goto("/login");
+  await page.locator(".cp-login__terms").getByRole("link", { name: "Privacy Policy" }).click();
+  await expect(page).toHaveURL(/\/privacy$/);
+  await page.goto("/");
+  await page.locator(".cp-door__foot").getByRole("link", { name: "Terms" }).click();
+  await expect(page).toHaveURL(/\/terms$/);
+});
 
+test.describe("the gate", () => {
   // The maintenance story and the NEED enrichment sources (owner,
   // 2026-09-27), on the door; the figure is the measured count of kinds of
   // source behind the collections (2026-10-06), never an unmeasured total.
@@ -419,14 +413,6 @@ test.describe("the gate", () => {
     }
   });
 
-  test("a reader who closed the earlier early-access note sees the new one once", async ({ page }) => {
-    await page.goto("/");
-    await page.evaluate(() => sessionStorage.setItem("cedar-press-early-access-notice", "dismissed"));
-    await page.reload();
-    await expect(page.getByTestId("press-preview-note")).toBeVisible();
-    await expect(page.getByTestId("press-preview-note")).toContainText("Early access is available soon");
-  });
-
   test("every signed-in route wears the same masthead", async ({ page }) => {
     // The collections page used to hide the standing line and shrink the
     // wordmark and the mark to buy 86px for the records. Owner, 2026-09-20:
@@ -496,19 +482,6 @@ test.describe("the gate", () => {
     await page.goto("/");
     await expect(page.locator(".cp-split")).toBeVisible();
     await expect(page.locator("#catalog")).toHaveCount(0);
-  });
-
-  test("the preview note is the door's, and is not carried into the product", async ({ page }) => {
-    // It used to render inside `PressMast`, which every signed-in page
-    // mounts, so a subscriber met an explanation of how they got in on the
-    // collections table, on an entity profile and on the methods page —
-    // above the product, addressed to somebody already inside it. Owner,
-    // 2026-09-20: it should only be on the landing page.
-    await signIn(page);
-    for (const path of ["/data", "/data?c=funding", "/entity/CE-001CC-8N", "/methods", "/whats-new"]) {
-      await page.goto(path);
-      await expect(page.getByTestId("press-preview-note")).toHaveCount(0);
-    }
   });
 
   test("a signed-out visitor gets the gate, not the reader", async ({ page }) => {

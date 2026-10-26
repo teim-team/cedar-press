@@ -20,6 +20,8 @@ from cedar_press.accounts.api.schemas import (
     AccountLink,
     AccountSetup,
     Credentials,
+    EmailChange,
+    EmailChangeConfirm,
     PasswordChange,
     ProfileChange,
     ResetConfirm,
@@ -35,6 +37,7 @@ from cedar_press.accounts.services.sessions import (
     sign_out,
 )
 from cedar_press.accounts.services.setup import AccountSetupService
+from cedar_press.billing.api.dependencies import BillingServices, get_billing_services
 
 router = APIRouter()
 
@@ -118,6 +121,129 @@ def write_account_profile(
     _require_auth_origin(request, "profile")
     subscribers.set_display_name(session.email, (change.name or "").strip() or None)
     return {"email": session.email, **subscribers.profile(session.email)}
+
+
+_EMAIL_LOG = logging.getLogger("cedar_press.email_change")
+
+
+def _send_notice(email: str, subject: str, body: str) -> None:
+    sender = AccountEmailSender()
+    if sender.configured():
+        sender.send_message(email, subject, body)
+        return
+    _EMAIL_LOG.warning("Account email for %s (%s):\n%s", email, subject, body)
+
+
+def _email_change_unavailable() -> HTTPException:
+    return HTTPException(
+        status_code=503,
+        detail={
+            "code": "EMAIL_CHANGE_UNAVAILABLE",
+            "message": (
+                "Changing your email is not available right now. Contact Cedar Press for help."
+            ),
+        },
+    )
+
+
+@router.post("/auth/email-change", status_code=202)
+def request_email_change(
+    change: EmailChange,
+    request: Request,
+    background: BackgroundTasks,
+    session: Session = Depends(require_account),
+) -> None:
+    """Send a confirmation link to the new address; nothing changes until it is opened.
+
+    The answer is the same when the new address already has an account, so
+    this cannot be used to ask whether somebody subscribes.
+    """
+    _require_auth_origin(request, "email change")
+    _guard(request, "email-change", ratelimit.LOGIN_ATTEMPTS)
+    if subscribers.authenticate(session.email, change.password) is None:
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "code": "INVALID_CREDENTIALS",
+                "message": "Your current password is not correct.",
+            },
+        )
+    target = change.new_email.strip().lower()
+    if target == session.email:
+        raise HTTPException(
+            status_code=400,
+            detail={"code": "EMAIL_UNCHANGED", "message": "That is already your sign-in email."},
+        )
+    if (
+        not AccountEmailSender().configured()
+        and os.environ.get("CEDAR_PRESS_ENVIRONMENT", "development") != "development"
+    ):
+        raise _email_change_unavailable()
+    try:
+        token = subscribers.issue_email_change(session.email, target)
+    except subscribers.EmailChangeUnavailable:
+        raise _email_change_unavailable() from None
+    if token:
+        background.add_task(
+            _send_notice,
+            target,
+            "Confirm your new Cedar Press email",
+            f"Open this link to make {target} the sign-in email for your Cedar Press account:\n\n"
+            f"{_APP_URL}/login#email-change={token}\n\n"
+            "The link expires in one hour and can be used once. "
+            "If you did not ask for this, you can ignore this email.",
+        )
+
+
+@router.post("/auth/email-change/confirm")
+def confirm_email_change(
+    body: EmailChangeConfirm,
+    request: Request,
+    response: Response,
+    background: BackgroundTasks,
+    services: BillingServices = Depends(get_billing_services),
+) -> dict[str, str]:
+    """Move the account to the confirmed address and sign it out everywhere."""
+    _require_auth_origin(request, "email change")
+    try:
+        changed = subscribers.redeem_email_change(
+            body.token, services.billing.adapter.update_customer_email
+        )
+    except subscribers.EmailChangeUnavailable:
+        raise _email_change_unavailable() from None
+    except Exception:
+        # Rolled back, so the link still works once billing answers again.
+        _EMAIL_LOG.exception("Email change could not be applied")
+        raise HTTPException(
+            status_code=502,
+            detail={
+                "code": "EMAIL_CHANGE_FAILED",
+                "message": (
+                    "Your email could not be changed just now. "
+                    "Open the link again in a few minutes."
+                ),
+            },
+        ) from None
+    if changed is None:
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "code": "EMAIL_CHANGE_INVALID",
+                "message": (
+                    "That link has expired or was already used. Request a new one from Settings."
+                ),
+            },
+        )
+    old, new = changed
+    sign_out(response)
+    background.add_task(
+        _send_notice,
+        old,
+        "Your Cedar Press email was changed",
+        f"The sign-in email for your Cedar Press account was changed to {new}. "
+        "If you did not make this change, contact contact@lumecon.ai.",
+    )
+    return {"email": new}
 
 
 def _require_password_length(password: str) -> None:
