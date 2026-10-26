@@ -51,7 +51,7 @@ export default function PressAd({ slot, example = false }) {
         <div className="cp-ad__house">
           <p className="cp-ad__housetitle">{AD_HOUSE.title}</p>
           <p className="cp-ad__housebody">{AD_HOUSE.body}</p>
-          <a className="cp-ad__houseact" href={AD_ENQUIRY_HREF} target="_blank" rel="noreferrer">
+          <a className="cp-ad__houseact" href={AD_ENQUIRY_HREF}>
             {AD_HOUSE.action} <span aria-hidden="true">&#8594;</span>
           </a>
         </div>
@@ -74,7 +74,7 @@ export default function PressAd({ slot, example = false }) {
           <p className="cp-ad__exbody">{AD_EXAMPLE.body}</p>
           <span className="cp-ad__exfoot">
             <span className="cp-ad__exsize">{spec.size}</span>
-            <a className="cp-ad__houseact" href={AD_ENQUIRY_HREF} target="_blank" rel="noreferrer">
+            <a className="cp-ad__houseact" href={AD_ENQUIRY_HREF}>
               {AD_EXAMPLE.action} <span aria-hidden="true">&#8594;</span>
             </a>
           </span>

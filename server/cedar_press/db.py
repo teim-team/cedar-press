@@ -14,7 +14,7 @@ CONFIGURED OR NOT, AND NOTHING IN BETWEEN.
 `DATABASE_URL` is the switch, and it is the same variable teim-app reads, so
 one deployment configures both services by setting it once. Set: every store
 in this service reads and writes Postgres. Unset: the previous behaviour
-exactly — environment accounts, in-memory activation, SQLite points — which
+exactly — environment accounts, in-memory sign-ups, SQLite points — which
 is what the preview deployment and the test suite run on.
 
 There is deliberately no third mode. A partly-configured service that keeps

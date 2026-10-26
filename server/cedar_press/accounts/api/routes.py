@@ -1,4 +1,4 @@
-"""Account sign-in, password recovery and activation endpoints."""
+"""Account sign-in, password recovery and account setup endpoints."""
 
 from __future__ import annotations
 
@@ -9,7 +9,7 @@ from urllib.parse import urlencode
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, Response
 
-from cedar_press import codes, ratelimit
+from cedar_press import ratelimit
 from cedar_press.accounts.api.dependencies import (
     _guard,
     _require_auth_origin,
@@ -19,10 +19,11 @@ from cedar_press.accounts.api.dependencies import (
 from cedar_press.accounts.api.schemas import (
     AccountLink,
     AccountSetup,
-    Activation,
-    CodeCheck,
     Credentials,
+    EmailChange,
+    EmailChangeConfirm,
     PasswordChange,
+    ProfileChange,
     ResetConfirm,
     ResetRequest,
 )
@@ -31,12 +32,12 @@ from cedar_press.accounts.services import subscribers
 from cedar_press.accounts.services.email import AccountEmailSender
 from cedar_press.accounts.services.sessions import (
     Session,
-    account_exists,
     current_session,
     sign_in,
     sign_out,
 )
 from cedar_press.accounts.services.setup import AccountSetupService
+from cedar_press.billing.api.dependencies import BillingServices, get_billing_services
 
 router = APIRouter()
 
@@ -106,6 +107,143 @@ def change_password(
             },
         )
     return renewed.as_payload()
+
+
+@router.get("/auth/profile")
+def read_account_profile(session: Session = Depends(require_account)) -> dict[str, object]:
+    return {"email": session.email, **subscribers.profile(session.email)}
+
+
+@router.patch("/auth/profile")
+def write_account_profile(
+    change: ProfileChange, request: Request, session: Session = Depends(require_account)
+) -> dict[str, object]:
+    _require_auth_origin(request, "profile")
+    subscribers.set_display_name(session.email, (change.name or "").strip() or None)
+    return {"email": session.email, **subscribers.profile(session.email)}
+
+
+_EMAIL_LOG = logging.getLogger("cedar_press.email_change")
+
+
+def _send_notice(email: str, subject: str, body: str) -> None:
+    sender = AccountEmailSender()
+    if sender.configured():
+        sender.send_message(email, subject, body)
+        return
+    _EMAIL_LOG.warning("Account email for %s (%s):\n%s", email, subject, body)
+
+
+def _email_change_unavailable() -> HTTPException:
+    return HTTPException(
+        status_code=503,
+        detail={
+            "code": "EMAIL_CHANGE_UNAVAILABLE",
+            "message": (
+                "Changing your email is not available right now. Contact Cedar Press for help."
+            ),
+        },
+    )
+
+
+@router.post("/auth/email-change", status_code=202)
+def request_email_change(
+    change: EmailChange,
+    request: Request,
+    background: BackgroundTasks,
+    session: Session = Depends(require_account),
+) -> None:
+    """Send a confirmation link to the new address; nothing changes until it is opened.
+
+    The answer is the same when the new address already has an account, so
+    this cannot be used to ask whether somebody subscribes.
+    """
+    _require_auth_origin(request, "email change")
+    _guard(request, "email-change", ratelimit.LOGIN_ATTEMPTS)
+    if subscribers.authenticate(session.email, change.password) is None:
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "code": "INVALID_CREDENTIALS",
+                "message": "Your current password is not correct.",
+            },
+        )
+    target = change.new_email.strip().lower()
+    if target == session.email:
+        raise HTTPException(
+            status_code=400,
+            detail={"code": "EMAIL_UNCHANGED", "message": "That is already your sign-in email."},
+        )
+    if (
+        not AccountEmailSender().configured()
+        and os.environ.get("CEDAR_PRESS_ENVIRONMENT", "development") != "development"
+    ):
+        raise _email_change_unavailable()
+    try:
+        token = subscribers.issue_email_change(session.email, target)
+    except subscribers.EmailChangeUnavailable:
+        raise _email_change_unavailable() from None
+    if token:
+        background.add_task(
+            _send_notice,
+            target,
+            "Confirm your new Cedar Press email",
+            f"Open this link to make {target} the sign-in email for your Cedar Press account:\n\n"
+            f"{_APP_URL}/login#email-change={token}\n\n"
+            "The link expires in one hour and can be used once. "
+            "If you did not ask for this, you can ignore this email.",
+        )
+
+
+@router.post("/auth/email-change/confirm")
+def confirm_email_change(
+    body: EmailChangeConfirm,
+    request: Request,
+    response: Response,
+    background: BackgroundTasks,
+    services: BillingServices = Depends(get_billing_services),
+) -> dict[str, str]:
+    """Move the account to the confirmed address and sign it out everywhere."""
+    _require_auth_origin(request, "email change")
+    try:
+        changed = subscribers.redeem_email_change(
+            body.token, services.billing.adapter.update_customer_email
+        )
+    except subscribers.EmailChangeUnavailable:
+        raise _email_change_unavailable() from None
+    except Exception:
+        # Rolled back, so the link still works once billing answers again.
+        _EMAIL_LOG.exception("Email change could not be applied")
+        raise HTTPException(
+            status_code=502,
+            detail={
+                "code": "EMAIL_CHANGE_FAILED",
+                "message": (
+                    "Your email could not be changed just now. "
+                    "Open the link again in a few minutes."
+                ),
+            },
+        ) from None
+    if changed is None:
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "code": "EMAIL_CHANGE_INVALID",
+                "message": (
+                    "That link has expired or was already used. Request a new one from Settings."
+                ),
+            },
+        )
+    old, new = changed
+    sign_out(response)
+    background.add_task(
+        _send_notice,
+        old,
+        "Your Cedar Press email was changed",
+        f"The sign-in email for your Cedar Press account was changed to {new}. "
+        "If you did not make this change, contact contact@lumecon.ai.",
+    )
+    return {"email": new}
 
 
 def _require_password_length(password: str) -> None:
@@ -249,89 +387,3 @@ def finish_account_setup(
         raise HTTPException(409, detail="Please sign in to your account.")
     return session.as_payload()
 
-
-def _refuse(error_code: str) -> HTTPException:
-    """A refusal the client already has copy for.
-
-    The message is a fallback: ``pressSignupError`` renders its own wording
-    per code, and this is what a caller that is not the client sees.
-    """
-    return HTTPException(
-        status_code=400,
-        detail={"code": error_code, "message": "That code could not be activated."},
-    )
-
-
-@router.post("/press/activation/validate", status_code=204)
-def validate_code(check: CodeCheck, request: Request) -> None:
-    """Step one: is this code real, unspent, unexpired, and theirs?
-
-    Creates nothing. The client asks this before showing the password field
-    so a wrong code costs a message rather than a half-made account, and so
-    the first screen a subscriber sees is two fields rather than four.
-    """
-    _guard(request, "activation", ratelimit.ACTIVATION_ATTEMPTS)
-    issued, error = codes.check(check.code, check.email)
-    if error:
-        raise _refuse(error)
-    # Checked here as well as at activation: a reader who already has an
-    # account should be sent to sign-in now, not after choosing a password.
-    if account_exists(issued.email):
-        raise _refuse(codes.EMAIL_IN_USE)
-
-
-@router.post("/press/activation")
-def activate(activation: Activation, request: Request, response: Response) -> dict[str, object]:
-    """Step two: create the account and sign them in.
-
-    The code is re-checked rather than trusted from step one. Step one set no
-    state, so nothing carries between the two calls, and an activation route
-    that believed a client's word about a code it validated a moment ago
-    would not need the code at all.
-
-    The tier comes off the issued code, never off the request. Letting a
-    caller name their own tier is how an activation route becomes an
-    escalation route.
-    """
-    _guard(request, "activation", ratelimit.ACTIVATION_ATTEMPTS)
-    issued, error = codes.check(activation.code, activation.email)
-    if error:
-        raise _refuse(error)
-    if account_exists(issued.email):
-        raise _refuse(codes.EMAIL_IN_USE)
-    _require_password_length(activation.password)
-
-    # ONE TRANSACTION WHERE THERE IS A DATABASE TO HAVE ONE IN.
-    # This used to create the account and then mark the code spent, in that
-    # order and for a good reason: the other way round loses a subscriber
-    # their code if the account fails to save. But two writes are two writes,
-    # and the failure between them left a subscriber whose code was still
-    # redeemable — which on a restart meant a second account on one code.
-    # `redeem` claims the code with an `UPDATE ... WHERE spent_at IS NULL`
-    # and inserts the subscriber before the commit, so the two facts cannot
-    # disagree; the row count also settles the race between two people
-    # submitting the same code at once, which the old order could not see.
-    # Without a database it is the same two steps as before, because a dict
-    # and a set have no transaction to share.
-    try:
-        made = subscribers.redeem(issued.code, activation.password)
-    except subscribers.AlreadySubscribed:
-        # The `account_exists` check above is a read, and a read is not a
-        # lock: two activations for one address can both pass it. The insert
-        # is where that is settled, and it refuses rather than resetting the
-        # password on an account somebody already has.
-        raise _refuse(codes.EMAIL_IN_USE) from None
-    if made is None:
-        # Somebody redeemed it between `check` above and this write.
-        raise _refuse(codes.CODE_USED)
-    codes.spend(issued.code)
-    session = sign_in(made.email, activation.password, response)
-    if session is None:
-        raise HTTPException(
-            status_code=409,
-            detail={
-                "code": "ACCOUNT_CHANGED",
-                "message": "Your account changed during activation. Please sign in again.",
-            },
-        )
-    return session.as_payload()

@@ -51,9 +51,9 @@ day real datasets land. Recorded here rather than left to be discovered.
 
 HAVALA REVIEW
 The three tiers below are a commercial decision, not a derived fact. ``press``
-exists only through the Tribal Business News subscription; ``grove`` is the
-standalone licence; ``tree`` is the full platform, which includes Grove. If the
-partnership changes what a reader tier buys, this set changes with it.
+is the Cedar Press subscription; ``grove`` is the standalone licence; ``tree``
+is the full platform, which includes Grove. If what a reader tier buys
+changes, this set changes with it.
 
 That ruling answers two different questions and they must not be run together.
 Whether a plan is sold the Cedar Press *page* is ``can_read_cedar_press``, and
@@ -79,10 +79,8 @@ from typing import Any
 __all__ = [
     "CATALOG",
     "RELEASES",
-    "LUMECON_URL",
     "PRESS_TIERS",
     "REPORT_CITATION_HREF",
-    "TBN_URL",
     "can_read_cedar_press",
 ]
 
@@ -93,9 +91,8 @@ _DATA: dict[str, Any] = json.loads(_DATA_PATH.read_text(encoding="utf-8"))
 def _deep_freeze(value: Any) -> Any:
     """Freeze mappings and sequences all the way down.
 
-    Freezing only the top level left an article's ``body``, ``draws``, figure
-    ``points`` and paired images mutable, so a caller could edit the
-    module-global catalogue every later caller sees.
+    Freezing only the top level left nested rows mutable, so a caller could
+    edit the module-global catalogue every later caller sees.
     """
     if isinstance(value, dict):
         return MappingProxyType({key: _deep_freeze(item) for key, item in value.items()})
@@ -115,10 +112,6 @@ def _frozen(rows: list[dict[str, Any]]) -> tuple[Mapping[str, Any], ...]:
     return tuple(_deep_freeze(row) for row in rows)
 
 
-#: Where the Research Briefs publish, and where the collection lives.
-TBN_URL: str = _DATA["tbnUrl"]
-LUMECON_URL: str = _DATA["lumeconUrl"]
-
 #: The full collection ladder (``pressCatalog.js``): every collection the
 #: storefront sells. Cedar's profile layer reads this for the collections that ship no figures,
 #: so a catalog entry can describe itself without a second hand-typed copy of
@@ -127,8 +120,8 @@ CATALOG = _frozen(_DATA["catalog"])
 
 #: Release history per collection (``pressReleases.js``): version, cadence and
 #: the change notes behind the What's New feed. Dumped rather than retyped for
-#: the same reason as the articles — a paraphrased change note misdescribes a
-#: release. Keyed by collection id.
+#: the same reason as the catalogue — a paraphrased change note misdescribes
+#: a release. Keyed by collection id.
 RELEASES = _deep_freeze(_DATA["releases"])
 
 #: Cedar's suggested questions per collection (``COLLECTION_JOBS`` in

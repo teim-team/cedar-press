@@ -68,11 +68,10 @@ PAIRS: tuple[Pair, ...] = (
         guarded_by="server/tests/test_access.py",
     ),
     Pair(
-        subject="Catalog, releases, articles and the citation register",
+        subject="Catalog, releases and the citation register",
         javascript=(
             "src/features/grove/pressCatalog.js",
             "src/features/grove/pressReleases.js",
-            "src/features/grove/pressArticles.js",
             "src/features/grove/pressCitations.js",
         ),
         python=(
@@ -80,12 +79,6 @@ PAIRS: tuple[Pair, ...] = (
             "server/cedar_press/_press_data.json",
         ),
         guarded_by="server/tests/test_collection.py and make check-generated (dump.mjs --kind press --check)",
-    ),
-    Pair(
-        subject="Activation refusals: the error codes and their wording",
-        javascript=("src/features/grove/pressSignup.js",),
-        python=("server/cedar_press/codes.py",),
-        guarded_by="nothing",
     ),
     Pair(
         subject="Download shaping: filename, citation row, what a tile promises",

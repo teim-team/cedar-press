@@ -27,7 +27,7 @@ const SITE_ORIGIN = "https://cedarpress.ai";
 
 /** The description index.html ships for the door; the fallback for every page. */
 const SITE_DESCRIPTION =
-  "Trusted intelligence for Indian Country: maintained collections on federal funding, contracting, deals, policy, giving, land and Native enterprise ownership, with source records, declared row grains and separately documented Native entity associations. Built by Lumecon, available exclusively through Tribal Business News.";
+  "Trusted intelligence for Indian Country: maintained collections on federal funding, contracting, deals, policy, giving, land and Native enterprise ownership, with source records, declared row grains and separately documented Native entity associations. Built by Lumecon.";
 
 function setMeta(selector, attribute, content) {
   const tag = document.head.querySelector(selector);

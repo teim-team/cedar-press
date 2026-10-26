@@ -111,7 +111,7 @@ export function showcaseItems(collectionId, items) {
  * the same collection still opens on a source.
  */
 export const DISPLAY_DEFAULTS = Object.freeze({
-  funding: Object.freeze(["canonical_name", "cedar_entity_role", "recipient_name", "obligations_usd", "action_date", "program_name", "awarding_agency", "source_url", "__source"]),
+  funding: Object.freeze(["canonical_name", "program_name", "obligations_usd", "action_date", "source_url", "__source"]),
   legislation: Object.freeze(["canonical_names", "entity_roles", "title", "introduced_date", "sponsor_name", "latest_action", "source_url", "__source"]),
   deals: Object.freeze(["canonical_name", "native_party_role", "title", "announced_value_usd", "value_basis", "event_date", "counterparty_or_funder", "source_url", "__source"]),
   nagpra: Object.freeze(["canonical_names", "entity_roles", "institution_name", "title", "publication_date", "agency_names", "source_url", "__source"]),

@@ -13,9 +13,8 @@
 // records on a claim of affiliation is not a program anyone should trust.
 
 import { Link } from "react-router";
-import { contactHref } from "../../features/grove/appLink.js";
+import { LUMECON_URL, contactHref } from "../../features/grove/appLink.js";
 
-import { LUMECON_URL, TBN_URL } from "../../features/grove/pressArticles";
 import { TRIBAL_REQUEST } from "../../features/grove/pressMethod";
 import { PRESS_METHODS_PATH, PRESS_PATH } from "../../features/grove/pressRoutes";
 import { useAuth } from "../../context/useAuth";

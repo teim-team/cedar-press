@@ -97,7 +97,7 @@ class TestSessionLifecycle(unittest.TestCase):
         # A pre-existing subscriber row uses the unchanged legacy password
         # format; session hardening is not a credential or subscription reset.
         original = dict(self.row)
-        self.assertTrue(self.row["password_hash"].startswith("pbkdf2$240000$"))
+        self.assertTrue(self.row["password_hash"].startswith(f"pbkdf2${subscribers._ROUNDS}$"))
         response = Response()
         signed_in = session.sign_in("Reader@Example.org ", "correct-horse", response)
         self.assertEqual(

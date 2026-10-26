@@ -28,7 +28,6 @@ cedar_press/
     collection_profiles.py  the machine-readable data dictionary Cedar answers from
     source_presentation.py  readable citations, naming original publishers, never file names
     press_catalog.py        the tiers and the catalog
-    protected_articles.py   subscriber article content, kept out of the public web build
     claims.py               the claim classes a finding carries
     plot_map.py             checks pinned PLOT map evidence and shapes its outlines
     shelf.py, templates/    the HTML shelf page, GET /press/shelf
@@ -42,8 +41,7 @@ cedar_press/
     accounts/services/
       sessions.py           who is signed in: a signed, HTTP-only cookie
       subscribers.py        subscriber persistence, credentials and legacy access
-    codes.py                checks an access code is real, unspent, unexpired and the reader's
-    ratelimit.py            rate limits on sign-in and activation
+    ratelimit.py            rate limits on sign-in and password reset
     priorities.py           Shape the Research: Cedar Points, priorities and requests
     db.py, migrate.py,      the Postgres connection, used when DATABASE_URL is set,
       migrations/           and its migrations
@@ -71,7 +69,6 @@ pip install -e .[dev]
 CEDAR_PRESS_SECRET=dev-secret \
 CEDAR_PRESS_INSECURE_COOKIE=1 \
 CEDAR_PRESS_ACCOUNTS='{"reader@example.org":{"password":"...","tier":"press"}}' \
-CEDAR_PRESS_CODES='{"TBN4-9K2M-X7QD":{"email":"reader@example.org","tier":"press"}}' \
 uvicorn cedar_press.app:app --reload --port 8000
 ```
 
@@ -79,11 +76,10 @@ uvicorn cedar_press.app:app --reload --port 8000
 | --- | --- |
 | `CEDAR_PRESS_SECRET` | Stable server-only session signing secret; staging/production require at least 32 characters. Only development may generate a temporary key. |
 | `CEDAR_PRESS_ACCOUNTS` | Provisioned subscribers as JSON. Empty by default, so a service started without accounts authenticates nobody. |
-| `CEDAR_PRESS_CODES` | Access codes as issued, keyed by code: `{"CODE": {"email": ..., "tier": ..., "expires": "YYYY-MM-DD"}}`. `expires` is optional. Empty by default, so a service started without a register activates nobody. |
 | `CEDAR_PRESS_ORIGINS` | Comma-separated origins allowed to send credentialed requests. |
 | `CEDAR_PRESS_APP_URL` | The client's origin, where password reset links open (`<url>/login#reset=...`); default `http://localhost:5173`. Reset by email is development-only until a mail provider is configured: development logs the link, and staging and production answer 503. |
 | `CEDAR_PRESS_INSECURE_COOKIE` | `1` in local development only: drops `Secure` so the cookie works over http. |
-| `CEDAR_PRESS_TRUST_PROXY` | `1` when the API sits behind a proxy that appends to `X-Forwarded-For` (the intended deployment once the API is activated: CloudFront in front of the API origin, `docs/HOSTNAMES.md`); `0` when clients connect directly. Sign-in and activation are rate limited per client address, so this decides what "client" means. Unset reads as `0` in development and is refused (503) in staging and production, because behind CloudFront `0` would key every subscriber to CloudFront's address and one stranger's wrong passwords would lock everyone out. |
+| `CEDAR_PRESS_TRUST_PROXY` | `1` when the API sits behind a proxy that appends to `X-Forwarded-For` (the intended deployment once the API is activated: CloudFront in front of the API origin, `docs/HOSTNAMES.md`); `0` when clients connect directly. Sign-in and password reset are rate limited per client address, so this decides what "client" means. Unset reads as `0` in development and is refused (503) in staging and production, because behind CloudFront `0` would key every subscriber to CloudFront's address and one stranger's wrong passwords would lock everyone out. |
 | `CEDAR_PRESS_PROXY_HOPS` | With `CEDAR_PRESS_TRUST_PROXY=1`, how many trusted proxies append to `X-Forwarded-For`; default `1` (CloudFront). Set `2` if a load balancer sits between CloudFront and the service. The client is the entry that many places from the right; everything left of it is caller-written and ignored. Only correct when the service cannot be reached except through that chain. |
 
 ## Where the database goes
@@ -93,9 +89,8 @@ modules today. When the collections move into Postgres it answers from there
 and `app.py` does not change — routes hold HTTP concerns and no data access
 of their own, which is what keeps that swap to one module.
 
-`accounts/services/subscribers.py` already persists subscribers and access codes when `DATABASE_URL`
-is configured. Redemption spends the code and creates its subscriber in one
-PostgreSQL transaction. The environment-backed account/code fallback is for
+`accounts/services/subscribers.py` already persists subscribers when `DATABASE_URL`
+is configured. The environment-backed account fallback is for
 development; staging and production refuse it. Install the PostgreSQL extra
 with `uv sync --locked --no-dev --extra postgres --project server` from the
 repository root and run the existing migration command in `DATABASE.md`.

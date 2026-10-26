@@ -56,8 +56,8 @@ export function BillingCard() {
   };
   const current = billing?.subscriptions.find((subscription) => !["canceled", "incomplete_expired"].includes(subscription.status));
   return (
-    <section className="cp-set__card cp-fade" aria-label="Billing">
-      <span className="cp-set__cap">Billing</span>
+    <section className="cp-set__card cp-fade" aria-label="Subscription">
+      <span className="cp-set__cap">Subscription</span>
       {error ? <p role="alert" className="cp-gate__error">{error}</p> : null}
       {!billing && !error ? <p role="status">Loading billing…</p> : null}
       {billing && !billing.available ? <p>Online billing is temporarily unavailable.</p> : null}

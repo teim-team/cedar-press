@@ -36,10 +36,6 @@ def account_id_for(email: str) -> str:
     return subscribers.account_id_for(email)
 
 
-def account_exists(email: str) -> bool:
-    return subscribers.exists(email)
-
-
 def forget_activated_for_tests() -> None:
     subscribers.forget_activated_for_tests()
 
@@ -106,6 +102,7 @@ def _lookup(email: str, password: str) -> Session | None:
     found = subscribers.authenticate(email, password)
     if found is None:
         return None
+    found = subscribers.upgrade_hash(found, password)
     # Complete the existing platform binding before capturing the cookie revision.
     subscribers.link_platform_account(found.email)
     # Re-read before issuance so a concurrent password change cannot bless

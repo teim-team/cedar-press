@@ -356,10 +356,9 @@ test("collections and plans are counted from the catalog: fourteen, seven on eac
 
 test("who made it reads the same way everywhere the door says it", () => {
   const who = DOOR_INTENTS.find((intent) => intent.id === "who");
-  assert.match(who.answer, /^Cedar Press is built by Lumecon in partnership with Tribal Business News/);
+  assert.match(who.answer, /^Cedar Press is built by Lumecon\./);
   for (const text of everything()) {
-    assert.doesNotMatch(text, /distributed exclusively through|built by Lumecon and/i, text.slice(0, 80));
-    if (/built by Lumecon/i.test(text)) assert.match(text, /built by Lumecon in partnership with Tribal Business News/i);
+    assert.doesNotMatch(text, /Tribal Business News|exclusively through|built by Lumecon and|enrollment is not open/i, text.slice(0, 80));
   }
 });
 

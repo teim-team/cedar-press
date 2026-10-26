@@ -10,7 +10,6 @@ production.
 
 from __future__ import annotations
 
-import datetime as dt
 import json
 import os
 import pathlib
@@ -21,7 +20,7 @@ from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from cedar_press import codes, db
+from cedar_press import db
 from cedar_press.accounts.services import sessions as session
 from cedar_press.accounts.services import subscribers
 
@@ -44,12 +43,6 @@ ACCOUNTS = json.dumps(
         },
     }
 )
-CODES = json.dumps(
-    {
-        "TBN4-9K2M-X7QD": {"email": "new@example.org", "tier": "press"},
-        "TBN4-0000-EXPD": {"email": "late@example.org", "tier": "press", "expires": "2020-01-01"},
-    }
-)
 
 
 class _Backend:
@@ -67,10 +60,10 @@ class _Backend:
         if self.pg:
             os.environ["DATABASE_URL"] = PG
             os.environ.pop("CEDAR_PRESS_ACCOUNTS", None)
-            os.environ.pop("CEDAR_PRESS_CODES", None)
             db.migrate()
             db.execute(
-                "TRUNCATE cedar_press_subscribers, cedar_press_codes, cedar_press_password_resets,"
+                "TRUNCATE cedar_press_subscribers, cedar_press_password_resets,"
+                " cedar_press_email_changes, cedar_press_reader_profiles,"
                 " cedar_press_login_identities, cedar_press_access_grants,"
                 " cedar_press_account_setup_links, cedar_press_account_email_deliveries,"
                 " cedar_press_checkout_attempts, cedar_press_checkouts,"
@@ -85,14 +78,9 @@ class _Backend:
                     "UPDATE cedar_press_subscribers SET account_id = %s WHERE email = %s",
                     ("acct-bank", seat),
                 )
-            subscribers.issue_code("TBN4-9K2M-X7QD", "new@example.org", "press")
-            subscribers.issue_code(
-                "TBN4-0000-EXPD", "late@example.org", "press", dt.date(2020, 1, 1)
-            )
         else:
             os.environ.pop("DATABASE_URL", None)
             os.environ["CEDAR_PRESS_ACCOUNTS"] = ACCOUNTS
-            os.environ["CEDAR_PRESS_CODES"] = CODES
 
     def tearDown(self) -> None:
         os.environ.pop("DATABASE_URL", None)
@@ -127,30 +115,6 @@ class _Backend:
         # And an address that declares nothing is its own subscription.
         self.assertEqual(subscribers.account_id_for("reader@example.org"), "reader@example.org")
 
-    def test_a_code_creates_the_subscriber_it_names(self) -> None:
-        made = subscribers.redeem("TBN4-9K2M-X7QD", "a-new-password")
-        self.assertIsNotNone(made)
-        self.assertEqual(made.email, "new@example.org")
-        self.assertEqual(made.tier, "press")
-        # And they can now sign in, which is the whole point of activation.
-        self.assertIsNotNone(subscribers.authenticate("new@example.org", "a-new-password"))
-
-    def test_a_code_is_spent_once(self) -> None:
-        self.assertIsNotNone(subscribers.redeem("TBN4-9K2M-X7QD", "first"))
-        # The second attempt gets nothing, and the first password still works:
-        # a spent code must not be a way to reset somebody's account.
-        self.assertIsNone(subscribers.redeem("TBN4-9K2M-X7QD", "second"))
-        self.assertIsNotNone(subscribers.authenticate("new@example.org", "first"))
-        self.assertIsNone(subscribers.authenticate("new@example.org", "second"))
-
-    def test_an_expired_code_is_refused(self) -> None:
-        self.assertIsNone(subscribers.redeem("TBN4-0000-EXPD", "whatever"))
-        self.assertFalse(subscribers.exists("late@example.org"))
-
-    def test_an_unknown_code_is_refused(self) -> None:
-        self.assertIsNone(subscribers.redeem("TBN4-NOPE-NOPE", "whatever"))
-        self.assertIsNone(subscribers.redeem("", "whatever"))
-
     def test_a_reset_token_sets_the_password_once(self) -> None:
         self.assertIsNone(subscribers.issue_reset("stranger@example.org"))
         token = subscribers.issue_reset("pro@example.org")
@@ -178,6 +142,12 @@ class _Backend:
         self.assertIsNone(subscribers.redeem_reset(token, "a-reset-password"))
         self.assertIsNotNone(subscribers.authenticate("reader@example.org", "correct-horse"))
 
+    def test_a_display_name_is_kept_and_cleared(self) -> None:
+        subscribers.set_display_name("Reader@Example.org", "Ada Reader")
+        self.assertEqual(subscribers.profile("reader@example.org")["name"], "Ada Reader")
+        subscribers.set_display_name("reader@example.org", None)
+        self.assertIsNone(subscribers.profile("reader@example.org")["name"])
+
 
 class TestEnvironmentBackend(_Backend, unittest.TestCase):
     pg = False
@@ -198,32 +168,104 @@ class TestPostgresBackend(_Backend, unittest.TestCase):
         self.assertNotIn("correct-horse", row["password_hash"])
         self.assertTrue(row["password_hash"].startswith("pbkdf2$"))
 
+    def test_the_profile_reads_join_date_and_verification_off_the_row(self) -> None:
+        row = db.one(
+            "SELECT created_at::date AS joined FROM cedar_press_subscribers WHERE email = %s",
+            ("reader@example.org",),
+        )
+        found = subscribers.profile("reader@example.org")
+        self.assertEqual(found["member_since"], row["joined"].isoformat())
+        self.assertFalse(found["email_verified"])
+        db.execute(
+            "UPDATE cedar_press_subscribers SET email_verified_at = now() WHERE email = %s",
+            ("reader@example.org",),
+        )
+        self.assertTrue(subscribers.profile("reader@example.org")["email_verified"])
+
+    def test_an_older_hash_is_upgraded_at_sign_in(self) -> None:
+        with mock.patch.object(subscribers, "_ROUNDS", 1_000):
+            older = subscribers.hash_password("correct-horse")
+        db.execute(
+            "UPDATE cedar_press_subscribers SET password_hash = %s WHERE email = %s",
+            (older, "reader@example.org"),
+        )
+        self.assertIsNone(subscribers.authenticate("reader@example.org", "wrong"))
+        self.assertIsNotNone(subscribers.authenticate("reader@example.org", "correct-horse"))
+        self.assertEqual(subscribers.find("reader@example.org").password_hash, older)
+        from fastapi import Response
+
+        signed_in = session.sign_in("reader@example.org", "correct-horse", Response())
+        self.assertIsNotNone(signed_in)
+        self.assertIsNotNone(session._decode(session._encode(signed_in)))
+        current = f"pbkdf2${subscribers._ROUNDS}$"
+        self.assertTrue(subscribers.find("reader@example.org").password_hash.startswith(current))
+        self.assertIsNotNone(subscribers.authenticate("reader@example.org", "correct-horse"))
+
+    def test_an_email_change_moves_the_account_once_and_signs_it_out(self) -> None:
+        cookie = session._encode(session.Session("reader@example.org", "press"))
+        db.execute(
+            "INSERT INTO cedar_press_reader_profiles (email, work) VALUES (%s, 'research')",
+            ("reader@example.org",),
+        )
+        reset = subscribers.issue_reset("reader@example.org")
+        token = subscribers.issue_email_change("reader@example.org", " New@Example.org ")
+        self.assertEqual(
+            subscribers.redeem_email_change(token), ("reader@example.org", "new@example.org")
+        )
+        self.assertIsNone(subscribers.find("reader@example.org"))
+        self.assertEqual(subscribers.find("new@example.org").tier, "press")
+        self.assertIsNotNone(subscribers.authenticate("new@example.org", "correct-horse"))
+        self.assertTrue(subscribers.profile("new@example.org")["email_verified"])
+        self.assertIsNone(session._decode(cookie))
+        self.assertEqual(
+            db.one("SELECT work FROM cedar_press_reader_profiles WHERE email = %s",
+                   ("new@example.org",))["work"],
+            "research",
+        )
+        self.assertIsNone(subscribers.redeem_reset(reset, "a-reset-password"))
+        self.assertIsNone(subscribers.redeem_email_change(token))
+
+    def test_an_email_change_cannot_take_an_address_in_use(self) -> None:
+        self.assertIsNone(subscribers.issue_email_change("reader@example.org", "PRO@example.org"))
+        token = subscribers.issue_email_change("reader@example.org", "later@example.org")
+        subscribers.create("later@example.org", "correct-horse", "press")
+        self.assertIsNone(subscribers.redeem_email_change(token))
+        self.assertIsNotNone(subscribers.find("reader@example.org"))
+
+    def test_a_billing_failure_rolls_the_email_change_back(self) -> None:
+        db.execute(
+            "UPDATE cedar_press_subscribers SET stripe_customer_id = 'cus_test' WHERE email = %s",
+            ("reader@example.org",),
+        )
+        token = subscribers.issue_email_change("reader@example.org", "new@example.org")
+
+        def refuse(customer, email):
+            raise RuntimeError("billing is down")
+
+        with self.assertRaises(RuntimeError):
+            subscribers.redeem_email_change(token, refuse)
+        self.assertIsNotNone(subscribers.find("reader@example.org"))
+        updated = []
+        subscribers.redeem_email_change(token, lambda *call: updated.append(call))
+        self.assertEqual(updated, [("cus_test", "new@example.org")])
+        self.assertIsNotNone(subscribers.find("new@example.org"))
+
+    def test_an_expired_email_change_is_refused(self) -> None:
+        with mock.patch.object(subscribers, "RESET_LIFETIME", -subscribers.RESET_LIFETIME):
+            token = subscribers.issue_email_change("reader@example.org", "new@example.org")
+        self.assertIsNone(subscribers.redeem_email_change(token))
+        self.assertIsNotNone(subscribers.find("reader@example.org"))
+
     def test_a_subscription_survives_a_restart(self) -> None:
         # The whole reason this module exists. `reset_for_tests` drops the
         # pool, which is as close to a restart as a test gets.
-        subscribers.redeem("TBN4-9K2M-X7QD", "kept")
+        subscribers.create("new@example.org", "kept", "press")
         db.reset_for_tests()
         self.assertIsNotNone(subscribers.authenticate("new@example.org", "kept"))
 
-    def test_spending_a_code_and_making_the_subscriber_are_one_transaction(self) -> None:
-        # A failure between the two used to leave a code nobody could use
-        # and a subscriber who was never created.
-        subscribers.redeem("TBN4-9K2M-X7QD", "together")
-        # Stored in the canonical form — uppercase, no hyphens — so a lookup
-        # is one index hit rather than a scan over every way a reader might
-        # have typed it. `canonical` is the same rule as `codes.normalize`
-        # and the client's `normalizePressCode`.
-        code = db.one(
-            "SELECT spent_at, spent_by FROM cedar_press_codes WHERE code = %s",
-            (subscribers.canonical("TBN4-9K2M-X7QD"),),
-        )
-        self.assertIsNotNone(code["spent_at"])
-        self.assertEqual(code["spent_by"], "new@example.org")
-        self.assertTrue(subscribers.exists("new@example.org"))
-
     def test_a_subscription_can_be_tied_to_a_platform_account(self) -> None:
-        # A Tribal Business News subscriber may arrive before they have ever
-        # opened the platform, so the binding happens later, if at all.
+        # A subscriber may buy Cedar Press before they have ever opened the
+        # platform, so the binding happens later, if at all.
         # `users` is teim-app's table, so this test creates its row without
         # truncating one it does not own — which is also how the real binding
         # will run, against a users table full of other people.
@@ -289,106 +331,7 @@ class TestPostgresBackend(_Backend, unittest.TestCase):
         self.assertEqual(
             session.account_id_for("ONE@Bank.example "), session.account_id_for("two@bank.example")
         )
-        # And the existence check, for the same reason: it gated activation
-        # and could not see a subscriber row at all.
-        self.assertTrue(session.account_exists("reader@example.org"))
-        self.assertFalse(session.account_exists("nobody@example.org"))
 
-    def test_a_code_cannot_reset_the_password_on_an_account_that_exists(self) -> None:
-        """Codex, PR #92, and this one is the account-takeover shape.
-
-        `redeem` upserted with `DO UPDATE SET password_hash`, so a second code
-        issued to an address that already had a subscription would set a new
-        password on it without anybody proving they held the old one.
-        """
-        before = subscribers.find("reader@example.org")
-        self.assertIsNotNone(before)
-        subscribers.issue_code("TBN9-DUPE-0001", "reader@example.org", "press_pro")
-        with self.assertRaises(subscribers.AlreadySubscribed):
-            subscribers.redeem("TBN9-DUPE-0001", "a-password-they-do-not-hold")
-        after = subscribers.find("reader@example.org")
-        self.assertEqual(after.password_hash, before.password_hash)
-        self.assertEqual(after.tier, before.tier)
-        # And the old password still signs them in.
-        self.assertIsNotNone(subscribers.authenticate("reader@example.org", "correct-horse"))
-        # The code is not consumed by the refusal, so it can still be voided
-        # or reissued deliberately rather than being silently burnt.
-        code = db.one(
-            "SELECT spent_at FROM cedar_press_codes WHERE code = %s",
-            (subscribers.canonical("TBN9-DUPE-0001"),),
-        )
-        self.assertIsNone(code["spent_at"])
-
-    def test_redemption_needs_one_connection_not_two(self) -> None:
-        """Codex, PR #92: `account_id_for` ran inside `redeem`'s transaction.
-
-        It performs a query of its own, so it asked the pool for a second
-        connection while the first was still held. A pool of one is the
-        smallest case that shows it, and it is a real configuration —
-        `CEDAR_PRESS_DB_POOL=1`. At the default of eight, eight simultaneous
-        activations hold all eight and each waits for a ninth.
-        """
-        was = os.environ.get("CEDAR_PRESS_DB_POOL")
-        os.environ["CEDAR_PRESS_DB_POOL"] = "1"
-        db.reset_for_tests()
-        try:
-            subscribers.issue_code("TBN9-ONE-CONN", "solo@example.org", "press")
-            made = subscribers.redeem("TBN9-ONE-CONN", "correct-horse-battery")
-            self.assertIsNotNone(made)
-            self.assertEqual(made.email, "solo@example.org")
-        finally:
-            if was is None:
-                os.environ.pop("CEDAR_PRESS_DB_POOL", None)
-            else:
-                os.environ["CEDAR_PRESS_DB_POOL"] = was
-            db.reset_for_tests()
-
-
-class TestExpiryIsFailClosed(unittest.TestCase):
-    """Codex, PR #92: a typo in `CEDAR_PRESS_CODES` became a 500.
-
-    `codes.py` has always promised the opposite, in as many words: "An
-    unparseable date is a register we cannot trust. Treated as expired rather
-    than as unlimited." When the lookup moved into `subscribers`, the parse
-    became a bare `date.fromisoformat`, so an operator's typo stopped
-    refusing the code and started telling the reader the service was broken.
-    """
-
-    def setUp(self) -> None:
-        self._was = os.environ.get("CEDAR_PRESS_CODES")
-        os.environ.pop("DATABASE_URL", None)
-        db.reset_for_tests()
-        subscribers.forget_activated_for_tests()
-        os.environ["CEDAR_PRESS_CODES"] = json.dumps(
-            {
-                "TBN4-BAD0-DATE": {"email": "typo@example.org", "tier": "press", "expires": "soon"},
-                "TBN4-GOOD-DATE": {
-                    "email": "fine@example.org",
-                    "tier": "press",
-                    "expires": "2999-01-01",
-                },
-            }
-        )
-
-    def tearDown(self) -> None:
-        if self._was is None:
-            os.environ.pop("CEDAR_PRESS_CODES", None)
-        else:
-            os.environ["CEDAR_PRESS_CODES"] = self._was
-
-    def test_an_unparseable_expiry_is_expired_and_not_an_error(self) -> None:
-        found = subscribers.find_code("TBN4-BAD0-DATE")
-        self.assertIsNotNone(found)
-        self.assertTrue(found.has_expired(dt.date.today()))
-        # And through the route's own gate, which is where the 500 surfaced.
-        issued, error = codes.check("TBN4-BAD0-DATE", "typo@example.org")
-        self.assertEqual(error, codes.CODE_EXPIRED)
-        self.assertIsNone(issued)
-
-    def test_a_good_expiry_still_works(self) -> None:
-        issued, error = codes.check("TBN4-GOOD-DATE", "fine@example.org")
-        self.assertIsNone(error)
-        self.assertEqual(issued.tier, "press")
 
 
 class TestMigrationsTravelWithThePackage(unittest.TestCase):
@@ -459,9 +402,8 @@ class TestAStandaloneDatabase(unittest.TestCase):
             " 'cedar_press_subscribers'::regclass AND contype = 'f'"
         )
         self.assertEqual(keys, [])
-        # And the service works: a code, an activation, a sign-in.
-        subscribers.issue_code("TBN5-SOLO-0001", "alone@example.org", "press_pro")
-        made = subscribers.redeem("TBN5-SOLO-0001", "correct-horse-battery")
+        # And the service works: an account, a sign-in.
+        made = subscribers.create("alone@example.org", "correct-horse-battery", "press_pro")
         self.assertEqual(made.tier, "press_pro")
         self.assertIsNotNone(subscribers.authenticate("alone@example.org", "correct-horse-battery"))
         # Binding is the no-op it always promised to be, not a crash.

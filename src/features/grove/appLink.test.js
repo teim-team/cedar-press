@@ -41,9 +41,9 @@ test("every Grove call to action opens the marketing page in a new tab", () => {
       found.push({ name, attrs: match[1] });
     }
   }
-  // The closing statement on the door, and an article's figure credit and
-  // upgrade prompt. The viewer page carries none (owner, 2026-09-27).
-  assert.ok(found.length >= 3, `expected the door and an article to link Grove, found ${found.length}`);
+  // The closing statement on the overview. The viewer page carries none
+  // (owner, 2026-09-27).
+  assert.ok(found.length >= 1, `expected the overview to link Grove, found ${found.length}`);
   for (const { name, attrs } of found) {
     assert.match(attrs, /target="_blank"/, name);
     assert.match(attrs, /rel="noreferrer"/, name);

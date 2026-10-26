@@ -55,17 +55,6 @@ test("credential errors keep the server refusal", async () => {
   });
 });
 
-test("activation refuses a misrouted success and keeps a genuine session payload", async () => {
-  const body = { code: "ABCD1234", email: "existing@example.org", password: "not-a-live-password" };
-  await withResponse(new Response("<html>static app</html>"), async () => {
-    await assert.rejects(api.activatePressAccount(body), { code: "AUTH_RESPONSE_INVALID" });
-  });
-  const session = { email: body.email, workspace_tier: "press" };
-  await withResponse(Response.json(session), async () => {
-    assert.deepEqual(await api.activatePressAccount(body), session);
-  });
-});
-
 test("checkout status and resend preserve the reservation target", async () => {
   const id = "48ff73db-cfe8-4775-901e-c212627d27f9";
   await withResponse(Response.json({ status: "complete" }), async calls => {

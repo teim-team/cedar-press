@@ -40,7 +40,7 @@ test would catch them. Imports are covered -- a wrong one fails the build, the
 suites or the smoke run -- but ``docs/*.md``, the generated architecture map,
 ``.env.example`` and the prose comments inside ``server/cedar_press/`` are
 not. The same measurement covers them, because it counts textual occurrences
-and not imports: once the four directories are gone, this test requires the
+and not imports: once the old directories are gone, this test requires the
 count to be zero and NAMES every file still carrying an old path. There is
 nothing to remember to write on the day of the rename; the check is already
 here and already runs.
@@ -51,7 +51,7 @@ Tracked files only, and every tracked file. A filesystem walk would sweep in
 restricted to ``src/`` would miss the references under ``docs/``, which are
 the ones nobody thinks of.
 
-This file names none of the four paths literally -- the pattern is assembled
+This file names none of the old paths literally -- the pattern is assembled
 from its parts below -- so that the count it reports is not a count of itself.
 ``test_rename_plan_gate.py`` proves the whole thing fires, by injecting a
 stale count, a stale breakdown that still adds up, and a surviving old path.
@@ -67,9 +67,9 @@ from pathlib import Path
 _REPO = Path(__file__).resolve().parents[2]
 _DOC = _REPO / "docs" / "ARCHITECTURE.md"
 
-#: The four directories the rename moves, and the name it moves them out of.
+#: The directories the rename moves, and the name it moves them out of.
 #: Held apart so this module contributes nothing to its own measurement.
-_DIRECTORIES = ("features", "pages", "components", "styles")
+_DIRECTORIES = ("features", "pages", "styles")
 _OLD_NAME = "grove"
 
 _PATTERN = "({})/{}".format("|".join(_DIRECTORIES), _OLD_NAME)
@@ -123,7 +123,7 @@ def _claims(path: str, label: str) -> bool:
     """Whether ``label`` from the table covers ``path``.
 
     A label is a directory when the path sits under it and a file when the two
-    are equal, so `main.jsx`, `package.json`, `scripts/` and the four moved
+    are equal, so `main.jsx`, `package.json`, `scripts/` and the moved
     directories are each written the way a reader would write them.
     """
     if path == label:
@@ -251,7 +251,7 @@ class TestTheRenamePlanIsStillTrue(unittest.TestCase):
             "docs/ARCHITECTURE.md states a rename measurement that is no longer "
             "true. Re-measured just now with\n"
             f"    git grep -I -o -E '{_PATTERN}'\n"
-            "and, for the first row, `git ls-files` over the four directories. "
+            "and, for the first row, `git ls-files` over the old directories. "
             f"Current values: {measured}. Update the table in the same commit "
             "as the change that moved them -- a planning number nobody re-reads "
             "is how this row went stale for a whole branch.",
@@ -319,7 +319,7 @@ class TestTheRenamePlanIsStillTrue(unittest.TestCase):
     def test_no_old_path_survives_the_rename(self) -> None:
         """The check the rename needs, live before the rename happens.
 
-        Until the four directories move this is skipped, with the reason, so
+        Until the old directories move this is skipped, with the reason, so
         a run does not count it as a check that passed. The moment they
         move, the same measurement becomes the stale-path
         sweep: every Markdown line, generated document, comment and dotfile

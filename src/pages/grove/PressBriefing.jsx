@@ -13,16 +13,13 @@
 // underneath itself as tiles. A reader who is already signed in does not
 // need the product's table of contents twice; they need to know what moved.
 //
-// EVERY LINE HERE IS READ, NOT WRITTEN. The lead is the newest brief, the
-// signals are the newest releases from the change ledger, the collection is
-// whichever one changed most recently, and the question is scoped to it.
+// EVERY LINE HERE IS READ, NOT WRITTEN. The signals are the newest releases
+// from the change ledger, the collection is whichever one changed most
+// recently, and the question is scoped to it.
 // Nothing on this page is copy that has to be kept in step by hand, which
 // is the only way a briefing survives contact with a release schedule.
 import { Link } from "react-router";
 
-import { ARTICLE_IMAGE, articleHref } from "../../features/grove/pressArticles";
-import { useAuth } from "../../context/useAuth";
-import { useProtectedArticles } from "../../features/grove/useProtectedArticles.js";
 import { PRESS_CATALOG_BY_ID } from "../../features/grove/pressCatalog";
 import { anchorOf, formatUpdated, latestRelease, recentlyUpdated } from "../../features/grove/pressReleases";
 import { PRESS_DATA_PATH, PRESS_WHATS_NEW_PATH } from "../../features/grove/pressRoutes";
@@ -39,143 +36,77 @@ function leadCollection(releases) {
 
 export default function PressBriefing({ releaseState }) {
   const releases = releaseState?.data?.releases ?? {};
-  const { user, loading } = useAuth();
-  const articleState = useProtectedArticles(loading ? null : user);
-  const [lead] = articleState.data?.articles ?? [];
   const signals = recentlyUpdated(3, releases);
   const collection = leadCollection(releases);
-  const away = lead && !lead.hosted;
 
   return (
     <section className="cp-brief cp-fade" aria-label="Today's briefing">
-      {/* ONE LEAD DEVELOPMENT. The newest piece of original research, at the
-          size of a lead — not a card in a grid of six. */}
-      {lead ? (
-        <article className="cp-brief__lead">
-          <span className="cp-brief__cap">{lead.earlyAccess ? "Early access" : "The latest research"}</span>
-          {/* THE LEAD HAS A PICTURE ON /articles AND HAD NONE HERE.
-              The briefing brief is "one lead development", which is about how
-              MANY things the page carries, not about stripping the one it
-              carries down to text. Every article in the corpus ships an
-              `image`, `imageAlt` and intrinsic dimensions, and the articles
-              index renders them; this page was the only surface that dropped
-              them, which is why it read as the emptiest page in the product
-              while being its front page.
-              Same source, same constant for the intrinsic size, so the two
-              renderings cannot drift into different aspect ratios. Eager and
-              high priority: on this page it is the largest thing on the first
-              screen, exactly as the lead card is on /articles. */}
-          {lead.image ? (
-            <div className="cp-brief__art">
-              <img
-                className="cp-brief__img"
-                src={lead.image}
-                alt={lead.imageAlt}
-                width={ARTICLE_IMAGE.width}
-                height={ARTICLE_IMAGE.height}
-                loading="eager"
-                fetchPriority="high"
-              />
-            </div>
-          ) : null}
-          <h2 className="cp-brief__title">
-            {away ? (
-              <a href={articleHref(lead)} target="_blank" rel="noreferrer">
-                {lead.title} <span aria-hidden="true">&#8599;</span>
-              </a>
-            ) : (
-              <Link to={articleHref(lead)}>
-                {lead.title} <span aria-hidden="true">&#8594;</span>
-              </Link>
-            )}
-          </h2>
-          <p className="cp-brief__dek">{lead.dek}</p>
-          <p className="cp-brief__meta">
-            {lead.date}
-            {lead.datasetId && PRESS_CATALOG_BY_ID[lead.datasetId]
-              ? <> · from <Link to={`${PRESS_DATA_PATH}?c=${lead.datasetId}`}>{PRESS_CATALOG_BY_ID[lead.datasetId].name}</Link></>
-              : null}
-            {away ? " · on Tribal Business News" : null}
-          </p>
-        </article>
-      ) : (
-        <div className="cp-brief__lead" data-testid="brief-article-unavailable">
-          <p role="status">
-            {articleState.status === "loading"
-              ? "Loading research articles…"
-              : "Research articles are unavailable on this connection. Your collections and account are still available."}
-          </p>
-        </div>
-      )}
-
-      <div className="cp-brief__side">
-        {/* THREE SIGNALS. Releases, newest first, each one a link to exactly
-            what changed rather than to the feed's top. */}
-        <div className="cp-brief__block">
-          <span className="cp-brief__cap">{releaseState?.data?.source === "verified_current" ? "Available now" : "Updates"}</span>
-          {!releaseState?.data ? <p role="status">{releaseState?.status === "loading" ? "Loading collection updates…" : "Collection updates are unavailable."}</p> : null}
-          <ul className="cp-brief__signals">
-            {signals.map((release) => {
-              const latest = latestRelease(release.id, releases);
-              const to = latest
-                ? `${PRESS_WHATS_NEW_PATH}#${anchorOf({ id: release.id, version: latest.version })}`
-                : PRESS_WHATS_NEW_PATH;
-              return (
-                <li key={release.id}>
-                  <Link to={to}>
-                    <span className="cp-brief__signame">
-                      {PRESS_CATALOG_BY_ID[release.id]?.name ?? release.id}
-                    </span>
-                    <span className="cp-brief__sigwhen">
-                      {release.updated ? formatUpdated(release.updated) : "Current verified data"}
-                    </span>
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-          <Link className="cp-brief__more" to={PRESS_WHATS_NEW_PATH}>
-            Collection updates <span aria-hidden="true">&#8594;</span>
-          </Link>
-        </div>
-
-        {/* ONE COLLECTION, AND ONE QUESTION ABOUT IT. The question is scoped
-            to the same collection, so pressing it asks something answerable
-            rather than opening an empty box. */}
-        {collection ? (
-          <div className="cp-brief__block">
-            <span className="cp-brief__cap">Explore the records</span>
-            <Link className="cp-brief__coll" to={`${PRESS_DATA_PATH}?c=${collection.id}`}>
-              <span className="cp-brief__collmark" aria-hidden="true">
-                {COLLECTION_ICONS[collection.id] ?? null}
-              </span>
-              <span>
-                <b>{collection.entry.name}</b>
-                {Number.isSafeInteger(collection.count) ? (
-                  <small>{collection.count.toLocaleString()} available observations</small>
-                ) : null}
-              </span>
-            </Link>
-            <button
-              type="button"
-              className="cp-brief__ask"
-              onClick={() =>
-                window.dispatchEvent(
-                  new CustomEvent("cedar:ask-collection", {
-                    detail: {
-                      id: collection.id,
-                      name: collection.entry.name,
-                      q: `What changed in ${collection.entry.name}?`,
-                    },
-                  }),
-                )
-              }
-            >
-              Ask Cedar what changed in it <span aria-hidden="true">&#8594;</span>
-            </button>
-          </div>
-        ) : null}
+      {/* THREE SIGNALS. Releases, newest first, each one a link to exactly
+          what changed rather than to the feed's top. */}
+      <div className="cp-brief__block">
+        <span className="cp-brief__cap">{releaseState?.data?.source === "verified_current" ? "Available now" : "Updates"}</span>
+        {!releaseState?.data ? <p role="status">{releaseState?.status === "loading" ? "Loading collection updates…" : "Collection updates are unavailable."}</p> : null}
+        <ul className="cp-brief__signals">
+          {signals.map((release) => {
+            const latest = latestRelease(release.id, releases);
+            const to = latest
+              ? `${PRESS_WHATS_NEW_PATH}#${anchorOf({ id: release.id, version: latest.version })}`
+              : PRESS_WHATS_NEW_PATH;
+            return (
+              <li key={release.id}>
+                <Link to={to}>
+                  <span className="cp-brief__signame">
+                    {PRESS_CATALOG_BY_ID[release.id]?.name ?? release.id}
+                  </span>
+                  <span className="cp-brief__sigwhen">
+                    {release.updated ? formatUpdated(release.updated) : "Current verified data"}
+                  </span>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+        <Link className="cp-brief__more" to={PRESS_WHATS_NEW_PATH}>
+          Collection updates <span aria-hidden="true">&#8594;</span>
+        </Link>
       </div>
+
+      {/* ONE COLLECTION, AND ONE QUESTION ABOUT IT. The question is scoped
+          to the same collection, so pressing it asks something answerable
+          rather than opening an empty box. */}
+      {collection ? (
+        <div className="cp-brief__block">
+          <span className="cp-brief__cap">Explore the records</span>
+          <Link className="cp-brief__coll" to={`${PRESS_DATA_PATH}?c=${collection.id}`}>
+            <span className="cp-brief__collmark" aria-hidden="true">
+              {COLLECTION_ICONS[collection.id] ?? null}
+            </span>
+            <span>
+              <b>{collection.entry.name}</b>
+              {Number.isSafeInteger(collection.count) ? (
+                <small>{collection.count.toLocaleString()} available observations</small>
+              ) : null}
+            </span>
+          </Link>
+          <button
+            type="button"
+            className="cp-brief__ask"
+            onClick={() =>
+              window.dispatchEvent(
+                new CustomEvent("cedar:ask-collection", {
+                  detail: {
+                    id: collection.id,
+                    name: collection.entry.name,
+                    q: `What changed in ${collection.entry.name}?`,
+                  },
+                }),
+              )
+            }
+          >
+            Ask Cedar what changed in it <span aria-hidden="true">&#8594;</span>
+          </button>
+        </div>
+      ) : null}
     </section>
   );
 }

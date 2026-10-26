@@ -205,13 +205,12 @@ const GENERAL_INTENTS = [
       `resolved to the nations, corporations and organizations the records belong to.\n\n` +
       `A federal contract names the company that won it but not the nation that owns the company, so ` +
       `Cedar does the work between the record and the entity, publishes what it could not resolve, and keeps the ` +
-      `collections current as new material arrives. Alongside the data there is original research, ` +
-      `starting with a brief on individually owned Native businesses, a release history and a methods reference.`,
+      `collections current as new material arrives. Alongside the data there is a release history and a methods reference.`,
     expanded:
       `Going deeper: the collections are one product rather than ${COUNT} downloads. Every one keys to the ` +
       `same entity layer, so a nation's contracts, awards, deals, notices and subsidiaries read as one ` +
       `nation across all of them, and a figure you cite reproduces because the update history preserves changes.\n\n` +
-      `Research briefs are written from the collections, the release history says what changed and when, and ` +
+      `The release history says what changed and when, and ` +
       `the methods page states the inclusion rules and the known gaps for each collection.`,
   },
   {
@@ -306,7 +305,7 @@ const GENERAL_INTENTS = [
       `Each person keeps their own sign-in, and their conversations and activity stay private to them, so ` +
       `teammates do not see each other's conversations. Access comes through the organization's plan: someone ` +
       `removed from the organization loses that access at once and keeps anything they hold individually.\n\n` +
-      `Enrollment is not open yet. To ask about an institutional plan, contact contact@lumecon.ai.`,
+      `To ask about an institutional plan, contact contact@lumecon.ai.`,
     expanded:
       `Going deeper: the organization's plan is what opens the collections for its members, and the admin ` +
       `manages who is in it by email invitation. Collaborative analysis and shared projects are part of ` +
@@ -333,9 +332,8 @@ const GENERAL_INTENTS = [
     followUps: ["tribal", "research", "collections"],
     triggers: ["how do i get", "how much", "price", "pricing", "cost", "subscribe", "subscription", "plans", "buy", "sign up", "membership", "tiers", "difference between", "get access", "access", "how do i read", "log in", "login"],
     answer:
-      `Cedar Press will be available exclusively through a Tribal Business News membership, which will ` +
-      `handle payment, renewals and upgrades. Enrollment is not open yet: early access is available soon, ` +
-      `and you can request it at contact@lumecon.ai. If you already have an account, log in.\n\n` +
+      `Subscribe annually on this site. Payment goes through Stripe, and the email that follows lets you ` +
+      `confirm your address and choose a password. If you already have an account, log in.\n\n` +
       `${PRESS?.name} opens ${STANDARD.length} collections, ` +
       `${lowerFirst(PRESS?.question ?? "")}\n` +
       `${PRESS_PRO?.name} adds the other ${PRO.length}, ` +
@@ -347,7 +345,7 @@ const GENERAL_INTENTS = [
       `Going deeper: there is no year gating. Every subscriber gets every year Cedar holds of each collection; ` +
       `the only difference between the two plans is which collections arrive. ${PRESS?.name} is ` +
       `${names(STANDARD)}. ${PRESS_PRO?.name} adds ${names(PRO)}.\n\n` +
-      `Each collection downloads as a CSV that cites itself, and the same reader opens the briefs, the ` +
+      `Each collection downloads as a CSV that cites itself, and the same reader opens the ` +
       `release history and the methods reference.`,
     links: ["plans", "request", "research"],
   },
@@ -390,16 +388,15 @@ const GENERAL_INTENTS = [
     id: "who",
     chip: "Who builds it?",
     followUps: ["entities", "limits", "plans"],
-    triggers: ["who builds", "who made", "who are you", "who is behind", "lumecon", "team", "tribal business news", "credentials", "who runs", "who makes", "who wrote"],
+    triggers: ["who builds", "who made", "who are you", "who is behind", "lumecon", "team", "credentials", "who runs", "who makes", "who wrote"],
     answer:
-      `Cedar Press is built by Lumecon in partnership with Tribal Business News, and is available ` +
-      `exclusively through a Tribal Business News membership.\n\n` +
+      `Cedar Press is built by Lumecon.\n\n` +
       `The collections are assembled by Indigenous researchers with Federal Reserve and university ` +
       `experience. Inclusion rules, known limitations and corrections ship with every collection rather ` +
       `than sitting in a document somewhere.`,
     expanded:
-      `Going deeper: Lumecon builds the collections and the analyst behind them; Tribal Business News ` +
-      `handles membership, payment and renewals. I am Cedar, Lumecon's AI economic analyst; here on the ` +
+      `Going deeper: Lumecon builds the collections and the analyst behind them, and handles membership, ` +
+      `payment and renewals. I am Cedar, Lumecon's AI economic analyst; here on the ` +
       `front page I answer about Cedar Press itself, and inside the product I answer from the collections.`,
   },
   {

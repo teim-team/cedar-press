@@ -65,10 +65,10 @@ from pydantic import BaseModel, Field
 
 from cedar_press import (
     cedar_service,
+    db,
     need_profiles,
     press_catalog,
     priorities,
-    protected_articles,
     release_research,
     repository,
     shelf,
@@ -208,8 +208,20 @@ def require_session(session: Session = Depends(require_account)) -> Session:
 
 
 @app.get("/health")
-def health() -> dict[str, str]:
-    return {"status": "ok"}
+def health(response: Response) -> dict[str, str]:
+    if not db.configured():
+        return {"status": "ok"}
+    try:
+        # Seconds, not the pool's thirty: a probe that hangs is no answer.
+        with db.pool().connection(timeout=3) as conn:
+            conn.execute("SELECT 1")
+    except Exception:
+        # A 503 here fails the deploy's health gate, which rolls back rather
+        # than swapping in a container that cannot reach its subscribers.
+        logging.getLogger("cedar_press.health").exception("Database check failed")
+        response.status_code = 503
+        return {"status": "unavailable", "database": "unreachable"}
+    return {"status": "ok", "database": "ok"}
 
 
 @app.exception_handler(HTTPException)
@@ -441,38 +453,6 @@ def releases(response: Response, session: Session = Depends(require_session)) ->
     if subscriber is None:
         raise HTTPException(status_code=401, detail="Authentication required")
     return repository.releases(subscriber.tier)
-
-
-def require_article_reader(session: Session | None = Depends(current_session)) -> Session:
-    if session is None:
-        raise HTTPException(
-            status_code=401, detail="Not signed in.", headers=protected_articles.ARTICLE_HEADERS
-        )
-    if not press_catalog.can_read_cedar_press(session.tier):
-        raise HTTPException(
-            status_code=403,
-            detail="This subscription does not include Cedar Press articles.",
-            headers=protected_articles.ARTICLE_HEADERS,
-        )
-    return session
-
-
-@app.get("/press/articles")
-def articles(session: Session = Depends(require_article_reader)) -> JSONResponse:
-    return JSONResponse(
-        {"articles": protected_articles.article_cards()},
-        headers=protected_articles.ARTICLE_HEADERS,
-    )
-
-
-@app.get("/press/articles/{slug}")
-def article(slug: str, session: Session = Depends(require_article_reader)) -> JSONResponse:
-    found = protected_articles.article_detail(slug)
-    if found is None:
-        raise HTTPException(
-            status_code=404, detail="No such article.", headers=protected_articles.ARTICLE_HEADERS
-        )
-    return JSONResponse({"article": found}, headers=protected_articles.ARTICLE_HEADERS)
 
 
 DOWNLOAD_LOG = logging.getLogger("cedar_press.download")

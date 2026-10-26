@@ -129,8 +129,7 @@ class TestAccountFoundation(unittest.TestCase):
 
     def test_legacy_activation_bridge_is_atomic_and_retains_identity_on_update(self):
         db.migrate()
-        subscribers.issue_code("LOCAL-TEST-1234", "new@example.org", "press")
-        subscribers.redeem("LOCAL-TEST-1234", "activation-password")
+        subscribers.create("new@example.org", "activation-password", "press")
         row = db.one("SELECT * FROM cedar_press_subscribers WHERE email = 'new@example.org'")
         db.execute(
             "UPDATE cedar_press_subscribers SET account_id = 'another', tier = 'press_pro'"
@@ -187,7 +186,7 @@ class TestAccountFoundation(unittest.TestCase):
                 " VALUES (%s, 'google', 'stable-provider-subject')", (users[1]["id"],)
             )
 
-    def test_single_account_identity_and_existing_account_activation_refusal(self):
+    def test_single_account_identity(self):
         db.migrate()
         user = accounts.create_user("unverified@example.org")
         with self.assertRaises(self.psycopg.errors.UniqueViolation) as caught:
@@ -196,10 +195,6 @@ class TestAccountFoundation(unittest.TestCase):
                 " VALUES (%s, 'another@example.org', 'another', NULL)", (user["id"],)
             )
         self.assertEqual(caught.exception.diag.constraint_name, "cedar_press_subscribers_pkey")
-        subscribers.issue_code("EXISTING-IDENTITY-123", user["email"], "press")
-        with self.assertRaises(subscribers.AlreadySubscribed):
-            subscribers.redeem("EXISTING-IDENTITY-123", "must-not-reset")
-        self.assertFalse(subscribers.find_code("EXISTING-IDENTITY-123").spent)
         self.assertIsNone(subscribers.find(user["email"]).password_hash)
         self.assertEqual(subscribers.find(user["email"]).tier, "free")
 
