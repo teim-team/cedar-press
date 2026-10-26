@@ -12,11 +12,11 @@ from unittest import mock
 from urllib.parse import parse_qs, urlsplit
 
 import stripe
-from scripts.setup_stripe import setup
 
 from cedar_press.billing.policy import BillingError
 from cedar_press.billing.stripe_gateway import API_VERSION, StripeGateway
 from tests.test_billing import PRICE_MAP, SETTINGS, price_data
+from tools.setup_stripe import setup
 
 
 class Transport(stripe.HTTPClient):
@@ -31,7 +31,8 @@ class Transport(stripe.HTTPClient):
 
     def request(self, method, url, headers, post_data=None, **kwargs):
         path = urlsplit(url).path
-        params = parse_qs(post_data or "")
+        params = parse_qs(urlsplit(url).query)
+        params.update(parse_qs(post_data or ""))
         self.calls.append((method, path, params, headers))
         price = {"object": "price", **price_data()}
         subscription = {
@@ -136,6 +137,8 @@ class Transport(stripe.HTTPClient):
                 "currency": "usd",
                 "duration": "once",
             }
+        elif path.endswith("/expire"):
+            result = {**checkout, "status": "expired"}
         elif path.startswith("/v1/checkout/sessions"):
             result = (
                 {"object": "list", "url": path, "has_more": False, "data": [checkout]}
@@ -243,6 +246,15 @@ class TestStripeGateway(unittest.TestCase):
         self.assertEqual(self.gateway.find_checkout("cus_fixture", "attempt")["id"], "cs_fixture")
         self.assertIsNone(self.gateway.find_checkout("cus_fixture", "different"))
 
+    def test_sdk_expiration_and_bounded_recovery_use_supported_parameters(self):
+        self.assertEqual(self.gateway.expire_checkout("cs_fixture")["status"], "expired")
+        method, path, _, headers = self.transport.calls[-1]
+        self.assertEqual((method, path), ("post", "/v1/checkout/sessions/cs_fixture/expire"))
+        self.assertEqual(headers["Idempotency-Key"], "press-expire-cs_fixture")
+        self.gateway.find_checkout(None, "attempt", created_after=10, created_before=20)
+        self.assertEqual(self.transport.calls[-1][2]["created[gte]"], ["10"])
+        self.assertEqual(self.transport.calls[-1][2]["created[lte]"], ["20"])
+
     def test_direct_guest_checkout_leaves_email_and_codes_to_stripe(self):
         attempt = {
             "id": "anonymous-attempt",
@@ -260,7 +272,8 @@ class TestStripeGateway(unittest.TestCase):
         self.assertEqual(params["client_reference_id"], ["anonymous-attempt"])
         self.assertEqual(params["metadata[cedar_press_guest_id]"], ["anonymous-attempt"])
         self.assertEqual(
-            params["success_url"], ["http://localhost:5173/subscribe?billing=processing"]
+            params["success_url"],
+            ["http://localhost:5173/subscribe?billing=processing&checkout=anonymous-attempt"],
         )
         self.assertNotIn("discounts[0][promotion_code]", params)
 
@@ -298,6 +311,38 @@ class TestStripeGateway(unittest.TestCase):
         self.assertEqual(
             params["flow_data[subscription_update_confirm][items][0][quantity]"], ["1"]
         )
+
+    def test_first_run_catalog_accepts_empty_compose_configuration(self):
+        self.transport.bootstrap = True
+        with (
+            mock.patch.dict(
+                os.environ,
+                {"CEDAR_PRESS_STRIPE_PRICES": "", "CEDAR_PRESS_STRIPE_LEGACY_PRICES": ""},
+            ),
+            contextlib.redirect_stdout(io.StringIO()) as output,
+        ):
+            setup(self.gateway, "SUMMIT")
+        self.assertIn("CEDAR_PRESS_STRIPE_PRICES=", output.getvalue())
+        self.assertIn("CEDAR_PRESS_STRIPE_LEGACY_PRICES=[]", output.getvalue())
+
+    def test_recovery_filters_the_window_and_stops_before_fetching_more_pages(self):
+        client = mock.Mock()
+
+        def rows():
+            yield {"id": "cs_match", "metadata": {"cedar_press_attempt_id": "attempt"}}
+            raise AssertionError("Recovery fetched beyond the matching session")
+
+        client.v1.checkout.sessions.list.return_value.auto_paging_iter.return_value = rows()
+        gateway = StripeGateway(client)
+        self.assertEqual(
+            gateway.find_checkout(None, "attempt", created_after=10, created_before=20)["id"],
+            "cs_match",
+        )
+        client.v1.checkout.sessions.list.assert_called_once_with(
+            {"limit": 100, "created": {"gte": 10, "lte": 20}}
+        )
+        with self.assertRaises(BillingError):
+            gateway.find_checkout(None, "attempt")
 
     def test_bootstrap_encodes_all_four_annual_prices_and_cohort_portals(self):
         self.transport.bootstrap = True

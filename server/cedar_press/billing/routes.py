@@ -6,6 +6,7 @@ import json
 import os
 import secrets
 from typing import Literal
+from uuid import UUID
 
 import stripe
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
@@ -33,6 +34,11 @@ router = APIRouter()
 class CheckoutRequest(BaseModel):
     tier: Literal["press", "press_pro"]
     discount_code: str = Field(default="", max_length=64)
+    replace_open: bool = False
+
+
+class CheckoutTarget(BaseModel):
+    checkout_id: UUID | None = None
 
 
 class SubscriptionRequest(BaseModel):
@@ -81,19 +87,27 @@ def guest_start(
 
 @router.get("/billing/guest/status", response_model=GuestStatusResponse)
 def guest_status(
-    request: Request, response: Response, services: BillingServices = Depends(get_billing_services)
+    request: Request,
+    response: Response,
+    checkout_id: UUID | None = None,
+    services: BillingServices = Depends(get_billing_services),
 ):
     response.headers["Cache-Control"] = "private, no-store"
-    return call(services.guest.status, request.cookies.get(COOKIE, ""))
+    return call(services.guest.status, request.cookies.get(COOKIE, ""), checkout_id)
 
 
 @router.post("/billing/guest/resend", response_model=GuestStatusResponse)
 def resend_guest_email(
-    request: Request, response: Response, services: BillingServices = Depends(get_billing_services)
+    request: Request,
+    response: Response,
+    body: CheckoutTarget | None = None,
+    services: BillingServices = Depends(get_billing_services),
 ):
     guard(request)
     response.headers["Cache-Control"] = "private, no-store"
-    return call(services.guest.resend, request.cookies.get(COOKIE, ""))
+    return call(
+        services.guest.resend, request.cookies.get(COOKIE, ""), body.checkout_id if body else None
+    )
 
 
 def account(session: Session | None = Depends(current_session)) -> Session:
@@ -149,7 +163,13 @@ def checkout(
     services: BillingServices = Depends(get_billing_services),
 ):
     guard(request)
-    return call(services.billing.checkout, session.email, body.tier, body.discount_code.strip())
+    return call(
+        services.billing.checkout,
+        session.email,
+        body.tier,
+        body.discount_code.strip(),
+        body.replace_open,
+    )
 
 
 @router.post("/billing/portal", response_model=RedirectResponse)

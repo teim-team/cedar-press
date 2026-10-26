@@ -75,7 +75,7 @@ export default function CedarPressLogin() {
     if (linkedToken) navigate({ pathname: location.pathname, search: location.search }, { replace: true });
   }, [linkedToken, location.pathname, location.search, navigate]);
 
-  if (!loading && canReadCedarPress(user)) return <Navigate to={next} replace />;
+  if (!loading && user) return <Navigate to={canReadCedarPress(user) ? next : "/settings"} replace />;
 
   const go = (to) => {
     setStep(to);

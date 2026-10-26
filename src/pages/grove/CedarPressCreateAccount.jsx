@@ -12,21 +12,33 @@ export default function CedarPressCreateAccount() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const { refreshSession } = useAuth();
-  const [token] = useState(() => new URLSearchParams(location.hash.slice(1)).get("token") || "");
+  const linkedToken = new URLSearchParams(location.hash.slice(1)).get("token") || "";
+  const [token, setToken] = useState(linkedToken);
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
 
+  if (linkedToken && linkedToken !== token) {
+    setToken(linkedToken);
+    setEmail("");
+    setPassword("");
+    setError("");
+  }
+
+  useEffect(() => {
+    // Keep mailbox credentials out of browser history and referrer headers.
+    if (linkedToken) navigate({ pathname: location.pathname, search: location.search }, { replace: true });
+  }, [linkedToken, navigate, location.pathname, location.search]);
+
   useEffect(() => {
     let stopped = false;
-    // Keep mailbox credentials out of browser history and referrer headers.
-    if (location.hash) navigate({ pathname: location.pathname, search: location.search }, { replace: true });
-    checkAccountSetup(token).then((result) => { if (!stopped) setEmail(result.email); })
-      .catch((failure) => { if (!stopped) setError(failure.message); });
+    checkAccountSetup(token).then((result) => {
+      if (!stopped) { setEmail(result.email); setError(""); }
+    }).catch((failure) => { if (!stopped) setError(failure.message); });
     return () => { stopped = true; };
-  }, [token, navigate, location.hash, location.pathname, location.search]);
+  }, [token]);
 
   const submit = async (event) => {
     event.preventDefault();

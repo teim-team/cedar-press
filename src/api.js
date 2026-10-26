@@ -319,8 +319,8 @@ export function fetchBilling({ signal } = {}) {
   return request("/billing", { signal });
 }
 
-export function startBillingCheckout({ tier, discountCode = "" }) {
-  return request("/billing/checkout", { method: "POST", body: { tier, discount_code: discountCode } });
+export function startBillingCheckout({ tier, discountCode = "", replaceOpen = false }) {
+  return request("/billing/checkout", { method: "POST", body: { tier, discount_code: discountCode, replace_open: replaceOpen } });
 }
 
 export function openBillingPortal(subscriptionId) {
@@ -339,8 +339,8 @@ export function startGuestCheckout({ tier }) {
   return request("/billing/guest/checkout", { method: "POST", body: { tier } });
 }
 
-export function fetchGuestCheckout() {
-  return request("/billing/guest/status");
+export function fetchGuestCheckout(checkoutId) {
+  return request(`/billing/guest/status${checkoutId ? `?checkout_id=${encodeURIComponent(checkoutId)}` : ""}`);
 }
 
 export function checkAccountSetup(token) {
@@ -351,6 +351,6 @@ export function completeAccountSetup({ token, name, password }) {
   return request("/auth/account-setup/confirm", { method: "POST", body: { token, name, new_password: password } });
 }
 
-export function resendGuestEmail() {
-  return request("/billing/guest/resend", { method: "POST" });
+export function resendGuestEmail(checkoutId) {
+  return request("/billing/guest/resend", { method: "POST", body: { checkout_id: checkoutId } });
 }

@@ -101,7 +101,7 @@ as a local alias for `CEDAR_PRESS_STRIPE_SECRET_KEY`.
 
 ```sh
 docker compose build tools
-docker compose run --rm tools python scripts/setup_stripe.py
+docker compose run --rm tools python server/tools/setup_stripe.py
 ```
 
 Save the printed price, portal and coupon IDs in `.env`. Obtain the listener's
@@ -151,7 +151,10 @@ The inbox stores IDs, attempts and processing status, without raw payloads.
 Invoices, payments and refunds are current snapshots with provider IDs;
 Stripe remains the financial system of record. Full refunds remove that
 invoice's access coverage; partial refunds retain it. Access never comes from
-the browser's Checkout return URL.
+the browser's Checkout return URL. Confirmation and resend target the reservation
+ID from that return URL and require its browser cookie. Recovery searches only
+the reservation window. Changing a signed-in checkout's plan or discount expires
+the previous Stripe session before creating its replacement.
 
 Retry reconciliation after provider failures with:
 

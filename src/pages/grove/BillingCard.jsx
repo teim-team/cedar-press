@@ -23,7 +23,7 @@ export function BillingCard() {
   useEffect(() => {
     const controller = new AbortController();
     fetchBilling({ signal: controller.signal }).then(setBilling).catch((failure) => {
-      if (failure.name !== "AbortError") setError(failure.message);
+      if (!controller.signal.aborted) setError(failure.message);
     });
     const refresh = () => { load(); refreshSession(); };
     window.addEventListener("focus", refresh);
@@ -47,7 +47,7 @@ export function BillingCard() {
     setError("");
     try {
       const result = tier === "change" ? await changeBillingPlan(subscriptionId)
-        : tier ? await startBillingCheckout({ tier, discountCode: code }) : await openBillingPortal(subscriptionId);
+        : tier ? await startBillingCheckout({ tier, discountCode: code, replaceOpen: true }) : await openBillingPortal(subscriptionId);
       window.location.assign(result.url);
     } catch (failure) {
       setError(failure.message);

@@ -16,6 +16,12 @@ export const test = base.extend({
       await context.clearCookies();
       await route.fulfill({ status: 204 });
     });
+    // The smoke API uses environment accounts without a billing database.
+    // Billing-specific tests override this baseline fixture at page scope.
+    await context.route("**/api/billing", route => route.fulfill({ json: {
+      available: false, cohort: "early_access", annualPrices: {},
+      subscriptions: [], invoices: [], payments: [], refunds: [], hasCustomer: false,
+    } }));
     await provide(context);
   },
 });

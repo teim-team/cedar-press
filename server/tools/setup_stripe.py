@@ -1,4 +1,4 @@
-"""Provision the Stripe catalog: python scripts/setup_stripe.py [--live]."""
+"""Provision the Stripe catalog: python server/tools/setup_stripe.py [--live]."""
 
 from __future__ import annotations
 
@@ -9,6 +9,7 @@ import os
 from zoneinfo import ZoneInfo
 
 import stripe
+
 from cedar_press.billing.policy import AMOUNTS
 from cedar_press.billing.stripe_gateway import StripeGateway, plain
 from cedar_press.billing.support import application_url
@@ -26,9 +27,7 @@ def setup(gateway, code):
             and p.get("metadata", {}).get("cedar_press_tier") == tier
         ]
         if len(matches) > 1:
-            raise SystemExit(
-                "Multiple matching Stripe products; resolve them before setup"
-            )
+            raise SystemExit("Multiple matching Stripe products; resolve them before setup")
         products[tier] = (
             matches[0]["id"]
             if matches
@@ -47,9 +46,7 @@ def setup(gateway, code):
         prices[cohort] = {}
         for tier, amount in amounts.items():
             lookup = f"cedar_press_{cohort}_{tier}_annual_v4"
-            found = gateway.rows(
-                client.prices.list({"lookup_keys": [lookup], "limit": 100})
-            )
+            found = gateway.rows(client.prices.list({"lookup_keys": [lookup], "limit": 100}))
             if found:
                 price = found[0]
                 if (
@@ -57,9 +54,7 @@ def setup(gateway, code):
                     or price.get("currency") != "usd"
                     or price.get("recurring", {}).get("interval") != "year"
                 ):
-                    raise SystemExit(
-                        "Existing price differs from the approved annual offer"
-                    )
+                    raise SystemExit("Existing price differs from the approved annual offer")
             else:
                 price = plain(
                     client.prices.create(
@@ -75,17 +70,14 @@ def setup(gateway, code):
                 )
             prices[cohort][tier] = price["id"]
         portals[cohort] = {}
-        configurations = gateway.rows(
-            client.billing_portal.configurations.list({"limit": 100})
-        )
+        configurations = gateway.rows(client.billing_portal.configurations.list({"limit": 100}))
         for current_tier in ("press", "press_pro"):
             target_tier = "press_pro" if current_tier == "press" else "press"
             found = [
                 c
                 for c in configurations
                 if c.get("metadata", {}).get("cedar_press_cohort") == cohort
-                and c.get("metadata", {}).get("cedar_press_current_tier")
-                == current_tier
+                and c.get("metadata", {}).get("cedar_press_current_tier") == current_tier
                 and c.get("metadata", {}).get("cedar_press_catalog") == "annual_v4"
             ]
             config = (
@@ -112,9 +104,7 @@ def setup(gateway, code):
                                     "default_allowed_updates": ["price"],
                                     "proration_behavior": "always_invoice",
                                     "schedule_at_period_end": {
-                                        "conditions": [
-                                            {"type": "decreasing_item_amount"}
-                                        ]
+                                        "conditions": [{"type": "decreasing_item_amount"}]
                                     },
                                     "products": [
                                         {
@@ -125,9 +115,7 @@ def setup(gateway, code):
                                 },
                             },
                         },
-                        options={
-                            "idempotency_key": f"press-portal-{cohort}-{current_tier}-v4"
-                        },
+                        options={"idempotency_key": f"press-portal-{cohort}-{current_tier}-v4"},
                     )
                 )
             )
@@ -154,32 +142,26 @@ def setup(gateway, code):
     for promotion in promotions:
         if (promotion.get("promotion") or {}).get("coupon") != coupon_id:
             client.promotion_codes.update(promotion["id"], {"active": False})
-    if not any(
-        (p.get("promotion") or {}).get("coupon") == coupon_id for p in promotions
-    ):
+    if not any((p.get("promotion") or {}).get("coupon") == coupon_id for p in promotions):
         client.promotion_codes.create(
             {
                 "code": code,
                 "promotion": {"type": "coupon", "coupon": coupon_id},
                 "restrictions": {"first_time_transaction": True},
                 "expires_at": int(
-                    dt.datetime(
-                        2027, 1, 1, tzinfo=ZoneInfo("America/Chicago")
-                    ).timestamp()
+                    dt.datetime(2027, 1, 1, tzinfo=ZoneInfo("America/Chicago")).timestamp()
                 ),
             },
             options={"idempotency_key": "press-promotion-v4-" + code},
         )
-    legacy = json.loads(os.environ.get("CEDAR_PRESS_STRIPE_LEGACY_PRICES", "[]"))
-    previous = json.loads(os.environ.get("CEDAR_PRESS_STRIPE_PRICES", "{}"))
+    legacy = json.loads(os.environ.get("CEDAR_PRESS_STRIPE_LEGACY_PRICES") or "[]")
+    previous = json.loads(os.environ.get("CEDAR_PRESS_STRIPE_PRICES") or "{}")
     for cohort, tiers in previous.items():
         for tier, price_id in tiers.items():
             entry = {"id": price_id, "tier": tier, "cohort": cohort}
             if price_id != prices.get(cohort, {}).get(tier) and entry not in legacy:
                 legacy.append(entry)
-    print(
-        "CEDAR_PRESS_STRIPE_LEGACY_PRICES=" + json.dumps(legacy, separators=(",", ":"))
-    )
+    print("CEDAR_PRESS_STRIPE_LEGACY_PRICES=" + json.dumps(legacy, separators=(",", ":")))
     print("CEDAR_PRESS_STRIPE_PRICES=" + json.dumps(prices, separators=(",", ":")))
     print("CEDAR_PRESS_STRIPE_PORTALS=" + json.dumps(portals, separators=(",", ":")))
     print("CEDAR_PRESS_STRIPE_SUMMIT_COUPON=" + coupon_id)
@@ -187,9 +169,7 @@ def setup(gateway, code):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument(
-        "--live", action="store_true", help="Explicitly permit live-account setup"
-    )
+    parser.add_argument("--live", action="store_true", help="Explicitly permit live-account setup")
     parser.add_argument("--summit-code", default="GREATLAKES2026")
     args = parser.parse_args(argv)
     gateway = StripeGateway()

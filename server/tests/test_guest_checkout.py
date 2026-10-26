@@ -279,6 +279,49 @@ class TestGuestCheckout(unittest.TestCase):
         with self.assertRaises(BillingError):
             self.service.status("another-browser-secret")
 
+    def test_confirmation_and_resend_target_paid_checkout_when_newer_tab_is_unpaid(self):
+        from cedar_press.app import app
+
+        self.start()
+        older = db.one("SELECT id FROM cedar_press_guest_checkouts")["id"]
+        event = self.complete()
+        self.service.start("press_pro", SECRET)
+        self.reconciler.process_event(event)
+        self.assertEqual(self.service.status(SECRET, older)["status"], "complete")
+        self.assertEqual(self.service.status(SECRET)["status"], "open")
+        ratelimit.reset_for_tests()
+        self.addCleanup(ratelimit.reset_for_tests)
+        self.assertEqual(self.service.resend(SECRET, older)["status"], "complete")
+        client = TestClient(app)
+        self.assertEqual(client.get(f"/billing/guest/status?checkout_id={older}").status_code, 404)
+        client.cookies.set("cedar_press_guest_checkout", SECRET)
+        self.assertEqual(
+            client.get(f"/billing/guest/status?checkout_id={older}").json()["status"], "complete"
+        )
+        self.assertEqual(
+            client.post("/billing/guest/resend", json={"checkout_id": str(older)}).json()["status"],
+            "complete",
+        )
+        self.assertEqual(client.get("/billing/guest/status?checkout_id=invalid").status_code, 422)
+
+    def test_guest_recovery_passes_the_reservation_creation_window(self):
+        self.gateway.fail_checkout = True
+        with self.assertRaises(stripe.APIConnectionError):
+            self.start()
+        db.execute("UPDATE cedar_press_guest_checkouts SET expires_at=now()+interval '29 minutes'")
+        row = db.one("SELECT * FROM cedar_press_guest_checkouts")
+        with mock.patch.object(
+            self.gateway, "find_checkout", wraps=self.gateway.find_checkout
+        ) as find:
+            self.start()
+        self.assertEqual(
+            find.call_args.kwargs,
+            {
+                "created_after": int(row["created_at"].timestamp()) - 60,
+                "created_before": int(row["expires_at"].timestamp()) + 60,
+            },
+        )
+
     def test_lost_checkout_response_reuses_idempotency_key(self):
         self.gateway.fail_checkout = True
         with self.assertRaises(stripe.APIConnectionError):

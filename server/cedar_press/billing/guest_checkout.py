@@ -110,7 +110,12 @@ class GuestCheckoutService:
             if attempt["session_id"]:
                 session = self.gateway.checkout_status(attempt["session_id"])
             elif attempt["expires_at"] <= self.clock() + dt.timedelta(minutes=30):
-                session = self.gateway.find_checkout(None, str(attempt["id"]))
+                session = self.gateway.find_checkout(
+                    None,
+                    str(attempt["id"]),
+                    created_after=int(attempt["created_at"].timestamp()) - 60,
+                    created_before=int(attempt["expires_at"].timestamp()) + 60,
+                )
                 if not session:
                     cur.execute(
                         "UPDATE cedar_press_guest_checkouts SET status='expired' WHERE id=%s",
@@ -220,7 +225,7 @@ class GuestCheckoutService:
         )
         return user
 
-    def status(self, secret):
+    def status(self, secret, checkout_id=None):
         if not self.db.configured():
             raise unavailable()
         row = self.db.one(
@@ -228,9 +233,10 @@ class GuestCheckoutService:
             SELECT g.email,g.status,g.claim_sent_at,s.password_hash
             FROM cedar_press_guest_checkouts g
             LEFT JOIN cedar_press_subscribers s ON s.id=g.user_id
-            WHERE g.secret_hash=%s ORDER BY g.created_at DESC LIMIT 1
+            WHERE g.secret_hash=%s AND (%s::uuid IS NULL OR g.id=%s)
+            ORDER BY g.created_at DESC LIMIT 1
             """,
-            (digest(secret),),
+            (digest(secret), checkout_id, checkout_id),
         )
         if not row:
             raise BillingError("CHECKOUT_MISSING", "Start a new checkout to subscribe.", 404)
@@ -241,16 +247,17 @@ class GuestCheckoutService:
             "accountSetup": row["password_hash"] is None,
         }
 
-    def resend(self, secret):
+    def resend(self, secret, checkout_id=None):
         if not self.db.configured() or not self.email_sender.configured():
             raise unavailable()
         row = self.db.one(
             """
             SELECT id,email,customer_id FROM cedar_press_guest_checkouts
-            WHERE secret_hash=%s AND status='complete' AND user_id IS NOT NULL
+            WHERE secret_hash=%s AND (%s::uuid IS NULL OR id=%s)
+            AND status='complete' AND user_id IS NOT NULL
             ORDER BY created_at DESC LIMIT 1
         """,
-            (digest(secret),),
+            (digest(secret), checkout_id, checkout_id),
         )
         if not row:
             raise BillingError(
@@ -269,4 +276,4 @@ class GuestCheckoutService:
             raise BillingError(
                 "EMAIL_UNAVAILABLE", "We couldn’t send the email. Please try again shortly.", 503
             ) from None
-        return self.status(secret)
+        return self.status(secret, checkout_id)

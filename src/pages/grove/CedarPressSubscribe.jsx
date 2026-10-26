@@ -36,11 +36,12 @@ export default function CedarPressSubscribe() {
   const [purchase, setPurchase] = useState(null);
   const [resent, setResent] = useState(false);
   const returning = params.get("billing") === "processing";
+  const checkoutId = params.get("checkout");
 
   useEffect(() => {
     const controller = new AbortController();
     fetchBillingPlans({ signal: controller.signal }).then(setPlans).catch((failure) => {
-      if (failure.name !== "AbortError") setError(failure);
+      if (!controller.signal.aborted) setError(failure);
     });
     return () => controller.abort();
   }, []);
@@ -52,7 +53,7 @@ export default function CedarPressSubscribe() {
     let count = 0;
     const check = async () => {
       try {
-        const result = await fetchGuestCheckout();
+        const result = await fetchGuestCheckout(checkoutId);
         if (stopped) return;
         setPurchase(result);
         if (result.emailSent || ++count >= 20) return;
@@ -61,7 +62,7 @@ export default function CedarPressSubscribe() {
     };
     check();
     return () => { stopped = true; window.clearTimeout(timer); };
-  }, [returning]);
+  }, [returning, checkoutId]);
 
   const choose = async (tier) => {
     setPending(true);
@@ -76,7 +77,7 @@ export default function CedarPressSubscribe() {
   const resendEmail = async () => {
     setPending(true);
     setError(null);
-    try { setPurchase(await resendGuestEmail()); setResent(true); }
+    try { setPurchase(await resendGuestEmail(checkoutId)); setResent(true); }
     catch (failure) { setError(failure); }
     finally { setPending(false); }
   };

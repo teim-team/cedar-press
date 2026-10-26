@@ -78,7 +78,7 @@
 .teim-rd .cp-confirm__next p { color: #6b7d88; font-size: 12px; line-height: 1.6; margin: 0; }
 .teim-rd .cp-confirm > .cp-btn--primary { margin-top: 20px; display: flex; justify-content: space-between; }
 .teim-rd .cp-confirm__help { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-top: 21px; text-align: left; }
-.teim-rd .cp-confirm__help p { font-size: 11px; line-height: 1.5; color: #768691; margin: 0; }
+.teim-rd .cp-confirm__help p { font-size: 12px; line-height: 1.5; color: #516874; margin: 0; }
 .teim-rd .cp-confirm__help .cp-btn { flex-shrink: 0; min-height: 34px; padding: 7px 11px; border: 1px solid #cbdadd; border-radius: 5px; font-size: 11px; color: #3a656f; }
 .teim-rd .cp-confirm__signin, .teim-rd .cp-confirm__resent { margin: 21px 0 0; font-size: 12px; color: #71828b; }
 .teim-rd .cp-confirm__signin a { color: #217c72; text-decoration: underline; }

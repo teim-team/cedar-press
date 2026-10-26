@@ -47,7 +47,7 @@ class BillingService:
             raise BillingError("ACCOUNT_MISSING", "Please sign in again.", 401)
         return row
 
-    def checkout(self, email, tier, discount_code=""):
+    def checkout(self, email, tier, discount_code="", replace_open=False):
         user = self.account(email)
         cohort = cohort_at(self.clock())
         chosen = price_for(tier, cohort)
@@ -97,10 +97,19 @@ class BillingService:
                 session = self.gateway.checkout_status(attempt["session_id"])
                 if session["status"] == "open":
                     if attempt["price_id"] != chosen.id or attempt["promotion_id"] != promotion:
-                        raise BillingError(
-                            "CHECKOUT_EXISTS", "Finish or cancel your open checkout first.", 409
-                        )
-                    return {"url": stripe_url(session["url"])}
+                        if not replace_open:
+                            raise BillingError(
+                                "CHECKOUT_EXISTS",
+                                "Finish or replace your open checkout first.",
+                                409,
+                            )
+                        session = self.gateway.expire_checkout(session["id"])
+                        if session["status"] != "expired":
+                            raise BillingError(
+                                "CHECKOUT_PROCESSING", "Your payment is processing.", 409
+                            )
+                    else:
+                        return {"url": stripe_url(session["url"])}
                 cur.execute(
                     "UPDATE cedar_press_checkout_attempts SET status=%s WHERE id=%s",
                     (session["status"], attempt["id"]),
@@ -118,7 +127,10 @@ class BillingService:
                         "CHECKOUT_EXISTS", "Retry your original checkout first.", 409
                     )
                 recovered = self.gateway.find_checkout(
-                    user["stripe_customer_id"], str(attempt["id"])
+                    user["stripe_customer_id"],
+                    str(attempt["id"]),
+                    created_after=int(attempt["created_at"].timestamp()) - 60,
+                    created_before=int(attempt["expires_at"].timestamp()) + 60,
                 )
                 if recovered and recovered["status"] == "open":
                     cur.execute(

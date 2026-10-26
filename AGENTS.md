@@ -117,7 +117,7 @@ Sign-in and activation retain the existing optional teim-app account linking.
 subscriber-storage CI job builds `server/Dockerfile.test` and runs that same
 command, refusing skipped contracts. Production uses `server/Dockerfile`.
 Stripe billing uses migration 005. Catalog provisioning lives in
-`scripts/setup_stripe.py`; production reconciliation uses
+`server/tools/setup_stripe.py`; production reconciliation uses
 `python -m cedar_press.billing.cli reconcile`.
 `docker compose --profile app up -d api` runs the local API; the optional `billing` profile forwards sandbox webhooks through Stripe CLI.
 See `server/DATABASE.md` for setup. Billing uses confirmed invoice coverage; an

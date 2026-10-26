@@ -157,7 +157,9 @@ class StripeGateway:
                 params["allow_promotion_codes"] = attempt["cohort"] == "early_access"
             params["metadata"]["cedar_press_guest_id"] = str(attempt["id"])
             params["subscription_data"] = {"metadata": {"cedar_press_guest_id": str(attempt["id"])}}
-            params["success_url"] = app_url + "/subscribe?billing=processing"
+            params["success_url"] = (
+                app_url + "/subscribe?billing=processing&checkout=" + str(attempt["id"])
+            )
             params["cancel_url"] = app_url + "/subscribe?billing=canceled"
         if attempt["promotion_id"]:
             params["discounts"] = [{"promotion_code": attempt["promotion_id"]}]
@@ -170,20 +172,26 @@ class StripeGateway:
     def checkout_status(self, session_id):
         return plain(self.client.v1.checkout.sessions.retrieve(session_id))
 
-    def find_checkout(self, customer, attempt_id):
-        sessions = self.rows(
-            self.client.v1.checkout.sessions.list(
-                {**({"customer": customer} if customer else {}), "limit": 100}
+    def expire_checkout(self, session_id):
+        return plain(
+            self.client.v1.checkout.sessions.expire(
+                session_id, options={"idempotency_key": "press-expire-" + session_id}
             )
         )
-        return next(
-            (
-                row
-                for row in sessions
-                if row.get("metadata", {}).get("cedar_press_attempt_id") == attempt_id
-            ),
-            None,
-        )
+
+    def find_checkout(self, customer, attempt_id, *, created_after=None, created_before=None):
+        params = {**({"customer": customer} if customer else {}), "limit": 100}
+        if created_after is not None and created_before is not None:
+            params["created"] = {"gte": created_after, "lte": created_before}
+        elif customer is None:
+            raise BillingError("CHECKOUT_WINDOW_REQUIRED", "Please start checkout again.", 409)
+        response = self.client.v1.checkout.sessions.list(params)
+        # Stop at the matching object rather than fetching later pages.
+        for item in response.auto_paging_iter():
+            row = plain(item)
+            if row.get("metadata", {}).get("cedar_press_attempt_id") == attempt_id:
+                return row
+        return None
 
     def guest_session(self, customer):
         sessions = self.rows(

@@ -149,8 +149,15 @@ class FakeGateway:
     def checkout_status(self, session_id):
         return copy.deepcopy(next(s for s in self.sessions.values() if s["id"] == session_id))
 
-    def find_checkout(self, customer, attempt_id):
+    def find_checkout(self, customer, attempt_id, **kwargs):
         return copy.deepcopy(self.sessions.get(attempt_id))
+
+    def expire_checkout(self, session_id):
+        for value in self.sessions.values():
+            if value["id"] == session_id:
+                value["status"] = "expired"
+                return copy.deepcopy(value)
+        raise AssertionError("Unknown checkout")
 
     def portal(self, customer, cohort, app_url, change_plan=False, subscription_id=None):
         return "https://billing.stripe.com/p/session/fixture"
@@ -537,6 +544,28 @@ class TestBillingPostgres(unittest.TestCase):
         self.assertEqual(len(set(self.gateway.attempts)), 1)
         self.assertEqual(len(self.gateway.sessions), 1)
         self.assertIsNone(db.one("SELECT activated_at FROM cedar_press_subscriptions LIMIT 1"))
+
+    def test_revised_plan_expires_the_owned_open_session_before_replacement(self):
+        self.billing.checkout(self.user["email"], "press")
+        original = db.one("SELECT * FROM cedar_press_checkout_attempts")
+        self.billing.checkout(self.user["email"], "press_pro", "SUMMIT", True)
+        self.assertEqual(self.gateway.checkout_status(original["session_id"])["status"], "expired")
+        rows = db.query(
+            "SELECT tier,status,promotion_id FROM cedar_press_checkout_attempts ORDER BY created_at"
+        )
+        self.assertEqual(
+            [(r["tier"], r["status"]) for r in rows], [("press", "expired"), ("press_pro", "open")]
+        )
+        self.assertEqual(rows[1]["promotion_id"], "promo_fixture")
+
+    def test_replacement_does_not_create_checkout_when_original_is_processing(self):
+        self.billing.checkout(self.user["email"], "press")
+        with mock.patch.object(
+            self.gateway, "expire_checkout", return_value={"status": "complete"}
+        ), self.assertRaises(BillingError) as error:
+            self.billing.checkout(self.user["email"], "press_pro", replace_open=True)
+        self.assertEqual(error.exception.code, "CHECKOUT_PROCESSING")
+        self.assertEqual(db.one("SELECT count(*) AS n FROM cedar_press_checkout_attempts")["n"], 1)
 
     def test_completed_checkout_blocks_a_second_purchase_before_webhook(self):
         self.billing.checkout(self.user["email"], "press")

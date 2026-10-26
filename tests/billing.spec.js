@@ -1,4 +1,5 @@
 import { expect, test } from "./fixtures.js";
+import { EMAIL, PASSWORD } from "./demoAccount.js";
 
 const summary = {
   available: true, cohort: "early_access", annualPrices: { press: 50000, press_pro: 100000 },
@@ -23,7 +24,7 @@ test("unpaid account can choose annual billing and submit a discount", async ({ 
   await page.getByLabel("Discount code (optional)").fill("SUMMIT");
   await page.getByRole("button", { name: "Cedar Press: $500.00/year", exact: true }).click();
   await expect(page.getByRole("alert")).toHaveText("That discount code is not available.");
-  expect(submitted).toEqual({ tier: "press", discount_code: "SUMMIT" });
+  expect(submitted).toEqual({ tier: "press", discount_code: "SUMMIT", replace_open: true });
   await expect(page.getByRole("button", { name: "Cedar Press+: $1,000.00/year", exact: true })).toBeEnabled();
 });
 
@@ -168,4 +169,77 @@ test("purchase confirmation resends account email and keeps sign in secondary", 
   await expect(page.getByText("Email sent. Check your inbox for your account setup link.")).toBeVisible();
   expect(sent).toBe(1);
   await expect(page.getByRole("link", { name: "Sign in to Cedar Press", exact: true })).toHaveCount(0);
+});
+
+test("payment return and resend keep the checkout target from the URL", async ({ page }) => {
+  const id = "48ff73db-cfe8-4775-901e-c212627d27f9";
+  await page.route("**/api/me", route => route.fulfill({ status: 401, json: {} }));
+  await page.route("**/api/billing/plans", route => route.fulfill({ json: summary }));
+  await page.route("**/api/billing/guest/status**", route => {
+    expect(new URL(route.request().url()).searchParams.get("checkout_id")).toBe(id);
+    return route.fulfill({ json: { status: "complete", email: "paid@example.invalid", emailSent: true, accountSetup: true } });
+  });
+  let target;
+  await page.route("**/api/billing/guest/resend", route => {
+    target = route.request().postDataJSON().checkout_id;
+    return route.fulfill({ json: { status: "complete", email: "paid@example.invalid", emailSent: true, accountSetup: true } });
+  });
+  await page.goto(`/subscribe?billing=processing&checkout=${id}`);
+  await page.getByRole("button", { name: "Resend email", exact: true }).click();
+  await expect.poll(() => target).toBe(id);
+});
+
+test("a replacement fragment checks the new account link without reloading", async ({ page }) => {
+  await page.route("**/api/me", route => route.fulfill({ status: 401, json: {} }));
+  const tokens = [];
+  await page.route("**/api/auth/account-setup/check", route => {
+    const token = route.request().postDataJSON().token;
+    tokens.push(token);
+    return route.fulfill(token === "replacement" ? { json: { email: "paid@example.invalid" } }
+      : { status: 400, json: { message: "This link expired." } });
+  });
+  await page.goto("/create-account#token=expired");
+  await expect(page.getByRole("alert")).toHaveText("This link expired.");
+  await page.evaluate(() => { window.location.hash = "token=replacement"; });
+  await expect(page.getByLabel("Email address")).toHaveValue("paid@example.invalid");
+  await expect(page.getByRole("alert")).toHaveCount(0);
+  await expect(page).toHaveURL(/\/create-account$/);
+  expect(tokens).toContain("replacement");
+});
+
+test("password recovery sends authenticated accounts without paid access to settings", async ({ page }) => {
+  let authenticated = false;
+  await page.route("**/api/me", route => route.fulfill(authenticated
+    ? { json: { email: "expired@example.invalid", workspace_tier: "free" } }
+    : { status: 401, json: {} }));
+  await page.route("**/api/auth/password-reset/confirm", route => {
+    authenticated = true;
+    return route.fulfill({ json: { email: "expired@example.invalid", workspace_tier: "free" } });
+  });
+  await page.goto("/login#reset=synthetic-recovery");
+  await page.getByLabel("New password", { exact: true }).fill("replacement-password-long");
+  await page.getByRole("button", { name: "Save and log in", exact: true }).click();
+  await expect(page).toHaveURL(/\/settings$/);
+  await expect(page.getByText("No current paid access")).toBeVisible();
+});
+
+test("settings tolerates unavailable billing without failed-resource console errors", async ({ page }) => {
+  const failures = [];
+  page.on("console", message => { if (message.type() === "error") failures.push(message.text()); });
+  const login = await page.request.post("/api/auth/login", { data: { email: EMAIL, password: PASSWORD } });
+  expect(login.ok()).toBe(true);
+  await page.goto("/settings");
+  await expect(page.getByText("Online billing is temporarily unavailable.")).toBeVisible();
+  expect(failures.filter(message => /Failed to load resource/.test(message))).toEqual([]);
+});
+
+test("account pages ignore canceled requests during effect cleanup", async ({ page }) => {
+  await account(page, { ...summary, available: false });
+  await page.route("**/api/billing/plans", route => route.fulfill({ json: summary }));
+  await page.goto("/settings");
+  await expect(page.getByText("Online billing is temporarily unavailable.")).toBeVisible();
+  await expect(page.getByRole("alert")).toHaveCount(0);
+  await page.goto("/subscribe");
+  await expect(page.getByRole("heading", { name: "Choose your Cedar Press membership." })).toBeVisible();
+  await expect(page.getByRole("alert")).toHaveCount(0);
 });
