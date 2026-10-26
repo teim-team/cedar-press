@@ -593,13 +593,16 @@ def answer_from_profile(question: str, dataset_id: str) -> dict[str, str] | None
         # Same reason as the content branch below: the last of these was
         # prefixed "Known limitations:", which is a field name rather than
         # something anybody says.
-        parts = [
-            _sentence(profile.get("entity_resolution_method") or ""),
-            _sentence(profile.get("inclusion_rules") or ""),
-            _sentence(f"What it does not do: {_lower_first(profile['known_limitations'])}")
-            if profile.get("known_limitations")
-            else "",
-        ]
+        parts = [_sentence(profile.get("method") or "")]
+        parts.extend(
+            [
+                _sentence(profile.get("entity_resolution_method") or ""),
+                _sentence(profile.get("inclusion_rules") or ""),
+                _sentence(f"What it does not do: {_lower_first(profile['known_limitations'])}")
+                if profile.get("known_limitations")
+                else "",
+            ]
+        )
         answer = " ".join(p for p in parts if p)
         if answer:
             return {"answer": answer, "basis": basis}
@@ -615,14 +618,15 @@ def answer_from_profile(question: str, dataset_id: str) -> dict[str, str] | None
         # and the release the answer came from is already printed under it
         # by the panel, so the sources line does not have to carry it.
         parts = [_sentence(profile["description"])]
+        for key in ("primary_sources", "method"):
+            text = profile.get(key)
+            if text:
+                parts.append(_sentence(text))
         unit = profile.get("unit_of_observation")
         if unit:
             parts.append(_sentence(f"Each record is {_lower_first(unit)}"))
         coverage = _coverage_sentence(profile)
         if coverage:
             parts.append(coverage)
-        sources = profile.get("primary_sources")
-        if sources:
-            parts.append(_sentence(f"It is built from {_lower_first(sources)}"))
         return {"answer": " ".join(parts), "basis": basis}
     return None
