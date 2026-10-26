@@ -113,21 +113,25 @@ export default function CedarPressSubscribe() {
         <div className="cp-memberships__cards">
           {Object.entries(plans.annualPrices).map(([id, amount]) => <article key={id} className={`cp-membership ${id === "press_pro" ? "cp-membership--plus" : ""}`} aria-label={label(id)}>
             <div className="cp-membership__heading">
-              <div><p className="cp-membership__eyebrow">{id === "press_pro" ? "Complete research access" : "Core research"}</p><h2>{label(id)}</h2></div>
+              <div><h2>{label(id)}</h2><p className="cp-membership__eyebrow">{id === "press_pro" ? "Complete research access" : "Core research"}</p></div>
               <div className="cp-membership__price"><strong>{money(amount)}</strong><span>per year</span></div>
             </div>
-            <p className="cp-membership__description">{id === "press_pro" ? "Connect the enterprises, contracts and assets behind the economy." : "Follow the funding, policy and transactions shaping Indian Country."}</p>
+            <p className="cp-membership__description">{id === "press_pro" ? "Connect the enterprises, contracts and assets behind the tribal economy." : "Follow the funding, policy and transactions shaping Indian Country."}</p>
             <button type="button" className={`cp-btn cp-btn--wide ${id === "press_pro" ? "cp-btn--primary" : "cp-btn--quiet"}`} disabled={pending || !!user} onClick={() => choose(id)}>
               {pending && selected === id ? "Opening Stripe…" : `Subscribe to ${label(id)}`}<span aria-hidden="true">↗</span>
             </button>
-            <div className="cp-membership__included"><span>{id === "press_pro" ? "Everything in Cedar Press, plus" : `Includes ${standard.length} research collections`}</span>{id === "press_pro" ? <span>{standard.length + pro.length} collections total</span> : null}</div>
+            <div className="cp-membership__included"><span>{id === "press_pro" ? "Everything in Cedar Press, plus" : "Included in Cedar Press"}</span><span>{id === "press_pro" ? standard.length + pro.length : standard.length} collections total</span></div>
             <ul className="cp-membership__features">{featureGroups[id].map((group) => <li key={group.title}>
               <span className="cp-membership__check" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="m3 8 3 3 7-7" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg></span>
               <div><strong>{group.title}</strong><span>{group.ids.map((entryId) => collectionNames[entryId]).join(" · ")}</span></div>
-            </li>)}</ul>
+            </li>)}
+              <li>
+                <span className="cp-membership__check" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="m3 8 3 3 7-7" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg></span>
+                <div><strong>Full historical coverage &amp; original source data</strong><span>Explore every available year and trace records to their sources.</span></div>
+              </li>
+            </ul>
           </article>)}
         </div>
-        <div className="cp-memberships__assurance"><span>Source-linked collections</span><span>Full historical coverage</span><span>Secure checkout with Stripe</span></div>
         <p className="cp-memberships__terms">Paid annually. Renews automatically. Your rate stays the same while your subscription is active.{plans.cohort === "early_access" ? " Early-access offer ends December 31, 2026." : ""}</p>
       </> : !error ? <p role="status">Loading annual plans…</p> : null}
       {error ? <p role="alert" className="cp-memberships__error">{error.message}</p> : null}
