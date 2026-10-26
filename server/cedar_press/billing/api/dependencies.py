@@ -8,7 +8,7 @@ from cedar_press.accounts.services.setup import AccountSetupService
 from cedar_press.billing.adapters.stripe import BillingAdapter, StripeAdapter
 from cedar_press.billing.services.billing import BillingService
 from cedar_press.billing.services.checkout import CheckoutService
-from cedar_press.billing.services.delivery import CheckoutEmailService
+from cedar_press.billing.services.purchase_email import PurchaseEmailService
 from cedar_press.billing.services.reconciler import BillingReconciler
 
 
@@ -19,7 +19,7 @@ class BillingServices:
     reconciler: BillingReconciler
     email: EmailSender
     setup: AccountSetupService
-    delivery: CheckoutEmailService
+    purchase_email: PurchaseEmailService
 
 
 def create_billing_services(
@@ -32,21 +32,21 @@ def create_billing_services(
     adapter = adapter if adapter is not None else StripeAdapter()
     sender = email_sender or AccountEmailSender()
     setup = AccountSetupService(database=database)
-    delivery = CheckoutEmailService(sender, setup, database=database)
+    purchase_email = PurchaseEmailService(sender, setup, database=database)
     checkout = CheckoutService(
         adapter=adapter,
         database=database,
         clock=clock,
         email_sender=sender,
-        delivery_service=delivery,
+        purchase_email_service=purchase_email,
     )
     return BillingServices(
         billing=BillingService(adapter=adapter, database=database, clock=clock),
         checkout=checkout,
-        reconciler=BillingReconciler(checkout, delivery, adapter=adapter, database=database),
+        reconciler=BillingReconciler(checkout, purchase_email, adapter=adapter, database=database),
         email=sender,
         setup=setup,
-        delivery=delivery,
+        purchase_email=purchase_email,
     )
 
 

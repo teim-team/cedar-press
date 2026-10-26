@@ -31,11 +31,11 @@ class CheckoutService:
         clock=None,
         app_url=None,
         email_sender=None,
-        delivery_service=None,
+        purchase_email_service=None,
         limiter=ratelimit,
     ):
         self.email_sender = email_sender or AccountEmailSender()
-        self.delivery = delivery_service
+        self.purchase_email = purchase_email_service
         self.limiter = limiter
         self._adapter = adapter
         self.db = database
@@ -264,9 +264,9 @@ class CheckoutService:
             raise BillingError(
                 "EMAIL_RATE_LIMIT", "Please wait before requesting another email.", 429
             )
-        self.delivery.request_resend(row["id"])
+        self.purchase_email.request_resend(row["id"])
         try:
-            self.delivery.send_claim(row["customer_id"])
+            self.purchase_email.send_claim(row["customer_id"])
         except (OSError, RuntimeError):
             raise BillingError(
                 "EMAIL_UNAVAILABLE", "We couldn’t send the email. Please try again shortly.", 503

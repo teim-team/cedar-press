@@ -8,7 +8,7 @@ from cedar_press.accounts.services.setup import AccountSetupService
 from cedar_press.billing.utils import application_url
 
 
-class CheckoutEmailService:
+class PurchaseEmailService:
     def __init__(
         self, email_sender: EmailSender, accounts: AccountSetupService, *, database=db, app_url=None
     ):

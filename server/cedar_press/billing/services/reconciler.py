@@ -37,13 +37,13 @@ class BillingReconciler:
     def __init__(
         self,
         checkout_service,
-        delivery_service,
+        purchase_email_service,
         *,
         adapter: BillingAdapter | None = None,
         database=db,
     ):
         self.checkout = checkout_service
-        self.delivery = delivery_service
+        self.purchase_email = purchase_email_service
         self._adapter = adapter
         self.db = database
 
@@ -258,7 +258,7 @@ class BillingReconciler:
                     user = self.checkout.activate(cur, customer, prepared)
                 for snapshot in snapshots:
                     self._subscription(cur, user["id"], customer, snapshot)
-        self.delivery.send_claim(customer)
+        self.purchase_email.send_claim(customer)
         return True
 
     def process_event(self, event):
@@ -371,4 +371,4 @@ class BillingReconciler:
             raise
         # Delivery failure leaves financial state processed. A duplicate webhook
         # or the repair command retries the separately persisted email job.
-        self.delivery.send_claim(customer)
+        self.purchase_email.send_claim(customer)

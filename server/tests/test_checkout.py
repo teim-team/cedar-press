@@ -201,7 +201,7 @@ class TestCheckout(unittest.TestCase):
             db.one("SELECT status FROM cedar_press_account_email_deliveries")["status"], "pending"
         )
         self.mail.side_effect = None
-        self.services.delivery.send_claim(self.customer)
+        self.services.purchase_email.send_claim(self.customer)
         self.assertEqual(
             db.one("SELECT status FROM cedar_press_account_email_deliveries")["status"], "sent"
         )
@@ -267,7 +267,7 @@ class TestCheckout(unittest.TestCase):
         self.reconciler.process_event(self.complete())
         db.execute("""UPDATE cedar_press_account_email_deliveries SET status='sending',
             lease_until=now()-interval '1 second'""")
-        self.services.delivery.send_claim(self.customer)
+        self.services.purchase_email.send_claim(self.customer)
         self.assertEqual(self.mail.call_count, 2)
         self.assertEqual(
             db.one("SELECT status,attempts FROM cedar_press_account_email_deliveries"),
