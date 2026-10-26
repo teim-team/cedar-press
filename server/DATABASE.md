@@ -101,7 +101,7 @@ as a local alias for `CEDAR_PRESS_STRIPE_SECRET_KEY`.
 
 ```sh
 docker compose build tools
-docker compose run --rm tools python -m cedar_press.billing.admin setup
+docker compose run --rm tools python scripts/setup_stripe.py
 ```
 
 Save the printed price, portal and coupon IDs in `.env`. Obtain the listener's
@@ -156,7 +156,7 @@ the browser's Checkout return URL.
 Retry reconciliation after provider failures with:
 
 ```sh
-docker compose run --rm tools python -m cedar_press.billing.admin reconcile
+docker compose run --rm tools python -m cedar_press.billing.cli reconcile
 ```
 
 For production, register `/billing/webhook` with API version

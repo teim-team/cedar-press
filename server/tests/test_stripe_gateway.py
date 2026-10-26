@@ -12,8 +12,8 @@ from unittest import mock
 from urllib.parse import parse_qs, urlsplit
 
 import stripe
+from scripts.setup_stripe import setup
 
-from cedar_press.billing.admin import setup
 from cedar_press.billing.policy import BillingError
 from cedar_press.billing.stripe_gateway import API_VERSION, StripeGateway
 from tests.test_billing import PRICE_MAP, SETTINGS, price_data

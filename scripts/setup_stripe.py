@@ -1,4 +1,4 @@
-"""Operator commands for sandbox setup and retryable Stripe reconciliation."""
+"""Provision the Stripe catalog: python scripts/setup_stripe.py [--live]."""
 
 from __future__ import annotations
 
@@ -9,9 +9,6 @@ import os
 from zoneinfo import ZoneInfo
 
 import stripe
-
-from cedar_press import db
-from cedar_press.billing.dependencies import create_billing_services
 from cedar_press.billing.policy import AMOUNTS
 from cedar_press.billing.stripe_gateway import StripeGateway, plain
 from cedar_press.billing.support import application_url
@@ -29,14 +26,19 @@ def setup(gateway, code):
             and p.get("metadata", {}).get("cedar_press_tier") == tier
         ]
         if len(matches) > 1:
-            raise SystemExit("Multiple matching Stripe products; resolve them before setup")
+            raise SystemExit(
+                "Multiple matching Stripe products; resolve them before setup"
+            )
         products[tier] = (
             matches[0]["id"]
             if matches
             else client.products.create(
                 {
                     "name": "Cedar Press+" if tier == "press_pro" else "Cedar Press",
-                    "metadata": {"cedar_press_catalog": "annual_v4", "cedar_press_tier": tier},
+                    "metadata": {
+                        "cedar_press_catalog": "annual_v4",
+                        "cedar_press_tier": tier,
+                    },
                 },
                 options={"idempotency_key": "press-product-annual-v4-" + tier},
             ).id
@@ -45,7 +47,9 @@ def setup(gateway, code):
         prices[cohort] = {}
         for tier, amount in amounts.items():
             lookup = f"cedar_press_{cohort}_{tier}_annual_v4"
-            found = gateway.rows(client.prices.list({"lookup_keys": [lookup], "limit": 100}))
+            found = gateway.rows(
+                client.prices.list({"lookup_keys": [lookup], "limit": 100})
+            )
             if found:
                 price = found[0]
                 if (
@@ -53,7 +57,9 @@ def setup(gateway, code):
                     or price.get("currency") != "usd"
                     or price.get("recurring", {}).get("interval") != "year"
                 ):
-                    raise SystemExit("Existing price differs from the approved annual offer")
+                    raise SystemExit(
+                        "Existing price differs from the approved annual offer"
+                    )
             else:
                 price = plain(
                     client.prices.create(
@@ -69,14 +75,17 @@ def setup(gateway, code):
                 )
             prices[cohort][tier] = price["id"]
         portals[cohort] = {}
-        configurations = gateway.rows(client.billing_portal.configurations.list({"limit": 100}))
+        configurations = gateway.rows(
+            client.billing_portal.configurations.list({"limit": 100})
+        )
         for current_tier in ("press", "press_pro"):
             target_tier = "press_pro" if current_tier == "press" else "press"
             found = [
                 c
                 for c in configurations
                 if c.get("metadata", {}).get("cedar_press_cohort") == cohort
-                and c.get("metadata", {}).get("cedar_press_current_tier") == current_tier
+                and c.get("metadata", {}).get("cedar_press_current_tier")
+                == current_tier
                 and c.get("metadata", {}).get("cedar_press_catalog") == "annual_v4"
             ]
             config = (
@@ -94,13 +103,18 @@ def setup(gateway, code):
                             "features": {
                                 "invoice_history": {"enabled": True},
                                 "payment_method_update": {"enabled": True},
-                                "subscription_cancel": {"enabled": True, "mode": "at_period_end"},
+                                "subscription_cancel": {
+                                    "enabled": True,
+                                    "mode": "at_period_end",
+                                },
                                 "subscription_update": {
                                     "enabled": True,
                                     "default_allowed_updates": ["price"],
                                     "proration_behavior": "always_invoice",
                                     "schedule_at_period_end": {
-                                        "conditions": [{"type": "decreasing_item_amount"}]
+                                        "conditions": [
+                                            {"type": "decreasing_item_amount"}
+                                        ]
                                     },
                                     "products": [
                                         {
@@ -111,7 +125,9 @@ def setup(gateway, code):
                                 },
                             },
                         },
-                        options={"idempotency_key": f"press-portal-{cohort}-{current_tier}-v4"},
+                        options={
+                            "idempotency_key": f"press-portal-{cohort}-{current_tier}-v4"
+                        },
                     )
                 )
             )
@@ -138,14 +154,18 @@ def setup(gateway, code):
     for promotion in promotions:
         if (promotion.get("promotion") or {}).get("coupon") != coupon_id:
             client.promotion_codes.update(promotion["id"], {"active": False})
-    if not any((p.get("promotion") or {}).get("coupon") == coupon_id for p in promotions):
+    if not any(
+        (p.get("promotion") or {}).get("coupon") == coupon_id for p in promotions
+    ):
         client.promotion_codes.create(
             {
                 "code": code,
                 "promotion": {"type": "coupon", "coupon": coupon_id},
                 "restrictions": {"first_time_transaction": True},
                 "expires_at": int(
-                    dt.datetime(2027, 1, 1, tzinfo=ZoneInfo("America/Chicago")).timestamp()
+                    dt.datetime(
+                        2027, 1, 1, tzinfo=ZoneInfo("America/Chicago")
+                    ).timestamp()
                 ),
             },
             options={"idempotency_key": "press-promotion-v4-" + code},
@@ -157,44 +177,25 @@ def setup(gateway, code):
             entry = {"id": price_id, "tier": tier, "cohort": cohort}
             if price_id != prices.get(cohort, {}).get(tier) and entry not in legacy:
                 legacy.append(entry)
-    print("CEDAR_PRESS_STRIPE_LEGACY_PRICES=" + json.dumps(legacy, separators=(",", ":")))
+    print(
+        "CEDAR_PRESS_STRIPE_LEGACY_PRICES=" + json.dumps(legacy, separators=(",", ":"))
+    )
     print("CEDAR_PRESS_STRIPE_PRICES=" + json.dumps(prices, separators=(",", ":")))
     print("CEDAR_PRESS_STRIPE_PORTALS=" + json.dumps(portals, separators=(",", ":")))
     print("CEDAR_PRESS_STRIPE_SUMMIT_COUPON=" + coupon_id)
 
 
-def main():
+def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("command", choices=("setup", "reconcile"))
-    parser.add_argument("--live", action="store_true", help="Explicitly permit live-account setup")
+    parser.add_argument(
+        "--live", action="store_true", help="Explicitly permit live-account setup"
+    )
     parser.add_argument("--summit-code", default="GREATLAKES2026")
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     gateway = StripeGateway()
-    if args.command == "setup":
-        if gateway.livemode and not args.live:
-            parser.error("Setup defaults to sandbox; live setup requires --live")
-        setup(gateway, args.summit_code)
-    else:
-        if not db.configured():
-            parser.error("Reconciliation requires DATABASE_URL")
-        reconciler = create_billing_services(gateway=gateway).reconciler
-        for reservation in db.query(
-            "SELECT session_id FROM cedar_press_guest_checkouts "
-            "WHERE status IN ('pending','open') AND session_id IS NOT NULL"
-        ):
-            session = gateway.checkout_status(reservation["session_id"])
-            customer = session.get("customer")
-            if isinstance(customer, str) and session.get("payment_status") == "paid":
-                reconciler.reconcile_customer(customer)
-        for row in db.query(
-            """
-            SELECT stripe_customer_id FROM cedar_press_subscribers WHERE
-            stripe_customer_id IS NOT NULL UNION SELECT customer_id AS stripe_customer_id
-            FROM cedar_press_guest_checkouts WHERE customer_id IS NOT NULL
-            """
-        ):
-            reconciler.reconcile_customer(row["stripe_customer_id"])
-        print("Billing reconciliation completed.")
+    if gateway.livemode and not args.live:
+        parser.error("Setup defaults to sandbox; live setup requires --live")
+    setup(gateway, args.summit_code)
 
 
 if __name__ == "__main__":

@@ -123,6 +123,8 @@ class AccountSetupService:
         return row
 
     def confirm(self, token, password, name):
+        if not self.db.configured():
+            return None
         hashed_password = subscribers.hash_password(password)
         with self.db.pool().connection() as conn, conn.cursor() as cur:
             # Lock the identity first; two different links cannot overwrite
