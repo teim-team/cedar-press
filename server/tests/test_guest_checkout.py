@@ -1,6 +1,5 @@
 """Guest purchase boundaries: existing accounts, paid provisioning and mailbox proof."""
 
-import os
 import unittest
 from unittest import mock
 from urllib.parse import parse_qs, urlsplit
@@ -8,8 +7,10 @@ from urllib.parse import parse_qs, urlsplit
 import stripe
 from fastapi.testclient import TestClient
 
-from cedar_press import account_email, accounts, billing, db, guest_checkout, ratelimit, subscribers
+from cedar_press import accounts, db, ratelimit, subscribers
+from cedar_press.account_email import AccountEmailSender
 from cedar_press.billing_policy import BillingError
+from cedar_press.billing_services import create_billing_services
 from tests import test_billing as fixtures
 from tests.test_billing import PG, FakeGateway
 
@@ -47,15 +48,16 @@ class TestGuestCheckout(unittest.TestCase):
     def setUp(self):
         self.setUp_database()
         self.gateway = GuestGateway()
-        ready = mock.patch.object(account_email, "configured", return_value=True)
-        ready.start()
-        self.addCleanup(ready.stop)
-        mailer = mock.patch.object(account_email, "send_link")
-        self.mail = mailer.start()
-        self.addCleanup(mailer.stop)
+        self.sender = mock.Mock(spec=AccountEmailSender)
+        self.sender.configured.return_value = True
+        self.mail = self.sender.send_link
+        self.services = create_billing_services(gateway=self.gateway, email_sender=self.sender)
+        self.service = self.services.guest
+        self.billing = self.services.billing
+        self.reconciler = self.services.reconciler
 
     def start(self, secret=SECRET):
-        return guest_checkout.start("press", secret, self.gateway)
+        return self.service.start("press", secret)
 
     def complete(self, paid=True, email=EMAIL):
         row = db.one("SELECT * FROM cedar_press_guest_checkouts ORDER BY created_at DESC LIMIT 1")
@@ -75,8 +77,7 @@ class TestGuestCheckout(unittest.TestCase):
         from cedar_press.app import app
 
         client = TestClient(app)
-        with mock.patch("cedar_press.guest_checkout.Gateway", return_value=self.gateway):
-            response = client.post("/billing/guest/checkout", json={"tier": "press"})
+        response = client.post("/billing/guest/checkout", json={"tier": "press"})
         self.assertEqual(response.status_code, 200)
         self.assertIn("HttpOnly", response.headers["set-cookie"])
         self.assertNotIn(SECRET, response.text)
@@ -89,14 +90,14 @@ class TestGuestCheckout(unittest.TestCase):
 
     def test_unpaid_checkout_does_not_create_an_account_or_send_claim(self):
         self.start()
-        billing.process_event(self.complete(paid=False), self.gateway)
+        self.reconciler.process_event(self.complete(paid=False))
         self.assertIsNone(subscribers.find(EMAIL))
         self.mail.assert_not_called()
 
     def test_paid_webhook_uses_stripe_email_and_only_mailbox_token_can_set_password(self):
         self.start()
         event = self.complete(email="  GUEST@EXAMPLE.INVALID  ")
-        billing.process_event(event, self.gateway)
+        self.reconciler.process_event(event)
         found = subscribers.find(EMAIL)
         self.assertEqual(found.tier, "press")
         self.assertIsNone(found.password_hash)
@@ -111,14 +112,14 @@ class TestGuestCheckout(unittest.TestCase):
         )
         self.assertIsNotNone(subscribers.redeem_reset(token, "new-password-long"))
         self.assertIsNone(subscribers.redeem_reset(token, "another-password"))
-        billing.process_event(event, self.gateway)
+        self.reconciler.process_event(event)
         self.mail.assert_called_once()
 
     def test_account_setup_requires_a_paid_email_token_and_stores_name(self):
         from cedar_press.app import app
 
         self.start()
-        billing.process_event(self.complete(), self.gateway)
+        self.reconciler.process_event(self.complete())
         token = parse_qs(urlsplit(self.mail.call_args.args[1]).fragment)["token"][0]
         client = TestClient(app)
         self.assertEqual(
@@ -148,9 +149,9 @@ class TestGuestCheckout(unittest.TestCase):
         event = self.complete()
         self.mail.side_effect = OSError("synthetic SMTP failure")
         with self.assertRaises(OSError):
-            billing.process_event(event, self.gateway)
+            self.reconciler.process_event(event)
         self.mail.side_effect = None
-        billing.process_event(event, self.gateway)
+        self.reconciler.process_event(event)
         self.assertEqual(
             db.one("SELECT count(*) AS n FROM cedar_press_subscribers WHERE email=%s", (EMAIL,))[
                 "n"
@@ -158,26 +159,26 @@ class TestGuestCheckout(unittest.TestCase):
             1,
         )
         self.assertEqual(db.one("SELECT count(*) AS n FROM cedar_press_payments")["n"], 1)
-        self.assertTrue(guest_checkout.status(SECRET)["emailSent"])
+        self.assertTrue(self.service.status(SECRET)["emailSent"])
 
     def test_resend_requires_own_paid_checkout_and_limits_mail_to_three_requests(self):
         ratelimit.reset_for_tests()
         self.addCleanup(ratelimit.reset_for_tests)
         self.start()
         with self.assertRaises(BillingError):
-            guest_checkout.resend(SECRET)
-        billing.process_event(self.complete(), self.gateway)
+            self.service.resend(SECRET)
+        self.reconciler.process_event(self.complete())
         first_token = parse_qs(urlsplit(self.mail.call_args.args[1]).fragment)["token"][0]
         with self.assertRaises(BillingError):
-            guest_checkout.resend("another-browser-secret")
-        result = guest_checkout.resend(SECRET)
+            self.service.resend("another-browser-secret")
+        result = self.service.resend(SECRET)
         self.assertTrue(result["emailSent"])
         self.assertEqual(self.mail.call_count, 2)
         self.assertIsNone(subscribers.redeem_reset(first_token, "a-long-new-password"))
-        guest_checkout.resend(SECRET)
-        guest_checkout.resend(SECRET)
+        self.service.resend(SECRET)
+        self.service.resend(SECRET)
         with self.assertRaises(BillingError) as caught:
-            guest_checkout.resend(SECRET)
+            self.service.resend(SECRET)
         self.assertEqual(caught.exception.status, 429)
         self.assertEqual(self.mail.call_count, 4)
 
@@ -185,7 +186,7 @@ class TestGuestCheckout(unittest.TestCase):
         self.assertEqual(self.start(), self.start())
         self.assertEqual(len(self.gateway.sessions), 1)
         with self.assertRaises(BillingError):
-            guest_checkout.status("another-browser-secret")
+            self.service.status("another-browser-secret")
 
     def test_lost_checkout_response_reuses_idempotency_key(self):
         self.gateway.fail_checkout = True
@@ -199,7 +200,7 @@ class TestGuestCheckout(unittest.TestCase):
         self.start()
         original = db.one("SELECT * FROM cedar_press_subscribers WHERE id=%s", (self.user["id"],))
         event = self.complete(email=self.user["email"].upper())
-        billing.process_event(event, self.gateway)
+        self.reconciler.process_event(event)
         stored = db.one("SELECT * FROM cedar_press_subscribers WHERE id=%s", (self.user["id"],))
         for field in (
             "id",
@@ -218,21 +219,21 @@ class TestGuestCheckout(unittest.TestCase):
         )
         self.assertIsNone(db.one("SELECT * FROM cedar_press_password_resets"))
         with db.pool().connection() as conn, conn.cursor() as cur:
-            self.assertEqual(guest_checkout.owner(cur, self.customer)["id"], self.user["id"])
+            self.assertEqual(self.service.owner(cur, self.customer)["id"], self.user["id"])
             self.assertEqual(
-                guest_checkout.owner(cur, original["stripe_customer_id"])["id"], self.user["id"]
+                self.service.owner(cur, original["stripe_customer_id"])["id"], self.user["id"]
             )
-        billing.reconcile_customer(self.customer, self.gateway)
+        self.reconciler.reconcile_customer(self.customer)
         self.assertEqual(
             db.one("SELECT customer_id FROM cedar_press_subscriptions")["customer_id"],
             self.customer,
         )
-        self.assertFalse(guest_checkout.status(SECRET)["accountSetup"])
+        self.assertFalse(self.service.status(SECRET)["accountSetup"])
 
     def test_existing_unpaid_account_can_claim_membership_by_email_without_duplicate_user(self):
         accounts.create_user(EMAIL)
         self.start()
-        billing.process_event(self.complete(), self.gateway)
+        self.reconciler.process_event(self.complete())
         self.assertEqual(
             db.one("SELECT count(*) AS n FROM cedar_press_subscribers WHERE email=%s", (EMAIL,))[
                 "n"
@@ -240,37 +241,34 @@ class TestGuestCheckout(unittest.TestCase):
             1,
         )
         token = parse_qs(urlsplit(self.mail.call_args.args[1]).fragment)["token"][0]
-        self.assertEqual(guest_checkout.account_details(token)["email"], EMAIL)
+        self.assertEqual(self.service.account_details(token)["email"], EMAIL)
 
     def test_wrong_checkout_metadata_cannot_provision_an_identity(self):
         self.start()
         event = self.complete()
         next(iter(self.gateway.sessions.values()))["client_reference_id"] = "another-attempt"
         with self.assertRaises(BillingError):
-            billing.process_event(event, self.gateway)
+            self.reconciler.process_event(event)
         self.assertIsNone(subscribers.find(EMAIL))
         self.mail.assert_not_called()
 
 
 class TestAccountEmail(unittest.TestCase):
     def test_local_smtp_sends_link_without_logging_tokens(self):
-        with (
-            mock.patch.dict(
-                os.environ,
-                {
-                    "CEDAR_PRESS_SMTP_HOST": "mailpit",
-                    "CEDAR_PRESS_SMTP_PORT": "1025",
-                    "CEDAR_PRESS_SMTP_STARTTLS": "0",
-                    "CEDAR_PRESS_EMAIL_FROM": "accounts@example.invalid",
-                    "CEDAR_PRESS_ENVIRONMENT": "development",
-                },
-            ),
-            mock.patch("smtplib.SMTP") as smtp,
-        ):
-            account_email.send_link(EMAIL, "http://localhost:5173/login#reset=synthetic")
-            message = smtp.return_value.__enter__.return_value.send_message.call_args.args[0]
-            self.assertEqual(message["To"], EMAIL)
-            self.assertIn("#reset=synthetic", message.get_content())
-            smtp.return_value.__enter__.return_value.starttls.assert_not_called()
-            with mock.patch.dict(os.environ, {"CEDAR_PRESS_ENVIRONMENT": "production"}):
-                self.assertFalse(account_email.configured())
+        settings = {
+            "CEDAR_PRESS_SMTP_HOST": "mailpit",
+            "CEDAR_PRESS_SMTP_PORT": "1025",
+            "CEDAR_PRESS_SMTP_STARTTLS": "0",
+            "CEDAR_PRESS_EMAIL_FROM": "accounts@example.invalid",
+            "CEDAR_PRESS_ENVIRONMENT": "development",
+        }
+        smtp = mock.MagicMock()
+        sender = AccountEmailSender(settings=settings, smtp_factory=smtp)
+        sender.send_link(EMAIL, "http://localhost:5173/login#reset=synthetic")
+        smtp.assert_called_once_with("mailpit", 1025, timeout=10)
+        message = smtp.return_value.__enter__.return_value.send_message.call_args.args[0]
+        self.assertEqual(message["To"], EMAIL)
+        self.assertIn("#reset=synthetic", message.get_content())
+        smtp.return_value.__enter__.return_value.starttls.assert_not_called()
+        settings["CEDAR_PRESS_ENVIRONMENT"] = "production"
+        self.assertFalse(sender.configured())

@@ -12,8 +12,11 @@ from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
-from cedar_press import billing, guest_checkout, ratelimit
+from cedar_press import ratelimit
 from cedar_press.billing_policy import BillingError
+from cedar_press.billing_services import BillingServices, get_billing_services
+from cedar_press.billing_support import utc_now
+from cedar_press.guest_checkout import COOKIE
 from cedar_press.session import Session, current_session
 from cedar_press.stripe_gateway import API_VERSION
 
@@ -33,23 +36,27 @@ class GuestCheckoutRequest(BaseModel):
 def public_plans():
     from cedar_press.billing_policy import AMOUNTS, cohort_at
 
-    cohort = cohort_at(billing.now())
+    cohort = cohort_at(utc_now())
     return {"cohort": cohort, "annualPrices": AMOUNTS[cohort]}
 
 
 @router.post("/billing/guest/checkout")
-def guest_start(body: GuestCheckoutRequest, request: Request):
+def guest_start(
+    body: GuestCheckoutRequest,
+    request: Request,
+    services: BillingServices = Depends(get_billing_services),
+):
     guard(request)
-    secret = request.cookies.get(guest_checkout.COOKIE, "")
+    secret = request.cookies.get(COOKIE, "")
     if not 32 <= len(secret) <= 128:
         secret = secrets.token_urlsafe(32)
     try:
-        result = call(guest_checkout.start, body.tier, secret)
+        result = call(services.guest.start, body.tier, secret)
         response = JSONResponse(result)
     except HTTPException as error:
         response = JSONResponse(error.detail, status_code=error.status_code)
     response.set_cookie(
-        guest_checkout.COOKIE,
+        COOKIE,
         secret,
         httponly=True,
         samesite="lax",
@@ -62,16 +69,20 @@ def guest_start(body: GuestCheckoutRequest, request: Request):
 
 
 @router.get("/billing/guest/status")
-def guest_status(request: Request, response: Response):
+def guest_status(
+    request: Request, response: Response, services: BillingServices = Depends(get_billing_services)
+):
     response.headers["Cache-Control"] = "private, no-store"
-    return call(guest_checkout.status, request.cookies.get(guest_checkout.COOKIE, ""))
+    return call(services.guest.status, request.cookies.get(COOKIE, ""))
 
 
 @router.post("/billing/guest/resend")
-def resend_guest_email(request: Request, response: Response):
+def resend_guest_email(
+    request: Request, response: Response, services: BillingServices = Depends(get_billing_services)
+):
     guard(request)
     response.headers["Cache-Control"] = "private, no-store"
-    return call(guest_checkout.resend, request.cookies.get(guest_checkout.COOKIE, ""))
+    return call(services.guest.resend, request.cookies.get(COOKIE, ""))
 
 
 def account(session: Session | None = Depends(current_session)) -> Session:
@@ -110,30 +121,45 @@ def call(function, *args):
 
 
 @router.get("/billing")
-def read_billing(session: Session = Depends(account)):
-    return call(billing.summary, session.email)
+def read_billing(
+    session: Session = Depends(account), services: BillingServices = Depends(get_billing_services)
+):
+    return call(services.billing.summary, session.email)
 
 
 @router.post("/billing/checkout")
-def checkout(body: CheckoutRequest, request: Request, session: Session = Depends(account)):
+def checkout(
+    body: CheckoutRequest,
+    request: Request,
+    session: Session = Depends(account),
+    services: BillingServices = Depends(get_billing_services),
+):
     guard(request)
-    return call(billing.checkout, session.email, body.tier, body.discount_code.strip())
+    return call(services.billing.checkout, session.email, body.tier, body.discount_code.strip())
 
 
 @router.post("/billing/portal")
-def portal(request: Request, session: Session = Depends(account)):
+def portal(
+    request: Request,
+    session: Session = Depends(account),
+    services: BillingServices = Depends(get_billing_services),
+):
     guard(request)
-    return call(billing.portal, session.email)
+    return call(services.billing.portal, session.email)
 
 
 @router.post("/billing/change-plan")
-def change_plan(request: Request, session: Session = Depends(account)):
+def change_plan(
+    request: Request,
+    session: Session = Depends(account),
+    services: BillingServices = Depends(get_billing_services),
+):
     guard(request)
-    return call(billing.portal, session.email, None, True)
+    return call(services.billing.portal, session.email, True)
 
 
 @router.post("/billing/webhook")
-async def webhook(request: Request):
+async def webhook(request: Request, services: BillingServices = Depends(get_billing_services)):
     secret = os.environ.get("CEDAR_PRESS_STRIPE_WEBHOOK_SECRET", "")
     if not secret.startswith("whsec_"):
         raise HTTPException(503, detail="Billing webhook is not configured.")
@@ -159,5 +185,5 @@ async def webhook(request: Request):
             raise ValueError("Missing object ID")
     except (ValueError, KeyError, TypeError, stripe.SignatureVerificationError):
         raise HTTPException(400, detail="Invalid billing webhook.") from None
-    call(billing.process_event, parsed)
+    call(services.reconciler.process_event, parsed)
     return {"received": True}

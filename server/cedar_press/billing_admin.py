@@ -10,9 +10,11 @@ from zoneinfo import ZoneInfo
 
 import stripe
 
-from cedar_press import billing, db
+from cedar_press import db
 from cedar_press.billing_policy import AMOUNTS
-from cedar_press.stripe_gateway import Gateway, plain
+from cedar_press.billing_services import create_billing_services
+from cedar_press.billing_support import application_url
+from cedar_press.stripe_gateway import StripeGateway, plain
 
 
 def setup(gateway, code):
@@ -88,7 +90,7 @@ def setup(gateway, code):
                                 "cedar_press_current_tier": current_tier,
                                 "cedar_press_catalog": "annual_v4",
                             },
-                            "default_return_url": billing.app_url() + "/settings",
+                            "default_return_url": application_url() + "/settings",
                             "features": {
                                 "invoice_history": {"enabled": True},
                                 "payment_method_update": {"enabled": True},
@@ -167,7 +169,7 @@ def main():
     parser.add_argument("--live", action="store_true", help="Explicitly permit live-account setup")
     parser.add_argument("--summit-code", default="GREATLAKES2026")
     args = parser.parse_args()
-    gateway = Gateway()
+    gateway = StripeGateway()
     if args.command == "setup":
         if gateway.livemode and not args.live:
             parser.error("Setup defaults to sandbox; live setup requires --live")
@@ -175,6 +177,7 @@ def main():
     else:
         if not db.configured():
             parser.error("Reconciliation requires DATABASE_URL")
+        reconciler = create_billing_services(gateway=gateway).reconciler
         for reservation in db.query(
             "SELECT session_id FROM cedar_press_guest_checkouts "
             "WHERE status IN ('pending','open') AND session_id IS NOT NULL"
@@ -182,7 +185,7 @@ def main():
             session = gateway.checkout_status(reservation["session_id"])
             customer = session.get("customer")
             if isinstance(customer, str) and session.get("payment_status") == "paid":
-                billing.reconcile_customer(customer, gateway)
+                reconciler.reconcile_customer(customer)
         for row in db.query(
             """
             SELECT stripe_customer_id FROM cedar_press_subscribers WHERE
@@ -190,7 +193,7 @@ def main():
             FROM cedar_press_guest_checkouts WHERE customer_id IS NOT NULL
             """
         ):
-            billing.reconcile_customer(row["stripe_customer_id"], gateway)
+            reconciler.reconcile_customer(row["stripe_customer_id"])
         print("Billing reconciliation completed.")
 
 

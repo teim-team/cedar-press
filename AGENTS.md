@@ -130,6 +130,9 @@ production uses configured SMTP with STARTTLS. The confirmation page supports
 `POST /billing/guest/resend` for its own paid checkout. The two tiers have
 separately named Stripe products; older price IDs remain recognized through
 `CEDAR_PRESS_STRIPE_LEGACY_PRICES`.
+Billing uses `BillingService`, `GuestCheckoutService` and `BillingReconciler`,
+with `StripeGateway` and `AccountEmailSender` for external calls.
+FastAPI dependencies compose the services; tests inject their dependencies.
 
 Docker Engine or Docker Desktop with Compose v2 is required for the database
 targets. Verify the Docker prerequisite before running them:

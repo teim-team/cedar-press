@@ -65,10 +65,8 @@ from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, Field
 
 from cedar_press import (
-    account_email,
     cedar_service,
     codes,
-    guest_checkout,
     need_profiles,
     press_catalog,
     priorities,
@@ -79,7 +77,10 @@ from cedar_press import (
     shelf,
     subscribers,
 )
+from cedar_press.account_email import AccountEmailSender
+from cedar_press.billing_policy import BillingError
 from cedar_press.billing_routes import router as billing_router
+from cedar_press.billing_services import BillingServices, get_billing_services
 from cedar_press.session import (
     Session,
     account_exists,
@@ -470,8 +471,9 @@ _RESET_LOG = logging.getLogger("cedar_press.password_reset")
 
 
 def _send_reset_link(email: str, link: str) -> None:
-    if account_email.configured():
-        account_email.send_link(email, link)
+    sender = AccountEmailSender()
+    if sender.configured():
+        sender.send_link(email, link)
         return
     _RESET_LOG.warning("Password reset link for %s: %s", email, link)
 
@@ -488,7 +490,7 @@ def request_password_reset(
     _require_auth_origin(request, "password reset")
     _guard(request, "reset", ratelimit.LOGIN_ATTEMPTS)
     if (
-        not account_email.configured()
+        not AccountEmailSender().configured()
         and os.environ.get("CEDAR_PRESS_ENVIRONMENT", "development") != "development"
     ):
         raise HTTPException(
@@ -559,12 +561,14 @@ class AccountSetup(ResetConfirm):
 
 
 @app.post("/auth/account-setup/check")
-def check_account_setup(body: AccountLink, request: Request):
+def check_account_setup(
+    body: AccountLink, request: Request, services: BillingServices = Depends(get_billing_services)
+):
     _require_auth_origin(request, "account setup")
     _guard(request, "account-setup-check", ratelimit.LOGIN_ATTEMPTS)
     try:
-        return guest_checkout.account_details(body.token)
-    except guest_checkout.BillingError as error:
+        return services.guest.account_details(body.token)
+    except BillingError as error:
         raise HTTPException(
             error.status, detail={"code": error.code, "message": error.message}
         ) from None

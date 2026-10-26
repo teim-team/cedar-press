@@ -17,7 +17,8 @@ from urllib.parse import urlsplit, urlunsplit
 import stripe
 from fastapi.testclient import TestClient
 
-from cedar_press import billing, db, session, subscribers
+from cedar_press import db, session, subscribers
+from cedar_press.billing import BillingService
 from cedar_press.billing_policy import (
     AMOUNTS,
     BillingError,
@@ -28,7 +29,9 @@ from cedar_press.billing_policy import (
     prices,
     validate_price,
 )
-from cedar_press.stripe_gateway import API_VERSION, Gateway, stripe_url
+from cedar_press.billing_services import create_billing_services, get_billing_services
+from cedar_press.billing_support import application_url
+from cedar_press.stripe_gateway import API_VERSION, StripeGateway, stripe_url
 
 PRICE_MAP = {
     cohort: {tier: f"price_{cohort}_{tier}" for tier in amounts}
@@ -154,7 +157,15 @@ class TestBillingPolicy(unittest.TestCase):
         patch.start()
         self.addCleanup(patch.stop)
 
+    def install_services(self):
+        from cedar_press.app import app
+
+        self.services = create_billing_services(gateway=mock.Mock())
+        app.dependency_overrides[get_billing_services] = lambda: self.services
+        self.addCleanup(app.dependency_overrides.clear)
+
     def test_billing_routes_require_identity_and_reject_foreign_origins(self):
+        self.install_services()
         from cedar_press.app import app
         from cedar_press.session import current_session
 
@@ -166,7 +177,7 @@ class TestBillingPolicy(unittest.TestCase):
         app.dependency_overrides[current_session] = lambda: session.Session(
             "test@example.invalid", "free"
         )
-        with mock.patch.object(billing, "portal") as portal:
+        with mock.patch.object(self.services.billing, "portal") as portal:
             self.assertEqual(
                 client.post(
                     "/billing/change-plan", headers={"Origin": "https://untrusted.invalid"}
@@ -179,7 +190,7 @@ class TestBillingPolicy(unittest.TestCase):
                 "/billing/change-plan", headers={"Origin": "http://localhost:5173"}
             )
             self.assertEqual(response.status_code, 200)
-            portal.assert_called_once_with("test@example.invalid", None, True)
+            portal.assert_called_once_with("test@example.invalid", True)
 
     def test_annual_offer_boundary_is_central_time(self):
         self.assertEqual(
@@ -244,16 +255,16 @@ class TestBillingPolicy(unittest.TestCase):
             ),
             self.assertRaises(BillingError),
         ):
-            billing.app_url()
+            application_url()
 
     def test_real_sdk_client_is_pinned_and_keys_are_mode_checked(self):
-        gateway = Gateway()
+        gateway = StripeGateway()
         self.assertFalse(gateway.livemode)
         with (
             mock.patch.dict(os.environ, {"CEDAR_PRESS_STRIPE_MODE": "live"}),
             self.assertRaises(BillingError),
         ):
-            Gateway()
+            StripeGateway()
 
     def test_signed_webhook_signature_and_version_checked_before_processing(self):
         from cedar_press.app import app
@@ -273,7 +284,8 @@ class TestBillingPolicy(unittest.TestCase):
             b"whsec_synthetic", str(timestamp).encode() + b"." + body, hashlib.sha256
         ).hexdigest()
         header = f"t={timestamp},v1={signature}"
-        with mock.patch.object(billing, "process_event") as process:
+        self.install_services()
+        with mock.patch.object(self.services.reconciler, "process_event") as process:
             self.assertEqual(
                 client.post(
                     "/billing/webhook", content=body, headers={"Stripe-Signature": "invalid"}
@@ -316,6 +328,13 @@ class TestBillingPostgres(unittest.TestCase):
             (self.customer, self.user["id"]),
         )
         self.gateway = FakeGateway()
+        self.services = create_billing_services(gateway=self.gateway)
+        self.billing = self.services.billing
+        self.reconciler = self.services.reconciler
+        from cedar_press.app import app
+
+        app.dependency_overrides[get_billing_services] = lambda: self.services
+        self.addCleanup(app.dependency_overrides.clear)
 
     def drop_database(self):
         from psycopg import sql
@@ -377,7 +396,7 @@ class TestBillingPostgres(unittest.TestCase):
     def test_confirmed_payment_updates_access_and_records_transactions(self):
         self.paid_subscription(tier="press_pro")
         cookie = session._encode(session.Session(self.user["email"], "press"))
-        billing.process_event(self.event(), self.gateway)
+        self.reconciler.process_event(self.event())
         self.assertEqual(subscribers.find(self.user["email"]).tier, "press_pro")
         self.assertEqual(session._decode(cookie).tier, "press_pro")
         self.assertEqual(db.one("SELECT count(*) AS n FROM cedar_press_invoices")["n"], 1)
@@ -386,11 +405,11 @@ class TestBillingPostgres(unittest.TestCase):
 
     def test_duplicates_and_old_events_use_current_provider_state(self):
         self.paid_subscription()
-        billing.process_event(self.event(), self.gateway)
-        billing.process_event(self.event(), self.gateway)
+        self.reconciler.process_event(self.event())
+        self.reconciler.process_event(self.event())
         self.assertEqual(db.one("SELECT attempts FROM cedar_press_webhook_events")["attempts"], 1)
         self.gateway.subs[0]["status"] = "canceled"
-        billing.process_event(self.event("evt_old"), self.gateway)
+        self.reconciler.process_event(self.event("evt_old"))
         self.assertEqual(subscribers.find(self.user["email"]).tier, "free")
         self.assertEqual(
             db.one("""
@@ -405,32 +424,32 @@ class TestBillingPostgres(unittest.TestCase):
         self.paid_subscription()
         self.gateway.fail_subscription = True
         with self.assertRaises(stripe.APIConnectionError):
-            billing.process_event(self.event(), self.gateway)
+            self.reconciler.process_event(self.event())
         self.assertEqual(
             db.one("SELECT status FROM cedar_press_webhook_events")["status"], "failed"
         )
         self.assertEqual(db.one("SELECT count(*) AS n FROM cedar_press_subscriptions")["n"], 0)
         self.gateway.fail_subscription = False
-        billing.process_event(self.event(), self.gateway)
+        self.reconciler.process_event(self.event())
         self.assertEqual(
             db.one("SELECT status FROM cedar_press_webhook_events")["status"], "processed"
         )
 
     def test_failed_renewal_cannot_extend_paid_access(self):
         self.paid_subscription()
-        billing.process_event(self.event(), self.gateway)
+        self.reconciler.process_event(self.event())
         self.gateway.subs[0]["status"] = "past_due"
         self.gateway.line_rows[0]["period"] = {
             "start": int(time.time()) - 100,
             "end": int(time.time()) - 1,
         }
-        billing.process_event(self.event("evt_failed"), self.gateway)
+        self.reconciler.process_event(self.event("evt_failed"))
         self.assertEqual(subscribers.find(self.user["email"]).tier, "free")
 
     def test_cancel_at_term_end_keeps_paid_access(self):
         self.paid_subscription()
         self.gateway.subs[0]["cancel_at_period_end"] = True
-        billing.process_event(self.event(), self.gateway)
+        self.reconciler.process_event(self.event())
         self.assertEqual(subscribers.find(self.user["email"]).tier, "press")
 
     def test_partial_and_full_refund_history_affects_paid_coverage(self):
@@ -445,39 +464,39 @@ class TestBillingPostgres(unittest.TestCase):
                 "created": int(time.time()),
             }
         ]
-        billing.process_event(self.event(), self.gateway)
+        self.reconciler.process_event(self.event())
         self.assertEqual(subscribers.find(self.user["email"]).tier, "press")
         self.gateway.refund_rows[0]["amount"] = 50_000
-        billing.process_event(self.event("evt_full_refund"), self.gateway)
+        self.reconciler.process_event(self.event("evt_full_refund"))
         self.assertEqual(subscribers.find(self.user["email"]).tier, "free")
         self.assertEqual(db.one("SELECT amount FROM cedar_press_refunds")["amount"], 50_000)
 
     def test_checkout_retries_reuse_persisted_intent_and_never_grant_access(self):
         self.gateway.fail_checkout = True
         with self.assertRaises(stripe.APIConnectionError):
-            billing.checkout(self.user["email"], "press", "SUMMIT", self.gateway)
-        result = billing.checkout(self.user["email"], "press", "SUMMIT", self.gateway)
+            self.billing.checkout(self.user["email"], "press", "SUMMIT")
+        result = self.billing.checkout(self.user["email"], "press", "SUMMIT")
         self.assertTrue(result["url"].startswith("https://checkout.stripe.com/"))
         self.assertEqual(len(set(self.gateway.attempts)), 1)
         self.assertEqual(len(self.gateway.sessions), 1)
         self.assertIsNone(db.one("SELECT activated_at FROM cedar_press_subscriptions LIMIT 1"))
 
     def test_completed_checkout_blocks_a_second_purchase_before_webhook(self):
-        billing.checkout(self.user["email"], "press", gateway=self.gateway)
+        self.billing.checkout(self.user["email"], "press")
         first = next(iter(self.gateway.sessions.values()))
         first["status"] = "complete"
         with self.assertRaises(BillingError) as caught:
-            billing.checkout(self.user["email"], "press", gateway=self.gateway)
+            self.billing.checkout(self.user["email"], "press")
         self.assertEqual(caught.exception.code, "CHECKOUT_PROCESSING")
         self.assertEqual(len(self.gateway.sessions), 1)
 
     def test_aged_pending_checkout_recovers_lost_response(self):
         self.gateway.fail_checkout = True
         with self.assertRaises(stripe.APIConnectionError):
-            billing.checkout(self.user["email"], "press", gateway=self.gateway)
+            self.billing.checkout(self.user["email"], "press")
         with db.pool().connection() as conn:
             conn.execute("UPDATE cedar_press_checkout_attempts SET expires_at=now()")
-        billing.checkout(self.user["email"], "press", gateway=self.gateway)
+        self.billing.checkout(self.user["email"], "press")
         self.assertEqual(len(self.gateway.sessions), 1)
         self.assertEqual(
             db.one("SELECT status FROM cedar_press_checkout_attempts")["status"], "open"
@@ -485,25 +504,22 @@ class TestBillingPostgres(unittest.TestCase):
 
     def test_new_subscriptions_after_cutoff_use_standard_price(self):
         future = dt.datetime(2027, 2, 1, tzinfo=dt.timezone.utc)
-        with mock.patch.object(billing, "now", return_value=future):
-            billing.checkout(self.user["email"], "press", gateway=self.gateway)
+        service = BillingService(gateway=self.gateway, clock=lambda: future)
+        service.checkout(self.user["email"], "press")
         self.assertEqual(
             db.one("SELECT cohort FROM cedar_press_checkout_attempts")["cohort"], "standard"
         )
-        with (
-            mock.patch.object(billing, "now", return_value=future),
-            self.assertRaises(BillingError),
-        ):
-            billing.checkout(self.user["email"], "press", "SUMMIT", self.gateway)
+        with self.assertRaises(BillingError):
+            service.checkout(self.user["email"], "press", "SUMMIT")
 
     def test_wrong_customer_and_duplicate_subscription_are_refused(self):
         self.paid_subscription()
         with self.assertRaises(BillingError) as caught:
-            billing.checkout(self.user["email"], "press", gateway=self.gateway)
+            self.billing.checkout(self.user["email"], "press")
         self.assertEqual(caught.exception.code, "SUBSCRIPTION_EXISTS")
         self.gateway.subs[0]["customer"] = "cus_someone_else"
         with self.assertRaises(BillingError):
-            billing.process_event(self.event(), self.gateway)
+            self.reconciler.process_event(self.event())
         self.assertEqual(db.one("SELECT count(*) AS n FROM cedar_press_subscriptions")["n"], 0)
 
     def test_resubscribed_account_portal_uses_active_cohort(self):
@@ -519,7 +535,7 @@ class TestBillingPostgres(unittest.TestCase):
         with mock.patch.object(
             self.gateway, "portal", return_value="https://billing.stripe.com/p/session/fixture"
         ) as portal:
-            billing.portal(self.user["email"], self.gateway)
+            self.billing.portal(self.user["email"])
             portal.assert_called_once_with(
                 self.customer, "standard", "http://localhost:5173", False
             )
@@ -528,8 +544,9 @@ class TestBillingPostgres(unittest.TestCase):
         from cedar_press.app import app
 
         self.paid_subscription(status="canceled")
-        billing.process_event(self.event(), self.gateway)
+        self.reconciler.process_event(self.event())
         app.dependency_overrides.clear()
+        app.dependency_overrides[get_billing_services] = lambda: self.services
         client = TestClient(app)
         response = client.post(
             "/auth/login", json={"email": self.user["email"], "password": "existing-password"}

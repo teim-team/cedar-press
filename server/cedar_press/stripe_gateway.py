@@ -36,7 +36,7 @@ def stripe_url(value: str) -> str:
     return value
 
 
-class Gateway:
+class StripeGateway:
     def __init__(self):
         mode = os.environ.get("CEDAR_PRESS_STRIPE_MODE", "test")
         key = os.environ.get("CEDAR_PRESS_STRIPE_SECRET_KEY", "")

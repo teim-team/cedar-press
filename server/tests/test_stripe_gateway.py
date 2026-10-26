@@ -15,7 +15,7 @@ import stripe
 
 from cedar_press.billing_admin import setup
 from cedar_press.billing_policy import BillingError
-from cedar_press.stripe_gateway import Gateway
+from cedar_press.stripe_gateway import StripeGateway
 from tests.test_billing import PRICE_MAP, SETTINGS, price_data
 
 
@@ -191,7 +191,7 @@ class TestStripeGateway(unittest.TestCase):
         patch.start()
         self.addCleanup(patch.stop)
         self.transport = Transport()
-        self.gateway = Gateway()
+        self.gateway = StripeGateway()
         self.gateway.client = stripe.StripeClient("sk_test_synthetic", http_client=self.transport)
 
     def test_sdk_resources_are_converted_and_pagination_is_followed(self):
