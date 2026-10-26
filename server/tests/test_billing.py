@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+import asyncio
 import copy
 import datetime as dt
 import hashlib
 import hmac
 import json
 import os
+import threading
 import time
 import unittest
 import uuid
@@ -18,8 +20,8 @@ import stripe
 from fastapi.testclient import TestClient
 
 from cedar_press import db, session, subscribers
-from cedar_press.billing import BillingService
-from cedar_press.billing_policy import (
+from cedar_press.billing.dependencies import create_billing_services, get_billing_services
+from cedar_press.billing.policy import (
     AMOUNTS,
     BillingError,
     cohort_at,
@@ -29,9 +31,9 @@ from cedar_press.billing_policy import (
     prices,
     validate_price,
 )
-from cedar_press.billing_services import create_billing_services, get_billing_services
-from cedar_press.billing_support import application_url
-from cedar_press.stripe_gateway import API_VERSION, StripeGateway, stripe_url
+from cedar_press.billing.service import BillingService
+from cedar_press.billing.stripe_gateway import API_VERSION, StripeGateway, stripe_url
+from cedar_press.billing.support import application_url
 
 PRICE_MAP = {
     cohort: {tier: f"price_{cohort}_{tier}" for tier in amounts}
@@ -95,6 +97,9 @@ class FakeGateway:
             raise stripe.APIConnectionError("synthetic provider timeout")
         return copy.deepcopy(next(s for s in self.subs if s["id"] == subscription_id))
 
+    def invoice(self, invoice_id):
+        return copy.deepcopy(next(i for i in self.invoice_rows if i["id"] == invoice_id))
+
     def invoices(self, subscription_id):
         return copy.deepcopy(self.invoice_rows)
 
@@ -147,7 +152,7 @@ class FakeGateway:
     def find_checkout(self, customer, attempt_id):
         return copy.deepcopy(self.sessions.get(attempt_id))
 
-    def portal(self, customer, cohort, app_url):
+    def portal(self, customer, cohort, app_url, change_plan=False, subscription_id=None):
         return "https://billing.stripe.com/p/session/fixture"
 
 
@@ -190,7 +195,58 @@ class TestBillingPolicy(unittest.TestCase):
                 "/billing/change-plan", headers={"Origin": "http://localhost:5173"}
             )
             self.assertEqual(response.status_code, 200)
-            portal.assert_called_once_with("test@example.invalid", True)
+            portal.assert_called_once_with("test@example.invalid", True, None)
+
+    def test_webhook_processing_runs_off_the_event_loop(self):
+        from cedar_press.billing.routes import webhook
+
+        event = {
+            "id": "evt_thread",
+            "type": "invoice.paid",
+            "api_version": API_VERSION,
+            "data": {"object": {"id": "in_thread"}},
+        }
+        payload = json.dumps(event).encode()
+        timestamp = int(time.time())
+        signature = hmac.new(
+            b"whsec_synthetic", str(timestamp).encode() + b"." + payload, hashlib.sha256
+        ).hexdigest()
+        request = mock.Mock()
+        request.headers = {"stripe-signature": f"t={timestamp},v1={signature}"}
+
+        async def stream():
+            yield payload
+
+        request.stream = stream
+        services = create_billing_services(gateway=mock.Mock())
+        entered, release = threading.Event(), threading.Event()
+        worker_threads = []
+
+        def slow_processing(event):
+            worker_threads.append(threading.get_ident())
+            entered.set()
+            release.wait(2)
+
+        async def check():
+            main_thread = threading.get_ident()
+            timer = threading.Timer(2, release.set)
+            timer.start()
+            try:
+                with mock.patch.object(
+                    services.reconciler, "process_event", side_effect=slow_processing
+                ):
+                    task = asyncio.create_task(webhook(request, services))
+                    self.assertTrue(await asyncio.to_thread(entered.wait, 1))
+                    self.assertNotEqual(worker_threads[0], main_thread)
+                    await asyncio.sleep(0)
+                    self.assertFalse(task.done())
+                    release.set()
+                    self.assertEqual(await task, {"received": True})
+            finally:
+                release.set()
+                timer.cancel()
+
+        asyncio.run(check())
 
     def test_annual_offer_boundary_is_central_time(self):
         self.assertEqual(
@@ -220,7 +276,7 @@ class TestBillingPolicy(unittest.TestCase):
     def test_legacy_prices_remain_recognized_but_new_purchases_use_named_tier_prices(self):
         legacy = [{"id": "price_previous", "tier": "press_pro", "cohort": "early_access"}]
         with mock.patch.dict(os.environ, {"CEDAR_PRESS_STRIPE_LEGACY_PRICES": json.dumps(legacy)}):
-            from cedar_press.billing_policy import identify_price
+            from cedar_press.billing.policy import identify_price
 
             self.assertEqual(identify_price("price_previous").tier, "press_pro")
             self.assertEqual(
@@ -353,6 +409,7 @@ class TestBillingPostgres(unittest.TestCase):
                 "customer": self.customer,
                 "status": status,
                 "cancel_at_period_end": False,
+                "latest_invoice": "in_fixture",
                 "items": {
                     "data": [
                         {
@@ -535,10 +592,54 @@ class TestBillingPostgres(unittest.TestCase):
         with mock.patch.object(
             self.gateway, "portal", return_value="https://billing.stripe.com/p/session/fixture"
         ) as portal:
-            self.billing.portal(self.user["email"])
+            self.billing.portal(self.user["email"], subscription_id="sub_new")
             portal.assert_called_once_with(
-                self.customer, "standard", "http://localhost:5173", False
+                self.customer, "standard", "http://localhost:5173", False, "sub_new"
             )
+
+    def test_every_subscription_has_an_owned_management_target(self):
+        for sub_id, customer in (("sub_one", self.customer), ("sub_two", "cus_second")):
+            db.execute(
+                """INSERT INTO cedar_press_subscriptions
+                (id,user_id,price_id,tier,cohort,status,customer_id)
+                VALUES (%s,%s,%s,'press','early_access','active',%s)""",
+                (sub_id, self.user["id"], PRICE_MAP["early_access"]["press"], customer),
+            )
+        with mock.patch.object(
+            self.gateway, "portal", return_value="https://billing.stripe.com/p/session/fixture"
+        ) as portal:
+            for sub_id, customer in (("sub_one", self.customer), ("sub_two", "cus_second")):
+                self.billing.portal(self.user["email"], subscription_id=sub_id)
+                self.assertEqual(portal.call_args.args[0], customer)
+                self.assertEqual(portal.call_args.args[-1], sub_id)
+            count = portal.call_count
+            for target in (None, "sub_other_users"):
+                with self.assertRaises(BillingError):
+                    self.billing.portal(self.user["email"], subscription_id=target)
+            self.assertEqual(portal.call_count, count)
+
+    def test_webhook_fetches_only_affected_invoice_without_open_transaction(self):
+        self.paid_subscription()
+        original = self.gateway.invoice
+
+        def checked_invoice(invoice_id):
+            with self.psycopg.connect(db.url(), autocommit=True) as monitor:
+                row = monitor.execute("""SELECT count(*) FROM pg_stat_activity
+                    WHERE datname=current_database() AND state='idle in transaction'""").fetchone()
+                self.assertEqual(row[0], 0)
+            return original(invoice_id)
+
+        event = self.event("evt_invoice", "invoice.paid")
+        event["data"]["object"]["id"] = "in_fixture"
+        with (
+            mock.patch.object(self.gateway, "invoices", side_effect=AssertionError("full scan")),
+            mock.patch.object(
+                self.gateway, "subscriptions", side_effect=AssertionError("full scan")
+            ),
+            mock.patch.object(self.gateway, "invoice", side_effect=checked_invoice),
+        ):
+            self.reconciler.process_event(event)
+        self.assertEqual(subscribers.find(self.user["email"]).tier, "press")
 
     def test_expired_user_can_sign_in_and_manage_billing_but_not_content(self):
         from cedar_press.app import app

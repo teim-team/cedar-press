@@ -29,7 +29,7 @@ test("unpaid account can choose annual billing and submit a discount", async ({ 
 
 test("existing annual subscriber sees management and invoice history", async ({ page }) => {
   await account(page, { ...summary, hasCustomer: true,
-    subscriptions: [{ tier: "press_pro", status: "active", cancel_at_period_end: true, period_end: "2027-10-25T12:00:00Z" }],
+    subscriptions: [{ id: "sub_fixture", tier: "press_pro", status: "active", cancel_at_period_end: true, period_end: "2027-10-25T12:00:00Z" }],
     invoices: [{ id: "in_fixture", created_at: "2026-10-25T12:00:00Z", currency: "usd", amount_due: 90000, status: "paid", hosted_url: "https://invoice.stripe.com/i/fixture" }],
   });
   await page.goto("/settings");
@@ -48,18 +48,38 @@ test("billing unavailable preserves the account settings page", async ({ page })
 
 test("annual upgrade uses a hosted confirmation and shows provider errors", async ({ page }) => {
   await account(page, { ...summary, hasCustomer: true,
-    subscriptions: [{ tier: "press", status: "active", cancel_at_period_end: false }],
+    subscriptions: [{ id: "sub_fixture", tier: "press", status: "active", cancel_at_period_end: false }],
   });
   let calls = 0;
   await page.route("**/api/billing/change-plan", async (route) => {
     calls++;
     expect(route.request().method()).toBe("POST");
+    expect(route.request().postDataJSON()).toEqual({ subscription_id: "sub_fixture" });
     await route.fulfill({ status: 502, json: { code: "STRIPE_UNAVAILABLE", message: "Please try again." } });
   });
   await page.goto("/settings");
   await page.getByRole("button", { name: "Upgrade to Cedar Press+", exact: true }).click();
   await expect(page.getByRole("alert")).toHaveText("Please try again.");
   expect(calls).toBe(1);
+});
+
+test("each purchase has its own subscription management action", async ({ page }) => {
+  await account(page, { ...summary, hasCustomer: true, subscriptions: [
+    { id: "sub_one", tier: "press", status: "active", cancel_at_period_end: false },
+    { id: "sub_two", tier: "press_pro", status: "active", cancel_at_period_end: false },
+  ] });
+  const targets = [];
+  await page.route("**/api/billing/portal", async route => {
+    targets.push(route.request().postDataJSON().subscription_id);
+    await route.fulfill({ status: 502, json: { message: "Please try again." } });
+  });
+  await page.goto("/settings");
+  await page.getByRole("group", { name: "Cedar Press subscription 1", exact: true })
+    .getByRole("button", { name: "Manage billing and plan" }).click();
+  await expect(page.getByRole("alert")).toHaveText("Please try again.");
+  await page.getByRole("group", { name: "Cedar Press+ subscription 2", exact: true })
+    .getByRole("button", { name: "Manage billing and plan" }).click();
+  await expect.poll(() => targets).toEqual(["sub_one", "sub_two"]);
 });
 
 test("new visitor goes straight to Stripe without an email or discount form", async ({ page }) => {
@@ -145,7 +165,7 @@ test("purchase confirmation resends account email and keeps sign in secondary", 
   await page.route("**/api/billing/guest/resend", route => { sent++; return route.fulfill({ json: purchase }); });
   await page.goto("/subscribe?billing=processing");
   await page.getByRole("button", { name: "Resend email", exact: true }).click();
-  await expect(page.getByText("Email sent. Please use the newest link.")).toBeVisible();
+  await expect(page.getByText("Email sent. Check your inbox for your account setup link.")).toBeVisible();
   expect(sent).toBe(1);
   await expect(page.getByRole("link", { name: "Sign in to Cedar Press", exact: true })).toHaveCount(0);
 });

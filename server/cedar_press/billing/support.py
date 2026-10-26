@@ -6,7 +6,7 @@ import datetime as dt
 import os
 from urllib.parse import urlsplit
 
-from cedar_press.billing_policy import BillingError, reference, unavailable
+from cedar_press.billing.policy import BillingError, reference, unavailable
 
 
 def utc_now():

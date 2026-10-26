@@ -323,12 +323,12 @@ export function startBillingCheckout({ tier, discountCode = "" }) {
   return request("/billing/checkout", { method: "POST", body: { tier, discount_code: discountCode } });
 }
 
-export function openBillingPortal() {
-  return request("/billing/portal", { method: "POST" });
+export function openBillingPortal(subscriptionId) {
+  return request("/billing/portal", { method: "POST", body: { subscription_id: subscriptionId } });
 }
 
-export function changeBillingPlan() {
-  return request("/billing/change-plan", { method: "POST" });
+export function changeBillingPlan(subscriptionId) {
+  return request("/billing/change-plan", { method: "POST", body: { subscription_id: subscriptionId } });
 }
 
 export function fetchBillingPlans({ signal } = {}) {

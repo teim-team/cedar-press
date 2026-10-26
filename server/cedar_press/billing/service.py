@@ -5,7 +5,8 @@ from __future__ import annotations
 import datetime as dt
 
 from cedar_press import db
-from cedar_press.billing_policy import (
+from cedar_press.billing.contracts import BillingGateway
+from cedar_press.billing.policy import (
     AMOUNTS,
     BillingError,
     cohort_at,
@@ -14,14 +15,16 @@ from cedar_press.billing_policy import (
     unavailable,
     validate_price,
 )
-from cedar_press.billing_support import application_url, utc_now
-from cedar_press.stripe_gateway import StripeGateway, stripe_url
+from cedar_press.billing.stripe_gateway import StripeGateway, stripe_url
+from cedar_press.billing.support import application_url, utc_now
 
 
 class BillingService:
     """Checkout, billing portal and account history with explicit dependencies."""
 
-    def __init__(self, *, gateway=None, database=db, clock=None, app_url=None):
+    def __init__(
+        self, *, gateway: BillingGateway | None = None, database=db, clock=None, app_url=None
+    ):
         self._gateway = gateway
         self.db = database
         self.clock = clock or utc_now
@@ -195,27 +198,41 @@ class BillingService:
                 )
             return {"url": stripe_url(session["url"])}
 
-    def portal(self, email, change_plan=False):
+    def portal(self, email, change_plan=False, subscription_id=None):
         user = self.account(email)
         if not user["stripe_customer_id"]:
             raise BillingError("NO_BILLING_ACCOUNT", "Choose an annual plan first.")
-        row = self.db.one(
-            """
-            SELECT cohort,customer_id FROM cedar_press_subscriptions WHERE user_id=%s ORDER BY
-            CASE WHEN status NOT IN ('canceled', 'incomplete_expired') THEN 0 ELSE 1 END,
-            activated_at DESC NULLS LAST, updated_at DESC LIMIT 1
-            """,
-            (user["id"],),
-        )
+        if subscription_id:
+            row = self.db.one(
+                "SELECT id,cohort,customer_id FROM cedar_press_subscriptions "
+                "WHERE id=%s AND user_id=%s",
+                (subscription_id, user["id"]),
+            )
+            if not row:
+                raise BillingError("SUBSCRIPTION_MISSING", "That subscription was not found.", 404)
+        else:
+            rows = self.db.query(
+                "SELECT id,cohort,customer_id FROM cedar_press_subscriptions WHERE user_id=%s",
+                (user["id"],),
+            )
+            if len(rows) > 1:
+                raise BillingError(
+                    "SUBSCRIPTION_REQUIRED", "Choose the subscription to manage.", 409
+                )
+            row = rows[0] if rows else None
         cohort = row["cohort"] if row else cohort_at(self.clock())
         customer = row["customer_id"] if row and row["customer_id"] else user["stripe_customer_id"]
-        return {"url": self.gateway.portal(customer, cohort, self.app_url(), change_plan)}
+        return {
+            "url": self.gateway.portal(
+                customer, cohort, self.app_url(), change_plan, row["id"] if row else None
+            )
+        }
 
     def summary(self, email):
         user = self.account(email)
         try:
             prices()
-            _ = self.gateway
+            _ = self.gateway.livemode
             configured = True
         except BillingError:
             configured = False

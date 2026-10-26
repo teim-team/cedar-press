@@ -11,10 +11,10 @@ from zoneinfo import ZoneInfo
 import stripe
 
 from cedar_press import db
-from cedar_press.billing_policy import AMOUNTS
-from cedar_press.billing_services import create_billing_services
-from cedar_press.billing_support import application_url
-from cedar_press.stripe_gateway import StripeGateway, plain
+from cedar_press.billing.dependencies import create_billing_services
+from cedar_press.billing.policy import AMOUNTS
+from cedar_press.billing.stripe_gateway import StripeGateway, plain
+from cedar_press.billing.support import application_url
 
 
 def setup(gateway, code):

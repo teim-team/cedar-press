@@ -98,7 +98,7 @@ export default function CedarPressSubscribe() {
         <div className="cp-confirm__next"><span className="cp-confirm__step" aria-hidden="true">{existingAccount ? "✓" : "1"}</span><div><h2>{existingAccount ? "Pick up your research" : "Create your account"}</h2><p>{existingAccount ? "Sign in with your existing email and password to access your membership." : "Open the email to confirm your address and choose a password. Then you’re ready to start your research."}</p></div></div>
         {existingAccount ? <Link className="cp-btn cp-btn--primary cp-btn--wide" to="/login">Sign in to Cedar Press <span aria-hidden="true">→</span></Link> : null}
         <div className="cp-confirm__help"><p>Can’t find the email? Check your spam folder.</p><button className="cp-btn cp-btn--quiet" type="button" disabled={pending} onClick={resendEmail}>{pending ? "Sending…" : "Resend email"}</button></div>
-        {resent ? <p className="cp-confirm__resent" role="status">Email sent. Please use the newest link.</p> : null}
+        {resent ? <p className="cp-confirm__resent" role="status">Email sent. Check your inbox for your account setup link.</p> : null}
         {!existingAccount ? <p className="cp-confirm__signin">Already set your password? <Link to="/login">Sign in</Link></p> : null}
       </> : null}
       {error ? <p role="alert" className="cp-gate__error">{error.message}</p> : null}

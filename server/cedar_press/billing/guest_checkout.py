@@ -6,9 +6,10 @@ import datetime as dt
 import hashlib
 import re
 
-from cedar_press import db, ratelimit, subscribers
+from cedar_press import db, ratelimit
 from cedar_press.account_email import AccountEmailSender
-from cedar_press.billing_policy import (
+from cedar_press.billing.contracts import BillingGateway
+from cedar_press.billing.policy import (
     BillingError,
     cohort_at,
     price_for,
@@ -16,8 +17,8 @@ from cedar_press.billing_policy import (
     unavailable,
     validate_price,
 )
-from cedar_press.billing_support import application_url, utc_now, verify_customer
-from cedar_press.stripe_gateway import StripeGateway, stripe_url
+from cedar_press.billing.stripe_gateway import StripeGateway, stripe_url
+from cedar_press.billing.support import application_url, utc_now, verify_customer
 
 COOKIE = "cedar_press_guest_checkout"
 
@@ -27,21 +28,21 @@ def digest(secret):
 
 
 class GuestCheckoutService:
-    """Own the guest purchase and setup-email lifecycle."""
+    """Own guest purchase reservations and paid identity provisioning."""
 
     def __init__(
         self,
         *,
-        gateway=None,
+        gateway: BillingGateway | None = None,
         database=db,
         clock=None,
         app_url=None,
         email_sender=None,
-        accounts=subscribers,
+        setup_service=None,
         limiter=ratelimit,
     ):
         self.email_sender = email_sender or AccountEmailSender()
-        self.accounts = accounts
+        self.setup = setup_service
         self.limiter = limiter
         self._gateway = gateway
         self.db = database
@@ -142,7 +143,7 @@ class GuestCheckoutService:
         )
         return cur.fetchone()
 
-    def activate(self, cur, customer):
+    def prepare_activation(self, cur, customer):
         cur.execute(
             "SELECT * FROM cedar_press_guest_checkouts WHERE customer_id=%s FOR UPDATE", (customer,)
         )
@@ -175,6 +176,12 @@ class GuestCheckoutService:
         verify_customer(subscription, customer)
         if subscription["status"] != "active":
             return None
+        return attempt, session
+
+    def activate(self, cur, customer, prepared):
+        if not prepared:
+            return None
+        attempt, session = prepared
         address = ((session.get("customer_details") or {}).get("email") or "").strip().lower()
         if len(address) > 254 or not re.fullmatch(r"[^\s@]+@[^\s@]+\.[^\s@]+", address):
             raise BillingError("BILLING_DATA_INVALID", "Checkout email could not be verified.", 502)
@@ -212,41 +219,6 @@ class GuestCheckoutService:
             (address, customer, user["id"], attempt["id"]),
         )
         return user
-
-    def send_claim(self, customer):
-        with self.db.pool().connection() as conn, conn.cursor() as cur:
-            cur.execute(
-                """
-                SELECT * FROM cedar_press_guest_checkouts WHERE customer_id=%s AND
-                status='complete' AND claim_sent_at IS NULL FOR UPDATE
-                """,
-                (customer,),
-            )
-            attempt = cur.fetchone()
-            if not attempt:
-                return
-            found = self.accounts.find(attempt["email"])
-            if found and found.password_hash:
-                self.email_sender.send_link(
-                    attempt["email"], self.app_url() + "/login", sign_in=True
-                )
-                cur.execute(
-                    "UPDATE cedar_press_guest_checkouts SET claim_sent_at=now() WHERE id=%s",
-                    (attempt["id"],),
-                )
-                return
-            token = self.accounts.issue_reset(attempt["email"])
-            if not token:
-                raise RuntimeError("Paid account is unavailable")
-            self.email_sender.send_link(
-                attempt["email"], self.app_url() + "/create-account#token=" + token
-            )
-            cur.execute(
-                """
-                UPDATE cedar_press_guest_checkouts SET claim_sent_at=now() WHERE id=%s
-                """,
-                (attempt["id"],),
-            )
 
     def status(self, secret):
         if not self.db.configured():
@@ -290,34 +262,11 @@ class GuestCheckoutService:
             raise BillingError(
                 "EMAIL_RATE_LIMIT", "Please wait before requesting another email.", 429
             )
-        self.db.execute(
-            "UPDATE cedar_press_guest_checkouts SET claim_sent_at=NULL WHERE id=%s", (row["id"],)
-        )
+        self.setup.request_resend(row["id"])
         try:
-            self.send_claim(row["customer_id"])
+            self.setup.send_claim(row["customer_id"])
         except (OSError, RuntimeError):
             raise BillingError(
                 "EMAIL_UNAVAILABLE", "We couldn’t send the email. Please try again shortly.", 503
             ) from None
         return self.status(secret)
-
-    def account_details(self, token):
-        if not self.db.configured():
-            raise unavailable()
-        row = self.db.one(
-            """
-            SELECT s.email FROM cedar_press_password_resets r
-            JOIN cedar_press_subscribers s ON s.email=r.email
-            JOIN cedar_press_guest_checkouts g ON g.user_id=s.id
-            WHERE r.token_hash=%s AND r.used_at IS NULL AND r.expires_at>now()
-            AND s.password_hash IS NULL AND g.status='complete'
-        """,
-            (digest(token),),
-        )
-        if not row:
-            raise BillingError(
-                "ACCOUNT_LINK_INVALID",
-                "This account link expired or was already used. "
-                "Request a password link to sign in.",
-            )
-        return row

@@ -116,7 +116,7 @@ Sign-in and activation retain the existing optional teim-app account linking.
 `make db-test` also rehearses this migration and its failure rollback. The
 subscriber-storage CI job builds `server/Dockerfile.test` and runs that same
 command, refusing skipped contracts. Production uses `server/Dockerfile`.
-Stripe billing uses migration 005 and `cedar_press.billing_admin` for sandbox
+Stripe billing uses migration 005 and `cedar_press.billing.admin` for sandbox
 setup and reconciliation. `docker compose --profile app up -d api` runs the local
 API; the optional `billing` profile forwards sandbox webhooks through Stripe CLI.
 See `server/DATABASE.md` for setup. Billing uses confirmed invoice coverage; an
@@ -131,8 +131,13 @@ production uses configured SMTP with STARTTLS. The confirmation page supports
 separately named Stripe products; older price IDs remain recognized through
 `CEDAR_PRESS_STRIPE_LEGACY_PRICES`.
 Billing uses `BillingService`, `GuestCheckoutService` and `BillingReconciler`,
-with `StripeGateway` and `AccountEmailSender` for external calls.
-FastAPI dependencies compose the services; tests inject their dependencies.
+with `StripeGateway` for Stripe calls. Shared account email delivery lives in
+`cedar_press.account_email`, outside the billing package.
+FastAPI dependencies share one lazy gateway; `StripeGateway(client=...)` accepts
+an injected SDK client. `AccountSetupService` handles activation and leased email
+delivery (migration 009), outside SQL transactions. Webhooks run off the event
+loop and refresh affected objects; the repair CLI reconciles full history.
+Billing management targets an owned subscription, including repeat purchases.
 
 Docker Engine or Docker Desktop with Compose v2 is required for the database
 targets. Verify the Docker prerequisite before running them:

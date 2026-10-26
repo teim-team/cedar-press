@@ -78,9 +78,9 @@ from cedar_press import (
     subscribers,
 )
 from cedar_press.account_email import AccountEmailSender
-from cedar_press.billing_policy import BillingError
-from cedar_press.billing_routes import router as billing_router
-from cedar_press.billing_services import BillingServices, get_billing_services
+from cedar_press.billing.dependencies import BillingServices, get_billing_services
+from cedar_press.billing.policy import BillingError
+from cedar_press.billing.routes import router as billing_router
 from cedar_press.session import (
     Session,
     account_exists,
@@ -567,7 +567,7 @@ def check_account_setup(
     _require_auth_origin(request, "account setup")
     _guard(request, "account-setup-check", ratelimit.LOGIN_ATTEMPTS)
     try:
-        return services.guest.account_details(body.token)
+        return services.setup.account_details(body.token)
     except BillingError as error:
         raise HTTPException(
             error.status, detail={"code": error.code, "message": error.message}
@@ -575,15 +575,18 @@ def check_account_setup(
 
 
 @app.post("/auth/account-setup/confirm")
-def finish_account_setup(body: AccountSetup, request: Request, response: Response):
+def finish_account_setup(
+    body: AccountSetup,
+    request: Request,
+    response: Response,
+    services: BillingServices = Depends(get_billing_services),
+):
     _require_auth_origin(request, "account setup")
     _guard(request, "account-setup", ratelimit.LOGIN_ATTEMPTS)
     _require_password_length(body.new_password)
     if not body.name.strip():
         raise HTTPException(400, detail="Enter your name.")
-    made = subscribers.redeem_reset(
-        body.token, body.new_password, account_setup=True, display_name=body.name.strip()
-    )
+    made = services.setup.confirm(body.token, body.new_password, body.name.strip())
     if not made:
         raise HTTPException(
             400,

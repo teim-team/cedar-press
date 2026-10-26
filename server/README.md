@@ -112,9 +112,11 @@ Annual Stripe Checkout, billing portal and signed webhook reconciliation are imp
 Guest checkout starts at `/subscribe`; paid customers create an account through
 a single-use email link. Stripe collects the email and discount code. Existing emails keep their
 credentials and sign in normally.
-Billing uses `BillingService`, `GuestCheckoutService` and `BillingReconciler`,
-with `StripeGateway` and `AccountEmailSender` for external calls.
-FastAPI dependencies compose the services; tests inject their dependencies.
+The `cedar_press.billing` package uses `BillingService`, `GuestCheckoutService` and `BillingReconciler`,
+with `StripeGateway` for Stripe calls. Shared account email delivery lives in
+`cedar_press.account_email`, outside the billing package.
+Dependencies share one lazy gateway; tests can inject `StripeGateway(client=...)`.
+`AccountSetupService` handles activation and retryable email delivery.
 Google sign-in remains separate work. See
 [DATABASE.md](DATABASE.md) for the [schema ERD](DATABASE.md#schema-erd) and local Docker setup.
 

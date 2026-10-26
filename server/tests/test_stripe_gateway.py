@@ -13,9 +13,9 @@ from urllib.parse import parse_qs, urlsplit
 
 import stripe
 
-from cedar_press.billing_admin import setup
-from cedar_press.billing_policy import BillingError
-from cedar_press.stripe_gateway import StripeGateway
+from cedar_press.billing.admin import setup
+from cedar_press.billing.policy import BillingError
+from cedar_press.billing.stripe_gateway import API_VERSION, StripeGateway
 from tests.test_billing import PRICE_MAP, SETTINGS, price_data
 
 
@@ -191,8 +191,22 @@ class TestStripeGateway(unittest.TestCase):
         patch.start()
         self.addCleanup(patch.stop)
         self.transport = Transport()
-        self.gateway = StripeGateway()
-        self.gateway.client = stripe.StripeClient("sk_test_synthetic", http_client=self.transport)
+        self.gateway = StripeGateway(
+            client=stripe.StripeClient(
+                "sk_test_synthetic", stripe_version=API_VERSION, http_client=self.transport
+            )
+        )
+
+    def test_injected_client_does_not_require_credentials_or_construct_a_real_client(self):
+        client = mock.Mock()
+        client.v1.prices.retrieve.return_value = {"id": "price_stub", "currency": "usd"}
+        with (
+            mock.patch.dict(os.environ, {"CEDAR_PRESS_STRIPE_SECRET_KEY": ""}),
+            mock.patch("stripe.StripeClient", side_effect=AssertionError("unexpected real client")),
+        ):
+            gateway = StripeGateway(client=client)
+            self.assertEqual(gateway.price("price_stub"), {"id": "price_stub", "currency": "usd"})
+        client.v1.prices.retrieve.assert_called_once_with("price_stub")
 
     def test_sdk_resources_are_converted_and_pagination_is_followed(self):
         self.assertEqual(self.gateway.price("price_fixture")["currency"], "usd")

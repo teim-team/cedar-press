@@ -42,12 +42,12 @@ export function BillingCard() {
     };
   }, [user?.email, load, refreshSession]);
 
-  const begin = async (tier) => {
+  const begin = async (tier, subscriptionId) => {
     setBusy(true);
     setError("");
     try {
-      const result = tier === "change" ? await changeBillingPlan()
-        : tier ? await startBillingCheckout({ tier, discountCode: code }) : await openBillingPortal();
+      const result = tier === "change" ? await changeBillingPlan(subscriptionId)
+        : tier ? await startBillingCheckout({ tier, discountCode: code }) : await openBillingPortal(subscriptionId);
       window.location.assign(result.url);
     } catch (failure) {
       setError(failure.message);
@@ -61,10 +61,6 @@ export function BillingCard() {
       {error ? <p role="alert" className="cp-gate__error">{error}</p> : null}
       {!billing && !error ? <p role="status">Loading billing…</p> : null}
       {billing && !billing.available ? <p>Online billing is temporarily unavailable.</p> : null}
-      {current ? (
-        <p>{name(current.tier)}: {current.status.replaceAll("_", " ")}.{current.cancel_at_period_end && current.period_end
-          ? ` Access is scheduled to end ${new Date(current.period_end).toLocaleDateString()}.` : ""}</p>
-      ) : null}
       {billing?.available && !current ? (
         <>
           <p>Choose annual access, paid upfront and renewed automatically.</p>
@@ -82,12 +78,19 @@ export function BillingCard() {
           <p className="cp-set__fine">{billing.cohort === "early_access" ? "The Summit code takes $100 off the first year. " : ""}Your underlying annual rate stays the same while your subscription remains active.</p>
         </>
       ) : null}
-      {billing?.available && current?.status === "active" && !current.cancel_at_period_end ? (
-        <button className="gv-btn gv-btn--primary" disabled={busy} onClick={() => begin("change")}>
-          {current.tier === "press" ? "Upgrade to Cedar Press+" : "Switch to Cedar Press at renewal"}
-        </button>
-      ) : null}
-      {billing?.available && billing.hasCustomer ? (
+      {billing?.subscriptions.map((subscription, index) => (
+        <div key={subscription.id ?? index} role="group" aria-label={`${name(subscription.tier)} subscription ${index + 1}`}>
+          <p>{name(subscription.tier)}: {subscription.status.replaceAll("_", " ")}.{subscription.cancel_at_period_end && subscription.period_end
+            ? ` Access is scheduled to end ${new Date(subscription.period_end).toLocaleDateString()}.` : ""}</p>
+          {billing.available && subscription.status === "active" && !subscription.cancel_at_period_end ? (
+            <button className="gv-btn gv-btn--primary" disabled={busy} onClick={() => begin("change", subscription.id)}>
+              {subscription.tier === "press" ? "Upgrade to Cedar Press+" : "Switch to Cedar Press at renewal"}
+            </button>
+          ) : null}
+          {billing.available ? <button className="gv-btn gv-btn--quiet" disabled={busy} onClick={() => begin(null, subscription.id)}>Manage billing and plan</button> : null}
+        </div>
+      ))}
+      {billing?.available && billing.hasCustomer && !billing.subscriptions.length ? (
         <button className="gv-btn gv-btn--quiet" disabled={busy} onClick={() => begin()}>Manage billing and plan</button>
       ) : null}
       <button className="gv-btn gv-btn--quiet" disabled={busy} onClick={() => { load(); refreshSession(); }}>Refresh billing</button>

@@ -1,6 +1,6 @@
 # The database
 
-See the [schema ERD](#schema-erd) for the tables defined by migrations 001–008.
+See the [schema ERD](#schema-erd) for the tables defined by migrations 001–009.
 
 ## Local Docker database
 
@@ -101,7 +101,7 @@ as a local alias for `CEDAR_PRESS_STRIPE_SECRET_KEY`.
 
 ```sh
 docker compose build tools
-docker compose run --rm tools python -m cedar_press.billing_admin setup
+docker compose run --rm tools python -m cedar_press.billing.admin setup
 ```
 
 Save the printed price, portal and coupon IDs in `.env`. Obtain the listener's
@@ -124,7 +124,10 @@ Mailpit with plaintext SMTP confined to the Docker network. Production requires
 STARTTLS and the chosen email provider's settings. Guest purchases refuse when
 email delivery is unconfigured. Password recovery uses the same sender.
 The confirmation page can resend its own paid account email, limited to three
-requests per 15 minutes. Only hashed browser and email tokens are stored; neither the browser's Checkout
+requests per 15 minutes. Migration 009 adds leased email delivery and hashed setup links.
+SMTP runs outside transactions; failed resends preserve earlier unexpired links.
+Webhook retries or the reconciliation command retry pending deliveries.
+Only hashed browser and email tokens are stored; neither the browser's Checkout
 return nor its reservation cookie can establish account ownership.
 
 The setup command is repeatable and requires `--live` for live-account setup.
@@ -140,7 +143,10 @@ Upgrades invoice prorations immediately; downgrades
 and cancellation take effect at renewal. Existing subscriptions retain their
 cohort. Stripe calculates prorations.
 
-Webhook events are deduplicated and reconciled from current Stripe objects.
+Webhook events are deduplicated and reconcile affected Stripe objects off the API
+event loop. Provider reads use a customer session lock without an open SQL transaction;
+the repair command performs full-history reconciliation. Each subscription has its
+own account-management action, with ownership checked on the server.
 The inbox stores IDs, attempts and processing status, without raw payloads.
 Invoices, payments and refunds are current snapshots with provider IDs;
 Stripe remains the financial system of record. Full refunds remove that
@@ -150,7 +156,7 @@ the browser's Checkout return URL.
 Retry reconciliation after provider failures with:
 
 ```sh
-docker compose run --rm tools python -m cedar_press.billing_admin reconcile
+docker compose run --rm tools python -m cedar_press.billing.admin reconcile
 ```
 
 For production, register `/billing/webhook` with API version
@@ -208,6 +214,8 @@ applied.
 | ----------------------------- | ------------------------------------------------------- |
 | `cedar_press_subscribers`     | who holds a subscription, on which tier, and their hash  |
 | `cedar_press_codes`           | codes Tribal Business News issued, and when each was spent |
+| `cedar_press_account_setup_links` | hashed, expiring setup links bound to account and email |
+| `cedar_press_account_email_deliveries` | delivery attempts and leases per paid checkout |
 | `cedar_press_password_resets` | hashed, single-use password reset tokens and their expiry |
 | `cedar_press_priorities`      | the editorial catalogue, re-seeded from the owner's file |
 | `cedar_press_ledger`          | append-only Cedar Points: why each point came or went    |
@@ -276,7 +284,7 @@ the month is already earned — and still reports 2.
 
 ## Schema ERD
 
-Current PostgreSQL schema after migrations 001–008. `cedar_press_subscribers`
+Current PostgreSQL schema after migrations 001–009. `cedar_press_subscribers`
 is the sole account table. Connections show database foreign keys only; dotted
 lines are non-identifying relationships. `users` is an optional external teim-app
 table, not a second Cedar Press user table. Its foreign key is installed only
@@ -292,6 +300,8 @@ erDiagram
     cedar_press_subscribers ||..o{ cedar_press_payments : user_id
     cedar_press_subscribers ||..o{ cedar_press_checkout_attempts : user_id
     cedar_press_subscribers |o..o{ cedar_press_guest_checkouts : "user_id after payment"
+    cedar_press_subscribers ||..o{ cedar_press_account_setup_links : user_id
+    cedar_press_guest_checkouts ||..o| cedar_press_account_email_deliveries : checkout_id
     cedar_press_subscriptions ||..o{ cedar_press_invoices : subscription_id
     cedar_press_payments ||..o{ cedar_press_refunds : payment_id
     users |o..o| cedar_press_subscribers : "optional platform user_id"
@@ -325,6 +335,22 @@ erDiagram
         timestamptz starts_at
         timestamptz ends_at "Nullable"
         timestamptz revoked_at "Nullable"
+    }
+    cedar_press_account_setup_links {
+        text token_hash PK
+        uuid user_id FK
+        text email
+        timestamptz expires_at
+        timestamptz used_at
+        timestamptz created_at
+    }
+    cedar_press_account_email_deliveries {
+        uuid checkout_id PK,FK
+        text status
+        uuid lease_id
+        timestamptz lease_until
+        integer attempts
+        timestamptz updated_at
     }
     cedar_press_subscriptions {
         text id PK "Stripe subscription"

@@ -11,14 +11,21 @@ import stripe
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
+from starlette.concurrency import run_in_threadpool
 
 from cedar_press import ratelimit
-from cedar_press.billing_policy import BillingError
-from cedar_press.billing_services import BillingServices, get_billing_services
-from cedar_press.billing_support import utc_now
-from cedar_press.guest_checkout import COOKIE
+from cedar_press.billing.contracts import (
+    BillingResponse,
+    GuestStatusResponse,
+    PlanResponse,
+    RedirectResponse,
+)
+from cedar_press.billing.dependencies import BillingServices, get_billing_services
+from cedar_press.billing.guest_checkout import COOKIE
+from cedar_press.billing.policy import BillingError
+from cedar_press.billing.stripe_gateway import API_VERSION
+from cedar_press.billing.support import utc_now
 from cedar_press.session import Session, current_session
-from cedar_press.stripe_gateway import API_VERSION
 
 router = APIRouter()
 
@@ -28,13 +35,17 @@ class CheckoutRequest(BaseModel):
     discount_code: str = Field(default="", max_length=64)
 
 
+class SubscriptionRequest(BaseModel):
+    subscription_id: str | None = Field(default=None, min_length=1, max_length=255)
+
+
 class GuestCheckoutRequest(BaseModel):
     tier: Literal["press", "press_pro"]
 
 
-@router.get("/billing/plans")
+@router.get("/billing/plans", response_model=PlanResponse)
 def public_plans():
-    from cedar_press.billing_policy import AMOUNTS, cohort_at
+    from cedar_press.billing.policy import AMOUNTS, cohort_at
 
     cohort = cohort_at(utc_now())
     return {"cohort": cohort, "annualPrices": AMOUNTS[cohort]}
@@ -68,7 +79,7 @@ def guest_start(
     return response
 
 
-@router.get("/billing/guest/status")
+@router.get("/billing/guest/status", response_model=GuestStatusResponse)
 def guest_status(
     request: Request, response: Response, services: BillingServices = Depends(get_billing_services)
 ):
@@ -76,7 +87,7 @@ def guest_status(
     return call(services.guest.status, request.cookies.get(COOKIE, ""))
 
 
-@router.post("/billing/guest/resend")
+@router.post("/billing/guest/resend", response_model=GuestStatusResponse)
 def resend_guest_email(
     request: Request, response: Response, services: BillingServices = Depends(get_billing_services)
 ):
@@ -120,14 +131,17 @@ def call(function, *args):
         ) from None
 
 
-@router.get("/billing")
+@router.get("/billing", response_model=BillingResponse)
 def read_billing(
-    session: Session = Depends(account), services: BillingServices = Depends(get_billing_services)
+    response: Response,
+    session: Session = Depends(account),
+    services: BillingServices = Depends(get_billing_services),
 ):
+    response.headers["Cache-Control"] = "private, no-store"
     return call(services.billing.summary, session.email)
 
 
-@router.post("/billing/checkout")
+@router.post("/billing/checkout", response_model=RedirectResponse)
 def checkout(
     body: CheckoutRequest,
     request: Request,
@@ -138,24 +152,30 @@ def checkout(
     return call(services.billing.checkout, session.email, body.tier, body.discount_code.strip())
 
 
-@router.post("/billing/portal")
+@router.post("/billing/portal", response_model=RedirectResponse)
 def portal(
     request: Request,
+    body: SubscriptionRequest | None = None,
     session: Session = Depends(account),
     services: BillingServices = Depends(get_billing_services),
 ):
     guard(request)
-    return call(services.billing.portal, session.email)
+    return call(
+        services.billing.portal, session.email, False, body.subscription_id if body else None
+    )
 
 
-@router.post("/billing/change-plan")
+@router.post("/billing/change-plan", response_model=RedirectResponse)
 def change_plan(
     request: Request,
+    body: SubscriptionRequest | None = None,
     session: Session = Depends(account),
     services: BillingServices = Depends(get_billing_services),
 ):
     guard(request)
-    return call(services.billing.portal, session.email, True)
+    return call(
+        services.billing.portal, session.email, True, body.subscription_id if body else None
+    )
 
 
 @router.post("/billing/webhook")
@@ -185,5 +205,5 @@ async def webhook(request: Request, services: BillingServices = Depends(get_bill
             raise ValueError("Missing object ID")
     except (ValueError, KeyError, TypeError, stripe.SignatureVerificationError):
         raise HTTPException(400, detail="Invalid billing webhook.") from None
-    call(services.reconciler.process_event, parsed)
+    await run_in_threadpool(call, services.reconciler.process_event, parsed)
     return {"received": True}

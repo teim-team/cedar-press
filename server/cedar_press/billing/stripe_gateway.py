@@ -8,7 +8,7 @@ from urllib.parse import urlsplit
 
 import stripe
 
-from cedar_press.billing_policy import (
+from cedar_press.billing.policy import (
     BillingError,
     identify_price,
     price_for,
@@ -37,12 +37,17 @@ def stripe_url(value: str) -> str:
 
 
 class StripeGateway:
-    def __init__(self):
+    def __init__(self, client: stripe.StripeClient | None = None):
         mode = os.environ.get("CEDAR_PRESS_STRIPE_MODE", "test")
-        key = os.environ.get("CEDAR_PRESS_STRIPE_SECRET_KEY", "")
-        if mode not in {"test", "live"} or not key.startswith((f"sk_{mode}_", f"rk_{mode}_")):
+        if mode not in {"test", "live"}:
             raise unavailable()
         self.livemode = mode == "live"
+        if client is not None:
+            self.client = client
+            return
+        key = os.environ.get("CEDAR_PRESS_STRIPE_SECRET_KEY", "")
+        if not key.startswith((f"sk_{mode}_", f"rk_{mode}_")):
+            raise unavailable()
         self.client = stripe.StripeClient(
             key,
             stripe_version=API_VERSION,
@@ -188,12 +193,13 @@ class StripeGateway:
             (s for s in sessions if s.get("metadata", {}).get("cedar_press_guest_id")), None
         )
 
-    def portal(self, customer, cohort, app_url, change_plan=False):
-        active = [
-            s
-            for s in self.subscriptions(customer)
-            if s["status"] not in {"canceled", "incomplete_expired"}
-        ]
+    def portal(self, customer, cohort, app_url, change_plan=False, subscription_id=None):
+        subscriptions = self.subscriptions(customer)
+        if subscription_id:
+            subscriptions = [s for s in subscriptions if s["id"] == subscription_id]
+            if not subscriptions:
+                raise BillingError("SUBSCRIPTION_MISSING", "That subscription was not found.", 404)
+        active = [s for s in subscriptions if s["status"] not in {"canceled", "incomplete_expired"}]
         if len(active) > 1:
             raise unavailable()
         current_tier = "press"
@@ -265,3 +271,15 @@ class StripeGateway:
                 },
             }
         return stripe_url(self.client.v1.billing_portal.sessions.create(params).url)
+
+
+class LazyStripeGateway:
+    """One request-scoped client, initialized only when billing is used."""
+
+    def __init__(self):
+        self._gateway = None
+
+    def __getattr__(self, name):
+        if self._gateway is None:
+            self._gateway = StripeGateway()
+        return getattr(self._gateway, name)

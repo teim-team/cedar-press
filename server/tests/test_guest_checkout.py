@@ -1,5 +1,8 @@
 """Guest purchase boundaries: existing accounts, paid provisioning and mailbox proof."""
 
+import concurrent.futures
+import os
+import threading
 import unittest
 from unittest import mock
 from urllib.parse import parse_qs, urlsplit
@@ -9,8 +12,8 @@ from fastapi.testclient import TestClient
 
 from cedar_press import accounts, db, ratelimit, subscribers
 from cedar_press.account_email import AccountEmailSender
-from cedar_press.billing_policy import BillingError
-from cedar_press.billing_services import create_billing_services
+from cedar_press.billing.dependencies import create_billing_services
+from cedar_press.billing.policy import BillingError
 from tests import test_billing as fixtures
 from tests.test_billing import PG, FakeGateway
 
@@ -108,10 +111,10 @@ class TestGuestCheckout(unittest.TestCase):
         self.assertEqual(target, EMAIL)
         token = parse_qs(urlsplit(link).fragment)["token"][0]
         self.assertNotEqual(
-            db.one("SELECT token_hash FROM cedar_press_password_resets")["token_hash"], token
+            db.one("SELECT token_hash FROM cedar_press_account_setup_links")["token_hash"], token
         )
-        self.assertIsNotNone(subscribers.redeem_reset(token, "new-password-long"))
-        self.assertIsNone(subscribers.redeem_reset(token, "another-password"))
+        self.assertIsNotNone(self.services.setup.confirm(token, "new-password-long", "Reader"))
+        self.assertIsNone(self.services.setup.confirm(token, "another-password", "Reader"))
         self.reconciler.process_event(event)
         self.mail.assert_called_once()
 
@@ -174,13 +177,101 @@ class TestGuestCheckout(unittest.TestCase):
         result = self.service.resend(SECRET)
         self.assertTrue(result["emailSent"])
         self.assertEqual(self.mail.call_count, 2)
-        self.assertIsNone(subscribers.redeem_reset(first_token, "a-long-new-password"))
+        self.assertEqual(self.services.setup.account_details(first_token)["email"], EMAIL)
         self.service.resend(SECRET)
         self.service.resend(SECRET)
         with self.assertRaises(BillingError) as caught:
             self.service.resend(SECRET)
         self.assertEqual(caught.exception.status, 429)
         self.assertEqual(self.mail.call_count, 4)
+
+    def test_failed_resend_preserves_previously_delivered_link(self):
+        ratelimit.reset_for_tests()
+        self.addCleanup(ratelimit.reset_for_tests)
+        self.start()
+        self.reconciler.process_event(self.complete())
+        token = parse_qs(urlsplit(self.mail.call_args.args[1]).fragment)["token"][0]
+        self.mail.side_effect = OSError("synthetic SMTP failure")
+        with self.assertRaises(BillingError):
+            self.service.resend(SECRET)
+        self.assertEqual(self.services.setup.account_details(token)["email"], EMAIL)
+        self.assertTrue(self.service.status(SECRET)["emailSent"])
+        self.assertEqual(
+            db.one("SELECT status FROM cedar_press_account_email_deliveries")["status"], "pending"
+        )
+        self.mail.side_effect = None
+        self.services.setup.send_claim(self.customer)
+        self.assertEqual(
+            db.one("SELECT status FROM cedar_press_account_email_deliveries")["status"], "sent"
+        )
+        made = self.services.setup.confirm(token, "new-password-long", "Reader")
+        self.assertEqual(made.email, EMAIL)
+        latest = parse_qs(urlsplit(self.mail.call_args.args[1]).fragment)["token"][0]
+        self.assertIsNone(self.services.setup.confirm(latest, "different-password-long", "Other"))
+
+    def test_delivery_releases_pool_connection_and_concurrent_retry_uses_lease(self):
+        self.start()
+        event = self.complete()
+        db.reset_for_tests()
+        with mock.patch.dict(os.environ, {"CEDAR_PRESS_DB_POOL": "1"}):
+            entered, release = threading.Event(), threading.Event()
+
+            def slow_smtp(*args, **kwargs):
+                # This borrows the only connection. It would time out if the
+                # sender still held its transaction or a pool connection.
+                self.assertEqual(db.one("SELECT 1 AS n")["n"], 1)
+                entered.set()
+                if not release.wait(5):
+                    raise AssertionError("SMTP test release timed out")
+
+            self.mail.side_effect = slow_smtp
+            try:
+                with concurrent.futures.ThreadPoolExecutor(max_workers=2) as pool:
+                    first = pool.submit(self.reconciler.process_event, event)
+                    try:
+                        self.assertTrue(entered.wait(5))
+                        duplicate = pool.submit(self.reconciler.process_event, event)
+                        duplicate.result(timeout=3)
+                        self.assertEqual(self.mail.call_count, 1)
+                    finally:
+                        release.set()
+                    first.result(timeout=3)
+            finally:
+                db.reset_for_tests()
+        self.assertTrue(self.service.status(SECRET)["emailSent"])
+
+    def test_setup_link_does_not_follow_an_email_reassignment(self):
+        self.start()
+        self.reconciler.process_event(self.complete())
+        token = parse_qs(urlsplit(self.mail.call_args.args[1]).fragment)["token"][0]
+        db.execute(
+            "UPDATE cedar_press_account_setup_links SET email='other@example.invalid'",
+        )
+        with self.assertRaises(BillingError):
+            self.services.setup.account_details(token)
+        self.assertIsNone(self.services.setup.confirm(token, "new-password-long", "Reader"))
+
+    def test_legacy_setup_links_still_work_after_delivery_migration(self):
+        self.start()
+        self.reconciler.process_event(self.complete())
+        token = subscribers.issue_reset(EMAIL)
+        self.assertEqual(self.services.setup.account_details(token)["email"], EMAIL)
+        self.assertEqual(
+            self.services.setup.confirm(token, "legacy-password-long", "Reader").email, EMAIL
+        )
+        self.assertIsNone(self.services.setup.confirm(token, "another-password-long", "Reader"))
+
+    def test_expired_delivery_lease_can_be_recovered(self):
+        self.start()
+        self.reconciler.process_event(self.complete())
+        db.execute("""UPDATE cedar_press_account_email_deliveries SET status='sending',
+            lease_until=now()-interval '1 second'""")
+        self.services.setup.send_claim(self.customer)
+        self.assertEqual(self.mail.call_count, 2)
+        self.assertEqual(
+            db.one("SELECT status,attempts FROM cedar_press_account_email_deliveries"),
+            {"status": "sent", "attempts": 2},
+        )
 
     def test_retries_reuse_reservation_and_other_browsers_cannot_read_it(self):
         self.assertEqual(self.start(), self.start())
@@ -241,7 +332,7 @@ class TestGuestCheckout(unittest.TestCase):
             1,
         )
         token = parse_qs(urlsplit(self.mail.call_args.args[1]).fragment)["token"][0]
-        self.assertEqual(self.service.account_details(token)["email"], EMAIL)
+        self.assertEqual(self.services.setup.account_details(token)["email"], EMAIL)
 
     def test_wrong_checkout_metadata_cannot_provision_an_identity(self):
         self.start()
