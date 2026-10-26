@@ -82,7 +82,7 @@ resource "aws_vpc_security_group_ingress_rule" "api_from_cloudfront" {
   ip_protocol                  = "tcp"
   from_port                    = 8000
   to_port                      = 8000
-  description                  = "API from the dev site's CloudFront"
+  description                  = "API from the dev site CloudFront"
 }
 
 resource "aws_cloudfront_function" "dev_site" {
