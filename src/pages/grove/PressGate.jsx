@@ -17,13 +17,13 @@
 //
 // The page below the hero changes material the way the marketing site
 // does: a navy passage with the licensed photograph and the four pillars,
-// then the ways in on white, then a short foot. "Early access" and "Log in"
+// then the ways in on white, then a short foot. "Early access" and "Sign in"
 // sit top right, where a visitor looks for them, and each opens a small
 // panel under the bar; the page underneath stays the page.
 //
 // Tribal Business News owns payment, renewals, upgrades and code issuance.
 // There is deliberately no "create account" here: an account exists because
-// an entitlement does. "Log in" goes to the login page (CedarPressLogin), which
+// an entitlement does. "Sign in" goes to the login page (CedarPressLogin), which
 // holds the sign-in and the access-code activation.
 
 import { useEffect, useRef, useState } from "react";
@@ -180,6 +180,7 @@ function Door({ user }) {
   // The workspace's login page on the public site, this origin's own anywhere
   // else (a dev server, a preview host).
   const loginHref = workspaceSignInHref(window.location) ?? PRESS_LOGIN_PATH;
+  const subscribeHref = new URL("/subscribe", new URL(loginHref, window.location.href)).href;
   // The source band moves until a reader stops it (WCAG 2.2.2): the button
   // beside its count pauses and resumes it, and reduced motion stills it.
 
@@ -330,21 +331,17 @@ function Door({ user }) {
               >
                 Early access
               </button>
-              <a id="cp-tab-signin" className="cp-btn cp-btn--primary" href={loginHref}>Log in</a>
+              <a id="cp-tab-signin" className="cp-btn cp-btn--primary" href={loginHref}>Sign in</a>
             </div>
           )}
         </div>
 
         {!user && plansOpen ? (
           <div id="cp-panel-plans" role="tabpanel" aria-labelledby="cp-tab-plans" className="cp-door__panel" ref={panelRef}>
-            {/* Enrollment is not open yet (2026-10-06), so this panel asks
-                for early access rather than sending a visitor to buy a
-                general Tribal Business News membership with no Cedar Press
-                plan on it. Log in stays beside it for existing accounts. */}
-            <h2 className="cp-gate__sub">Cedar Press will be available exclusively through Tribal Business News.</h2>
-            <p className="cp-door__panelp">Enrollment is not open yet. Early access is available soon: write to us and we will be in touch.</p>
-            <a className="cp-btn cp-btn--primary cp-btn--wide" href={EARLY_ACCESS_HREF}>
-              {EARLY_ACCESS_LABEL} <span className="cp-btn__arrow" aria-hidden="true">&#8594;</span>
+            <h2 className="cp-gate__sub">Choose your annual Cedar Press plan.</h2>
+            <p className="cp-door__panelp">Pay securely through Stripe, then confirm your email and set your password.</p>
+            <a className="cp-btn cp-btn--primary cp-btn--wide" href={subscribeHref}>
+              Subscribe annually <span className="cp-btn__arrow" aria-hidden="true">&#8594;</span>
             </a>
           </div>
         ) : null}
@@ -384,7 +381,7 @@ function Door({ user }) {
               </a>
               {user ? null : (
                 <a className="cp-btn cp-btn--quiet cp-btn--lg" href={loginHref}>
-                  Log in <span className="cp-btn__arrow" aria-hidden="true">&#8594;</span>
+                  Sign in <span className="cp-btn__arrow" aria-hidden="true">&#8594;</span>
                 </a>
               )}
             </div>
@@ -611,6 +608,7 @@ function Door({ user }) {
         <div className="cp-ways__in">
           <header className="cp-ways__head cp-fade">
             <p className="cp-kicker">Get Cedar Press</p>
+            <a className="cp-btn cp-btn--primary" href={subscribeHref}>Subscribe annually</a>
             <h2 className="cp-ways__title" id="cp-ways-title">
               Available exclusively through <span>Tribal Business News.</span>
             </h2>
@@ -625,7 +623,7 @@ function Door({ user }) {
               </a>
               {user ? null : (
                 <a className="cp-btn cp-btn--quiet cp-btn--lg" href={loginHref}>
-                  Log in <span className="cp-btn__arrow" aria-hidden="true">&#8594;</span>
+                  Sign in <span className="cp-btn__arrow" aria-hidden="true">&#8594;</span>
                 </a>
               )}
             </div>

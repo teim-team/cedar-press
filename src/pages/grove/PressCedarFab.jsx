@@ -332,7 +332,7 @@ export function PressCedarFab({ gated = null, examples = OPEN_EXAMPLES }) {
           your membership includes Cedar Press.{" "}
           {/* Enrollment is not open yet (2026-10-06): early access, never a
               purchase page that sells no Cedar Press plan. */}
-          {item.gate === "unentitled" ? "Enrollment is not open yet, so " : "Log in above, or "}
+          {item.gate === "unentitled" ? "Enrollment is not open yet, so " : "Sign in above, or "}
           <a href={EARLY_ACCESS_HREF}>request early access</a>
           .
         </p>

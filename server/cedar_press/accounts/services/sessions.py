@@ -17,27 +17,19 @@ import json
 import os
 import time
 from base64 import b64decode, urlsafe_b64encode
-from dataclasses import dataclass, field
 from hashlib import sha256
 
 from fastapi import Cookie, HTTPException, Response
 
-from cedar_press import ratelimit, subscribers
+from cedar_press import ratelimit
+from cedar_press.accounts.models import Session
+from cedar_press.accounts.services import subscribers
 
 COOKIE = "cedar_press_session"
 MAX_AGE = 60 * 60 * 24 * 14
+ACCOUNT_TIERS = (*subscribers.TIERS, "free")
 _CLOCK_SKEW = 60
 _SECRET = os.environ.get("CEDAR_PRESS_SECRET") or os.urandom(32).hex()
-
-
-@dataclass(frozen=True)
-class Session:
-    email: str
-    tier: str
-    revision: str = field(default="", compare=False, repr=False)
-
-    def as_payload(self) -> dict[str, object]:
-        return {"email": self.email, "workspace_tier": self.tier}
 
 
 def account_id_for(email: str) -> str:
@@ -104,7 +96,7 @@ def _revision(subscriber: subscribers.Subscriber) -> str:
 
 def _issued_session(email: str) -> Session:
     found = subscribers.find(email)
-    if found is None or found.tier not in subscribers.TIERS:
+    if found is None or found.tier not in ACCOUNT_TIERS:
         raise ValueError("Subscriber is no longer available")
     return Session(found.email, found.tier, _revision(found))
 
@@ -121,7 +113,7 @@ def _lookup(email: str, password: str) -> Session | None:
     current = subscribers.find(found.email)
     if (
         current is None
-        or current.tier not in subscribers.TIERS
+        or current.tier not in ACCOUNT_TIERS
         or current.password_hash != found.password_hash
     ):
         # A later revision change invalidates the issued token normally.
@@ -187,7 +179,7 @@ def _decode(value: str) -> Session | None:
     if issued > now + _CLOCK_SKEW or expires - issued != MAX_AGE or now >= expires:
         return None
     found = subscribers.find(email)
-    if found is None or found.tier not in subscribers.TIERS:
+    if found is None or found.tier not in ACCOUNT_TIERS:
         return None
     if not hmac.compare_digest(_revision(found), revision):
         return None

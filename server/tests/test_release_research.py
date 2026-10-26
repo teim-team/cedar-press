@@ -229,9 +229,9 @@ class ReleaseResearchTest(unittest.TestCase):
     def test_http_rechecks_current_account_including_revocation(self):
         from fastapi.testclient import TestClient
 
-        from cedar_press import subscribers
+        from cedar_press.accounts.services import subscribers
+        from cedar_press.accounts.services.sessions import Session, current_session
         from cedar_press.app import app
-        from cedar_press.session import Session, current_session
 
         target = "/press/collections/foundation-corporate-giving/research"
         params = {"release_id": self.rid, "component": "reviewed_disclosures"}

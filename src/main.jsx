@@ -1,3 +1,5 @@
+import CedarPressCreateAccount from "./pages/grove/CedarPressCreateAccount.jsx";
+import CedarPressSubscribe from "./pages/grove/CedarPressSubscribe.jsx";
 import { StrictMode, Suspense } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router";
@@ -63,6 +65,8 @@ createRoot(document.getElementById("root")).render(
         <Suspense fallback={<PageArriving />}>
         <Routes>
           <Route path={PRESS_PATH} element={<CedarPress />} />
+          <Route path="/create-account" element={<CedarPressCreateAccount />} />
+          <Route path="/subscribe" element={<CedarPressSubscribe />} />
           <Route path={PRESS_LOGIN_PATH} element={<CedarPressLogin />} />
           <Route path={PRESS_ARTICLES_PATH} element={<CedarPressArticles />} />
           <Route path={PRESS_DATA_PATH} element={<CedarPressData />} />

@@ -56,7 +56,7 @@ from cedar_press import (
     repository,  # noqa: E402
 )
 from cedar_press import collections as launch  # noqa: E402
-from cedar_press import session as session_module  # noqa: E402
+from cedar_press.accounts.services import sessions as session_module
 from cedar_press.app import app  # noqa: E402
 
 client = TestClient(app)
@@ -201,7 +201,8 @@ class TestPasswordReset(unittest.TestCase):
         self.addCleanup(session_module.forget_activated_for_tests)
         self.sent: list[tuple[str, str]] = []
         patcher = mock.patch(
-            "cedar_press.app._send_reset_link", lambda email, link: self.sent.append((email, link))
+            "cedar_press.accounts.api.routes._send_reset_link",
+            lambda email, link: self.sent.append((email, link))
         )
         patcher.start()
         self.addCleanup(patcher.stop)
@@ -255,9 +256,31 @@ class TestPasswordReset(unittest.TestCase):
             self.assertEqual(self.ask().status_code, 204)
         self.assertEqual(len(self.sent), 3)
 
+    def test_recovery_preserves_a_local_destination_and_rejects_external_urls(self) -> None:
+        response = client.post(
+            "/auth/password-reset",
+            json={
+                "email": "reader@example.org",
+                "next": "/record?collection=funding",
+            },
+        )
+        self.assertEqual(response.status_code, 204)
+        self.assertIn("/login?next=%2Frecord%3Fcollection%3Dfunding#reset=", self.sent[-1][1])
+        response = client.post(
+            "/auth/password-reset",
+            json={
+                "email": "reader@example.org",
+                "next": "//untrusted.invalid",
+            },
+        )
+        self.assertEqual(response.status_code, 204)
+        self.assertIn("/login#reset=", self.sent[-1][1])
+        self.assertNotIn("untrusted.invalid", self.sent[-1][1])
+
     def test_it_refuses_where_no_email_can_be_sent(self) -> None:
-        with mock.patch("cedar_press.app.validate_auth_configuration"), mock.patch.dict(
-            os.environ, {"CEDAR_PRESS_ENVIRONMENT": "production"}
+        with (
+            mock.patch("cedar_press.accounts.api.dependencies.validate_auth_configuration"),
+            mock.patch.dict(os.environ, {"CEDAR_PRESS_ENVIRONMENT": "production"}),
         ):
             response = self.ask()
         self.assertEqual(response.status_code, 503)
@@ -929,9 +952,7 @@ class TestActivation(unittest.TestCase):
         # never issued at all are one answer, byte for byte, until the code
         # AND the address match.
         def ask(code: str, email: str):
-            return client.post(
-                "/press/activation/validate", json={"code": code, "email": email}
-            )
+            return client.post("/press/activation/validate", json={"code": code, "email": email})
 
         unissued = ask("TBN4-0000-0000", "guess@example.org")
         self.assertEqual(unissued.status_code, 400)

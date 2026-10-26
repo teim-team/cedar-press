@@ -51,6 +51,8 @@ def main() -> int:
             suite = unittest.defaultTestLoader.loadTestsFromNames([
                 "tests.test_subscribers",
                 "tests.test_account_foundation",
+                "tests.test_billing",
+                "tests.test_checkout",
                 "tests.test_priorities",
                 "tests.test_auth_session_lifecycle",
                 "tests.test_release_download",

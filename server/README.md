@@ -39,8 +39,9 @@ cedar_press/
     need_profiles.py        NEED evidence on registered Native entity profiles
 
   subscribers
-    session.py              who is signed in: a signed, HTTP-only cookie
-    subscribers.py          who holds a subscription, and which access code bought it
+    accounts/services/
+      sessions.py           who is signed in: a signed, HTTP-only cookie
+      subscribers.py        subscriber persistence, credentials and legacy access
     codes.py                checks an access code is real, unspent, unexpired and the reader's
     ratelimit.py            rate limits on sign-in and activation
     priorities.py           Shape the Research: Cedar Points, priorities and requests
@@ -92,7 +93,7 @@ modules today. When the collections move into Postgres it answers from there
 and `app.py` does not change — routes hold HTTP concerns and no data access
 of their own, which is what keeps that swap to one module.
 
-`subscribers.py` already persists subscribers and access codes when `DATABASE_URL`
+`accounts/services/subscribers.py` already persists subscribers and access codes when `DATABASE_URL`
 is configured. Redemption spends the code and creates its subscriber in one
 PostgreSQL transaction. The environment-backed account/code fallback is for
 development; staging and production refuse it. Install the PostgreSQL extra
@@ -108,7 +109,20 @@ old cookies without lifecycle claims require a fresh sign-in.
 
 The account foundation extends the existing subscriber account with verification
 and Stripe customer fields. Google identities and access grants reference its UUID.
-Registration, Google sign-in and direct billing are not implemented yet. See
+Annual Stripe Checkout, billing portal and signed webhook reconciliation are implemented.
+Checkout starts at `/subscribe`; paid customers create an account through
+a single-use email link. Stripe collects the email and discount code. Existing emails keep their
+credentials and sign in normally.
+The `cedar_press.billing` package uses `BillingService`, `CheckoutService` and `BillingReconciler`,
+with `StripeAdapter` in `billing/adapters/stripe.py` for Stripe calls.
+Both packages keep HTTP routes, schemas and dependencies under `api/`, application
+services under `services/`, and domain records in `models.py`. Accounts owns
+authentication, sessions, setup links and email transport. Billing owns purchase delivery tracking in `billing/services/purchase_email.py`.
+Dependencies share one `StripeAdapter`; its client initializes on first use.
+Tests can inject `StripeAdapter(client=...)`.
+`AccountSetupService` handles activation; `PurchaseEmailService` handles purchase
+email delivery and retries.
+Google sign-in remains separate work. See
 [DATABASE.md](DATABASE.md) for the [schema ERD](DATABASE.md#schema-erd) and local Docker setup.
 
 The static browser preview gate is a separate login authority. Enabling

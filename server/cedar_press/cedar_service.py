@@ -62,7 +62,7 @@ import urllib.request
 import uuid
 from dataclasses import dataclass
 
-from cedar_press import subscribers
+from cedar_press.accounts.services import subscribers
 
 logger = logging.getLogger(__name__)
 

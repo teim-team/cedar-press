@@ -116,6 +116,36 @@ Sign-in and activation retain the existing optional teim-app account linking.
 `make db-test` also rehearses this migration and its failure rollback. The
 subscriber-storage CI job builds `server/Dockerfile.test` and runs that same
 command, refusing skipped contracts. Production uses `server/Dockerfile`.
+Stripe billing uses migration 005. Catalog provisioning lives in
+`server/tools/setup_stripe.py`; production reconciliation uses
+`python -m cedar_press.billing.cli reconcile`.
+`docker compose --profile app up -d api` runs the local API; the optional `billing` profile forwards sandbox webhooks through Stripe CLI.
+See `server/DATABASE.md` for setup. Billing uses confirmed invoice coverage; an
+expired subscription can still sign in for billing but cannot read paid content.
+Checkout starts at `/subscribe` and sends the selected plan directly to
+Stripe for email and discount-code entry. It does not block repeat purchases.
+Migration 006 stores purchase reservations; migration 007 adds the display name;
+migration 008 supports email collection in Stripe and preserves customer history. Paid customers follow a mailbox ownership link to
+`/create-account`. Local Mailpit receives those links at http://localhost:8025;
+production uses configured SMTP with STARTTLS. The confirmation page supports
+`POST /billing/checkout/resend` for its own paid checkout. The two tiers have
+separately named Stripe products; older price IDs remain recognized through
+`CEDAR_PRESS_STRIPE_LEGACY_PRICES`.
+Billing uses `BillingService`, `CheckoutService` and `BillingReconciler`,
+with `StripeAdapter` in `billing/adapters/stripe.py` for Stripe calls.
+Both packages keep HTTP routes, schemas and dependencies under `api/`, application
+services under `services/`, and domain records in `models.py`. Accounts owns
+authentication, sessions, setup links and email transport. Subscriber storage lives
+in `accounts/services/subscribers.py`. Billing owns purchase delivery tracking in `billing/services/purchase_email.py`.
+FastAPI dependencies share one `StripeAdapter`, which creates its SDK client on
+first use or accepts an injected client through `StripeAdapter(client=...)`.
+`AccountSetupService` handles account activation; `PurchaseEmailService` handles
+leased purchase email delivery (migration 009), outside SQL transactions. Webhooks
+run off the event
+loop and refresh affected objects; the repair CLI reconciles full history.
+Billing management targets an owned subscription, including repeat purchases.
+General portal sessions use `CEDAR_PRESS_STRIPE_PORTALS.management` with price
+changes disabled. Cohort prices are exposed only by targeted plan-change flows.
 
 Docker Engine or Docker Desktop with Compose v2 is required for the database
 targets. Verify the Docker prerequisite before running them:

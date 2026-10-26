@@ -68,7 +68,7 @@ class SpreadsheetRoutes(unittest.TestCase):
                 ).status_code,
                 503,
             )
-            from cedar_press import subscribers
+            from cedar_press.accounts.services import subscribers
 
             with patch.object(subscribers, "find", return_value=None):
                 self.assertEqual(

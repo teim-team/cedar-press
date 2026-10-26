@@ -1,11 +1,12 @@
 // REVIEW OWNER: Havala
 //
-// The workspace's way in: app.cedarpress.ai/login. The marketing site's Log in
+// The workspace's way in: app.cedarpress.ai/login. The marketing site's Sign in
 // lands here, and so does any signed-out visit to a page behind the gate, with
 // `?next=` carrying where the visitor was going. Activation is the sign-up:
 // Tribal Business News issues the code, and the password is chosen here.
+import { AccountPage } from "./AccountPage.jsx";
 import { cloneElement, useEffect, useId, useState } from "react";
-import { Navigate, useLocation, useNavigate, useSearchParams } from "react-router";
+import { Link, Navigate, useLocation, useNavigate, useSearchParams } from "react-router";
 
 import { activatePressAccount, confirmPasswordReset, requestPasswordReset, validatePressCode } from "../../api";
 import { useAuth } from "../../context/useAuth";
@@ -23,7 +24,7 @@ import {
 } from "../../features/grove/pressSignup";
 import { useDocumentTitle } from "../../features/grove/useDocumentTitle";
 
-const MARK = "/brand/lumecon-logo-mark-teal.png";
+
 // The public site is another host in production; a dev server has only itself.
 const MARKETING_URL = import.meta.env.DEV ? "/" : "https://cedarpress.ai";
 
@@ -40,7 +41,7 @@ function Field({ label, aside = null, children }) {
 }
 
 export default function CedarPressLogin() {
-  useDocumentTitle("Log in");
+  useDocumentTitle("Sign in");
   const { user, loading, login, refreshSession } = useAuth();
   const [params] = useSearchParams();
   const next = safeNext(params.get("next"));
@@ -49,7 +50,7 @@ export default function CedarPressLogin() {
   // The emailed link carries the token in the fragment, which never reaches a server log.
   const linkedToken = new URLSearchParams(location.hash.slice(1)).get("reset");
   const [resetToken, setResetToken] = useState(linkedToken);
-  const [step, setStep] = useState(linkedToken ? PRESS_STEP.RESET : PRESS_STEP.SIGN_IN);
+  const [step, setStep] = useState(linkedToken ? PRESS_STEP.RESET : params.get("activate") === "1" ? PRESS_STEP.ACTIVATE : PRESS_STEP.SIGN_IN);
   const [code, setCode] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -74,7 +75,7 @@ export default function CedarPressLogin() {
     if (linkedToken) navigate({ pathname: location.pathname, search: location.search }, { replace: true });
   }, [linkedToken, location.pathname, location.search, navigate]);
 
-  if (!loading && canReadCedarPress(user)) return <Navigate to={next} replace />;
+  if (!loading && user) return <Navigate to={canReadCedarPress(user) ? next : "/settings"} replace />;
 
   const go = (to) => {
     setStep(to);
@@ -97,7 +98,7 @@ export default function CedarPressLogin() {
 
   const submitSignIn = run(async () => {
     const session = await login({ email, password });
-    if (!canReadCedarPress(session)) throw new Error("This account does not include Cedar Press.");
+    if (!canReadCedarPress(session)) navigate("/settings");
   });
 
   const submitCode = run(async () => {
@@ -114,7 +115,7 @@ export default function CedarPressLogin() {
   }, describeSignup);
 
   const submitForgot = run(async () => {
-    await requestPasswordReset({ email });
+    await requestPasswordReset({ email, next });
     setResetSent(true);
   });
 
@@ -133,27 +134,18 @@ export default function CedarPressLogin() {
   const errorLine = error ? <p className="cp-gate__error" role="alert">{error}</p> : null;
 
   return (
-    <div className="teim-rd teim-rd--paper cp-login">
-      <aside className="cp-login__side" aria-hidden="true">
-        <img className="cp-login__mark" src={MARK} alt="" />
-        <p className="cp-login__tag">Know what&rsquo;s shaping Indian Country.</p>
-        <p className="cp-login__sub">Original collections, research briefs and Cedar, the AI economic analyst, in one workspace.</p>
-      </aside>
-      <main id="cp-main" className="cp-login__main">
-        <a className="cp-login__brand" href={MARKETING_URL}>
-          <img src={MARK} alt="" width="28" height="28" />
-          <span>Cedar Press</span>
-        </a>
+    <AccountPage>
         <div className="cp-login__card">
           {!isConnected() && !import.meta.env.DEV ? (
             <>
-              <h1 className="cp-login__h">Log in</h1>
+              <h1 className="cp-login__h">Sign in</h1>
               <p className="cp-gate__fine" role="status">Sign-in is not available yet.</p>
             </>
           ) : signingIn ? (
             <>
-              <h1 className="cp-login__h">Log in to Cedar Press</h1>
-              <p className="cp-login__lede">Enter your work email and password to continue.</p>
+              <h1 className="cp-login__h">Welcome back.</h1>
+              <p className="cp-login__lede">Sign in to Cedar Press.</p>
+              <p>New to Cedar Press? <Link to="/subscribe">Subscribe annually</Link>.</p>
               {!isConnected() ? (
                 <p className="cp-gate__ok" role="status">
                   Dev server, not connected to the API, so signing in will fail. Run <code>npm run dev:connected</code> with the API running (docs/CONNECTING.md).
@@ -169,7 +161,7 @@ export default function CedarPressLogin() {
                 </Field>
                 {errorLine}
                 <button type="submit" className="cp-btn cp-btn--primary cp-btn--wide" disabled={pending}>
-                  {pending ? "Logging in" : "Log in"}
+                  {pending ? "Signing in" : "Sign in"}
                 </button>
               </form>
               {PRESS_ACTIVATION_AVAILABLE ? (
@@ -260,14 +252,13 @@ export default function CedarPressLogin() {
               </p>
               <p className="cp-gate__aside">
                 Already set a password?{" "}
-                <button type="button" className="cp-split__linkbtn" onClick={() => go(PRESS_STEP.SIGN_IN)}>Log in</button>
+                <button type="button" className="cp-split__linkbtn" onClick={() => go(PRESS_STEP.SIGN_IN)}>Sign in</button>
               </p>
               <p className="cp-gate__aside"><a href={EARLY_ACCESS_HREF}>{EARLY_ACCESS_LABEL}</a></p>
             </>
           )}
         </div>
         <p className="cp-login__back"><a href={MARKETING_URL}>&larr; Back to Cedar Press</a></p>
-      </main>
-    </div>
+    </AccountPage>
   );
 }

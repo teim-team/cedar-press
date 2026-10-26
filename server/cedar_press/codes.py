@@ -32,7 +32,7 @@ import re
 from dataclasses import dataclass
 from datetime import date
 
-from cedar_press import subscribers
+from cedar_press.accounts.services import subscribers
 
 #: Error codes the client already has copy for. See
 #: ``src/features/grove/pressSignup.js::pressSignupError`` — adding one here

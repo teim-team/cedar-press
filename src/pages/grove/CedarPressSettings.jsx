@@ -19,7 +19,7 @@ import { PressInfluence } from "./PressInfluence";
 import { useFadeIn } from "../../features/grove/useFadeIn";
 import { canReadCedarPress } from "../../features/grove/pressAccess";
 import { loadWork, saveWork, workOptions } from "../../features/grove/readerWork.js";
-import { LUMECON_URL, TBN_PLANS_URL, TBN_URL } from "../../features/grove/pressArticles";
+import { LUMECON_URL } from "../../features/grove/pressArticles";
 import { PRESS_TIERS } from "../../features/grove/pressCatalog";
 import { PRESS_REQUEST_PATH, PRESS_RESEARCH_PATH } from "../../features/grove/pressRoutes";
 import { resolveTier } from "../../workspaceTier.js";
@@ -29,6 +29,7 @@ import { PressCedarFab } from "./PressCedarFab";
 import { PressFoot, PressMast } from "./PressChrome";
 import PressGate from "./PressGate";
 import { TierName } from "./TierName";
+import { BillingCard } from "./BillingCard.jsx";
 import { buildLine } from "../../features/grove/buildStamp.js";
 
 /**
@@ -106,26 +107,6 @@ function WorkCard() {
   );
 }
 
-function PlanCard({ currentId }) {
-  const plans = PRESS_TIERS.filter((entry) => entry.storefront);
-  return (
-    <section className="cp-set__card cp-fade" aria-label="Plans">
-      <span className="cp-set__cap">Plans</span>
-      <ul className="cp-set__links cp-set__links--flat">
-        {plans.map((plan) => (
-          <li key={plan.id}>
-            <b><TierName name={plan.name} />{plan.id === currentId ? " (current)" : ""}</b>
-            <span>{plan.question}</span>
-          </li>
-        ))}
-      </ul>
-      <p className="cp-set__fine">
-        Changing plans online is not available yet. Until it is, plan changes go through
-        Tribal Business News.
-      </p>
-    </section>
-  );
-}
 
 function PasswordCard() {
   const [current, setCurrent] = useState("");
@@ -184,9 +165,9 @@ export default function CedarPressSettings() {
   useScrollToTop("settings");
   // Sitewide arrival language.
   const fadeRoot = useFadeIn();
-  const { influence, status: influenceStatus } = usePriorities({ user });
+  const { influence, status: influenceStatus } = usePriorities({ user: entitled ? user : null });
 
-  if (!loading && !entitled) {
+  if (!loading && !user) {
     return (
       <div className="teim-rd teim-rd--paper">
         <PressGate user={user} />
@@ -206,9 +187,7 @@ export default function CedarPressSettings() {
           <p className="cp-hero__access">Settings</p>
           <h1 className="cp-mh__title">Your account.</h1>
           <p className="cp-mh__sub">
-            Cedar Press access is provided through a Tribal Business News subscription.
-            Membership, billing and renewals are managed there. This page shows your Cedar
-            Press access and preferences.
+            Manage your Cedar Press access, annual subscription and preferences.
           </p>
         </section>
 
@@ -229,31 +208,17 @@ export default function CedarPressSettings() {
               </div>
               <div>
                 <dt>Plan</dt>
-                <dd>{tier ? <TierName name={tier.name} /> : "Cedar Press"}</dd>
-              </div>
-              <div>
-                <dt>Sold and renewed by</dt>
-                <dd>
-                  <a href={TBN_URL} target="_blank" rel="noreferrer">Tribal Business News</a>
-                </dd>
+                <dd>{tier ? <TierName name={tier.name} /> : "No current paid access"}</dd>
               </div>
             </dl>
             <div className="cp-set__acts">
-              <a
-                className="gv-btn gv-btn--primary"
-                href={TBN_PLANS_URL}
-                target="_blank"
-                rel="noreferrer"
-              >
-                Manage TBN membership <span aria-hidden="true">&#8594;</span>
-              </a>
               <button type="button" className="gv-btn gv-btn--quiet" onClick={() => logout()}>
                 Sign out
               </button>
             </div>
           </section>
 
-          <PlanCard currentId={tierId} />
+          <BillingCard />
           <PasswordCard />
           <WorkCard />
         </div>
@@ -263,7 +228,7 @@ export default function CedarPressSettings() {
           {/* Where the account's influence lives: what this subscription has
               earned by using the product, where it put it, and what it asked
               for. The page is worth visiting for this, not only for billing. */}
-          <PressInfluence influence={influence} tier={tierId} status={influenceStatus} />
+          {entitled ? <PressInfluence influence={influence} tier={tierId} status={influenceStatus} /> : null}
 
           {/* Links out to public programs, not features of the account: both
               pages work with or without a subscription, and the gate and
