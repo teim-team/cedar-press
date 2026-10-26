@@ -105,7 +105,7 @@ resource "aws_iam_role_policy" "github_actions_deploy" {
 
   policy = jsonencode({
     Version = "2012-10-17"
-    Statement = [
+    Statement = concat([
       {
         Effect   = "Allow"
         Action   = ["ecr:GetAuthorizationToken"]
@@ -144,6 +144,28 @@ resource "aws_iam_role_policy" "github_actions_deploy" {
         Action   = ["ssm:GetCommandInvocation", "ssm:ListCommandInvocations"]
         Resource = "*"
       }
-    ]
+      ], local.dev_site ? [
+      {
+        Effect   = "Allow"
+        Action   = ["s3:ListBucket"]
+        Resource = aws_s3_bucket.dev_site[0].arn
+      },
+      {
+        Effect   = "Allow"
+        Action   = ["s3:PutObject", "s3:DeleteObject"]
+        Resource = "${aws_s3_bucket.dev_site[0].arn}/*"
+      },
+      {
+        Effect   = "Allow"
+        Action   = ["cloudfront:CreateInvalidation"]
+        Resource = aws_cloudfront_distribution.dev_site[0].arn
+      },
+      {
+        # The publish workflow finds the distribution by its comment.
+        Effect   = "Allow"
+        Action   = ["cloudfront:ListDistributions"]
+        Resource = "*"
+      }
+    ] : [])
   })
 }

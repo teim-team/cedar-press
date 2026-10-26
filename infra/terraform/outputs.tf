@@ -26,3 +26,13 @@ output "database_endpoint" {
 output "ssm_prefix" {
   value = local.prefix
 }
+
+output "dev_site_url" {
+  value = local.dev_site ? "https://${aws_cloudfront_distribution.dev_site[0].domain_name}" : null
+}
+
+output "dev_site_password" {
+  description = "User name cedar."
+  value       = local.dev_site ? random_password.dev_site[0].result : null
+  sensitive   = true
+}

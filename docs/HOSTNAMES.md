@@ -15,6 +15,10 @@
 - **DNS**: Route 53 hosted zone `Z07251432LVISIVE32FRN`. A and AAAA aliases for the apex, `app` and `www`, the ACM validation CNAMEs, and `_dmarc`.
 - **Registrar**: GoDaddy, nameservers set to the four Route 53 servers in the zone.
 
+## Dev site (account `teim-dev`, us-east-1)
+
+`infra/terraform/dev-site.tf`, applied with `dev.tfvars`: a CloudFront distribution on its default `*.cloudfront.net` name (`terraform output dev_site_url`), with the client build in a private S3 bucket and `/api/*` sent to the dev API host through a CloudFront VPC origin, prefix removed. A viewer-request function asks for one shared password on every path (user `cedar`, `terraform output -raw dev_site_password`) and serves `index.html` for extensionless paths. The distribution's origin is added to `CEDAR_PRESS_ORIGINS`, which the API reads on its next deploy. `deploy-dev-site.yml` publishes the client on pushes to `main`.
+
 ## Publishing
 
 `deploy.yml` — *Publish cedarpress.ai* — runs its gates, builds `dist-site/`
