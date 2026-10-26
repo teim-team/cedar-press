@@ -101,11 +101,15 @@ repository root and run the existing migration command in `DATABASE.md`.
 
 Sessions expire after 14 days. Every authenticated request re-reads the subscriber
 and current Press tier; removed subscribers and changed credentials or account
-bindings invalidate existing cookies. Logout advances the subscriber's persistent
-revocation revision, ending that email's sessions on all devices without ending
-other seats' sessions. A stable server-only signing secret is required in staging
+bindings invalidate existing cookies. Logout advances `sessions_revoked_at`,
+ending that user's sessions on all devices. A stable server-only signing secret is required in staging
 and production. Existing passwords, accounts and subscription tiers are preserved;
 old cookies without lifecycle claims require a fresh sign-in.
+
+The account foundation extends the existing subscriber account with verification
+and Stripe customer fields. Google identities and access grants reference its UUID.
+Registration, Google sign-in and direct billing are not implemented yet. See
+[DATABASE.md](DATABASE.md) for the [schema ERD](DATABASE.md#schema-erd) and local Docker setup.
 
 The static browser preview gate is a separate login authority. Enabling
 `VITE_API_URL` does not migrate its accounts. Before switching an existing site,

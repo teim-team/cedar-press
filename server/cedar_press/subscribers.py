@@ -45,7 +45,7 @@ TIERS = ("press", "press_pro")
 
 
 class AlreadySubscribed(Exception):
-    """This address already holds a subscription, so a code cannot make one.
+    """This address already holds an account, so a code cannot create one.
 
     Raised rather than returned, because it is a different answer from "that
     code is not usable" and the reader is owed a different sentence. Letting
@@ -57,7 +57,7 @@ class AlreadySubscribed(Exception):
 @dataclass(frozen=True)
 class Subscriber:
     email: str
-    tier: str
+    tier: str | None
     account_id: str
     password_hash: str | None = None
     session_revision: str = ""
@@ -246,7 +246,7 @@ def find(email: str) -> Subscriber | None:
         return None
     if db.configured():
         row = db.one(
-            "SELECT email, tier, account_id, password_hash, updated_at"
+            "SELECT email, tier, account_id, password_hash, sessions_revoked_at"
             " FROM cedar_press_subscribers WHERE lower(email) = %s",
             (address,),
         )
@@ -257,7 +257,7 @@ def find(email: str) -> Subscriber | None:
             row["tier"],
             row["account_id"],
             row["password_hash"],
-            _session_revision(row["updated_at"]),
+            _session_revision(row["sessions_revoked_at"]),
         )
     if address in _activated:
         password, tier = _activated[address]
@@ -279,8 +279,8 @@ def revoke_sessions(email: str) -> bool:
     if db.configured():
         return (
             db.execute(
-                "UPDATE cedar_press_subscribers SET updated_at ="
-                " GREATEST(clock_timestamp(), updated_at + interval '1 microsecond')"
+                "UPDATE cedar_press_subscribers SET sessions_revoked_at ="
+                " GREATEST(clock_timestamp(), sessions_revoked_at + interval '1 microsecond')"
                 " WHERE lower(email) = %s",
                 (address,),
             )
@@ -365,16 +365,8 @@ def bind_user(email: str, user_id: str) -> bool:
 def link_platform_account(email: str) -> bool:
     """Tie this subscription to the teim-app account at the same address.
 
-    Called on sign-in and on activation, because those are the two moments
-    the service is certain who is at the keyboard, and because the order the
-    two accounts appear in is not ours to choose: a Tribal Business News
-    subscriber may activate a press code months before they ever open the
-    platform, or the other way round. Binding on every sign-in means whichever
-    comes second still finds the first.
-
-    One statement, so a sign-in costs one no-op UPDATE rather than a lookup
-    and a write: `IS DISTINCT FROM` makes a subscription that is already bound
-    — the overwhelming majority — touch nothing.
+    Called after password authentication during sign-in and activation. It is
+    a no-op when the optional teim-app users table or matching account is absent.
 
     Returns whether a binding was made. False is the ordinary answer: no
     database, no `users` table (Cedar Press pointed at a database of its own),

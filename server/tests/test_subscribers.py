@@ -64,7 +64,8 @@ class _Backend:
             os.environ.pop("CEDAR_PRESS_CODES", None)
             db.migrate()
             db.execute(
-                "TRUNCATE cedar_press_subscribers, cedar_press_codes, cedar_press_password_resets"
+                "TRUNCATE cedar_press_subscribers, cedar_press_codes, cedar_press_password_resets,"
+                " cedar_press_login_identities, cedar_press_access_grants"
             )
             for email, tier in (("reader@example.org", "press"), ("pro@example.org", "press_pro")):
                 subscribers.create(email, "correct-horse", tier)
@@ -231,8 +232,10 @@ class TestPostgresBackend(_Backend, unittest.TestCase):
         )
         self.assertEqual(str(row["user_id"]), str(user["id"]))
 
-    def test_the_binding_happens_by_itself_at_sign_in(self) -> None:
-        """`link_platform_account` is what the login route calls, in one statement."""
+    def test_platform_binding_happens_at_sign_in(self) -> None:
+        """Sign-in binds an existing platform account before issuing the cookie."""
+        from fastapi import Response
+
         # `users` is teim-app's, so this makes and unmakes exactly its own row
         # rather than truncating a table it does not own.
         db.execute("DELETE FROM users WHERE email = %s", ("pro@example.org",))
@@ -242,7 +245,11 @@ class TestPostgresBackend(_Backend, unittest.TestCase):
             ("pro@example.org",),
         )
         # The platform account appeared second; the next sign-in finds it.
-        self.assertTrue(subscribers.link_platform_account("PRO@Example.org "))
+        old_cookie = session._encode(session.Session("pro@example.org", "press_pro"))
+        signed_in = session.sign_in("PRO@Example.org ", "correct-horse", Response())
+        self.assertIsNotNone(signed_in)
+        self.assertIsNone(session._decode(old_cookie))
+        self.assertIsNotNone(session._decode(session._encode(signed_in)))
         row = db.one(
             "SELECT user_id FROM cedar_press_subscribers WHERE email = %s",
             ("pro@example.org",),

@@ -1,7 +1,7 @@
 """Signed subscriber sessions backed by the existing subscriber store.
 
 PostgreSQL deployments persist accounts and account-wide session revocation.
-Logout advances the subscriber's existing updated_at revision, invalidating all
+Logout advances the subscriber's dedicated revocation revision, invalidating all
 sessions for that account without adding a session table. Preview mode remains
 process-local; it is not evidence of durable authentication.
 
@@ -87,7 +87,7 @@ def _configuration_required() -> None:
 
 def _revision(subscriber: subscribers.Subscriber) -> str:
     # Password and account changes invalidate a token even if an external
-    # account writer forgot to advance updated_at. The tier is read afresh,
+    # account writer forgot to advance the revocation revision. The tier is read afresh,
     # never trusted from the cookie; unversioned downgrades apply immediately.
     material = json.dumps(
         [
@@ -114,17 +114,17 @@ def _lookup(email: str, password: str) -> Session | None:
     found = subscribers.authenticate(email, password)
     if found is None:
         return None
-    # Linking updates the subscriber revision. It must finish before issuing
-    # the token, not after the login route has already set its cookie.
+    # Complete the existing platform binding before capturing the cookie revision.
     subscribers.link_platform_account(found.email)
+    # Re-read before issuance so a concurrent password change cannot bless
+    # the old password with a new session revision.
     current = subscribers.find(found.email)
     if (
         current is None
         or current.tier not in subscribers.TIERS
         or current.password_hash != found.password_hash
     ):
-        # A password reset racing the link step must not bless an old password
-        # with the new revision. A later revision change invalidates normally.
+        # A later revision change invalidates the issued token normally.
         return None
     return Session(current.email, current.tier, _revision(current))
 
