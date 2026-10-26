@@ -108,7 +108,11 @@ old cookies without lifecycle claims require a fresh sign-in.
 
 The account foundation extends the existing subscriber account with verification
 and Stripe customer fields. Google identities and access grants reference its UUID.
-Registration, Google sign-in and direct billing are not implemented yet. See
+Annual Stripe Checkout, billing portal and signed webhook reconciliation are implemented.
+Guest checkout starts at `/subscribe`; paid customers create an account through
+a single-use email link. Stripe collects the email and discount code. Existing emails keep their
+credentials and sign in normally.
+Google sign-in remains separate work. See
 [DATABASE.md](DATABASE.md) for the [schema ERD](DATABASE.md#schema-erd) and local Docker setup.
 
 The static browser preview gate is a separate login authority. Enabling

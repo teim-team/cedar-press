@@ -1,6 +1,6 @@
 # The database
 
-See the [schema ERD](#schema-erd) for the tables defined by migrations 001–004.
+See the [schema ERD](#schema-erd) for the tables defined by migrations 001–008.
 
 ## Local Docker database
 
@@ -27,10 +27,9 @@ These credentials are for local development only.
 
 Open http://localhost:8081 for Adminer. Choose PostgreSQL, server `db`, username
 `cedar_local`, password `local_development_only`, database `cedar_press`.
-This lets you inspect subscriber records and the Cedar Points transaction ledger.
-Payment, invoice, refund and webhook history will be added with the billing
-implementation; the current schema has no Stripe transaction tables. Local
-Stripe testing will use sandbox payments, persisted in this development database.
+This lets you inspect accounts, Cedar Points, Stripe subscriptions, invoices,
+payments, refunds, checkout attempts and webhook processing history. Sandbox
+transactions persist in this database. Card details stay with Stripe.
 
 The named Docker volume preserves records across container restarts and
 `make db-stop`. Each `make db-test` invocation creates a uniquely named disposable
@@ -70,16 +69,20 @@ a parallel users table:
 
 Existing account IDs, password hashes, timestamps and Cedar Points grouping are
 preserved. There are no group accounts, memberships, `identity_id` column or
-identity synchronization triggers. Future subscriptions and payment records will
-reference the existing account UUID. Registration, Google sign-in and Stripe
-billing flows are not implemented yet.
+identity synchronization triggers. Stripe subscription and payment records reference the existing account UUID.
+New subscribers purchase at `/subscribe`, then follow the emailed link to
+`/create-account` to confirm their email and choose a password. Google sign-in
+remains separate work.
 
 A null legacy tier represents an account without legacy access. Code redemption
 creates the account and legacy grant in the same transaction; duplicate-account
 redemption leaves the code unspent and does not replace credentials. Tier changes
 close the previous legacy grant and create a new one. Setting the tier to null
 revokes legacy grants while preserving the account, Google identity and independent
-complimentary grants. Existing runtime access checks still use the legacy tier.
+complimentary grants. Runtime access uses `cedar_press_current_access`, combining active grants and
+confirmed paid invoice coverage. After the first paid Stripe invoice, legacy
+grants no longer restore access when that subscription ends. Complimentary
+grants remain independent.
 Accounts with grant history cannot be accidentally hard-deleted through the foreign
 key; deliberate account deletion is a separate future lifecycle flow.
 
@@ -88,12 +91,73 @@ Ordinary timestamps and changes between active tiers do not sign users out.
 Sign-in and activation retain the existing optional teim-app account linking. Raw email or
 UUID reassignment is refused until a verified account-management flow exists.
 
-`accounts.create_user` creates an internal unpaid account with no password or
-access grant. New public registration and unpaid sign-in are subsequent changes.
-This unmerged PR uses one account-foundation migration. Databases that ran earlier
-branch drafts require local reconciliation; editing an applied migration file alone
-does not change their schema. The local empty draft tables were replaced
-transactionally, retaining the original application records and migration ledger.
+`accounts.create_user` creates an internal unpaid account. Unpaid and expired
+accounts can sign in and manage billing; paid content remains protected.
+
+### Stripe sandbox
+
+Keep credentials in the ignored root `.env`. Compose accepts `STRIPE_TEST_KEY`
+as a local alias for `CEDAR_PRESS_STRIPE_SECRET_KEY`.
+
+```sh
+docker compose build tools
+docker compose run --rm tools python -m cedar_press.billing_admin setup
+```
+
+Save the printed price, portal and coupon IDs in `.env`. Obtain the listener's
+signing secret with `docker compose run --rm stripe-listener listen --print-secret`
+and save it as `CEDAR_PRESS_STRIPE_WEBHOOK_SECRET`. Treat it as a credential.
+Then start `docker compose --profile app --profile billing up -d` and run
+`npm run dev:connected -- --port 5173 --strictPort`. Open `/subscribe` with a
+plan. The button goes directly to Stripe, which collects email and discount codes.
+Checkout reservations create no users. A confirmed payment creates a new account
+and emails its single-use setup link. Existing emails retain their account and
+credentials and receive a sign-in link. This flow does not block repeat purchases.
+Open the local Mailpit inbox at http://localhost:8025 to follow that link.
+Stripe forwards signed sandbox events to the API. Restart the API after
+changing `.env`.
+
+SMTP settings are `CEDAR_PRESS_SMTP_HOST`, `CEDAR_PRESS_SMTP_PORT`,
+`CEDAR_PRESS_SMTP_STARTTLS`, `CEDAR_PRESS_SMTP_USERNAME`,
+`CEDAR_PRESS_SMTP_PASSWORD` and `CEDAR_PRESS_EMAIL_FROM`. Docker defaults to
+Mailpit with plaintext SMTP confined to the Docker network. Production requires
+STARTTLS and the chosen email provider's settings. Guest purchases refuse when
+email delivery is unconfigured. Password recovery uses the same sender.
+The confirmation page can resend its own paid account email, limited to three
+requests per 15 minutes. Only hashed browser and email tokens are stored; neither the browser's Checkout
+return nor its reservation cookie can establish account ownership.
+
+The setup command is repeatable and requires `--live` for live-account setup.
+Prices are annual USD: $500/$1,000 early access, $1,000/$2,000 from January 1,
+2027 in America/Chicago. `GREATLAKES2026` deducts $100 from the first invoice.
+Cedar Press and Cedar Press+ use separate Stripe products so Checkout names the
+selected tier correctly. Each cohort uses tier-specific portal configurations
+offering only the other tier’s cohort price. Previous price IDs remain in
+`CEDAR_PRESS_STRIPE_LEGACY_PRICES` for existing purchases; new purchases use the
+primary configured prices. Settings links directly to Stripe’s plan-change
+confirmation; the general portal manages payment methods, invoices and cancellation.
+Upgrades invoice prorations immediately; downgrades
+and cancellation take effect at renewal. Existing subscriptions retain their
+cohort. Stripe calculates prorations.
+
+Webhook events are deduplicated and reconciled from current Stripe objects.
+The inbox stores IDs, attempts and processing status, without raw payloads.
+Invoices, payments and refunds are current snapshots with provider IDs;
+Stripe remains the financial system of record. Full refunds remove that
+invoice's access coverage; partial refunds retain it. Access never comes from
+the browser's Checkout return URL.
+
+Retry reconciliation after provider failures with:
+
+```sh
+docker compose run --rm tools python -m cedar_press.billing_admin reconcile
+```
+
+For production, register `/billing/webhook` with API version
+`2026-09-30.endive`, configure its signing secret and canonical `CEDAR_PRESS_*`
+variables, and run reconciliation periodically as an operational recovery job.
+Local Compose is for development only. `make db-test` covers migrations and
+billing lifecycle failures in disposable databases.
 
 The migrations are transactional. Roll back the application only after
 ending outstanding sessions, since old and new logout writers differ. Do not drop
@@ -127,10 +191,9 @@ catalogue become rows in the platform's own database, beside teim-app's
 `users`. Setting the variable is the whole of the installation: the service
 applies any migration that has not run when it opens the store.
 
-That is safe while every migration is additive — all of them so far are
-`CREATE TABLE IF NOT EXISTS` — because the advisory lock makes two instances
-booting at once take turns instead of racing, and an instance still running
-the old code is reading tables the new migration only added to. It stops
+The migration ledger and advisory lock make simultaneous API starts take turns
+instead of racing. Keep deployment migrations compatible with the application
+version still serving requests. Automatic startup migration stops
 being safe the first time a migration drops or retypes a column an older
 instance is still reading. At that point run it as a deploy step instead:
 
@@ -213,7 +276,7 @@ the month is already earned — and still reports 2.
 
 ## Schema ERD
 
-Current PostgreSQL schema after migrations 001–004. `cedar_press_subscribers`
+Current PostgreSQL schema after migrations 001–008. `cedar_press_subscribers`
 is the sole account table. Connections show database foreign keys only; dotted
 lines are non-identifying relationships. `users` is an optional external teim-app
 table, not a second Cedar Press user table. Its foreign key is installed only
@@ -224,11 +287,19 @@ activation link a matching platform account before issuing the session cookie.
 erDiagram
     cedar_press_subscribers ||..o{ cedar_press_login_identities : "id to user_id; cascade delete"
     cedar_press_subscribers ||..o{ cedar_press_access_grants : "id to user_id; NO ACTION delete"
+    cedar_press_subscribers ||..o{ cedar_press_subscriptions : user_id
+    cedar_press_subscribers ||..o{ cedar_press_invoices : user_id
+    cedar_press_subscribers ||..o{ cedar_press_payments : user_id
+    cedar_press_subscribers ||..o{ cedar_press_checkout_attempts : user_id
+    cedar_press_subscribers |o..o{ cedar_press_guest_checkouts : "user_id after payment"
+    cedar_press_subscriptions ||..o{ cedar_press_invoices : subscription_id
+    cedar_press_payments ||..o{ cedar_press_refunds : payment_id
     users |o..o| cedar_press_subscribers : "optional platform user_id"
 
     cedar_press_subscribers {
         uuid id PK
         text email UK
+        text display_name "Nullable"
         text account_id "Legacy Cedar Points key"
         text tier "Nullable; press or press_pro"
         text password_hash "Nullable; never plaintext"
@@ -254,6 +325,76 @@ erDiagram
         timestamptz starts_at
         timestamptz ends_at "Nullable"
         timestamptz revoked_at "Nullable"
+    }
+    cedar_press_subscriptions {
+        text id PK "Stripe subscription"
+        uuid user_id FK
+        text price_id
+        text tier
+        text cohort
+        text customer_id "Stripe customer for this subscription"
+        text status
+        boolean cancel_at_period_end
+        timestamptz period_end
+        timestamptz activated_at
+    }
+    cedar_press_invoices {
+        text id PK
+        uuid user_id FK
+        text subscription_id FK
+        text status
+        text currency
+        bigint amount_due "Integer cents"
+        bigint amount_paid "Integer cents"
+        text tier
+        timestamptz access_starts_at
+        timestamptz access_ends_at
+    }
+    cedar_press_payments {
+        text id PK "Stripe PaymentIntent"
+        uuid user_id FK
+        text invoice_id "Nullable, no FK; events can arrive first"
+        text charge_id
+        text status
+        text currency
+        bigint amount
+        bigint amount_received
+    }
+    cedar_press_refunds {
+        text id PK
+        text payment_id FK
+        text status
+        text currency
+        bigint amount
+    }
+    cedar_press_checkout_attempts {
+        uuid id PK
+        uuid user_id FK
+        text price_id
+        text session_id UK "Nullable"
+        text status
+        timestamptz expires_at
+    }
+    cedar_press_guest_checkouts {
+        uuid id PK
+        text email "Nullable until Stripe confirms payment"
+        text secret_hash "Hashed browser cookie; no sign-in authority"
+        text price_id
+        text customer_id UK
+        text session_id UK
+        text status
+        uuid user_id FK "Nullable until payment confirmed"
+        timestamptz expires_at
+        timestamptz claim_sent_at
+    }
+    cedar_press_webhook_events {
+        text id PK
+        text event_type
+        text object_id
+        text customer_id
+        text status
+        int attempts
+        text error_code
     }
     cedar_press_codes {
         text code PK
@@ -327,5 +468,5 @@ Application-level references without database foreign keys:
 Google identities are unique by `(provider, subject)` and `(user_id, provider)`.
 At most one unrevoked legacy access grant exists per account. Subscriber emails
 also have a normalized unique index. The Cedar Points ledger records points,
-not money; Stripe subscription, invoice, payment and refund tables are not yet
-implemented. See migration 004 for account-security and legacy-grant triggers.
+not money. See migration 004 for account-security and legacy-grant triggers
+and migration 005 for Stripe records and effective access.

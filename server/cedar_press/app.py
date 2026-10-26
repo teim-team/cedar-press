@@ -53,7 +53,7 @@ import re
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
-from urllib.parse import quote
+from urllib.parse import quote, urlencode
 
 from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, Request, Response
 from fastapi.exception_handlers import http_exception_handler
@@ -65,8 +65,10 @@ from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, Field
 
 from cedar_press import (
+    account_email,
     cedar_service,
     codes,
+    guest_checkout,
     need_profiles,
     press_catalog,
     priorities,
@@ -77,6 +79,7 @@ from cedar_press import (
     shelf,
     subscribers,
 )
+from cedar_press.billing_routes import router as billing_router
 from cedar_press.session import (
     Session,
     account_exists,
@@ -216,15 +219,17 @@ class Question(BaseModel):
     pathname: str | None = None
 
 
-def require_session(session: Session | None = Depends(current_session)) -> Session:
-    """A route that reads subscriber data needs a subscriber.
-
-    Entitlement is decided here rather than in the client: the client's
-    ``pressAccess`` decides what renders, and this decides what is served.
-    The two are written to answer identically, and this one is the control.
-    """
+def require_account(session: Session | None = Depends(current_session)) -> Session:
+    """Authenticated identity, including an account without current paid access."""
     if session is None:
         raise HTTPException(status_code=401, detail="Not signed in.")
+    return session
+
+
+def require_session(session: Session = Depends(require_account)) -> Session:
+    """Paid or explicitly granted content access, independently of account sign-in."""
+    if session.tier == "free":
+        raise HTTPException(status_code=403, detail="A current subscription is required.")
     return session
 
 
@@ -255,9 +260,10 @@ async def _flatten_error(request: Request, exc: HTTPException):
 
 
 @app.get("/me")
-def me(session: Session = Depends(require_session)) -> dict[str, object]:
+def me(session: Session = Depends(require_account)) -> dict[str, object]:
     # The first authenticated call of a visit: the month's points, once.
-    _priorities.accrue(_account(session))
+    if session.tier in subscribers.TIERS:
+        _priorities.accrue(_account(session))
     return session.as_payload()
 
 
@@ -336,14 +342,14 @@ class ReaderProfile(BaseModel):
 
 
 @app.get("/press/profile")
-def read_profile(session: Session = Depends(require_session)) -> dict[str, object]:
+def read_profile(session: Session = Depends(require_account)) -> dict[str, object]:
     """The reader's declared work, per seat (``readerWork.js``)."""
     return _priorities.profile(session.email)
 
 
 @app.patch("/press/profile")
 def write_profile(
-    body: ReaderProfile, session: Session = Depends(require_session)
+    body: ReaderProfile, session: Session = Depends(require_account)
 ) -> dict[str, object]:
     """Record what the reader declared. The vocabulary is the client's own
     (``WORK_KINDS``, dumped into ``_press_data.json``), so an answer the
@@ -405,7 +411,7 @@ def change_password(
     change: PasswordChange,
     request: Request,
     response: Response,
-    session: Session = Depends(require_session),
+    session: Session = Depends(require_account),
 ) -> dict[str, object]:
     """Replace the password and keep only this device signed in.
 
@@ -424,7 +430,7 @@ def change_password(
             },
         )
     _require_password_length(change.new_password)
-    subscribers.create(found.email, change.new_password, found.tier)
+    subscribers.change_password(found.email, change.new_password)
     renewed = sign_in(found.email, change.new_password, response)
     if renewed is None:
         raise HTTPException(
@@ -450,6 +456,7 @@ def _require_password_length(password: str) -> None:
 
 class ResetRequest(BaseModel):
     email: str = Field(max_length=254)
+    next: str = Field(default="/", max_length=2048)
 
 
 class ResetConfirm(BaseModel):
@@ -463,8 +470,9 @@ _RESET_LOG = logging.getLogger("cedar_press.password_reset")
 
 
 def _send_reset_link(email: str, link: str) -> None:
-    # No mail provider is wired in yet, so development logs the link and
-    # `request_password_reset` refuses everywhere else.
+    if account_email.configured():
+        account_email.send_link(email, link)
+        return
     _RESET_LOG.warning("Password reset link for %s: %s", email, link)
 
 
@@ -479,7 +487,10 @@ def request_password_reset(
     """
     _require_auth_origin(request, "password reset")
     _guard(request, "reset", ratelimit.LOGIN_ATTEMPTS)
-    if os.environ.get("CEDAR_PRESS_ENVIRONMENT", "development") != "development":
+    if (
+        not account_email.configured()
+        and os.environ.get("CEDAR_PRESS_ENVIRONMENT", "development") != "development"
+    ):
         raise HTTPException(
             status_code=503,
             detail={
@@ -495,7 +506,15 @@ def request_password_reset(
         return
     token = subscribers.issue_reset(address)
     if token:
-        background.add_task(_send_reset_link, address, f"{_APP_URL}/login#reset={token}")
+        destination = body.next
+        if (
+            not destination.startswith("/")
+            or destination.startswith("//")
+            or re.search(r"[\s\\]", destination)
+        ):
+            destination = "/"
+        query = "?" + urlencode({"next": destination}) if destination != "/" else ""
+        background.add_task(_send_reset_link, address, f"{_APP_URL}/login{query}#reset={token}")
 
 
 @app.post("/auth/password-reset/confirm")
@@ -528,6 +547,53 @@ def confirm_password_reset(
                 "message": "Your account changed. Please sign in again.",
             },
         )
+    return session.as_payload()
+
+
+class AccountLink(BaseModel):
+    token: str = Field(max_length=128)
+
+
+class AccountSetup(ResetConfirm):
+    name: str = Field(min_length=1, max_length=120)
+
+
+@app.post("/auth/account-setup/check")
+def check_account_setup(body: AccountLink, request: Request):
+    _require_auth_origin(request, "account setup")
+    _guard(request, "account-setup-check", ratelimit.LOGIN_ATTEMPTS)
+    try:
+        return guest_checkout.account_details(body.token)
+    except guest_checkout.BillingError as error:
+        raise HTTPException(
+            error.status, detail={"code": error.code, "message": error.message}
+        ) from None
+
+
+@app.post("/auth/account-setup/confirm")
+def finish_account_setup(body: AccountSetup, request: Request, response: Response):
+    _require_auth_origin(request, "account setup")
+    _guard(request, "account-setup", ratelimit.LOGIN_ATTEMPTS)
+    _require_password_length(body.new_password)
+    if not body.name.strip():
+        raise HTTPException(400, detail="Enter your name.")
+    made = subscribers.redeem_reset(
+        body.token, body.new_password, account_setup=True, display_name=body.name.strip()
+    )
+    if not made:
+        raise HTTPException(
+            400,
+            detail={
+                "code": "ACCOUNT_LINK_INVALID",
+                "message": (
+                    "This account link expired or was already used. "
+                    "Request a password link to sign in."
+                ),
+            },
+        )
+    session = sign_in(made.email, body.new_password, response)
+    if session is None:
+        raise HTTPException(409, detail="Please sign in to your account.")
     return session.as_payload()
 
 
@@ -1261,9 +1327,7 @@ def ask_cedar(question: Question, session: Session = Depends(require_session)) -
                 pathname=question.pathname,
             )
             if reply.unavailable:
-                raise cedar_service.CedarUnavailable(
-                    "Cedar reported that it is unavailable."
-                )
+                raise cedar_service.CedarUnavailable("Cedar reported that it is unavailable.")
         except cedar_service.CedarUnavailable:
             raise HTTPException(
                 status_code=503,
@@ -1307,3 +1371,6 @@ def ask_cedar(question: Question, session: Session = Depends(require_session)) -
             ),
         },
     )
+
+
+app.include_router(billing_router)

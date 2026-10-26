@@ -5,7 +5,7 @@ function handler(event) {
   var request = event.request;
   var host = request.headers.host.value;
   var uri = request.uri;
-  var apexLogin = host === "cedarpress.ai" && /^\/login\/?$/.test(uri);
+  var apexLogin = host === "cedarpress.ai" && /^\/(?:login|subscribe|create-account)\/?$/.test(uri);
   if (host === "www.cedarpress.ai" || apexLogin) {
     var query = [];
     var values = request.querystring || {};
@@ -33,7 +33,7 @@ function handler(event) {
 
   if (host === "app.cedarpress.ai") {
     var path = uri.length > 1 && uri.endsWith("/") ? uri.slice(0, -1) : uri;
-    var pages = ["/", "/login", "/articles", "/data", "/settings", "/methods", "/whats-new", "/priorities", "/record",
+    var pages = ["/", "/login", "/subscribe", "/create-account", "/articles", "/data", "/settings", "/methods", "/whats-new", "/priorities", "/record",
       "/tribal-data-request", "/research-access"];
     if (pages.indexOf(path) !== -1 || /^\/entity\/[^/]+$/.test(path) || /^\/articles\/[^/]+$/.test(path)) {
       // package.json copies this app shell before public-page prerendering.

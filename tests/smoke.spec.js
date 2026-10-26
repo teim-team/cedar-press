@@ -139,7 +139,7 @@ async function signIn(page, account = ACCOUNT) {
   await page.goto("/login");
   await page.getByLabel("Work email").fill(account.email);
   await page.getByLabel("Password", { exact: true }).fill(account.password);
-  await page.locator(".cp-gate__form").getByRole("button", { name: "Log in" }).click();
+  await page.locator(".cp-gate__form").getByRole("button", { name: "Sign in" }).click();
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
     "Know what’s shaping Indian Country",
   );
@@ -688,7 +688,7 @@ test.describe("the gate", () => {
     // where the panel is now the screen and there is no "outside" to click.
     // Both contracts are checked, because both are real: the phone's way out
     // is the close button, which is why it is 44px.
-    // The phone hides the Early access tab (the hero carries it), so Log in is what sits behind the panel there.
+    // The phone hides the Early access tab (the hero carries it), so Sign in is what sits behind the panel there.
     const behind = page.locator(testInfo.project.name === "phone" ? "#cp-tab-signin" : ".cp-door__tab--plans");
     await launcher.click();
     await expect(panel).toBeVisible();
@@ -744,7 +744,7 @@ test.describe("the gate", () => {
     await expect(page).toHaveURL(/\/login$/);
     await page.getByLabel("Work email").fill(ACCOUNT.email);
     await page.getByLabel("Password", { exact: true }).fill("not-the-password");
-    await page.locator(".cp-gate__form").getByRole("button", { name: "Log in" }).click();
+    await page.locator(".cp-gate__form").getByRole("button", { name: "Sign in" }).click();
     await expect(page.getByRole("alert")).toBeVisible();
     await expect(page).toHaveURL(/\/login$/);
   });
@@ -772,7 +772,7 @@ test.describe("the gate", () => {
     const panel = page.locator(".cp-login__card");
     await expect(panel.getByLabel("Work email")).toBeVisible();
     await expect(panel.getByLabel("Password", { exact: true })).toBeVisible();
-    await expect(panel.getByRole("button", { name: "Log in" })).toBeVisible();
+    await expect(panel.getByRole("button", { name: "Sign in" })).toBeVisible();
     for (const gone of [/preview build/i, /not access control/i, /your own browser/i]) {
       await expect(panel).not.toContainText(gone);
     }
@@ -1938,7 +1938,7 @@ test.describe("the door's use cases", () => {
     await expect(line.getByRole("link", { name: "Lumecon" })).toHaveCSS("color", "rgb(10, 127, 116)");
   });
 
-  // A Cedar Press reader signs in through the door's "Log in" link and the
+  // A Cedar Press reader signs in through the door's "Sign in" link and the
   // login page, with the suite's own account, after the band was added above
   // the strip: the link still goes to the form and the form still lets them in.
   test("a Cedar Press reader still signs in through the door", async ({ page }) => {

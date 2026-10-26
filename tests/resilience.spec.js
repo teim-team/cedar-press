@@ -23,7 +23,7 @@ async function signedIn(page) {
   await page.goto("/login");
   await page.getByLabel("Work email").fill(EMAIL);
   await page.getByLabel("Password", { exact: true }).fill(PASSWORD);
-  await page.locator(".cp-gate__form").getByRole("button", { name: "Log in" }).click();
+  await page.locator(".cp-gate__form").getByRole("button", { name: "Sign in" }).click();
   await expect(page.getByRole("heading", { level: 1 })).toContainText("Know what’s shaping Indian Country");
 }
 

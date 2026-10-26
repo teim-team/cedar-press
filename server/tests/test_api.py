@@ -255,9 +255,31 @@ class TestPasswordReset(unittest.TestCase):
             self.assertEqual(self.ask().status_code, 204)
         self.assertEqual(len(self.sent), 3)
 
+    def test_recovery_preserves_a_local_destination_and_rejects_external_urls(self) -> None:
+        response = client.post(
+            "/auth/password-reset",
+            json={
+                "email": "reader@example.org",
+                "next": "/record?collection=funding",
+            },
+        )
+        self.assertEqual(response.status_code, 204)
+        self.assertIn("/login?next=%2Frecord%3Fcollection%3Dfunding#reset=", self.sent[-1][1])
+        response = client.post(
+            "/auth/password-reset",
+            json={
+                "email": "reader@example.org",
+                "next": "//untrusted.invalid",
+            },
+        )
+        self.assertEqual(response.status_code, 204)
+        self.assertIn("/login#reset=", self.sent[-1][1])
+        self.assertNotIn("untrusted.invalid", self.sent[-1][1])
+
     def test_it_refuses_where_no_email_can_be_sent(self) -> None:
-        with mock.patch("cedar_press.app.validate_auth_configuration"), mock.patch.dict(
-            os.environ, {"CEDAR_PRESS_ENVIRONMENT": "production"}
+        with (
+            mock.patch("cedar_press.app.validate_auth_configuration"),
+            mock.patch.dict(os.environ, {"CEDAR_PRESS_ENVIRONMENT": "production"}),
         ):
             response = self.ask()
         self.assertEqual(response.status_code, 503)
@@ -929,9 +951,7 @@ class TestActivation(unittest.TestCase):
         # never issued at all are one answer, byte for byte, until the code
         # AND the address match.
         def ask(code: str, email: str):
-            return client.post(
-                "/press/activation/validate", json={"code": code, "email": email}
-            )
+            return client.post("/press/activation/validate", json={"code": code, "email": email})
 
         unissued = ask("TBN4-0000-0000", "guess@example.org")
         self.assertEqual(unissued.status_code, 400)

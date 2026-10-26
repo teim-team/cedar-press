@@ -161,8 +161,8 @@ export async function changePassword({ currentPassword, newPassword }) {
 }
 
 /** Email a reset link. Answers the same whether or not the address has an account. */
-export async function requestPasswordReset({ email }) {
-  return request("/auth/password-reset", { method: "POST", body: { email } });
+export async function requestPasswordReset({ email, next = "/" }) {
+  return request("/auth/password-reset", { method: "POST", body: { email, next } });
 }
 
 export async function confirmPasswordReset({ token, newPassword }) {
@@ -312,4 +312,45 @@ export async function submitResearchRequest({ text, useCase, priorityId, support
 
 export function getNeedEntityEvidence(cedarUid, { signal } = {}) {
   return request(`/press/entities/${encodeURIComponent(cedarUid)}/need-evidence`, { signal });
+}
+
+/* Account billing. Prices and customer ownership are resolved on the server. */
+export function fetchBilling({ signal } = {}) {
+  return request("/billing", { signal });
+}
+
+export function startBillingCheckout({ tier, discountCode = "" }) {
+  return request("/billing/checkout", { method: "POST", body: { tier, discount_code: discountCode } });
+}
+
+export function openBillingPortal() {
+  return request("/billing/portal", { method: "POST" });
+}
+
+export function changeBillingPlan() {
+  return request("/billing/change-plan", { method: "POST" });
+}
+
+export function fetchBillingPlans({ signal } = {}) {
+  return request("/billing/plans", { signal });
+}
+
+export function startGuestCheckout({ tier }) {
+  return request("/billing/guest/checkout", { method: "POST", body: { tier } });
+}
+
+export function fetchGuestCheckout() {
+  return request("/billing/guest/status");
+}
+
+export function checkAccountSetup(token) {
+  return request("/auth/account-setup/check", { method: "POST", body: { token } });
+}
+
+export function completeAccountSetup({ token, name, password }) {
+  return request("/auth/account-setup/confirm", { method: "POST", body: { token, name, new_password: password } });
+}
+
+export function resendGuestEmail() {
+  return request("/billing/guest/resend", { method: "POST" });
 }

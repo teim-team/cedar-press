@@ -31,10 +31,14 @@ ACCOUNTS = json.dumps(
         "pro@example.org": {"password": "correct-horse", "tier": "press_pro"},
         # Two seats, one subscription, declared.
         "one@bank.example": {
-            "password": "correct-horse", "tier": "press_pro", "account": "acct-bank"
+            "password": "correct-horse",
+            "tier": "press_pro",
+            "account": "acct-bank",
         },
         "two@bank.example": {
-            "password": "correct-horse", "tier": "press_pro", "account": "acct-bank"
+            "password": "correct-horse",
+            "tier": "press_pro",
+            "account": "acct-bank",
         },
     }
 )
@@ -65,7 +69,10 @@ class _Backend:
             db.migrate()
             db.execute(
                 "TRUNCATE cedar_press_subscribers, cedar_press_codes, cedar_press_password_resets,"
-                " cedar_press_login_identities, cedar_press_access_grants"
+                " cedar_press_login_identities, cedar_press_access_grants,"
+                " cedar_press_checkout_attempts, cedar_press_guest_checkouts,"
+                " cedar_press_refunds, cedar_press_payments,"
+                " cedar_press_invoices, cedar_press_subscriptions"
             )
             for email, tier in (("reader@example.org", "press"), ("pro@example.org", "press_pro")):
                 subscribers.create(email, "correct-horse", tier)
@@ -115,9 +122,7 @@ class _Backend:
             subscribers.account_id_for("two@bank.example"),
         )
         # And an address that declares nothing is its own subscription.
-        self.assertEqual(
-            subscribers.account_id_for("reader@example.org"), "reader@example.org"
-        )
+        self.assertEqual(subscribers.account_id_for("reader@example.org"), "reader@example.org")
 
     def test_a_code_creates_the_subscriber_it_names(self) -> None:
         made = subscribers.redeem("TBN4-9K2M-X7QD", "a-new-password")
@@ -355,7 +360,9 @@ class TestExpiryIsFailClosed(unittest.TestCase):
             {
                 "TBN4-BAD0-DATE": {"email": "typo@example.org", "tier": "press", "expires": "soon"},
                 "TBN4-GOOD-DATE": {
-                    "email": "fine@example.org", "tier": "press", "expires": "2999-01-01"
+                    "email": "fine@example.org",
+                    "tier": "press",
+                    "expires": "2999-01-01",
                 },
             }
         )

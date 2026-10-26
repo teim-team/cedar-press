@@ -246,8 +246,10 @@ def find(email: str) -> Subscriber | None:
         return None
     if db.configured():
         row = db.one(
-            "SELECT email, tier, account_id, password_hash, sessions_revoked_at"
-            " FROM cedar_press_subscribers WHERE lower(email) = %s",
+            "SELECT s.email, COALESCE(access.tier, 'free') AS tier, s.account_id,"
+            " s.password_hash, s.sessions_revoked_at FROM cedar_press_subscribers s"
+            " JOIN cedar_press_current_access access ON access.user_id=s.id"
+            " WHERE lower(s.email) = %s",
             (address,),
         )
         if not row:
@@ -337,6 +339,20 @@ def create(email: str, password: str, tier: str) -> Subscriber:
         with _session_lock:
             _session_revisions[address] = _session_revisions.get(address, 0) + 1
     return Subscriber(address, tier, account)
+
+
+def change_password(email: str, password: str) -> Subscriber | None:
+    """Change credentials without copying a resolved billing tier into legacy access."""
+    address = email.strip().lower()
+    if db.configured():
+        changed = db.execute(
+            "UPDATE cedar_press_subscribers SET password_hash=%s,updated_at=now()"
+            " WHERE lower(email)=%s",
+            (hash_password(password), address),
+        )
+        return find(address) if changed else None
+    found = find(address)
+    return create(address, password, found.tier) if found else None
 
 
 def exists(email: str) -> bool:
@@ -431,27 +447,43 @@ def issue_reset(email: str) -> str | None:
     return token
 
 
-def redeem_reset(token: str, password: str) -> Subscriber | None:
+def redeem_reset(
+    token: str, password: str, *, account_setup=False, display_name=None
+) -> Subscriber | None:
     """Set a new password from a reset token.
 
     None when the token is unknown, expired or already used.
     """
     key = _reset_hash(token or "")
     if db.configured():
-        row = db.one(
-            "UPDATE cedar_press_password_resets SET used_at = now()"
-            " WHERE token_hash = %s AND used_at IS NULL AND expires_at > now()"
-            " RETURNING email",
-            (key,),
-        )
-        email = row and row["email"]
+        with db.pool().connection() as conn, conn.cursor() as cur:
+            cur.execute(
+                "UPDATE cedar_press_password_resets SET used_at=now()"
+                " WHERE token_hash=%s AND used_at IS NULL AND expires_at>now()"
+                " AND (NOT %s OR EXISTS (SELECT 1 FROM cedar_press_subscribers s"
+                " JOIN cedar_press_guest_checkouts g ON g.user_id=s.id"
+                " WHERE s.email=cedar_press_password_resets.email AND s.password_hash IS NULL"
+                " AND g.status='complete')) RETURNING email",
+                (key, account_setup),
+            )
+            row = cur.fetchone()
+            if not row:
+                return None
+            email = row["email"]
+            cur.execute(
+                "UPDATE cedar_press_subscribers SET password_hash=%s,updated_at=now(),"
+                " email_verified_at=COALESCE(email_verified_at,now()),"
+                " display_name=COALESCE(%s,display_name) WHERE email=%s",
+                (hash_password(password), display_name, email),
+            )
+        return find(email)
     else:
         now = dt.datetime.now(dt.timezone.utc)
         email = next((e for e, (h, x) in _resets.items() if h == key and x > now), None)
         if email:
             del _resets[email]
     found = email and find(email)
-    return create(found.email, password, found.tier) if found else None
+    return change_password(found.email, password) if found else None
 
 
 # ── access codes ────────────────────────────────────────────────────────────

@@ -97,7 +97,7 @@ class TestAccountFoundation(unittest.TestCase):
         user = accounts.create_user(" Unpaid@Example.org ")
         self.assertEqual(user["email"], "unpaid@example.org")
         self.assertIsNone(user["email_verified_at"])
-        self.assertIsNone(subscribers.find(user["email"]).tier)
+        self.assertEqual(subscribers.find(user["email"]).tier, "free")
         self.assertIsNone(subscribers.authenticate(user["email"], "anything"))
         self.assertEqual(db.query(
             "SELECT * FROM cedar_press_access_grants WHERE user_id = %s", (user["id"],)
@@ -199,7 +199,7 @@ class TestAccountFoundation(unittest.TestCase):
             subscribers.redeem("EXISTING-IDENTITY-123", "must-not-reset")
         self.assertFalse(subscribers.find_code("EXISTING-IDENTITY-123").spent)
         self.assertIsNone(subscribers.find(user["email"]).password_hash)
-        self.assertIsNone(subscribers.find(user["email"]).tier)
+        self.assertEqual(subscribers.find(user["email"]).tier, "free")
 
     def test_google_identity_cannot_follow_an_unverified_legacy_email_edit(self):
         db.migrate()
