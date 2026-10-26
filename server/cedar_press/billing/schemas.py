@@ -1,12 +1,31 @@
-"""Public HTTP response models for billing routes."""
+"""HTTP request and response models for billing routes."""
 
 from datetime import datetime
 from typing import Literal
+from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 Tier = Literal["press", "press_pro"]
 Cohort = Literal["early_access", "standard"]
+
+
+class CheckoutRequest(BaseModel):
+    tier: Tier
+    discount_code: str = Field(default="", max_length=64)
+    replace_open: bool = False
+
+
+class CheckoutTarget(BaseModel):
+    checkout_id: UUID | None = None
+
+
+class SubscriptionRequest(BaseModel):
+    subscription_id: str | None = Field(default=None, min_length=1, max_length=255)
+
+
+class CheckoutStartRequest(BaseModel):
+    tier: Tier
 
 
 class RedirectResponse(BaseModel):

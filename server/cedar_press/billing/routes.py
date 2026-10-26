@@ -5,13 +5,11 @@ from __future__ import annotations
 import json
 import os
 import secrets
-from typing import Literal
 from uuid import UUID
 
 import stripe
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel, Field
 from starlette.concurrency import run_in_threadpool
 
 from cedar_press import ratelimit
@@ -20,33 +18,19 @@ from cedar_press.billing.dependencies import BillingServices, get_billing_servic
 from cedar_press.billing.errors import BillingError
 from cedar_press.billing.schemas import (
     BillingResponse,
+    CheckoutRequest,
+    CheckoutStartRequest,
     CheckoutStatusResponse,
+    CheckoutTarget,
     PlanResponse,
     RedirectResponse,
+    SubscriptionRequest,
 )
 from cedar_press.billing.stripe_gateway import API_VERSION
 from cedar_press.billing.utils import utc_now
 from cedar_press.session import Session, current_session
 
 router = APIRouter()
-
-
-class CheckoutRequest(BaseModel):
-    tier: Literal["press", "press_pro"]
-    discount_code: str = Field(default="", max_length=64)
-    replace_open: bool = False
-
-
-class CheckoutTarget(BaseModel):
-    checkout_id: UUID | None = None
-
-
-class SubscriptionRequest(BaseModel):
-    subscription_id: str | None = Field(default=None, min_length=1, max_length=255)
-
-
-class CheckoutStartRequest(BaseModel):
-    tier: Literal["press", "press_pro"]
 
 
 @router.get("/billing/plans", response_model=PlanResponse)
