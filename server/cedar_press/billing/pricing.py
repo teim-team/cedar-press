@@ -5,10 +5,10 @@ from __future__ import annotations
 import datetime as dt
 import json
 import os
-from dataclasses import dataclass
 from zoneinfo import ZoneInfo
 
 from cedar_press.billing.errors import BillingError, unavailable
+from cedar_press.billing.models import Price
 from cedar_press.billing.utils import reference
 
 AMOUNTS = {
@@ -26,21 +26,14 @@ def cohort_at(now: dt.datetime) -> str:
     )
 
 
-@dataclass(frozen=True)
-class Price:
-    id: str
-    tier: str
-    cohort: str
-
-    @property
-    def amount(self) -> int:
-        return AMOUNTS[self.cohort][self.tier]
-
-
 def prices() -> list[Price]:
     try:
         raw = json.loads(os.environ.get("CEDAR_PRESS_STRIPE_PRICES", "{}"))
-        result = [Price(raw[cohort][tier], tier, cohort) for cohort in AMOUNTS for tier in RANK]
+        result = [
+            Price(raw[cohort][tier], tier, cohort, AMOUNTS[cohort][tier])
+            for cohort in AMOUNTS
+            for tier in RANK
+        ]
         if any(not isinstance(p.id, str) or not p.id.startswith("price_") for p in result):
             raise ValueError
         if len({p.id for p in result}) != 4:
@@ -49,7 +42,9 @@ def prices() -> list[Price]:
         if not isinstance(legacy, list):
             raise ValueError
         for entry in legacy:
-            price = Price(entry["id"], entry["tier"], entry["cohort"])
+            price = Price(
+                entry["id"], entry["tier"], entry["cohort"], AMOUNTS[entry["cohort"]][entry["tier"]]
+            )
             if (
                 price.tier not in RANK
                 or price.cohort not in AMOUNTS

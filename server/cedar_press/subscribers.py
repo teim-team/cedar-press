@@ -40,6 +40,7 @@ import threading
 from dataclasses import dataclass
 
 from cedar_press import db
+from cedar_press.accounts.models import Subscriber as Subscriber
 
 TIERS = ("press", "press_pro")
 
@@ -54,13 +55,6 @@ class AlreadySubscribed(Exception):
     """
 
 
-@dataclass(frozen=True)
-class Subscriber:
-    email: str
-    tier: str | None
-    account_id: str
-    password_hash: str | None = None
-    session_revision: str = ""
 
 
 @dataclass(frozen=True)
@@ -418,6 +412,18 @@ RESET_LIFETIME = dt.timedelta(hours=1)
 
 def _reset_hash(token: str) -> str:
     return hashlib.sha256(token.encode("utf-8")).hexdigest()
+
+
+def legacy_setup_email(token_digest: str):
+    """Recognize outstanding setup links issued before migration 009."""
+    return db.one(
+        """SELECT s.email FROM cedar_press_password_resets r
+        JOIN cedar_press_subscribers s ON s.email=r.email
+        JOIN cedar_press_checkouts c ON c.user_id=s.id
+        WHERE r.token_hash=%s AND r.used_at IS NULL AND r.expires_at>now()
+        AND s.password_hash IS NULL AND c.status='complete'""",
+        (token_digest,),
+    )
 
 
 def issue_reset(email: str) -> str | None:

@@ -15,7 +15,8 @@ from unittest import mock
 from fastapi import HTTPException, Response
 from fastapi.testclient import TestClient
 
-from cedar_press import db, session, subscribers
+from cedar_press import db, subscribers
+from cedar_press.accounts.services import sessions as session
 
 
 class TestSessionLifecycle(unittest.TestCase):
@@ -305,7 +306,7 @@ class TestWorkspaceCors(unittest.TestCase):
         from cedar_press import priorities
 
         name = "cedar_press._workspace_cors_fixture"
-        path = Path(session.__file__).with_name("app.py")
+        path = Path(__file__).resolve().parents[1] / "cedar_press" / "app.py"
         with mock.patch.dict(
             os.environ,
             {
@@ -342,7 +343,7 @@ class TestWorkspaceCors(unittest.TestCase):
                     )
                     self.assertEqual(reply.status_code, 400)
                     self.assertNotIn("access-control-allow-origin", reply.headers)
-                    with mock.patch.object(module, "sign_out") as revoke:
+                    with mock.patch("cedar_press.accounts.api.routes.sign_out") as revoke:
                         denied = client.post(
                             "/auth/logout",
                             headers={

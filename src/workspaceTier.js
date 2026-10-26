@@ -4,7 +4,7 @@
  * Tier resolution and tier copy shared across the site.
  *
  * `workspace_tier` arrives on the session payload (`/me`, from the FastAPI
- * service in server/: session.py names the field for exactly this reader)
+ * service in server/: accounts/services/sessions.py names the field for exactly this reader)
  * and `resolveTier` reads it directly. Unknown or missing values fall back
  * to "sprout", the platform's rule for a provisioned account that has not
  * chosen a plan; the two Cedar Press tiers are `press` and `press_pro`.

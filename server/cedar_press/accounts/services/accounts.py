@@ -1,8 +1,8 @@
 """Account creation in the existing subscriber store, independent of paid access.
 
 No public registration or provider-token handling lives here. Existing passwords
-and subscriber authorization remain in subscribers.py until subscription-based
-access is implemented.
+and subscriber authorization remain in subscribers.py while that store is split
+by responsibility.
 """
 
 from __future__ import annotations

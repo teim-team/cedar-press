@@ -13,10 +13,10 @@ from fastapi.responses import JSONResponse
 from starlette.concurrency import run_in_threadpool
 
 from cedar_press import ratelimit
-from cedar_press.billing.checkout import COOKIE
-from cedar_press.billing.dependencies import BillingServices, get_billing_services
-from cedar_press.billing.errors import BillingError
-from cedar_press.billing.schemas import (
+from cedar_press.accounts.services.sessions import Session, current_session
+from cedar_press.billing.adapters.stripe import API_VERSION
+from cedar_press.billing.api.dependencies import BillingServices, get_billing_services
+from cedar_press.billing.api.schemas import (
     BillingResponse,
     CheckoutRequest,
     CheckoutStartRequest,
@@ -26,9 +26,9 @@ from cedar_press.billing.schemas import (
     RedirectResponse,
     SubscriptionRequest,
 )
-from cedar_press.billing.stripe_gateway import API_VERSION
+from cedar_press.billing.errors import BillingError
+from cedar_press.billing.services.checkout import COOKIE
 from cedar_press.billing.utils import utc_now
-from cedar_press.session import Session, current_session
 
 router = APIRouter()
 

@@ -13,9 +13,9 @@ from urllib.parse import parse_qs, urlsplit
 
 import stripe
 
-from cedar_press.billing.dependencies import create_billing_services
+from cedar_press.billing.adapters.stripe import API_VERSION, StripeAdapter
+from cedar_press.billing.api.dependencies import create_billing_services
 from cedar_press.billing.errors import BillingError
-from cedar_press.billing.stripe_gateway import API_VERSION, StripeGateway
 from tests.test_billing import PRICE_MAP, SETTINGS, price_data
 from tools.setup_stripe import setup
 
@@ -188,7 +188,7 @@ class Transport(stripe.HTTPClient):
         return json.dumps(result), 200, {"request-id": "req_fixture"}
 
 
-class TestStripeGateway(unittest.TestCase):
+class TestStripeAdapter(unittest.TestCase):
     def setUp(self):
         patch = mock.patch.dict(
             os.environ,
@@ -207,7 +207,7 @@ class TestStripeGateway(unittest.TestCase):
         patch.start()
         self.addCleanup(patch.stop)
         self.transport = Transport()
-        self.gateway = StripeGateway(
+        self.adapter = StripeAdapter(
             client=stripe.StripeClient(
                 "sk_test_synthetic", stripe_version=API_VERSION, http_client=self.transport
             )
@@ -220,29 +220,29 @@ class TestStripeGateway(unittest.TestCase):
             mock.patch.dict(os.environ, {"CEDAR_PRESS_STRIPE_SECRET_KEY": ""}),
             mock.patch("stripe.StripeClient", side_effect=AssertionError("unexpected real client")),
         ):
-            gateway = StripeGateway(client=client)
-            self.assertEqual(gateway.price("price_stub"), {"id": "price_stub", "currency": "usd"})
+            adapter = StripeAdapter(client=client)
+            self.assertEqual(adapter.price("price_stub"), {"id": "price_stub", "currency": "usd"})
         client.v1.prices.retrieve.assert_called_once_with("price_stub")
 
     def test_default_client_is_created_once_on_first_use(self):
         with mock.patch("stripe.StripeClient") as client_factory:
             client_factory.return_value.v1.prices.retrieve.return_value = {"id": "price_stub"}
-            gateway = StripeGateway()
+            adapter = StripeAdapter()
             client_factory.assert_not_called()
-            self.assertEqual(gateway.price("price_stub"), {"id": "price_stub"})
-            self.assertFalse(gateway.livemode)
-            self.assertEqual(gateway.price("price_stub"), {"id": "price_stub"})
+            self.assertEqual(adapter.price("price_stub"), {"id": "price_stub"})
+            self.assertFalse(adapter.livemode)
+            self.assertEqual(adapter.price("price_stub"), {"id": "price_stub"})
             client_factory.assert_called_once()
             self.assertEqual(client_factory.call_args.kwargs["stripe_version"], API_VERSION)
 
-    def test_composition_shares_one_gateway_without_requiring_stripe_configuration(self):
+    def test_composition_shares_one_adapter_without_requiring_stripe_configuration(self):
         with mock.patch.dict(os.environ, {"CEDAR_PRESS_STRIPE_SECRET_KEY": ""}):
             services = create_billing_services()
-            self.assertIsInstance(services.billing.gateway, StripeGateway)
-            self.assertIs(services.billing.gateway, services.checkout.gateway)
-            self.assertIs(services.billing.gateway, services.reconciler.gateway)
+            self.assertIsInstance(services.billing.adapter, StripeAdapter)
+            self.assertIs(services.billing.adapter, services.checkout.adapter)
+            self.assertIs(services.billing.adapter, services.reconciler.adapter)
             with self.assertRaises(BillingError):
-                _ = services.billing.gateway.livemode
+                _ = services.billing.adapter.livemode
             database = mock.Mock()
             database.one.return_value = {
                 "id": "user",
@@ -254,20 +254,20 @@ class TestStripeGateway(unittest.TestCase):
             self.assertFalse(services.billing.summary("reader@example.invalid")["available"])
 
     def test_sdk_resources_are_converted_and_pagination_is_followed(self):
-        self.assertEqual(self.gateway.price("price_fixture")["currency"], "usd")
+        self.assertEqual(self.adapter.price("price_fixture")["currency"], "usd")
         self.assertEqual(
-            self.gateway.customer({"id": "user", "email": "reader@example.org"}), "cus_fixture"
+            self.adapter.customer({"id": "user", "email": "reader@example.org"}), "cus_fixture"
         )
-        self.assertEqual(self.gateway.subscriptions("cus_fixture")[0]["id"], "sub_fixture")
-        self.assertEqual(self.gateway.subscription("sub_fixture")["id"], "sub_fixture")
-        self.assertEqual(self.gateway.invoices("sub_fixture")[0]["id"], "in_fixture")
-        self.assertEqual(self.gateway.invoice("in_fixture")["id"], "in_fixture")
-        self.assertEqual(self.gateway.lines("in_fixture")[0]["id"], "il_fixture")
-        self.assertEqual(self.gateway.invoice_payments("in_fixture")[0]["id"], "inpay_fixture")
-        self.assertEqual(self.gateway.payment("pi_fixture")["latest_charge"]["id"], "ch_fixture")
-        self.assertEqual(self.gateway.charge("ch_fixture")["id"], "ch_fixture")
-        self.assertEqual(self.gateway.refunds("ch_fixture")[0]["id"], "re_fixture")
-        self.assertEqual(self.gateway.refund("re_fixture")["id"], "re_fixture")
+        self.assertEqual(self.adapter.subscriptions("cus_fixture")[0]["id"], "sub_fixture")
+        self.assertEqual(self.adapter.subscription("sub_fixture")["id"], "sub_fixture")
+        self.assertEqual(self.adapter.invoices("sub_fixture")[0]["id"], "in_fixture")
+        self.assertEqual(self.adapter.invoice("in_fixture")["id"], "in_fixture")
+        self.assertEqual(self.adapter.lines("in_fixture")[0]["id"], "il_fixture")
+        self.assertEqual(self.adapter.invoice_payments("in_fixture")[0]["id"], "inpay_fixture")
+        self.assertEqual(self.adapter.payment("pi_fixture")["latest_charge"]["id"], "ch_fixture")
+        self.assertEqual(self.adapter.charge("ch_fixture")["id"], "ch_fixture")
+        self.assertEqual(self.adapter.refunds("ch_fixture")[0]["id"], "re_fixture")
+        self.assertEqual(self.adapter.refund("re_fixture")["id"], "re_fixture")
 
     def test_sdk_checkout_request_contains_server_price_and_stable_idempotency_key(self):
         attempt = {
@@ -277,23 +277,23 @@ class TestStripeGateway(unittest.TestCase):
             "promotion_id": "promo_fixture",
             "expires_at": dt.datetime.now(dt.timezone.utc) + dt.timedelta(minutes=31),
         }
-        result = self.gateway.checkout("cus_fixture", attempt, "http://localhost:5173")
+        result = self.adapter.checkout("cus_fixture", attempt, "http://localhost:5173")
         self.assertEqual(result["id"], "cs_fixture")
         _, _, params, headers = self.transport.calls[-1]
         self.assertEqual(params["line_items[0][price]"], ["price_fixture"])
         self.assertEqual(params["managed_payments[enabled]"], ["false"])
         self.assertEqual(params["discounts[0][promotion_code]"], ["promo_fixture"])
         self.assertEqual(headers["Idempotency-Key"], "press-checkout-attempt")
-        self.assertEqual(self.gateway.checkout_status("cs_fixture")["status"], "open")
-        self.assertEqual(self.gateway.find_checkout("cus_fixture", "attempt")["id"], "cs_fixture")
-        self.assertIsNone(self.gateway.find_checkout("cus_fixture", "different"))
+        self.assertEqual(self.adapter.checkout_status("cs_fixture")["status"], "open")
+        self.assertEqual(self.adapter.find_checkout("cus_fixture", "attempt")["id"], "cs_fixture")
+        self.assertIsNone(self.adapter.find_checkout("cus_fixture", "different"))
 
     def test_sdk_expiration_and_bounded_recovery_use_supported_parameters(self):
-        self.assertEqual(self.gateway.expire_checkout("cs_fixture")["status"], "expired")
+        self.assertEqual(self.adapter.expire_checkout("cs_fixture")["status"], "expired")
         method, path, _, headers = self.transport.calls[-1]
         self.assertEqual((method, path), ("post", "/v1/checkout/sessions/cs_fixture/expire"))
         self.assertEqual(headers["Idempotency-Key"], "press-expire-cs_fixture")
-        self.gateway.find_checkout(None, "attempt", created_after=10, created_before=20)
+        self.adapter.find_checkout(None, "attempt", created_after=10, created_before=20)
         self.assertEqual(self.transport.calls[-1][2]["created[gte]"], ["10"])
         self.assertEqual(self.transport.calls[-1][2]["created[lte]"], ["20"])
 
@@ -306,7 +306,7 @@ class TestStripeGateway(unittest.TestCase):
             "promotion_id": None,
             "expires_at": dt.datetime.now(dt.timezone.utc) + dt.timedelta(minutes=31),
         }
-        self.gateway.checkout(None, attempt, "http://localhost:5173", account_setup=True)
+        self.adapter.checkout(None, attempt, "http://localhost:5173", account_setup=True)
         _, _, params, _ = self.transport.calls[-1]
         self.assertNotIn("customer", params)
         self.assertNotIn("customer_email", params)
@@ -320,30 +320,30 @@ class TestStripeGateway(unittest.TestCase):
         self.assertNotIn("discounts[0][promotion_code]", params)
 
     def test_only_the_approved_first_invoice_coupon_is_accepted(self):
-        self.assertEqual(self.gateway.promotion("SUMMIT"), "promo_fixture")
+        self.assertEqual(self.adapter.promotion("SUMMIT"), "promo_fixture")
         self.transport.coupon_valid = False
         with self.assertRaises(BillingError):
-            self.gateway.promotion("SUMMIT")
+            self.adapter.promotion("SUMMIT")
         with (
             mock.patch.dict(os.environ, {"CEDAR_PRESS_STRIPE_SUMMIT_COUPON": "different"}),
             self.assertRaises(BillingError),
         ):
-            self.gateway.promotion("SUMMIT")
+            self.adapter.promotion("SUMMIT")
 
     def test_portal_prices_preserve_cohort_and_downgrades_wait_until_term_end(self):
         self.assertTrue(
-            self.gateway.portal("cus_fixture", "early_access", "http://localhost:5173").startswith(
+            self.adapter.portal("cus_fixture", "early_access", "http://localhost:5173").startswith(
                 "https://billing.stripe.com/"
             )
         )
         self.transport.portal_safe = False
         with self.assertRaises(BillingError):
-            self.gateway.portal("cus_fixture", "early_access", "http://localhost:5173")
+            self.adapter.portal("cus_fixture", "early_access", "http://localhost:5173")
         with self.assertRaises(BillingError):
-            self.gateway.portal("cus_fixture", "standard", "http://localhost:5173")
+            self.adapter.portal("cus_fixture", "standard", "http://localhost:5173")
 
     def test_plan_change_uses_stripe_confirmation_and_only_cohort_target(self):
-        self.gateway.portal(
+        self.adapter.portal(
             "cus_fixture", "early_access", "http://localhost:5173", True, "sub_fixture"
         )
         _, _, params, _ = self.transport.calls[-1]
@@ -365,15 +365,15 @@ class TestStripeGateway(unittest.TestCase):
                 "items": {"data": [{"id": "si_standard", "price": price_data(cohort="standard")}]},
             },
         ]
-        with mock.patch.object(self.gateway, "subscriptions", return_value=subscriptions) as fetch:
-            self.gateway.portal(
+        with mock.patch.object(self.adapter, "subscriptions", return_value=subscriptions) as fetch:
+            self.adapter.portal(
                 "cus_fixture", "early_access", "http://localhost:5173", False, "sub_old"
             )
             fetch.assert_not_called()
             params = self.transport.calls[-1][2]
             self.assertEqual(params["configuration"], ["bpc_management"])
             self.assertNotIn("flow_data[type]", params)
-            self.gateway.portal(
+            self.adapter.portal(
                 "cus_fixture", "standard", "http://localhost:5173", True, "sub_standard"
             )
             params = self.transport.calls[-1][2]
@@ -385,7 +385,7 @@ class TestStripeGateway(unittest.TestCase):
                 [PRICE_MAP["standard"]["press_pro"]],
             )
         with self.assertRaises(BillingError):
-            self.gateway.portal("cus_fixture", "early_access", "http://localhost:5173", True)
+            self.adapter.portal("cus_fixture", "early_access", "http://localhost:5173", True)
 
     def test_first_run_catalog_accepts_empty_compose_configuration(self):
         self.transport.bootstrap = True
@@ -396,7 +396,7 @@ class TestStripeGateway(unittest.TestCase):
             ),
             contextlib.redirect_stdout(io.StringIO()) as output,
         ):
-            setup(self.gateway, "SUMMIT")
+            setup(self.adapter, "SUMMIT")
         self.assertIn("CEDAR_PRESS_STRIPE_PRICES=", output.getvalue())
         self.assertIn("CEDAR_PRESS_STRIPE_LEGACY_PRICES=[]", output.getvalue())
 
@@ -408,21 +408,21 @@ class TestStripeGateway(unittest.TestCase):
             raise AssertionError("Recovery fetched beyond the matching session")
 
         client.v1.checkout.sessions.list.return_value.auto_paging_iter.return_value = rows()
-        gateway = StripeGateway(client)
+        adapter = StripeAdapter(client)
         self.assertEqual(
-            gateway.find_checkout(None, "attempt", created_after=10, created_before=20)["id"],
+            adapter.find_checkout(None, "attempt", created_after=10, created_before=20)["id"],
             "cs_match",
         )
         client.v1.checkout.sessions.list.assert_called_once_with(
             {"limit": 100, "created": {"gte": 10, "lte": 20}}
         )
         with self.assertRaises(BillingError):
-            gateway.find_checkout(None, "attempt")
+            adapter.find_checkout(None, "attempt")
 
     def test_bootstrap_encodes_all_four_annual_prices_and_cohort_portals(self):
         self.transport.bootstrap = True
         with contextlib.redirect_stdout(io.StringIO()) as output:
-            setup(self.gateway, "SUMMIT")
+            setup(self.adapter, "SUMMIT")
         self.assertIn("CEDAR_PRESS_STRIPE_PRICES=", output.getvalue())
         creates = [
             params

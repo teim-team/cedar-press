@@ -56,7 +56,7 @@ from cedar_press import (
     repository,  # noqa: E402
 )
 from cedar_press import collections as launch  # noqa: E402
-from cedar_press import session as session_module  # noqa: E402
+from cedar_press.accounts.services import sessions as session_module
 from cedar_press.app import app  # noqa: E402
 
 client = TestClient(app)
@@ -201,7 +201,8 @@ class TestPasswordReset(unittest.TestCase):
         self.addCleanup(session_module.forget_activated_for_tests)
         self.sent: list[tuple[str, str]] = []
         patcher = mock.patch(
-            "cedar_press.app._send_reset_link", lambda email, link: self.sent.append((email, link))
+            "cedar_press.accounts.api.routes._send_reset_link",
+            lambda email, link: self.sent.append((email, link))
         )
         patcher.start()
         self.addCleanup(patcher.stop)
@@ -278,7 +279,7 @@ class TestPasswordReset(unittest.TestCase):
 
     def test_it_refuses_where_no_email_can_be_sent(self) -> None:
         with (
-            mock.patch("cedar_press.app.validate_auth_configuration"),
+            mock.patch("cedar_press.accounts.api.dependencies.validate_auth_configuration"),
             mock.patch.dict(os.environ, {"CEDAR_PRESS_ENVIRONMENT": "production"}),
         ):
             response = self.ask()

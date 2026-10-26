@@ -132,11 +132,15 @@ production uses configured SMTP with STARTTLS. The confirmation page supports
 separately named Stripe products; older price IDs remain recognized through
 `CEDAR_PRESS_STRIPE_LEGACY_PRICES`.
 Billing uses `BillingService`, `CheckoutService` and `BillingReconciler`,
-with `StripeGateway` for Stripe calls. Shared account email delivery lives in
-`cedar_press.account_email`, outside the billing package.
-FastAPI dependencies share one `StripeGateway`, which creates its SDK client on
-first use or accepts an injected client through `StripeGateway(client=...)`. `AccountSetupService` handles activation and leased email
-delivery (migration 009), outside SQL transactions. Webhooks run off the event
+with `StripeAdapter` in `billing/adapters/stripe.py` for Stripe calls.
+Both packages keep HTTP routes, schemas and dependencies under `api/`, application
+services under `services/`, and domain records in `models.py`. Accounts owns
+authentication, sessions, setup links and email transport. Billing owns purchase delivery tracking in `billing/services/delivery.py`.
+FastAPI dependencies share one `StripeAdapter`, which creates its SDK client on
+first use or accepts an injected client through `StripeAdapter(client=...)`.
+`AccountSetupService` handles account activation; `CheckoutEmailService` handles
+leased purchase email delivery (migration 009), outside SQL transactions. Webhooks
+run off the event
 loop and refresh affected objects; the repair CLI reconciles full history.
 Billing management targets an owned subscription, including repeat purchases.
 General portal sessions use `CEDAR_PRESS_STRIPE_PORTALS.management` with price

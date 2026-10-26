@@ -11,17 +11,18 @@ import stripe
 from fastapi.testclient import TestClient
 
 from cedar_press import accounts, db, ratelimit, subscribers
-from cedar_press.account_email import AccountEmailSender
-from cedar_press.billing.dependencies import create_billing_services
+from cedar_press.accounts.errors import AccountError
+from cedar_press.accounts.services.email import AccountEmailSender
+from cedar_press.billing.api.dependencies import create_billing_services
 from cedar_press.billing.errors import BillingError
 from tests import test_billing as fixtures
-from tests.test_billing import PG, FakeGateway
+from tests.test_billing import PG, FakeAdapter
 
 EMAIL = "checkout@example.invalid"
 SECRET = "synthetic-browser-secret-for-testing-only"
 
 
-class CheckoutGateway(FakeGateway):
+class CheckoutAdapter(FakeAdapter):
     def checkout(self, customer, attempt, app_url, account_setup=False):
         result = super().checkout(customer, attempt, app_url)
         result.update(
@@ -50,11 +51,11 @@ class TestCheckout(unittest.TestCase):
 
     def setUp(self):
         self.setUp_database()
-        self.gateway = CheckoutGateway()
+        self.adapter = CheckoutAdapter()
         self.sender = mock.Mock(spec=AccountEmailSender)
         self.sender.configured.return_value = True
         self.mail = self.sender.send_link
-        self.services = create_billing_services(gateway=self.gateway, email_sender=self.sender)
+        self.services = create_billing_services(adapter=self.adapter, email_sender=self.sender)
         self.service = self.services.checkout
         self.billing = self.services.billing
         self.reconciler = self.services.reconciler
@@ -66,7 +67,7 @@ class TestCheckout(unittest.TestCase):
         row = db.one("SELECT * FROM cedar_press_checkouts ORDER BY created_at DESC LIMIT 1")
         self.customer = "cus_checkout_" + str(row["id"])
         self.paid_subscription()
-        session = self.gateway.sessions[str(row["id"])]
+        session = self.adapter.sessions[str(row["id"])]
         session.update(
             status="complete",
             customer=self.customer,
@@ -200,7 +201,7 @@ class TestCheckout(unittest.TestCase):
             db.one("SELECT status FROM cedar_press_account_email_deliveries")["status"], "pending"
         )
         self.mail.side_effect = None
-        self.services.setup.send_claim(self.customer)
+        self.services.delivery.send_claim(self.customer)
         self.assertEqual(
             db.one("SELECT status FROM cedar_press_account_email_deliveries")["status"], "sent"
         )
@@ -247,7 +248,7 @@ class TestCheckout(unittest.TestCase):
         db.execute(
             "UPDATE cedar_press_account_setup_links SET email='other@example.invalid'",
         )
-        with self.assertRaises(BillingError):
+        with self.assertRaises(AccountError):
             self.services.setup.account_details(token)
         self.assertIsNone(self.services.setup.confirm(token, "new-password-long", "Reader"))
 
@@ -266,7 +267,7 @@ class TestCheckout(unittest.TestCase):
         self.reconciler.process_event(self.complete())
         db.execute("""UPDATE cedar_press_account_email_deliveries SET status='sending',
             lease_until=now()-interval '1 second'""")
-        self.services.setup.send_claim(self.customer)
+        self.services.delivery.send_claim(self.customer)
         self.assertEqual(self.mail.call_count, 2)
         self.assertEqual(
             db.one("SELECT status,attempts FROM cedar_press_account_email_deliveries"),
@@ -275,7 +276,7 @@ class TestCheckout(unittest.TestCase):
 
     def test_retries_reuse_reservation_and_other_browsers_cannot_read_it(self):
         self.assertEqual(self.start(), self.start())
-        self.assertEqual(len(self.gateway.sessions), 1)
+        self.assertEqual(len(self.adapter.sessions), 1)
         with self.assertRaises(BillingError):
             self.service.status("another-browser-secret")
 
@@ -311,13 +312,13 @@ class TestCheckout(unittest.TestCase):
         )
 
     def test_checkout_recovery_passes_the_reservation_creation_window(self):
-        self.gateway.fail_checkout = True
+        self.adapter.fail_checkout = True
         with self.assertRaises(stripe.APIConnectionError):
             self.start()
         db.execute("UPDATE cedar_press_checkouts SET expires_at=now()+interval '29 minutes'")
         row = db.one("SELECT * FROM cedar_press_checkouts")
         with mock.patch.object(
-            self.gateway, "find_checkout", wraps=self.gateway.find_checkout
+            self.adapter, "find_checkout", wraps=self.adapter.find_checkout
         ) as find:
             self.start()
         self.assertEqual(
@@ -329,12 +330,12 @@ class TestCheckout(unittest.TestCase):
         )
 
     def test_lost_checkout_response_reuses_idempotency_key(self):
-        self.gateway.fail_checkout = True
+        self.adapter.fail_checkout = True
         with self.assertRaises(stripe.APIConnectionError):
             self.start()
         self.start()
-        self.assertEqual(len(self.gateway.sessions), 1)
-        self.assertEqual(len(set(self.gateway.attempts)), 1)
+        self.assertEqual(len(self.adapter.sessions), 1)
+        self.assertEqual(len(set(self.adapter.attempts)), 1)
 
     def test_existing_credentials_are_preserved_and_new_customer_history_is_linked(self):
         self.start()
@@ -386,7 +387,7 @@ class TestCheckout(unittest.TestCase):
     def test_wrong_checkout_metadata_cannot_provision_an_identity(self):
         self.start()
         event = self.complete()
-        next(iter(self.gateway.sessions.values()))["client_reference_id"] = "another-attempt"
+        next(iter(self.adapter.sessions.values()))["client_reference_id"] = "another-attempt"
         with self.assertRaises(BillingError):
             self.reconciler.process_event(event)
         self.assertIsNone(subscribers.find(EMAIL))

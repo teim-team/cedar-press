@@ -5,8 +5,8 @@ from __future__ import annotations
 import argparse
 
 from cedar_press import db
-from cedar_press.billing.dependencies import create_billing_services
-from cedar_press.billing.stripe_gateway import StripeGateway
+from cedar_press.billing.adapters.stripe import StripeAdapter
+from cedar_press.billing.api.dependencies import create_billing_services
 
 
 def main(argv=None):
@@ -15,13 +15,13 @@ def main(argv=None):
     parser.parse_args(argv)
     if not db.configured():
         parser.error("Reconciliation requires DATABASE_URL")
-    gateway = StripeGateway()
-    reconciler = create_billing_services(gateway=gateway).reconciler
+    adapter = StripeAdapter()
+    reconciler = create_billing_services(adapter=adapter).reconciler
     for reservation in db.query(
         "SELECT session_id FROM cedar_press_checkouts "
         "WHERE status IN ('pending','open') AND session_id IS NOT NULL"
     ):
-        session = gateway.checkout_status(reservation["session_id"])
+        session = adapter.checkout_status(reservation["session_id"])
         customer = session.get("customer")
         if isinstance(customer, str) and session.get("payment_status") == "paid":
             reconciler.reconcile_customer(customer)

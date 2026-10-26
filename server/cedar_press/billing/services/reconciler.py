@@ -5,10 +5,10 @@ from __future__ import annotations
 from contextlib import contextmanager
 
 from cedar_press import db
+from cedar_press.billing.adapters.stripe import StripeAdapter, stripe_url
 from cedar_press.billing.errors import BillingError
-from cedar_press.billing.interfaces import BillingGateway
+from cedar_press.billing.interfaces import BillingAdapter
 from cedar_press.billing.pricing import RANK, identify_price, validate_price
-from cedar_press.billing.stripe_gateway import StripeGateway, stripe_url
 from cedar_press.billing.utils import instant, reference, verify_customer, verify_write
 
 
@@ -36,18 +36,23 @@ class BillingReconciler:
     """Synchronize provider state while keeping transaction boundaries visible."""
 
     def __init__(
-        self, checkout_service, setup_service, *, gateway: BillingGateway | None = None, database=db
+        self,
+        checkout_service,
+        delivery_service,
+        *,
+        adapter: BillingAdapter | None = None,
+        database=db,
     ):
         self.checkout = checkout_service
-        self.setup = setup_service
-        self._gateway = gateway
+        self.delivery = delivery_service
+        self._adapter = adapter
         self.db = database
 
     @property
-    def gateway(self):
-        if self._gateway is None:
-            self._gateway = StripeGateway()
-        return self._gateway
+    def adapter(self):
+        if self._adapter is None:
+            self._adapter = StripeAdapter()
+        return self._adapter
 
     def _payment(self, cur, user_id, customer, snapshot, invoice_id=None):
         payment, refunds = snapshot
@@ -199,27 +204,27 @@ class BillingReconciler:
             )
 
     def _load_payment(self, payment_id):
-        payment = self.gateway.payment(payment_id)
+        payment = self.adapter.payment(payment_id)
         charge = reference(payment.get("latest_charge"))
-        return payment, self.gateway.refunds(charge) if charge else []
+        return payment, self.adapter.refunds(charge) if charge else []
 
     def _load_subscription(self, subscription_id, *, full=False, invoice=None):
-        subscription = self.gateway.subscription(subscription_id)
+        subscription = self.adapter.subscription(subscription_id)
         if full:
-            invoices = self.gateway.invoices(subscription_id)
+            invoices = self.adapter.invoices(subscription_id)
         elif invoice:
             invoices = [invoice]
         else:
             latest = reference(subscription.get("latest_invoice"))
-            invoices = [self.gateway.invoice(latest)] if latest else []
+            invoices = [self.adapter.invoice(latest)] if latest else []
         snapshots = []
         for row in invoices:
             payments = []
-            for record in self.gateway.invoice_payments(row["id"]):
+            for record in self.adapter.invoice_payments(row["id"]):
                 payment_id = reference((record.get("payment") or {}).get("payment_intent"))
                 if payment_id:
                     payments.append(self._load_payment(payment_id))
-            snapshots.append((row, self.gateway.lines(row["id"]), payments))
+            snapshots.append((row, self.adapter.lines(row["id"]), payments))
         return subscription, snapshots
 
     @contextmanager
@@ -247,20 +252,20 @@ class BillingReconciler:
                 return False
             snapshots = [
                 self._load_subscription(s["id"], full=True)
-                for s in self.gateway.subscriptions(customer)
+                for s in self.adapter.subscriptions(customer)
             ]
             with conn.transaction():
                 if not user:
                     user = self.checkout.activate(cur, customer, prepared)
                 for snapshot in snapshots:
                     self._subscription(cur, user["id"], customer, snapshot)
-        self.setup.send_claim(customer)
+        self.delivery.send_claim(customer)
         return True
 
     def process_event(self, event):
         obj = event["data"]["object"]
         event_type, object_id = event["type"], obj["id"]
-        if event.get("livemode") is not self.gateway.livemode:
+        if event.get("livemode") is not self.adapter.livemode:
             raise BillingError("WEBHOOK_MODE_INVALID", "Webhook mode does not match this service.")
         customer = reference(obj.get("customer"))
         self.db.execute(
@@ -271,7 +276,7 @@ class BillingReconciler:
         try:
             # Resolve the customer for refund events before taking its session lock.
             if event_type.startswith("refund."):
-                charge = self.gateway.charge(reference(self.gateway.refund(object_id)["charge"]))
+                charge = self.adapter.charge(reference(self.adapter.refund(object_id)["charge"]))
                 customer = reference(charge.get("customer"))
             with self._customer_connection(customer or event["id"]) as conn, conn.cursor() as cur:
                 cur.execute(
@@ -302,7 +307,7 @@ class BillingReconciler:
                         if event_type.startswith("customer.subscription."):
                             subscription_id = object_id
                         elif event_type.startswith("invoice."):
-                            invoice = self.gateway.invoice(object_id)
+                            invoice = self.adapter.invoice(object_id)
                             verify_customer(invoice, customer)
                             subscription_id = reference(
                                 invoice.get("subscription")
@@ -311,17 +316,17 @@ class BillingReconciler:
                                 .get("subscription")
                             )
                         elif event_type.startswith("checkout.session."):
-                            checkout = self.gateway.checkout_status(object_id)
+                            checkout = self.adapter.checkout_status(object_id)
                             verify_customer(checkout, customer)
                             subscription_id = reference(checkout.get("subscription"))
                         elif event_type.startswith("payment_intent."):
                             payment = self._load_payment(object_id)
                         else:
                             charge = (
-                                self.gateway.charge(object_id)
+                                self.adapter.charge(object_id)
                                 if event_type == "charge.refunded"
-                                else self.gateway.charge(
-                                    reference(self.gateway.refund(object_id)["charge"])
+                                else self.adapter.charge(
+                                    reference(self.adapter.refund(object_id)["charge"])
                                 )
                             )
                             verify_customer(charge, customer)
@@ -367,4 +372,4 @@ class BillingReconciler:
             raise
         # Delivery failure leaves financial state processed. A duplicate webhook
         # or the repair command retries the separately persisted email job.
-        self.setup.send_claim(customer)
+        self.delivery.send_claim(customer)

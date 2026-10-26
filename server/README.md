@@ -113,11 +113,14 @@ Checkout starts at `/subscribe`; paid customers create an account through
 a single-use email link. Stripe collects the email and discount code. Existing emails keep their
 credentials and sign in normally.
 The `cedar_press.billing` package uses `BillingService`, `CheckoutService` and `BillingReconciler`,
-with `StripeGateway` for Stripe calls. Shared account email delivery lives in
-`cedar_press.account_email`, outside the billing package.
-Dependencies share one `StripeGateway`; its client initializes on first use.
-Tests can inject `StripeGateway(client=...)`.
-`AccountSetupService` handles activation and retryable email delivery.
+with `StripeAdapter` in `billing/adapters/stripe.py` for Stripe calls.
+Both packages keep HTTP routes, schemas and dependencies under `api/`, application
+services under `services/`, and domain records in `models.py`. Accounts owns
+authentication, sessions, setup links and email transport. Billing owns purchase delivery tracking in `billing/services/delivery.py`.
+Dependencies share one `StripeAdapter`; its client initializes on first use.
+Tests can inject `StripeAdapter(client=...)`.
+`AccountSetupService` handles activation; `CheckoutEmailService` handles purchase
+email delivery and retries.
 Google sign-in remains separate work. See
 [DATABASE.md](DATABASE.md) for the [schema ERD](DATABASE.md#schema-erd) and local Docker setup.
 

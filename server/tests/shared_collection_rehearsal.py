@@ -27,8 +27,8 @@ def main():
     from lumecon_data.collection import build_collection_catalog, verify_collection_release
 
     from cedar_press import repository, subscribers
+    from cedar_press.accounts.services.sessions import Session, current_session
     from cedar_press.app import app
-    from cedar_press.session import Session, current_session
 
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--store", required=True, type=Path)

@@ -5,10 +5,10 @@ from __future__ import annotations
 import datetime as dt
 
 from cedar_press import db
+from cedar_press.billing.adapters.stripe import StripeAdapter, stripe_url
 from cedar_press.billing.errors import BillingError, unavailable
-from cedar_press.billing.interfaces import BillingGateway
+from cedar_press.billing.interfaces import BillingAdapter
 from cedar_press.billing.pricing import AMOUNTS, cohort_at, price_for, prices, validate_price
-from cedar_press.billing.stripe_gateway import StripeGateway, stripe_url
 from cedar_press.billing.utils import application_url, utc_now
 
 
@@ -16,18 +16,18 @@ class BillingService:
     """Checkout, billing portal and account history with explicit dependencies."""
 
     def __init__(
-        self, *, gateway: BillingGateway | None = None, database=db, clock=None, app_url=None
+        self, *, adapter: BillingAdapter | None = None, database=db, clock=None, app_url=None
     ):
-        self._gateway = gateway
+        self._adapter = adapter
         self.db = database
         self.clock = clock or utc_now
         self.app_url = app_url or application_url
 
     @property
-    def gateway(self):
-        if self._gateway is None:
-            self._gateway = StripeGateway()
-        return self._gateway
+    def adapter(self):
+        if self._adapter is None:
+            self._adapter = StripeAdapter()
+        return self._adapter
 
     def account(self, email):
         if not self.db.configured():
@@ -44,12 +44,12 @@ class BillingService:
         user = self.account(email)
         cohort = cohort_at(self.clock())
         chosen = price_for(tier, cohort)
-        validate_price(self.gateway.price(chosen.id), chosen)
+        validate_price(self.adapter.price(chosen.id), chosen)
         promotion = None
         if discount_code:
             if cohort != "early_access":
                 raise BillingError("DISCOUNT_INVALID", "That discount code is not available.")
-            promotion = self.gateway.promotion(discount_code)
+            promotion = self.adapter.promotion(discount_code)
         url = self.app_url()
         # Persist the intent before the external call, so a timeout retries the same
         # idempotency key rather than creating a second Checkout Session.
@@ -63,7 +63,7 @@ class BillingService:
             )
             user = cur.fetchone()
             if not user["stripe_customer_id"]:
-                user["stripe_customer_id"] = self.gateway.customer(user)
+                user["stripe_customer_id"] = self.adapter.customer(user)
                 cur.execute(
                     """
                     UPDATE cedar_press_subscribers SET stripe_customer_id=%s,
@@ -73,7 +73,7 @@ class BillingService:
                 )
             if any(
                 s["status"] not in {"canceled", "incomplete_expired"}
-                for s in self.gateway.subscriptions(user["stripe_customer_id"])
+                for s in self.adapter.subscriptions(user["stripe_customer_id"])
             ):
                 raise BillingError(
                     "SUBSCRIPTION_EXISTS", "Manage your existing subscription instead.", 409
@@ -87,7 +87,7 @@ class BillingService:
             )
             attempt = cur.fetchone()
             if attempt and attempt["session_id"]:
-                session = self.gateway.checkout_status(attempt["session_id"])
+                session = self.adapter.checkout_status(attempt["session_id"])
                 if session["status"] == "open":
                     if attempt["price_id"] != chosen.id or attempt["promotion_id"] != promotion:
                         if not replace_open:
@@ -96,7 +96,7 @@ class BillingService:
                                 "Finish or replace your open checkout first.",
                                 409,
                             )
-                        session = self.gateway.expire_checkout(session["id"])
+                        session = self.adapter.expire_checkout(session["id"])
                         if session["status"] != "expired":
                             raise BillingError(
                                 "CHECKOUT_PROCESSING", "Your payment is processing.", 409
@@ -119,7 +119,7 @@ class BillingService:
                     raise BillingError(
                         "CHECKOUT_EXISTS", "Retry your original checkout first.", 409
                     )
-                recovered = self.gateway.find_checkout(
+                recovered = self.adapter.find_checkout(
                     user["stripe_customer_id"],
                     str(attempt["id"]),
                     created_after=int(attempt["created_at"].timestamp()) - 60,
@@ -152,7 +152,7 @@ class BillingService:
             if not attempt:
                 if any(
                     s["status"] not in {"canceled", "incomplete_expired"}
-                    for s in self.gateway.subscriptions(user["stripe_customer_id"])
+                    for s in self.adapter.subscriptions(user["stripe_customer_id"])
                 ):
                     raise BillingError(
                         "SUBSCRIPTION_EXISTS", "Manage your existing subscription instead.", 409
@@ -189,9 +189,9 @@ class BillingService:
             ):
                 raise BillingError("CHECKOUT_EXPIRED", "Please start checkout again.", 409)
             session = (
-                self.gateway.checkout_status(attempt["session_id"])
+                self.adapter.checkout_status(attempt["session_id"])
                 if attempt["session_id"]
-                else self.gateway.checkout(user["stripe_customer_id"], attempt, url)
+                else self.adapter.checkout(user["stripe_customer_id"], attempt, url)
             )
             cur.execute(
                 "UPDATE cedar_press_checkout_attempts SET session_id=%s,status=%s WHERE id=%s",
@@ -228,7 +228,7 @@ class BillingService:
         cohort = row["cohort"] if row else cohort_at(self.clock())
         customer = row["customer_id"] if row and row["customer_id"] else user["stripe_customer_id"]
         return {
-            "url": self.gateway.portal(
+            "url": self.adapter.portal(
                 customer, cohort, self.app_url(), change_plan, row["id"] if row else None
             )
         }
@@ -237,7 +237,7 @@ class BillingService:
         user = self.account(email)
         try:
             prices()
-            _ = self.gateway.livemode
+            _ = self.adapter.livemode
             configured = True
         except BillingError:
             configured = False

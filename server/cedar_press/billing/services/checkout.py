@@ -7,11 +7,11 @@ import hashlib
 import re
 
 from cedar_press import db, ratelimit
-from cedar_press.account_email import AccountEmailSender
+from cedar_press.accounts.services.email import AccountEmailSender
+from cedar_press.billing.adapters.stripe import StripeAdapter, stripe_url
 from cedar_press.billing.errors import BillingError, unavailable
-from cedar_press.billing.interfaces import BillingGateway
+from cedar_press.billing.interfaces import BillingAdapter
 from cedar_press.billing.pricing import cohort_at, price_for, validate_price
-from cedar_press.billing.stripe_gateway import StripeGateway, stripe_url
 from cedar_press.billing.utils import application_url, reference, utc_now, verify_customer
 
 COOKIE = "cedar_press_checkout"
@@ -27,34 +27,34 @@ class CheckoutService:
     def __init__(
         self,
         *,
-        gateway: BillingGateway | None = None,
+        adapter: BillingAdapter | None = None,
         database=db,
         clock=None,
         app_url=None,
         email_sender=None,
-        setup_service=None,
+        delivery_service=None,
         limiter=ratelimit,
     ):
         self.email_sender = email_sender or AccountEmailSender()
-        self.setup = setup_service
+        self.delivery = delivery_service
         self.limiter = limiter
-        self._gateway = gateway
+        self._adapter = adapter
         self.db = database
         self.clock = clock or utc_now
         self.app_url = app_url or application_url
 
     @property
-    def gateway(self):
-        if self._gateway is None:
-            self._gateway = StripeGateway()
-        return self._gateway
+    def adapter(self):
+        if self._adapter is None:
+            self._adapter = StripeAdapter()
+        return self._adapter
 
     def start(self, tier, secret):
         if not self.db.configured() or not self.email_sender.configured():
             raise unavailable()
         cohort = cohort_at(self.clock())
         chosen = price_for(tier, cohort)
-        validate_price(self.gateway.price(chosen.id), chosen)
+        validate_price(self.adapter.price(chosen.id), chosen)
         with self.db.pool().connection() as conn, conn.cursor() as cur:
             cur.execute("SELECT pg_advisory_xact_lock(hashtextextended(%s,0))", (digest(secret),))
             cur.execute(
@@ -102,9 +102,9 @@ class CheckoutService:
                     409,
                 )
             if attempt["session_id"]:
-                session = self.gateway.checkout_status(attempt["session_id"])
+                session = self.adapter.checkout_status(attempt["session_id"])
             elif attempt["expires_at"] <= self.clock() + dt.timedelta(minutes=30):
-                session = self.gateway.find_checkout(
+                session = self.adapter.find_checkout(
                     None,
                     str(attempt["id"]),
                     created_after=int(attempt["created_at"].timestamp()) - 60,
@@ -118,7 +118,7 @@ class CheckoutService:
                     conn.commit()
                     raise BillingError("CHECKOUT_EXPIRED", "Please start checkout again.", 409)
             else:
-                session = self.gateway.checkout(None, attempt, self.app_url(), account_setup=True)
+                session = self.adapter.checkout(None, attempt, self.app_url(), account_setup=True)
             if session["status"] != "open":
                 raise BillingError(
                     "CHECKOUT_PROCESSING",
@@ -148,9 +148,9 @@ class CheckoutService:
         )
         attempt = cur.fetchone()
         session = (
-            self.gateway.checkout_status(attempt["session_id"])
+            self.adapter.checkout_status(attempt["session_id"])
             if attempt
-            else self.gateway.find_checkout_for_customer(customer)
+            else self.adapter.find_checkout_for_customer(customer)
         )
         if not session:
             return None
@@ -171,7 +171,7 @@ class CheckoutService:
             )
         if session["status"] != "complete" or session.get("payment_status") != "paid":
             return None
-        subscription = self.gateway.subscription(reference(session.get("subscription")))
+        subscription = self.adapter.subscription(reference(session.get("subscription")))
         verify_customer(subscription, customer)
         if subscription["status"] != "active":
             return None
@@ -265,9 +265,9 @@ class CheckoutService:
             raise BillingError(
                 "EMAIL_RATE_LIMIT", "Please wait before requesting another email.", 429
             )
-        self.setup.request_resend(row["id"])
+        self.delivery.request_resend(row["id"])
         try:
-            self.setup.send_claim(row["customer_id"])
+            self.delivery.send_claim(row["customer_id"])
         except (OSError, RuntimeError):
             raise BillingError(
                 "EMAIL_UNAVAILABLE", "We couldn’t send the email. Please try again shortly.", 503

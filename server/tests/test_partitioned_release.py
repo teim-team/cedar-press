@@ -15,8 +15,8 @@ from unittest.mock import patch
 from fastapi.testclient import TestClient
 
 from cedar_press import repository, subscribers
+from cedar_press.accounts.services.sessions import Session, current_session
 from cedar_press.app import _VerifiedDownloadResponse, app
-from cedar_press.session import Session, current_session
 
 
 class PartitionedReleaseTest(unittest.TestCase):

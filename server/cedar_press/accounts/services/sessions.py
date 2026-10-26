@@ -17,28 +17,18 @@ import json
 import os
 import time
 from base64 import b64decode, urlsafe_b64encode
-from dataclasses import dataclass, field
 from hashlib import sha256
 
 from fastapi import Cookie, HTTPException, Response
 
 from cedar_press import ratelimit, subscribers
+from cedar_press.accounts.models import Session
 
 COOKIE = "cedar_press_session"
 MAX_AGE = 60 * 60 * 24 * 14
 ACCOUNT_TIERS = (*subscribers.TIERS, "free")
 _CLOCK_SKEW = 60
 _SECRET = os.environ.get("CEDAR_PRESS_SECRET") or os.urandom(32).hex()
-
-
-@dataclass(frozen=True)
-class Session:
-    email: str
-    tier: str
-    revision: str = field(default="", compare=False, repr=False)
-
-    def as_payload(self) -> dict[str, object]:
-        return {"email": self.email, "workspace_tier": self.tier}
 
 
 def account_id_for(email: str) -> str:

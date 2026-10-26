@@ -32,7 +32,7 @@ def stripe_url(value: str) -> str:
     return value
 
 
-class StripeGateway:
+class StripeAdapter:
     """Stripe operations with an injected client or one initialized on first use."""
 
     def __init__(self, client: stripe.StripeClient | None = None):

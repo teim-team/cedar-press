@@ -3,12 +3,7 @@
 from typing import Protocol
 
 
-class EmailSender(Protocol):
-    def configured(self) -> bool: ...
-    def send_link(self, email: str, link: str, *, sign_in: bool = False) -> None: ...
-
-
-class BillingGateway(Protocol):
+class BillingAdapter(Protocol):
     livemode: bool
 
     def price(self, price_id: str) -> dict: ...

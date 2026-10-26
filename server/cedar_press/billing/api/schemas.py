@@ -6,8 +6,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field
 
-Tier = Literal["press", "press_pro"]
-Cohort = Literal["early_access", "standard"]
+from cedar_press.billing.models import Cohort, Tier
 
 
 class CheckoutRequest(BaseModel):

@@ -18,8 +18,8 @@ from unittest.mock import patch
 from fastapi.testclient import TestClient
 
 from cedar_press import grove_exchange, release_research, repository, subscribers
+from cedar_press.accounts.services.sessions import Session, current_session
 from cedar_press.app import app
-from cedar_press.session import Session, current_session
 
 
 def run_one(item, output):

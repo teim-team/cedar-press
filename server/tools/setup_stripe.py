@@ -10,15 +10,15 @@ from zoneinfo import ZoneInfo
 
 import stripe
 
+from cedar_press.billing.adapters.stripe import StripeAdapter, plain
 from cedar_press.billing.pricing import AMOUNTS
-from cedar_press.billing.stripe_gateway import StripeGateway, plain
 from cedar_press.billing.utils import application_url
 
 
-def setup(gateway, code):
-    client = gateway.client.v1
+def setup(adapter, code):
+    client = adapter.client.v1
     products, prices, portals = {}, {}, {}
-    existing = gateway.rows(client.products.list({"limit": 100}))
+    existing = adapter.rows(client.products.list({"limit": 100}))
     for tier in ("press", "press_pro"):
         matches = [
             p
@@ -46,7 +46,7 @@ def setup(gateway, code):
         prices[cohort] = {}
         for tier, amount in amounts.items():
             lookup = f"cedar_press_{cohort}_{tier}_annual_v4"
-            found = gateway.rows(client.prices.list({"lookup_keys": [lookup], "limit": 100}))
+            found = adapter.rows(client.prices.list({"lookup_keys": [lookup], "limit": 100}))
             if found:
                 price = found[0]
                 if (
@@ -70,7 +70,7 @@ def setup(gateway, code):
                 )
             prices[cohort][tier] = price["id"]
         portals[cohort] = {}
-        configurations = gateway.rows(client.billing_portal.configurations.list({"limit": 100}))
+        configurations = adapter.rows(client.billing_portal.configurations.list({"limit": 100}))
         for current_tier in ("press", "press_pro"):
             target_tier = "press_pro" if current_tier == "press" else "press"
             found = [
@@ -120,7 +120,7 @@ def setup(gateway, code):
                 )
             )
             portals[cohort][current_tier] = config["id"]
-    configurations = gateway.rows(client.billing_portal.configurations.list({"limit": 100}))
+    configurations = adapter.rows(client.billing_portal.configurations.list({"limit": 100}))
     management = [
         c
         for c in configurations
@@ -161,7 +161,7 @@ def setup(gateway, code):
             },
             options={"idempotency_key": coupon_id},
         )
-    promotions = gateway.rows(
+    promotions = adapter.rows(
         client.promotion_codes.list({"code": code, "active": True, "limit": 100})
     )
     for promotion in promotions:
@@ -197,10 +197,10 @@ def main(argv=None):
     parser.add_argument("--live", action="store_true", help="Explicitly permit live-account setup")
     parser.add_argument("--summit-code", default="GREATLAKES2026")
     args = parser.parse_args(argv)
-    gateway = StripeGateway()
-    if gateway.livemode and not args.live:
+    adapter = StripeAdapter()
+    if adapter.livemode and not args.live:
         parser.error("Setup defaults to sandbox; live setup requires --live")
-    setup(gateway, args.summit_code)
+    setup(adapter, args.summit_code)
 
 
 if __name__ == "__main__":

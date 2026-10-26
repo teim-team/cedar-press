@@ -144,8 +144,8 @@ def run_one(item, output, temporary, timeout):
     from lumecon_data.collection import collection_dir
 
     from cedar_press import repository, subscribers
+    from cedar_press.accounts.services.sessions import Session, current_session
     from cedar_press.app import app
-    from cedar_press.session import Session, current_session
 
     key, rid, store = item["collection"], item["release"], Path(item["store"])
     collection_path = collection_dir(store, key, rid)
