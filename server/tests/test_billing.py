@@ -22,8 +22,8 @@ from fastapi.testclient import TestClient
 from cedar_press import db, session, subscribers
 from cedar_press.billing.dependencies import create_billing_services, get_billing_services
 from cedar_press.billing.errors import BillingError
-from cedar_press.billing.invoice_coverage import coverage
 from cedar_press.billing.pricing import AMOUNTS, cohort_at, price_for, prices, validate_price
+from cedar_press.billing.reconciler import coverage
 from cedar_press.billing.service import BillingService
 from cedar_press.billing.stripe_gateway import API_VERSION, StripeGateway, stripe_url
 from cedar_press.billing.utils import application_url, instant
