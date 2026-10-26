@@ -52,8 +52,7 @@ that database. Do not remove the volume if you want to keep local transactions.
 ## Account foundation and direct billing
 
 Cedar Press owns account creation, Stripe billing, renewals and upgrades
-(Brian Kim, 2026-10-25). Older TBN-only payment descriptions below describe
-the legacy access-code integration and do not define the billing roadmap.
+(Brian Kim, 2026-10-25). There are no access codes.
 The Terraform deployment uses a dedicated PostgreSQL database; sharing a
 database with teim-app remains an optional compatibility arrangement.
 
@@ -184,20 +183,20 @@ setting it once.
 ## Unset
 
 Exactly what the service did before this existed: subscribers parsed out of
-`CEDAR_PRESS_ACCOUNTS`, access codes out of `CEDAR_PRESS_CODES`, anything
-activated at runtime held in a dict the process forgets on restart, and Cedar
+`CEDAR_PRESS_ACCOUNTS`, anything created at runtime held in a dict the
+process forgets on restart, and Cedar
 Points in a SQLite file at `CEDAR_PRESS_DB` that defaults to `:memory:`.
 
 That is right for the preview deployment and for the test suite. It is wrong
 for anything a subscriber has paid for: a restart loses every account created
-by activation, and an access code that was spent becomes spendable again.
+at runtime.
 
 ## Set
 
     pip install -e server[postgres]
     DATABASE_URL=postgresql://user:pass@host/db
 
-Subscribers, access codes, the Cedar Points ledger and the priorities
+Subscribers, the Cedar Points ledger and the priorities
 catalogue become rows in the platform's own database, beside teim-app's
 `users`. Setting the variable is the whole of the installation: the service
 applies any migration that has not run when it opens the store.
@@ -218,7 +217,7 @@ applied.
 | table                         | what it holds                                           |
 | ----------------------------- | ------------------------------------------------------- |
 | `cedar_press_subscribers`     | who holds a subscription, on which tier, and their hash  |
-| `cedar_press_codes`           | codes Tribal Business News issued, and when each was spent |
+| `cedar_press_codes`           | retired access codes, kept for their history; nothing reads or writes it |
 | `cedar_press_account_setup_links` | hashed, expiring setup links bound to account and email |
 | `cedar_press_account_email_deliveries` | delivery attempts and leases per paid checkout |
 | `cedar_press_password_resets` | hashed, single-use password reset tokens and their expiry |
@@ -232,7 +231,7 @@ applied.
 
 teim-app owns `users(id, email, password_hash, workspace_tier)`, and
 `workspace_tier` is the TMAP ladder — seed, sprout, sapling, tree. Cedar
-Press's ladder is `press` and `press_pro`, sold through Tribal Business News,
+Press's ladder is `press` and `press_pro`, sold through Stripe on this site,
 and a person can hold one, the other, both or neither. So the press tier is a
 row in `cedar_press_subscribers` rather than a column on `users`, and the two
 ladders never have to be collapsed into one.

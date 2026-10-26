@@ -19,7 +19,6 @@ User-agent: *
 Allow: /$
 Allow: /tribal-data-request
 Allow: /research-access
-Disallow: /articles
 Disallow: /data
 Disallow: /whats-new
 Disallow: /methods

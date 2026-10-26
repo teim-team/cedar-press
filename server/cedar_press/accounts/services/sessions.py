@@ -36,10 +36,6 @@ def account_id_for(email: str) -> str:
     return subscribers.account_id_for(email)
 
 
-def account_exists(email: str) -> bool:
-    return subscribers.exists(email)
-
-
 def forget_activated_for_tests() -> None:
     subscribers.forget_activated_for_tests()
 

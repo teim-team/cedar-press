@@ -10,13 +10,13 @@
 -- THE SEAM WITH `users`. teim-app owns `users(id UUID, email UNIQUE,
 -- password_hash, workspace_tier)`; `workspace_tier` is the TMAP ladder
 -- (seed/sprout/sapling/tree) and is none of Cedar Press's business. Cedar
--- Press's ladder is press/press_pro, sold through Tribal Business News, and
+-- Press's ladder is press/press_pro, sold on its own, and
 -- a person can hold one, the other, both or neither. So the press tier is a
 -- row here rather than a column there, and the two ladders never have to be
 -- collapsed into one.
 --
--- `user_id` is nullable ON PURPOSE. A Tribal Business News subscriber may
--- arrive with an access code before they have ever signed into the platform,
+-- `user_id` is nullable ON PURPOSE. A subscriber may arrive before they have
+-- ever signed into the platform,
 -- and refusing them until a `users` row exists would make the platform a
 -- prerequisite for a product sold separately. `email` is the key that always
 -- exists; `user_id` is bound when the platform account does, and the unique
@@ -68,7 +68,7 @@ BEGIN
   END IF;
 END $$;
 
--- Access codes, issued by Tribal Business News and spent once.
+-- Access codes, spent once. Retired: nothing reads or writes this table now.
 --
 -- `spent_at` rather than a delete, because "this code was used, on this day,
 -- by this address" is the question asked when a subscriber says they never

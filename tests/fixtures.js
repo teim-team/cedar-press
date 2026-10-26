@@ -28,11 +28,6 @@ export const test = base.extend({
 
 export { expect };
 
-/** The article service refusing, to reach the "Articles are unavailable" states that a connected API does not show. */
-export function articlesDown(page) {
-  return page.route("**/api/press/articles**", (route) => route.fulfill({ status: 503, body: "" }));
-}
-
 /** A current release feed with three collections, which the fixture API (no release builds) cannot serve. */
 export function releasesFeed(page) {
   const releases = ["funding", "deals", "federal-register"].map((id, i) => {

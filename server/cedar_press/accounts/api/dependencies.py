@@ -45,7 +45,7 @@ def _guard(request: Request, bucket: str, attempts: int) -> None:
     """Refuse a caller who has spent their attempts.
 
     Keyed by bucket as well as by client, so exhausting the sign-in allowance
-    does not also lock the same person out of activation — those are different
+    does not also lock the same person out of a password reset — those are different
     tasks and a subscriber may legitimately be doing the second after failing
     the first.
     """

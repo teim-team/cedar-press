@@ -1,8 +1,8 @@
 /**
  * The session context: { user, loading, login, logout, refreshSession,
  * sessionUnreachable, retrySession }. The session is a signed HTTP-only
- * cookie; nothing is kept in browser storage. There is no self-serve account
- * creation: accounts exist because Tribal Business News issued an entitlement.
+ * cookie; nothing is kept in browser storage. Accounts are created from the
+ * emailed setup link that follows a Stripe checkout.
  */
 import { createContext } from "react";
 

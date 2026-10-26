@@ -1,6 +1,13 @@
 /** One source display shared by real sample previews and the full record view. */
 export default function SourceCitation({ source, compact = false }) {
   if (!source) return <span>Source details are unavailable.</span>;
+  // In a table row the source is one link; the record page carries the citation.
+  if (compact) {
+    const publisher = source.publisher ?? "Publisher not established";
+    return source.url
+      ? <a className="cp-rec__open" href={source.url} target="_blank" rel="noreferrer" title={publisher} aria-label={`Open cited source: ${publisher}`}>Open</a>
+      : <span className="cp-rec__fine">{publisher}</span>;
+  }
   return (
     <div className="cp-rec__source">
       <strong>{source.publisher ?? "Publisher not established"}</strong>
@@ -9,14 +16,12 @@ export default function SourceCitation({ source, compact = false }) {
       {source.periodText ? <span className="cp-rec__fine">{source.periodText}</span> : null}
       {source.evidenceBasis ? <span className="cp-rec__fine">{source.evidenceBasis.label}: {source.evidenceBasis.text}</span> : null}
       {source.url ? <a href={source.url} target="_blank" rel="noreferrer">Open cited source <span aria-hidden="true">&#8599;</span></a> : null}
-      {!compact ? <>
-        {source.publicationDate ? <span className="cp-rec__fine">Published: {source.publicationDate}</span> : null}
-        {source.snapshotDate ? <span className="cp-rec__fine">Source snapshot: {source.snapshotDate}</span> : null}
-        {source.retrievedDate ? <span className="cp-rec__fine">Retrieved: {source.retrievedDate}</span> : null}
-        {source.originalDocumentSha256 ? <span className="cp-rec__fine">Original document SHA-256: <code>{source.originalDocumentSha256}</code></span> : null}
-        <p>{source.citation}</p>
-        {source.gaps.map((gap) => <span className="cp-rec__fine" key={gap}>{gap}</span>)}
-      </> : null}
+      {source.publicationDate ? <span className="cp-rec__fine">Published: {source.publicationDate}</span> : null}
+      {source.snapshotDate ? <span className="cp-rec__fine">Source snapshot: {source.snapshotDate}</span> : null}
+      {source.retrievedDate ? <span className="cp-rec__fine">Retrieved: {source.retrievedDate}</span> : null}
+      {source.originalDocumentSha256 ? <span className="cp-rec__fine">Original document SHA-256: <code>{source.originalDocumentSha256}</code></span> : null}
+      <p>{source.citation}</p>
+      {source.gaps.map((gap) => <span className="cp-rec__fine" key={gap}>{gap}</span>)}
     </div>
   );
 }

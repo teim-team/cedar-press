@@ -37,8 +37,8 @@ rules.
 Until 2026-09-02 this client carried Cedar Grove's modules under the
 platform's paths, so that re-syncing one was a copy. The owner retired that
 model then, and nothing re-syncs from Grove. The paths are vestigial names:
-`src/features/`, `src/components/` and `src/pages/` each hold only a `grove/`
-directory, and every file under the four `grove/` paths is Cedar Press.
+`src/features/` and `src/pages/` each hold only a `grove/` directory, and
+every file under the `grove/` paths is Cedar Press.
 
 **The rename is a named next step, not done here.**
 
@@ -47,23 +47,23 @@ each test run, the breakdowns included, and `test_rename_plan_gate.py` injects
 a stale figure to prove the comparison fails. Re-measured with:
 
 ```
-git grep -I -o -E '(features|pages|components|styles)/grove'   # references
+git grep -I -o -E '(features|pages|styles)/grove'              # references
 git ls-files src/<dir>/grove                                   # files to move
 ```
 
 | | |
 |---|---|
-| Files to move | 182 — `features/grove` 129, `pages/grove` 48, `components/grove` 1, `styles/grove` 4 |
-| Path references to rewrite | 409, across 87 files |
-| Referencing files inside `src/` | 56 — `pages/` 39, `features/` 14, `context/` 1, `components/` 1, `main.jsx` 1 |
-| Referencing files outside `src/` | 31 — `server/cedar_press/` 7, `scripts/` 7, `docs/` 6, `server/tests/` 5, `tests/` 2, `data/` 2, `.env.example` 1, `eslint.config.js` 1 |
+| Files to move | 168 — `features/grove` 120, `pages/grove` 44, `styles/grove` 4 |
+| Path references to rewrite | 358, across 80 files |
+| Referencing files inside `src/` | 50 — `pages/` 36, `features/` 12, `context/` 1, `main.jsx` 1 |
+| Referencing files outside `src/` | 30 — `server/cedar_press/` 6, `scripts/` 7, `docs/` 6, `server/tests/` 5, `tests/` 2, `data/` 2, `.env.example` 1, `eslint.config.js` 1 |
 
 The reason this was deferred, open pull requests that touched the same files,
 has expired.
 
 It is a mechanical rename with no behaviour change, and it should land as its
-own commit: the four directories move to `press/` and the references are
-rewritten in one pass. The question "did all 409 references get rewritten?"
+own commit: the three directories move to `press/` and the references are
+rewritten in one pass. The question "did all 358 references get rewritten?"
 is one the build, the suites and the smoke run answer, and a reader cannot
 answer it from a diff. Prose (Markdown, comments, `.env.example`) is what no build sees,
 which is why `test_rename_plan.py` counts textual occurrences rather than
@@ -79,9 +79,8 @@ src/
   main.jsx                 route table and providers
   api.js                   platform API client
   context/                 session provider and the useAuth hook
-  features/grove/          collection, release, entitlement and article models
+  features/grove/          collection, release and entitlement models
                            (+ their unit tests, run by `npm run test`)
-  components/grove/        figure renderers shared with the platform
   pages/grove/             the pages, their chrome and their page-local parts
   styles/                  tokens (index, redesign) and the press stylesheet
 public/                    fonts, imagery, CNAME
@@ -97,8 +96,8 @@ from that module rather than writing a string.
 ## Pages
 
 The overview states what the service is and indexes the sections, with each
-section's standing read from the catalog. `Articles` and `Data` are the two
-content sections; `What's new`, `Methods`, `Tribal data request` and
+section's standing read from the catalog. `Data` is the content section;
+`What's new`, `Methods`, `Tribal data request` and
 `Research access` stand alone so each URL can be sent to someone directly.
 `PressChrome.jsx` owns the masthead, its section nav and the footer, so the
 pages cannot drift apart.
@@ -129,7 +128,7 @@ Every request has a deadline, body included: 15 seconds
 (`REQUEST_TIMEOUT_MS`), 45 for the research preview and 60 for Cedar, whose
 server-side waits are 30 and 45. A miss rejects with code `TIMEOUT`, a
 dropped connection with `NETWORK`, and `isUnreachable(error)` tells either
-from a refusal. The session check, an article and the collection
+from a refusal. The session check and the collection
 spreadsheets answer an unreachable service with a Retry rather than a
 verdict ("no dataset for this account"); the session's notice is portalled
 outside `#root` so the prerender cannot capture it. Before the deadline a
@@ -145,7 +144,6 @@ The API compresses (`GZipMiddleware`, over 1 kB): `/press/collections` is
 | `POST /press/activation`, `/press/activation/validate` | Subscription activation |
 | `GET /press/collections` | The catalog this subscription can see |
 | `GET /press/releases` | Release history |
-| `GET /press/articles` | Published briefs |
 | `GET /press/collections/:id/download` | A release file, served as a blob |
 | `GET /press/collections/:id/profile` | The collection's data dictionary |
 | `POST /cedar/ask` | Cedar, scoped to this surface (see **Cedar** below) |
@@ -339,8 +337,8 @@ identically.
 and client token are both configured, and imports the SDK dynamically so a
 deployment without telemetry never downloads it. It reports errors and
 performance plus a small set of named product events — signed in, section
-opened, collection viewed and downloaded, locked collection tapped, article
-opened, Cedar asked. There is deliberately no page-wide
+opened, collection viewed and downloaded, locked collection tapped, Cedar
+asked. There is deliberately no page-wide
 click or scroll capture: behavioural exhaust nobody reads is a privacy cost
 with no product return. Subscribers are identified by tier and an opaque id;
 email addresses are never sent.

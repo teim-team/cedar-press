@@ -409,7 +409,7 @@ class TestPressCatalogSnapshot(unittest.TestCase):
         cls.js = _javascript_press()
 
     def test_the_committed_snapshot_is_what_the_dump_writes(self) -> None:
-        # Everything, not just the catalogue: the articles and release notes
+        # Everything, not just the catalogue: the release notes
         # in this file are transcribed editorial copy, and a stale one is a
         # misquotation.
         snapshot = json.loads(

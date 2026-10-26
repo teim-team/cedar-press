@@ -9,7 +9,7 @@
 // asks is asked plainly: more detail means better-curated collections, and
 // a reader who does not want to answer never sees it again.
 import { useCallback, useEffect, useState } from "react";
-import { contactHref } from "../../features/grove/appLink.js";
+import { LUMECON_URL, contactHref } from "../../features/grove/appLink.js";
 import { Link } from "react-router";
 
 import { changePassword } from "../../api";
@@ -19,7 +19,6 @@ import { PressInfluence } from "./PressInfluence";
 import { useFadeIn } from "../../features/grove/useFadeIn";
 import { canReadCedarPress } from "../../features/grove/pressAccess";
 import { loadWork, saveWork, workOptions } from "../../features/grove/readerWork.js";
-import { LUMECON_URL } from "../../features/grove/pressArticles";
 import { PRESS_TIERS } from "../../features/grove/pressCatalog";
 import { PRESS_REQUEST_PATH, PRESS_RESEARCH_PATH } from "../../features/grove/pressRoutes";
 import { resolveTier } from "../../workspaceTier.js";

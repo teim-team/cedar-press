@@ -9,7 +9,7 @@ import { useState } from "react";
 import { Link, NavLink } from "react-router";
 
 import { useAuth } from "../../context/useAuth";
-import { CONTACT_EMAIL, contactHref } from "../../features/grove/appLink.js";
+import { CONTACT_EMAIL, LUMECON_URL, contactHref } from "../../features/grove/appLink.js";
 import { useNarrow } from "../../features/grove/useNarrow.js";
 import { canReadCedarPress } from "../../features/grove/pressAccess";
 import { useDismissable } from "./useDismissable.jsx";
@@ -33,9 +33,7 @@ function initialsOf(email) {
   return (local.slice(0, 2) || "?").toUpperCase();
 }
 
-import { LUMECON_URL, TBN_URL } from "../../features/grove/pressArticles";
 import {
-  PRESS_ARTICLES_PATH,
   PRESS_DATA_PATH,
   PRESS_METHODS_PATH,
   PRESS_PRIORITIES_PATH,
@@ -45,14 +43,12 @@ import {
   PRESS_WHATS_NEW_PATH,
 } from "../../features/grove/pressRoutes";
 
-// The order the owner set, 2026-09-14: the collections are the product, the
-// briefs are what Cedar wrote from them, and Priorities is where a subscriber
-// changes what comes next. What's new and Methods are reference, so they
+// The order the owner set, 2026-09-14: the collections are the product, and
+// Priorities is where a subscriber changes what comes next. What's new and Methods are reference, so they
 // follow. The same order runs in the hub tiles and the footer, because three
 // navigations in three orders is three different maps of one site.
 const NAV = [
   { id: "data", label: "Collections", to: PRESS_DATA_PATH },
-  { id: "articles", label: "Research Briefs", to: PRESS_ARTICLES_PATH },
   { id: "priorities", label: "Priorities", to: PRESS_PRIORITIES_PATH },
   { id: "whats-new", label: "What’s new", to: PRESS_WHATS_NEW_PATH },
   { id: "methods", label: "Methods", to: PRESS_METHODS_PATH },
@@ -63,9 +59,9 @@ const NAV = [
  *
  * The nav is on every page rather than a menu the front page hands out once,
  * so a reader can cross the service from wherever they landed — a citation
- * link, a shared brief — without going home first. `section` marks which
- * entry is current; a leaf page passes the section it belongs to (an article
- * marks Articles), so the nav still says where you are.
+ * link, a shared record — without going home first. `section` marks which
+ * entry is current; a leaf page passes the section it belongs to (a record
+ * marks Collections), so the nav still says where you are.
  *
  * `nav={false}` is for the public program pages read by someone signed out:
  * every section link would land them on the gate, and a row of doors that
@@ -278,9 +274,8 @@ export function PressMast({ section = null }) {
             <span className="cp-mast__word">CEDAR PRESS</span>
           </Link>
         )}
-        {/* Who made it and who sells it, said plainly — to visitors. "A ×
-            partnership" left both questions open; a signed-in reader has
-            already answered them. */}
+        {/* Who made it, said plainly to visitors; a signed-in reader has
+            already answered that. */}
         {signedIn ? (
           // ONE LOCKUP, BOTH SIDES OF THE DOOR.
           // The door's bar reads CEDAR PRESS | TRUSTED INTELLIGENCE FOR
@@ -288,14 +283,12 @@ export function PressMast({ section = null }) {
           // the product dropped its own positioning line at the moment
           // somebody became a customer. The attribution below is still
           // withheld from a signed-in reader for the reason it always was —
-          // they have answered who made it and who sold it — but the standing
+          // they have answered who made it — but the standing
           // line stays, the way a masthead's does.
           <span className="cp-mast__of cp-mast__of--line">Trusted intelligence for Indian Country</span>
         ) : (
           <span className="cp-mast__of">
-            Built by <a href={LUMECON_URL} target="_blank" rel="noreferrer">Lumecon</a>. Available
-            exclusively through{" "}
-            <a href={TBN_URL} target="_blank" rel="noreferrer">Tribal Business News</a>.
+            Built by <a href={LUMECON_URL} target="_blank" rel="noreferrer">Lumecon</a>.
           </span>
         )}
         {/* The section menu rides the same row as the lockup on a phone, so
@@ -365,7 +358,6 @@ export function PressFoot({ flush = false, nav = true }) {
           {nav ? (
             <>
               <Link to={PRESS_DATA_PATH}>Collections</Link>
-              <Link to={PRESS_ARTICLES_PATH}>Research Briefs</Link>
               <Link to={PRESS_PRIORITIES_PATH}>Priorities</Link>
               <Link to={PRESS_WHATS_NEW_PATH}>What&rsquo;s new</Link>
               <Link to={PRESS_METHODS_PATH}>Methods</Link>
@@ -384,8 +376,6 @@ export function PressFoot({ flush = false, nav = true }) {
             </Link>
           </span>
           <span>
-            <a href={TBN_URL} target="_blank" rel="noreferrer">tribalbusinessnews.com</a>
-            {" · "}
             <a href={LUMECON_URL} target="_blank" rel="noreferrer">lumecon.ai</a>
           </span>
         </div>

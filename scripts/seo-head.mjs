@@ -40,7 +40,7 @@ const KEYWORDS = [
   "tribal enterprises", "Native-owned businesses", "federal funding to tribes",
   "federal contracting tribal", "NAGPRA notices", "tribal consultation", "Federal Register tribes",
   "tribal legislation", "tribal lobbying", "Indian Country deals", "tribal natural resources revenue",
-  "Native nonprofits", "Cedar Press", "Lumecon", "Tribal Business News",
+  "Native nonprofits", "Cedar Press", "Lumecon",
 ];
 
 // How the catalog's one-line description names each collection. The count and

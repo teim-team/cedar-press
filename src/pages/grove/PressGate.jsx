@@ -17,25 +17,23 @@
 //
 // The page below the hero changes material the way the marketing site
 // does: a navy passage with the licensed photograph and the four pillars,
-// then the ways in on white, then a short foot. "Early access" and "Sign in"
+// then the ways in on white, then a short foot. "Subscribe" and "Sign in"
 // sit top right, where a visitor looks for them, and each opens a small
 // panel under the bar; the page underneath stays the page.
 //
-// Tribal Business News owns payment, renewals, upgrades and code issuance.
-// There is deliberately no "create account" here: an account exists because
-// an entitlement does. "Sign in" goes to the login page (CedarPressLogin), which
-// holds the sign-in and the access-code activation.
+// "Subscribe" goes to the membership cards (CedarPressSubscribe), where Stripe
+// takes payment and the account follows from the emailed setup link. "Sign in"
+// goes to the login page (CedarPressLogin).
 
 import { useEffect, useRef, useState } from "react";
 import { Link, Navigate, useLocation, useSearchParams } from "react-router";
 
-import { EARLY_ACCESS_HREF, EARLY_ACCESS_LABEL } from "../../features/grove/appLink.js";
-import { isWorkspaceHost, loginRedirect, workspaceSignInHref } from "../../features/grove/pressSessionNavigation.js";
+import { isWorkspaceHost, loginRedirect, subscribeHref as subscribeHrefFor, workspaceSignInHref } from "../../features/grove/pressSessionNavigation.js";
 import { useAuth } from "../../context/useAuth";
 import { useFadeIn } from "../../features/grove/useFadeIn";
+import { LUMECON_URL } from "../../features/grove/appLink.js";
 import { coverageFrom } from "../../features/grove/pressAccess";
-import { LUMECON_TEAM_URL, LUMECON_URL, TBN_URL } from "../../features/grove/pressArticles";
-import { PRESS_TIERS, STOREFRONT_CATALOG, collectionsOnShelf } from "../../features/grove/pressCatalog";
+import { PRESS_CATALOG_BY_ID, PRESS_TIERS, STOREFRONT_CATALOG, collectionsOnShelf } from "../../features/grove/pressCatalog";
 import { LAUNCH_COLLECTION, LAUNCH_ROWS_TOTAL, OBSERVATIONS_NOTE } from "../../features/grove/collection";
 import { formatUpdated, recentlyUpdated } from "../../features/grove/pressReleases";
 import { SOURCE_REACH_UPDATED, SOURCE_ROTATION_ORDER } from "../../features/grove/sourceRotation.js";
@@ -49,12 +47,6 @@ import {
 import { EVENT, track } from "../../features/grove/telemetry.js";
 import { useRegister } from "../../features/grove/useRegister.js";
 import { COLLECTION_ICONS } from "./pressCollectionIcons";
-import {
-  CedarIcon,
-  CredibleResearchIcon,
-  InsightsIcon,
-  OriginalCollectionsIcon,
-} from "./pressGateIcons";
 import CollectionPreview from "./PressCollectionPreview";
 import PressCollectionRail from "./PressCollectionRail.jsx";
 import PressDoorCedar from "./PressDoorCedar";
@@ -114,7 +106,7 @@ const TIER_OF = Object.fromEntries(SHELVES.flatMap(({ tier, entries }) => entrie
 // hand-picked seven: the breadth IS the argument, and a visitor who counts
 // six familiar federal systems concludes Cedar repackages open data.
 
-// The four pillars. Each names something a reader can check on this page or
+// The three pillars. Each names something a reader can check on this page or
 // on Methods, because "data-driven insights" and "credible research" are
 // adjectives a reader has no way to test. Rewritten 2026-09-13 on review.
 //
@@ -124,7 +116,7 @@ const TIER_OF = Object.fromEntries(SHELVES.flatMap(({ tier, entries }) => entrie
 // nothing about the one thing that distinguishes the collections. Revert this
 // pillar if that ruling was meant to cover the claim and not only the wording.
 // Owner copy, 2026-10-06: each block a distinct purpose (usable data,
-// connected information, original research, guided exploration). The old
+// connected information, guided exploration). The old
 // blocks repeated the sourcing and matching story the section already tells,
 // claimed "every row" carries an entity (a record about Indian Country
 // broadly need not), and promised Cedar would answer any question with the
@@ -134,30 +126,20 @@ const PROOF_POINTS = [
   {
     id: "collections",
     label: "Put the data to work",
+    short: "Data to work",
     body: "Explore original datasets on funding, business, policy and land. Download collections for your own research, reporting and planning, with the definitions and source references needed to use them.",
-    icon: OriginalCollectionsIcon,
   },
   {
     id: "insights",
     label: "Follow connections across collections",
+    short: "Connections",
     body: "Connect a nation\u2019s enterprises with their contracts, funding and transactions. Read those relationships alongside broader policy and economic records to understand individual organizations and the developments shaping Indian Country.",
-    icon: InsightsIcon,
-  },
-  {
-    id: "credible",
-    label: "Research grounded in the collections",
-    // Owner copy narrowed 2026-10-06: the public brief catalog
-    // (`PRESS_ARTICLES`) holds one brief, the Native-owned business roster,
-    // so the block says research briefs start there rather than promising a
-    // shelf across funding, enterprise activity and policy.
-    body: "Read original research briefs, starting with the first nation-shared roster of individually owned Native businesses. Follow the findings back to their evidence and use the underlying collections to investigate your own questions.",
-    icon: CredibleResearchIcon,
   },
   {
     id: "cedar",
     label: "Explore with Cedar",
+    short: "Explore with Cedar",
     body: "Ask Cedar what a collection covers, how it is built and what has changed. Find relevant data and understand how the collections can help you approach your question.",
-    icon: CedarIcon,
   },
 ];
 
@@ -180,7 +162,7 @@ function Door({ user }) {
   // The workspace's login page on the public site, this origin's own anywhere
   // else (a dev server, a preview host).
   const loginHref = workspaceSignInHref(window.location) ?? PRESS_LOGIN_PATH;
-  const subscribeHref = new URL("/subscribe", new URL(loginHref, window.location.href)).href;
+  const subscribeHref = subscribeHrefFor(window.location);
   // The source band moves until a reader stops it (WCAG 2.2.2): the button
   // beside its count pauses and resumes it, and reduced motion stills it.
 
@@ -243,8 +225,9 @@ function Door({ user }) {
       ([entry]) => document.body.toggleAttribute("data-cp-preview-in-view", entry.isIntersecting),
       // A sliver of the frame showing at the very bottom is not the reader
       // looking at it, and toggling on that sliver makes the launcher flicker
-      // on every scroll through the hero.
-      { threshold: 0.35 },
+      // on every scroll through the hero. The frame is taller than the screen
+      // at full width, so the share it needs is small.
+      { threshold: 0.15 },
     );
     observer.observe(stage);
     return () => {
@@ -303,14 +286,17 @@ function Door({ user }) {
             <img className="cp-door__mark" src={MARK} alt="" aria-hidden="true" />
             <span className="cp-door__word">Cedar Press</span>
           </span>
-          <span className="cp-door__of">Trusted intelligence for Indian Country</span>
+          <nav className="cp-door__nav" aria-label="Public navigation">
+            <a href="#cp-viewer">Explore</a>
+            <Link to={PRESS_METHODS_PATH}>Methods</Link>
+          </nav>
           {user ? (
             // Someone signed in on the wrong membership has one move,
             // upgrading; the bar says who they are and offers the other account.
             <span className="cp-door__user">
               <span className="cp-door__who">Signed in as {user.email} · no Cedar Press</span>
-              <a className="cp-btn cp-btn--primary" href={EARLY_ACCESS_HREF}>
-                {EARLY_ACCESS_LABEL} <span className="cp-btn__arrow" aria-hidden="true">&#8594;</span>
+              <a className="cp-btn cp-btn--primary" href={subscribeHref}>
+                Subscribe <span className="cp-btn__arrow" aria-hidden="true">&#8594;</span>
               </a>
               <button type="button" className="cp-split__linkbtn" onClick={() => logout()}>
                 Use a different account
@@ -320,18 +306,18 @@ function Door({ user }) {
             // One question, two answers: get Cedar Press, or you already have
             // it. Tabs, so the panel under the bar shows one at a time.
             <div className="cp-door__tabs" role="tablist" aria-label="Get Cedar Press or log in" ref={tabsRef}>
+              <a id="cp-tab-signin" className="cp-door__signin" href={loginHref}>Sign in</a>
               <button
                 type="button"
                 id="cp-tab-plans"
                 role="tab"
-                className="cp-btn cp-btn--quiet cp-door__tab--plans"
+                className="cp-btn cp-btn--primary cp-door__tab--plans"
                 aria-selected={plansOpen}
                 aria-controls="cp-panel-plans"
                 onClick={() => setPlansOpen((open) => !open)}
               >
-                Early access
+                Subscribe
               </button>
-              <a id="cp-tab-signin" className="cp-btn cp-btn--primary" href={loginHref}>Sign in</a>
             </div>
           )}
         </div>
@@ -352,45 +338,33 @@ function Door({ user }) {
       {/* ── The hero: the promise, and beside it the product ─────────── */}
       <section className="cp-hero3" aria-label="Cedar Press">
         <div className="cp-hero3__in">
-          {/* Two messages, on purpose: the door sells the asset, the
-              signed-in overview keeps the editorial "Know what's shaping
-              Indian Country." The headline spans both columns on a wide
-              screen (owner, 2026-10-07: it was squeezed into the copy
-              column with the whole width free beside it). */}
-          <h1 className="cp-hero3__title cp-fade">
-            The <em>data</em> behind Indian Country.
-          </h1>
+          {/* A short introduction above the viewer, so the viewer gets the
+              full width of the page. */}
           <div className="cp-hero3__copy" ref={heroCopyRef}>
+            <p className="cp-kicker cp-hero3__kicker cp-fade">Intelligence for Indian Country</p>
+            <h1 className="cp-hero3__title cp-fade">
+              See what&rsquo;s possible.<br /> Shape what&rsquo;s next.
+            </h1>
             <p className="cp-hero3__lede cp-fade">
-              Original collections built from publicly available sources, connected through original
-              research, and maintained as Indian Country changes. Every record traces back to the
-              document it came from.
+              Explore funding, enterprises and policy through original research and connected
+              records you can trace to their sources.
             </p>
             {/* Who made it, on the first screen (owner's brief, 2026-09-26):
                 one restrained line rather than logos, so the product frame
-                stays the proof object. The foot and the navy passage still
-                say what each partner contributes. */}
+                stays the proof object. */}
             <p className="cp-hero3__by cp-fade">
-              Built by <a href={LUMECON_URL} target="_blank" rel="noreferrer">Lumecon</a> in
-              partnership with{" "}
-              <a href={TBN_URL} target="_blank" rel="noreferrer">Tribal Business News</a>.
+              Built by <a href={LUMECON_URL} target="_blank" rel="noreferrer">Lumecon</a>.
             </p>
             <div className="cp-hero3__cta cp-fade">
-              <a className="cp-btn cp-btn--primary cp-btn--lg" href={EARLY_ACCESS_HREF}>
-                {EARLY_ACCESS_LABEL} <span className="cp-btn__arrow" aria-hidden="true">&#8594;</span>
-              </a>
-              {user ? null : (
-                <a className="cp-btn cp-btn--quiet cp-btn--lg" href={loginHref}>
-                  Sign in <span className="cp-btn__arrow" aria-hidden="true">&#8594;</span>
-                </a>
-              )}
+              <a className="cp-btn cp-btn--primary cp-btn--lg" href="#cp-viewer">Explore the data</a>
+              <a className="cp-btn cp-btn--quiet cp-btn--lg" href={subscribeHref}>View membership</a>
             </div>
           </div>
 
           {/* The product frame. The rail is the twelve collections with
               their marks, one group a shelf; the pane is the one in hand.
               Not `#catalog`: that id is the reader's shelf on /data. */}
-          <figure className="cp-hero3__stage cp-fade" ref={previewRef}>
+          <figure className="cp-hero3__stage cp-fade" id="cp-viewer" ref={previewRef}>
             {/* The frame holds a real desktop window at real desktop size and
                 scales it to fit, the way a product screenshot does. Rendering
                 the app at the ~800px the column actually offers gave a narrow
@@ -433,6 +407,7 @@ function Door({ user }) {
               </div>
             </div>
             </div>
+            <p className="cp-kicker cp-hero3__tagline">Tribal Nations · Enterprises · Research &amp; Policy</p>
             <figcaption className="cp-fade">
               The Cedar Press viewer, showing example records from each collection&rsquo;s
               current dataset.
@@ -480,50 +455,12 @@ function Door({ user }) {
         <div className="cp-why__in">
           <header className="cp-why__head">
             <div>
-              <p className="cp-kicker cp-kicker--light cp-fade">What Cedar does with them</p>
-              {/* "Records are only the beginning" was cut on the owner's
-                  ruling of 2026-09-13, here and on the Methods page. It names
-                  a starting point and stops, which describes a gap rather
-                  than a product and could sit on any data company's page. The
-                  claim underneath is narrower and much harder to copy: the
-                  records are abundant, the key that would let them be added
-                  up does not exist, and Cedar mints it and maintains it.
-                  The lede also opened on a federal contract, which made a
-                  twelve-collection product read as a contracting product with
-                  eleven extras. It names three kinds of record now, in one
-                  sentence rather than three clipped ones (owner, 2026-09-26). */}
               <h2 className="cp-why__title cp-fade" id="cp-why-title">
                 The hard part is knowing who a record is about.
               </h2>
               <p className="cp-why__lede cp-fade">
-                A federal contract names the company that won it, a Form 990 names the nonprofit
-                that filed it, and a royalty statement names whoever was paid. None of them says
-                whether those names belong to one nation or three. Those relationships are not
-                consistently recorded across public systems.
-              </p>
-              {/* Owner copy, 2026-09-27 (second pass), verbatim: what the
-                  researchers do with public material and what it produces,
-                  then what Tribal Business News adds. The team page stays
-                  linked from "researchers". The closing line naming the
-                  Native Entity Enterprise Dataset as the identity foundation
-                  was dropped on the owner's note: the spine is Lumecon's own
-                  dataset on Native entities. */}
-              <p className="cp-why__lede cp-fade">
-                <a href={LUMECON_URL} target="_blank" rel="noreferrer">Lumecon</a>&rsquo;s{" "}
-                <a href={LUMECON_TEAM_URL} target="_blank" rel="noreferrer">researchers</a> turn
-                material that is public but scattered, difficult to find, or structured for compliance
-                rather than analysis into original datasets, drawing on the source systems listed
-                on this page. We standardize dates and measures, reconcile duplicate events and changing
-                names, and check proposed Native entity links against source evidence with human
-                review. That work creates searchable data no single publisher provides, while
-                preserving the evidence and known limits behind each published record.
-              </p>
-              <p className="cp-why__lede cp-fade">
-                <a href={TBN_URL} target="_blank" rel="noreferrer">Tribal Business News</a> reports
-                on topics no one else covers and has become a trusted partner across Indian Country,
-                including with government agencies. Organizations that want to reach people engaged
-                in the multibillion-dollar Indian Country economy turn to it, and its reporting gives
-                each figure context about the nations and enterprises behind it.
+                <a href={LUMECON_URL} target="_blank" rel="noreferrer">Lumecon</a> connects scattered
+                records while keeping each nation, enterprise and related organization distinct.
               </p>
             </div>
             {/* The source banner sits here (owner, 2026-09-27): the passage
@@ -533,7 +470,7 @@ function Door({ user }) {
               <aside className="cp-hero3__proof cp-why__sources cp-fade" aria-label="Source systems">
                 <div className="cp-hero3__proofhead">
                   <Link className="cp-hero3__prooflabel" to={PRESS_METHODS_PATH}>
-                    Sources Lumecon draws on
+                    Sources and methods
                   </Link>
                 </div>
                 {/* Several runs, alternating direction, so the banner fills
@@ -561,14 +498,6 @@ function Door({ user }) {
                   ))}
                 </div>
               </aside>
-              <ul className="cp-why__shelves cp-fade" aria-label="The shelves">
-                {SHELVES.map(({ tier, entries }) => (
-                  <li key={tier.id}>
-                    <b><TierName name={tier.name} /></b>
-                    <span>{tier.question} {entries.length} collections.</span>
-                  </li>
-                ))}
-              </ul>
             </div>
           </header>
           <div className="cp-why__photo cp-fade" aria-hidden="true">
@@ -582,17 +511,14 @@ function Door({ user }) {
             </p>
           </div>
           <ol className="cp-why__proof">
-            {PROOF_POINTS.map((point, i) => (
+            {PROOF_POINTS.map((point) => (
               // Owner, 2026-10-06: the headline is enough at a glance; the
               // paragraph opens on request. A native disclosure, so it works
               // from the keyboard and with a screen reader as it is.
               <li className="cp-why__item cp-fade" key={point.id}>
                 <details className="cp-why__more">
                   <summary className="cp-why__sum">
-                    <span className="cp-why__step" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>
-                    <span className="cp-why__ic" aria-hidden="true">{point.icon}</span>
-                    <span className="cp-why__label">{point.label}</span>
-                    <span className="cp-why__toggle" aria-hidden="true" />
+                    <span className="cp-why__label" title={point.label}>{point.short}</span>
                   </summary>
                   <p className="cp-why__body">{point.body}</p>
                 </details>
@@ -608,18 +534,16 @@ function Door({ user }) {
         <div className="cp-ways__in">
           <header className="cp-ways__head cp-fade">
             <p className="cp-kicker">Get Cedar Press</p>
-            <a className="cp-btn cp-btn--primary" href={subscribeHref}>Subscribe annually</a>
             <h2 className="cp-ways__title" id="cp-ways-title">
-              Available exclusively through <span>Tribal Business News.</span>
+              Choose your <span>annual membership.</span>
             </h2>
             <p className="cp-ways__lede">
-              A Cedar Press membership will open the collections, the research briefs and Cedar.
-              Enrollment is not open yet, so request early access and we will be in touch. Two
-              other relationships need no subscription at all.
+              A Cedar Press membership opens the collections and Cedar.
+              Two other relationships need no subscription at all.
             </p>
             <div className="cp-hero3__cta">
-              <a className="cp-btn cp-btn--primary cp-btn--lg" href={EARLY_ACCESS_HREF}>
-                {EARLY_ACCESS_LABEL} <span className="cp-btn__arrow" aria-hidden="true">&#8594;</span>
+              <a className="cp-btn cp-btn--primary cp-btn--lg" href={subscribeHref}>
+                Subscribe annually <span className="cp-btn__arrow" aria-hidden="true">&#8594;</span>
               </a>
               {user ? null : (
                 <a className="cp-btn cp-btn--quiet cp-btn--lg" href={loginHref}>
@@ -661,8 +585,7 @@ function Door({ user }) {
 
       <footer className="cp-door__foot cp-fade">
         <span>
-          Built by <a href={LUMECON_URL} target="_blank" rel="noreferrer">Lumecon</a>. Available
-          exclusively through <a href={TBN_URL} target="_blank" rel="noreferrer">Tribal Business News</a>.
+          Built by <a href={LUMECON_URL} target="_blank" rel="noreferrer">Lumecon</a>.
         </span>
         <button
           type="button"

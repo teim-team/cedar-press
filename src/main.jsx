@@ -19,8 +19,6 @@ import { AuthProvider } from "./context/AuthProvider.jsx";
 import { startTelemetry } from "./features/grove/telemetry.js";
 import {
   CedarPress,
-  CedarPressArticle,
-  CedarPressArticles,
   CedarPressData,
   CedarPressEntity,
   CedarPressLogin,
@@ -35,8 +33,6 @@ import {
 } from "./pages/grove/pages.jsx";
 import { PageBoundary } from "./pages/grove/PageBoundary.jsx";
 import {
-  PRESS_ARTICLES_PATH,
-  PRESS_ARTICLE_PATH,
   PRESS_DATA_PATH,
   PRESS_ENTITY_PATH,
   PRESS_LOGIN_PATH,
@@ -68,7 +64,6 @@ createRoot(document.getElementById("root")).render(
           <Route path="/create-account" element={<CedarPressCreateAccount />} />
           <Route path="/subscribe" element={<CedarPressSubscribe />} />
           <Route path={PRESS_LOGIN_PATH} element={<CedarPressLogin />} />
-          <Route path={PRESS_ARTICLES_PATH} element={<CedarPressArticles />} />
           <Route path={PRESS_DATA_PATH} element={<CedarPressData />} />
           <Route path={PRESS_METHODS_PATH} element={<CedarPressMethods />} />
           <Route path={PRESS_REQUEST_PATH} element={<CedarPressTribalRequest />} />
@@ -76,7 +71,6 @@ createRoot(document.getElementById("root")).render(
           <Route path={PRESS_WHATS_NEW_PATH} element={<CedarPressWhatsNew />} />
           <Route path={PRESS_SETTINGS_PATH} element={<CedarPressSettings />} />
           <Route path={PRESS_PRIORITIES_PATH} element={<CedarPressPriorities />} />
-          <Route path={PRESS_ARTICLE_PATH} element={<CedarPressArticle />} />
           <Route path={PRESS_RECORD_PATH} element={<CedarPressRecord />} />
           <Route path={PRESS_ENTITY_PATH} element={<CedarPressEntity />} />
           <Route path="*" element={<Navigate to={PRESS_PATH} replace />} />

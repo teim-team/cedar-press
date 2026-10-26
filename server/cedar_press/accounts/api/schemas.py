@@ -1,4 +1,4 @@
-"""Account authentication and activation request schemas."""
+"""Account authentication and setup request schemas."""
 
 from pydantic import BaseModel, Field
 
@@ -30,13 +30,3 @@ class AccountLink(BaseModel):
 class AccountSetup(ResetConfirm):
     name: str = Field(min_length=1, max_length=120)
 
-
-class CodeCheck(BaseModel):
-    code: str
-    email: str
-
-
-class Activation(BaseModel):
-    code: str
-    email: str
-    password: str

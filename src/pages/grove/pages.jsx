@@ -28,9 +28,7 @@ export { default as CedarPress } from "./CedarPress.jsx";
 export { default as CedarPressResearchAccess } from "./CedarPressResearchAccess.jsx";
 export { default as CedarPressTribalRequest } from "./CedarPressTribalRequest.jsx";
 
-export const CedarPressArticles = lazy(() => import("./CedarPressArticles.jsx"));
 export const CedarPressData = lazy(() => import("./CedarPressData.jsx"));
-export const CedarPressArticle = lazy(() => import("./CedarPressArticle.jsx"));
 export const CedarPressMethods = lazy(() => import("./CedarPressMethods.jsx"));
 export const CedarPressSettings = lazy(() => import("./CedarPressSettings.jsx"));
 export const CedarPressPriorities = lazy(() => import("./CedarPressPriorities.jsx"));

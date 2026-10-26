@@ -11,8 +11,7 @@
  * CONTRACT
  * Cookies carry the session (`credentials: "include"`), because a token in
  * browser storage is a token any script on the page can read. Errors arrive
- * as `{ code, message }` and are rethrown as an Error with `code` attached,
- * which is the shape pressSignup.pressSignupError already reads.
+ * as `{ code, message }` and are rethrown as an Error with `code` attached.
  *
  * Every request has a deadline (`REQUEST_TIMEOUT_MS`, longer for the
  * call whose server side waits on Cedar). A request that misses
@@ -172,16 +171,6 @@ export async function confirmPasswordReset({ token, newPassword }) {
   }));
 }
 
-/* ── Activation ──────────────────────────────────────────────────────── */
-
-export async function validatePressCode({ code, email }) {
-  return request("/press/activation/validate", { method: "POST", body: { code, email } });
-}
-
-export async function activatePressAccount({ code, email, password }) {
-  return requireSessionPayload(await request("/press/activation", { method: "POST", body: { code, email, password } }));
-}
-
 /* ── The subscriber ──────────────────────────────────────────────────── */
 
 /** The subscriber's declared organization and role. */
@@ -204,15 +193,6 @@ export async function fetchCollections({ signal } = {}) {
 /** Release history: what changed in each collection, newest first. */
 export async function fetchReleases({ signal } = {}) {
   return request("/press/releases", { signal });
-}
-
-/** Published briefs. */
-export async function fetchArticles({ signal } = {}) {
-  return request("/press/articles", { signal });
-}
-
-export async function fetchArticle(slug, { signal } = {}) {
-  return request("/press/articles/" + encodeURIComponent(slug), { signal });
 }
 
 /**

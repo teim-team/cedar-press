@@ -17,8 +17,8 @@
 // says so rather than borrowing a neighbour's rows.
 //
 // The door owns which collection is in hand; this file only draws the one
-// it is given. The action names the way in at Tribal Business News for the
-// shelf the collection sits on, never a route past the paywall.
+// it is given. The action names the membership for the shelf the collection
+// sits on, never a route past the paywall.
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
@@ -33,7 +33,7 @@ import { LANDING_EXAMPLES, landingSample } from "../../features/grove/landingExa
 import { Cards, Rows } from "./PressRecordTable.jsx";
 import { useNarrow } from "../../features/grove/useNarrow.js";
 import { coverageLabel } from "../../features/grove/pressAccess";
-import { EARLY_ACCESS_HREF } from "../../features/grove/appLink.js";
+import { subscribeHref } from "../../features/grove/pressSessionNavigation.js";
 import { freshnessLine } from "../../features/grove/pressReleases";
 import { EVENT, track } from "../../features/grove/telemetry.js";
 import { TierName } from "./TierName";
@@ -269,11 +269,10 @@ export default function CollectionPreview({ entry, tier, register }) {
         <p className="cp-pane__acts">
           <a
             className="cp-pane__act"
-            href={EARLY_ACCESS_HREF}
+            href={subscribeHref()}
             onClick={() => track(EVENT.upgradeOpened, { collection: entry.id, shelf: entry.shelf })}
           >
-            {/* Enrollment is not open yet (2026-10-06): early access, not a purchase. */}
-            Request early access to <TierName name={tier.name} /> <span aria-hidden="true">&#8594;</span>
+            Subscribe to <TierName name={tier.name} /> <span aria-hidden="true">&#8594;</span>
           </a>
           <button
             type="button"

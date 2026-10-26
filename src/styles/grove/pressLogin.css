@@ -14,8 +14,6 @@
 .teim-rd .cp-login__field { display: flex; flex-direction: column; gap: 0.35rem; }
 .teim-rd .cp-login__row { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; font-size: 0.88rem; font-weight: 600; color: var(--ink); }
 .teim-rd .cp-login__row a { font-weight: 400; font-size: 0.84rem; color: var(--dteal); }
-.teim-rd .cp-login__or { display: flex; align-items: center; gap: 0.8rem; margin: 1.1rem 0; font-size: 0.82rem; color: var(--door-ink-3); }
-.teim-rd .cp-login__or::before, .teim-rd .cp-login__or::after { content: ""; flex: 1; height: 1px; background: var(--line); }
 .teim-rd .cp-login__back { margin: 0; font-size: 0.88rem; }
 .teim-rd .cp-login__back a { color: var(--dteal); }
 @media (max-width: 860px) {

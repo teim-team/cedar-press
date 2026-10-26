@@ -32,25 +32,10 @@ os.environ["CEDAR_PRESS_ACCOUNTS"] = json.dumps(
         },
     }
 )
-os.environ["CEDAR_PRESS_CODES"] = json.dumps(
-    {
-        "TBN4-9K2M-X7QD": {"email": "new@example.org", "tier": "press"},
-        "TBN4-9K2M-X7QE": {"email": "upgrade@example.org", "tier": "press_pro"},
-        "TBN4-0000-EXPD": {
-            "email": "late@example.org",
-            "tier": "press",
-            "expires": "2020-01-01",
-        },
-        # Issued to an address that already has an account.
-        "TBN4-0000-DUPE": {"email": "reader@example.org", "tier": "press"},
-    }
-)
-
 from fastapi.testclient import TestClient  # noqa: E402
 
 from cedar_press import (
     cedar_service,  # noqa: E402
-    codes,  # noqa: E402
     press_catalog,  # noqa: E402
     ratelimit,  # noqa: E402
     repository,  # noqa: E402
@@ -97,7 +82,7 @@ class TestSession(unittest.TestCase):
         self.assertEqual(client.get("/health").status_code, 200)
 
     def test_reading_without_a_session_is_refused(self) -> None:
-        for path in ("/me", "/press/collections", "/press/articles"):
+        for path in ("/me", "/press/collections"):
             with self.subTest(path=path):
                 self.assertEqual(client.get(path).status_code, 401)
 
@@ -365,9 +350,6 @@ class TestCatalog(unittest.TestCase):
         self.assertEqual(len(press_catalog.WORK_KINDS), len(kinds))
         self.assertIn("government", press_catalog.WORK_KINDS)
         client.patch("/press/profile", json={"work": None})
-
-    def test_articles_are_served(self) -> None:
-        self.assertTrue(client.get("/press/articles").json()["articles"])
 
     def test_a_download_carries_its_citation(self) -> None:
         response = client.get("/press/collections/deals/download")
@@ -902,209 +884,27 @@ class TestErrorShape(unittest.TestCase):
     def test_an_ordinary_404_is_left_alone(self) -> None:
         # Only dict details with a code are flattened; everything else keeps
         # FastAPI's shape so nothing else in the stack has to care.
-        response = client.get("/press/articles/nope")
+        response = client.get("/press/no-such-route")
         self.assertEqual(response.status_code, 404)
-
-
-class TestActivation(unittest.TestCase):
-    """The way in: a code from Tribal Business News, then an account."""
-
-    def setUp(self) -> None:
-        client.cookies.clear()
-        codes.reset_for_tests()
-        ratelimit.reset_for_tests()
-        session_module.forget_activated_for_tests()
-
-    def test_a_good_code_validates_without_creating_anything(self) -> None:
-        response = client.post(
-            "/press/activation/validate",
-            json={"code": "TBN4-9K2M-X7QD", "email": "new@example.org"},
-        )
-        self.assertEqual(response.status_code, 204)
-        # Nothing was created, so the code is still spendable and the address
-        # still has no account.
-        self.assertFalse(session_module.account_exists("new@example.org"))
-
-    def test_hyphens_and_case_are_the_readers_problem_not_theirs(self) -> None:
-        response = client.post(
-            "/press/activation/validate",
-            json={"code": "  tbn49k2m x7qd ", "email": "New@Example.org"},
-        )
-        self.assertEqual(response.status_code, 204)
-
-    def test_an_unissued_code_is_refused(self) -> None:
-        response = client.post(
-            "/press/activation/validate",
-            json={"code": "TBN4-0000-0000", "email": "new@example.org"},
-        )
-        self.assertEqual(response.json()["code"], "PRESS_CODE_INVALID")
-
-    def test_a_code_issued_to_another_address_is_refused(self) -> None:
-        response = client.post(
-            "/press/activation/validate",
-            json={"code": "TBN4-9K2M-X7QD", "email": "someone@example.org"},
-        )
-        self.assertEqual(response.json()["code"], "PRESS_CODE_INVALID")
-
-    def test_a_real_code_with_the_wrong_address_reads_as_an_unissued_one(self) -> None:
-        # The endpoint must not be an oracle for which codes exist: issued to
-        # someone else, spent by someone else, expired for someone else and
-        # never issued at all are one answer, byte for byte, until the code
-        # AND the address match.
-        def ask(code: str, email: str):
-            return client.post("/press/activation/validate", json={"code": code, "email": email})
-
-        unissued = ask("TBN4-0000-0000", "guess@example.org")
-        self.assertEqual(unissued.status_code, 400)
-        client.post(
-            "/press/activation",
-            json={
-                "code": "TBN4-9K2M-X7QD",
-                "email": "new@example.org",
-                "password": "a-long-enough-password",
-            },
-        )
-        client.cookies.clear()
-        for code in ("TBN4-9K2M-X7QE", "TBN4-0000-EXPD", "TBN4-9K2M-X7QD"):
-            with self.subTest(code=code):
-                response = ask(code, "guess@example.org")
-                self.assertEqual(response.status_code, unissued.status_code)
-                self.assertEqual(response.json(), unissued.json())
-        # The owner of a spent code is still told it was used.
-        self.assertEqual(ask("TBN4-9K2M-X7QD", "new@example.org").json()["code"], "PRESS_CODE_USED")
-
-    def test_an_expired_code_says_so(self) -> None:
-        response = client.post(
-            "/press/activation/validate",
-            json={"code": "TBN4-0000-EXPD", "email": "late@example.org"},
-        )
-        self.assertEqual(response.json()["code"], "PRESS_CODE_EXPIRED")
-
-    def test_an_address_that_already_has_an_account_is_sent_to_sign_in(self) -> None:
-        response = client.post(
-            "/press/activation/validate",
-            json={"code": "TBN4-0000-DUPE", "email": "reader@example.org"},
-        )
-        self.assertEqual(response.json()["code"], "EMAIL_IN_USE")
-
-    def test_activation_creates_the_account_and_signs_them_in(self) -> None:
-        response = client.post(
-            "/press/activation",
-            json={
-                "code": "TBN4-9K2M-X7QD",
-                "email": "new@example.org",
-                "password": "a-long-enough-password",
-            },
-        )
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json()["email"], "new@example.org")
-        # Signed in already: the client calls refreshSession() straight after.
-        self.assertEqual(client.get("/me").status_code, 200)
-
-    def test_the_tier_comes_off_the_code_not_the_request(self) -> None:
-        client.post(
-            "/press/activation",
-            json={
-                "code": "TBN4-9K2M-X7QE",
-                "email": "upgrade@example.org",
-                "password": "a-long-enough-password",
-            },
-        )
-        self.assertEqual(client.get("/me").json()["workspace_tier"], "press_pro")
-
-    def test_a_code_activates_once(self) -> None:
-        first = client.post(
-            "/press/activation",
-            json={
-                "code": "TBN4-9K2M-X7QD",
-                "email": "new@example.org",
-                "password": "a-long-enough-password",
-            },
-        )
-        self.assertEqual(first.status_code, 200)
-        second = client.post(
-            "/press/activation",
-            json={
-                "code": "TBN4-9K2M-X7QD",
-                "email": "new@example.org",
-                "password": "another-long-password",
-            },
-        )
-        self.assertEqual(second.json()["code"], "PRESS_CODE_USED")
-
-    def test_the_new_account_can_sign_in_afterwards(self) -> None:
-        client.post(
-            "/press/activation",
-            json={
-                "code": "TBN4-9K2M-X7QD",
-                "email": "new@example.org",
-                "password": "a-long-enough-password",
-            },
-        )
-        client.cookies.clear()
-        response = sign_in("new@example.org", "a-long-enough-password")
-        self.assertEqual(response.status_code, 200)
-
-    def test_a_short_password_is_refused_and_the_code_survives(self) -> None:
-        response = client.post(
-            "/press/activation",
-            json={"code": "TBN4-9K2M-X7QD", "email": "new@example.org", "password": "short"},
-        )
-        self.assertEqual(response.json()["code"], "PASSWORD_TOO_SHORT")
-        # The code must not be spent by a failed attempt: a subscriber who
-        # typed a weak password has not lost their membership.
-        again = client.post(
-            "/press/activation/validate",
-            json={"code": "TBN4-9K2M-X7QD", "email": "new@example.org"},
-        )
-        self.assertEqual(again.status_code, 204)
-
-    def test_activation_is_re_checked_rather_than_trusted_from_step_one(self) -> None:
-        # Step one sets no state, so step two must stand on its own. Calling
-        # it with a code that was never validated is the same as calling it
-        # with one that was: both are checked here.
-        response = client.post(
-            "/press/activation",
-            json={
-                "code": "TBN4-0000-0000",
-                "email": "new@example.org",
-                "password": "a-long-enough-password",
-            },
-        )
-        self.assertEqual(response.json()["code"], "PRESS_CODE_INVALID")
 
 
 class TestRateLimiting(unittest.TestCase):
     """The control that turns "guessable given enough attempts" into "not".
 
-    An access code is 8 to 32 alphanumeric characters and the activation
-    routes say plainly whether one is real. Unlimited, that is an oracle.
+    Sign-in says plainly whether a password is right. Unlimited, that is an
+    oracle.
     """
 
     def setUp(self) -> None:
         client.cookies.clear()
         ratelimit.reset_for_tests()
-        codes.reset_for_tests()
 
     def tearDown(self) -> None:
         ratelimit.reset_for_tests()
 
-    def test_guessing_codes_runs_out_of_attempts(self) -> None:
-        seen = set()
-        for _ in range(ratelimit.ACTIVATION_ATTEMPTS + 4):
-            response = client.post(
-                "/press/activation/validate",
-                json={"code": "TBN4-0000-0000", "email": "guess@example.org"},
-            )
-            seen.add(response.status_code)
-        self.assertIn(429, seen)
-
     def test_the_refusal_says_when_to_come_back(self) -> None:
-        for _ in range(ratelimit.ACTIVATION_ATTEMPTS + 1):
-            response = client.post(
-                "/press/activation/validate",
-                json={"code": "TBN4-0000-0000", "email": "guess@example.org"},
-            )
+        for _ in range(ratelimit.LOGIN_ATTEMPTS + 1):
+            response = sign_in(password="wrong")
         self.assertEqual(response.status_code, 429)
         self.assertEqual(response.json()["code"], "TOO_MANY_ATTEMPTS")
         self.assertGreater(int(response.headers["retry-after"]), 0)
@@ -1116,15 +916,11 @@ class TestRateLimiting(unittest.TestCase):
         self.assertIn(429, seen)
 
     def test_the_two_surfaces_have_separate_allowances(self) -> None:
-        # Failing sign-in must not lock a subscriber out of activation: those
-        # are different tasks and doing the second after failing the first is
-        # exactly what someone with a new code would do.
+        # Failing sign-in must not lock a subscriber out of a password reset:
+        # asking for one after failing to sign in is exactly what they would do.
         for _ in range(ratelimit.LOGIN_ATTEMPTS + 2):
             sign_in(password="wrong")
-        response = client.post(
-            "/press/activation/validate",
-            json={"code": "TBN4-9K2M-X7QD", "email": "new@example.org"},
-        )
+        response = client.post("/auth/password-reset", json={"email": "reader@example.org"})
         self.assertEqual(response.status_code, 204)
 
     def test_a_forwarded_header_is_ignored_unless_the_deployment_trusts_it(self) -> None:

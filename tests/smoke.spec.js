@@ -15,7 +15,7 @@
 import { readdir, readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 
-import { articlesDown, expect, releasesFeed, test } from "./fixtures.js";
+import { expect, releasesFeed, test } from "./fixtures.js";
 
 import { EMAIL, PASSWORD, PRESS_EMAIL } from "./demoAccount.js";
 import { loadCodebook, parseCsv, rowSource, contractFor, exploreTables, labelFor, universalRows } from "../src/features/grove/explore.js";
@@ -53,7 +53,7 @@ if (!FR_ROW) throw new Error("Published Federal Register sample needs a cited so
 // The fourteen, read from the catalog rather than typed: a list typed here
 // would pass while the door advertised something else.
 import { STOREFRONT_CATALOG } from "../src/features/grove/pressCatalog.js";
-import { LUMECON_URL, TBN_URL } from "../src/features/grove/pressArticles.js";
+import { LUMECON_URL } from "../src/features/grove/appLink.js";
 import {
   AUDIENCE_JOBS,
   ENTITY_JOBS,
@@ -91,7 +91,6 @@ async function chooseAudience(page, index) {
 
 /** The pages behind the gate, by the route a reader reaches them at. */
 const SECTIONS = [
-  { name: "Articles", path: "/articles" },
   { name: "Collections", path: "/data" },
   { name: "What's new", path: "/whats-new" },
   { name: "Methods", path: "/methods" },
@@ -251,7 +250,7 @@ test.describe("the gate", () => {
     await expect(note).toHaveCount(0);
     // A scroll before the page has grown tall enough is clamped to the top and fires nothing.
     await page.waitForFunction(() => document.documentElement.scrollHeight > window.innerHeight * 2);
-    await page.evaluate(() => window.scrollTo(0, window.innerHeight * 1.6));
+    await page.evaluate(() => window.scrollTo(0, document.querySelector(".cp-why").offsetTop));
     await expect(note).toBeVisible({ timeout: 5_000 });
     await expect(note).toContainText("Hi, I’m Cedar.");
     await expect(note).not.toContainText(/\p{Extended_Pictographic}/u);
@@ -261,7 +260,8 @@ test.describe("the gate", () => {
     await note.getByRole("button", { name: "Dismiss this message" }).click();
     await expect(note).toHaveCount(0);
     await page.reload();
-    await page.evaluate(() => window.scrollTo(0, window.innerHeight * 1.6));
+    await page.locator(".cp-why").waitFor({ state: "attached" });
+    await page.evaluate(() => window.scrollTo(0, document.querySelector(".cp-why").offsetTop));
     await page.waitForTimeout(2_500);
     await expect(note).toHaveCount(0);
   });
@@ -270,7 +270,7 @@ test.describe("the gate", () => {
     test.skip(testInfo.project.name !== "desktop", "the phone launcher waits out the hero");
     await page.goto("/");
     await page.waitForFunction(() => document.documentElement.scrollHeight > window.innerHeight * 2);
-    await page.evaluate(() => window.scrollTo(0, window.innerHeight * 1.6));
+    await page.evaluate(() => window.scrollTo(0, document.querySelector(".cp-why").offsetTop));
     const note = page.locator(".cp-greet");
     await expect(note).toBeVisible({ timeout: 5_000 });
     await note.locator(".cp-greet__open").click();
@@ -292,19 +292,17 @@ test.describe("the gate", () => {
 
   // The landing layout of 2026-09-27: the source banner in the navy
   // passage's right column, the summary figures one line under the viewer
-  // caption with nothing below the hero's button, the passage in three
-  // paragraphs with Lumecon, its team page and Tribal Business News linked,
-  // and the long-run trust line gone.
+  // caption with nothing below the hero's button, the passage in one short
+  // paragraph with Lumecon linked, and the long-run trust line gone.
   test("the source banner sits in the navy passage and the figures sit under the viewer", async ({ page }) => {
     await page.goto("/");
     await expect(page.locator(".cp-why .cp-why__side .cp-hero3__proof")).toHaveCount(1);
     await expect(page.locator(".cp-hero3__copy .cp-hero3__facts")).toHaveCount(0);
     await expect(page.locator(".cp-hero3__stage figcaption + .cp-hero3__facts")).toHaveCount(1);
     const ledes = page.locator(".cp-why__lede");
-    await expect(ledes).toHaveCount(3);
-    await expect(ledes.nth(1).locator('a[href="https://lumecon.ai"]')).toHaveCount(1);
-    await expect(ledes.nth(1).locator('a[href="https://lumecon.ai/team/"]')).toHaveCount(1);
-    await expect(ledes.nth(2).locator('a[href="https://tribalbusinessnews.com"]')).toHaveCount(1);
+    await expect(ledes).toHaveCount(1);
+    await expect(ledes.first().locator('a[href="https://lumecon.ai"]')).toHaveCount(1);
+    await expect(page.locator("body")).not.toContainText("Tribal Business News");
     await expect(page.locator("body")).not.toContainText("As search and analytical tools improve");
   });
 
@@ -441,12 +439,11 @@ test.describe("the gate", () => {
     // EVERY route, not the seven section pages. The three that were left out
     // were the three that were wrong: the two public pages passed the reader
     // to the masthead but no sign-out, so their Sign out button was wired to
-    // `undefined`, and an article id that is not hosted rendered a masthead
-    // with no reader at all and stood 12px shorter than the rest.
+    // `undefined`.
     for (const path of [
-      "/", "/data", "/articles", "/whats-new", "/methods", "/priorities", "/settings",
+      "/", "/data", "/whats-new", "/methods", "/priorities", "/settings",
       "/research-access", "/tribal-data-request", "/record",
-      "/entity/CE-001CC-8N", "/articles/not-a-piece-we-host",
+      "/entity/CE-001CC-8N",
     ]) {
       await page.goto(path);
       await page.locator(".cp-mast").waitFor();
@@ -548,8 +545,7 @@ test.describe("the gate", () => {
     await expect(stage).toBeVisible();
     await expect(stage.locator('[data-testid="stage-record"]').first()).toBeVisible();
     // The way in is named on the stage, never a route past the paywall.
-    // Enrollment is not open yet (2026-10-06): the way in is early access.
-    await expect(stage.getByRole("link", { name: /^Request early access to Cedar Press/ })).toBeVisible();
+    await expect(stage.getByRole("link", { name: /^Subscribe to Cedar Press/ })).toBeVisible();
     await expect(stage.getByRole("link", { name: /Browse the records/ })).toHaveCount(0);
     // Owner, 2026-10-06: example records of the dataset's observations, and
     // the hero states the observations across every collection.
@@ -681,14 +677,14 @@ test.describe("the gate", () => {
     // back to the launcher a frame after the browser focused what was clicked,
     // so dismissing the sheet ate the click that dismissed it and the control
     // had to be clicked twice. The sheet is not modal; the click belongs to
-    // the control. The Early access tab sits in the header, which the corner card
+    // the control. The Subscribe tab sits in the header, which the corner card
     // never covers.
     //
     // That premise holds at a desktop width and no longer holds on a phone,
     // where the panel is now the screen and there is no "outside" to click.
     // Both contracts are checked, because both are real: the phone's way out
     // is the close button, which is why it is 44px.
-    // The phone hides the Early access tab (the hero carries it), so Sign in is what sits behind the panel there.
+    // The phone hides the Subscribe tab (the hero carries it), so Sign in is what sits behind the panel there.
     const behind = page.locator(testInfo.project.name === "phone" ? "#cp-tab-signin" : ".cp-door__tab--plans");
     await launcher.click();
     await expect(panel).toBeVisible();
@@ -776,6 +772,11 @@ test.describe("the gate", () => {
     for (const gone of [/preview build/i, /not access control/i, /your own browser/i]) {
       await expect(panel).not.toContainText(gone);
     }
+    await expect(panel).toContainText("By continuing, you agree to our Terms of Service and acknowledge our Privacy Policy.");
+    const pitch = page.getByRole("region", { name: "See what you’re missing" });
+    await expect(pitch.getByRole("link", { name: "Learn more" })).toBeVisible();
+    await pitch.getByRole("link", { name: "Create an account" }).click();
+    await expect(page).toHaveURL(/\/subscribe$/);
   });
 
   test("a deep link while signed out lands on the gate", async ({ page }) => {
@@ -789,18 +790,10 @@ test.describe("the gate", () => {
 
 test.describe("the subscriber's path", () => {
   test("sign in, read the overview, sign out", async ({ page }) => {
-    const errors = watchConsole(page, { ignore: ["/api/press/articles"] });
-    await articlesDown(page);
+    const errors = watchConsole(page);
     await releasesFeed(page);
     await signIn(page);
 
-    // The offline briefing keeps release navigation and account controls,
-    // while its research slot truthfully reports the absent protected API.
-    await expect(page.locator(".cp-brief__lead")).toBeVisible();
-    await expect(page.getByTestId("brief-article-unavailable")).toContainText(
-      "Research articles are unavailable on this connection.",
-    );
-    await expect(page.locator(".cp-brief__img")).toHaveCount(0);
     await expect(page.locator(".cp-brief__signals a")).toHaveCount(3);
     await expect(page.locator(".cp-brief__coll")).toBeVisible();
     await expect(page.getByRole("button", { name: /Ask Cedar what changed/ })).toBeVisible();
@@ -846,10 +839,8 @@ test.describe("the subscriber's path", () => {
     // the table became the Collections page, and the action moved into the
     // pane head rather than going with them.
     await expect(page.locator(".cp-rail__item").first()).toBeVisible();
-    // In the actions menu since 2026-09-20: the toolbar collapsed to one row
-    // so the table could have the screen, and the secondary downloads went
-    // behind "More" together. Still one click from the records.
-    await page.locator(".cp-ex__bar .cp-ex__more > summary").click();
+    // In the actions menu under the frame, beside Save view and Download.
+    await page.locator(".cp-ex__after .cp-ex__more > summary").click();
     const panelAction = page.locator(".cp-ex__sample").first();
     await expect(panelAction).toBeVisible();
     const download = page.waitForEvent("download");
@@ -988,13 +979,13 @@ test.describe("Explore the collections", () => {
     await expect(records.first()).toBeVisible();
     await page.locator(".cp-rail__item").filter({ hasText: "Advocacy" }).first().click();
     await expect(page).toHaveURL(/[?&]c=lobbying/);
-    await expect(page.getByTestId("explore-caption")).toContainText("columns");
     await expect(page.getByTestId("explore-scope")).toContainText("reporting year");
     if (!phone) {
       await expect(page.locator(".cp-ex__table--table")).toBeVisible();
       await expect(page.locator(".cp-ex__table--table thead th").first()).toBeVisible();
+      await expect(page.locator(".cp-ex__baracts")).toContainText(/\d+\/\d+ columns/);
       await page.getByRole("button", { name: /Show all \d+ columns/ }).click();
-      await expect(page.getByTestId("explore-caption")).toContainText(/(\d+)\/\1 columns/);
+      await expect(page.locator(".cp-ex__baracts")).toContainText(/(\d+)\/\1 columns/);
     }
     // A row opens the record's own page, which carries the cut it came from.
     // Covered end to end in "the record page" below; here the only claim is
@@ -1275,9 +1266,9 @@ test.describe("Explore the collections", () => {
     expect(errors).toEqual([]);
   });
 
-  // Owner, 2026-09-27: the viewer page carries no Cedar Grove line under the
-  // table, and on a wide window the frame runs the full width.
-  test("the viewer runs full width with no Cedar Grove line under it", async ({ page }, testInfo) => {
+  // The viewer page carries no Cedar Grove line under the table, and on a
+  // wide window the frame sits inside the page's gutters.
+  test("the viewer sits inside the page gutters with no Cedar Grove line under it", async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== "desktop", "a wide-window question");
     const errors = watchConsole(page);
     await page.setViewportSize({ width: 1680, height: 900 });
@@ -1286,8 +1277,8 @@ test.describe("Explore the collections", () => {
     const frame = page.locator(".cp-ex__frame");
     await expect(frame).toBeVisible({ timeout: 10_000 });
     const box = await frame.boundingBox();
-    expect(box.x).toBeLessThanOrEqual(1);
-    expect(box.x + box.width).toBeGreaterThanOrEqual(1680 - 20);
+    expect(box.x).toBeGreaterThanOrEqual(16);
+    expect(box.x + box.width).toBeLessThanOrEqual(1680 - 16);
     await expect(page.locator("#grove")).toHaveCount(0);
     await expect(page.getByText("brings these collections into a shared workspace")).toHaveCount(0);
     expect(errors).toEqual([]);
@@ -1927,12 +1918,11 @@ test.describe("the door's use cases", () => {
     await expect(page.locator(".cp-dc__fab")).toBeVisible();
   });
 
-  test("the partners are named on the first screen, and each name links to its site", async ({ page }) => {
+  test("the maker is named on the first screen and links to its site", async ({ page }) => {
     await page.goto("/");
     const line = page.locator(".cp-hero3__by");
-    await expect(line).toHaveText("Built by Lumecon in partnership with Tribal Business News.");
+    await expect(line).toHaveText("Built by Lumecon.");
     await expect(line.getByRole("link", { name: "Lumecon" })).toHaveAttribute("href", LUMECON_URL);
-    await expect(line.getByRole("link", { name: "Tribal Business News" })).toHaveAttribute("href", TBN_URL);
     // Teal text is --dteal (#0A7F74), and the door's own `a { color: inherit }`
     // must not win over it.
     await expect(line.getByRole("link", { name: "Lumecon" })).toHaveCSS("color", "rgb(10, 127, 116)");
@@ -2449,8 +2439,6 @@ test.describe("sponsorship", () => {
   // exists to be believed and carries no inventory at any price.
   for (const { name, path, expected } of [
     { name: "the overview", path: "/", expected: 1 },
-    { name: "Articles", path: "/articles", expected: 1 },
-    { name: "an unavailable article", path: "/articles/brief-owned", expected: 0 },
     { name: "What's new", path: "/whats-new", expected: 1 },
     { name: "Methods", path: "/methods", expected: 0 },
   ]) {
@@ -2572,7 +2560,7 @@ test.describe("crawlers", () => {
     expect(response.status()).toBe(200);
     const body = await response.text();
     expect(body).toContain("Sitemap: https://cedarpress.ai/sitemap.xml");
-    for (const path of ["/articles", "/data", "/whats-new", "/methods", "/settings"]) {
+    for (const path of ["/data", "/whats-new", "/methods", "/settings"]) {
       expect(body).toContain(`Disallow: ${path}`);
     }
   });
@@ -2585,7 +2573,7 @@ test.describe("crawlers", () => {
     expect(body).toContain("<loc>https://cedarpress.ai/</loc>");
     // A sitemap that lists a page answering with a sign-in asks a search
     // engine to rank a login wall.
-    for (const path of ["/articles", "/data", "/whats-new", "/settings"]) {
+    for (const path of ["/data", "/whats-new", "/settings"]) {
       expect(body).not.toContain(`<loc>https://cedarpress.ai${path}</loc>`);
     }
   });
@@ -2595,9 +2583,9 @@ test.describe("crawlers", () => {
   // the raw response, not the rendered page, because the rendered page looks
   // identical whether or not the prerender happened.
   for (const [path, heading] of [
-    // "data" is emphasised inside the headline, so the string a crawler
-    // sees is split by a tag; the tail of the sentence is contiguous.
-    ["/", "behind Indian Country."],
+    // The headline breaks across two lines, so the string a crawler sees is
+    // split by a tag; the second line is contiguous.
+    ["/", "Shape what’s next."],
     ["/tribal-data-request", "See what Cedar knows about your Nation"],
     ["/research-access", "Need one or two Cedar collections for a defined project"],
   ]) {
@@ -2654,6 +2642,7 @@ test.describe("the stylesheet", () => {
   // colour, because that palette has changed twice and a smoke test should
   // not have an opinion about it.
   test("survived the build", async ({ page }, testInfo) => {
+    await releasesFeed(page);
     await signIn(page);
 
     const band = page.locator(".cp-close");
@@ -2665,20 +2654,20 @@ test.describe("the stylesheet", () => {
     // the failure a truncated stylesheet produces. The briefing has the same
     // exposure and the same tell: it is two columns on a wide screen, and a
     // stylesheet that did not survive gives one column of stacked blocks.
+    await expect(page.locator(".cp-brief__block")).toHaveCount(2);
     const shape = await page.evaluate(() => {
       const brief = document.querySelector(".cp-brief");
-      const lead = document.querySelector(".cp-brief__lead");
-      const side = document.querySelector(".cp-brief__side");
+      const [first, second] = document.querySelectorAll(".cp-brief__block");
       return {
         width: brief.getBoundingClientRect().width,
-        leadWidth: lead.getBoundingClientRect().width,
+        firstWidth: first.getBoundingClientRect().width,
         sameRow:
-          Math.abs(lead.getBoundingClientRect().top - side.getBoundingClientRect().top) < 8,
+          Math.abs(first.getBoundingClientRect().top - second.getBoundingClientRect().top) < 8,
       };
     });
-    // The lead and its margin share a row, and neither owns the whole of it.
+    // The two blocks share a row, and neither owns the whole of it.
     expect(shape.sameRow).toBe(true);
-    expect(shape.leadWidth).toBeLessThan(shape.width);
+    expect(shape.firstWidth).toBeLessThan(shape.width);
   });
 });
 
@@ -3019,63 +3008,7 @@ test.describe("the first screen", () => {
   });
 });
 
-test.describe("the loop between the records and the journalism", () => {
-  // With the article service down, subscriber bodies and protected research
-  // links must stay unavailable. Successful
-  // delivery, authorization, figure shapes and PDF content are covered by
-  // server/tests/test_protected_articles.py and the article module tests.
-  test("offline collection profiles do not revive static demonstration articles", async ({ page }) => {
-    const errors = watchConsole(page, { ignore: ["/api/press/articles"] });
-    await articlesDown(page);
-    await signIn(page);
-    await page.goto("/data?c=deals&about=1");
-    await expect(page.locator(".cp-ab")).toBeVisible();
-    await expect(page.locator(".cp-ex__wrote")).toHaveCount(0);
-    await expect(page.locator(".cp-ab__read")).toHaveCount(0);
-    await expect(page.getByRole("heading", { name: "Research built from this collection" })).toHaveCount(0);
-    expect(errors).toEqual([]);
-  });
-
-  test("Research Briefs preserves sign-in and explains that the article service is unavailable", async ({ page }) => {
-    const errors = watchConsole(page, { ignore: ["/api/press/articles"] });
-    await articlesDown(page);
-    await signIn(page);
-    await page.goto("/articles");
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Research Briefs.");
-    await expect(page.getByRole("status")).toContainText("Articles are unavailable on this connection.");
-    await expect(page.locator(".cp-briefgrid .cp-art--square")).toHaveCount(0);
-    await expect(page.locator(".cp-acct")).toBeVisible();
-    expect(errors).toEqual([]);
-  });
-
-  test("an offline article never falls back to bundled bodies, highlights or figures", async ({ page }) => {
-    const errors = watchConsole(page, { ignore: ["/api/press/articles"] });
-    await articlesDown(page);
-    await signIn(page);
-    for (const id of ["brief-owned", "two-tribes-one-building", "brief-deals"]) {
-      await page.goto("/articles/" + id);
-      await expect(page.getByRole("status")).toContainText("Articles are unavailable on this connection.");
-      await expect(page.locator(".cp-ar__body, .cp-ar__hero, .cp-ar__highlights, .cp-ar__fig")).toHaveCount(0);
-      await expect(page.getByRole("link", { name: /All Research Briefs/ })).toBeVisible();
-    }
-    expect(errors).toEqual([]);
-  });
-
-  test("an unavailable article cannot download a PDF and still lets the reader sign out", async ({ page }) => {
-    const errors = watchConsole(page, { ignore: ["/api/press/articles"] });
-    await articlesDown(page);
-    await signIn(page);
-    await page.goto("/articles/brief-owned");
-    await expect(page.getByRole("status")).toContainText("Articles are unavailable on this connection.");
-    await expect(page.getByRole("group", { name: "Share this brief" })).toHaveCount(0);
-    await expect(page.getByRole("button", { name: "Download PDF" })).toHaveCount(0);
-    await page.locator(".cp-acct > summary").click();
-    await page.getByRole("button", { name: "Sign out" }).click();
-    await expect(page.locator(".cp-split")).toBeVisible();
-    await expect(page.locator(".cp-ar__body")).toHaveCount(0);
-    expect(errors).toEqual([]);
-  });
-
+test.describe("from an entity back to the records", () => {
   // The third way in: an entity's profile reads ten sample rows per table,
   // and each collection heading on it opens the release itself — carrying
   // BOTH the collection and the entity, so it lands narrowed to what the
@@ -3351,12 +3284,6 @@ test.describe("a finger gets no hover state", () => {
     await chips.nth(2).hover();
     await page.waitForTimeout(400);
     expect((await chips.nth(2).evaluate(readMotion)).transform, "no lift for a finger").toBe("none");
-    // The four claims respond to nothing under a finger either.
-    const claim = page.locator(".cp-why__item").first();
-    await claim.scrollIntoViewIfNeeded();
-    await claim.hover();
-    await page.waitForTimeout(300);
-    expect(await claim.locator(".cp-why__ic").evaluate((el) => getComputedStyle(el).transform)).toBe("none");
   });
 });
 
@@ -3384,25 +3311,6 @@ test.describe("Methods' seven stages arrive as a sequence", () => {
     expect(rest).toEqual(Array(stages.length).fill(["1", "none"]));
     expect(errors).toEqual([]);
   });
-});
-
-test("built public assets contain no subscriber article paragraphs or review files", async () => {
-  const catalog = JSON.parse(await readFile(new URL("../server/cedar_press/articles.json", import.meta.url), "utf8"));
-  const privateParagraphs = catalog.flatMap((article) =>
-    (article.body ?? []).filter((block) => block.kind === "p" && block.text?.length > 80).map((block) => block.text));
-  expect(privateParagraphs.length, "private article assertions must cover real prose").toBeGreaterThan(20);
-  const dir = fileURLToPath(new URL("../dist-site/", import.meta.url));
-  const assets = await readdir(dir, { recursive: true, withFileTypes: true });
-  const files = assets.filter((entry) => entry.isFile() && /\.(js|html|json|map)$/.test(entry.name));
-  expect(files.length).toBeGreaterThan(0);
-  for (const entry of files) {
-    const body = await readFile(entry.parentPath + "/" + entry.name, "utf8");
-    expect(body, entry.name + " exposes the private article catalog").not.toContain("server/cedar_press/articles.json");
-    for (const text of privateParagraphs) {
-      expect(body, entry.name + " contains subscriber prose").not.toContain(text);
-      expect(body, entry.name + " contains escaped subscriber prose").not.toContain(JSON.stringify(text).slice(1, -1));
-    }
-  }
 });
 
 // Owner, 2026-10-06: hovering a collection tells you more, and NEED and PLOT

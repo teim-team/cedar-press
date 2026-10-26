@@ -75,9 +75,8 @@ export const WORKSPACE_TIERS = Object.freeze({
       "Unlimited users in one organization",
     ]),
   }),
-  // Cedar Press, in two rungs. Both are sold only through an eligible Tribal
-  // Business News membership: the membership issues an access code, the code
-  // creates the account. Standalone, and not included with Grove or Tree.
+  // Cedar Press, in two rungs, sold as annual subscriptions on this site.
+  // Standalone, and not included with Grove or Tree.
   //
   // Standard carries part of the collection. The rest is visible but capped,
   // with the upgrade in the place the data would be, so a reader can see what
@@ -93,10 +92,9 @@ export const WORKSPACE_TIERS = Object.freeze({
     maxUsers: 1,
     accessLabel: "Cedar Press, with part of the collection",
     features: Object.freeze([
-      "The Research Briefs and the collection's figures",
+      "The collection's figures",
       "The collections on the Cedar Press shelf, with their methods and updates",
       "The citation register",
-      "Available only through a Tribal Business News access code",
     ]),
     setupFeatures: Object.freeze([
       "The rest of the Cedar Press collection (Cedar Press+)",

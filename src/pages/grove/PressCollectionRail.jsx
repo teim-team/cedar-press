@@ -33,7 +33,8 @@ import { canOpenDataset } from "../../features/grove/pressAccess";
 import { downloadAll } from "../../features/grove/pressDownload";
 import { PRESS_TIERS, STOREFRONT_CATALOG } from "../../features/grove/pressCatalog";
 import { LAUNCH_COLLECTION, sampleUnavailableReason } from "../../features/grove/collection";
-import { TBN_PLANS_URL } from "../../features/grove/pressArticles";
+import { Link } from "react-router";
+import { PRESS_SETTINGS_PATH } from "../../features/grove/pressRoutes";
 import { COLLECTION_ICONS } from "./pressCollectionIcons";
 import { TierName } from "./TierName";
 import { coverageLabel } from "../../features/grove/pressAccess";
@@ -47,8 +48,8 @@ const SHELVES = PRESS_TIERS.filter((tier) => tier.storefront).map((tier) => ({
   entries: STOREFRONT_CATALOG.filter((entry) => entry.shelf === tier.shelf),
 }));
 
-/** "Download all N samples", per shelf, from inside the rail. */
-function ShelfDownload({ tier, entries }) {
+/** "Download all N samples" across every shelf the reader can open. */
+function SampleDownloadAll({ entries }) {
   const [state, setState] = useState("idle");
   return (
     <button
@@ -58,7 +59,7 @@ function ShelfDownload({ tier, entries }) {
       onClick={async () => {
         setState("busy");
         try {
-          await downloadAll(entries, `cedar-press-${tier.id}-examples.zip`);
+          await downloadAll(entries, "cedar-press-examples.zip");
           setState("idle");
         } catch {
           // Said, not swallowed: a download that quietly does nothing is
@@ -148,6 +149,7 @@ export default function PressCollectionRail({
   // right edge, so the visitor saw a pane with no visible selection. The
   // strip scrolls itself (never the page) to bring the selected chip in.
   const navRef = useRef(null);
+  const sampleReady = SHELVES.flatMap(({ entries }) => entries).filter((entry) => canOpenDataset(user, entry) && !sampleUnavailableReason(entry.id));
   useEffect(() => {
     const nav = navRef.current;
     const on = nav?.querySelector(".cp-rail__item.is-on");
@@ -175,22 +177,18 @@ export default function PressCollectionRail({
           <span className="cp-rail__name">{allLabel}</span>
         </button>
       ) : null}
+      {mode === "app" && sampleReady.length ? (
+        <span className="cp-rail__tier">
+          Examples
+          <SampleDownloadAll entries={sampleReady} />
+        </span>
+      ) : null}
       {SHELVES.map(({ tier, entries }) => {
-        const sampleReady = entries.filter((entry) => canOpenDataset(user, entry) && !sampleUnavailableReason(entry.id));
         const upgradeable = entries.filter((entry) => !canOpenDataset(user, entry) && !sampleUnavailableReason(entry.id));
         return (
           <div className="cp-rail__shelf" key={tier.id}>
           <span className="cp-rail__tier">
             <TierName name={tier.name} />
-            {/* The one thing the tier bands did that nothing else does. They
-                were deleted when the table became the Collections page, and
-                a shelf's samples are a real feature, so the action came with
-                the shelf rather than going with the band. Preview only on
-                the door, where there is no subscription to download
-                against. */}
-            {mode === "app" && sampleReady.length ? (
-              <ShelfDownload tier={tier} entries={sampleReady} />
-            ) : null}
             {/* THE UPSELL BELONGS TO THE SHELF IT IS ABOUT.
                 It was a line inside the table pane — "6 more collections on
                 Cedar Press+" — above the records, on every screen, whichever
@@ -199,9 +197,9 @@ export default function PressCollectionRail({
                 nothing. A reader on the full plan never sees it, because the
                 shelf has nothing locked on it. */}
             {mode === "app" && upgradeable.length ? (
-              <a className="cp-rail__get" href={TBN_PLANS_URL} target="_blank" rel="noreferrer">
+              <Link className="cp-rail__get" to={PRESS_SETTINGS_PATH}>
                 Get {upgradeable.length} more <span aria-hidden="true">&#8594;</span>
-              </a>
+              </Link>
             ) : null}
           </span>
           <ul className="cp-rail__list">

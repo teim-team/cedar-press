@@ -50,10 +50,10 @@ held the Cedar data workspace, described below.
 
 **The subscriber-facing service.** Cedar Press at cedarpress.ai: a Vite + React
 static client with a FastAPI service alongside it, serving the Overview,
-Collections, Research Briefs, Priorities, What's new and Methods, plus
-`/tribal-data-request` and `/research-access` on their own URLs. Cedar Press is a Lumecon research publication, partnered
-with Tribal Business News: built by Lumecon and available exclusively through
-Tribal Business News. Cedar Press handles account creation, direct Stripe billing,
+Collections, Priorities, What's new and Methods, plus
+`/tribal-data-request` and `/research-access` on their own URLs. Cedar Press is a Lumecon research publication,
+built by Lumecon. Readers sign up directly at `/subscribe`; there are no access
+codes. Cedar Press handles account creation, direct Stripe billing,
 renewals and upgrades (Brian Kim, 2026-10-25). There is no year gating: every
 subscriber gets full coverage.
 
@@ -307,8 +307,7 @@ list, all of which this project has paid for:
   "AI assistant". Ampersands are allowed (owner ruling 2026-10-13, Elijah
   Moreno); the no-ampersand rule was retired.
 - **No year gating.** Every subscriber gets full coverage; no plan changes how
-  far back a collection goes. Subscriber plans are handled on the Tribal
-  Business News side. The year cap that once separated the tiers was retired
+  far back a collection goes. The year cap that once separated the tiers was retired
   on the owner's ruling of 2026-09-02 (see the `ONE AXIS` note in
   `pressCatalog.js`).
 - **A collection name is a data contract.** It is embedded verbatim in the
@@ -319,15 +318,14 @@ list, all of which this project has paid for:
 - **Build and write it as the shipped product.** No surface, route or copy
   describes Cedar Press as a prototype or a pilot. Something that is not real
   yet is labelled plainly for what it does today and tracked as a gap, never
-  called a prototype. Pilots run as ordinary accounts or access codes, not a
+  called a prototype. Pilots run as ordinary accounts, not a
   separate code path. Cedar Press owns direct Stripe billing and subscriber accounts (Brian Kim,
   2026-10-25). Annual early-access prices are $500 for Cedar Press and $1,000
   for Cedar Press+, retained while the subscription remains active. New
   subscriptions from January 1, 2027 cost $1,000/$2,000 annually. The approved
   Summit promotion discounts the first year by $100 and then renews at the
   early-access rate. Resubscription after a subscription ends uses current
-  pricing. Existing access codes remain a compatibility path, separate from
-  Stripe promotion codes.
+  pricing. Stripe promotion codes are the only codes; there are no access codes.
 
 ## 7. How this doc gets updated
 

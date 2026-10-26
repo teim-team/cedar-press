@@ -30,7 +30,6 @@ import {
 import { codebookFor } from "../../features/grove/explore.js";
 import { coverageLabel } from "../../features/grove/pressAccess.js";
 import { sampleRecordCount } from "../../features/grove/readerPresentation.js";
-import { articleHref, articlesDrawingOn } from "../../features/grove/pressArticles.js";
 import { PRESS_CATALOG_BY_ID } from "../../features/grove/pressCatalog.js";
 import { collectionQuestions } from "../../features/grove/pressJobs.js";
 import { MAINTENANCE, NEED_ENRICHMENTS } from "../../features/grove/pressMethod.js";
@@ -73,8 +72,7 @@ function Block({ title, children }) {
   );
 }
 
-export default function PressCollectionAbout({ entry, flagship, onClose, articles = [] }) {
-  const written = articlesDrawingOn(entry?.id, articles);
+export default function PressCollectionAbout({ entry, flagship, onClose }) {
   const panelRef = useRef(null);
   const closeRef = useRef(null);
 
@@ -249,43 +247,6 @@ export default function PressCollectionAbout({ entry, flagship, onClose, article
         </Block>
           </div>
         </details>
-
-        {/* THE OTHER HALF OF THE LOOP.
-            The article page names the collections a piece drew on and offers
-            their data. Read the other way, this is what a subscriber holding
-            the records wants next: what somebody already wrote from them.
-            Same `draws`, no second list to maintain. */}
-        {written.length ? (
-          <Block title="Research built from this collection">
-            <ul className="cp-ab__reads">
-              {written.map((article) => {
-                const away = !article.hosted;
-                const inner = (
-                  <>
-                    <span className="cp-ab__readtitle">{article.title}</span>
-                    <span className="cp-ab__readmeta">
-                      {article.date}
-                      {away ? " · Tribal Business News" : ""}
-                    </span>
-                  </>
-                );
-                return (
-                  <li key={article.id}>
-                    {away ? (
-                      <a className="cp-ab__read" href={articleHref(article)} target="_blank" rel="noreferrer">
-                        {inner}
-                      </a>
-                    ) : (
-                      <Link className="cp-ab__read" to={articleHref(article)}>
-                        {inner}
-                      </Link>
-                    )}
-                  </li>
-                );
-              })}
-            </ul>
-          </Block>
-        ) : null}
 
         <p className="cp-ab__foot">
           <Link className="cp-ab__link" to={PRESS_METHODS_PATH}>

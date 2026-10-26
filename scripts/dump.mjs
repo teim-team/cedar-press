@@ -11,7 +11,6 @@ import { EXCLUDED_COLLECTIONS, COLLECTION_FIGURES, LAUNCH_COLLECTION, UNMEASURED
 import { PLAN_REACH, SHELF, canOpenDataset, canReadCedarPress, shelfReach } from "../src/features/grove/pressAccess.js";
 import { PRESS_CATALOG } from "../src/features/grove/pressCatalog.js";
 import { WORKSPACE_TIERS } from "../src/workspaceTier.js";
-import { PRESS_ARTICLES, TBN_URL, LUMECON_URL } from "../src/features/grove/pressArticles.js";
 import { CITATIONS, REPORT_CITATION_HREF } from "../src/features/grove/pressCitations.js";
 import { COLLECTION_JOBS, cedarQuestions } from "../src/features/grove/pressJobs.js";
 import { PRESS_RELEASES } from "../src/features/grove/pressReleases.js";
@@ -101,9 +100,6 @@ return {
 
 function pressPayload() {
 return {
-      tbnUrl: TBN_URL,
-      lumeconUrl: LUMECON_URL,
-      articles: PRESS_ARTICLES,
       citations: CITATIONS,
       reportCitationHref: REPORT_CITATION_HREF,
       catalog: PRESS_CATALOG,

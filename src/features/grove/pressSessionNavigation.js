@@ -7,6 +7,11 @@ export function workspaceSignInHref(location) {
   return `https://app.cedarpress.ai${PRESS_LOGIN_PATH}`;
 }
 
+/** The membership cards, on the same host as the login page. */
+export function subscribeHref(location = globalThis.location) {
+  return workspaceSignInHref(location) ? "https://app.cedarpress.ai/subscribe" : "/subscribe";
+}
+
 /** The workspace host serves the app; VITE_APP_HOST=1 does the same for a local dev server. */
 export function isWorkspaceHost(location) {
   return location?.hostname === "app.cedarpress.ai" || import.meta.env?.VITE_APP_HOST === "1";
