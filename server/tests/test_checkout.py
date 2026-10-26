@@ -1,4 +1,4 @@
-"""Guest purchase boundaries: existing accounts, paid provisioning and mailbox proof."""
+"""Checkout boundaries: existing accounts, paid provisioning and mailbox proof."""
 
 import concurrent.futures
 import os
@@ -13,20 +13,20 @@ from fastapi.testclient import TestClient
 from cedar_press import accounts, db, ratelimit, subscribers
 from cedar_press.account_email import AccountEmailSender
 from cedar_press.billing.dependencies import create_billing_services
-from cedar_press.billing.policy import BillingError
+from cedar_press.billing.errors import BillingError
 from tests import test_billing as fixtures
 from tests.test_billing import PG, FakeGateway
 
-EMAIL = "guest@example.invalid"
+EMAIL = "checkout@example.invalid"
 SECRET = "synthetic-browser-secret-for-testing-only"
 
 
-class GuestGateway(FakeGateway):
-    def checkout(self, customer, attempt, app_url, guest=False):
+class CheckoutGateway(FakeGateway):
+    def checkout(self, customer, attempt, app_url, account_setup=False):
         result = super().checkout(customer, attempt, app_url)
         result.update(
             {
-                "metadata": {"cedar_press_guest_id": str(attempt["id"])},
+                "metadata": {"cedar_press_checkout_id": str(attempt["id"])},
                 "client_reference_id": str(attempt["id"]),
                 "payment_status": "unpaid",
             }
@@ -34,7 +34,7 @@ class GuestGateway(FakeGateway):
         self.sessions[str(attempt["id"])] = result
         return result
 
-    def guest_session(self, customer):
+    def find_checkout_for_customer(self, customer):
         return next(
             (session for session in self.sessions.values() if session.get("customer") == customer),
             None,
@@ -42,7 +42,7 @@ class GuestGateway(FakeGateway):
 
 
 @unittest.skipUnless(PG, "set CEDAR_PRESS_TEST_DATABASE_URL")
-class TestGuestCheckout(unittest.TestCase):
+class TestCheckout(unittest.TestCase):
     setUp_database = fixtures.TestBillingPostgres.setUp
     drop_database = fixtures.TestBillingPostgres.drop_database
     paid_subscription = fixtures.TestBillingPostgres.paid_subscription
@@ -50,12 +50,12 @@ class TestGuestCheckout(unittest.TestCase):
 
     def setUp(self):
         self.setUp_database()
-        self.gateway = GuestGateway()
+        self.gateway = CheckoutGateway()
         self.sender = mock.Mock(spec=AccountEmailSender)
         self.sender.configured.return_value = True
         self.mail = self.sender.send_link
         self.services = create_billing_services(gateway=self.gateway, email_sender=self.sender)
-        self.service = self.services.guest
+        self.service = self.services.checkout
         self.billing = self.services.billing
         self.reconciler = self.services.reconciler
 
@@ -63,8 +63,8 @@ class TestGuestCheckout(unittest.TestCase):
         return self.service.start("press", secret)
 
     def complete(self, paid=True, email=EMAIL):
-        row = db.one("SELECT * FROM cedar_press_guest_checkouts ORDER BY created_at DESC LIMIT 1")
-        self.customer = "cus_guest_" + str(row["id"])
+        row = db.one("SELECT * FROM cedar_press_checkouts ORDER BY created_at DESC LIMIT 1")
+        self.customer = "cus_checkout_" + str(row["id"])
         self.paid_subscription()
         session = self.gateway.sessions[str(row["id"])]
         session.update(
@@ -80,14 +80,14 @@ class TestGuestCheckout(unittest.TestCase):
         from cedar_press.app import app
 
         client = TestClient(app)
-        response = client.post("/billing/guest/checkout", json={"tier": "press"})
+        response = client.post("/billing/checkout/start", json={"tier": "press"})
         self.assertEqual(response.status_code, 200)
         self.assertIn("HttpOnly", response.headers["set-cookie"])
         self.assertNotIn(SECRET, response.text)
-        self.assertEqual(client.get("/billing/guest/status").json()["status"], "open")
-        self.assertEqual(TestClient(app).get("/billing/guest/status").status_code, 404)
+        self.assertEqual(client.get("/billing/checkout/status").json()["status"], "open")
+        self.assertEqual(TestClient(app).get("/billing/checkout/status").status_code, 404)
         self.assertIsNone(subscribers.find(EMAIL))
-        row = db.one("SELECT email,customer_id FROM cedar_press_guest_checkouts")
+        row = db.one("SELECT email,customer_id FROM cedar_press_checkouts")
         self.assertIsNone(row["email"])
         self.assertIsNone(row["customer_id"])
 
@@ -99,7 +99,7 @@ class TestGuestCheckout(unittest.TestCase):
 
     def test_paid_webhook_uses_stripe_email_and_only_mailbox_token_can_set_password(self):
         self.start()
-        event = self.complete(email="  GUEST@EXAMPLE.INVALID  ")
+        event = self.complete(email="  CHECKOUT@EXAMPLE.INVALID  ")
         self.reconciler.process_event(event)
         found = subscribers.find(EMAIL)
         self.assertEqual(found.tier, "press")
@@ -283,7 +283,7 @@ class TestGuestCheckout(unittest.TestCase):
         from cedar_press.app import app
 
         self.start()
-        older = db.one("SELECT id FROM cedar_press_guest_checkouts")["id"]
+        older = db.one("SELECT id FROM cedar_press_checkouts")["id"]
         event = self.complete()
         self.service.start("press_pro", SECRET)
         self.reconciler.process_event(event)
@@ -293,23 +293,29 @@ class TestGuestCheckout(unittest.TestCase):
         self.addCleanup(ratelimit.reset_for_tests)
         self.assertEqual(self.service.resend(SECRET, older)["status"], "complete")
         client = TestClient(app)
-        self.assertEqual(client.get(f"/billing/guest/status?checkout_id={older}").status_code, 404)
-        client.cookies.set("cedar_press_guest_checkout", SECRET)
         self.assertEqual(
-            client.get(f"/billing/guest/status?checkout_id={older}").json()["status"], "complete"
+            client.get(f"/billing/checkout/status?checkout_id={older}").status_code, 404
+        )
+        client.cookies.set("cedar_press_checkout", SECRET)
+        self.assertEqual(
+            client.get(f"/billing/checkout/status?checkout_id={older}").json()["status"], "complete"
         )
         self.assertEqual(
-            client.post("/billing/guest/resend", json={"checkout_id": str(older)}).json()["status"],
+            client.post("/billing/checkout/resend", json={"checkout_id": str(older)}).json()[
+                "status"
+            ],
             "complete",
         )
-        self.assertEqual(client.get("/billing/guest/status?checkout_id=invalid").status_code, 422)
+        self.assertEqual(
+            client.get("/billing/checkout/status?checkout_id=invalid").status_code, 422
+        )
 
-    def test_guest_recovery_passes_the_reservation_creation_window(self):
+    def test_checkout_recovery_passes_the_reservation_creation_window(self):
         self.gateway.fail_checkout = True
         with self.assertRaises(stripe.APIConnectionError):
             self.start()
-        db.execute("UPDATE cedar_press_guest_checkouts SET expires_at=now()+interval '29 minutes'")
-        row = db.one("SELECT * FROM cedar_press_guest_checkouts")
+        db.execute("UPDATE cedar_press_checkouts SET expires_at=now()+interval '29 minutes'")
+        row = db.one("SELECT * FROM cedar_press_checkouts")
         with mock.patch.object(
             self.gateway, "find_checkout", wraps=self.gateway.find_checkout
         ) as find:

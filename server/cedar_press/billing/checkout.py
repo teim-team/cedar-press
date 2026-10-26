@@ -8,27 +8,21 @@ import re
 
 from cedar_press import db, ratelimit
 from cedar_press.account_email import AccountEmailSender
-from cedar_press.billing.contracts import BillingGateway
-from cedar_press.billing.policy import (
-    BillingError,
-    cohort_at,
-    price_for,
-    reference,
-    unavailable,
-    validate_price,
-)
+from cedar_press.billing.errors import BillingError, unavailable
+from cedar_press.billing.interfaces import BillingGateway
+from cedar_press.billing.pricing import cohort_at, price_for, validate_price
 from cedar_press.billing.stripe_gateway import StripeGateway, stripe_url
-from cedar_press.billing.support import application_url, utc_now, verify_customer
+from cedar_press.billing.utils import application_url, reference, utc_now, verify_customer
 
-COOKIE = "cedar_press_guest_checkout"
+COOKIE = "cedar_press_checkout"
 
 
 def digest(secret):
     return hashlib.sha256(secret.encode()).hexdigest()
 
 
-class GuestCheckoutService:
-    """Own guest purchase reservations and paid identity provisioning."""
+class CheckoutService:
+    """Own checkout reservations and paid identity provisioning."""
 
     def __init__(
         self,
@@ -65,7 +59,7 @@ class GuestCheckoutService:
             cur.execute("SELECT pg_advisory_xact_lock(hashtextextended(%s,0))", (digest(secret),))
             cur.execute(
                 """
-                SELECT * FROM cedar_press_guest_checkouts WHERE secret_hash=%s
+                SELECT * FROM cedar_press_checkouts WHERE secret_hash=%s
                 AND price_id=%s AND email IS NULL AND status IN ('pending','open')
                 ORDER BY created_at DESC LIMIT 1 FOR UPDATE
             """,
@@ -74,14 +68,14 @@ class GuestCheckoutService:
             attempt = cur.fetchone()
             if attempt and attempt["expires_at"] <= self.clock():
                 cur.execute(
-                    "UPDATE cedar_press_guest_checkouts SET status='expired' WHERE id=%s",
+                    "UPDATE cedar_press_checkouts SET status='expired' WHERE id=%s",
                     (attempt["id"],),
                 )
                 attempt = None
             if not attempt:
                 cur.execute(
                     """
-                    INSERT INTO cedar_press_guest_checkouts
+                    INSERT INTO cedar_press_checkouts
                     (secret_hash,price_id,tier,cohort,expires_at)
                     VALUES (%s,%s,%s,%s,%s) RETURNING *
                 """,
@@ -98,7 +92,7 @@ class GuestCheckoutService:
         # the same Stripe idempotency key, without creating an account or customer.
         with self.db.pool().connection() as conn, conn.cursor() as cur:
             cur.execute(
-                "SELECT * FROM cedar_press_guest_checkouts WHERE id=%s FOR UPDATE", (attempt["id"],)
+                "SELECT * FROM cedar_press_checkouts WHERE id=%s FOR UPDATE", (attempt["id"],)
             )
             attempt = cur.fetchone()
             if attempt["status"] not in {"pending", "open"}:
@@ -118,13 +112,13 @@ class GuestCheckoutService:
                 )
                 if not session:
                     cur.execute(
-                        "UPDATE cedar_press_guest_checkouts SET status='expired' WHERE id=%s",
+                        "UPDATE cedar_press_checkouts SET status='expired' WHERE id=%s",
                         (attempt["id"],),
                     )
                     conn.commit()
                     raise BillingError("CHECKOUT_EXPIRED", "Please start checkout again.", 409)
             else:
-                session = self.gateway.checkout(None, attempt, self.app_url(), guest=True)
+                session = self.gateway.checkout(None, attempt, self.app_url(), account_setup=True)
             if session["status"] != "open":
                 raise BillingError(
                     "CHECKOUT_PROCESSING",
@@ -132,7 +126,7 @@ class GuestCheckoutService:
                     409,
                 )
             cur.execute(
-                "UPDATE cedar_press_guest_checkouts SET session_id=%s,status='open' WHERE id=%s",
+                "UPDATE cedar_press_checkouts SET session_id=%s,status='open' WHERE id=%s",
                 (session["id"], attempt["id"]),
             )
             return {"url": stripe_url(session["url"])}
@@ -141,7 +135,7 @@ class GuestCheckoutService:
         cur.execute(
             """
             SELECT id FROM cedar_press_subscribers WHERE stripe_customer_id=%s
-            UNION SELECT user_id AS id FROM cedar_press_guest_checkouts
+            UNION SELECT user_id AS id FROM cedar_press_checkouts
             WHERE customer_id=%s AND status='complete' AND user_id IS NOT NULL
         """,
             (customer, customer),
@@ -150,26 +144,26 @@ class GuestCheckoutService:
 
     def prepare_activation(self, cur, customer):
         cur.execute(
-            "SELECT * FROM cedar_press_guest_checkouts WHERE customer_id=%s FOR UPDATE", (customer,)
+            "SELECT * FROM cedar_press_checkouts WHERE customer_id=%s FOR UPDATE", (customer,)
         )
         attempt = cur.fetchone()
         session = (
             self.gateway.checkout_status(attempt["session_id"])
             if attempt
-            else self.gateway.guest_session(customer)
+            else self.gateway.find_checkout_for_customer(customer)
         )
         if not session:
             return None
         if not attempt:
             cur.execute(
-                "SELECT * FROM cedar_press_guest_checkouts WHERE id=%s FOR UPDATE",
-                (session.get("metadata", {}).get("cedar_press_guest_id"),),
+                "SELECT * FROM cedar_press_checkouts WHERE id=%s FOR UPDATE",
+                (session.get("metadata", {}).get("cedar_press_checkout_id"),),
             )
             attempt = cur.fetchone()
         if not attempt or session["id"] != attempt["session_id"]:
             return None
         verify_customer(session, customer)
-        if session.get("metadata", {}).get("cedar_press_guest_id") != str(
+        if session.get("metadata", {}).get("cedar_press_checkout_id") != str(
             attempt["id"]
         ) or session.get("client_reference_id") != str(attempt["id"]):
             raise BillingError(
@@ -190,7 +184,9 @@ class GuestCheckoutService:
         address = ((session.get("customer_details") or {}).get("email") or "").strip().lower()
         if len(address) > 254 or not re.fullmatch(r"[^\s@]+@[^\s@]+\.[^\s@]+", address):
             raise BillingError("BILLING_DATA_INVALID", "Checkout email could not be verified.", 502)
-        cur.execute("SELECT pg_advisory_xact_lock(hashtextextended(%s,0))", ("guest:" + address,))
+        cur.execute(
+            "SELECT pg_advisory_xact_lock(hashtextextended(%s,0))", ("checkout:" + address,)
+        )
         cur.execute(
             """
             INSERT INTO cedar_press_subscribers(email,account_id,tier,stripe_customer_id)
@@ -217,7 +213,7 @@ class GuestCheckoutService:
             )
         cur.execute(
             """
-            UPDATE cedar_press_guest_checkouts
+            UPDATE cedar_press_checkouts
             SET email=%s,customer_id=%s,user_id=%s,status='complete'
             WHERE id=%s
         """,
@@ -231,7 +227,7 @@ class GuestCheckoutService:
         row = self.db.one(
             """
             SELECT g.email,g.status,g.claim_sent_at,s.password_hash
-            FROM cedar_press_guest_checkouts g
+            FROM cedar_press_checkouts g
             LEFT JOIN cedar_press_subscribers s ON s.id=g.user_id
             WHERE g.secret_hash=%s AND (%s::uuid IS NULL OR g.id=%s)
             ORDER BY g.created_at DESC LIMIT 1
@@ -252,7 +248,7 @@ class GuestCheckoutService:
             raise unavailable()
         row = self.db.one(
             """
-            SELECT id,email,customer_id FROM cedar_press_guest_checkouts
+            SELECT id,email,customer_id FROM cedar_press_checkouts
             WHERE secret_hash=%s AND (%s::uuid IS NULL OR id=%s)
             AND status='complete' AND user_id IS NOT NULL
             ORDER BY created_at DESC LIMIT 1

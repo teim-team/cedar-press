@@ -335,12 +335,12 @@ export function fetchBillingPlans({ signal } = {}) {
   return request("/billing/plans", { signal });
 }
 
-export function startGuestCheckout({ tier }) {
-  return request("/billing/guest/checkout", { method: "POST", body: { tier } });
+export function startCheckout({ tier }) {
+  return request("/billing/checkout/start", { method: "POST", body: { tier } });
 }
 
-export function fetchGuestCheckout(checkoutId) {
-  return request(`/billing/guest/status${checkoutId ? `?checkout_id=${encodeURIComponent(checkoutId)}` : ""}`);
+export function fetchCheckout(checkoutId) {
+  return request(`/billing/checkout/status${checkoutId ? `?checkout_id=${encodeURIComponent(checkoutId)}` : ""}`);
 }
 
 export function checkAccountSetup(token) {
@@ -351,6 +351,6 @@ export function completeAccountSetup({ token, name, password }) {
   return request("/auth/account-setup/confirm", { method: "POST", body: { token, name, new_password: password } });
 }
 
-export function resendGuestEmail(checkoutId) {
-  return request("/billing/guest/resend", { method: "POST", body: { checkout_id: checkoutId } });
+export function resendCheckoutEmail(checkoutId) {
+  return request("/billing/checkout/resend", { method: "POST", body: { checkout_id: checkoutId } });
 }

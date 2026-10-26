@@ -52,7 +52,7 @@ def main() -> int:
                 "tests.test_subscribers",
                 "tests.test_account_foundation",
                 "tests.test_billing",
-                "tests.test_guest_checkout",
+                "tests.test_checkout",
                 "tests.test_priorities",
                 "tests.test_auth_session_lifecycle",
                 "tests.test_release_download",

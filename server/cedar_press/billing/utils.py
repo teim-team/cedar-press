@@ -1,4 +1,4 @@
-"""Small shared billing rules with no service or HTTP dependencies."""
+"""Small shared helpers for billing URLs, timestamps and ownership checks."""
 
 from __future__ import annotations
 
@@ -6,7 +6,7 @@ import datetime as dt
 import os
 from urllib.parse import urlsplit
 
-from cedar_press.billing.policy import BillingError, reference, unavailable
+from cedar_press.billing.errors import BillingError, unavailable
 
 
 def utc_now():
@@ -47,3 +47,13 @@ def verify_write(cur):
         raise BillingError(
             "BILLING_OWNER_MISMATCH", "Billing ownership could not be verified.", 502
         )
+
+
+def reference(value) -> str | None:
+    return value.get("id") if isinstance(value, dict) else value if isinstance(value, str) else None
+
+
+def instant(value) -> dt.datetime:
+    if type(value) is not int or value < 0:
+        raise BillingError("BILLING_DATA_INVALID", "Billing data could not be verified.", 502)
+    return dt.datetime.fromtimestamp(value, dt.timezone.utc)

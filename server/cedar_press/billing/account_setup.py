@@ -7,9 +7,9 @@ import secrets
 import uuid
 
 from cedar_press import db, subscribers
-from cedar_press.billing.contracts import EmailSender
-from cedar_press.billing.policy import BillingError, unavailable
-from cedar_press.billing.support import application_url
+from cedar_press.billing.errors import BillingError, unavailable
+from cedar_press.billing.interfaces import EmailSender
+from cedar_press.billing.utils import application_url
 
 
 def token_hash(token):
@@ -27,7 +27,7 @@ class AccountSetupService:
         # older releases, so deploying the queue does not resend every purchase.
         self.db.execute(
             """INSERT INTO cedar_press_account_email_deliveries(checkout_id)
-            SELECT id FROM cedar_press_guest_checkouts WHERE customer_id=%s
+            SELECT id FROM cedar_press_checkouts WHERE customer_id=%s
             AND status='complete' AND claim_sent_at IS NULL ON CONFLICT DO NOTHING""",
             (customer,),
         )
@@ -36,7 +36,7 @@ class AccountSetupService:
             cur.execute(
                 """UPDATE cedar_press_account_email_deliveries d SET status='sending',
                 lease_id=%s,lease_until=now()+interval '2 minutes',attempts=attempts+1,
-                updated_at=now() FROM cedar_press_guest_checkouts g
+                updated_at=now() FROM cedar_press_checkouts g
                 WHERE d.checkout_id=g.id AND g.customer_id=%s
                 AND (d.status='pending' OR (d.status='sending' AND d.lease_until<now()))
                 RETURNING g.id,g.user_id,g.email""",
@@ -80,7 +80,7 @@ class AccountSetupService:
             )
             if cur.fetchone():
                 cur.execute(
-                    "UPDATE cedar_press_guest_checkouts SET claim_sent_at=now() WHERE id=%s",
+                    "UPDATE cedar_press_checkouts SET claim_sent_at=now() WHERE id=%s",
                     (delivery["id"],),
                 )
 
@@ -109,7 +109,7 @@ class AccountSetupService:
             row = self.db.one(
                 """SELECT s.email FROM cedar_press_password_resets r
                 JOIN cedar_press_subscribers s ON s.email=r.email
-                JOIN cedar_press_guest_checkouts g ON g.user_id=s.id
+                JOIN cedar_press_checkouts g ON g.user_id=s.id
                 WHERE r.token_hash=%s AND r.used_at IS NULL AND r.expires_at>now()
                 AND s.password_hash IS NULL AND g.status='complete'""",
                 (token_hash(token),),

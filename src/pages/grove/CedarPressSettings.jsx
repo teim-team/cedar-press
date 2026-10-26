@@ -228,7 +228,7 @@ export default function CedarPressSettings() {
           {/* Where the account's influence lives: what this subscription has
               earned by using the product, where it put it, and what it asked
               for. The page is worth visiting for this, not only for billing. */}
-          <PressInfluence influence={influence} tier={tierId} status={influenceStatus} />
+          {entitled ? <PressInfluence influence={influence} tier={tierId} status={influenceStatus} /> : null}
 
           {/* Links out to public programs, not features of the account: both
               pages work with or without a subscription, and the gate and

@@ -71,7 +71,7 @@ class _Backend:
                 "TRUNCATE cedar_press_subscribers, cedar_press_codes, cedar_press_password_resets,"
                 " cedar_press_login_identities, cedar_press_access_grants,"
                 " cedar_press_account_setup_links, cedar_press_account_email_deliveries,"
-                " cedar_press_checkout_attempts, cedar_press_guest_checkouts,"
+                " cedar_press_checkout_attempts, cedar_press_checkouts,"
                 " cedar_press_refunds, cedar_press_payments,"
                 " cedar_press_invoices, cedar_press_subscriptions"
             )

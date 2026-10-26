@@ -21,19 +21,12 @@ from fastapi.testclient import TestClient
 
 from cedar_press import db, session, subscribers
 from cedar_press.billing.dependencies import create_billing_services, get_billing_services
-from cedar_press.billing.policy import (
-    AMOUNTS,
-    BillingError,
-    cohort_at,
-    coverage,
-    instant,
-    price_for,
-    prices,
-    validate_price,
-)
+from cedar_press.billing.errors import BillingError
+from cedar_press.billing.invoice_coverage import coverage
+from cedar_press.billing.pricing import AMOUNTS, cohort_at, price_for, prices, validate_price
 from cedar_press.billing.service import BillingService
 from cedar_press.billing.stripe_gateway import API_VERSION, StripeGateway, stripe_url
-from cedar_press.billing.support import application_url
+from cedar_press.billing.utils import application_url, instant
 
 PRICE_MAP = {
     cohort: {tier: f"price_{cohort}_{tier}" for tier in amounts}
@@ -283,7 +276,7 @@ class TestBillingPolicy(unittest.TestCase):
     def test_legacy_prices_remain_recognized_but_new_purchases_use_named_tier_prices(self):
         legacy = [{"id": "price_previous", "tier": "press_pro", "cohort": "early_access"}]
         with mock.patch.dict(os.environ, {"CEDAR_PRESS_STRIPE_LEGACY_PRICES": json.dumps(legacy)}):
-            from cedar_press.billing.policy import identify_price
+            from cedar_press.billing.pricing import identify_price
 
             self.assertEqual(identify_price("price_previous").tier, "press_pro")
             self.assertEqual(

@@ -66,11 +66,11 @@ test("activation refuses a misrouted success and keeps a genuine session payload
   });
 });
 
-test("guest status and resend preserve the reservation target", async () => {
+test("checkout status and resend preserve the reservation target", async () => {
   const id = "48ff73db-cfe8-4775-901e-c212627d27f9";
   await withResponse(Response.json({ status: "complete" }), async calls => {
-    await api.fetchGuestCheckout(id);
-    await api.resendGuestEmail(id);
+    await api.fetchCheckout(id);
+    await api.resendCheckoutEmail(id);
     assert.equal(new URL(calls[0].url).searchParams.get("checkout_id"), id);
     assert.deepEqual(JSON.parse(calls[1].options.body), { checkout_id: id });
   });

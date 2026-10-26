@@ -12,7 +12,7 @@ CREATE INDEX cedar_press_setup_link_user ON cedar_press_account_setup_links(user
 
 -- A lease prevents concurrent deliveries without holding a transaction during SMTP.
 CREATE TABLE cedar_press_account_email_deliveries (
-    checkout_id UUID PRIMARY KEY REFERENCES cedar_press_guest_checkouts(id),
+    checkout_id UUID PRIMARY KEY REFERENCES cedar_press_checkouts(id),
     status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','sending','sent')),
     lease_id UUID,
     lease_until TIMESTAMPTZ,

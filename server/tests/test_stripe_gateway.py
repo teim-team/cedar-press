@@ -14,7 +14,7 @@ from urllib.parse import parse_qs, urlsplit
 import stripe
 
 from cedar_press.billing.dependencies import create_billing_services
-from cedar_press.billing.policy import BillingError
+from cedar_press.billing.errors import BillingError
 from cedar_press.billing.stripe_gateway import API_VERSION, StripeGateway
 from tests.test_billing import PRICE_MAP, SETTINGS, price_data
 from tools.setup_stripe import setup
@@ -71,7 +71,7 @@ class Transport(stripe.HTTPClient):
                 {"object": "list", "url": path, "has_more": False, "data": []}
                 if method == "get"
                 else {
-                    "id": "bpc_" + params["metadata[cedar_press_cohort]"][0],
+                    "id": "bpc_" + params.get("metadata[cedar_press_cohort]", ["management"])[0],
                     "object": "billing_portal.configuration",
                 }
             )
@@ -153,12 +153,20 @@ class Transport(stripe.HTTPClient):
                 "features": {
                     "subscription_cancel": {"mode": "at_period_end"},
                     "subscription_update": {
-                        "enabled": True,
+                        "enabled": (not self.portal_safe)
+                        if path.endswith("bpc_management")
+                        else True,
                         "default_allowed_updates": ["price"],
                         "proration_behavior": "always_invoice",
                         "products": [
                             {
-                                "prices": [PRICE_MAP["early_access"]["press_pro"]]
+                                "prices": [
+                                    PRICE_MAP[
+                                        "standard"
+                                        if path.endswith("bpc_standard")
+                                        else "early_access"
+                                    ]["press_pro"]
+                                ]
                                 if self.portal_safe
                                 else ["price_unapproved"]
                             }
@@ -188,7 +196,11 @@ class TestStripeGateway(unittest.TestCase):
                 **SETTINGS,
                 "CEDAR_PRESS_STRIPE_SUMMIT_COUPON": "coupon_fixture",
                 "CEDAR_PRESS_STRIPE_PORTALS": json.dumps(
-                    {"early_access": {"press": "bpc_fixture"}}
+                    {
+                        "management": "bpc_management",
+                        "early_access": {"press": "bpc_fixture"},
+                        "standard": {"press": "bpc_standard"},
+                    }
                 ),
             },
         )
@@ -227,7 +239,7 @@ class TestStripeGateway(unittest.TestCase):
         with mock.patch.dict(os.environ, {"CEDAR_PRESS_STRIPE_SECRET_KEY": ""}):
             services = create_billing_services()
             self.assertIsInstance(services.billing.gateway, StripeGateway)
-            self.assertIs(services.billing.gateway, services.guest.gateway)
+            self.assertIs(services.billing.gateway, services.checkout.gateway)
             self.assertIs(services.billing.gateway, services.reconciler.gateway)
             with self.assertRaises(BillingError):
                 _ = services.billing.gateway.livemode
@@ -285,7 +297,7 @@ class TestStripeGateway(unittest.TestCase):
         self.assertEqual(self.transport.calls[-1][2]["created[gte]"], ["10"])
         self.assertEqual(self.transport.calls[-1][2]["created[lte]"], ["20"])
 
-    def test_direct_guest_checkout_leaves_email_and_codes_to_stripe(self):
+    def test_checkout_with_account_setup_leaves_email_and_codes_to_stripe(self):
         attempt = {
             "id": "anonymous-attempt",
             "tier": "press",
@@ -294,13 +306,13 @@ class TestStripeGateway(unittest.TestCase):
             "promotion_id": None,
             "expires_at": dt.datetime.now(dt.timezone.utc) + dt.timedelta(minutes=31),
         }
-        self.gateway.checkout(None, attempt, "http://localhost:5173", guest=True)
+        self.gateway.checkout(None, attempt, "http://localhost:5173", account_setup=True)
         _, _, params, _ = self.transport.calls[-1]
         self.assertNotIn("customer", params)
         self.assertNotIn("customer_email", params)
         self.assertEqual(params["allow_promotion_codes"], ["true"])
         self.assertEqual(params["client_reference_id"], ["anonymous-attempt"])
-        self.assertEqual(params["metadata[cedar_press_guest_id]"], ["anonymous-attempt"])
+        self.assertEqual(params["metadata[cedar_press_checkout_id]"], ["anonymous-attempt"])
         self.assertEqual(
             params["success_url"],
             ["http://localhost:5173/subscribe?billing=processing&checkout=anonymous-attempt"],
@@ -331,7 +343,9 @@ class TestStripeGateway(unittest.TestCase):
             self.gateway.portal("cus_fixture", "standard", "http://localhost:5173")
 
     def test_plan_change_uses_stripe_confirmation_and_only_cohort_target(self):
-        self.gateway.portal("cus_fixture", "early_access", "http://localhost:5173", True)
+        self.gateway.portal(
+            "cus_fixture", "early_access", "http://localhost:5173", True, "sub_fixture"
+        )
         _, _, params, _ = self.transport.calls[-1]
         self.assertEqual(params["flow_data[type]"], ["subscription_update_confirm"])
         self.assertEqual(
@@ -341,6 +355,37 @@ class TestStripeGateway(unittest.TestCase):
         self.assertEqual(
             params["flow_data[subscription_update_confirm][items][0][quantity]"], ["1"]
         )
+
+    def test_old_canceled_cohort_cannot_enable_price_changes_in_customer_portal(self):
+        subscriptions = [
+            {"id": "sub_old", "status": "canceled", "items": {"data": [{"price": price_data()}]}},
+            {
+                "id": "sub_standard",
+                "status": "active",
+                "items": {"data": [{"id": "si_standard", "price": price_data(cohort="standard")}]},
+            },
+        ]
+        with mock.patch.object(self.gateway, "subscriptions", return_value=subscriptions) as fetch:
+            self.gateway.portal(
+                "cus_fixture", "early_access", "http://localhost:5173", False, "sub_old"
+            )
+            fetch.assert_not_called()
+            params = self.transport.calls[-1][2]
+            self.assertEqual(params["configuration"], ["bpc_management"])
+            self.assertNotIn("flow_data[type]", params)
+            self.gateway.portal(
+                "cus_fixture", "standard", "http://localhost:5173", True, "sub_standard"
+            )
+            params = self.transport.calls[-1][2]
+            self.assertEqual(
+                params["flow_data[subscription_update_confirm][subscription]"], ["sub_standard"]
+            )
+            self.assertEqual(
+                params["flow_data[subscription_update_confirm][items][0][price]"],
+                [PRICE_MAP["standard"]["press_pro"]],
+            )
+        with self.assertRaises(BillingError):
+            self.gateway.portal("cus_fixture", "early_access", "http://localhost:5173", True)
 
     def test_first_run_catalog_accepts_empty_compose_configuration(self):
         self.transport.bootstrap = True
@@ -393,8 +438,16 @@ class TestStripeGateway(unittest.TestCase):
             if method == "post" and path == "/v1/billing_portal/configurations"
         ]
         self.assertEqual(len({p["product"][0] for p in creates}), 2)
-        self.assertEqual(len(configs), 4)
+        self.assertEqual(len(configs), 5)
+        management = [
+            c for c in configs if c.get("features[subscription_update][enabled]") == ["false"]
+        ]
+        self.assertEqual(len(management), 1)
+        self.assertIn("CEDAR_PRESS_STRIPE_PORTALS=", output.getvalue())
         for config in configs:
+            if config in management:
+                self.assertNotIn("features[subscription_update][products][0][prices][0]", config)
+                continue
             self.assertEqual(config["features[subscription_cancel][mode]"], ["at_period_end"])
             self.assertEqual(
                 config["features[subscription_update][proration_behavior]"], ["always_invoice"]

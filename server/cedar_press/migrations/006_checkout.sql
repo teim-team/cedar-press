@@ -1,6 +1,6 @@
 -- Purchase reservations are separate from accounts. An account is created only
 -- after Stripe confirms payment; mailbox ownership is required to set a password.
-CREATE TABLE cedar_press_guest_checkouts (
+CREATE TABLE cedar_press_checkouts (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     email TEXT NOT NULL CHECK (email = lower(btrim(email)) AND length(email) <= 254),
     secret_hash TEXT NOT NULL CHECK (secret_hash ~ '^[0-9a-f]{64}$'),
@@ -16,6 +16,6 @@ CREATE TABLE cedar_press_guest_checkouts (
     claim_sent_at TIMESTAMPTZ,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-CREATE UNIQUE INDEX cedar_press_guest_email_pending ON cedar_press_guest_checkouts(email)
+CREATE UNIQUE INDEX cedar_press_checkout_email_pending ON cedar_press_checkouts(email)
     WHERE status IN ('pending','open');
-CREATE INDEX cedar_press_guest_secret ON cedar_press_guest_checkouts(secret_hash);
+CREATE INDEX cedar_press_checkout_secret ON cedar_press_checkouts(secret_hash);

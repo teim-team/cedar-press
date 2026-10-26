@@ -109,10 +109,10 @@ old cookies without lifecycle claims require a fresh sign-in.
 The account foundation extends the existing subscriber account with verification
 and Stripe customer fields. Google identities and access grants reference its UUID.
 Annual Stripe Checkout, billing portal and signed webhook reconciliation are implemented.
-Guest checkout starts at `/subscribe`; paid customers create an account through
+Checkout starts at `/subscribe`; paid customers create an account through
 a single-use email link. Stripe collects the email and discount code. Existing emails keep their
 credentials and sign in normally.
-The `cedar_press.billing` package uses `BillingService`, `GuestCheckoutService` and `BillingReconciler`,
+The `cedar_press.billing` package uses `BillingService`, `CheckoutService` and `BillingReconciler`,
 with `StripeGateway` for Stripe calls. Shared account email delivery lives in
 `cedar_press.account_email`, outside the billing package.
 Dependencies share one `StripeGateway`; its client initializes on first use.

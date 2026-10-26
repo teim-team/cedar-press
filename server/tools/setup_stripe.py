@@ -10,9 +10,9 @@ from zoneinfo import ZoneInfo
 
 import stripe
 
-from cedar_press.billing.policy import AMOUNTS
+from cedar_press.billing.pricing import AMOUNTS
 from cedar_press.billing.stripe_gateway import StripeGateway, plain
-from cedar_press.billing.support import application_url
+from cedar_press.billing.utils import application_url
 
 
 def setup(gateway, code):
@@ -120,6 +120,31 @@ def setup(gateway, code):
                 )
             )
             portals[cohort][current_tier] = config["id"]
+    configurations = gateway.rows(client.billing_portal.configurations.list({"limit": 100}))
+    management = [
+        c
+        for c in configurations
+        if c.get("metadata", {}).get("cedar_press_purpose") == "management_v1"
+    ]
+    if len(management) > 1:
+        raise SystemExit("Multiple matching management portals; resolve them before setup")
+    portals["management"] = (
+        management[0]["id"]
+        if management
+        else client.billing_portal.configurations.create(
+            {
+                "metadata": {"cedar_press_purpose": "management_v1"},
+                "default_return_url": application_url() + "/settings",
+                "features": {
+                    "invoice_history": {"enabled": True},
+                    "payment_method_update": {"enabled": True},
+                    "subscription_cancel": {"enabled": True, "mode": "at_period_end"},
+                    "subscription_update": {"enabled": False},
+                },
+            },
+            options={"idempotency_key": "press-portal-management-v1"},
+        ).id
+    )
     coupon_id = "cedar_press_summit_2026_v4"
     try:
         client.coupons.retrieve(coupon_id)

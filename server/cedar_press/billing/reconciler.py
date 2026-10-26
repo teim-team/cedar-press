@@ -5,26 +5,21 @@ from __future__ import annotations
 from contextlib import contextmanager
 
 from cedar_press import db
-from cedar_press.billing.contracts import BillingGateway
-from cedar_press.billing.policy import (
-    BillingError,
-    coverage,
-    identify_price,
-    instant,
-    reference,
-    validate_price,
-)
+from cedar_press.billing.errors import BillingError
+from cedar_press.billing.interfaces import BillingGateway
+from cedar_press.billing.invoice_coverage import coverage
+from cedar_press.billing.pricing import identify_price, validate_price
 from cedar_press.billing.stripe_gateway import StripeGateway, stripe_url
-from cedar_press.billing.support import verify_customer, verify_write
+from cedar_press.billing.utils import instant, reference, verify_customer, verify_write
 
 
 class BillingReconciler:
     """Synchronize provider state while keeping transaction boundaries visible."""
 
     def __init__(
-        self, guest_service, setup_service, *, gateway: BillingGateway | None = None, database=db
+        self, checkout_service, setup_service, *, gateway: BillingGateway | None = None, database=db
     ):
-        self.guests = guest_service
+        self.checkout = checkout_service
         self.setup = setup_service
         self._gateway = gateway
         self.db = database
@@ -227,8 +222,8 @@ class BillingReconciler:
 
     def reconcile_customer(self, customer):
         with self._customer_connection(customer) as conn, conn.cursor() as cur:
-            user = self.guests.owner(cur, customer)
-            prepared = self.guests.prepare_activation(cur, customer) if not user else None
+            user = self.checkout.owner(cur, customer)
+            prepared = self.checkout.prepare_activation(cur, customer) if not user else None
             if not user and not prepared:
                 return False
             snapshots = [
@@ -237,7 +232,7 @@ class BillingReconciler:
             ]
             with conn.transaction():
                 if not user:
-                    user = self.guests.activate(cur, customer, prepared)
+                    user = self.checkout.activate(cur, customer, prepared)
                 for snapshot in snapshots:
                     self._subscription(cur, user["id"], customer, snapshot)
         self.setup.send_claim(customer)
@@ -265,7 +260,7 @@ class BillingReconciler:
                 )
                 done = cur.fetchone()["status"] in {"processed", "ignored"}
                 if not done:
-                    user = self.guests.owner(cur, customer)
+                    user = self.checkout.owner(cur, customer)
                     supported = (
                         event_type.startswith(
                             (
@@ -279,7 +274,7 @@ class BillingReconciler:
                         or event_type == "charge.refunded"
                     )
                     prepared = (
-                        self.guests.prepare_activation(cur, customer)
+                        self.checkout.prepare_activation(cur, customer)
                         if customer and supported and not user
                         else None
                     )
@@ -323,7 +318,7 @@ class BillingReconciler:
                     )
                     with conn.transaction():
                         if not user and prepared:
-                            user = self.guests.activate(cur, customer, prepared)
+                            user = self.checkout.activate(cur, customer, prepared)
                         if user and snapshot:
                             self._subscription(cur, user["id"], customer, snapshot)
                         if user and payment:

@@ -79,7 +79,7 @@ from cedar_press import (
 )
 from cedar_press.account_email import AccountEmailSender
 from cedar_press.billing.dependencies import BillingServices, get_billing_services
-from cedar_press.billing.policy import BillingError
+from cedar_press.billing.errors import BillingError
 from cedar_press.billing.routes import router as billing_router
 from cedar_press.session import (
     Session,

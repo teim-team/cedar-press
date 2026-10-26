@@ -1,7 +1,7 @@
 import { AccountPage } from "./AccountPage.jsx";
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router";
-import { fetchBillingPlans, fetchGuestCheckout, resendGuestEmail, startGuestCheckout } from "../../api.js";
+import { fetchBillingPlans, fetchCheckout, resendCheckoutEmail, startCheckout } from "../../api.js";
 import { useAuth } from "../../context/useAuth.js";
 import { collectionsOnShelf } from "../../features/grove/pressCatalog.js";
 import { useDocumentTitle } from "../../features/grove/useDocumentTitle.js";
@@ -53,7 +53,7 @@ export default function CedarPressSubscribe() {
     let count = 0;
     const check = async () => {
       try {
-        const result = await fetchGuestCheckout(checkoutId);
+        const result = await fetchCheckout(checkoutId);
         if (stopped) return;
         setPurchase(result);
         if (result.emailSent || ++count >= 20) return;
@@ -69,7 +69,7 @@ export default function CedarPressSubscribe() {
     setSelected(tier);
     setError(null);
     try {
-      const result = await startGuestCheckout({ tier });
+      const result = await startCheckout({ tier });
       window.location.assign(result.url);
     } catch (failure) { setError(failure); setPending(false); }
   };
@@ -77,7 +77,7 @@ export default function CedarPressSubscribe() {
   const resendEmail = async () => {
     setPending(true);
     setError(null);
-    try { setPurchase(await resendGuestEmail(checkoutId)); setResent(true); }
+    try { setPurchase(await resendCheckoutEmail(checkoutId)); setResent(true); }
     catch (failure) { setError(failure); }
     finally { setPending(false); }
   };

@@ -122,16 +122,16 @@ Stripe billing uses migration 005. Catalog provisioning lives in
 `docker compose --profile app up -d api` runs the local API; the optional `billing` profile forwards sandbox webhooks through Stripe CLI.
 See `server/DATABASE.md` for setup. Billing uses confirmed invoice coverage; an
 expired subscription can still sign in for billing but cannot read paid content.
-Guest checkout starts at `/subscribe` and sends the selected plan directly to
+Checkout starts at `/subscribe` and sends the selected plan directly to
 Stripe for email and discount-code entry. It does not block repeat purchases.
 Migration 006 stores purchase reservations; migration 007 adds the display name;
 migration 008 supports email collection in Stripe and preserves customer history. Paid customers follow a mailbox ownership link to
 `/create-account`. Local Mailpit receives those links at http://localhost:8025;
 production uses configured SMTP with STARTTLS. The confirmation page supports
-`POST /billing/guest/resend` for its own paid checkout. The two tiers have
+`POST /billing/checkout/resend` for its own paid checkout. The two tiers have
 separately named Stripe products; older price IDs remain recognized through
 `CEDAR_PRESS_STRIPE_LEGACY_PRICES`.
-Billing uses `BillingService`, `GuestCheckoutService` and `BillingReconciler`,
+Billing uses `BillingService`, `CheckoutService` and `BillingReconciler`,
 with `StripeGateway` for Stripe calls. Shared account email delivery lives in
 `cedar_press.account_email`, outside the billing package.
 FastAPI dependencies share one `StripeGateway`, which creates its SDK client on
@@ -139,6 +139,8 @@ first use or accepts an injected client through `StripeGateway(client=...)`. `Ac
 delivery (migration 009), outside SQL transactions. Webhooks run off the event
 loop and refresh affected objects; the repair CLI reconciles full history.
 Billing management targets an owned subscription, including repeat purchases.
+General portal sessions use `CEDAR_PRESS_STRIPE_PORTALS.management` with price
+changes disabled. Cohort prices are exposed only by targeted plan-change flows.
 
 Docker Engine or Docker Desktop with Compose v2 is required for the database
 targets. Verify the Docker prerequisite before running them:

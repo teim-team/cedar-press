@@ -461,7 +461,7 @@ def redeem_reset(
                 "UPDATE cedar_press_password_resets SET used_at=now()"
                 " WHERE token_hash=%s AND used_at IS NULL AND expires_at>now()"
                 " AND (NOT %s OR EXISTS (SELECT 1 FROM cedar_press_subscribers s"
-                " JOIN cedar_press_guest_checkouts g ON g.user_id=s.id"
+                " JOIN cedar_press_checkouts g ON g.user_id=s.id"
                 " WHERE s.email=cedar_press_password_resets.email AND s.password_hash IS NULL"
                 " AND g.status='complete')) RETURNING email",
                 (key, account_setup),

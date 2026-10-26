@@ -8,13 +8,9 @@ from urllib.parse import urlsplit
 
 import stripe
 
-from cedar_press.billing.policy import (
-    BillingError,
-    identify_price,
-    price_for,
-    reference,
-    unavailable,
-)
+from cedar_press.billing.errors import BillingError, unavailable
+from cedar_press.billing.pricing import identify_price, price_for
+from cedar_press.billing.utils import reference
 
 API_VERSION = "2026-09-30.endive"
 
@@ -138,24 +134,26 @@ class StripeGateway:
             raise BillingError("DISCOUNT_INVALID", "That discount code is not available.")
         return promotion["id"]
 
-    def checkout(self, customer, attempt, app_url, guest=False):
+    def checkout(self, customer, attempt, app_url, account_setup=False):
         params = {
             "mode": "subscription",
             "managed_payments": {"enabled": False},
             "customer": customer,
             "line_items": [{"price": attempt["price_id"], "quantity": 1}],
-            "client_reference_id": str(attempt["id"] if guest else attempt["user_id"]),
+            "client_reference_id": str(attempt["id"] if account_setup else attempt["user_id"]),
             "metadata": {"cedar_press_attempt_id": str(attempt["id"])},
             "subscription_data": {
                 "metadata": {
-                    "cedar_press_user_id": str(attempt["id"] if guest else attempt["user_id"])
+                    "cedar_press_user_id": str(
+                        attempt["id"] if account_setup else attempt["user_id"]
+                    )
                 }
             },
             "success_url": app_url + "/settings?billing=processing",
             "cancel_url": app_url + "/settings?billing=canceled",
             "expires_at": int(attempt["expires_at"].timestamp()),
         }
-        if guest:
+        if account_setup:
             name = "Cedar Press+" if attempt["tier"] == "press_pro" else "Cedar Press"
             params["custom_text"] = {
                 "submit": {
@@ -166,8 +164,10 @@ class StripeGateway:
             if customer is None:
                 params.pop("customer")
                 params["allow_promotion_codes"] = attempt["cohort"] == "early_access"
-            params["metadata"]["cedar_press_guest_id"] = str(attempt["id"])
-            params["subscription_data"] = {"metadata": {"cedar_press_guest_id": str(attempt["id"])}}
+            params["metadata"]["cedar_press_checkout_id"] = str(attempt["id"])
+            params["subscription_data"] = {
+                "metadata": {"cedar_press_checkout_id": str(attempt["id"])}
+            }
             params["success_url"] = (
                 app_url + "/subscribe?billing=processing&checkout=" + str(attempt["id"])
             )
@@ -204,15 +204,44 @@ class StripeGateway:
                 return row
         return None
 
-    def guest_session(self, customer):
+    def find_checkout_for_customer(self, customer):
         sessions = self.rows(
             self.client.v1.checkout.sessions.list({"customer": customer, "limit": 100})
         )
         return next(
-            (s for s in sessions if s.get("metadata", {}).get("cedar_press_guest_id")), None
+            (s for s in sessions if s.get("metadata", {}).get("cedar_press_checkout_id")), None
+        )
+
+    def _management_portal(self, customer, app_url):
+        try:
+            config = json.loads(os.environ.get("CEDAR_PRESS_STRIPE_PORTALS", "{}"))["management"]
+            if not isinstance(config, str) or not config.startswith("bpc_"):
+                raise ValueError
+        except (ValueError, KeyError, TypeError):
+            raise unavailable() from None
+        features = plain(self.client.v1.billing_portal.configurations.retrieve(config)).get(
+            "features", {}
+        )
+        if (
+            features.get("subscription_update", {}).get("enabled") is not False
+            or features.get("subscription_cancel", {}).get("mode") != "at_period_end"
+        ):
+            raise unavailable()
+        return stripe_url(
+            self.client.v1.billing_portal.sessions.create(
+                {
+                    "customer": customer,
+                    "configuration": config,
+                    "return_url": app_url + "/settings",
+                }
+            ).url
         )
 
     def portal(self, customer, cohort, app_url, change_plan=False, subscription_id=None):
+        if not change_plan:
+            return self._management_portal(customer, app_url)
+        if not subscription_id:
+            raise BillingError("SUBSCRIPTION_REQUIRED", "Choose the subscription to change.", 409)
         subscriptions = self.subscriptions(customer)
         if subscription_id:
             subscriptions = [s for s in subscriptions if s["id"] == subscription_id]

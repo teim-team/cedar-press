@@ -18,7 +18,7 @@ def main(argv=None):
     gateway = StripeGateway()
     reconciler = create_billing_services(gateway=gateway).reconciler
     for reservation in db.query(
-        "SELECT session_id FROM cedar_press_guest_checkouts "
+        "SELECT session_id FROM cedar_press_checkouts "
         "WHERE status IN ('pending','open') AND session_id IS NOT NULL"
     ):
         session = gateway.checkout_status(reservation["session_id"])
@@ -29,7 +29,7 @@ def main(argv=None):
         """
         SELECT stripe_customer_id FROM cedar_press_subscribers WHERE
         stripe_customer_id IS NOT NULL UNION SELECT customer_id AS stripe_customer_id
-        FROM cedar_press_guest_checkouts WHERE customer_id IS NOT NULL
+        FROM cedar_press_checkouts WHERE customer_id IS NOT NULL
         """
     ):
         reconciler.reconcile_customer(row["stripe_customer_id"])

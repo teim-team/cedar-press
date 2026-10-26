@@ -121,7 +121,7 @@ SMTP settings are `CEDAR_PRESS_SMTP_HOST`, `CEDAR_PRESS_SMTP_PORT`,
 `CEDAR_PRESS_SMTP_STARTTLS`, `CEDAR_PRESS_SMTP_USERNAME`,
 `CEDAR_PRESS_SMTP_PASSWORD` and `CEDAR_PRESS_EMAIL_FROM`. Docker defaults to
 Mailpit with plaintext SMTP confined to the Docker network. Production requires
-STARTTLS and the chosen email provider's settings. Guest purchases refuse when
+STARTTLS and the chosen email provider's settings. Checkout refuses when
 email delivery is unconfigured. Password recovery uses the same sender.
 The confirmation page can resend its own paid account email, limited to three
 requests per 15 minutes. Migration 009 adds leased email delivery and hashed setup links.
@@ -139,6 +139,8 @@ offering only the other tier’s cohort price. Previous price IDs remain in
 `CEDAR_PRESS_STRIPE_LEGACY_PRICES` for existing purchases; new purchases use the
 primary configured prices. Settings links directly to Stripe’s plan-change
 confirmation; the general portal manages payment methods, invoices and cancellation.
+General portal sessions use `CEDAR_PRESS_STRIPE_PORTALS.management` with price
+changes disabled. Cohort prices are exposed only by targeted plan-change flows.
 Upgrades invoice prorations immediately; downgrades
 and cancellation take effect at renewal. Existing subscriptions retain their
 cohort. Stripe calculates prorations.
@@ -302,9 +304,9 @@ erDiagram
     cedar_press_subscribers ||..o{ cedar_press_invoices : user_id
     cedar_press_subscribers ||..o{ cedar_press_payments : user_id
     cedar_press_subscribers ||..o{ cedar_press_checkout_attempts : user_id
-    cedar_press_subscribers |o..o{ cedar_press_guest_checkouts : "user_id after payment"
+    cedar_press_subscribers |o..o{ cedar_press_checkouts : "user_id after payment"
     cedar_press_subscribers ||..o{ cedar_press_account_setup_links : user_id
-    cedar_press_guest_checkouts ||..o| cedar_press_account_email_deliveries : checkout_id
+    cedar_press_checkouts ||..o| cedar_press_account_email_deliveries : checkout_id
     cedar_press_subscriptions ||..o{ cedar_press_invoices : subscription_id
     cedar_press_payments ||..o{ cedar_press_refunds : payment_id
     users |o..o| cedar_press_subscribers : "optional platform user_id"
@@ -404,7 +406,7 @@ erDiagram
         text status
         timestamptz expires_at
     }
-    cedar_press_guest_checkouts {
+    cedar_press_checkouts {
         uuid id PK
         text email "Nullable until Stripe confirms payment"
         text secret_hash "Hashed browser cookie; no sign-in authority"

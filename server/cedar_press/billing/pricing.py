@@ -1,4 +1,4 @@
-"""Annual offers, price validation and invoice coverage; all amounts are integer cents."""
+"""Annual offers, price configuration and validation; amounts are integer cents."""
 
 from __future__ import annotations
 
@@ -8,21 +8,14 @@ import os
 from dataclasses import dataclass
 from zoneinfo import ZoneInfo
 
+from cedar_press.billing.errors import BillingError, unavailable
+from cedar_press.billing.utils import reference
+
 AMOUNTS = {
     "early_access": {"press": 50_000, "press_pro": 100_000},
     "standard": {"press": 100_000, "press_pro": 200_000},
 }
 RANK = {"press": 1, "press_pro": 2}
-
-
-class BillingError(Exception):
-    def __init__(self, code: str, message: str, status: int = 400):
-        super().__init__(message)
-        self.code, self.message, self.status = code, message, status
-
-
-def unavailable() -> BillingError:
-    return BillingError("BILLING_UNAVAILABLE", "Billing is temporarily unavailable.", 503)
 
 
 def cohort_at(now: dt.datetime) -> str:
@@ -31,16 +24,6 @@ def cohort_at(now: dt.datetime) -> str:
         if now.astimezone(ZoneInfo("America/Chicago")).date() < dt.date(2027, 1, 1)
         else "standard"
     )
-
-
-def reference(value) -> str | None:
-    return value.get("id") if isinstance(value, dict) else value if isinstance(value, str) else None
-
-
-def instant(value) -> dt.datetime:
-    if type(value) is not int or value < 0:
-        raise BillingError("BILLING_DATA_INVALID", "Billing data could not be verified.", 502)
-    return dt.datetime.fromtimestamp(value, dt.timezone.utc)
 
 
 @dataclass(frozen=True)
@@ -109,23 +92,3 @@ def validate_price(value: dict, expected: Price) -> None:
         or value.get("type") != "recurring"
     ):
         raise BillingError("PRICE_INVALID", "The annual plan price could not be verified.", 503)
-
-
-def coverage(lines: list[dict]):
-    candidates = []
-    for line in lines:
-        price_id = line.get("price") or (line.get("pricing") or {}).get("price_details", {}).get(
-            "price"
-        )
-        if not price_id or line.get("amount", 0) < 0:
-            continue
-        try:
-            price = identify_price(price_id)
-        except BillingError:
-            continue  # Tax or unrelated invoice lines never establish Press access.
-        period = line.get("period") or {}
-        start, end = instant(period.get("start")), instant(period.get("end"))
-        if end <= start:
-            raise BillingError("BILLING_DATA_INVALID", "Invoice access dates are invalid.", 502)
-        candidates.append((price.tier, start, end))
-    return max(candidates, key=lambda c: (RANK[c[0]], c[2])) if candidates else (None, None, None)

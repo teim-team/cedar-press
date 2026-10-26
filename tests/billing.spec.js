@@ -87,7 +87,7 @@ test("new visitor goes straight to Stripe without an email or discount form", as
   await page.route("**/api/me", (route) => route.fulfill({ status: 401, json: {} }));
   await page.route("**/api/billing/plans", (route) => route.fulfill({ json: summary }));
   let submitted;
-  await page.route("**/api/billing/guest/checkout", (route) => {
+  await page.route("**/api/billing/checkout/start", (route) => {
     submitted = route.request().postDataJSON();
     return route.fulfill({ json: { url: "https://checkout.stripe.com/c/pay/fixture" } });
   });
@@ -100,13 +100,13 @@ test("new visitor goes straight to Stripe without an email or discount form", as
   expect(submitted).toEqual({ tier: "press" });
 });
 
-test("guest return waits for email verification without signing in", async ({ page }) => {
+test("checkout return waits for email verification without signing in", async ({ page }) => {
   await page.route("**/api/me", (route) => route.fulfill({ status: 401, json: { detail: "Not signed in." } }));
   await page.route("**/api/billing/plans", (route) => route.fulfill({ json: summary }));
-  await page.route("**/api/billing/guest/status", (route) => route.fulfill({ json: { status: "complete", email: "guest@example.invalid", emailSent: true } }));
+  await page.route("**/api/billing/checkout/status", (route) => route.fulfill({ json: { status: "complete", email: "checkout@example.invalid", emailSent: true } }));
   await page.goto("/subscribe?billing=processing");
   await expect(page.getByRole("status")).toHaveText("We’ve sent your account setup link to");
-  await expect(page.locator(".cp-confirm__email")).toHaveText("guest@example.invalid");
+  await expect(page.locator(".cp-confirm__email")).toHaveText("checkout@example.invalid");
   await expect(page.getByRole("heading", { name: "You’re subscribed." })).toBeVisible();
   await expect(page.getByRole("button", { name: "Continue to checkout" })).toHaveCount(0);
 });
@@ -132,7 +132,7 @@ test("membership prices sit beside plan names and select the correct Stripe tier
   await page.route("**/api/me", (route) => route.fulfill({ status: 401, json: {} }));
   await page.route("**/api/billing/plans", (route) => route.fulfill({ json: summary }));
   let submitted;
-  await page.route("**/api/billing/guest/checkout", (route) => {
+  await page.route("**/api/billing/checkout/start", (route) => {
     submitted = route.request().postDataJSON();
     return route.fulfill({ status: 502, json: { message: "Synthetic checkout refusal." } });
   });
@@ -160,10 +160,10 @@ test("membership prices sit beside plan names and select the correct Stripe tier
 test("purchase confirmation resends account email and keeps sign in secondary", async ({ page }) => {
   await page.route("**/api/me", route => route.fulfill({ status: 401, json: {} }));
   await page.route("**/api/billing/plans", route => route.fulfill({ json: summary }));
-  const purchase = { status: "complete", email: "guest@example.invalid", emailSent: true, accountSetup: true };
-  await page.route("**/api/billing/guest/status", route => route.fulfill({ json: purchase }));
+  const purchase = { status: "complete", email: "checkout@example.invalid", emailSent: true, accountSetup: true };
+  await page.route("**/api/billing/checkout/status", route => route.fulfill({ json: purchase }));
   let sent = 0;
-  await page.route("**/api/billing/guest/resend", route => { sent++; return route.fulfill({ json: purchase }); });
+  await page.route("**/api/billing/checkout/resend", route => { sent++; return route.fulfill({ json: purchase }); });
   await page.goto("/subscribe?billing=processing");
   await page.getByRole("button", { name: "Resend email", exact: true }).click();
   await expect(page.getByText("Email sent. Check your inbox for your account setup link.")).toBeVisible();
@@ -175,12 +175,12 @@ test("payment return and resend keep the checkout target from the URL", async ({
   const id = "48ff73db-cfe8-4775-901e-c212627d27f9";
   await page.route("**/api/me", route => route.fulfill({ status: 401, json: {} }));
   await page.route("**/api/billing/plans", route => route.fulfill({ json: summary }));
-  await page.route("**/api/billing/guest/status**", route => {
+  await page.route("**/api/billing/checkout/status**", route => {
     expect(new URL(route.request().url()).searchParams.get("checkout_id")).toBe(id);
     return route.fulfill({ json: { status: "complete", email: "paid@example.invalid", emailSent: true, accountSetup: true } });
   });
   let target;
-  await page.route("**/api/billing/guest/resend", route => {
+  await page.route("**/api/billing/checkout/resend", route => {
     target = route.request().postDataJSON().checkout_id;
     return route.fulfill({ json: { status: "complete", email: "paid@example.invalid", emailSent: true, accountSetup: true } });
   });
@@ -221,6 +221,9 @@ test("password recovery sends authenticated accounts without paid access to sett
   await page.getByRole("button", { name: "Save and log in", exact: true }).click();
   await expect(page).toHaveURL(/\/settings$/);
   await expect(page.getByText("No current paid access")).toBeVisible();
+  await expect(page.getByTestId("influence")).toHaveCount(0);
+  await expect(page.getByText("Reading your ledger…")).toHaveCount(0);
+  await expect(page.getByRole("region", { name: "Billing", exact: true })).toBeVisible();
 });
 
 test("settings tolerates unavailable billing without failed-resource console errors", async ({ page }) => {

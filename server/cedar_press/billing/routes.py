@@ -15,17 +15,17 @@ from pydantic import BaseModel, Field
 from starlette.concurrency import run_in_threadpool
 
 from cedar_press import ratelimit
-from cedar_press.billing.contracts import (
+from cedar_press.billing.checkout import COOKIE
+from cedar_press.billing.dependencies import BillingServices, get_billing_services
+from cedar_press.billing.errors import BillingError
+from cedar_press.billing.schemas import (
     BillingResponse,
-    GuestStatusResponse,
+    CheckoutStatusResponse,
     PlanResponse,
     RedirectResponse,
 )
-from cedar_press.billing.dependencies import BillingServices, get_billing_services
-from cedar_press.billing.guest_checkout import COOKIE
-from cedar_press.billing.policy import BillingError
 from cedar_press.billing.stripe_gateway import API_VERSION
-from cedar_press.billing.support import utc_now
+from cedar_press.billing.utils import utc_now
 from cedar_press.session import Session, current_session
 
 router = APIRouter()
@@ -45,21 +45,21 @@ class SubscriptionRequest(BaseModel):
     subscription_id: str | None = Field(default=None, min_length=1, max_length=255)
 
 
-class GuestCheckoutRequest(BaseModel):
+class CheckoutStartRequest(BaseModel):
     tier: Literal["press", "press_pro"]
 
 
 @router.get("/billing/plans", response_model=PlanResponse)
 def public_plans():
-    from cedar_press.billing.policy import AMOUNTS, cohort_at
+    from cedar_press.billing.pricing import AMOUNTS, cohort_at
 
     cohort = cohort_at(utc_now())
     return {"cohort": cohort, "annualPrices": AMOUNTS[cohort]}
 
 
-@router.post("/billing/guest/checkout")
-def guest_start(
-    body: GuestCheckoutRequest,
+@router.post("/billing/checkout/start")
+def start_checkout(
+    body: CheckoutStartRequest,
     request: Request,
     services: BillingServices = Depends(get_billing_services),
 ):
@@ -68,7 +68,7 @@ def guest_start(
     if not 32 <= len(secret) <= 128:
         secret = secrets.token_urlsafe(32)
     try:
-        result = call(services.guest.start, body.tier, secret)
+        result = call(services.checkout.start, body.tier, secret)
         response = JSONResponse(result)
     except HTTPException as error:
         response = JSONResponse(error.detail, status_code=error.status_code)
@@ -85,19 +85,19 @@ def guest_start(
     return response
 
 
-@router.get("/billing/guest/status", response_model=GuestStatusResponse)
-def guest_status(
+@router.get("/billing/checkout/status", response_model=CheckoutStatusResponse)
+def checkout_status(
     request: Request,
     response: Response,
     checkout_id: UUID | None = None,
     services: BillingServices = Depends(get_billing_services),
 ):
     response.headers["Cache-Control"] = "private, no-store"
-    return call(services.guest.status, request.cookies.get(COOKIE, ""), checkout_id)
+    return call(services.checkout.status, request.cookies.get(COOKIE, ""), checkout_id)
 
 
-@router.post("/billing/guest/resend", response_model=GuestStatusResponse)
-def resend_guest_email(
+@router.post("/billing/checkout/resend", response_model=CheckoutStatusResponse)
+def resend_checkout_email(
     request: Request,
     response: Response,
     body: CheckoutTarget | None = None,
@@ -106,7 +106,9 @@ def resend_guest_email(
     guard(request)
     response.headers["Cache-Control"] = "private, no-store"
     return call(
-        services.guest.resend, request.cookies.get(COOKIE, ""), body.checkout_id if body else None
+        services.checkout.resend,
+        request.cookies.get(COOKIE, ""),
+        body.checkout_id if body else None,
     )
 
 
