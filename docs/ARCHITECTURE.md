@@ -141,7 +141,7 @@ The API compresses (`GZipMiddleware`, over 1 kB): `/press/collections` is
 | Endpoint | Purpose |
 | --- | --- |
 | `GET /me`, `POST /auth/login`, `POST /auth/logout`, `POST /auth/password` | The session |
-| `POST /press/activation`, `/press/activation/validate` | Subscription activation |
+| `GET`, `PATCH /auth/profile` | The account's name, join date and email verification |
 | `GET /press/collections` | The catalog this subscription can see |
 | `GET /press/releases` | Release history |
 | `GET /press/collections/:id/download` | A release file, served as a blob |

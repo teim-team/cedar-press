@@ -21,6 +21,7 @@ from cedar_press.accounts.api.schemas import (
     AccountSetup,
     Credentials,
     PasswordChange,
+    ProfileChange,
     ResetConfirm,
     ResetRequest,
 )
@@ -103,6 +104,20 @@ def change_password(
             },
         )
     return renewed.as_payload()
+
+
+@router.get("/auth/profile")
+def read_account_profile(session: Session = Depends(require_account)) -> dict[str, object]:
+    return {"email": session.email, **subscribers.profile(session.email)}
+
+
+@router.patch("/auth/profile")
+def write_account_profile(
+    change: ProfileChange, request: Request, session: Session = Depends(require_account)
+) -> dict[str, object]:
+    _require_auth_origin(request, "profile")
+    subscribers.set_display_name(session.email, (change.name or "").strip() or None)
+    return {"email": session.email, **subscribers.profile(session.email)}
 
 
 def _require_password_length(password: str) -> None:

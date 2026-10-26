@@ -120,6 +120,32 @@ class TestSession(unittest.TestCase):
         self.assertEqual(client.get("/me").status_code, 401)
 
 
+class TestAccountProfile(unittest.TestCase):
+    def setUp(self) -> None:
+        client.cookies.clear()
+        ratelimit.reset_for_tests()
+        session_module.forget_activated_for_tests()
+        self.addCleanup(session_module.forget_activated_for_tests)
+
+    def test_it_needs_a_session(self) -> None:
+        self.assertEqual(client.get("/auth/profile").status_code, 401)
+        self.assertEqual(client.patch("/auth/profile", json={"name": "A"}).status_code, 401)
+
+    def test_a_name_is_set_trimmed_and_cleared(self) -> None:
+        sign_in()
+        self.assertEqual(client.get("/auth/profile").json()["name"], None)
+        saved = client.patch("/auth/profile", json={"name": "  Ada Reader  "}).json()
+        self.assertEqual(saved, {
+            "email": "reader@example.org", "name": "Ada Reader",
+            "member_since": None, "email_verified": None,
+        })
+        self.assertEqual(client.patch("/auth/profile", json={"name": "   "}).json()["name"], None)
+
+    def test_a_name_over_the_column_limit_is_refused(self) -> None:
+        sign_in()
+        self.assertEqual(client.patch("/auth/profile", json={"name": "x" * 121}).status_code, 422)
+
+
 class TestPasswordChange(unittest.TestCase):
     NEW = "a-new-long-password"
 

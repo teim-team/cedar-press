@@ -11,7 +11,28 @@ async function account(page, billing = summary) {
     email: "billing@cedar-press.invalid", workspace_tier: "free",
   } }));
   await page.route("**/api/billing", (route) => route.fulfill({ json: billing }));
+  await page.route("**/api/auth/profile", (route) => route.fulfill({ json: {
+    email: "billing@cedar-press.invalid", name: null, member_since: "2026-10-01", email_verified: true,
+  } }));
 }
+
+test("settings shows the profile and saves a name", async ({ page }) => {
+  await account(page);
+  let saved;
+  await page.route("**/api/auth/profile", async (route) => {
+    if (route.request().method() !== "PATCH") return route.fallback();
+    saved = route.request().postDataJSON();
+    await route.fulfill({ json: { email: "billing@cedar-press.invalid", name: "Ada Reader", member_since: "2026-10-01", email_verified: true } });
+  });
+  await page.goto("/settings");
+  const profile = page.getByRole("region", { name: "Profile", exact: true });
+  await expect(profile.getByText("billing@cedar-press.invalid (verified)")).toBeVisible();
+  await expect(profile.getByText("October 1, 2026")).toBeVisible();
+  await profile.getByLabel("Name").fill("Ada Reader");
+  await profile.getByRole("button", { name: "Save name", exact: true }).click();
+  await expect(profile.getByRole("button", { name: "Save name", exact: true })).toBeDisabled();
+  expect(saved).toEqual({ name: "Ada Reader" });
+});
 
 test("unpaid account can choose annual billing and submit a discount", async ({ page }) => {
   await account(page);
@@ -223,7 +244,7 @@ test("password recovery sends authenticated accounts without paid access to sett
   await expect(page.getByText("No current paid access")).toBeVisible();
   await expect(page.getByTestId("influence")).toHaveCount(0);
   await expect(page.getByText("Reading your ledger…")).toHaveCount(0);
-  await expect(page.getByRole("region", { name: "Billing", exact: true })).toBeVisible();
+  await expect(page.getByRole("region", { name: "Subscription", exact: true })).toBeVisible();
 });
 
 test("settings tolerates unavailable billing without failed-resource console errors", async ({ page }) => {

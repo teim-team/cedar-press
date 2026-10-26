@@ -12,7 +12,7 @@ import { useCallback, useEffect, useState } from "react";
 import { LUMECON_URL, contactHref } from "../../features/grove/appLink.js";
 import { Link } from "react-router";
 
-import { changePassword } from "../../api";
+import { changePassword, fetchAccountProfile, saveAccountProfile } from "../../api";
 import { useAuth } from "../../context/useAuth";
 import { usePriorities } from "../../features/grove/usePriorities.js";
 import { PressInfluence } from "./PressInfluence";
@@ -107,6 +107,77 @@ function WorkCard() {
 }
 
 
+function ProfileCard({ user, tier, onSignOut }) {
+  const [profile, setProfile] = useState(null);
+  const [name, setName] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState(null);
+
+  const apply = useCallback((value) => {
+    setProfile(value);
+    setName(value?.name ?? "");
+  }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    fetchAccountProfile({ signal: controller.signal }).then(apply).catch(() => {
+      if (!controller.signal.aborted) setError("Your profile could not be loaded.");
+    });
+    return () => controller.abort();
+  }, [apply]);
+
+  const submit = async (event) => {
+    event.preventDefault();
+    setBusy(true);
+    setError(null);
+    try {
+      apply(await saveAccountProfile({ name }));
+    } catch (failure) {
+      setError(failure.message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <section className="cp-set__card cp-fade" aria-label="Profile">
+      <span className="cp-set__cap">Profile</span>
+      <form className="cp-set__form" onSubmit={submit}>
+        <label className="cp-who__label" htmlFor="cp-profile-name">Name</label>
+        <input id="cp-profile-name" type="text" autoComplete="name" maxLength={120}
+          value={name} onChange={(event) => setName(event.target.value)} disabled={!profile} />
+        {error ? <p className="cp-gate__error" role="alert">{error}</p> : null}
+        <div className="cp-set__acts">
+          <button type="submit" className="gv-btn gv-btn--quiet" disabled={busy || !profile || name.trim() === (profile.name ?? "")}>
+            {busy ? "Saving" : "Save name"}
+          </button>
+        </div>
+      </form>
+      <dl className="cp-set__rows">
+        <div>
+          <dt>Email</dt>
+          <dd>{user?.email}{profile?.email_verified ? " (verified)" : ""}</dd>
+        </div>
+        {profile?.member_since ? (
+          <div>
+            <dt>Member since</dt>
+            <dd>{new Date(`${profile.member_since}T00:00:00`).toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" })}</dd>
+          </div>
+        ) : null}
+        <div>
+          <dt>Plan</dt>
+          <dd>{tier ? <TierName name={tier.name} /> : "No current paid access"}</dd>
+        </div>
+      </dl>
+      <div className="cp-set__acts">
+        <button type="button" className="gv-btn gv-btn--quiet" onClick={onSignOut}>
+          Sign out
+        </button>
+      </div>
+    </section>
+  );
+}
+
 function PasswordCard() {
   const [current, setCurrent] = useState("");
   const [next, setNext] = useState("");
@@ -198,25 +269,7 @@ export default function CedarPressSettings() {
             then what it TAKES PART IN. Nothing moves off the page. */}
         <h2 className="cp-set__group">Account</h2>
         <div className="cp-set cp-set--account cp-fade">
-          <section className="cp-set__card cp-fade" aria-label="Subscription">
-            <span className="cp-set__cap">Subscription</span>
-            <dl className="cp-set__rows">
-              <div>
-                <dt>Signed in as</dt>
-                <dd>{user?.email}</dd>
-              </div>
-              <div>
-                <dt>Plan</dt>
-                <dd>{tier ? <TierName name={tier.name} /> : "No current paid access"}</dd>
-              </div>
-            </dl>
-            <div className="cp-set__acts">
-              <button type="button" className="gv-btn gv-btn--quiet" onClick={() => logout()}>
-                Sign out
-              </button>
-            </div>
-          </section>
-
+          <ProfileCard user={user} tier={tier} onSignOut={() => logout()} />
           <BillingCard />
           <PasswordCard />
           <WorkCard />

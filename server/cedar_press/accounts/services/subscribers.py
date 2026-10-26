@@ -81,7 +81,7 @@ def account_id_for(email: str) -> str:
 
 # ── password hashing ────────────────────────────────────────────────────────
 
-_ROUNDS = 240_000
+_ROUNDS = 600_000
 
 
 def hash_password(password: str, *, salt: bytes | None = None) -> str:
@@ -129,6 +129,8 @@ def verify_password(password: str, stored: str | None) -> bool:
 #: which is why `DATABASE_URL` exists.
 _activated: dict[str, tuple[str, str]] = {}
 _session_revisions: dict[str, int] = {}
+#: Email -> display name, for accounts without a database.
+_names: dict[str, str] = {}
 _session_lock = threading.Lock()
 #: Email -> (reset token hash, expires at): one live link per address.
 _resets: dict[str, tuple[str, dt.datetime]] = {}
@@ -155,6 +157,7 @@ def _env_accounts() -> dict[str, tuple[str, str]]:
 def forget_activated_for_tests() -> None:
     _activated.clear()
     _resets.clear()
+    _names.clear()
     with _session_lock:
         _session_revisions.clear()
 
@@ -237,7 +240,7 @@ def authenticate(email: str, password: str) -> Subscriber | None:
     if not found:
         if db.configured():
             # THE SAME 401 IS NOT THE SAME ANSWER IF ONE ARRIVES FASTER.
-            # A known address costs 240,000 PBKDF2 rounds to refuse and an
+            # A known address costs 600,000 PBKDF2 rounds to refuse and an
             # unknown one used to cost a SELECT, which is a difference large
             # enough and repeatable enough to read off a stopwatch. That turns
             # the login form into a query for "is this person a Cedar Press
@@ -246,7 +249,20 @@ def authenticate(email: str, password: str) -> Subscriber | None:
             verify_password(password, _DUMMY_HASH)
         return None
     if db.configured():
-        return found if verify_password(password, found.password_hash) else None
+        if not verify_password(password, found.password_hash):
+            return None
+        if int(found.password_hash.split("$")[1]) < _ROUNDS:
+            # Sign-in is the only time the password is in hand to re-derive an
+            # older, cheaper hash. Conditional on the hash just verified, so a
+            # password changed in the same instant is never overwritten.
+            upgraded = db.execute(
+                "UPDATE cedar_press_subscribers SET password_hash = %s, updated_at = now()"
+                " WHERE lower(email) = %s AND password_hash = %s",
+                (hash_password(password), found.email, found.password_hash),
+            )
+            if upgraded:
+                return find(found.email)
+        return found
     return found if hmac.compare_digest(found.password_hash or "", password) else None
 
 
@@ -427,3 +443,37 @@ def redeem_reset(
     found = email and find(email)
     return change_password(found.email, password) if found else None
 
+
+def profile(email: str) -> dict[str, object]:
+    """The account's name, when it joined, and whether its address is proven.
+
+    Without a database there is no join date or verification to report, so
+    those are None rather than a guess.
+    """
+    address = (email or "").strip().lower()
+    if db.configured():
+        row = db.one(
+            "SELECT display_name, created_at, email_verified_at FROM cedar_press_subscribers"
+            " WHERE lower(email) = %s",
+            (address,),
+        )
+        if row:
+            return {
+                "name": row["display_name"],
+                "member_since": row["created_at"].date().isoformat(),
+                "email_verified": row["email_verified_at"] is not None,
+            }
+    return {"name": _names.get(address), "member_since": None, "email_verified": None}
+
+
+def set_display_name(email: str, name: str | None) -> None:
+    address = (email or "").strip().lower()
+    if db.configured():
+        db.execute(
+            "UPDATE cedar_press_subscribers SET display_name = %s WHERE lower(email) = %s",
+            (name, address),
+        )
+    elif name is None:
+        _names.pop(address, None)
+    else:
+        _names[address] = name

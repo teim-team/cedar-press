@@ -141,6 +141,12 @@ class _Backend:
         self.assertIsNone(subscribers.redeem_reset(token, "a-reset-password"))
         self.assertIsNotNone(subscribers.authenticate("reader@example.org", "correct-horse"))
 
+    def test_a_display_name_is_kept_and_cleared(self) -> None:
+        subscribers.set_display_name("Reader@Example.org", "Ada Reader")
+        self.assertEqual(subscribers.profile("reader@example.org")["name"], "Ada Reader")
+        subscribers.set_display_name("reader@example.org", None)
+        self.assertIsNone(subscribers.profile("reader@example.org")["name"])
+
 
 class TestEnvironmentBackend(_Backend, unittest.TestCase):
     pg = False
@@ -160,6 +166,38 @@ class TestPostgresBackend(_Backend, unittest.TestCase):
         )
         self.assertNotIn("correct-horse", row["password_hash"])
         self.assertTrue(row["password_hash"].startswith("pbkdf2$"))
+
+    def test_the_profile_reads_join_date_and_verification_off_the_row(self) -> None:
+        row = db.one(
+            "SELECT created_at::date AS joined FROM cedar_press_subscribers WHERE email = %s",
+            ("reader@example.org",),
+        )
+        found = subscribers.profile("reader@example.org")
+        self.assertEqual(found["member_since"], row["joined"].isoformat())
+        self.assertFalse(found["email_verified"])
+        db.execute(
+            "UPDATE cedar_press_subscribers SET email_verified_at = now() WHERE email = %s",
+            ("reader@example.org",),
+        )
+        self.assertTrue(subscribers.profile("reader@example.org")["email_verified"])
+
+    def test_an_older_hash_is_upgraded_at_sign_in(self) -> None:
+        with mock.patch.object(subscribers, "_ROUNDS", 1_000):
+            older = subscribers.hash_password("correct-horse")
+        db.execute(
+            "UPDATE cedar_press_subscribers SET password_hash = %s WHERE email = %s",
+            (older, "reader@example.org"),
+        )
+        self.assertIsNone(subscribers.authenticate("reader@example.org", "wrong"))
+        self.assertEqual(subscribers.find("reader@example.org").password_hash, older)
+        from fastapi import Response
+
+        signed_in = session.sign_in("reader@example.org", "correct-horse", Response())
+        self.assertIsNotNone(signed_in)
+        self.assertIsNotNone(session._decode(session._encode(signed_in)))
+        current = f"pbkdf2${subscribers._ROUNDS}$"
+        self.assertTrue(subscribers.find("reader@example.org").password_hash.startswith(current))
+        self.assertIsNotNone(subscribers.authenticate("reader@example.org", "correct-horse"))
 
     def test_a_subscription_survives_a_restart(self) -> None:
         # The whole reason this module exists. `reset_for_tests` drops the

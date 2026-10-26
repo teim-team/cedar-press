@@ -159,6 +159,15 @@ export async function changePassword({ currentPassword, newPassword }) {
   }));
 }
 
+/** The account's name, join date and whether its address is verified. */
+export async function fetchAccountProfile({ signal } = {}) {
+  return request("/auth/profile", { signal });
+}
+
+export async function saveAccountProfile({ name }) {
+  return request("/auth/profile", { method: "PATCH", body: { name } });
+}
+
 /** Email a reset link. Answers the same whether or not the address has an account. */
 export async function requestPasswordReset({ email, next = "/" }) {
   return request("/auth/password-reset", { method: "POST", body: { email, next } });
