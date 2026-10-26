@@ -67,6 +67,12 @@
 .teim-rd .cp-memberships__footer { text-align: center; margin: 16px 0 0; color: #6a7c85; font-size: 12px; }
 .teim-rd .cp-memberships__footer a { color: #247c74; }
 .teim-rd .cp-memberships__error { padding: 12px; text-align: center; background: #fff0ef; color: #8f302d; border-radius: 5px; font-size: 13px; }
+@media (min-width: 801px) and (max-width: 1400px) {
+  .teim-rd .cp-memberships__intro { margin-bottom: 22px; }
+  .teim-rd .cp-membership { padding: 26px; }
+  .teim-rd .cp-membership__description { margin-top: 18px; }
+  .teim-rd .cp-membership__features { margin-top: 16px; gap: 16px; }
+}
 @media (max-width: 900px) and (min-width: 701px) { .teim-rd .cp-membership { padding: 23px 20px; } .teim-rd .cp-membership h2 { font-size: 22px; } }
 @media (max-width: 700px) { .teim-rd .cp-memberships__cards { grid-template-columns: minmax(0, 1fr); } .teim-rd .cp-account-page__main--wide { padding: 26px 16px; } .teim-rd .cp-membership { padding: 23px; } }
 @media (max-width: 380px) { .teim-rd .cp-membership { padding: 20px; } .teim-rd .cp-membership h2 { font-size: 22px; } .teim-rd .cp-membership__heading { gap: 10px; } }
