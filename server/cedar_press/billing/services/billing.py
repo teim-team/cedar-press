@@ -5,9 +5,8 @@ from __future__ import annotations
 import datetime as dt
 
 from cedar_press import db
-from cedar_press.billing.adapters.stripe import StripeAdapter, stripe_url
+from cedar_press.billing.adapters.stripe import BillingAdapter, StripeAdapter, stripe_url
 from cedar_press.billing.errors import BillingError, unavailable
-from cedar_press.billing.interfaces import BillingAdapter
 from cedar_press.billing.pricing import AMOUNTS, cohort_at, price_for, prices, validate_price
 from cedar_press.billing.utils import application_url, utc_now
 

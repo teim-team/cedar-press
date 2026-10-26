@@ -3,7 +3,7 @@
 import uuid
 
 from cedar_press import db
-from cedar_press.accounts.interfaces import EmailSender
+from cedar_press.accounts.services.email import EmailSender
 from cedar_press.accounts.services.setup import AccountSetupService
 from cedar_press.billing.utils import application_url
 

@@ -8,9 +8,8 @@ import re
 
 from cedar_press import db, ratelimit
 from cedar_press.accounts.services.email import AccountEmailSender
-from cedar_press.billing.adapters.stripe import StripeAdapter, stripe_url
+from cedar_press.billing.adapters.stripe import BillingAdapter, StripeAdapter, stripe_url
 from cedar_press.billing.errors import BillingError, unavailable
-from cedar_press.billing.interfaces import BillingAdapter
 from cedar_press.billing.pricing import cohort_at, price_for, validate_price
 from cedar_press.billing.utils import application_url, reference, utc_now, verify_customer
 

@@ -3,11 +3,9 @@
 from dataclasses import dataclass
 
 from cedar_press import db
-from cedar_press.accounts.interfaces import EmailSender
-from cedar_press.accounts.services.email import AccountEmailSender
+from cedar_press.accounts.services.email import AccountEmailSender, EmailSender
 from cedar_press.accounts.services.setup import AccountSetupService
-from cedar_press.billing.adapters.stripe import StripeAdapter
-from cedar_press.billing.interfaces import BillingAdapter
+from cedar_press.billing.adapters.stripe import BillingAdapter, StripeAdapter
 from cedar_press.billing.services.billing import BillingService
 from cedar_press.billing.services.checkout import CheckoutService
 from cedar_press.billing.services.delivery import CheckoutEmailService
