@@ -48,7 +48,7 @@ jobs:
       # first. That is why the deployed build is the last step in this job and
       # not this one: a build placed before the smoke run would be overwritten
       # by it, and the site would ship the test fixture.
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.12"
       - run: pip install -e server[dev]
