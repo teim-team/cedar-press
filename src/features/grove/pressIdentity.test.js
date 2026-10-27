@@ -175,11 +175,11 @@ test("the business card states the exception rather than overclaiming", () => {
   // today. The rule is true going forward; the exception is dated and on the
   // page.
   const business = IDENTIFIERS.find((item) => item.id === "business");
-  assert.ok(business.exception, "the dated exception is gone; did the 45 lose their uids?");
+  assert.ok(business.exception, "the dated exception is gone; did the 44 lose their uids?");
   const index = register.classes.findIndex((entry) => entry.code === WITHHELD_CLASS);
   const count = register.entities.filter((entity) => entity[2] === index).length;
-  assert.equal(count, 45, `the register holds ${count} of that class; the exception says forty-five`);
-  assert.match(business.exception, /forty-five/i);
+  assert.equal(count, 44, `the register holds ${count} of that class; the exception says forty-four`);
+  assert.match(business.exception, /forty-four/i);
   assert.match(business.exception, /closed to new mints/i);
   // Codex, PR #78: it said those firms HAVE equivalence rows and that every
   // firm resolved from here CARRIES a business id only. Neither register
