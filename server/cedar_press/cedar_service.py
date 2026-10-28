@@ -58,6 +58,7 @@ import json
 import logging
 import math
 import os
+import re
 import time
 import urllib.error
 import urllib.request
@@ -226,6 +227,33 @@ def _open_thread(
         return None
 
 
+_RELEASE_ID = re.compile(r"^[0-9a-f]{64}$")
+
+
+def retrieval_allowlist(tier: str) -> tuple[list[str], dict[str, str]]:
+    """Storefront ids this tier may open, each with its installed release id.
+
+    The page is not an argument. Order is ``LAUNCH_COLLECTION`` order. An id
+    ``may_open`` refuses, or whose ``release_id`` is not 64 lowercase hex
+    characters, is absent from both results.
+    """
+    from cedar_press import collections as launch
+    from cedar_press import repository
+
+    allowed: list[str] = []
+    pins: dict[str, str] = {}
+    for dataset in launch.LAUNCH_COLLECTION:
+        if not repository.may_open(tier, dataset.id):
+            continue
+        facts = launch.collection_cedar_facts(dataset.id)
+        release_id = facts.get("release_id") if isinstance(facts, dict) else None
+        if not isinstance(release_id, str) or _RELEASE_ID.fullmatch(release_id) is None:
+            continue
+        allowed.append(dataset.id)
+        pins[dataset.id] = release_id
+    return allowed, pins
+
+
 def _payload(
     *,
     question: str,
@@ -247,6 +275,7 @@ def _payload(
     request_id = f"press-{uuid.uuid4()}"
     project_id = f"collection:{collection_id}" if collection_id else "cedar-press"
     project_name = collection_name or "Cedar Press"
+    allowed, pins = retrieval_allowlist(tier)
     return {
         "version": CONTRACT_VERSION,
         "requestId": request_id,
@@ -256,10 +285,9 @@ def _payload(
             "id": project_id,
             "name": project_name,
             "analysisYear": None,
-            # Everything Cedar needs to know that this is a Press reader and
-            # what they may open. The service decides nothing about
-            # entitlement; it is told, because entitlement was already
-            # decided on this side of the hop.
+            # ``collectionId`` is the page and may be a collection the reader
+            # cannot open. Entitlement is ``pressContext.allowedCollectionIds``
+            # and ``pinnedReleaseIds``, built in ``_payload`` from the tier.
             "projectData": {
                 "surface": "cedar-press",
                 "tier": tier,
@@ -274,6 +302,8 @@ def _payload(
                 "surface": "cedar-press",
                 "collectionId": collection_id,
                 "collectionName": collection_name,
+                "allowedCollectionIds": allowed,
+                "pinnedReleaseIds": pins,
                 "retrieval": {
                     "available": False,
                     "instruction": (
@@ -307,8 +337,9 @@ def ask(
     if not available():
         raise CedarUnavailable("Cedar is not configured for this deployment.")
 
-    # Authentication and collection access are checked by the route first.
-    # A raw identifier supplied by a browser can never select Cedar's memory.
+    # Authentication is checked by the route first. The allow-list is
+    # computed from the tier inside ``_payload``. The page id is not an
+    # access check.
     account_id = subscribers.account_id_for(email)
     upstream_thread = _open_thread(
         thread_id, email=email, tier=tier, collection_id=collection_id, account_id=account_id

@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import os
 import unittest
+from types import SimpleNamespace
 from unittest import mock
 
 from cedar_press import cedar_service
@@ -225,6 +226,122 @@ class TestAgainstTheRealSchema(unittest.TestCase):
         parsed = CedarMessageRequest.model_validate(body)
         self.assertEqual(parsed.message.text, body["message"]["text"])
         self.assertEqual(parsed.project.name, "Native Federal Contractors")
+
+
+HEX_A = "a" * 64
+HEX_B = "b" * 64
+HEX_C = "c" * 64
+
+_DATASETS = (
+    SimpleNamespace(id="funding", shelf="standard"),
+    SimpleNamespace(id="deals", shelf="standard"),
+    SimpleNamespace(id="contractors", shelf="pro"),
+    SimpleNamespace(id="need", shelf="pro"),
+)
+
+
+def _facts(table):
+    def lookup(dataset_id):
+        return table.get(dataset_id)
+
+    return lookup
+
+
+class TestRetrievalAllowlist(unittest.TestCase):
+    def setUp(self):
+        from cedar_press import collections as launch
+
+        self.launch = launch
+        self.table = {
+            "funding": {"release_id": HEX_A},
+            "deals": {"release_id": HEX_B},
+            "contractors": {"release_id": HEX_C},
+            "need": {"release_id": "short"},
+        }
+        self.catalog = mock.patch.object(launch, "LAUNCH_COLLECTION", _DATASETS)
+        self.facts = mock.patch.object(
+            launch, "collection_cedar_facts", side_effect=_facts(self.table)
+        )
+        self.catalog.start()
+        self.facts.start()
+
+    def tearDown(self):
+        self.facts.stop()
+        self.catalog.stop()
+
+    def test_press_sends_standard_ids_in_catalog_order(self):
+        allowed, pins = cedar_service.retrieval_allowlist("press")
+        self.assertEqual(allowed, ["funding", "deals"])
+        self.assertEqual(pins, {"funding": HEX_A, "deals": HEX_B})
+
+    def test_press_pro_adds_a_pro_id_with_a_real_release_id(self):
+        allowed, pins = cedar_service.retrieval_allowlist("press_pro")
+        self.assertEqual(allowed, ["funding", "deals", "contractors"])
+        self.assertEqual(pins["contractors"], HEX_C)
+        self.assertNotIn("need", allowed)
+
+    def test_grove_and_tree_receive_the_same_open_storefront_ids(self):
+        for tier in ("grove", "tree"):
+            with self.subTest(tier=tier):
+                allowed, _pins = cedar_service.retrieval_allowlist(tier)
+                self.assertEqual(allowed, ["funding", "deals", "contractors"])
+                # Gaming stays out because it is not in LAUNCH_COLLECTION,
+                # which test_access.py already pins.
+
+    def test_an_unknown_tier_sends_nothing(self):
+        allowed, pins = cedar_service.retrieval_allowlist("seed")
+        self.assertEqual(allowed, [])
+        self.assertEqual(pins, {})
+
+    def test_a_missing_release_id_drops_that_id_and_keeps_the_other(self):
+        self.table["deals"] = None
+        allowed, pins = cedar_service.retrieval_allowlist("press")
+        self.assertEqual(allowed, ["funding"])
+        self.assertEqual(pins, {"funding": HEX_A})
+
+    def test_an_uppercase_release_id_is_dropped(self):
+        self.table["funding"] = {"release_id": "A" * 64}
+        allowed, pins = cedar_service.retrieval_allowlist("press")
+        self.assertEqual(allowed, ["deals"])
+        self.assertEqual(pins, {"deals": HEX_B})
+
+    def test_may_open_false_drops_the_id_even_with_a_release_id(self):
+        with mock.patch("cedar_press.repository.may_open", return_value=False):
+            allowed, pins = cedar_service.retrieval_allowlist("press_pro")
+        self.assertEqual(allowed, [])
+        self.assertEqual(pins, {})
+
+    def test_the_page_does_not_filter_the_payload(self):
+        body = cedar_service._payload(
+            question="How many deals did the Cherokee Nation have?",
+            email="reader@example.org",
+            tier="press",
+            thread_id=None,
+            collection_id="contractors",
+            collection_name="Prime Contracting",
+            pathname="/data",
+        )
+        press = body["context"]["pressContext"]
+        self.assertEqual(press["collectionId"], "contractors")
+        self.assertEqual(press["allowedCollectionIds"], ["funding", "deals"])
+        self.assertEqual(
+            press["pinnedReleaseIds"], {"funding": HEX_A, "deals": HEX_B}
+        )
+        self.assertNotIn("contractors", press["allowedCollectionIds"])
+        self.assertFalse(press["retrieval"]["available"])
+        again = cedar_service._payload(
+            question="A different question that names funding",
+            email="reader@example.org",
+            tier="press",
+            thread_id=None,
+            collection_id="contractors",
+            collection_name="Prime Contracting",
+            pathname="/data",
+        )
+        self.assertEqual(
+            again["context"]["pressContext"]["allowedCollectionIds"],
+            press["allowedCollectionIds"],
+        )
 
 
 if __name__ == "__main__":
