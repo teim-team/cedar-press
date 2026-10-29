@@ -593,13 +593,16 @@ def answer_from_profile(question: str, dataset_id: str) -> dict[str, str] | None
         # Same reason as the content branch below: the last of these was
         # prefixed "Known limitations:", which is a field name rather than
         # something anybody says.
-        parts = [
-            _sentence(profile.get("entity_resolution_method") or ""),
-            _sentence(profile.get("inclusion_rules") or ""),
-            _sentence(f"What it does not do: {_lower_first(profile['known_limitations'])}")
-            if profile.get("known_limitations")
-            else "",
-        ]
+        parts = [_sentence(profile.get("method") or "")]
+        parts.extend(
+            [
+                _sentence(profile.get("entity_resolution_method") or ""),
+                _sentence(profile.get("inclusion_rules") or ""),
+                _sentence(f"What it does not do: {_lower_first(profile['known_limitations'])}")
+                if profile.get("known_limitations")
+                else "",
+            ]
+        )
         answer = " ".join(p for p in parts if p)
         if answer:
             return {"answer": answer, "basis": basis}
@@ -607,22 +610,24 @@ def answer_from_profile(question: str, dataset_id: str) -> dict[str, str] | None
         # PROSE, NOT A FIELD DUMP.
         #
         # Owner review, 2026-09-20: "Keep answers direct and human. Do not
-        # make Cedar lead with system language." This used to read
-        # "... Unit of observation: One federal assistance award (grant,
-        # loan, ...). Coverage from 2007 to present. Sources: USAspending
-        # ..." — the profile's own column headings, read aloud. The facts
-        # are the same facts; they are said the way a person would say them,
-        # and the release the answer came from is already printed under it
-        # by the panel, so the sources line does not have to carry it.
+        # make Cedar lead with system language." The answer is said the way
+        # a person would say it, not as the profile's own column headings
+        # read aloud. The description quotes the manifest: what the
+        # collection tracks, then its sources, then its method, in that
+        # order. The unit-of-observation sentence and the coverage sentence
+        # still follow them. The release the answer came from is already
+        # printed under it by the panel, so the sources do not have to
+        # carry it.
         parts = [_sentence(profile["description"])]
+        for key in ("primary_sources", "method"):
+            text = profile.get(key)
+            if text:
+                parts.append(_sentence(text))
         unit = profile.get("unit_of_observation")
         if unit:
             parts.append(_sentence(f"Each record is {_lower_first(unit)}"))
         coverage = _coverage_sentence(profile)
         if coverage:
             parts.append(coverage)
-        sources = profile.get("primary_sources")
-        if sources:
-            parts.append(_sentence(f"It is built from {_lower_first(sources)}"))
         return {"answer": " ".join(parts), "basis": basis}
     return None
