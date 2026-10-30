@@ -87,5 +87,111 @@ class TestCedarQuestions(unittest.TestCase):
         )
 
 
+class TestWordMatching(unittest.TestCase):
+    """The router matches whole words, so a word inside another word is not a cue."""
+
+    def test_country_is_not_a_count(self) -> None:
+        self.assertIsNone(
+            collection_profiles.answer_from_profile(
+                "What was the total federal funding to Indian Country in fiscal year 2020?",
+                "funding",
+            )
+        )
+
+    def test_records_alone_is_not_a_figures_question(self) -> None:
+        self.assertIsNone(
+            collection_profiles.answer_from_profile("Where do these records come from?", "funding")
+        )
+
+    def test_an_inflected_cue_still_routes(self) -> None:
+        profile = collection_profiles.profile_for("lobbying")
+        answered = collection_profiles.answer_from_profile(
+            "Which sources does this collection draw on?", "lobbying"
+        )
+        self.assertIsNotNone(answered)
+        self.assertEqual(branch_of(answered["answer"], profile), "content")
+        changed = collection_profiles.answer_from_profile(
+            "What changes came with the latest release?", "lobbying"
+        )
+        self.assertEqual(branch_of(changed["answer"], profile), "changes")
+
+    def test_how_many_records_is_still_a_figures_question(self) -> None:
+        profile = collection_profiles.profile_for("deals")
+        answered = collection_profiles.answer_from_profile(
+            "How many records are in this collection?", "deals"
+        )
+        self.assertEqual(branch_of(answered["answer"], profile), "stats")
+
+
+class TestAnotherCollection(unittest.TestCase):
+    """A question that names another collection is not answered from this page's profile."""
+
+    def test_a_named_collection_is_not_this_page(self) -> None:
+        for question in (
+            "How much federal funding did Cherokee Nation receive in fiscal year 2024, "
+            "from Federal Funding to Indian Country?",
+            "What does Federal Funding to Indian Country cover?",
+        ):
+            with self.subTest(question=question):
+                self.assertIsNone(collection_profiles.answer_from_profile(question, "contractors"))
+
+    def test_the_page_naming_itself_still_answers(self) -> None:
+        self.assertIsNotNone(
+            collection_profiles.answer_from_profile("What does PLOT contain?", "plot")
+        )
+
+
+class TestSpecificRecords(unittest.TestCase):
+    """A figures question about one entity or one year is about records, not the release."""
+
+    def test_a_year_or_a_name_is_specific(self) -> None:
+        specific = collection_profiles.asks_about_specific_records
+        self.assertTrue(specific("How many awards were made in 2020?", "funding"))
+        self.assertTrue(specific("How many awards did Cherokee Nation receive?", "funding"))
+        self.assertFalse(specific("How many records are in this collection?", "funding"))
+        self.assertFalse(
+            specific("How many records are in Federal Funding to Indian Country?", "funding")
+        )
+        self.assertFalse(specific("What are the headline figures?", "funding"))
+
+
+
+class TestWholeCollection(unittest.TestCase):
+    """Only a question plainly about the collection or its release stays with the profile."""
+
+    def test_questions_about_the_collection_or_release(self) -> None:
+        whole = collection_profiles.about_the_whole_collection
+        for question in (
+            "How many records are in this collection?",
+            "What are the headline figures?",
+            "What changed since I last used this collection?",
+            "What changed in the latest release?",
+            "What changed in v4.2?",
+            "What's new?",
+        ):
+            with self.subTest(question=question):
+                self.assertTrue(whole(question, "funding"))
+
+    def test_questions_about_records_or_left_open(self) -> None:
+        whole = collection_profiles.about_the_whole_collection
+        for question in (
+            "What changed for Cherokee Nation funding in 2021?",
+            "what changed for cherokee nation funding?",
+            "What changed since 2025?",
+            "total funding for cherokee nation",
+            "How many records does Cherokee Nation have in this collection?",
+            "How many records are in this collection for 2020?",
+            "What's the latest count?",
+        ):
+            with self.subTest(question=question):
+                self.assertFalse(whole(question, "funding"))
+
+    def test_change_words_are_recognised(self) -> None:
+        changes = collection_profiles.asks_about_changes
+        self.assertTrue(changes("What changed for Cherokee Nation funding in 2021?"))
+        self.assertTrue(changes("What's new?"))
+        self.assertFalse(changes("Where do these records come from?"))
+
+
 if __name__ == "__main__":
     unittest.main()
