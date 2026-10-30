@@ -1,0 +1,63 @@
+name: Publish the dev site
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - src/**
+      - public/**
+      - index.html
+      - package.json
+      - package-lock.json
+      - vite.config.js
+      - .github/workflows/deploy-dev-site.yml
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: dev-site
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      BUCKET: cedar-press-dev-site-473387994903
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          role-to-assume: arn:aws:iam::473387994903:role/cedar-press-dev-github-actions
+          aws-region: us-east-1
+
+      # infra/terraform/dev-site.tf creates the distribution; its domain is only known once it exists.
+      - id: site
+        run: |
+          set -euo pipefail
+          read -r ID DOMAIN <<<"$(aws cloudfront list-distributions \
+            --query "DistributionList.Items[?Comment=='cedar-press-dev-site'].[Id,DomainName]" --output text)"
+          if [ -z "${ID:-}" ] || [ "$ID" = "None" ]; then
+            echo "::error::No CloudFront distribution with comment cedar-press-dev-site; apply infra/terraform with dev.tfvars first."
+            exit 1
+          fi
+          echo "id=$ID" >> "$GITHUB_OUTPUT"
+          echo "domain=$DOMAIN" >> "$GITHUB_OUTPUT"
+
+      - run: npm run build
+        env:
+          VITE_API_URL: https://${{ steps.site.outputs.domain }}/api
+
+      - run: |
+          aws s3 sync dist-site "s3://$BUCKET" --delete --exclude CNAME --exclude 'assets/*' --cache-control 'public, max-age=600'
+          aws s3 sync dist-site/assets "s3://$BUCKET/assets" --delete --cache-control 'public, max-age=31536000, immutable'
+          aws cloudfront create-invalidation --distribution-id "${{ steps.site.outputs.id }}" --paths '/*'

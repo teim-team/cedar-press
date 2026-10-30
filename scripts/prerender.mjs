@@ -62,6 +62,8 @@ async function main() {
     }
     const context = await browser.newContext({ reducedMotion: "reduce", viewport: { width: 1280, height: 900 } });
     const page = await context.newPage();
+    // The prerendered door is the public site's: no API, nobody signed in.
+    await page.addInitScript(() => { globalThis.__CEDAR_PRERENDER__ = true; });
     const shell = readFileSync(`${OUT}/index.html`, "utf8");
     for (const path of PAGES) {
       await page.goto(`http://localhost:${PORT}${path}`, { waitUntil: "networkidle" });

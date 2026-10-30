@@ -1,0 +1,89 @@
+"""Annual offers, price configuration and validation; amounts are integer cents."""
+
+from __future__ import annotations
+
+import datetime as dt
+import json
+import os
+from zoneinfo import ZoneInfo
+
+from cedar_press.billing.errors import BillingError, unavailable
+from cedar_press.billing.models import Price
+from cedar_press.billing.utils import reference
+
+AMOUNTS = {
+    "early_access": {"press": 50_000, "press_pro": 100_000},
+    "standard": {"press": 100_000, "press_pro": 200_000},
+}
+RANK = {"press": 1, "press_pro": 2}
+
+
+def cohort_at(now: dt.datetime) -> str:
+    return (
+        "early_access"
+        if now.astimezone(ZoneInfo("America/Chicago")).date() < dt.date(2027, 1, 1)
+        else "standard"
+    )
+
+
+def prices() -> list[Price]:
+    try:
+        raw = json.loads(os.environ.get("CEDAR_PRESS_STRIPE_PRICES", "{}"))
+        result = [
+            Price(raw[cohort][tier], tier, cohort, AMOUNTS[cohort][tier])
+            for cohort in AMOUNTS
+            for tier in RANK
+        ]
+        if any(not isinstance(p.id, str) or not p.id.startswith("price_") for p in result):
+            raise ValueError
+        if len({p.id for p in result}) != 4:
+            raise ValueError
+        legacy = json.loads(os.environ.get("CEDAR_PRESS_STRIPE_LEGACY_PRICES", "[]"))
+        if not isinstance(legacy, list):
+            raise ValueError
+        for entry in legacy:
+            price = Price(
+                entry["id"], entry["tier"], entry["cohort"], AMOUNTS[entry["cohort"]][entry["tier"]]
+            )
+            if (
+                price.tier not in RANK
+                or price.cohort not in AMOUNTS
+                or not isinstance(price.id, str)
+                or not price.id.startswith("price_")
+            ):
+                raise ValueError
+            existing = next((p for p in result if p.id == price.id), None)
+            if existing and existing != price:
+                raise ValueError
+            if not existing:
+                result.append(price)
+        return result
+    except (ValueError, TypeError, KeyError):
+        raise unavailable() from None
+
+
+def price_for(tier: str, cohort: str) -> Price:
+    for price in prices():
+        if (price.tier, price.cohort) == (tier, cohort):
+            return price
+    raise BillingError("PLAN_INVALID", "Choose Cedar Press or Cedar Press+.")
+
+
+def identify_price(value) -> Price:
+    for price in prices():
+        if price.id == reference(value):
+            return price
+    raise BillingError("PRICE_UNRECOGNIZED", "This subscription price is not configured.", 502)
+
+
+def validate_price(value: dict, expected: Price) -> None:
+    recurring = value.get("recurring") or {}
+    if (
+        value.get("id") != expected.id
+        or value.get("currency") != "usd"
+        or value.get("unit_amount") != expected.amount
+        or recurring.get("interval") != "year"
+        or recurring.get("interval_count") != 1
+        or value.get("type") != "recurring"
+    ):
+        raise BillingError("PRICE_INVALID", "The annual plan price could not be verified.", 503)

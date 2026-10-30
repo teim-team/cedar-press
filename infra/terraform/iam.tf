@@ -88,7 +88,11 @@ resource "aws_iam_role" "github_actions" {
       Condition = {
         StringEquals = {
           "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
-          "token.actions.githubusercontent.com:sub" = "repo:${var.github_repo}:environment:${var.environment}"
+          "token.actions.githubusercontent.com:sub" = [
+            "repo:${var.github_repo}:ref:refs/heads/main",
+            # This repo issues the immutable form of the subject (org and repo IDs inside).
+            "repo:${var.github_repo_immutable}:ref:refs/heads/main",
+          ]
         }
       }
     }]
@@ -101,7 +105,7 @@ resource "aws_iam_role_policy" "github_actions_deploy" {
 
   policy = jsonencode({
     Version = "2012-10-17"
-    Statement = [
+    Statement = concat([
       {
         Effect   = "Allow"
         Action   = ["ecr:GetAuthorizationToken"]
@@ -122,6 +126,11 @@ resource "aws_iam_role_policy" "github_actions_deploy" {
         Resource = aws_ecr_repository.api.arn
       },
       {
+        Effect   = "Allow"
+        Action   = ["ec2:DescribeInstances"]
+        Resource = "*"
+      },
+      {
         Effect = "Allow"
         Action = ["ssm:SendCommand"]
         Resource = [
@@ -135,6 +144,28 @@ resource "aws_iam_role_policy" "github_actions_deploy" {
         Action   = ["ssm:GetCommandInvocation", "ssm:ListCommandInvocations"]
         Resource = "*"
       }
-    ]
+      ], local.dev_site ? [
+      {
+        Effect   = "Allow"
+        Action   = ["s3:ListBucket"]
+        Resource = aws_s3_bucket.dev_site[0].arn
+      },
+      {
+        Effect   = "Allow"
+        Action   = ["s3:PutObject", "s3:DeleteObject"]
+        Resource = "${aws_s3_bucket.dev_site[0].arn}/*"
+      },
+      {
+        Effect   = "Allow"
+        Action   = ["cloudfront:CreateInvalidation"]
+        Resource = aws_cloudfront_distribution.dev_site[0].arn
+      },
+      {
+        # The publish workflow finds the distribution by its comment.
+        Effect   = "Allow"
+        Action   = ["cloudfront:ListDistributions"]
+        Resource = "*"
+      }
+    ] : [])
   })
 }

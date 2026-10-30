@@ -293,14 +293,6 @@ export async function buildArticlePdf({ article, url, collections = [], lead = n
 
   // ── The text.
   y = bandH + 26;
-  if (article.demonstration) {
-    para("Illustrative figures: this brief's charts use example data while the research behind it is completed.", {
-      size: 8.5,
-      style: "italic",
-      color: MUTED,
-    });
-    y += 4;
-  }
   const imgHeight = (chart) => (chart?.src ? Math.min(300, Math.round((FULL * chart.h) / chart.w)) : 0);
   const notesHeight = (block) => {
     font("normal", 8);

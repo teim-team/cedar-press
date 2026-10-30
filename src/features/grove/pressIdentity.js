@@ -155,19 +155,19 @@ export const IDENTIFIERS = Object.freeze([
       "Opaque, append-only, never reused. It identifies the business, not its owner, not a citizenship or certification claim, not a UEI, CAGE, EIN, DUNS or SAM registration, not a location, brand, project or contract, and not a person. A surviving legal business keeps its id through a change; a genuine legal successor gets a new one.",
     // Codex, PR #77, and it was right: the displayed copy said flatly that an
     // individually owned firm carries a business id and no entity id, while
-    // the published register shows the 45 firms in that class carrying CE-
-    // uids today. ADR-043 closed the class to new mints and gives those 45 an
+    // the published register shows the 44 firms in that class carrying CE-
+    // uids today. ADR-043 closed the class to new mints and gives those 44 an
     // equivalence row rather than taking their uids away, so the rule is true
     // going forward and false about the firms that already exist. Said as
     // what it is: a rule with a dated exception, on the page, not in a
     // comment.
-    // Codex, PR #78: this said the 45 firms have equivalence rows and that
+    // Codex, PR #78: this said the 44 firms have equivalence rows and that
     // every firm resolved from here carries a business id only. No CB- value
     // and no equivalence row exists in data/spine, so both were present-tense
     // claims about a register that has not been written. Future tense, which
     // is also what the governing decision says.
     exception:
-      "Forty-five privately owned firms were minted into the entity register before this rule and keep their entity ids. The class is closed to new mints: when the business register is written, those firms gain a business id with an equivalence row to their entity id, and every firm resolved after it carries a business id alone.",
+      "Forty-four privately owned firms were minted into the entity register before this rule and keep their entity ids. The class is closed to new mints: when the business register is written, those firms gain a business id with an equivalence row to their entity id, and every firm resolved after it carries a business id alone.",
   }),
 ]);
 

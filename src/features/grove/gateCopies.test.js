@@ -190,7 +190,7 @@ test("AGENTS.md's check list is ci.yml's, step for step", () => {
   );
 });
 
-test("every tool a Makefile gate calls is installed by AGENTS.md's setup", () => {
+test("every Makefile tool is installed or documented as a prerequisite", () => {
   const agents = read("AGENTS.md");
   const commands = [...(markedBlock(agents, "setup") ?? []), ...(markedBlock(agents, "ci-steps") ?? [])];
   const installed = new Set(
@@ -210,6 +210,13 @@ test("every tool a Makefile gate calls is installed by AGENTS.md's setup", () =>
   // What every checkout already has: node and its tools, the interpreter,
   // coreutils, and modules of the standard library.
   const present = new Set(["node", "npm", "npx", "python3", "rm", "unittest"]);
+  // System tools have platform-specific installers. Require executable version
+  // checks in the operating guide instead of treating them as pip packages.
+  const prerequisites = new Set((markedBlock(agents, "prerequisites") ?? []).map((command) => {
+    const match = command.match(/^([a-z][a-z0-9_-]*) --version$/);
+    assert.ok(match, `Prerequisite must be a tool version check: ${command}`);
+    return match[1];
+  }));
   const tools = new Set();
   for (const { recipe } of makefile().values()) {
     for (const line of recipe) {
@@ -217,8 +224,9 @@ test("every tool a Makefile gate calls is installed by AGENTS.md's setup", () =>
       for (const match of line.matchAll(/\s-m\s+(\S+)/g)) tools.add(match[1]);
     }
   }
-  const missing = [...tools].filter((tool) => !present.has(tool) && !installed.has(tool));
-  assert.deepEqual(missing, [], `AGENTS.md installs none of: ${missing.join(", ")}`);
+  const missing = [...tools].filter((tool) =>
+    !present.has(tool) && !installed.has(tool) && !prerequisites.has(tool));
+  assert.deepEqual(missing, [], `AGENTS.md does not install or require: ${missing.join(", ")}`);
 });
 
 test("a block-scalar run step is one command", () => {

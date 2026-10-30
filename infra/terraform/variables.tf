@@ -23,6 +23,12 @@ variable "github_repo" {
   default = "teim-team/cedar-press"
 }
 
+variable "github_repo_immutable" {
+  type        = string
+  default     = "teim-team@251803252/cedar-press@1346703644"
+  description = "The repo as GitHub's immutable OIDC subject names it: org@id/repo@id."
+}
+
 variable "app_instance_type" {
   type    = string
   default = "t3.small"

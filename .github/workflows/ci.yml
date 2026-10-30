@@ -58,18 +58,18 @@ jobs:
       # project runs the mobile profile on the same engine.
       #
       # This step BUILDS as well as tests: playwright.config.js starts the
-      # server with `npm run build`, configured with a throwaway demo account
-      # of its own. That is why the deployed build is the last step in this
-      # job and not this one — a build placed before the smoke run would be
-      # overwritten by it, and the site would ship the test fixture as its
-      # sign-in.
-      - run: npx playwright install --with-deps chromium
-      - run: npm run test:smoke
-      # The API ships with the client, so its checks gate the same pipeline.
+      # server with `npm run build`, next to a throwaway copy of the API with
+      # its own fixture account, so the server's dependencies are installed
+      # first. That is why the deployed build is the last step in this job and
+      # not this one: a build placed before the smoke run would be overwritten
+      # by it, and the site would ship the test fixture.
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: "3.12"
       - run: pip install -e server[dev]
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:smoke
+      # The API ships with the client, so its checks gate the same pipeline.
       # `make audit-python` resolves the server's declared dependencies with
       # uv before auditing them, every extra included: the dev tools (ruff,
       # httpx2, coverage, pip-audit) as well as postgres.

@@ -3,20 +3,18 @@
 WHY THIS FILE EXISTS
 Cedar Press shipped its own idea of an assistant: a textarea that POSTed to
 ``/cedar/ask`` and got one paragraph back. Meanwhile the assistant this
-company actually built answers at ``POST /api/v1/messages`` in the ``cedar``
-service, and ``teim-app`` has been talking to it since contract ``1.0.0``.
-Two products, two different assistants, one name. This is Cedar Press joining
-the contract rather than keeping a second one.
+company actually built answers in the ``cedar`` service. Cedar Impact
+uses ``POST /api/v1/messages``. Cedar Press uses
+``POST /api/v1/press/messages``. ``teim-app`` has spoken the Impact contract
+since ``1.0.0``. This client speaks the Press contract.
 
 THE CONTRACT, AND WHERE IT IS WRITTEN DOWN
-``teim-app/server/cedar/client.js`` builds the request and
-``cedar/schemas/chat.py`` receives it. Both were read to write this, and the
-field names below are theirs, not a guess:
+``cedar/schemas/press.py`` (``PressMessageRequest``) receives this body. The
+field names below are that schema's, not a guess:
 
-    POST {CEDAR_BASE_URL}/api/v1/messages
+    POST {CEDAR_BASE_URL}/api/v1/press/messages
     Authorization: Bearer {CEDAR_INTERNAL_API_KEY}
-    {version, requestId, threadId, user, project, projectContext,
-     context, message}
+    {version, requestId, threadId, user, project, context, message}
  -> {messageId, threadId, answer, contextUsed, unavailable}
 
 The browser receives a signed, expiring continuation handle bound to the
@@ -65,7 +63,7 @@ import urllib.request
 import uuid
 from dataclasses import dataclass
 
-from cedar_press import subscribers
+from cedar_press.accounts.services import subscribers
 
 logger = logging.getLogger(__name__)
 
@@ -73,12 +71,9 @@ logger = logging.getLogger(__name__)
 #: ``teim-app/server/cedar/client.js``; bump both together or not at all.
 CONTRACT_VERSION = "1.0.0"
 
-#: Where the messages endpoint lives, under whatever base URL is configured.
-#: ``api/v1/router.py`` mounts ``/v1`` and ``/messages`` under it, and the app
-#: mounts that under ``/api`` — so the default is the same one ``teim-app``
-#: names in ``DEFAULT_CHAT_PATH``, and ``CEDAR_API_PATH`` overrides it there
-#: and here alike.
-DEFAULT_CHAT_PATH = "/api/v1/messages"
+#: Cedar Press chat. ``api/v1/router.py`` mounts this under ``/api``.
+#: ``CEDAR_API_PATH`` overrides it. Cedar Impact stays on ``/api/v1/messages``.
+DEFAULT_CHAT_PATH = "/api/v1/press/messages"
 
 #: Cedar reasons about a question before it answers, so this is a patience
 #: limit rather than a liveness one. ``teim-app``'s default is 120s; a reader

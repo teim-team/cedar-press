@@ -4,15 +4,16 @@ resource "random_password" "session_secret" {
 }
 
 locals {
-  prefix = "/cedar-press/${var.environment}"
+  prefix        = "/cedar-press/${var.environment}"
   cedar_enabled = var.cedar_alb_name != null
   cedar_base    = local.cedar_enabled ? "http://${data.aws_lb.cedar[0].dns_name}" : ""
+  press_origins = concat(var.press_origins, local.dev_site ? ["https://${aws_cloudfront_distribution.dev_site[0].domain_name}"] : [])
 
   plain_config = {
     CEDAR_PRESS_ENVIRONMENT = var.press_environment
     CEDAR_PRESS_TRUST_PROXY = "1"
     CEDAR_PRESS_PROXY_HOPS  = tostring(var.proxy_hops)
-    CEDAR_PRESS_ORIGINS     = join(",", var.press_origins)
+    CEDAR_PRESS_ORIGINS     = join(",", local.press_origins)
     CEDAR_ENABLED           = tostring(local.cedar_enabled)
     CEDAR_BASE_URL          = local.cedar_base
   }
@@ -20,7 +21,8 @@ locals {
 
 # unset means absent for SSM 
 resource "aws_ssm_parameter" "plain" {
-  for_each = { for key, value in local.plain_config : key => value if value != "" }
+  # The dev site's domain is unknown until its distribution exists, and for_each keys must be known at plan.
+  for_each  = { for key, value in local.plain_config : key => value if key == "CEDAR_PRESS_ORIGINS" ? length(local.press_origins) > 0 : value != "" }
   name      = "${local.prefix}/${each.key}"
   type      = "String"
   value     = each.value

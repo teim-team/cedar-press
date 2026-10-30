@@ -1,0 +1,99 @@
+.teim-rd.cp-account-page { min-height: 100vh; background: #f1f6f6; color: #142c3c; }
+.teim-rd .cp-account-page__header { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 2rem; min-height: 72px; padding: .6rem clamp(1rem, 4vw, 4rem); background: #fff; border-bottom: 1px solid #dce6e8; }
+.teim-rd .cp-account-page__identity { display: flex; align-items: center; gap: 1.2rem; min-width: 0; }
+.teim-rd .cp-account-page__tagline { border-left: 1px solid #dce6e8; padding-left: 1.2rem; font-family: var(--mono); font-size: .66rem; letter-spacing: .1em; text-transform: uppercase; color: #657985; white-space: nowrap; }
+.teim-rd .cp-account-page__brand { display: inline-flex; align-items: center; gap: .65rem; color: #142c3c; font-size: 1rem; font-weight: 750; text-decoration: none; text-transform: uppercase; white-space: nowrap; }
+.teim-rd .cp-account-page__brand img { width: 32px; height: 32px; object-fit: contain; }
+.teim-rd .cp-account-page__header nav { display: flex; gap: 1.5rem; justify-content: center; }
+.teim-rd .cp-account-page__header a { color: inherit; text-decoration: none; }
+.teim-rd .cp-account-page__actions { display: flex; align-items: center; gap: .6rem; justify-self: end; }
+.teim-rd.cp-account-page .cp-account-page__actions .cp-btn { border-radius: 8px; padding: .7rem 1.1rem; white-space: nowrap; box-shadow: 0 1px 2px #142c3c15; }
+.teim-rd.cp-account-page .cp-account-page__actions .cp-btn--quiet { background: #fff; border: 1px solid #d2d9dd; color: #142c3c; }
+.teim-rd.cp-account-page .cp-account-page__actions .cp-btn--primary { background: linear-gradient(160deg, #43968e, #307773); border-color: #43968e; color: #fff; }
+@media (max-width: 1700px) { .teim-rd .cp-account-page__tagline { display: none; } }
+.teim-rd .cp-account-page__main { display: flex; flex-direction: column; align-items: center; gap: 1.25rem; padding: clamp(2rem, 6vw, 5rem) 1rem; }
+.teim-rd.cp-account-page .cp-login__card { width: min(100%, 460px); padding: clamp(1.5rem, 4vw, 2.25rem); background: #fff; border: 1px solid #dce6e8; border-radius: 10px; box-shadow: 0 3px 15px #142c3c03; }
+.teim-rd.cp-account-page .cp-login__h { margin-bottom: .6rem; font-size: clamp(1.65rem, 4vw, 2rem); line-height: 1.2; }
+.teim-rd.cp-account-page .cp-login__lede { margin-top: 0; line-height: 1.5; }
+.teim-rd.cp-account-page .cp-gate__form { gap: 1.3rem; margin: 1.5rem 0; }
+.teim-rd.cp-account-page input:not([type="radio"]):not([type="checkbox"]) { width: 100%; box-sizing: border-box; min-height: 44px; border: 1px solid #cbdadd; border-radius: 5px; padding: .7rem .8rem; background: #fff; color: #142c3c; }
+.teim-rd.cp-account-page input:focus-visible { outline: 2px solid #008c86; outline-offset: 2px; }
+.teim-rd.cp-account-page input[readonly] { background: #f5f8f8; }
+.teim-rd.cp-account-page .cp-btn--primary, .teim-rd.cp-account-page .gv-btn--primary { background: linear-gradient(160deg, #009991, #00716f); border-color: #008780; color: #fff; border-radius: 5px; }
+.teim-rd.cp-account-page .cp-gate__form > button[type="submit"] { width: 100%; min-height: 44px; }
+.teim-rd.cp-account-page label, .teim-rd.cp-account-page legend { font-size: .9rem; font-weight: 600; }
+.teim-rd.cp-account-page fieldset { display: grid; gap: .7rem; padding: 1rem; border: 1px solid #dce6e8; border-radius: 5px; }
+.teim-rd.cp-account-page a:not(.cp-btn) { text-underline-offset: 3px; }
+@media (max-width: 800px) {
+  .teim-rd .cp-account-page__header { grid-template-columns: minmax(0, 1fr) auto; gap: .75rem; padding: 1rem; }
+  .teim-rd .cp-account-page__header nav { grid-row: 2; grid-column: 1 / -1; justify-self: center; }
+  .teim-rd .cp-account-page__actions { grid-row: 1; grid-column: 2; }
+  .teim-rd .cp-account-page__actions { gap: .8rem; font-size: .85rem; }
+  .teim-rd.cp-account-page .cp-account-page__actions .cp-btn { padding: .5rem .7rem; }
+  .teim-rd .cp-account-page__brand { font-size: .85rem; }
+}
+.teim-rd .cp-account-page__main--wide { padding: 28px 24px 24px; }
+.teim-rd .cp-memberships { width: min(1180px, 100%); }
+.teim-rd .cp-memberships__intro { text-align: center; margin-bottom: 28px; }
+.teim-rd .cp-memberships__intro .cp-kicker { margin: 0 0 10px; font-size: 10px; letter-spacing: .16em; }
+.teim-rd .cp-memberships__intro h1 { margin: 0 0 10px; font-size: clamp(1.8rem, 3vw, 2.65rem); line-height: 1.15; letter-spacing: -.035em; }
+.teim-rd .cp-memberships__intro > p:last-child { margin: 0; color: #586c77; font-size: 15px; line-height: 1.5; }
+.teim-rd .cp-memberships__cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+.teim-rd .cp-membership { display: flex; flex-direction: column; padding: 30px; background: #fff; border: 1px solid #d6e2e5; border-radius: 12px; box-shadow: 0 8px 28px #183b4806; }
+.teim-rd .cp-membership--plus { border-color: #65a39c; background: linear-gradient(145deg, #fbfefd, #fff 50%); box-shadow: 0 8px 30px #0d706910, inset 0 3px #438e85; }
+.teim-rd .cp-membership__heading { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+.teim-rd.cp-account-page .cp-membership__eyebrow { margin: 7px 0 0; padding: 0; text-align: left; color: #56717c; font-size: 10px; font-weight: 650; letter-spacing: .09em; text-transform: uppercase; }
+.teim-rd .cp-membership--plus .cp-membership__eyebrow { color: #087b70; }
+.teim-rd.cp-account-page .cp-membership .cp-membership__eyebrow { margin-left: 3px; }
+.teim-rd .cp-membership .cp-membership__description { margin-left: 2px; }
+.teim-rd .cp-membership h2 { margin: 0; font-size: 28px; line-height: 1.15; letter-spacing: -.025em; }
+.teim-rd .cp-membership__price { display: grid; gap: 4px; text-align: right; flex-shrink: 0; }
+.teim-rd .cp-membership__price strong { font-size: 32px; font-weight: 700; line-height: 1; letter-spacing: -.04em; }
+.teim-rd .cp-membership__price span { font-size: 11px; color: #607480; }
+.teim-rd .cp-membership__description { min-height: 48px; margin: 22px 0 18px; color: #516874; font-size: 15px; line-height: 1.5; max-width: 390px; }
+.teim-rd .cp-membership > .cp-btn { display: flex; justify-content: space-between; min-height: 46px; padding: 12px 17px; margin: 0 0 24px; font-size: 14px; border-radius: 6px; }
+.teim-rd.cp-account-page .cp-membership > .cp-btn--primary { background: linear-gradient(120deg, #43968e, #307773); border-color: #43968e; }
+.teim-rd .cp-membership > .cp-btn--quiet { border-color: #bfced3; background: #fff; }
+.teim-rd .cp-membership > .cp-btn--quiet:hover { background: #f2f7f6; border-color: #54877e; }
+.teim-rd .cp-membership__included { display: flex; justify-content: space-between; gap: 12px; padding-top: 18px; border-top: 1px solid #e2eaec; color: #314f5e; font-size: 12px; font-weight: 600; }
+.teim-rd .cp-membership__included > span + span { font-weight: 400; font-size: 11px; color: #617b85; text-align: right; }
+.teim-rd .cp-membership__features { display: grid; gap: 21px; padding: 0; margin: 22px 0 0; list-style: none; }
+.teim-rd .cp-membership__features li { display: flex; gap: 12px; align-items: flex-start; }
+.teim-rd .cp-membership__check { display: grid; place-items: center; flex-shrink: 0; width: 25px; height: 25px; margin-top: 1px; color: #248175; background: #edf5f2; border-radius: 50%; }
+.teim-rd .cp-membership__features li > div { display: grid; gap: 4px; min-width: 0; justify-items: start; text-align: left; }
+.teim-rd .cp-membership__features strong { font-size: 14px; font-weight: 650; color: #254454; }
+.teim-rd .cp-membership__features li > div > span { font-size: 12.5px; line-height: 1.5; color: #657985; }
+.teim-rd .cp-memberships__terms { max-width: 850px; margin: 12px auto 0; text-align: center; color: #6d7d85; font-size: 10.5px; line-height: 1.5; }
+.teim-rd .cp-memberships__footer { text-align: center; margin: 16px 0 0; color: #6a7c85; font-size: 12px; }
+.teim-rd .cp-memberships__footer a { color: #247c74; }
+.teim-rd .cp-memberships__error { padding: 12px; text-align: center; background: #fff0ef; color: #8f302d; border-radius: 5px; font-size: 13px; }
+@media (min-width: 801px) and (max-width: 1400px) {
+  .teim-rd .cp-memberships__intro { margin-bottom: 22px; }
+  .teim-rd .cp-membership { padding: 26px; }
+  .teim-rd .cp-membership__description { margin-top: 18px; }
+  .teim-rd .cp-membership__features { margin-top: 16px; gap: 16px; }
+}
+@media (max-width: 900px) and (min-width: 701px) { .teim-rd .cp-membership { padding: 23px 20px; } .teim-rd .cp-membership h2 { font-size: 22px; } }
+@media (max-width: 700px) { .teim-rd .cp-memberships__cards { grid-template-columns: minmax(0, 1fr); } .teim-rd .cp-account-page__main--wide { padding: 26px 16px; } .teim-rd .cp-membership { padding: 23px; } }
+@media (max-width: 380px) { .teim-rd .cp-membership { padding: 20px; } .teim-rd .cp-membership h2 { font-size: 22px; } .teim-rd .cp-membership__heading { gap: 10px; } }
+.teim-rd.cp-account-page .cp-confirm { width: min(100%, 520px); padding: 34px 36px 28px; text-align: center; }
+.teim-rd .cp-confirm__icon { display: grid; place-items: center; width: 58px; height: 58px; margin: 0 auto 17px; border: 1px solid #cee8de; border-radius: 50%; color: #258673; background: #eef8f3; box-shadow: 0 0 0 6px #f7fbf9; }
+.teim-rd .cp-confirm__icon--pending { color: #5c7d87; background: #f0f6f7; border-color: #d7e5e8; }
+.teim-rd .cp-confirm__eyebrow { margin: 0 0 9px; text-transform: uppercase; letter-spacing: .13em; font-size: 10px; font-weight: 650; color: #357d70; }
+.teim-rd.cp-account-page .cp-confirm .cp-login__h { font-size: 29px; letter-spacing: -.035em; margin-bottom: 12px; }
+.teim-rd .cp-confirm__intro { color: #657985; font-size: 14px; line-height: 1.6; margin: 0; }
+.teim-rd .cp-confirm__email { display: flex; justify-content: center; align-items: center; gap: 10px; padding: 13px 14px; margin: 17px 0 23px; background: #f3f7f7; border: 1px solid #e1eaea; border-radius: 7px; color: #315663; }
+.teim-rd .cp-confirm__email svg { flex-shrink: 0; }
+.teim-rd .cp-confirm__email strong { min-width: 0; overflow-wrap: anywhere; font-size: 14px; font-weight: 550; }
+.teim-rd .cp-confirm__next { display: flex; gap: 13px; padding: 21px 0; border-top: 1px solid #e4ebed; border-bottom: 1px solid #e4ebed; text-align: left; }
+.teim-rd .cp-confirm__step { display: grid; place-items: center; flex-shrink: 0; width: 27px; height: 27px; border-radius: 50%; background: #eaf4f0; color: #267c6b; font-size: 12px; font-weight: 650; }
+.teim-rd .cp-confirm__next h2 { font-size: 14px; margin: 1px 0 6px; }
+.teim-rd .cp-confirm__next p { color: #6b7d88; font-size: 12px; line-height: 1.6; margin: 0; }
+.teim-rd .cp-confirm > .cp-btn--primary { margin-top: 20px; display: flex; justify-content: space-between; }
+.teim-rd .cp-confirm__help { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-top: 21px; text-align: left; }
+.teim-rd .cp-confirm__help p { font-size: 12px; line-height: 1.5; color: #516874; margin: 0; }
+.teim-rd .cp-confirm__help .cp-btn { flex-shrink: 0; min-height: 34px; padding: 7px 11px; border: 1px solid #cbdadd; border-radius: 5px; font-size: 11px; color: #3a656f; }
+.teim-rd .cp-confirm__signin, .teim-rd .cp-confirm__resent { margin: 21px 0 0; font-size: 12px; color: #71828b; }
+.teim-rd .cp-confirm__signin a { color: #217c72; text-decoration: underline; }
+.teim-rd .cp-confirm__resent { color: #267c6b; }
+@media (max-width: 600px) { .teim-rd.cp-account-page .cp-confirm { padding: 28px 22px; } }

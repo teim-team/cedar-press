@@ -5,7 +5,8 @@ function handler(event) {
   var request = event.request;
   var host = request.headers.host.value;
   var uri = request.uri;
-  if (host === "www.cedarpress.ai") {
+  var apexLogin = host === "cedarpress.ai" && /^\/(?:login|subscribe|create-account)\/?$/.test(uri);
+  if (host === "www.cedarpress.ai" || apexLogin) {
     var query = [];
     var values = request.querystring || {};
     Object.keys(values).forEach(function (key) {
@@ -16,11 +17,12 @@ function handler(event) {
         query.push(key + "=" + entry.value);
       });
     });
+    // The login page lives on the workspace host; the public door only links to it.
     return {
       statusCode: 301,
       statusDescription: "Moved Permanently",
       headers: {
-        location: { value: "https://cedarpress.ai" + uri + (query.length ? "?" + query.join("&") : "") },
+        location: { value: (apexLogin ? "https://app.cedarpress.ai" : "https://cedarpress.ai") + uri + (query.length ? "?" + query.join("&") : "") },
       },
     };
   }
@@ -31,7 +33,7 @@ function handler(event) {
 
   if (host === "app.cedarpress.ai") {
     var path = uri.length > 1 && uri.endsWith("/") ? uri.slice(0, -1) : uri;
-    var pages = ["/", "/articles", "/data", "/settings", "/methods", "/whats-new", "/priorities", "/record",
+    var pages = ["/", "/login", "/subscribe", "/create-account", "/articles", "/data", "/settings", "/methods", "/whats-new", "/priorities", "/record",
       "/tribal-data-request", "/research-access"];
     if (pages.indexOf(path) !== -1 || /^\/entity\/[^/]+$/.test(path) || /^\/articles\/[^/]+$/.test(path)) {
       // package.json copies this app shell before public-page prerendering.

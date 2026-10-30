@@ -10,7 +10,7 @@ function event(host, uri, querystring = {}) {
 }
 
 test("workspace login and all registered app route families serve the app shell without redirect", () => {
-  for (const uri of ["/", "/data", "/settings/", "/methods", "/whats-new", "/priorities", "/record",
+  for (const uri of ["/", "/login", "/subscribe", "/create-account", "/data", "/settings/", "/methods", "/whats-new", "/priorities", "/record",
     "/articles", "/articles/research-note", "/entity/CE-000001", "/research-access", "/tribal-data-request"]) {
     const input = event("app.cedarpress.ai", uri, { signin: { value: "1" } });
     const result = handler(input);
@@ -60,4 +60,17 @@ test("HEAD requests retain their method and known routes use the existing build 
   assert.equal(handler(input).method, "HEAD");
   const pkg = JSON.parse(readFileSync(new URL("../../../package.json", import.meta.url), "utf8"));
   assert.match(pkg.scripts.build, /cp dist-site\/index\.html dist-site\/404\.html/);
+});
+
+test("the public site hands /login to the workspace host and nothing else moves", () => {
+  const result = handler(event("cedarpress.ai", "/login", { next: { value: "%2Fdata" } }));
+  assert.equal(result.statusCode, 301);
+  assert.equal(result.headers.location.value, "https://app.cedarpress.ai/login?next=%2Fdata");
+  assert.equal(handler(event("app.cedarpress.ai", "/login")).uri, "/404.html");
+});
+
+test("public subscribe route hands off to the workspace", () => {
+  const result = handler(event("cedarpress.ai", "/subscribe", { billing: { value: "processing" } }));
+  assert.equal(result.statusCode, 301);
+  assert.equal(result.headers.location.value, "https://app.cedarpress.ai/subscribe?billing=processing");
 });

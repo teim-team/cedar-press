@@ -56,16 +56,10 @@ class Pair:
 #: "Ported from", "Mirrors" and "mirroring" under ``server/cedar_press``.
 PAIRS: tuple[Pair, ...] = (
     Pair(
-        subject="Launch collection: descriptors, figures, findings, citations, download bytes",
+        subject="Launch collection: descriptors, figures, honesty items, citations, download bytes",
         javascript=("src/features/grove/collection.js",),
         python=("server/cedar_press/collections.py",),
         guarded_by="server/tests/test_collection.py",
-    ),
-    Pair(
-        subject="Claim classes: the taxonomy a finding names",
-        javascript=("src/features/grove/claims.js",),
-        python=("server/cedar_press/claims.py",),
-        guarded_by="nothing",
     ),
     Pair(
         subject="Shelf access: which plan reaches which shelf",

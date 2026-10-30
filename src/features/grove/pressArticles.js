@@ -12,7 +12,6 @@ export const PRESS_ARTICLES = Object.freeze([
   {
     "id": "brief-owned",
     "hosted": true,
-    "demonstration": false,
     "tone": "gold",
     "image": "/pitch/lanes/construction-wide.webp",
     "imageAlt": "Crews working a large construction site",

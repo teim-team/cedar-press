@@ -12,13 +12,14 @@ import { useCallback, useEffect, useState } from "react";
 import { contactHref } from "../../features/grove/appLink.js";
 import { Link } from "react-router";
 
+import { changePassword } from "../../api";
 import { useAuth } from "../../context/useAuth";
 import { usePriorities } from "../../features/grove/usePriorities.js";
 import { PressInfluence } from "./PressInfluence";
 import { useFadeIn } from "../../features/grove/useFadeIn";
 import { canReadCedarPress } from "../../features/grove/pressAccess";
 import { loadWork, saveWork, workOptions } from "../../features/grove/readerWork.js";
-import { LUMECON_URL, TBN_PLANS_URL, TBN_URL } from "../../features/grove/pressArticles";
+import { LUMECON_URL } from "../../features/grove/pressArticles";
 import { PRESS_TIERS } from "../../features/grove/pressCatalog";
 import { PRESS_REQUEST_PATH, PRESS_RESEARCH_PATH } from "../../features/grove/pressRoutes";
 import { resolveTier } from "../../workspaceTier.js";
@@ -28,6 +29,7 @@ import { PressCedarFab } from "./PressCedarFab";
 import { PressFoot, PressMast } from "./PressChrome";
 import PressGate from "./PressGate";
 import { TierName } from "./TierName";
+import { BillingCard } from "./BillingCard.jsx";
 import { buildLine } from "../../features/grove/buildStamp.js";
 
 /**
@@ -105,6 +107,57 @@ function WorkCard() {
   );
 }
 
+
+function PasswordCard() {
+  const [current, setCurrent] = useState("");
+  const [next, setNext] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState(null);
+  const [done, setDone] = useState(false);
+
+  const submit = async (event) => {
+    event.preventDefault();
+    setBusy(true);
+    setError(null);
+    setDone(false);
+    try {
+      await changePassword({ currentPassword: current, newPassword: next });
+      setCurrent("");
+      setNext("");
+      setDone(true);
+    } catch (failure) {
+      setError(failure.message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <section className="cp-set__card cp-fade" aria-label="Password">
+      <span className="cp-set__cap">Password</span>
+      <p className="cp-set__body">
+        Changing your password signs you out on every other device.
+      </p>
+      <form className="cp-set__form" onSubmit={submit}>
+        <label className="cp-who__label" htmlFor="cp-pw-current">Current password</label>
+        <input id="cp-pw-current" type="password" autoComplete="current-password"
+          value={current} onChange={(event) => setCurrent(event.target.value)} required />
+        <label className="cp-who__label" htmlFor="cp-pw-new">New password</label>
+        <input id="cp-pw-new" type="password" autoComplete="new-password" minLength={10}
+          placeholder="10 or more characters"
+          value={next} onChange={(event) => setNext(event.target.value)} required />
+        {error ? <p className="cp-gate__error" role="alert">{error}</p> : null}
+        {done ? <p className="cp-gate__ok" role="status">Password changed.</p> : null}
+        <div className="cp-set__acts">
+          <button type="submit" className="gv-btn gv-btn--quiet" disabled={busy}>
+            {busy ? "Saving" : "Change password"}
+          </button>
+        </div>
+      </form>
+    </section>
+  );
+}
+
 export default function CedarPressSettings() {
   useDocumentTitle("Settings");
   const { user, loading, logout } = useAuth();
@@ -112,9 +165,9 @@ export default function CedarPressSettings() {
   useScrollToTop("settings");
   // Sitewide arrival language.
   const fadeRoot = useFadeIn();
-  const { influence, status: influenceStatus } = usePriorities({ user });
+  const { influence, status: influenceStatus } = usePriorities({ user: entitled ? user : null });
 
-  if (!loading && !entitled) {
+  if (!loading && !user) {
     return (
       <div className="teim-rd teim-rd--paper">
         <PressGate user={user} />
@@ -134,9 +187,7 @@ export default function CedarPressSettings() {
           <p className="cp-hero__access">Settings</p>
           <h1 className="cp-mh__title">Your account.</h1>
           <p className="cp-mh__sub">
-            Cedar Press access is provided through a Tribal Business News subscription.
-            Membership, billing and renewals are managed there. This page shows your Cedar
-            Press access and preferences.
+            Manage your Cedar Press access, annual subscription and preferences.
           </p>
         </section>
 
@@ -157,30 +208,18 @@ export default function CedarPressSettings() {
               </div>
               <div>
                 <dt>Plan</dt>
-                <dd>{tier ? <TierName name={tier.name} /> : "Cedar Press"}</dd>
-              </div>
-              <div>
-                <dt>Sold and renewed by</dt>
-                <dd>
-                  <a href={TBN_URL} target="_blank" rel="noreferrer">Tribal Business News</a>
-                </dd>
+                <dd>{tier ? <TierName name={tier.name} /> : "No current paid access"}</dd>
               </div>
             </dl>
             <div className="cp-set__acts">
-              <a
-                className="gv-btn gv-btn--primary"
-                href={TBN_PLANS_URL}
-                target="_blank"
-                rel="noreferrer"
-              >
-                Manage TBN membership <span aria-hidden="true">&#8594;</span>
-              </a>
               <button type="button" className="gv-btn gv-btn--quiet" onClick={() => logout()}>
                 Sign out
               </button>
             </div>
           </section>
 
+          <BillingCard />
+          <PasswordCard />
           <WorkCard />
         </div>
 
@@ -189,7 +228,7 @@ export default function CedarPressSettings() {
           {/* Where the account's influence lives: what this subscription has
               earned by using the product, where it put it, and what it asked
               for. The page is worth visiting for this, not only for billing. */}
-          <PressInfluence influence={influence} tier={tierId} status={influenceStatus} />
+          {entitled ? <PressInfluence influence={influence} tier={tierId} status={influenceStatus} /> : null}
 
           {/* Links out to public programs, not features of the account: both
               pages work with or without a subscription, and the gate and

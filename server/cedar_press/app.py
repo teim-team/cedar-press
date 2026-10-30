@@ -48,7 +48,6 @@ from __future__ import annotations
 import io
 import json
 import logging
-import os
 import re
 import uuid
 from datetime import datetime, timezone
@@ -66,26 +65,23 @@ from pydantic import BaseModel, Field
 
 from cedar_press import (
     cedar_service,
-    codes,
     need_profiles,
     press_catalog,
     priorities,
     protected_articles,
-    ratelimit,
     release_research,
     repository,
     shelf,
-    subscribers,
 )
-from cedar_press.session import (
+from cedar_press.accounts.api.dependencies import auth_origins, require_account
+from cedar_press.accounts.api.routes import router as accounts_router
+from cedar_press.accounts.services import subscribers
+from cedar_press.accounts.services.sessions import (
     Session,
-    account_exists,
     account_id_for,
     current_session,
-    sign_in,
-    sign_out,
-    validate_auth_configuration,
 )
+from cedar_press.billing.api.routes import router as billing_router
 
 app = FastAPI(
     title="Cedar Press",
@@ -97,14 +93,7 @@ app = FastAPI(
 # and the session rides in a cookie, so credentials must be allowed and the
 # origin list must be explicit — "*" is not permitted with credentials, and
 # should not be wanted.
-_AUTH_ORIGINS = [
-    origin.strip()
-    for origin in os.environ.get(
-        "CEDAR_PRESS_ORIGINS",
-        "http://localhost:5173,https://cedarpress.ai,https://app.cedarpress.ai",
-    ).split(",")
-    if origin.strip()
-]
+_AUTH_ORIGINS = auth_origins()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=_AUTH_ORIGINS,
@@ -153,11 +142,6 @@ for _path, _directory in _STATIC:
         app.mount(_path, StaticFiles(directory=_directory), name=_path.lstrip("/"))
 
 _templates = Jinja2Templates(directory=Path(__file__).with_name("templates"))
-
-
-class Credentials(BaseModel):
-    email: str
-    password: str
 
 
 class PointsMove(BaseModel):
@@ -216,15 +200,10 @@ class Question(BaseModel):
     pathname: str | None = None
 
 
-def require_session(session: Session | None = Depends(current_session)) -> Session:
-    """A route that reads subscriber data needs a subscriber.
-
-    Entitlement is decided here rather than in the client: the client's
-    ``pressAccess`` decides what renders, and this decides what is served.
-    The two are written to answer identically, and this one is the control.
-    """
-    if session is None:
-        raise HTTPException(status_code=401, detail="Not signed in.")
+def require_session(session: Session = Depends(require_account)) -> Session:
+    """Paid or explicitly granted content access, independently of account sign-in."""
+    if session.tier == "free":
+        raise HTTPException(status_code=403, detail="A current subscription is required.")
     return session
 
 
@@ -255,9 +234,10 @@ async def _flatten_error(request: Request, exc: HTTPException):
 
 
 @app.get("/me")
-def me(session: Session = Depends(require_session)) -> dict[str, object]:
+def me(session: Session = Depends(require_account)) -> dict[str, object]:
     # The first authenticated call of a visit: the month's points, once.
-    _priorities.accrue(_account(session))
+    if session.tier in subscribers.TIERS:
+        _priorities.accrue(_account(session))
     return session.as_payload()
 
 
@@ -336,14 +316,14 @@ class ReaderProfile(BaseModel):
 
 
 @app.get("/press/profile")
-def read_profile(session: Session = Depends(require_session)) -> dict[str, object]:
+def read_profile(session: Session = Depends(require_account)) -> dict[str, object]:
     """The reader's declared work, per seat (``readerWork.js``)."""
     return _priorities.profile(session.email)
 
 
 @app.patch("/press/profile")
 def write_profile(
-    body: ReaderProfile, session: Session = Depends(require_session)
+    body: ReaderProfile, session: Session = Depends(require_account)
 ) -> dict[str, object]:
     """Record what the reader declared. The vocabulary is the client's own
     (``WORK_KINDS``, dumped into ``_press_data.json``), so an answer the
@@ -357,164 +337,6 @@ def write_profile(
             },
         )
     return _priorities.set_profile(session.email, body.work)
-
-
-@app.post("/auth/login")
-def login(credentials: Credentials, request: Request, response: Response) -> dict[str, object]:
-    _guard(request, "login", ratelimit.LOGIN_ATTEMPTS)
-    session = sign_in(credentials.email, credentials.password, response)
-    if session is None:
-        raise HTTPException(
-            status_code=401,
-            detail={
-                "code": "INVALID_CREDENTIALS",
-                "message": (
-                    "That sign-in did not work. Check the address and password on "
-                    "your Cedar Press confirmation."
-                ),
-            },
-        )
-    return session.as_payload()
-
-
-@app.post("/auth/logout", status_code=204)
-def logout(
-    request: Request,
-    response: Response,
-    session: Session | None = Depends(current_session),
-) -> None:
-    # CORS governs response access, not whether a simple cross-site POST runs.
-    # Reject an unrelated browser origin before account-wide revocation.
-    origin = request.headers.get("origin")
-    if origin is not None and origin not in _AUTH_ORIGINS:
-        raise HTTPException(status_code=403, detail="Untrusted sign-out origin.")
-    sign_out(response, session)
-
-
-class CodeCheck(BaseModel):
-    code: str
-    email: str
-
-
-class Activation(BaseModel):
-    code: str
-    email: str
-    password: str
-
-
-def _guard(request: Request, bucket: str, attempts: int) -> None:
-    """Refuse a caller who has spent their attempts.
-
-    Keyed by bucket as well as by client, so exhausting the sign-in allowance
-    does not also lock the same person out of activation — those are different
-    tasks and a subscriber may legitimately be doing the second after failing
-    the first.
-    """
-    validate_auth_configuration()
-    key = f"{bucket}:{ratelimit.client_key(request)}"
-    if not ratelimit.allow(key, attempts=attempts):
-        raise HTTPException(
-            status_code=429,
-            detail={
-                "code": "TOO_MANY_ATTEMPTS",
-                "message": "Too many attempts. Wait a few minutes and try again.",
-            },
-            headers={"Retry-After": str(ratelimit.retry_after(key))},
-        )
-
-
-def _refuse(error_code: str) -> HTTPException:
-    """A refusal the client already has copy for.
-
-    The message is a fallback: ``pressSignupError`` renders its own wording
-    per code, and this is what a caller that is not the client sees.
-    """
-    return HTTPException(
-        status_code=400,
-        detail={"code": error_code, "message": "That code could not be activated."},
-    )
-
-
-@app.post("/press/activation/validate", status_code=204)
-def validate_code(check: CodeCheck, request: Request) -> None:
-    """Step one: is this code real, unspent, unexpired, and theirs?
-
-    Creates nothing. The client asks this before showing the password field
-    so a wrong code costs a message rather than a half-made account, and so
-    the first screen a subscriber sees is two fields rather than four.
-    """
-    _guard(request, "activation", ratelimit.ACTIVATION_ATTEMPTS)
-    issued, error = codes.check(check.code, check.email)
-    if error:
-        raise _refuse(error)
-    # Checked here as well as at activation: a reader who already has an
-    # account should be sent to sign-in now, not after choosing a password.
-    if account_exists(issued.email):
-        raise _refuse(codes.EMAIL_IN_USE)
-
-
-@app.post("/press/activation")
-def activate(activation: Activation, request: Request, response: Response) -> dict[str, object]:
-    """Step two: create the account and sign them in.
-
-    The code is re-checked rather than trusted from step one. Step one set no
-    state, so nothing carries between the two calls, and an activation route
-    that believed a client's word about a code it validated a moment ago
-    would not need the code at all.
-
-    The tier comes off the issued code, never off the request. Letting a
-    caller name their own tier is how an activation route becomes an
-    escalation route.
-    """
-    _guard(request, "activation", ratelimit.ACTIVATION_ATTEMPTS)
-    issued, error = codes.check(activation.code, activation.email)
-    if error:
-        raise _refuse(error)
-    if account_exists(issued.email):
-        raise _refuse(codes.EMAIL_IN_USE)
-    if len(activation.password) < 10:
-        raise HTTPException(
-            status_code=400,
-            detail={
-                "code": "PASSWORD_TOO_SHORT",
-                "message": "Choose a password of at least 10 characters.",
-            },
-        )
-
-    # ONE TRANSACTION WHERE THERE IS A DATABASE TO HAVE ONE IN.
-    # This used to create the account and then mark the code spent, in that
-    # order and for a good reason: the other way round loses a subscriber
-    # their code if the account fails to save. But two writes are two writes,
-    # and the failure between them left a subscriber whose code was still
-    # redeemable — which on a restart meant a second account on one code.
-    # `redeem` claims the code with an `UPDATE ... WHERE spent_at IS NULL`
-    # and inserts the subscriber before the commit, so the two facts cannot
-    # disagree; the row count also settles the race between two people
-    # submitting the same code at once, which the old order could not see.
-    # Without a database it is the same two steps as before, because a dict
-    # and a set have no transaction to share.
-    try:
-        made = subscribers.redeem(issued.code, activation.password)
-    except subscribers.AlreadySubscribed:
-        # The `account_exists` check above is a read, and a read is not a
-        # lock: two activations for one address can both pass it. The insert
-        # is where that is settled, and it refuses rather than resetting the
-        # password on an account somebody already has.
-        raise _refuse(codes.EMAIL_IN_USE) from None
-    if made is None:
-        # Somebody redeemed it between `check` above and this write.
-        raise _refuse(codes.CODE_USED)
-    codes.spend(issued.code)
-    session = sign_in(made.email, activation.password, response)
-    if session is None:
-        raise HTTPException(
-            status_code=409,
-            detail={
-                "code": "ACCOUNT_CHANGED",
-                "message": "Your account changed during activation. Please sign in again.",
-            },
-        )
-    return session.as_payload()
 
 
 @app.get("/press/collections")
@@ -1120,9 +942,7 @@ def ask_cedar(question: Question, session: Session = Depends(require_session)) -
                 pathname=question.pathname,
             )
             if reply.unavailable:
-                raise cedar_service.CedarUnavailable(
-                    "Cedar reported that it is unavailable."
-                )
+                raise cedar_service.CedarUnavailable("Cedar reported that it is unavailable.")
         except cedar_service.CedarUnavailable:
             raise HTTPException(
                 status_code=503,
@@ -1173,3 +993,8 @@ def ask_cedar(question: Question, session: Session = Depends(require_session)) -
             ),
         },
     )
+
+
+app.include_router(billing_router)
+
+app.include_router(accounts_router)

@@ -39,8 +39,9 @@ cedar_press/
     need_profiles.py        NEED evidence on registered Native entity profiles
 
   subscribers
-    session.py              who is signed in: a signed, HTTP-only cookie
-    subscribers.py          who holds a subscription, and which access code bought it
+    accounts/services/
+      sessions.py           who is signed in: a signed, HTTP-only cookie
+      subscribers.py        subscriber persistence, credentials and legacy access
     codes.py                checks an access code is real, unspent, unexpired and the reader's
     ratelimit.py            rate limits on sign-in and activation
     priorities.py           Shape the Research: Cedar Points, priorities and requests
@@ -80,6 +81,7 @@ uvicorn cedar_press.app:app --reload --port 8000
 | `CEDAR_PRESS_ACCOUNTS` | Provisioned subscribers as JSON. Empty by default, so a service started without accounts authenticates nobody. |
 | `CEDAR_PRESS_CODES` | Access codes as issued, keyed by code: `{"CODE": {"email": ..., "tier": ..., "expires": "YYYY-MM-DD"}}`. `expires` is optional. Empty by default, so a service started without a register activates nobody. |
 | `CEDAR_PRESS_ORIGINS` | Comma-separated origins allowed to send credentialed requests. |
+| `CEDAR_PRESS_APP_URL` | The client's origin, where password reset links open (`<url>/login#reset=...`); default `http://localhost:5173`. Reset by email is development-only until a mail provider is configured: development logs the link, and staging and production answer 503. |
 | `CEDAR_PRESS_INSECURE_COOKIE` | `1` in local development only: drops `Secure` so the cookie works over http. |
 | `CEDAR_PRESS_TRUST_PROXY` | `1` when the API sits behind a proxy that appends to `X-Forwarded-For` (the intended deployment once the API is activated: CloudFront in front of the API origin, `docs/HOSTNAMES.md`); `0` when clients connect directly. Sign-in and activation are rate limited per client address, so this decides what "client" means. Unset reads as `0` in development and is refused (503) in staging and production, because behind CloudFront `0` would key every subscriber to CloudFront's address and one stranger's wrong passwords would lock everyone out. |
 | `CEDAR_PRESS_PROXY_HOPS` | With `CEDAR_PRESS_TRUST_PROXY=1`, how many trusted proxies append to `X-Forwarded-For`; default `1` (CloudFront). Set `2` if a load balancer sits between CloudFront and the service. The client is the entry that many places from the right; everything left of it is caller-written and ignored. Only correct when the service cannot be reached except through that chain. |
@@ -91,7 +93,7 @@ modules today. When the collections move into Postgres it answers from there
 and `app.py` does not change — routes hold HTTP concerns and no data access
 of their own, which is what keeps that swap to one module.
 
-`subscribers.py` already persists subscribers and access codes when `DATABASE_URL`
+`accounts/services/subscribers.py` already persists subscribers and access codes when `DATABASE_URL`
 is configured. Redemption spends the code and creates its subscriber in one
 PostgreSQL transaction. The environment-backed account/code fallback is for
 development; staging and production refuse it. Install the PostgreSQL extra
@@ -100,11 +102,28 @@ repository root and run the existing migration command in `DATABASE.md`.
 
 Sessions expire after 14 days. Every authenticated request re-reads the subscriber
 and current Press tier; removed subscribers and changed credentials or account
-bindings invalidate existing cookies. Logout advances the subscriber's persistent
-revocation revision, ending that email's sessions on all devices without ending
-other seats' sessions. A stable server-only signing secret is required in staging
+bindings invalidate existing cookies. Logout advances `sessions_revoked_at`,
+ending that user's sessions on all devices. A stable server-only signing secret is required in staging
 and production. Existing passwords, accounts and subscription tiers are preserved;
 old cookies without lifecycle claims require a fresh sign-in.
+
+The account foundation extends the existing subscriber account with verification
+and Stripe customer fields. Google identities and access grants reference its UUID.
+Annual Stripe Checkout, billing portal and signed webhook reconciliation are implemented.
+Checkout starts at `/subscribe`; paid customers create an account through
+a single-use email link. Stripe collects the email and discount code. Existing emails keep their
+credentials and sign in normally.
+The `cedar_press.billing` package uses `BillingService`, `CheckoutService` and `BillingReconciler`,
+with `StripeAdapter` in `billing/adapters/stripe.py` for Stripe calls.
+Both packages keep HTTP routes, schemas and dependencies under `api/`, application
+services under `services/`, and domain records in `models.py`. Accounts owns
+authentication, sessions, setup links and email transport. Billing owns purchase delivery tracking in `billing/services/purchase_email.py`.
+Dependencies share one `StripeAdapter`; its client initializes on first use.
+Tests can inject `StripeAdapter(client=...)`.
+`AccountSetupService` handles activation; `PurchaseEmailService` handles purchase
+email delivery and retries.
+Google sign-in remains separate work. See
+[DATABASE.md](DATABASE.md) for the [schema ERD](DATABASE.md#schema-erd) and local Docker setup.
 
 The static browser preview gate is a separate login authority. Enabling
 `VITE_API_URL` does not migrate its accounts. Before switching an existing site,

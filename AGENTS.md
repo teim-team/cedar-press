@@ -53,8 +53,9 @@ static client with a FastAPI service alongside it, serving the Overview,
 Collections, Research Briefs, Priorities, What's new and Methods, plus
 `/tribal-data-request` and `/research-access` on their own URLs. Cedar Press is a Lumecon research publication, partnered
 with Tribal Business News: built by Lumecon and available exclusively through
-Tribal Business News, which handles subscriber plans (payment, renewals and
-issuance). There is no year gating: every subscriber gets full coverage.
+Tribal Business News. Cedar Press handles account creation, direct Stripe billing,
+renewals and upgrades (Brian Kim, 2026-10-25). There is no year gating: every
+subscriber gets full coverage.
 
 **The former Cedar data workspace.** Its historical acquisition, adjudication and
 reproduction scripts left the tree and are kept in git history at the tag
@@ -64,8 +65,6 @@ filters and customer presentation. The journal that recorded it is at the same t
 
 **Does not own:**
 
-- Subscriber plans: payment, renewals and access-code issuance. Those belong
-  to Tribal Business News, whose involvement is with Cedar Press only.
 - The shared data foundation. That is
   [`Lumecon-data`](https://github.com/teim-team/Lumecon-data), the separate
   data repository decided on 2026-09-21. Its installed builders and spreadsheet
@@ -101,6 +100,61 @@ a contract, not a label anyone reads; leave it alone.
 
 ## 3. Setup and checks
 
+Local PostgreSQL and a browser database viewer run through `make db-up`.
+`make db-migrate` applies the existing migrations; `make db-test` exercises
+subscriber and points contracts against a separate disposable test database.
+The test runner creates a fresh database, applies application migrations, and
+removes its database afterward; it does not depend on volume initialization SQL.
+`make db-shell` inspects persistent development records. See
+[`server/DATABASE.md`](server/DATABASE.md) for connection details.
+Migration 004 extends `cedar_press_subscribers` as the sole account store,
+adding verification and Stripe customer fields. Google identities and individual
+access grants reference its existing UUID; there is no parallel users table or
+group billing model. A null tier disables legacy access while retaining the
+account and grant history. `sessions_revoked_at` owns explicit session revocation.
+Sign-in and activation retain the existing optional teim-app account linking.
+`make db-test` also rehearses this migration and its failure rollback. The
+subscriber-storage CI job builds `server/Dockerfile.test` and runs that same
+command, refusing skipped contracts. Production uses `server/Dockerfile`.
+Stripe billing uses migration 005. Catalog provisioning lives in
+`server/tools/setup_stripe.py`; production reconciliation uses
+`python -m cedar_press.billing.cli reconcile`.
+`docker compose --profile app up -d api` runs the local API; the optional `billing` profile forwards sandbox webhooks through Stripe CLI.
+See `server/DATABASE.md` for setup. Billing uses confirmed invoice coverage; an
+expired subscription can still sign in for billing but cannot read paid content.
+Checkout starts at `/subscribe` and sends the selected plan directly to
+Stripe for email and discount-code entry. It does not block repeat purchases.
+Migration 006 stores purchase reservations; migration 007 adds the display name;
+migration 008 supports email collection in Stripe and preserves customer history. Paid customers follow a mailbox ownership link to
+`/create-account`. Local Mailpit receives those links at http://localhost:8025;
+production uses configured SMTP with STARTTLS. The confirmation page supports
+`POST /billing/checkout/resend` for its own paid checkout. The two tiers have
+separately named Stripe products; older price IDs remain recognized through
+`CEDAR_PRESS_STRIPE_LEGACY_PRICES`.
+Billing uses `BillingService`, `CheckoutService` and `BillingReconciler`,
+with `StripeAdapter` in `billing/adapters/stripe.py` for Stripe calls.
+Both packages keep HTTP routes, schemas and dependencies under `api/`, application
+services under `services/`, and domain records in `models.py`. Accounts owns
+authentication, sessions, setup links and email transport. Subscriber storage lives
+in `accounts/services/subscribers.py`. Billing owns purchase delivery tracking in `billing/services/purchase_email.py`.
+FastAPI dependencies share one `StripeAdapter`, which creates its SDK client on
+first use or accepts an injected client through `StripeAdapter(client=...)`.
+`AccountSetupService` handles account activation; `PurchaseEmailService` handles
+leased purchase email delivery (migration 009), outside SQL transactions. Webhooks
+run off the event
+loop and refresh affected objects; the repair CLI reconciles full history.
+Billing management targets an owned subscription, including repeat purchases.
+General portal sessions use `CEDAR_PRESS_STRIPE_PORTALS.management` with price
+changes disabled. Cohort prices are exposed only by targeted plan-change flows.
+
+Docker Engine or Docker Desktop with Compose v2 is required for the database
+targets. Verify the Docker prerequisite before running them:
+
+<!-- gate:prerequisites -->
+```bash
+docker --version
+```
+
 Node 22 and Python 3.12, the versions CI uses. Two tools have to be installed
 by hand: `uv`, which `make audit-python` uses to resolve the server's
 dependencies (CI takes it from `astral-sh/setup-uv`), and `pre-commit`, which
@@ -122,9 +176,9 @@ npm ci
 npm run lint
 make check-generated
 npm run test
+pip install -e server[dev]
 npx playwright install --with-deps chromium
 npm run test:smoke
-pip install -e server[dev]
 ruff check server
 make test-python
 make audit-python
@@ -161,9 +215,10 @@ Lumecon-data.
 
 `npm run test:smoke` needs Playwright's browsers, which
 `npx playwright install --with-deps chromium` installs once. It **builds as
-well as tests**: `playwright.config.js` starts the server with `npm run build`
-configured with a throwaway demo account, which is why the deployed build is
-the last step of the CI job and not this one.
+well as tests**: `playwright.config.js` builds the site and starts it beside a
+throwaway copy of the API (fixture account in `tests/demoAccount.js`), which is
+why the server's dependencies are installed first and the deployed build is the
+last step of the CI job and not this one.
 
 ## 4. Branch, commit and review conventions
 
@@ -265,10 +320,14 @@ list, all of which this project has paid for:
   describes Cedar Press as a prototype or a pilot. Something that is not real
   yet is labelled plainly for what it does today and tracked as a gap, never
   called a prototype. Pilots run as ordinary accounts or access codes, not a
-  separate code path. Payment for Cedar Press is owned by Tribal Business News
-  today (`server/cedar_press/codes.py`); Lumecon's side is codes and
-  entitlement. Lumecon's own Stripe account, with Brian Kim and Kaylyn Lee as
-  admins, carries Cedar Grove payments: teim-team/teim-app#186.
+  separate code path. Cedar Press owns direct Stripe billing and subscriber accounts (Brian Kim,
+  2026-10-25). Annual early-access prices are $500 for Cedar Press and $1,000
+  for Cedar Press+, retained while the subscription remains active. New
+  subscriptions from January 1, 2027 cost $1,000/$2,000 annually. The approved
+  Summit promotion discounts the first year by $100 and then renews at the
+  early-access rate. Resubscription after a subscription ends uses current
+  pricing. Existing access codes remain a compatibility path, separate from
+  Stripe promotion codes.
 
 ## 7. How this doc gets updated
 
@@ -294,7 +353,7 @@ One other place absorbs a specific kind of update, so it does not land here:
 |---|---|---|
 | [`teim-app`](https://github.com/teim-team/teim-app) | The authenticated platform — Cedar Impact, Cedar Commons and Cedar Grove | Cedar Grove carries these collections into the full analysis environment |
 | [`teim-engine`](https://github.com/teim-team/teim-engine) | The model engine behind Cedar Impact (internal) | The former workspace read its reference data as `reference_dataset` per ADR-044; nothing in this tree reads it |
-| [`cedar`](https://github.com/teim-team/cedar) | Cedar, the AI economic analyst, as a service | No runtime dependency in either direction |
+| [`cedar`](https://github.com/teim-team/cedar) | Cedar, the AI economic analyst, as a service | This service calls `POST /api/v1/press/messages`. Cedar does not call Cedar Press. |
 | [`lumecon-website`](https://github.com/teim-team/lumecon-website) | The public site, and the **North Star** for product vocabulary | Product names and their one-line definitions follow its `AGENTS.md` |
 | [`Lumecon-data`](https://github.com/teim-team/Lumecon-data) | The shared Python data foundation behind Cedar Press, Cedar Grove, Cedar and Cedar Impact | Owns current versioned builders, verification and researcher spreadsheet exports. Press consumes exact pins; the historical workspace scripts are at the tag `data-workspace-final` for reproduction and adjudication. |
 

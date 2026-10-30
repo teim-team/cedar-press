@@ -15,7 +15,9 @@ from unittest import mock
 from fastapi import HTTPException, Response
 from fastapi.testclient import TestClient
 
-from cedar_press import db, session, subscribers
+from cedar_press import db
+from cedar_press.accounts.services import sessions as session
+from cedar_press.accounts.services import subscribers
 
 
 class TestSessionLifecycle(unittest.TestCase):
@@ -31,7 +33,7 @@ class TestSessionLifecycle(unittest.TestCase):
             "tier": "press_pro",
             "account_id": "account-fixture",
             "password_hash": self.password_hash,
-            "updated_at": datetime(2026, 10, 1, tzinfo=timezone.utc),
+            "sessions_revoked_at": datetime(2026, 10, 1, tzinfo=timezone.utc),
         }
         self.lookups = 0
         self.revocations = 0
@@ -59,17 +61,19 @@ class TestSessionLifecycle(unittest.TestCase):
     def read(self, sql, params=None):
         if "to_regclass" in sql:
             return None
-        self.assertIn("updated_at", sql)
+        self.assertIn("sessions_revoked_at", sql)
         self.lookups += 1
         if self.row is None or params != (self.row["email"],):
             return None
         return dict(self.row)
 
     def write(self, sql, params=None):
-        self.assertIn("GREATEST(clock_timestamp(), updated_at + interval '1 microsecond')", sql)
+        self.assertIn(
+            "GREATEST(clock_timestamp(), sessions_revoked_at + interval '1 microsecond')", sql
+        )
         if self.row is None or params != (self.row["email"],):
             return 0
-        self.row["updated_at"] += timedelta(microseconds=1)
+        self.row["sessions_revoked_at"] += timedelta(microseconds=1)
         self.revocations += 1
         return 1
 
@@ -164,8 +168,8 @@ class TestSessionLifecycle(unittest.TestCase):
 
     def test_equivalent_database_timezones_keep_the_same_session_revision(self):
         cookie = self.cookie()
-        instant = self.row["updated_at"]
-        self.row["updated_at"] = instant.astimezone(timezone(timedelta(hours=-7)))
+        instant = self.row["sessions_revoked_at"]
+        self.row["sessions_revoked_at"] = instant.astimezone(timezone(timedelta(hours=-7)))
         self.assertIsNotNone(session._decode(cookie))
         self.assertEqual(
             subscribers.find("reader@example.org").session_revision,
@@ -173,15 +177,20 @@ class TestSessionLifecycle(unittest.TestCase):
         )
 
     def test_naive_database_revision_is_refused_without_guessing_a_timezone(self):
-        self.row["updated_at"] = self.row["updated_at"].replace(tzinfo=None)
+        self.row["sessions_revoked_at"] = self.row["sessions_revoked_at"].replace(tzinfo=None)
         with self.assertRaisesRegex(ValueError, "timezone-aware"):
             subscribers.find("reader@example.org")
+
+    def test_ordinary_account_update_does_not_revoke_a_session(self):
+        cookie = self.cookie()
+        self.row["updated_at"] = datetime(2026, 10, 2, tzinfo=timezone.utc)
+        self.assertIsNotNone(session._decode(cookie))
 
     def test_password_account_or_revision_changes_invalidate_existing_cookie(self):
         for field, value in (
             ("password_hash", "a-reset-password-hash"),
             ("account_id", "another-account"),
-            ("updated_at", datetime(2026, 10, 2, tzinfo=timezone.utc)),
+            ("sessions_revoked_at", datetime(2026, 10, 2, tzinfo=timezone.utc)),
         ):
             with self.subTest(field=field):
                 cookie = self.cookie()
@@ -210,26 +219,32 @@ class TestSessionLifecycle(unittest.TestCase):
         self.assertEqual(self.revocations, 0)
         self.assertIsNotNone(session._decode(cookie))
 
-    def test_login_signs_after_platform_link_revision_change(self):
-        def link(email):
-            self.assertEqual(email, self.row["email"])
-            self.row["updated_at"] += timedelta(microseconds=1)
+    def test_login_links_platform_account_before_issuing_session(self):
+        old_cookie = self.cookie()
+
+        def bind(_email):
+            self.row["sessions_revoked_at"] += timedelta(microseconds=1)
             return True
 
-        with mock.patch.object(subscribers, "link_platform_account", side_effect=link):
+        with mock.patch.object(subscribers, "link_platform_account", side_effect=bind) as link:
             response = Response()
             signed_in = session.sign_in("reader@example.org", "correct-horse", response)
+        link.assert_called_once_with("reader@example.org")
         self.assertIsNotNone(signed_in)
+        self.assertIsNone(session._decode(old_cookie))
         self.assertIsNotNone(session._decode(session._encode(signed_in)))
         self.assertIn("HttpOnly", response.headers["set-cookie"])
 
-    def test_password_reset_during_link_is_not_issued_a_new_revision(self):
-        def reset(_email):
+    def test_password_reset_before_issuance_is_not_issued_a_new_revision(self):
+        authenticate = subscribers.authenticate
+
+        def reset(email, password):
+            authenticated = authenticate(email, password)
             self.row["password_hash"] = "a-new-password-hash"
-            return True
+            return authenticated
 
         response = Response()
-        with mock.patch.object(subscribers, "link_platform_account", side_effect=reset):
+        with mock.patch.object(subscribers, "authenticate", side_effect=reset):
             signed_in = session.sign_in("reader@example.org", "correct-horse", response)
         self.assertIsNone(signed_in)
         self.assertNotIn("set-cookie", response.headers)
@@ -292,7 +307,7 @@ class TestWorkspaceCors(unittest.TestCase):
         from cedar_press import priorities
 
         name = "cedar_press._workspace_cors_fixture"
-        path = Path(session.__file__).with_name("app.py")
+        path = Path(__file__).resolve().parents[1] / "cedar_press" / "app.py"
         with mock.patch.dict(
             os.environ,
             {
@@ -329,7 +344,7 @@ class TestWorkspaceCors(unittest.TestCase):
                     )
                     self.assertEqual(reply.status_code, 400)
                     self.assertNotIn("access-control-allow-origin", reply.headers)
-                    with mock.patch.object(module, "sign_out") as revoke:
+                    with mock.patch("cedar_press.accounts.api.routes.sign_out") as revoke:
                         denied = client.post(
                             "/auth/logout",
                             headers={

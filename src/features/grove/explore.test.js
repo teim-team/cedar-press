@@ -239,7 +239,7 @@ test("the register publishes every individually owned firm's name (owner ruling 
   assert.equal(withheld.length, 0);
   assert.equal(json.withheld_names, 0);
   const firms = REGISTER.entities.filter((e) => e.type === INDIVIDUAL_CLASS);
-  assert.equal(firms.length, 45);
+  assert.equal(firms.length, 44);
   assert.ok(firms.every((e) => typeof e.name === "string" && e.name.trim()), "a firm of the class has no name");
   assert.equal(REGISTER.classes.length, 18);
   assert.equal(REGISTER.byUid.get("CE-00134-BX")?.name, "Cherokee Nation");
@@ -252,7 +252,7 @@ test("the register's firm names are the spine's, name for name", () => {
   const spine = readFileSync(`${REPO}data/spine/cedar_entity_names.csv`, "utf8").split("\n").slice(1)
     .map((line) => parseCsv(`a,b,c\n${line}`).rows[0]).filter(Boolean)
     .filter((r) => r.c === INDIVIDUAL_CLASS);
-  assert.equal(spine.length, 45);
+  assert.equal(spine.length, 44);
   for (const r of spine) {
     assert.equal(REGISTER.byUid.get(r.a)?.name, r.b, `${r.a} is not published under its spine name`);
     assert.equal(REGISTER.byUid.get(r.a)?.withheld, false);

@@ -12,8 +12,8 @@ from fastapi.testclient import TestClient
 
 from cedar_press import need_profiles as profiles
 from cedar_press import repository
+from cedar_press.accounts.services.sessions import Session
 from cedar_press.app import app, require_session
-from cedar_press.session import Session
 
 UID = "CE-00000-00"
 ENTERPRISE = "CEDAR-NEST-SYNTHETIC"

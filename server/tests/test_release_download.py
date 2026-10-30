@@ -16,9 +16,10 @@ from unittest.mock import patch
 
 from fastapi.testclient import TestClient
 
-from cedar_press import db, repository, subscribers
+from cedar_press import db, repository
+from cedar_press.accounts.services import subscribers
+from cedar_press.accounts.services.sessions import Session, current_session
 from cedar_press.app import app
-from cedar_press.session import Session, current_session
 
 
 class ReleaseDownloadTest(unittest.TestCase):
@@ -229,7 +230,8 @@ class ReleaseDownloadTest(unittest.TestCase):
                     self.client.get(resources_url, params={"release_id": self.rid}).status_code,
                     403,
                 )
-                db.execute("DELETE FROM cedar_press_subscribers WHERE email = %s", (pro_email,))
+                db.execute("UPDATE cedar_press_subscribers SET tier = NULL WHERE email = %s",
+                           (pro_email,))
                 self.assertEqual(
                     self.client.get(resources_url, params={"release_id": self.rid}).status_code,
                     401,
@@ -238,6 +240,9 @@ class ReleaseDownloadTest(unittest.TestCase):
 
             finally:
                 for address in (email, pro_email):
+                    db.execute("DELETE FROM cedar_press_access_grants WHERE user_id IN"
+                               " (SELECT id FROM cedar_press_subscribers WHERE email = %s)",
+                               (address,))
                     db.execute("DELETE FROM cedar_press_subscribers WHERE email = %s", (address,))
                 db.reset_for_tests()
 

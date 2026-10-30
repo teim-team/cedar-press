@@ -15,9 +15,9 @@
 import { readdir, readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 
-import { expect, test } from "@playwright/test";
+import { articlesDown, expect, releasesFeed, test } from "./fixtures.js";
 
-import { EMAIL, HASH, PASSWORD, PRESS_EMAIL } from "./demoAccount.js";
+import { EMAIL, PASSWORD, PRESS_EMAIL } from "./demoAccount.js";
 import { loadCodebook, parseCsv, rowSource, contractFor, exploreTables, labelFor, universalRows } from "../src/features/grove/explore.js";
 import { LAUNCH_COLLECTION, collectionCedarFacts } from "../src/features/grove/collection.js";
 import { coverageLabel } from "../src/features/grove/pressAccess.js";
@@ -38,7 +38,6 @@ async function currentSample(id) {
 }
 const FUNDING_SAMPLE = await currentSample("funding");
 const FR_SAMPLE = await currentSample("federal-register");
-const LOBBYING_SAMPLE = await currentSample("lobbying");
 const NEED_SAMPLE = await currentSample("need");
 const OWNED_SAMPLE = await currentSample("owned");
 const GIVING_SAMPLE = await currentSample("foundation-corporate-giving");
@@ -64,9 +63,9 @@ import {
   visibleAudiences,
 } from "../src/features/grove/pressJobs.js";
 
-// The throwaway account playwright.config.js provisions into the build it
-// starts. It is not a credential and it opens nothing that is deployed
-// anywhere; see tests/demoAccount.js.
+// The throwaway accounts playwright.config.js gives the API it starts. They are
+// not credentials and open nothing that is deployed anywhere; see
+// tests/demoAccount.js.
 // `labelFor` reads the codebook, which the site loads on demand
 // (src/features/grove/codebook.js); the assertions that call it need it too.
 test.beforeAll(async () => { await loadCodebook(); });
@@ -107,11 +106,13 @@ const SECTIONS = [
  * screenshot. Collected per test and asserted at the end, so the failure
  * names the console text rather than reporting a timeout somewhere else.
  */
-function watchConsole(page) {
+function watchConsole(page, { ignore = [] } = {}) {
   const errors = [];
   page.on("pageerror", (error) => errors.push(String(error)));
   page.on("console", (message) => {
-    if (message.type() === "error") errors.push(message.text());
+    // Signed out, the session probe answers 401 by design.
+    const url = message.location().url;
+    if (message.type() === "error" && !url.endsWith("/api/me") && !ignore.some((part) => url.includes(part))) errors.push(message.text());
   });
   return errors;
 }
@@ -135,11 +136,10 @@ async function settled(locator) {
 
 /** Sign in through the gate, the way a subscriber does. */
 async function signIn(page, account = ACCOUNT) {
-  await page.goto("/");
-  await page.getByRole("tab", { name: "Log in" }).click();
-  await page.getByLabel("Email address").fill(account.email);
+  await page.goto("/login");
+  await page.getByLabel("Work email").fill(account.email);
   await page.getByLabel("Password", { exact: true }).fill(account.password);
-  await page.locator(".cp-gate__form").getByRole("button", { name: "Log in" }).click();
+  await page.locator(".cp-gate__form").getByRole("button", { name: "Sign in" }).click();
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
     "Know what’s shaping Indian Country",
   );
@@ -249,6 +249,8 @@ test.describe("the gate", () => {
     await page.goto("/");
     const note = page.locator(".cp-greet");
     await expect(note).toHaveCount(0);
+    // A scroll before the page has grown tall enough is clamped to the top and fires nothing.
+    await page.waitForFunction(() => document.documentElement.scrollHeight > window.innerHeight * 2);
     await page.evaluate(() => window.scrollTo(0, window.innerHeight * 1.6));
     await expect(note).toBeVisible({ timeout: 5_000 });
     await expect(note).toContainText("Hi, I’m Cedar.");
@@ -267,6 +269,7 @@ test.describe("the gate", () => {
   test("clicking the greeting opens the door's Cedar", async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== "desktop", "the phone launcher waits out the hero");
     await page.goto("/");
+    await page.waitForFunction(() => document.documentElement.scrollHeight > window.innerHeight * 2);
     await page.evaluate(() => window.scrollTo(0, window.innerHeight * 1.6));
     const note = page.locator(".cp-greet");
     await expect(note).toBeVisible({ timeout: 5_000 });
@@ -447,6 +450,8 @@ test.describe("the gate", () => {
     ]) {
       await page.goto(path);
       await page.locator(".cp-mast").waitFor();
+      // The masthead renders before the session answers; a route that never shows the menu still gets measured without it.
+      await page.locator(".cp-acct").waitFor({ timeout: 3000 }).catch(() => {});
       await page.evaluate(() => document.fonts.ready);
       const signature = await page.evaluate(() => {
         const mast = document.querySelector(".cp-mast");
@@ -676,14 +681,15 @@ test.describe("the gate", () => {
     // back to the launcher a frame after the browser focused what was clicked,
     // so dismissing the sheet ate the click that dismissed it and the control
     // had to be clicked twice. The sheet is not modal; the click belongs to
-    // the control. `#cp-tab-signin` sits in the header, which the corner card
+    // the control. The Early access tab sits in the header, which the corner card
     // never covers.
     //
     // That premise holds at a desktop width and no longer holds on a phone,
     // where the panel is now the screen and there is no "outside" to click.
     // Both contracts are checked, because both are real: the phone's way out
     // is the close button, which is why it is 44px.
-    const behind = page.locator("#cp-tab-signin");
+    // The phone hides the Early access tab (the hero carries it), so Sign in is what sits behind the panel there.
+    const behind = page.locator(testInfo.project.name === "phone" ? "#cp-tab-signin" : ".cp-door__tab--plans");
     await launcher.click();
     await expect(panel).toBeVisible();
     await settled(panel);
@@ -734,12 +740,13 @@ test.describe("the gate", () => {
 
   test("a wrong password is refused and says so", async ({ page }) => {
     await page.goto("/");
-    await page.getByRole("tab", { name: "Log in" }).click();
-    await page.getByLabel("Email address").fill(ACCOUNT.email);
+    await page.locator("#cp-tab-signin").click();
+    await expect(page).toHaveURL(/\/login$/);
+    await page.getByLabel("Work email").fill(ACCOUNT.email);
     await page.getByLabel("Password", { exact: true }).fill("not-the-password");
-    await page.locator(".cp-gate__form").getByRole("button", { name: "Log in" }).click();
+    await page.locator(".cp-gate__form").getByRole("button", { name: "Sign in" }).click();
     await expect(page.getByRole("alert")).toBeVisible();
-    await expect(page.locator(".cp-split")).toBeVisible();
+    await expect(page).toHaveURL(/\/login$/);
   });
 
   // This asserted the opposite until 2026-09-02: that the panel explained it
@@ -757,14 +764,15 @@ test.describe("the gate", () => {
   // sign-in that actually works.
   //
   // What the copy said is still true and still written down where it is
-  // load-bearing: pressDemoGate.js's docstring and SECURITY.md.
-  test("the sign-in panel offers a working form and no build meta-copy", async ({ page }) => {
+  // load-bearing: SECURITY.md.
+  test("the login page offers a working form and no build meta-copy", async ({ page }) => {
     await page.goto("/");
-    await page.getByRole("tab", { name: "Log in" }).click();
-    const panel = page.locator("#cp-panel-signin");
-    await expect(panel.getByLabel("Email address")).toBeVisible();
+    await page.locator("#cp-tab-signin").click();
+    await expect(page).toHaveURL(/\/login$/);
+    const panel = page.locator(".cp-login__card");
+    await expect(panel.getByLabel("Work email")).toBeVisible();
     await expect(panel.getByLabel("Password", { exact: true })).toBeVisible();
-    await expect(panel.getByRole("button", { name: "Log in" })).toBeVisible();
+    await expect(panel.getByRole("button", { name: "Sign in" })).toBeVisible();
     for (const gone of [/preview build/i, /not access control/i, /your own browser/i]) {
       await expect(panel).not.toContainText(gone);
     }
@@ -781,7 +789,9 @@ test.describe("the gate", () => {
 
 test.describe("the subscriber's path", () => {
   test("sign in, read the overview, sign out", async ({ page }) => {
-    const errors = watchConsole(page);
+    const errors = watchConsole(page, { ignore: ["/api/press/articles"] });
+    await articlesDown(page);
+    await releasesFeed(page);
     await signIn(page);
 
     // The offline briefing keeps release navigation and account controls,
@@ -1652,6 +1662,7 @@ test.describe("the use cases drive the viewer", () => {
   test("the plan split is on the chips and in the line under them", async ({ page }) => {
     await page.goto("/");
     const all = page.locator(".cp-aud__col");
+    await all.first().waitFor({ state: "attached" });
     const shelves = await all.evaluateAll((els) => els.map((el) => [el.dataset.shelf, Boolean(el.querySelector(".cp-plus"))]));
     expect(shelves.length).toBeGreaterThan(0);
     for (const [shelf, plus] of shelves) expect(plus, `a ${shelf} chip`).toBe(shelf === "pro");
@@ -1927,13 +1938,10 @@ test.describe("the door's use cases", () => {
     await expect(line.getByRole("link", { name: "Lumecon" })).toHaveCSS("color", "rgb(10, 127, 116)");
   });
 
-  // THE PREVIEW LOGIN. The named reviewer at Indian Country Media signs in to
-  // the standalone preview through this door's "Log in" tab, with an account
-  // the deploy provisions from a repository secret (pressDemoGate.test.js
-  // holds that wiring). This is the same path with the suite's own Cedar
-  // Press account, after the band was added above the strip: the door still
-  // opens the form and the form still lets the reviewer in.
-  test("the preview login still signs a Cedar Press reader in through the door", async ({ page }) => {
+  // A Cedar Press reader signs in through the door's "Sign in" link and the
+  // login page, with the suite's own account, after the band was added above
+  // the strip: the link still goes to the form and the form still lets them in.
+  test("a Cedar Press reader still signs in through the door", async ({ page }) => {
     const errors = watchConsole(page);
     await page.goto("/");
     await expect(band(page)).toHaveCount(1);
@@ -2014,13 +2022,14 @@ test.describe("the use-case card", () => {
 
 test.describe("the product copy reads the jobs layer", () => {
   test("the signed-in homepage, its briefing, and the entity page's actions", async ({ page }) => {
-    const errors = watchConsole(page);
+    const errors = watchConsole(page, { ignore: ["/need-evidence"] });
+    await releasesFeed(page);
     await signIn(page);
     await expect(page.locator(".cp-hero__deck")).toHaveText(
       "Compare peers, follow funding and business activity, spot changes worth investigating and trace the evidence behind them.",
     );
     const caps = await page.locator(".cp-brief__cap").allInnerTexts();
-    expect(caps.map((c) => c.toLowerCase())).toEqual(expect.arrayContaining(["updates", "explore the records"]));
+    expect(caps.map((c) => c.toLowerCase())).toEqual(expect.arrayContaining(["available now", "explore the records"]));
     expect(caps.join(" ")).not.toMatch(/worth watching|open today|insight|opportunit/i);
 
     await page.goto("/data?c=funding");
@@ -2124,22 +2133,9 @@ test.describe("the record page", () => {
     expect(errors).toEqual([]);
   });
 
-  test("a served table whose bytes are not the published customer table is refused, not shown", async ({ page }) => {
-    // Until 2026-10-04 this edited one row's source to test the no-link line.
-    // Every reader now checks a fetched table against its published digest
-    // (customerTables.js, sampleFetch.js), so edited bytes are a stale cache or
-    // a substituted file, and the page must refuse them rather than render them.
-    const first = LOBBYING_SAMPLE.rows[0];
-    const quote = (value) => '"' + String(value ?? "").replaceAll('"', '""') + '"';
-    const rows = LOBBYING_SAMPLE.rows.map((row, index) => index ? row : { ...row, source_url: "" });
-    const body = [LOBBYING_SAMPLE.columns, ...rows.map((row) => LOBBYING_SAMPLE.columns.map((column) => row[column]))]
-      .map((row) => row.map(quote).join(",")).join("\n") + "\n";
-    await page.route("**/data/cedar/downloads/lobbying.csv", (route) => route.fulfill({ status: 200, contentType: "text/csv", body }));
-    await signIn(page);
-    await page.goto(recordHref({ key: "lobbying/lobbying", recordId: first[contractFor("lobbying/lobbying").record_id] }));
-    await expect(page.getByText("The published sample could not be loaded.")).toBeVisible();
-    await expect(page.getByTestId("record-no-link")).toHaveCount(0);
-  });
+  // A served table whose bytes differ from the published digest is refused in
+  // sampleFetch.test.js. Signed in, the viewer reads the API's own table and
+  // leaves the digest to the service, so there is no browser path to test here.
 
   test("a record that is not in the preview says so rather than showing a neighbour", async ({ page }) => {
     await signIn(page);
@@ -2167,10 +2163,7 @@ test.describe("the record page", () => {
 });
 
 test.describe("Shape the research", () => {
-  test("the priorities page lists both kinds, says the counting needs the service, and the profile carries the card", async ({ page }) => {
-    // This build has no service, so no point is counted and no point can be
-    // placed; the page and the profile say exactly that rather than showing
-    // a zero that means "unknown".
+  test("the priorities page lists both kinds, and the profile carries the influence card", async ({ page }) => {
     const errors = watchConsole(page);
     await signIn(page);
     await page.goto("/priorities");
@@ -2189,29 +2182,20 @@ test.describe("Shape the research", () => {
     expect(small).toBeLessThan(lead);
     await expect(page.getByTestId("priorities-research_question").getByTestId("priority").first()).toBeVisible();
     await expect(page.getByTestId("priorities-dataset").getByTestId("priority").first()).toBeVisible();
-    // The influence card carries the "no service" sentence; the note under it
-    // says what the list is, given that. It used to repeat "not connected" a
-    // second time in the same column.
-    await expect(page.getByTestId("influence")).toContainText("not connected");
-    await expect(page.getByTestId("priorities-static")).toContainText("Support cannot be placed here");
-    // Eleven cards reading "0 points · 0 subscribers" is a product nobody
-    // uses; with no service those zeros are not measurements, so the row says
-    // who does the counting instead.
-    await expect(page.getByTestId("priority-total").first()).toContainText("Support is counted by the Cedar Press service");
+    await expect(page.getByTestId("influence")).toContainText("points available");
     // Writing anything is the point of the page, so the box leads it and the
     // use case is a free field rather than a menu of seven guesses.
     await expect(page.getByRole("textbox", { name: "What you would use it for" })).toBeVisible();
     // The request form reads the words against the list before sending.
     await page.getByLabel("Tell Cedar what you need").fill("I wish you had a dataset showing which tribal enterprises own which subsidiaries");
     await expect(page.getByTestId("request-match")).toContainText("Tribal enterprise ownership and subsidiary relationships");
-    await expect(page.getByRole("button", { name: "Submit my specific use case" })).toBeDisabled();
+    await expect(page.getByRole("button", { name: "Submit my specific use case" })).toBeEnabled();
     // The profile's card and the homepage block.
     await page.goto("/settings");
     await expect(page.getByTestId("influence")).toContainText("Your research influence");
-    await expect(page.getByTestId("influence")).toContainText("not connected");
+    await expect(page.getByTestId("influence")).toContainText("points available");
     await page.goto("/");
     await expect(page.getByTestId("priorities-block")).toContainText("Subscriber research priorities");
-    await expect(page.getByTestId("priorities-block")).toContainText("not yet counted");
     expect(errors).toEqual([]);
   });
 });
@@ -2248,12 +2232,10 @@ test.describe("Ask Cedar", () => {
       expect(box.height).toBeGreaterThanOrEqual(viewport.height - 1);
     }
 
-    // This build is standalone: nothing reaches the collections. The
-    // composer is disabled, and so are the starters, which used to render
-    // scoped chips whose every tap became a NOT_CONNECTED error turn.
-    await expect(panel.locator(".cp-dc__input")).toBeDisabled();
-    await expect(panel.locator(".cp-dc__chip")).toHaveCount(0);
-    await expect(panel.locator(".cp-dc__bubble").first()).toContainText("can't reach the collections");
+    // Signed in against the API, the composer and the starters are live.
+    await expect(panel.locator(".cp-dc__input")).toBeEnabled();
+    await expect(panel.locator(".cp-dc__chip").first()).toBeVisible();
+    await expect(panel.locator(".cp-dc__bubble").first()).toContainText("Ask me about any of the collections.");
 
     if (testInfo.project.name === "phone") {
       // The launcher is hidden while a full-screen dialog is up — it would
@@ -2491,15 +2473,14 @@ test.describe("sponsorship", () => {
 });
 
 test.describe("the bundle", () => {
-  // The standalone gate is a demonstration gate and everything it reads is
-  // public. That is survivable only while what it reads is a DIGEST. Until
-  // 2026-09, this repository committed two preview accounts with their
-  // passwords in plaintext and every build shipped them — grep the deployed
-  // JavaScript and there they were.
+  // Until 2026-09 this repository committed two preview accounts with their
+  // passwords in plaintext and every build shipped them: grep the deployed
+  // JavaScript and there they were. The client has no accounts now, and the
+  // fixture's password must not reach a build.
   //
   // Read off disk rather than over HTTP so the check covers every emitted
   // chunk, including the lazily loaded ones no page in this suite opens.
-  test("carries the digest and not the password", async () => {
+  test("ships no password", async () => {
     const dir = fileURLToPath(new URL("../dist-site/", import.meta.url));
     const assets = await readdir(dir, { recursive: true, withFileTypes: true });
     const text = assets.filter(
@@ -2507,15 +2488,10 @@ test.describe("the bundle", () => {
     );
     expect(text.length, "nothing was built to check").toBeGreaterThan(0);
 
-    let digestSeen = false;
     for (const entry of text) {
       const body = await readFile(`${entry.parentPath}/${entry.name}`, "utf8");
       expect(body, `${entry.name} ships the plaintext password`).not.toContain(PASSWORD);
-      if (body.includes(HASH)) digestSeen = true;
     }
-    // Without this the test would pass just as happily against a build with
-    // no account configured at all, which proves nothing about the digest.
-    expect(digestSeen, "the configured digest is not in the build").toBe(true);
   });
 
   // Foundation & Corporate Giving and PLOT are published and live (owner,
@@ -3013,7 +2989,7 @@ test.describe("the first screen", () => {
   });
 
   test("an entity profile opens on its records", async ({ page }) => {
-    const errors = watchConsole(page);
+    const errors = watchConsole(page, { ignore: ["/need-evidence"] });
     await signIn(page);
     await page.goto(`/entity/${CURRENT_ENTITY_UID}`);
     await page.locator(".cp-ent__row").first().waitFor();
@@ -3044,12 +3020,13 @@ test.describe("the first screen", () => {
 });
 
 test.describe("the loop between the records and the journalism", () => {
-  // This suite deliberately builds without an API. Subscriber bodies and
-  // protected research links must stay unavailable in that mode. Successful
+  // With the article service down, subscriber bodies and protected research
+  // links must stay unavailable. Successful
   // delivery, authorization, figure shapes and PDF content are covered by
   // server/tests/test_protected_articles.py and the article module tests.
   test("offline collection profiles do not revive static demonstration articles", async ({ page }) => {
-    const errors = watchConsole(page);
+    const errors = watchConsole(page, { ignore: ["/api/press/articles"] });
+    await articlesDown(page);
     await signIn(page);
     await page.goto("/data?c=deals&about=1");
     await expect(page.locator(".cp-ab")).toBeVisible();
@@ -3060,7 +3037,8 @@ test.describe("the loop between the records and the journalism", () => {
   });
 
   test("Research Briefs preserves sign-in and explains that the article service is unavailable", async ({ page }) => {
-    const errors = watchConsole(page);
+    const errors = watchConsole(page, { ignore: ["/api/press/articles"] });
+    await articlesDown(page);
     await signIn(page);
     await page.goto("/articles");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Research Briefs.");
@@ -3071,7 +3049,8 @@ test.describe("the loop between the records and the journalism", () => {
   });
 
   test("an offline article never falls back to bundled bodies, highlights or figures", async ({ page }) => {
-    const errors = watchConsole(page);
+    const errors = watchConsole(page, { ignore: ["/api/press/articles"] });
+    await articlesDown(page);
     await signIn(page);
     for (const id of ["brief-owned", "two-tribes-one-building", "brief-deals"]) {
       await page.goto("/articles/" + id);
@@ -3083,7 +3062,8 @@ test.describe("the loop between the records and the journalism", () => {
   });
 
   test("an unavailable article cannot download a PDF and still lets the reader sign out", async ({ page }) => {
-    const errors = watchConsole(page);
+    const errors = watchConsole(page, { ignore: ["/api/press/articles"] });
+    await articlesDown(page);
     await signIn(page);
     await page.goto("/articles/brief-owned");
     await expect(page.getByRole("status")).toContainText("Articles are unavailable on this connection.");
@@ -3101,7 +3081,7 @@ test.describe("the loop between the records and the journalism", () => {
   // BOTH the collection and the entity, so it lands narrowed to what the
   // heading was about rather than on the collection's first page.
   test("an entity's collection heading opens the table already narrowed to it", async ({ page }) => {
-    const errors = watchConsole(page);
+    const errors = watchConsole(page, { ignore: ["/need-evidence"] });
     await signIn(page);
     await page.goto(`/entity/${CURRENT_ENTITY_UID}`);
     const heading = page.locator(".cp-ent__glink").first();
@@ -3210,6 +3190,7 @@ test.describe("Settings: your work", () => {
 
   test("offers the landing audiences, in order, as the landing names them", async ({ page }) => {
     await page.goto("/");
+    await page.locator(".cp-aud__tab").first().waitFor({ state: "attached" });
     const landing = await page.locator(".cp-aud__tab").allTextContents();
     expect(landing).toEqual(OFFERED);
     await signIn(page);
@@ -3222,14 +3203,22 @@ test.describe("Settings: your work", () => {
   for (const [id, level] of [["federal", "federal"], ["state_local", "state or local"]]) {
     test(`keeps a stored ${id} answer under the government audience, unchanged`, async ({ page }) => {
       await signIn(page);
-      await page.evaluate((value) => localStorage.setItem("cedar-press-work", value), id);
+      // Connected, the answer lives with the service, not in the browser.
+      const writes = [];
+      await page.route("**/api/press/profile", (route) => {
+        if (route.request().method() !== "GET") {
+          writes.push(route.request().method());
+          return route.continue();
+        }
+        return route.fulfill({ json: { work: id } });
+      });
       await page.goto("/settings");
       const select = page.locator("#cp-work");
       await expect(select).toHaveValue(id);
       const at = OFFERED.indexOf("Government and public agency officials");
       const expected = ["Rather not say", ...OFFERED.slice(0, at + 1), `Government and public agency officials (${level})`, ...OFFERED.slice(at + 1)];
       await expect(select.locator("option")).toHaveText(expected);
-      expect(await page.evaluate(() => localStorage.getItem("cedar-press-work"))).toBe(id);
+      expect(writes, "opening Settings does not rewrite the stored answer").toEqual([]);
     });
   }
 });

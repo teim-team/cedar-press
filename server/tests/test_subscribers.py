@@ -17,10 +17,13 @@ import pathlib
 import sys
 import unittest
 from pathlib import Path
+from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from cedar_press import codes, db, session, subscribers  # noqa: E402
+from cedar_press import codes, db
+from cedar_press.accounts.services import sessions as session
+from cedar_press.accounts.services import subscribers
 
 PG = os.environ.get("CEDAR_PRESS_TEST_DATABASE_URL", "").strip()
 
@@ -30,10 +33,14 @@ ACCOUNTS = json.dumps(
         "pro@example.org": {"password": "correct-horse", "tier": "press_pro"},
         # Two seats, one subscription, declared.
         "one@bank.example": {
-            "password": "correct-horse", "tier": "press_pro", "account": "acct-bank"
+            "password": "correct-horse",
+            "tier": "press_pro",
+            "account": "acct-bank",
         },
         "two@bank.example": {
-            "password": "correct-horse", "tier": "press_pro", "account": "acct-bank"
+            "password": "correct-horse",
+            "tier": "press_pro",
+            "account": "acct-bank",
         },
     }
 )
@@ -62,7 +69,14 @@ class _Backend:
             os.environ.pop("CEDAR_PRESS_ACCOUNTS", None)
             os.environ.pop("CEDAR_PRESS_CODES", None)
             db.migrate()
-            db.execute("TRUNCATE cedar_press_subscribers, cedar_press_codes")
+            db.execute(
+                "TRUNCATE cedar_press_subscribers, cedar_press_codes, cedar_press_password_resets,"
+                " cedar_press_login_identities, cedar_press_access_grants,"
+                " cedar_press_account_setup_links, cedar_press_account_email_deliveries,"
+                " cedar_press_checkout_attempts, cedar_press_checkouts,"
+                " cedar_press_refunds, cedar_press_payments,"
+                " cedar_press_invoices, cedar_press_subscriptions"
+            )
             for email, tier in (("reader@example.org", "press"), ("pro@example.org", "press_pro")):
                 subscribers.create(email, "correct-horse", tier)
             for seat in ("one@bank.example", "two@bank.example"):
@@ -111,9 +125,7 @@ class _Backend:
             subscribers.account_id_for("two@bank.example"),
         )
         # And an address that declares nothing is its own subscription.
-        self.assertEqual(
-            subscribers.account_id_for("reader@example.org"), "reader@example.org"
-        )
+        self.assertEqual(subscribers.account_id_for("reader@example.org"), "reader@example.org")
 
     def test_a_code_creates_the_subscriber_it_names(self) -> None:
         made = subscribers.redeem("TBN4-9K2M-X7QD", "a-new-password")
@@ -138,6 +150,33 @@ class _Backend:
     def test_an_unknown_code_is_refused(self) -> None:
         self.assertIsNone(subscribers.redeem("TBN4-NOPE-NOPE", "whatever"))
         self.assertIsNone(subscribers.redeem("", "whatever"))
+
+    def test_a_reset_token_sets_the_password_once(self) -> None:
+        self.assertIsNone(subscribers.issue_reset("stranger@example.org"))
+        token = subscribers.issue_reset("pro@example.org")
+        made = subscribers.redeem_reset(token, "a-reset-password")
+        self.assertEqual((made.email, made.tier), ("pro@example.org", "press_pro"))
+        self.assertIsNotNone(subscribers.authenticate("pro@example.org", "a-reset-password"))
+        self.assertIsNone(subscribers.authenticate("pro@example.org", "correct-horse"))
+        self.assertIsNone(subscribers.redeem_reset(token, "again-a-password"))
+        self.assertIsNone(subscribers.redeem_reset("", "again-a-password"))
+
+    def test_a_reset_keeps_the_seat_on_its_subscription(self) -> None:
+        subscribers.redeem_reset(subscribers.issue_reset("one@bank.example"), "a-reset-password")
+        self.assertEqual(subscribers.account_id_for("one@bank.example"), "acct-bank")
+
+    def test_a_new_reset_token_replaces_the_older_one(self) -> None:
+        older = subscribers.issue_reset("reader@example.org")
+        newer = subscribers.issue_reset("Reader@Example.org")
+        self.assertIsNone(subscribers.redeem_reset(older, "another-password"))
+        self.assertIsNotNone(subscribers.redeem_reset(newer, "a-reset-password"))
+        self.assertIsNotNone(subscribers.authenticate("reader@example.org", "a-reset-password"))
+
+    def test_an_expired_reset_token_is_refused(self) -> None:
+        with mock.patch.object(subscribers, "RESET_LIFETIME", -subscribers.RESET_LIFETIME):
+            token = subscribers.issue_reset("reader@example.org")
+        self.assertIsNone(subscribers.redeem_reset(token, "a-reset-password"))
+        self.assertIsNotNone(subscribers.authenticate("reader@example.org", "correct-horse"))
 
 
 class TestEnvironmentBackend(_Backend, unittest.TestCase):
@@ -201,8 +240,10 @@ class TestPostgresBackend(_Backend, unittest.TestCase):
         )
         self.assertEqual(str(row["user_id"]), str(user["id"]))
 
-    def test_the_binding_happens_by_itself_at_sign_in(self) -> None:
-        """`link_platform_account` is what the login route calls, in one statement."""
+    def test_platform_binding_happens_at_sign_in(self) -> None:
+        """Sign-in binds an existing platform account before issuing the cookie."""
+        from fastapi import Response
+
         # `users` is teim-app's, so this makes and unmakes exactly its own row
         # rather than truncating a table it does not own.
         db.execute("DELETE FROM users WHERE email = %s", ("pro@example.org",))
@@ -212,7 +253,11 @@ class TestPostgresBackend(_Backend, unittest.TestCase):
             ("pro@example.org",),
         )
         # The platform account appeared second; the next sign-in finds it.
-        self.assertTrue(subscribers.link_platform_account("PRO@Example.org "))
+        old_cookie = session._encode(session.Session("pro@example.org", "press_pro"))
+        signed_in = session.sign_in("PRO@Example.org ", "correct-horse", Response())
+        self.assertIsNotNone(signed_in)
+        self.assertIsNone(session._decode(old_cookie))
+        self.assertIsNotNone(session._decode(session._encode(signed_in)))
         row = db.one(
             "SELECT user_id FROM cedar_press_subscribers WHERE email = %s",
             ("pro@example.org",),
@@ -318,7 +363,9 @@ class TestExpiryIsFailClosed(unittest.TestCase):
             {
                 "TBN4-BAD0-DATE": {"email": "typo@example.org", "tier": "press", "expires": "soon"},
                 "TBN4-GOOD-DATE": {
-                    "email": "fine@example.org", "tier": "press", "expires": "2999-01-01"
+                    "email": "fine@example.org",
+                    "tier": "press",
+                    "expires": "2999-01-01",
                 },
             }
         )

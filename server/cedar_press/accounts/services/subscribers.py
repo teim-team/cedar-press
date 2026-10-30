@@ -22,7 +22,7 @@ when — if — a platform account appears. `bind_user` is that moment.
 
 WHY THE PASSWORD RULE IS NOT IN HERE.
 This module answers "is this address a subscriber, and on which tier".
-`session.py` still owns the cookie, the signature and the comparison, so
+`sessions.py` still owns the cookie, the signature and the comparison, so
 there is one place that decides whether somebody is signed in. What changed
 is where it looks the subscriber up.
 """
@@ -35,16 +35,18 @@ import hmac
 import json
 import os
 import re
+import secrets
 import threading
 from dataclasses import dataclass
 
 from cedar_press import db
+from cedar_press.accounts.models import Subscriber as Subscriber
 
 TIERS = ("press", "press_pro")
 
 
 class AlreadySubscribed(Exception):
-    """This address already holds a subscription, so a code cannot make one.
+    """This address already holds an account, so a code cannot create one.
 
     Raised rather than returned, because it is a different answer from "that
     code is not usable" and the reader is owed a different sentence. Letting
@@ -53,13 +55,6 @@ class AlreadySubscribed(Exception):
     """
 
 
-@dataclass(frozen=True)
-class Subscriber:
-    email: str
-    tier: str
-    account_id: str
-    password_hash: str | None = None
-    session_revision: str = ""
 
 
 @dataclass(frozen=True)
@@ -173,6 +168,8 @@ _activated: dict[str, tuple[str, str]] = {}
 _spent: set[str] = set()
 _session_revisions: dict[str, int] = {}
 _session_lock = threading.Lock()
+#: Email -> (reset token hash, expires at): one live link per address.
+_resets: dict[str, tuple[str, dt.datetime]] = {}
 
 
 def _env_accounts() -> dict[str, tuple[str, str]]:
@@ -221,6 +218,7 @@ def _env_codes() -> dict[str, dict[str, object]]:
 def forget_activated_for_tests() -> None:
     _activated.clear()
     _spent.clear()
+    _resets.clear()
     with _session_lock:
         _session_revisions.clear()
 
@@ -242,8 +240,10 @@ def find(email: str) -> Subscriber | None:
         return None
     if db.configured():
         row = db.one(
-            "SELECT email, tier, account_id, password_hash, updated_at"
-            " FROM cedar_press_subscribers WHERE lower(email) = %s",
+            "SELECT s.email, COALESCE(access.tier, 'free') AS tier, s.account_id,"
+            " s.password_hash, s.sessions_revoked_at FROM cedar_press_subscribers s"
+            " JOIN cedar_press_current_access access ON access.user_id=s.id"
+            " WHERE lower(s.email) = %s",
             (address,),
         )
         if not row:
@@ -253,7 +253,7 @@ def find(email: str) -> Subscriber | None:
             row["tier"],
             row["account_id"],
             row["password_hash"],
-            _session_revision(row["updated_at"]),
+            _session_revision(row["sessions_revoked_at"]),
         )
     if address in _activated:
         password, tier = _activated[address]
@@ -275,8 +275,8 @@ def revoke_sessions(email: str) -> bool:
     if db.configured():
         return (
             db.execute(
-                "UPDATE cedar_press_subscribers SET updated_at ="
-                " GREATEST(clock_timestamp(), updated_at + interval '1 microsecond')"
+                "UPDATE cedar_press_subscribers SET sessions_revoked_at ="
+                " GREATEST(clock_timestamp(), sessions_revoked_at + interval '1 microsecond')"
                 " WHERE lower(email) = %s",
                 (address,),
             )
@@ -315,7 +315,7 @@ def authenticate(email: str, password: str) -> Subscriber | None:
 
 
 def create(email: str, password: str, tier: str) -> Subscriber:
-    """Add a subscriber. Used by activation, which has already spent a code."""
+    """Add a subscriber, or replace an existing one's password and tier."""
     address = (email or "").strip().lower()
     if tier not in TIERS:
         raise ValueError(f"tier must be one of {TIERS}")
@@ -333,6 +333,20 @@ def create(email: str, password: str, tier: str) -> Subscriber:
         with _session_lock:
             _session_revisions[address] = _session_revisions.get(address, 0) + 1
     return Subscriber(address, tier, account)
+
+
+def change_password(email: str, password: str) -> Subscriber | None:
+    """Change credentials without copying a resolved billing tier into legacy access."""
+    address = email.strip().lower()
+    if db.configured():
+        changed = db.execute(
+            "UPDATE cedar_press_subscribers SET password_hash=%s,updated_at=now()"
+            " WHERE lower(email)=%s",
+            (hash_password(password), address),
+        )
+        return find(address) if changed else None
+    found = find(address)
+    return create(address, password, found.tier) if found else None
 
 
 def exists(email: str) -> bool:
@@ -361,16 +375,8 @@ def bind_user(email: str, user_id: str) -> bool:
 def link_platform_account(email: str) -> bool:
     """Tie this subscription to the teim-app account at the same address.
 
-    Called on sign-in and on activation, because those are the two moments
-    the service is certain who is at the keyboard, and because the order the
-    two accounts appear in is not ours to choose: a Tribal Business News
-    subscriber may activate a press code months before they ever open the
-    platform, or the other way round. Binding on every sign-in means whichever
-    comes second still finds the first.
-
-    One statement, so a sign-in costs one no-op UPDATE rather than a lookup
-    and a write: `IS DISTINCT FROM` makes a subscription that is already bound
-    — the overwhelming majority — touch nothing.
+    Called after password authentication during sign-in and activation. It is
+    a no-op when the optional teim-app users table or matching account is absent.
 
     Returns whether a binding was made. False is the ordinary answer: no
     database, no `users` table (Cedar Press pointed at a database of its own),
@@ -397,6 +403,93 @@ def link_platform_account(email: str) -> bool:
         )
         > 0
     )
+
+
+# ── password resets ─────────────────────────────────────────────────────────
+
+RESET_LIFETIME = dt.timedelta(hours=1)
+
+
+def _reset_hash(token: str) -> str:
+    return hashlib.sha256(token.encode("utf-8")).hexdigest()
+
+
+def legacy_setup_email(token_digest: str):
+    """Recognize outstanding setup links issued before migration 009."""
+    return db.one(
+        """SELECT s.email FROM cedar_press_password_resets r
+        JOIN cedar_press_subscribers s ON s.email=r.email
+        JOIN cedar_press_checkouts c ON c.user_id=s.id
+        WHERE r.token_hash=%s AND r.used_at IS NULL AND r.expires_at>now()
+        AND s.password_hash IS NULL AND c.status='complete'""",
+        (token_digest,),
+    )
+
+
+def issue_reset(email: str) -> str | None:
+    """A single-use reset token for this subscriber, or None if there is none.
+
+    Only the token's hash is stored, so reading the table resets nobody. A new
+    token replaces any outstanding one, so an older email in the inbox stops
+    working.
+    """
+    found = find(email)
+    if found is None:
+        return None
+    address = found.email.lower()
+    token = secrets.token_urlsafe(32)
+    expires = dt.datetime.now(dt.timezone.utc) + RESET_LIFETIME
+    if db.configured():
+        db.execute(
+            "INSERT INTO cedar_press_password_resets (token_hash, email, expires_at)"
+            " VALUES (%s, %s, %s)"
+            " ON CONFLICT (email) WHERE used_at IS NULL DO UPDATE SET"
+            " token_hash = EXCLUDED.token_hash, expires_at = EXCLUDED.expires_at,"
+            " created_at = now()",
+            (_reset_hash(token), address, expires),
+        )
+    else:
+        _resets[address] = (_reset_hash(token), expires)
+    return token
+
+
+def redeem_reset(
+    token: str, password: str, *, account_setup=False, display_name=None
+) -> Subscriber | None:
+    """Set a new password from a reset token.
+
+    None when the token is unknown, expired or already used.
+    """
+    key = _reset_hash(token or "")
+    if db.configured():
+        with db.pool().connection() as conn, conn.cursor() as cur:
+            cur.execute(
+                "UPDATE cedar_press_password_resets SET used_at=now()"
+                " WHERE token_hash=%s AND used_at IS NULL AND expires_at>now()"
+                " AND (NOT %s OR EXISTS (SELECT 1 FROM cedar_press_subscribers s"
+                " JOIN cedar_press_checkouts g ON g.user_id=s.id"
+                " WHERE s.email=cedar_press_password_resets.email AND s.password_hash IS NULL"
+                " AND g.status='complete')) RETURNING email",
+                (key, account_setup),
+            )
+            row = cur.fetchone()
+            if not row:
+                return None
+            email = row["email"]
+            cur.execute(
+                "UPDATE cedar_press_subscribers SET password_hash=%s,updated_at=now(),"
+                " email_verified_at=COALESCE(email_verified_at,now()),"
+                " display_name=COALESCE(%s,display_name) WHERE email=%s",
+                (hash_password(password), display_name, email),
+            )
+        return find(email)
+    else:
+        now = dt.datetime.now(dt.timezone.utc)
+        email = next((e for e, (h, x) in _resets.items() if h == key and x > now), None)
+        if email:
+            del _resets[email]
+    found = email and find(email)
+    return change_password(found.email, password) if found else None
 
 
 # ── access codes ────────────────────────────────────────────────────────────
