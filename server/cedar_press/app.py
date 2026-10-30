@@ -867,19 +867,26 @@ def _ask_which_collection(thread_id: str | None) -> dict[str, object]:
     }
 
 
-def _cedar_counts_these_records(question: Question, tier: str) -> bool:
-    """Whether Cedar, not the profile, should answer this figures question.
+def _cedar_reads_this(question: Question, tier: str) -> bool:
+    """Whether Cedar, not the profile, should answer this figures or change question.
 
-    The profile states release-level figures. A count or total for one
-    entity or one year is read from the records, and Cedar can read them when
-    it is wired and this plan's allow-list carries the page's collection.
+    The profile states release-level figures and release notes. A total for
+    one entity, a count for one year, or how one nation's funding moved is
+    read from the records. When Cedar is wired and this plan's allow-list
+    carries the page's collection, a figures or change question goes to Cedar
+    unless it is plainly about the collection or its release as a whole. An
+    ambiguous question goes to Cedar too, because the profile can only answer
+    it from the release.
     """
     collection_id = question.collectionId
     if not collection_id or not cedar_service.available():
         return False
-    if not collection_profiles.asks_for_figures(question.question):
+    asked = question.question
+    if not (
+        collection_profiles.asks_for_figures(asked) or collection_profiles.asks_about_changes(asked)
+    ):
         return False
-    if not collection_profiles.asks_about_specific_records(question.question, collection_id):
+    if collection_profiles.about_the_whole_collection(asked, collection_id):
         return False
     allowed, _pins = cedar_service.retrieval_allowlist(tier)
     return collection_id in allowed
@@ -900,8 +907,9 @@ def ask_cedar(question: Question, session: Session = Depends(require_session)) -
     for a sold collection this plan cannot open returns ``_not_included_answer``
     and does not hop. Any other question hops. Two questions skip the profile:
     one that names another collection (the profile answers only for its own
-    page), and a figures question about one entity or one year on a collection
-    Cedar can read (``_cedar_counts_these_records``). A hidden control in the browser,
+    page), and a figures or change question that is not plainly about the
+    collection or its release, on a collection Cedar can read
+    (``_cedar_reads_this``). A hidden control in the browser,
     an omitted sample request and a client-supplied plan are all display
     decisions, and none of them is authorization.
 
@@ -934,7 +942,7 @@ def ask_cedar(question: Question, session: Session = Depends(require_session)) -
             raise HTTPException(status_code=404, detail="No such collection.")
         collection_name = profile.get("collection_name")
         answered = repository.cedar_answer(question.question, question.collectionId)
-        if answered and _cedar_counts_these_records(question, session.tier):
+        if answered and _cedar_reads_this(question, session.tier):
             answered = None
         if (
             answered

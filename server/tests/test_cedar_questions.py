@@ -155,5 +155,43 @@ class TestSpecificRecords(unittest.TestCase):
         self.assertFalse(specific("What are the headline figures?", "funding"))
 
 
+
+class TestWholeCollection(unittest.TestCase):
+    """Only a question plainly about the collection or its release stays with the profile."""
+
+    def test_questions_about_the_collection_or_release(self) -> None:
+        whole = collection_profiles.about_the_whole_collection
+        for question in (
+            "How many records are in this collection?",
+            "What are the headline figures?",
+            "What changed since I last used this collection?",
+            "What changed in the latest release?",
+            "What changed in v4.2?",
+            "What's new?",
+        ):
+            with self.subTest(question=question):
+                self.assertTrue(whole(question, "funding"))
+
+    def test_questions_about_records_or_left_open(self) -> None:
+        whole = collection_profiles.about_the_whole_collection
+        for question in (
+            "What changed for Cherokee Nation funding in 2021?",
+            "what changed for cherokee nation funding?",
+            "What changed since 2025?",
+            "total funding for cherokee nation",
+            "How many records does Cherokee Nation have in this collection?",
+            "How many records are in this collection for 2020?",
+            "What's the latest count?",
+        ):
+            with self.subTest(question=question):
+                self.assertFalse(whole(question, "funding"))
+
+    def test_change_words_are_recognised(self) -> None:
+        changes = collection_profiles.asks_about_changes
+        self.assertTrue(changes("What changed for Cherokee Nation funding in 2021?"))
+        self.assertTrue(changes("What's new?"))
+        self.assertFalse(changes("Where do these records come from?"))
+
+
 if __name__ == "__main__":
     unittest.main()

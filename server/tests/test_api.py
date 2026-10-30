@@ -665,9 +665,10 @@ class TestEntitlement(unittest.TestCase):
     # A locked profile hit stays local (`NOT_INCLUDED`); a locked profile miss
     # hops with the page id and `answerBasis.opened` false; an open profile hit
     # stays local; an open profile miss hops; no page id hops with
-    # `collectionId` null; a named miss is 501 when Cedar is unwired. A figures
-    # question about one entity or year hops when Cedar can read the page's
-    # collection, and a question naming another collection skips the profile.
+    # `collectionId` null; a named miss is 501 when Cedar is unwired. A figures or
+    # change question that is not plainly about the collection or its release
+    # hops when Cedar can read the page's collection, and a question naming
+    # another collection skips the profile.
 
     def _ask(self, email: str, collection_id: str, question: str | None = None):
         ratelimit.reset_for_tests()
@@ -875,6 +876,39 @@ class TestEntitlement(unittest.TestCase):
         self.assertEqual(asked.call_args.kwargs["collection_id"], "contractors")
         self.assertEqual(body["source"], "cedar")
         self.assertNotIn("access", body)
+
+
+    def _hops(self, collection_id: str, question: str) -> bool:
+        with (
+            mock.patch.object(cedar_service, "available", return_value=True),
+            mock.patch.object(cedar_service, "ask") as asked,
+        ):
+            asked.return_value = cedar_service.CedarReply(
+                answer="composed", thread_id="t-1", unavailable=False
+            )
+            body = self._ask("reader@example.org", collection_id, question).json()
+        self.assertEqual(body["source"], "cedar" if asked.called else "profile")
+        return asked.called
+
+    def test_a_change_question_about_records_hops(self) -> None:
+        for question in (
+            "What changed for Cherokee Nation funding in 2021?",
+            "what changed for cherokee nation funding?",
+            "What changed since 2025?",
+        ):
+            with self.subTest(question=question):
+                self.assertTrue(self._hops("funding", question))
+
+    def test_a_figures_question_with_a_lowercase_name_hops(self) -> None:
+        self.assertTrue(self._hops("funding", "how many awards did cherokee nation receive?"))
+
+    def test_a_question_about_the_release_stays_local(self) -> None:
+        for question in (
+            "What changed since I last used this collection?",
+            "What are the headline figures?",
+        ):
+            with self.subTest(question=question):
+                self.assertFalse(self._hops("funding", question))
 
 
 class TestCedarConversation(unittest.TestCase):

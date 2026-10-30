@@ -437,6 +437,24 @@ _STATS_WORDS = (
     "count",
     "number",
 )
+# Words that put a question on the collection or its release as a whole.
+# "latest" and "updated" are left out: "the latest count" may be a record
+# question, and an ambiguous question goes to Cedar, not to the profile.
+_WHOLE_COLLECTION_WORDS = (
+    "this collection",
+    "the collection",
+    "this dataset",
+    "the dataset",
+    "headline",
+    "published figure",
+    "release",
+    "version",
+    "what's new",
+    "whats new",
+    "since i last",
+    "since you last",
+)
+_VERSION = re.compile(r"\bv\d+(?:\.\d+)*\b", re.IGNORECASE)
 _YEAR = re.compile(r"\b(?:19|20)\d{2}\b|\bfy\s?\d{2,4}\b|\bfiscal year\b", re.IGNORECASE)
 _NAME = re.compile(r"\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*")
 
@@ -466,6 +484,26 @@ def names_another_collection(question: str, dataset_id: str) -> bool:
 def asks_for_figures(question: str) -> bool:
     """Whether the question asks for a quantity, the cue the figures answer reads."""
     return _mentions(question.lower(), _STATS_WORDS)
+
+
+def asks_about_changes(question: str) -> bool:
+    """Whether the question uses a change cue, the one the release-notes answer reads."""
+    return _mentions(question.lower(), _CHANGE_WORDS)
+
+
+def about_the_whole_collection(question: str, dataset_id: str) -> bool:
+    """Whether the question is plainly about the collection or its release.
+
+    It must say so, with a word such as "this collection", "headline" or
+    "release" or a version number, and it must not name a year or an entity.
+    "What changed since I last used this collection" is about the release;
+    "what changed for cherokee nation funding" and "what changed since 2025"
+    are not plainly so, and the route sends them to Cedar.
+    """
+    asked = question.lower()
+    if not (_mentions(asked, _WHOLE_COLLECTION_WORDS) or _VERSION.search(question)):
+        return False
+    return not asks_about_specific_records(question, dataset_id)
 
 
 def asks_about_specific_records(question: str, dataset_id: str) -> bool:
