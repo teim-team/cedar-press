@@ -32,8 +32,13 @@ docker run --rm --env-file "$DIR/env" "$IMAGE" python -m cedar_press.migrate
 
 PREVIOUS=$(docker inspect --format '{{.Config.Image}}' "$NAME" 2>/dev/null || true)
 
+# Optional reviewed release catalog (CEDAR_PRESS_RELEASE_CATALOG=/etc/cedar-press/release/catalog.json).
+MOUNTS=()
+[ -d "$DIR/release-catalog" ] && MOUNTS+=(-v "$DIR/release-catalog:/etc/cedar-press/release:ro")
+
 start() {
   docker run -d --name "$NAME" --restart unless-stopped --env-file "$DIR/env" -p 8000:8000 \
+    "${MOUNTS[@]}" \
     --memory 1g --pids-limit 256 --log-opt max-size=10m --log-opt max-file=3 "$1" >/dev/null
 }
 

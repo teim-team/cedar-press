@@ -237,8 +237,9 @@ tenant-private release, which is a customer's own data, is refused, and no other
 rights status or publication hold stops a download. No matching or cleaning happens in the
 consumer. Missing, stale or malformed pins and service failures do not fall back
 to a sample. Unconfigured collections fail closed. Single artifacts and individual manifest parts are bounded
-at 256 MiB. Larger logical tables require the explicit development-only
-`CEDAR_PRESS_PARTITIONED_REHEARSAL=1` contract; staging/production refuse that path.
+at 256 MiB. Larger logical tables require the explicit
+`CEDAR_PRESS_PARTITIONED_REHEARSAL=1` contract, which works in development and
+staging; production refuses that path.
 The paired Lumecon collection `/download` endpoint verifies every component once
 and returns the exact manifest-ordered JSONL concatenation. Cedar verifies each
 part boundary, digest, schema and row count plus global primary-key uniqueness

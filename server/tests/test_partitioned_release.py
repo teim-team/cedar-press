@@ -246,10 +246,17 @@ class PartitionedReleaseTest(unittest.TestCase):
         for env in (
             {"CEDAR_PRESS_ENVIRONMENT": "production"},
             {"CEDAR_PRESS_PARTITIONED_REHEARSAL": "0"},
+            {"CEDAR_PRESS_ENVIRONMENT": "staging", "CEDAR_PRESS_PARTITIONED_REHEARSAL": "0"},
         ):
             with patch.dict(os.environ, env):
                 self.assertEqual(self.request().status_code, 503)
         self.mock_raw.assert_not_called()
+
+    def test_staging_with_opt_in_is_served(self):
+        with patch.dict(os.environ, {"CEDAR_PRESS_ENVIRONMENT": "staging"}):
+            response = self.request()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content, b"".join(self.parts.values()))
 
     def test_unauthorized_requests_never_fetch(self):
         app.dependency_overrides[current_session] = lambda: None
