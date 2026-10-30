@@ -65,6 +65,7 @@ from pydantic import BaseModel, Field
 
 from cedar_press import (
     cedar_service,
+    collection_profiles,
     need_profiles,
     press_catalog,
     priorities,
@@ -866,6 +867,24 @@ def _ask_which_collection(thread_id: str | None) -> dict[str, object]:
     }
 
 
+def _cedar_counts_these_records(question: Question, tier: str) -> bool:
+    """Whether Cedar, not the profile, should answer this figures question.
+
+    The profile states release-level figures. A count or total for one
+    entity or one year is read from the records, and Cedar can read them when
+    it is wired and this plan's allow-list carries the page's collection.
+    """
+    collection_id = question.collectionId
+    if not collection_id or not cedar_service.available():
+        return False
+    if not collection_profiles.asks_for_figures(question.question):
+        return False
+    if not collection_profiles.asks_about_specific_records(question.question, collection_id):
+        return False
+    allowed, _pins = cedar_service.retrieval_allowlist(tier)
+    return collection_id in allowed
+
+
 @app.post("/cedar/ask")
 def ask_cedar(question: Question, session: Session = Depends(require_session)) -> dict[str, object]:
     """Cedar, scoped to what this subscription can open.
@@ -879,7 +898,10 @@ def ask_cedar(question: Question, session: Session = Depends(require_session)) -
     ``allowedCollectionIds`` plus ``pinnedReleaseIds``. The page id stays on
     ``collectionId`` and does not remove ids from that list. A profile answer
     for a sold collection this plan cannot open returns ``_not_included_answer``
-    and does not hop. Any other question hops. A hidden control in the browser,
+    and does not hop. Any other question hops. Two questions skip the profile:
+    one that names another collection (the profile answers only for its own
+    page), and a figures question about one entity or one year on a collection
+    Cedar can read (``_cedar_counts_these_records``). A hidden control in the browser,
     an omitted sample request and a client-supplied plan are all display
     decisions, and none of them is authorization.
 
@@ -912,6 +934,8 @@ def ask_cedar(question: Question, session: Session = Depends(require_session)) -
             raise HTTPException(status_code=404, detail="No such collection.")
         collection_name = profile.get("collection_name")
         answered = repository.cedar_answer(question.question, question.collectionId)
+        if answered and _cedar_counts_these_records(question, session.tier):
+            answered = None
         if (
             answered
             and repository.is_sold(question.collectionId)

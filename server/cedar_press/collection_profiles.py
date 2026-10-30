@@ -38,6 +38,7 @@ is honest; a generated sentence that reads like a claim about method is not.
 
 from __future__ import annotations
 
+import re
 from collections.abc import Mapping
 from typing import Any
 
@@ -425,6 +426,8 @@ _CONSTRUCT_WORDS = (
     "how does",
 )
 _CONTENT_WORDS = ("cover", "contain", "what is", "what does", "include", "track", "field", "source")
+# "record" is not a cue on its own: "where do these records come from" asks
+# for sources, and "how many records" is already caught by "how many".
 _STATS_WORDS = (
     "headline",
     "figure",
@@ -432,9 +435,53 @@ _STATS_WORDS = (
     "largest",
     "how many",
     "count",
-    "record",
     "number",
 )
+_YEAR = re.compile(r"\b(?:19|20)\d{2}\b|\bfy\s?\d{2,4}\b|\bfiscal year\b", re.IGNORECASE)
+_NAME = re.compile(r"\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*")
+
+
+def _mentions(asked: str, words: tuple[str, ...]) -> bool:
+    """Whether a cue appears as a whole word, plural or past tense included.
+
+    A plain substring test read "Indian Country" as "count" and "resources"
+    as "source", so the funding page's own name routed a total to the figures
+    answer and the question never reached Cedar.
+    """
+    return any(re.search(rf"\b{re.escape(word)}(?:s|es|d|ed)?\b", asked) for word in words)
+
+
+def _names(text: str, name: str) -> bool:
+    return re.search(rf"\b{re.escape(name.lower())}\b", text) is not None
+
+
+def names_another_collection(question: str, dataset_id: str) -> bool:
+    """Whether the question names a storefront collection other than this page's."""
+    asked = question.lower()
+    return any(
+        dataset.id != dataset_id and _names(asked, dataset.name) for dataset in LAUNCH_COLLECTION
+    )
+
+
+def asks_for_figures(question: str) -> bool:
+    """Whether the question asks for a quantity, the cue the figures answer reads."""
+    return _mentions(question.lower(), _STATS_WORDS)
+
+
+def asks_about_specific_records(question: str, dataset_id: str) -> bool:
+    """Whether the question is about one year or one named entity, not the release.
+
+    A year, a fiscal year, or a capitalised name after the first word that is
+    not the collection's own name. "How many records are in this collection"
+    is about the release and the profile answers it; "how many awards did
+    Cherokee Nation receive in 2020" is about records, which only Cedar reads.
+    """
+    if _YEAR.search(question):
+        return True
+    profile = profile_for(dataset_id) or {}
+    own = (profile.get("collection_name") or "").lower()
+    after_first_word = question.strip().partition(" ")[2]
+    return any(match.group(0).lower() not in own for match in _NAME.finditer(after_first_word))
 
 
 def _changes_sentence(profile: dict[str, Any], asked: str) -> str:
@@ -552,9 +599,13 @@ def answer_from_profile(question: str, dataset_id: str) -> dict[str, str] | None
     else:
         basis = f"{profile['collection_name']}, Cedar Press catalog entry"
 
-    if any(word in asked for word in _CHANGE_WORDS):
+    # A question that names another collection is about that one; this
+    # page's profile would answer it with the wrong collection's facts.
+    if names_another_collection(question, dataset_id):
+        return None
+    if _mentions(asked, _CHANGE_WORDS):
         return {"answer": _changes_sentence(profile, asked), "basis": basis}
-    if any(word in asked for word in _STATS_WORDS):
+    if _mentions(asked, _STATS_WORDS):
         sentence = _stats_sentence(profile)
         if sentence:
             return {"answer": sentence, "basis": basis}
@@ -589,7 +640,7 @@ def answer_from_profile(question: str, dataset_id: str) -> dict[str, str] | None
             ),
             "basis": basis,
         }
-    if any(word in asked for word in _CONSTRUCT_WORDS):
+    if _mentions(asked, _CONSTRUCT_WORDS):
         # Same reason as the content branch below: the last of these was
         # prefixed "Known limitations:", which is a field name rather than
         # something anybody says.
@@ -606,7 +657,7 @@ def answer_from_profile(question: str, dataset_id: str) -> dict[str, str] | None
         answer = " ".join(p for p in parts if p)
         if answer:
             return {"answer": answer, "basis": basis}
-    if any(word in asked for word in _CONTENT_WORDS):
+    if _mentions(asked, _CONTENT_WORDS):
         # PROSE, NOT A FIELD DUMP.
         #
         # Owner review, 2026-09-20: "Keep answers direct and human. Do not
