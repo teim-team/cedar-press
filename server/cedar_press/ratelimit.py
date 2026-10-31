@@ -1,18 +1,11 @@
 """Rate limiting on the ways in.
 
 WHY THIS EXISTS
-An access code is 8 to 32 alphanumeric characters, and an activation route
-says yes to the right code with the right address. Without a limit that is
-still a search: an attacker with a script asks it a few million times and
-activates somebody else's subscription. (``codes.py`` answers "not
-recognized" until code and address both match, so one attempt reveals no
-more than that.) The same applies to sign-in, where the guessable secret
-is a password rather than a code.
-
-Rate limiting is what turns "guessable given enough attempts" into "not
-guessable", and it is the only control here that does that. The careful error
-ordering in ``codes.py`` narrows what a single attempt reveals; this is what
-bounds how many attempts there are.
+Sign-in says yes to the right password for the right address. Without a
+limit that is still a search: an attacker with a script asks it a few
+million times and gets into somebody else's subscription. Rate limiting is
+what turns "guessable given enough attempts" into "not guessable", and it is
+the only control here that does that.
 
 WHAT THIS IS NOT
 Per-process and in-memory, so several workers each get their own allowance
@@ -34,11 +27,9 @@ from time import monotonic
 logger = logging.getLogger(__name__)
 
 #: Attempts allowed per window, per key. Deliberately low: a subscriber types
-#: their code once off a confirmation email and their password a few times at
-#: worst, so a limit generous enough for a person is still nowhere near
-#: enough for a search.
+#: their password a few times at worst, so a limit generous enough for a
+#: person is still nowhere near enough for a search.
 LOGIN_ATTEMPTS = 10
-ACTIVATION_ATTEMPTS = 8
 WINDOW_SECONDS = 15 * 60
 
 #: Stop the table growing without bound when the callers are all different.

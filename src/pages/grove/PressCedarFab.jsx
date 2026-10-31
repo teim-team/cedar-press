@@ -41,8 +41,9 @@ import { Link } from "react-router";
 import { askCedar } from "../../api.js";
 import { answerSource } from "../../features/grove/cedarAnswer.js";
 import { REPEAT_BRIDGES } from "../../features/grove/cedarConversation.js";
-import { EARLY_ACCESS_HREF, appUrl, contactHref } from "../../features/grove/appLink.js";
-import { PRESS_DATA_PATH } from "../../features/grove/pressRoutes.js";
+import { appUrl, contactHref } from "../../features/grove/appLink.js";
+import { PRESS_DATA_PATH, PRESS_SETTINGS_PATH } from "../../features/grove/pressRoutes.js";
+import { subscribeHref } from "../../features/grove/pressSessionNavigation.js";
 import { OPEN_EXAMPLES, fabFollowUps, fabStarters, isDrillDown, topicOf, unavailableReply } from "../../features/grove/readerCedar.js";
 import { isConnected } from "../../config.js";
 import { EVENT, track, trackError } from "../../features/grove/telemetry.js";
@@ -330,10 +331,9 @@ export function PressCedarFab({ gated = null, examples = OPEN_EXAMPLES }) {
         <p>
           Cedar answers questions like this from the Cedar Press collections once
           your membership includes Cedar Press.{" "}
-          {/* Enrollment is not open yet (2026-10-06): early access, never a
-              purchase page that sells no Cedar Press plan. */}
-          {item.gate === "unentitled" ? "Enrollment is not open yet, so " : "Sign in above, or "}
-          <a href={EARLY_ACCESS_HREF}>request early access</a>
+          {item.gate === "unentitled"
+            ? <>Choose a membership in <Link to={PRESS_SETTINGS_PATH}>Settings</Link></>
+            : <>Sign in above, or <a href={subscribeHref()}>subscribe</a></>}
           .
         </p>
       ) : item.kind === "error" ? (

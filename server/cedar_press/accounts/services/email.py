@@ -12,6 +12,7 @@ from typing import Protocol
 class EmailSender(Protocol):
     def configured(self) -> bool: ...
     def send_link(self, email: str, link: str, *, sign_in: bool = False) -> None: ...
+    def send_message(self, email: str, subject: str, body: str) -> None: ...
 
 
 class AccountEmailSender:
@@ -29,26 +30,31 @@ class AccountEmailSender:
         ) and (development or self.settings.get("CEDAR_PRESS_SMTP_STARTTLS", "1") == "1")
 
     def send_link(self, email, link, *, sign_in=False):
+        if sign_in:
+            self.send_message(
+                email,
+                "Your Cedar Press membership",
+                "Your Cedar Press membership is ready. Sign in with your existing account:\n\n"
+                + link,
+            )
+        else:
+            self.send_message(
+                email,
+                "Set your Cedar Press password",
+                "Use this link to set your Cedar Press password and confirm your email address:\n\n"
+                + link
+                + "\n\nThis link expires in one hour and can be used once. "
+                "If you did not request it, you can ignore this email.",
+            )
+
+    def send_message(self, email, subject, body):
         if not self.configured():
             raise RuntimeError("Account email is not configured")
         message = EmailMessage()
         message["From"] = self.settings["CEDAR_PRESS_EMAIL_FROM"]
         message["To"] = email
-        message["Subject"] = (
-            "Your Cedar Press membership" if sign_in else "Set your Cedar Press password"
-        )
-        if sign_in:
-            message.set_content(
-                "Your Cedar Press membership is ready. Sign in with your existing account:\n\n"
-                + link
-            )
-        else:
-            message.set_content(
-                "Use this link to set your Cedar Press password and confirm your email address:\n\n"
-                + link
-                + "\n\nThis link expires in one hour and can be used once. "
-                "If you did not request it, you can ignore this email."
-            )
+        message["Subject"] = subject
+        message.set_content(body)
         with self.smtp_factory(
             self.settings["CEDAR_PRESS_SMTP_HOST"],
             int(self.settings.get("CEDAR_PRESS_SMTP_PORT", "587")),

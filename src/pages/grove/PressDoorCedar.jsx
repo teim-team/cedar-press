@@ -55,7 +55,7 @@ import {
   intentForCollection,
   resolveDoor,
 } from "../../features/grove/doorCedar.js";
-import { EARLY_ACCESS_HREF, EARLY_ACCESS_LABEL } from "../../features/grove/appLink.js";
+import { subscribeHref } from "../../features/grove/pressSessionNavigation.js";
 import { PRESS_METHODS_PATH, PRESS_REQUEST_PATH, PRESS_RESEARCH_PATH } from "../../features/grove/pressRoutes";
 import { EVENT, track } from "../../features/grove/telemetry.js";
 import { rememberFocus } from "../../features/grove/focusReturn.js";
@@ -65,8 +65,7 @@ import { CedarGreeting } from "./CedarGreeting";
 
 /** The routes an answer can offer, by the key an intent names. */
 const LINKS = {
-  // Enrollment is not open yet (2026-10-06), so the route is early access.
-  plans: { label: EARLY_ACCESS_LABEL, href: EARLY_ACCESS_HREF, external: false },
+  plans: { label: "Subscribe", href: subscribeHref(), external: false },
   request: { label: "Tribal government data requests", to: PRESS_REQUEST_PATH },
   research: { label: "Research access", to: PRESS_RESEARCH_PATH },
   methods: { label: "Read the methods", to: PRESS_METHODS_PATH },

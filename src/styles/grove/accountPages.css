@@ -12,7 +12,7 @@
 .teim-rd.cp-account-page .cp-account-page__actions .cp-btn--primary { background: linear-gradient(160deg, #43968e, #307773); border-color: #43968e; color: #fff; }
 @media (max-width: 1700px) { .teim-rd .cp-account-page__tagline { display: none; } }
 .teim-rd .cp-account-page__main { display: flex; flex-direction: column; align-items: center; gap: 1.25rem; padding: clamp(2rem, 6vw, 5rem) 1rem; }
-.teim-rd.cp-account-page .cp-login__card { width: min(100%, 460px); padding: clamp(1.5rem, 4vw, 2.25rem); background: #fff; border: 1px solid #dce6e8; border-radius: 10px; box-shadow: 0 3px 15px #142c3c03; }
+.teim-rd.cp-account-page .cp-login__card, .teim-rd.cp-account-page .cp-login__pitch { box-sizing: border-box; width: min(100%, 460px); padding: clamp(1.5rem, 4vw, 2.25rem); background: #fff; border: 1px solid #dce6e8; border-radius: 10px; box-shadow: 0 3px 15px #142c3c03; }
 .teim-rd.cp-account-page .cp-login__h { margin-bottom: .6rem; font-size: clamp(1.65rem, 4vw, 2rem); line-height: 1.2; }
 .teim-rd.cp-account-page .cp-login__lede { margin-top: 0; line-height: 1.5; }
 .teim-rd.cp-account-page .cp-gate__form { gap: 1.3rem; margin: 1.5rem 0; }
@@ -97,3 +97,12 @@
 .teim-rd .cp-confirm__signin a { color: #217c72; text-decoration: underline; }
 .teim-rd .cp-confirm__resent { color: #267c6b; }
 @media (max-width: 600px) { .teim-rd.cp-account-page .cp-confirm { padding: 28px 22px; } }
+.teim-rd.cp-account-page .cp-login__terms { margin: 0; color: #6d7d85; font-size: 12px; line-height: 1.5; }
+.teim-rd.cp-account-page .cp-login__pitch h2 { margin: 0 0 .4rem; font-size: 1.35rem; line-height: 1.25; }
+.teim-rd.cp-account-page .cp-login__pitch > p { margin: 0; color: #516874; font-size: 14px; line-height: 1.5; }
+.teim-rd.cp-account-page .cp-login__pitch > .cp-login__pitch-kicker { margin-bottom: .5rem; color: #087b70; font-size: 11px; font-weight: 650; letter-spacing: .09em; text-transform: uppercase; }
+.teim-rd .cp-login__pitch ul { display: grid; gap: .55rem; margin: 1.1rem 0 1.4rem; padding: 0; list-style: none; color: #254454; font-size: 14px; line-height: 1.45; }
+.teim-rd .cp-login__pitch li { display: flex; gap: .6rem; }
+.teim-rd .cp-login__pitch li::before { content: "✓"; color: #258478; flex-shrink: 0; }
+.teim-rd .cp-login__pitch-actions { display: flex; flex-wrap: wrap; gap: .75rem; }
+.teim-rd .cp-login__pitch-actions .cp-btn { flex: 1 1 10rem; justify-content: center; min-height: 44px; }

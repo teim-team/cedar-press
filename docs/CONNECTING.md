@@ -29,7 +29,7 @@ With the API up and no data source, sign-in works and every page renders. `GET /
 Server-side, in `server/README.md` ("Running it", "Server-only configuration"):
 
 - `CEDAR_PRESS_RELEASE_CATALOG`: a reviewed catalog from Lumecon-data `build_catalog`, or `CEDAR_PRESS_DATA_API` and `CEDAR_PRESS_DATA_TOKEN` for the Lumecon API.
-- `DATABASE_URL`: Postgres for subscribers and access codes. Staging and production require it, plus secrets of 32 characters or more.
+- `DATABASE_URL`: Postgres for subscribers and billing. Staging and production require it, plus secrets of 32 characters or more.
 - `CEDAR_PRESS_ORIGINS`: the exact origins allowed to send credentialed requests.
 
 ## Deploying

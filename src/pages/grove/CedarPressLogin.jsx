@@ -2,33 +2,32 @@
 //
 // The workspace's way in: app.cedarpress.ai/login. The marketing site's Sign in
 // lands here, and so does any signed-out visit to a page behind the gate, with
-// `?next=` carrying where the visitor was going. Activation is the sign-up:
-// Tribal Business News issues the code, and the password is chosen here.
+// `?next=` carrying where the visitor was going. New readers subscribe at
+// /subscribe and choose their password from the emailed account link.
 import { AccountPage } from "./AccountPage.jsx";
 import { cloneElement, useEffect, useId, useState } from "react";
 import { Link, Navigate, useLocation, useNavigate, useSearchParams } from "react-router";
 
-import { activatePressAccount, confirmPasswordReset, requestPasswordReset, validatePressCode } from "../../api";
+import { confirmEmailChange, confirmPasswordReset, requestPasswordReset } from "../../api";
 import { useAuth } from "../../context/useAuth";
-import { EARLY_ACCESS_HREF, EARLY_ACCESS_LABEL, contactHref } from "../../features/grove/appLink.js";
+import { contactHref } from "../../features/grove/appLink.js";
 import { canReadCedarPress } from "../../features/grove/pressAccess";
 import { isConnected } from "../../config.js";
 import { safeNext } from "../../features/grove/pressSessionNavigation.js";
-import {
-  PRESS_ACTIVATION_AVAILABLE,
-  PRESS_STEP,
-  formatPressCode,
-  isPlausiblePressCode,
-  normalizePressCode,
-  pressSignupError,
-} from "../../features/grove/pressSignup";
 import { useDocumentTitle } from "../../features/grove/useDocumentTitle";
 
 
 // The public site is another host in production; a dev server has only itself.
 const MARKETING_URL = import.meta.env.DEV ? "/" : "https://cedarpress.ai";
 
-const describeSignup = (err) => pressSignupError(err?.code, err?.message);
+const PITCH = [
+  "Maintained collections on federal funding, contracting, deals, policy, giving, land and Native enterprise ownership",
+  "Cedar, the AI economic analyst",
+  "Source records behind every figure",
+  "Downloadable spreadsheets",
+];
+
+const STEP = Object.freeze({ SIGN_IN: "sign-in", FORGOT: "forgot", RESET: "reset", EMAIL_CHANGE: "email-change" });
 
 function Field({ label, aside = null, children }) {
   const id = useId();
@@ -48,10 +47,13 @@ export default function CedarPressLogin() {
   const location = useLocation();
   const navigate = useNavigate();
   // The emailed link carries the token in the fragment, which never reaches a server log.
-  const linkedToken = new URLSearchParams(location.hash.slice(1)).get("reset");
+  const fragment = new URLSearchParams(location.hash.slice(1));
+  const linkedToken = fragment.get("reset");
+  const linkedChange = fragment.get("email-change");
   const [resetToken, setResetToken] = useState(linkedToken);
-  const [step, setStep] = useState(linkedToken ? PRESS_STEP.RESET : params.get("activate") === "1" ? PRESS_STEP.ACTIVATE : PRESS_STEP.SIGN_IN);
-  const [code, setCode] = useState("");
+  const [changeToken, setChangeToken] = useState(linkedChange);
+  const [step, setStep] = useState(linkedToken ? STEP.RESET : linkedChange ? STEP.EMAIL_CHANGE : STEP.SIGN_IN);
+  const [notice, setNotice] = useState(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [pending, setPending] = useState(false);
@@ -62,7 +64,12 @@ export default function CedarPressLogin() {
   // the page does not remount and the initial state above never sees it.
   if (linkedToken && linkedToken !== resetToken) {
     setResetToken(linkedToken);
-    setStep(PRESS_STEP.RESET);
+    setStep(STEP.RESET);
+    setError(null);
+  }
+  if (linkedChange && linkedChange !== changeToken) {
+    setChangeToken(linkedChange);
+    setStep(STEP.EMAIL_CHANGE);
     setError(null);
   }
 
@@ -72,15 +79,16 @@ export default function CedarPressLogin() {
 
   // The token is held in state, so it can leave the address bar and history.
   useEffect(() => {
-    if (linkedToken) navigate({ pathname: location.pathname, search: location.search }, { replace: true });
-  }, [linkedToken, location.pathname, location.search, navigate]);
+    if (linkedToken || linkedChange) navigate({ pathname: location.pathname, search: location.search }, { replace: true });
+  }, [linkedToken, linkedChange, location.pathname, location.search, navigate]);
 
-  if (!loading && user) return <Navigate to={canReadCedarPress(user) ? next : "/settings"} replace />;
+  if (!loading && user && step !== STEP.EMAIL_CHANGE) return <Navigate to={canReadCedarPress(user) ? next : "/settings"} replace />;
 
   const go = (to) => {
     setStep(to);
     setError(null);
     setResetSent(false);
+    setNotice(null);
   };
 
   const run = (action, describe = (err) => err?.message) => async (event) => {
@@ -101,19 +109,6 @@ export default function CedarPressLogin() {
     if (!canReadCedarPress(session)) navigate("/settings");
   });
 
-  const submitCode = run(async () => {
-    if (!isPlausiblePressCode(code)) {
-      throw new Error("That code does not look complete. It is 8 to 32 letters and digits, on your Tribal Business News confirmation.");
-    }
-    await validatePressCode({ code: normalizePressCode(code), email });
-    setStep(PRESS_STEP.SET_PASSWORD);
-  }, describeSignup);
-
-  const submitPassword = run(async () => {
-    await activatePressAccount({ code: normalizePressCode(code), email, password });
-    await refreshSession();
-  }, describeSignup);
-
   const submitForgot = run(async () => {
     await requestPasswordReset({ email, next });
     setResetSent(true);
@@ -124,7 +119,15 @@ export default function CedarPressLogin() {
     await refreshSession();
   });
 
-  const signingIn = step === PRESS_STEP.SIGN_IN || !PRESS_ACTIVATION_AVAILABLE;
+  const submitEmailChange = run(async () => {
+    const { email: changed } = await confirmEmailChange({ token: changeToken });
+    await refreshSession();
+    setEmail(changed);
+    go(STEP.SIGN_IN);
+    setNotice(`Your sign-in email is now ${changed}. Sign in with it.`);
+  });
+
+  const signingIn = step === STEP.SIGN_IN || !isConnected();
   const emailField = (
     <Field label="Work email">
       <input type="email" autoComplete="email" placeholder="you@organization.org"
@@ -145,7 +148,7 @@ export default function CedarPressLogin() {
             <>
               <h1 className="cp-login__h">Welcome back.</h1>
               <p className="cp-login__lede">Sign in to Cedar Press.</p>
-              <p>New to Cedar Press? <Link to="/subscribe">Subscribe annually</Link>.</p>
+              {notice ? <p className="cp-gate__ok" role="status">{notice}</p> : null}
               {!isConnected() ? (
                 <p className="cp-gate__ok" role="status">
                   Dev server, not connected to the API, so signing in will fail. Run <code>npm run dev:connected</code> with the API running (docs/CONNECTING.md).
@@ -153,8 +156,8 @@ export default function CedarPressLogin() {
               ) : null}
               <form className="cp-gate__form" onSubmit={submitSignIn}>
                 {emailField}
-                <Field label="Password" aside={PRESS_ACTIVATION_AVAILABLE
-                  ? <button type="button" className="cp-split__linkbtn" onClick={() => go(PRESS_STEP.FORGOT)}>Forgot password?</button>
+                <Field label="Password" aside={isConnected()
+                  ? <button type="button" className="cp-split__linkbtn" onClick={() => go(STEP.FORGOT)}>Forgot password?</button>
                   : <a href={contactHref("Cedar Press password help")}>Forgot password?</a>}>
                   <input type="password" autoComplete="current-password" value={password}
                     onChange={(event) => setPassword(event.target.value)} required />
@@ -164,16 +167,9 @@ export default function CedarPressLogin() {
                   {pending ? "Signing in" : "Sign in"}
                 </button>
               </form>
-              {PRESS_ACTIVATION_AVAILABLE ? (
-                <>
-                  <p className="cp-login__or"><span>or</span></p>
-                  <button type="button" className="cp-btn cp-btn--quiet cp-btn--wide" onClick={() => go(PRESS_STEP.ACTIVATE)}>
-                    Activate with an access code
-                  </button>
-                </>
-              ) : null}
+              <p className="cp-login__terms">By continuing, you agree to our <Link to="/terms">Terms of Service</Link> and acknowledge our <Link to="/privacy">Privacy Policy</Link>.</p>
             </>
-          ) : step === PRESS_STEP.FORGOT ? (
+          ) : step === STEP.FORGOT ? (
             <>
               <h1 className="cp-login__h">Reset your password</h1>
               {resetSent ? (
@@ -193,11 +189,25 @@ export default function CedarPressLogin() {
                 </>
               )}
               <p className="cp-gate__aside">
-                <button type="button" className="cp-split__linkbtn" onClick={() => go(PRESS_STEP.SIGN_IN)}>Back to log in</button>
+                <button type="button" className="cp-split__linkbtn" onClick={() => go(STEP.SIGN_IN)}>Back to log in</button>
               </p>
               <p className="cp-gate__aside"><a href={contactHref("Cedar Press password help")}>Contact us for help</a></p>
             </>
-          ) : step === PRESS_STEP.RESET ? (
+          ) : step === STEP.EMAIL_CHANGE ? (
+            <>
+              <h1 className="cp-login__h">Confirm your new email</h1>
+              <p className="cp-login__lede">
+                This makes the address that received the link your Cedar Press sign-in. You will be
+                signed out everywhere and sign in again with it.
+              </p>
+              <form className="cp-gate__form" onSubmit={submitEmailChange}>
+                {errorLine}
+                <button type="submit" className="cp-btn cp-btn--primary cp-btn--wide" disabled={pending}>
+                  {pending ? "Confirming" : "Confirm new email"}
+                </button>
+              </form>
+            </>
+          ) : (
             <>
               <h1 className="cp-login__h">Choose a new password</h1>
               <form className="cp-gate__form" onSubmit={submitReset}>
@@ -211,53 +221,25 @@ export default function CedarPressLogin() {
                 </button>
               </form>
               <p className="cp-gate__aside">
-                <button type="button" className="cp-split__linkbtn" onClick={() => go(PRESS_STEP.FORGOT)}>Request a new link</button>
+                <button type="button" className="cp-split__linkbtn" onClick={() => go(STEP.FORGOT)}>Request a new link</button>
               </p>
-            </>
-          ) : step === PRESS_STEP.SET_PASSWORD ? (
-            <>
-              <h1 className="cp-login__h">Choose a password</h1>
-              <p className="cp-gate__ok" role="status">Code accepted for {email}.</p>
-              <form className="cp-gate__form" onSubmit={submitPassword}>
-                <Field label="Choose a password">
-                  <input type="password" autoComplete="new-password" placeholder="10 or more characters"
-                    minLength={10} value={password} onChange={(event) => setPassword(event.target.value)} required />
-                </Field>
-                {errorLine}
-                <button type="submit" className="cp-btn cp-btn--primary cp-btn--wide" disabled={pending}>
-                  {pending ? "Activating" : "Activate Cedar Press"}
-                </button>
-              </form>
-              <p className="cp-gate__aside">
-                <button type="button" className="cp-split__linkbtn" onClick={() => go(PRESS_STEP.ACTIVATE)}>Use a different code</button>
-              </p>
-            </>
-          ) : (
-            <>
-              <h1 className="cp-login__h">Activate Cedar Press</h1>
-              <form className="cp-gate__form" onSubmit={submitCode}>
-                <Field label="Access code">
-                  <input type="text" autoComplete="one-time-code" spellCheck={false} className="cp-code"
-                    value={code} onChange={(event) => setCode(event.target.value)}
-                    onBlur={() => setCode((current) => formatPressCode(current))} required />
-                </Field>
-                {emailField}
-                {errorLine}
-                <button type="submit" className="cp-btn cp-btn--primary cp-btn--wide" disabled={pending}>
-                  {pending ? "Checking your code" : "Continue"}
-                </button>
-              </form>
-              <p className="cp-gate__fine">
-                Each access code is issued to one authorized user through Tribal Business News and may not be shared.
-              </p>
-              <p className="cp-gate__aside">
-                Already set a password?{" "}
-                <button type="button" className="cp-split__linkbtn" onClick={() => go(PRESS_STEP.SIGN_IN)}>Sign in</button>
-              </p>
-              <p className="cp-gate__aside"><a href={EARLY_ACCESS_HREF}>{EARLY_ACCESS_LABEL}</a></p>
             </>
           )}
         </div>
+        {!user && signingIn ? (
+          <section className="cp-login__pitch" aria-labelledby="cp-login-pitch">
+            <p className="cp-login__pitch-kicker">Not a Cedar Press subscriber?</p>
+            <h2 id="cp-login-pitch">See what you&rsquo;re missing</h2>
+            <p>Trusted intelligence for Indian Country.</p>
+            <ul>
+              {PITCH.map((line) => <li key={line}>{line}</li>)}
+            </ul>
+            <div className="cp-login__pitch-actions">
+              <a className="cp-btn cp-btn--quiet" href={MARKETING_URL}>Learn more</a>
+              <Link className="cp-btn cp-btn--primary" to="/subscribe">Create an account</Link>
+            </div>
+          </section>
+        ) : null}
         <p className="cp-login__back"><a href={MARKETING_URL}>&larr; Back to Cedar Press</a></p>
     </AccountPage>
   );

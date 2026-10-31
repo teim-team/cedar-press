@@ -1,6 +1,6 @@
 # The database
 
-See the [schema ERD](#schema-erd) for the tables defined by migrations 001–009.
+See the [schema ERD](#schema-erd) for the tables defined by migrations 001–010.
 
 ## Local Docker database
 
@@ -52,8 +52,7 @@ that database. Do not remove the volume if you want to keep local transactions.
 ## Account foundation and direct billing
 
 Cedar Press owns account creation, Stripe billing, renewals and upgrades
-(Brian Kim, 2026-10-25). Older TBN-only payment descriptions below describe
-the legacy access-code integration and do not define the billing roadmap.
+(Brian Kim, 2026-10-25). There are no access codes.
 The Terraform deployment uses a dedicated PostgreSQL database; sharing a
 database with teim-app remains an optional compatibility arrangement.
 
@@ -127,6 +126,10 @@ The confirmation page can resend its own paid account email, limited to three
 requests per 15 minutes. Migration 009 adds leased email delivery and hashed setup links.
 SMTP runs outside transactions; failed resends preserve earlier unexpired links.
 Webhook retries or the reconciliation command retry pending deliveries.
+Migration 010 adds confirmed email changes: a hashed one-hour link goes to the
+new address, and redeeming it moves the account, ends every session and updates
+the Stripe customer in one transaction. The account guard still refuses any
+other change of address.
 Only hashed browser and email tokens are stored; neither the browser's Checkout
 return nor its reservation cookie can establish account ownership.
 
@@ -184,20 +187,20 @@ setting it once.
 ## Unset
 
 Exactly what the service did before this existed: subscribers parsed out of
-`CEDAR_PRESS_ACCOUNTS`, access codes out of `CEDAR_PRESS_CODES`, anything
-activated at runtime held in a dict the process forgets on restart, and Cedar
+`CEDAR_PRESS_ACCOUNTS`, anything created at runtime held in a dict the
+process forgets on restart, and Cedar
 Points in a SQLite file at `CEDAR_PRESS_DB` that defaults to `:memory:`.
 
 That is right for the preview deployment and for the test suite. It is wrong
 for anything a subscriber has paid for: a restart loses every account created
-by activation, and an access code that was spent becomes spendable again.
+at runtime.
 
 ## Set
 
     pip install -e server[postgres]
     DATABASE_URL=postgresql://user:pass@host/db
 
-Subscribers, access codes, the Cedar Points ledger and the priorities
+Subscribers, the Cedar Points ledger and the priorities
 catalogue become rows in the platform's own database, beside teim-app's
 `users`. Setting the variable is the whole of the installation: the service
 applies any migration that has not run when it opens the store.
@@ -218,10 +221,11 @@ applied.
 | table                         | what it holds                                           |
 | ----------------------------- | ------------------------------------------------------- |
 | `cedar_press_subscribers`     | who holds a subscription, on which tier, and their hash  |
-| `cedar_press_codes`           | codes Tribal Business News issued, and when each was spent |
+| `cedar_press_codes`           | retired access codes, kept for their history; nothing reads or writes it |
 | `cedar_press_account_setup_links` | hashed, expiring setup links bound to account and email |
 | `cedar_press_account_email_deliveries` | delivery attempts and leases per paid checkout |
 | `cedar_press_password_resets` | hashed, single-use password reset tokens and their expiry |
+| `cedar_press_email_changes`   | hashed, single-use links that move an account to a confirmed new address |
 | `cedar_press_priorities`      | the editorial catalogue, re-seeded from the owner's file |
 | `cedar_press_ledger`          | append-only Cedar Points: why each point came or went    |
 | `cedar_press_allocations`     | the derived totals per priority                          |
@@ -232,7 +236,7 @@ applied.
 
 teim-app owns `users(id, email, password_hash, workspace_tier)`, and
 `workspace_tier` is the TMAP ladder — seed, sprout, sapling, tree. Cedar
-Press's ladder is `press` and `press_pro`, sold through Tribal Business News,
+Press's ladder is `press` and `press_pro`, sold through Stripe on this site,
 and a person can hold one, the other, both or neither. So the press tier is a
 row in `cedar_press_subscribers` rather than a column on `users`, and the two
 ladders never have to be collapsed into one.
@@ -289,7 +293,7 @@ the month is already earned — and still reports 2.
 
 ## Schema ERD
 
-Current PostgreSQL schema after migrations 001–009. `cedar_press_subscribers`
+Current PostgreSQL schema after migrations 001–010. `cedar_press_subscribers`
 is the sole account table. Connections show database foreign keys only; dotted
 lines are non-identifying relationships. `users` is an optional external teim-app
 table, not a second Cedar Press user table. Its foreign key is installed only
@@ -306,6 +310,7 @@ erDiagram
     cedar_press_subscribers ||..o{ cedar_press_checkout_attempts : user_id
     cedar_press_subscribers |o..o{ cedar_press_checkouts : "user_id after payment"
     cedar_press_subscribers ||..o{ cedar_press_account_setup_links : user_id
+    cedar_press_subscribers ||..o{ cedar_press_email_changes : "id to user_id; cascade delete"
     cedar_press_checkouts ||..o| cedar_press_account_email_deliveries : checkout_id
     cedar_press_subscriptions ||..o{ cedar_press_invoices : subscription_id
     cedar_press_payments ||..o{ cedar_press_refunds : payment_id
@@ -347,6 +352,14 @@ erDiagram
         text email
         timestamptz expires_at
         timestamptz used_at
+        timestamptz created_at
+    }
+    cedar_press_email_changes {
+        text token_hash PK
+        uuid user_id FK
+        text new_email
+        timestamptz expires_at
+        timestamptz used_at "Nullable"
         timestamptz created_at
     }
     cedar_press_account_email_deliveries {

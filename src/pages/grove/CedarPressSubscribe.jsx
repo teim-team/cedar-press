@@ -132,10 +132,10 @@ export default function CedarPressSubscribe() {
             </ul>
           </article>)}
         </div>
-        <p className="cp-memberships__terms">Paid annually. Renews automatically. Your rate stays the same while your subscription is active.{plans.cohort === "early_access" ? " Early-access offer ends December 31, 2026." : ""}</p>
+        <p className="cp-memberships__terms">Paid annually. Renews automatically. Your rate stays the same while your subscription is active.{plans.cohort === "early_access" ? " Early-access offer ends December 31, 2026." : ""} By subscribing you agree to the <Link to="/terms">Terms of Service</Link> and acknowledge the <Link to="/privacy">Privacy Policy</Link>.</p>
       </> : !error ? <p role="status">Loading annual plans…</p> : null}
       {error ? <p role="alert" className="cp-memberships__error">{error.message}</p> : null}
-      <p className="cp-memberships__footer">{user ? <Link to="/settings">Manage your membership</Link> : <>Already a subscriber? <Link to="/login">Sign in</Link> · <Link to="/login?activate=1">Activate an access code</Link></>}</p>
+      <p className="cp-memberships__footer">{user ? <Link to="/settings">Manage your membership</Link> : <>Already a subscriber? <Link to="/login">Sign in</Link></>}</p>
     </section>}
   </AccountPage>;
 }

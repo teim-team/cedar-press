@@ -10,11 +10,11 @@
 // THE BRIEFING SHAPE
 // The reader used to be one long page carrying everything; then it was six
 // tiles opening six doors, which is the masthead's nav bar restated
-// underneath itself. It is a briefing now (`PressBriefing`): the newest
-// research, the three newest releases, the collection that just moved and
+// underneath itself. It is a briefing now (`PressBriefing`): the three
+// newest releases, the collection that just moved and
 // one question about it, then the subscriber priorities and the maintenance
-// promise. Every line of it is read from the release record and the article
-// list rather than written, so it cannot fall out of step with the product.
+// promise. Every line of it is read from the release record rather than
+// written, so it cannot fall out of step with the product.
 //
 // Built from the design system's own tokens (index.css base, redesign.css
 // retheme, then press.css, imported once in main.jsx in that order).
@@ -117,7 +117,7 @@ export default function CedarPress() {
               nav bar restated underneath itself as tiles. A reader who has
               signed in has already chosen this product; what they do not
               know is what moved. Every line of the briefing is read from the
-              release record and the article list, so it cannot go stale. */}
+              release record, so it cannot go stale. */}
           <PressBriefing releaseState={releaseState} />
           <PressPrioritiesBlock user={user} />
         </div>

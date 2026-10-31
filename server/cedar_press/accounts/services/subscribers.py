@@ -1,24 +1,20 @@
-"""Who holds a Cedar Press subscription, and which access code bought it.
+"""Who holds a Cedar Press subscription, and on which tier.
 
 TWO BACKENDS, ONE INTERFACE, CHOSEN BY `DATABASE_URL`.
-Without it, this is exactly what the service did before: subscribers parsed
-out of `CEDAR_PRESS_ACCOUNTS`, codes out of `CEDAR_PRESS_CODES`, and anything
-activated at runtime held in a module-level dict that a restart forgets. That
-is the right behaviour for the preview deployment and for the test suite, and
-the wrong behaviour for a product somebody has paid for.
+Without it, subscribers are parsed out of `CEDAR_PRESS_ACCOUNTS`, and
+anything created at runtime is held in a module-level dict that a restart
+forgets. That is the right behaviour for the preview deployment and for the
+test suite, and the wrong behaviour for a product somebody has paid for.
 
-With it, the same calls read and write `cedar_press_subscribers` and
-`cedar_press_codes` in the platform's own database, beside teim-app's
-`users`. A subscriber who activates a code is a row, written in the same
-transaction that marks the code spent, so the two can never disagree about
-whether an access code was used.
+With it, the same calls read and write `cedar_press_subscribers` in the
+platform's own database, beside teim-app's `users`.
 
 WHY EMAIL IS THE KEY AND `user_id` IS NOT.
-A Tribal Business News subscriber can arrive with an access code before they
-have ever opened the platform. Requiring a `users` row first would make the
-platform a prerequisite for a product sold separately through somebody else's
-magazine. So `email` is the key that always exists and `user_id` is bound
-when — if — a platform account appears. `bind_user` is that moment.
+A subscriber can buy Cedar Press before they have ever opened the platform.
+Requiring a `users` row first would make the platform a prerequisite for a
+product sold on its own. So `email` is the key that always exists and
+`user_id` is bound when — if — a platform account appears. `bind_user` is
+that moment.
 
 WHY THE PASSWORD RULE IS NOT IN HERE.
 This module answers "is this address a subscriber, and on which tier".
@@ -34,46 +30,13 @@ import hashlib
 import hmac
 import json
 import os
-import re
 import secrets
 import threading
-from dataclasses import dataclass
 
 from cedar_press import db
 from cedar_press.accounts.models import Subscriber as Subscriber
 
 TIERS = ("press", "press_pro")
-
-
-class AlreadySubscribed(Exception):
-    """This address already holds an account, so a code cannot create one.
-
-    Raised rather than returned, because it is a different answer from "that
-    code is not usable" and the reader is owed a different sentence. Letting
-    it fall through as `None` would tell somebody whose account already
-    exists that their code was already spent.
-    """
-
-
-
-
-@dataclass(frozen=True)
-class Code:
-    code: str
-    email: str
-    tier: str
-    expires_on: dt.date | None
-    spent_at: dt.datetime | None
-
-    def has_expired(self, today: dt.date) -> bool:
-        return self.expires_on is not None and self.expires_on < today
-
-    @property
-    def spent(self) -> bool:
-        return self.spent_at is not None
-
-
-# ── the subscription an address belongs to ──────────────────────────────────
 
 
 def account_id_for(email: str) -> str:
@@ -118,7 +81,7 @@ def account_id_for(email: str) -> str:
 
 # ── password hashing ────────────────────────────────────────────────────────
 
-_ROUNDS = 240_000
+_ROUNDS = 600_000
 
 
 def hash_password(password: str, *, salt: bytes | None = None) -> str:
@@ -165,8 +128,9 @@ def verify_password(password: str, stored: str | None) -> bool:
 #: Accounts activated in this process. In-memory, so a restart forgets them —
 #: which is why `DATABASE_URL` exists.
 _activated: dict[str, tuple[str, str]] = {}
-_spent: set[str] = set()
 _session_revisions: dict[str, int] = {}
+#: Email -> display name, for accounts without a database.
+_names: dict[str, str] = {}
 _session_lock = threading.Lock()
 #: Email -> (reset token hash, expires at): one live link per address.
 _resets: dict[str, tuple[str, dt.datetime]] = {}
@@ -190,35 +154,10 @@ def _env_accounts() -> dict[str, tuple[str, str]]:
     return out
 
 
-#: A code, in the one form everything stores and compares it in: uppercase,
-#: no spaces, no hyphens. `codes.normalize` is the same rule and the client's
-#: `normalizePressCode` is the same rule again — a code the form accepts and
-#: the server rejects over a hyphen the reader was told not to worry about
-#: reads as "my subscription is not real". Keeping the canonical form HERE
-#: means the database column holds it too, so a lookup is an index hit rather
-#: than a scan over every stored spelling.
-_SEPARATORS = re.compile(r"[\s-]+")
-
-
-def canonical(raw: str | None) -> str:
-    return _SEPARATORS.sub("", str(raw or "")).upper()
-
-
-def _env_codes() -> dict[str, dict[str, object]]:
-    raw = os.environ.get("CEDAR_PRESS_CODES", "").strip()
-    if not raw:
-        return {}
-    try:
-        parsed = json.loads(raw)
-    except json.JSONDecodeError:
-        return {}
-    return {canonical(k): v for k, v in parsed.items() if isinstance(v, dict)}
-
-
 def forget_activated_for_tests() -> None:
     _activated.clear()
-    _spent.clear()
     _resets.clear()
+    _names.clear()
     with _session_lock:
         _session_revisions.clear()
 
@@ -301,7 +240,7 @@ def authenticate(email: str, password: str) -> Subscriber | None:
     if not found:
         if db.configured():
             # THE SAME 401 IS NOT THE SAME ANSWER IF ONE ARRIVES FASTER.
-            # A known address costs 240,000 PBKDF2 rounds to refuse and an
+            # A known address costs 600,000 PBKDF2 rounds to refuse and an
             # unknown one used to cost a SELECT, which is a difference large
             # enough and repeatable enough to read off a stopwatch. That turns
             # the login form into a query for "is this person a Cedar Press
@@ -312,6 +251,24 @@ def authenticate(email: str, password: str) -> Subscriber | None:
     if db.configured():
         return found if verify_password(password, found.password_hash) else None
     return found if hmac.compare_digest(found.password_hash or "", password) else None
+
+
+def upgrade_hash(found: Subscriber, password: str) -> Subscriber:
+    """Re-derive an older, cheaper hash from a password just verified.
+
+    Sign-in only: a new hash ends every session, so a password check made
+    inside a signed-in request must not trigger it. Conditional on the hash
+    just verified, so a password changed in the same instant is never
+    overwritten.
+    """
+    if not db.configured() or int(found.password_hash.split("$")[1]) >= _ROUNDS:
+        return found
+    upgraded = db.execute(
+        "UPDATE cedar_press_subscribers SET password_hash = %s, updated_at = now()"
+        " WHERE lower(email) = %s AND password_hash = %s",
+        (hash_password(password), found.email, found.password_hash),
+    )
+    return (find(found.email) or found) if upgraded else found
 
 
 def create(email: str, password: str, tier: str) -> Subscriber:
@@ -347,10 +304,6 @@ def change_password(email: str, password: str) -> Subscriber | None:
         return find(address) if changed else None
     found = find(address)
     return create(address, password, found.tier) if found else None
-
-
-def exists(email: str) -> bool:
-    return find(email) is not None
 
 
 def bind_user(email: str, user_id: str) -> bool:
@@ -492,131 +445,118 @@ def redeem_reset(
     return change_password(found.email, password) if found else None
 
 
-# ── access codes ────────────────────────────────────────────────────────────
+def profile(email: str) -> dict[str, object]:
+    """The account's name, when it joined, and whether its address is proven.
 
-
-def find_code(code: str) -> Code | None:
-    key = canonical(code)
-    if not key:
-        return None
+    Without a database there is no join date or verification to report, so
+    those are None rather than a guess.
+    """
+    address = (email or "").strip().lower()
     if db.configured():
         row = db.one(
-            "SELECT code, email, tier, expires_on, spent_at FROM cedar_press_codes WHERE code = %s",
-            (key,),
+            "SELECT display_name, created_at, email_verified_at FROM cedar_press_subscribers"
+            " WHERE lower(email) = %s",
+            (address,),
         )
-        if not row:
-            return None
-        return Code(row["code"], row["email"], row["tier"], row["expires_on"], row["spent_at"])
-    raw = _env_codes().get(key)
-    if not raw:
-        return None
-    expires = raw.get("expires")
-    return Code(
-        key,
-        str(raw.get("email", "")).strip().lower(),
-        str(raw.get("tier", "press")),
-        _expiry(expires),
-        dt.datetime.now(dt.timezone.utc) if key in _spent else None,
-    )
+        if row:
+            return {
+                "name": row["display_name"],
+                "member_since": row["created_at"].date().isoformat(),
+                "email_verified": row["email_verified_at"] is not None,
+            }
+    return {"name": _names.get(address), "member_since": None, "email_verified": None}
 
 
-#: The earliest date there is, which `has_expired` is always true for.
-_LONG_EXPIRED = dt.date.min
+def set_display_name(email: str, name: str | None) -> None:
+    address = (email or "").strip().lower()
+    if db.configured():
+        db.execute(
+            "UPDATE cedar_press_subscribers SET display_name = %s WHERE lower(email) = %s",
+            (name, address),
+        )
+    else:
+        _names[address] = name
 
 
-def _expiry(raw: object) -> dt.date | None:
-    """An `expires` field as a date, and an unparseable one as long expired.
+# ── email changes ───────────────────────────────────────────────────────────
 
-    UNPARSEABLE MEANS EXPIRED, WHICH IS A RULE THIS ALMOST DROPPED.
-    `codes.py` has always said so in as many words: "An unparseable date is a
-    register we cannot trust. Treated as expired rather than as unlimited:
-    the failure that turns a typo into a code that never stops working is
-    worse than the one that turns it into a code that does not work." When
-    this lookup moved here, the parse became a bare `date.fromisoformat`, so
-    a typo in `CEDAR_PRESS_CODES` stopped being a refused code and became a
-    500 on `/press/activation/validate` — a reader told the service is broken
-    rather than told their code is not good.
+
+class EmailChangeUnavailable(Exception):
+    """Changing a sign-in address needs the account database."""
+
+
+def issue_email_change(email: str, new_email: str) -> str | None:
+    """A single-use token that moves this account to ``new_email``.
+
+    None when the new address already holds an account; the caller answers
+    the same either way, so the form cannot be used to ask who subscribes.
+    A new request replaces any outstanding one.
     """
-    if not raw:
-        return None
-    try:
-        return dt.date.fromisoformat(str(raw))
-    except ValueError:
-        return _LONG_EXPIRED
-
-
-def redeem(code: str, password: str) -> Subscriber | None:
-    """Spend a code and create the subscriber it names, together.
-
-    ONE TRANSACTION, AND THAT IS THE POINT. The old flow marked the code
-    spent in one place and added the account in another, so a failure between
-    them left a code that could never be used again and a subscriber who had
-    never been created. Here the `UPDATE ... WHERE spent_at IS NULL` both
-    claims the code and proves nobody else claimed it first — the row count
-    is the answer — and the subscriber is inserted before the commit.
-
-    Returns None when the code does not exist, has expired, or was already
-    spent. The caller decides what to tell the reader; this decides what is
-    true.
-    """
-    key = canonical(code)
-    found = find_code(key)
-    if not found or found.spent or found.has_expired(dt.date.today()):
-        return None
-
     if not db.configured():
-        if exists(found.email):
-            raise AlreadySubscribed(found.email)
-        _spent.add(key)
-        return create(found.email, password, found.tier)
+        raise EmailChangeUnavailable
+    target = (new_email or "").strip().lower()
+    if db.one("SELECT 1 FROM cedar_press_subscribers WHERE lower(btrim(email)) = %s", (target,)):
+        return None
+    token = secrets.token_urlsafe(32)
+    db.execute(
+        "INSERT INTO cedar_press_email_changes (token_hash, user_id, new_email, expires_at)"
+        " SELECT %s, id, %s, %s FROM cedar_press_subscribers WHERE lower(email) = %s"
+        " ON CONFLICT (user_id) WHERE used_at IS NULL DO UPDATE SET"
+        " token_hash = EXCLUDED.token_hash, new_email = EXCLUDED.new_email,"
+        " expires_at = EXCLUDED.expires_at, created_at = now()",
+        (
+            _reset_hash(token),
+            target,
+            dt.datetime.now(dt.timezone.utc) + RESET_LIFETIME,
+            (email or "").strip().lower(),
+        ),
+    )
+    return token
 
-    # BEFORE THE TRANSACTION, NOT INSIDE IT. `account_id_for` runs a query of
-    # its own, and a query inside the block below asks the pool for a SECOND
-    # connection while this one is still held. At `CEDAR_PRESS_DB_POOL=1`
-    # every activation then waits out the pool timeout; at the default eight,
-    # eight simultaneous activations hold all eight connections and each waits
-    # for a ninth that cannot come. The value does not change across the
-    # transaction — there is no subscriber row yet — so it is resolved here.
-    account = account_id_for(found.email)
-    hashed = hash_password(password)
 
+def redeem_email_change(token: str, on_change=None) -> tuple[str, str] | None:
+    """Move the account to its confirmed address: ``(old, new)``, or None.
+
+    Every session ends, since the address is part of each cookie. The reader's
+    declared work moves with it and outstanding reset links for the old
+    address die. ``on_change(customer_id, new_email)`` runs inside the
+    transaction, so a billing record that cannot follow rolls the change back
+    rather than leaving the two disagreeing.
+    """
+    if not db.configured():
+        raise EmailChangeUnavailable
     with db.pool().connection() as conn, conn.cursor() as cur:
         cur.execute(
-            "UPDATE cedar_press_codes SET spent_at = now(), spent_by = %s"
-            " WHERE code = %s AND spent_at IS NULL",
-            (found.email, key),
+            "UPDATE cedar_press_email_changes c SET used_at = now()"
+            " FROM cedar_press_subscribers s"
+            " WHERE c.token_hash = %s AND c.used_at IS NULL AND c.expires_at > now()"
+            " AND s.id = c.user_id RETURNING s.id, s.email, s.stripe_customer_id, c.new_email",
+            (_reset_hash(token or ""),),
         )
-        if cur.rowcount == 0:
-            # Somebody redeemed it between the read above and this write.
+        row = cur.fetchone()
+        if not row:
+            return None
+        old, new = row["email"], row["new_email"]
+        cur.execute(
+            "SELECT 1 FROM cedar_press_subscribers WHERE lower(btrim(email)) = %s", (new,)
+        )
+        if cur.fetchone():
             conn.rollback()
             return None
-        # DO NOTHING, NOT DO UPDATE, AND THE DIFFERENCE IS AN ACCOUNT.
-        # This used to overwrite `password_hash` and `tier` on conflict, so a
-        # second code issued to an address that already had a subscription
-        # would set a new password on it — without anybody proving they held
-        # the old one. The caller checks `exists` first; this is the half of
-        # it that also holds when two requests race, because the check and
-        # the insert are not the same instant.
+        # The account guard (migration 010) refuses an address change outside this flow.
+        cur.execute("SET LOCAL cedar_press.verified_email_change = 'on'")
         cur.execute(
-            "INSERT INTO cedar_press_subscribers (email, account_id, tier, password_hash)"
-            " VALUES (%s, %s, %s, %s) ON CONFLICT (email) DO NOTHING",
-            (found.email, account, found.tier, hashed),
+            "UPDATE cedar_press_subscribers SET email = %s, email_verified_at = now(),"
+            " updated_at = now() WHERE id = %s",
+            (new, row["id"]),
         )
-        if cur.rowcount == 0:
-            conn.rollback()
-            raise AlreadySubscribed(found.email)
-        conn.commit()
-    return Subscriber(found.email, found.tier, account)
-
-
-def issue_code(code: str, email: str, tier: str, expires_on: dt.date | None = None) -> None:
-    """Record a code Tribal Business News has issued. Database only."""
-    if not db.configured():
-        raise RuntimeError("issuing codes needs DATABASE_URL")
-    if tier not in TIERS:
-        raise ValueError(f"tier must be one of {TIERS}")
-    db.execute(
-        "INSERT INTO cedar_press_codes (code, email, tier, expires_on)"
-        " VALUES (%s, %s, %s, %s) ON CONFLICT (code) DO NOTHING",
-        (canonical(code), (email or "").strip().lower(), tier, expires_on),
-    )
+        cur.execute("DELETE FROM cedar_press_reader_profiles WHERE email = %s", (new,))
+        cur.execute(
+            "UPDATE cedar_press_reader_profiles SET email = %s WHERE email = %s", (new, old)
+        )
+        cur.execute(
+            "DELETE FROM cedar_press_password_resets WHERE email = %s AND used_at IS NULL", (old,)
+        )
+        if on_change and row["stripe_customer_id"]:
+            on_change(row["stripe_customer_id"], new)
+    return old, new

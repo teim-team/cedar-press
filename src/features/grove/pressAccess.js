@@ -5,8 +5,8 @@
  * Who may read Cedar Press, and how much of the collection they get.
  *
  * Cedar Press is a standalone product, not a rung on the platform ladder and
- * not a Cedar Grove surface. It is sold through Tribal Business News: an
- * eligible membership issues an access code, the code creates the account.
+ * not a Cedar Grove surface. It is sold as an annual subscription on this
+ * site, and the account follows the purchase.
  * Cedar Grove is a superset of it by content — Grove carries all the datasets,
  * plus a data library and other public data work — but Press reads the same
  * upstream Grove does and runs without it.

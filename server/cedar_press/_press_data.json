@@ -1,26 +1,4 @@
 {
-  "tbnUrl": "https://tribalbusinessnews.com",
-  "lumeconUrl": "https://lumecon.ai",
-  "articles": [
-    {
-      "id": "brief-owned",
-      "hosted": true,
-      "tone": "gold",
-      "image": "/pitch/lanes/construction-wide.webp",
-      "imageAlt": "Crews working a large construction site",
-      "caption": "White Earth Nation's certified list runs heavily to the building trades: construction, drywall, tile and site services, most of it first-preference certified.",
-      "datasetId": "owned",
-      "draws": [
-        "owned"
-      ],
-      "tag": "Original Research",
-      "title": "The first nation-shared roster of individually owned Native businesses is in",
-      "dek": "White Earth Nation's TERO sent its certified Indian-owned business list in answer to a request through the office's public contact, the first roster in a dataset of the businesses no federal register counts.",
-      "date": "August 2026",
-      "byline": "Elijah S. Moreno",
-      "minutes": 3
-    }
-  ],
   "citations": [],
   "reportCitationHref": "mailto:contact@lumecon.ai?subject=Cedar%20Press%20citation",
   "catalog": [

@@ -11,7 +11,60 @@ async function account(page, billing = summary) {
     email: "billing@cedar-press.invalid", workspace_tier: "free",
   } }));
   await page.route("**/api/billing", (route) => route.fulfill({ json: billing }));
+  await page.route("**/api/auth/profile", (route) => route.fulfill({ json: {
+    email: "billing@cedar-press.invalid", name: null, member_since: "2026-10-01", email_verified: true,
+  } }));
 }
+
+test("settings shows the profile and saves a name", async ({ page }) => {
+  await account(page);
+  let saved;
+  await page.route("**/api/auth/profile", async (route) => {
+    if (route.request().method() !== "PATCH") return route.fallback();
+    saved = route.request().postDataJSON();
+    await route.fulfill({ json: { email: "billing@cedar-press.invalid", name: "Ada Reader", member_since: "2026-10-01", email_verified: true } });
+  });
+  await page.goto("/settings");
+  const profile = page.getByRole("region", { name: "Profile", exact: true });
+  await expect(profile.getByText("billing@cedar-press.invalid (verified)")).toBeVisible();
+  await expect(profile.getByText("October 1, 2026")).toBeVisible();
+  await profile.getByLabel("Name").fill("Ada Reader");
+  await profile.getByRole("button", { name: "Save name", exact: true }).click();
+  await expect(profile.getByRole("button", { name: "Save name", exact: true })).toBeDisabled();
+  expect(saved).toEqual({ name: "Ada Reader" });
+});
+
+test("settings sends an email change for confirmation", async ({ page }) => {
+  await account(page);
+  let sent;
+  await page.route("**/api/auth/email-change", async (route) => {
+    sent = route.request().postDataJSON();
+    await route.fulfill({ status: 202, json: null });
+  });
+  await page.goto("/settings");
+  const profile = page.getByRole("region", { name: "Profile", exact: true });
+  await profile.getByText("Change email").click();
+  await profile.getByLabel("New email").fill("new@cedar-press.invalid");
+  await profile.getByLabel("Current password").fill("a-long-password");
+  await profile.getByRole("button", { name: "Send confirmation link", exact: true }).click();
+  await expect(profile.getByRole("status")).toContainText("new@cedar-press.invalid");
+  expect(sent).toEqual({ new_email: "new@cedar-press.invalid", password: "a-long-password" });
+});
+
+test("the emailed link confirms the change and asks for a fresh sign-in", async ({ page }) => {
+  await page.route("**/api/me", (route) => route.fulfill({ status: 401, json: { detail: "Not signed in." } }));
+  let confirmed;
+  await page.route("**/api/auth/email-change/confirm", async (route) => {
+    confirmed = route.request().postDataJSON();
+    await route.fulfill({ json: { email: "new@cedar-press.invalid" } });
+  });
+  await page.goto("/login#email-change=synthetic-change");
+  await expect(page).toHaveURL(/\/login$/);
+  await page.getByRole("button", { name: "Confirm new email", exact: true }).click();
+  await expect(page.getByRole("status")).toContainText("Your sign-in email is now new@cedar-press.invalid");
+  await expect(page.getByLabel("Work email")).toHaveValue("new@cedar-press.invalid");
+  expect(confirmed).toEqual({ token: "synthetic-change" });
+});
 
 test("unpaid account can choose annual billing and submit a discount", async ({ page }) => {
   await account(page);
@@ -223,7 +276,7 @@ test("password recovery sends authenticated accounts without paid access to sett
   await expect(page.getByText("No current paid access")).toBeVisible();
   await expect(page.getByTestId("influence")).toHaveCount(0);
   await expect(page.getByText("Reading your ledger…")).toHaveCount(0);
-  await expect(page.getByRole("region", { name: "Billing", exact: true })).toBeVisible();
+  await expect(page.getByRole("region", { name: "Subscription", exact: true })).toBeVisible();
 });
 
 test("settings tolerates unavailable billing without failed-resource console errors", async ({ page }) => {

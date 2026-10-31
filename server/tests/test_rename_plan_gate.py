@@ -31,7 +31,7 @@ FOUR INJECTIONS, ONE PER WAY THE TABLE CAN GO WRONG
                       The coverage check exists so that a new row cannot be
                       decoration; this proves it refuses one.
 
-  a surviving path    the four directories are actually moved, so the rename
+  a surviving path    the old directories are actually moved, so the rename
                       HAS happened as far as the subject can tell, and the
                       Markdown, comments and dotfiles still naming the old
                       paths must be listed by name. None of those would fail
@@ -47,7 +47,7 @@ runs ``git init`` and ``git add``, and
 ``test_the_untouched_copy_passes_the_gate`` is the control that proves the
 copy measures what the real tree measures before anything is injected.
 
-This file names none of the four old paths literally. It builds them from the
+This file names none of the old paths literally. It builds them from the
 subject's own ``_DIRECTORIES`` and ``_OLD_NAME``, for the reason the subject
 does the same: a fixture that spelled them out would be counted by the
 measurement it is testing.
@@ -136,7 +136,7 @@ def _breakdown_pair(root: Path) -> tuple[tuple[str, int], tuple[str, int]]:
     ranked = sorted(((label, int(n)) for label, n in parts), key=lambda p: -p[1])
     return ranked[0], ranked[1]
 
-#: What the four directories are renamed TO in the simulated-rename injection.
+#: What the old directories are renamed TO in the simulated-rename injection.
 #: Only the name matters; nothing reads the new paths.
 _NEW_NAME = "press"
 
@@ -199,7 +199,7 @@ class TestTheRenameGateFires(unittest.TestCase):
 
     @contextmanager
     def _renamed(self):
-        """Actually move the four directories in the copy, then move them back.
+        """Actually move the old directories in the copy, then move them back.
 
         Not a stubbed flag: the subject decides the rename has happened by
         asking `git ls-files` whether anything is still tracked under the old

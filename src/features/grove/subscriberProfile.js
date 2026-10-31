@@ -2,7 +2,7 @@
  * PURPOSE
  * What the service can tell about a reader without asking them anything.
  *
- * Accounts arrive from a Tribal Business News subscription, so the service is
+ * Accounts arrive from a checkout that asks for an email address, so the service is
  * handed an address and nothing else — and a reader should not have to fill
  * in a form to use something they already pay for. The address itself
  * classifies most of the audience that matters: tribal governments sit on

@@ -2,7 +2,7 @@
 // accessibility pass (axe-core 4.13 plus keyboard walks, at 375 and 1280 px).
 // Each test names the defect it holds closed; each was checked by breaking
 // the fix and watching the test fail.
-import { articlesDown, expect, test } from "./fixtures.js";
+import { expect, test } from "./fixtures.js";
 
 import { EMAIL, PASSWORD } from "./demoAccount.js";
 
@@ -94,10 +94,12 @@ test.describe("panels hand focus back", () => {
 
 test.describe("menus over the table", () => {
   for (const name of ["Filters", "More actions"]) {
-    test(`${name} closes on Escape and on a click elsewhere`, async ({ page }) => {
+    test(`${name} closes on Escape and on a click elsewhere`, async ({ page }, testInfo) => {
+      // Wider than a phone the filters sit open in a row, with no menu to close.
+      test.skip(name === "Filters" && testInfo.project.name !== "phone", "the Filters menu is the narrow layout");
       await signedIn(page);
       await page.goto("/data?c=funding");
-      const details = page.locator(name === "Filters" ? ".cp-ex__filters" : ".cp-ex__bar .cp-ex__more");
+      const details = page.locator(name === "Filters" ? ".cp-ex__filters" : ".cp-ex__after .cp-ex__more");
       const summary = details.locator("> summary");
       await summary.focus();
       await page.keyboard.press("Enter");
@@ -146,14 +148,6 @@ test.describe("headings and announcements", () => {
     for (const type of ["research_question", "dataset"]) {
       await expect(page.getByTestId(`priorities-${type}`).getByRole("heading", { level: 2 })).toHaveCount(1);
     }
-  });
-
-  test("an article that is not available still has a page heading", async ({ page }) => {
-    await articlesDown(page);
-    await signedIn(page);
-    await page.goto("/articles/brief-owned");
-    await expect(page.getByRole("status")).toContainText("Articles are unavailable");
-    await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);
   });
 
   test("a failed sample read is announced by the live region that said it was loading", async ({ page }) => {

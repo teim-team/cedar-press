@@ -73,8 +73,7 @@ In scope:
 
 Out of scope:
 
-- Third-party destinations we link to, including Tribal Business News, the
-  partner that handles Cedar Press subscriber plans.
+- Third-party destinations we link to.
 - The sibling Lumecon repositories, each separate scope with its own policy
   (*as of 2026-10-03*):
   - `teim-app`, the Lumecon platform (Cedar Impact, Cedar Commons and Cedar

@@ -1,4 +1,4 @@
-"""Account authentication and activation request schemas."""
+"""Account authentication and setup request schemas."""
 
 from pydantic import BaseModel, Field
 
@@ -31,12 +31,15 @@ class AccountSetup(ResetConfirm):
     name: str = Field(min_length=1, max_length=120)
 
 
-class CodeCheck(BaseModel):
-    code: str
-    email: str
+class ProfileChange(BaseModel):
+    name: str | None = Field(default=None, max_length=120)
 
 
-class Activation(BaseModel):
-    code: str
-    email: str
+class EmailChange(BaseModel):
+    new_email: str = Field(max_length=254, pattern=r"^\s*[^@\s]+@[^@\s]+\.[^@\s]+\s*$")
     password: str
+
+
+class EmailChangeConfirm(BaseModel):
+    token: str = Field(max_length=256)
+

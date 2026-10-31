@@ -11,8 +11,7 @@
  * CONTRACT
  * Cookies carry the session (`credentials: "include"`), because a token in
  * browser storage is a token any script on the page can read. Errors arrive
- * as `{ code, message }` and are rethrown as an Error with `code` attached,
- * which is the shape pressSignup.pressSignupError already reads.
+ * as `{ code, message }` and are rethrown as an Error with `code` attached.
  *
  * Every request has a deadline (`REQUEST_TIMEOUT_MS`, longer for the
  * call whose server side waits on Cedar). A request that misses
@@ -160,6 +159,25 @@ export async function changePassword({ currentPassword, newPassword }) {
   }));
 }
 
+/** The account's name, join date and whether its address is verified. */
+export async function fetchAccountProfile({ signal } = {}) {
+  return request("/auth/profile", { signal });
+}
+
+export async function saveAccountProfile({ name }) {
+  return request("/auth/profile", { method: "PATCH", body: { name } });
+}
+
+/** Email a confirmation link to the new address; nothing changes until it is opened. */
+export async function requestEmailChange({ newEmail, password }) {
+  return request("/auth/email-change", { method: "POST", body: { new_email: newEmail, password } });
+}
+
+/** Apply a confirmed change. Every session ends, this one included. */
+export async function confirmEmailChange({ token }) {
+  return request("/auth/email-change/confirm", { method: "POST", body: { token } });
+}
+
 /** Email a reset link. Answers the same whether or not the address has an account. */
 export async function requestPasswordReset({ email, next = "/" }) {
   return request("/auth/password-reset", { method: "POST", body: { email, next } });
@@ -170,16 +188,6 @@ export async function confirmPasswordReset({ token, newPassword }) {
     method: "POST",
     body: { token, new_password: newPassword },
   }));
-}
-
-/* ── Activation ──────────────────────────────────────────────────────── */
-
-export async function validatePressCode({ code, email }) {
-  return request("/press/activation/validate", { method: "POST", body: { code, email } });
-}
-
-export async function activatePressAccount({ code, email, password }) {
-  return requireSessionPayload(await request("/press/activation", { method: "POST", body: { code, email, password } }));
 }
 
 /* ── The subscriber ──────────────────────────────────────────────────── */
@@ -204,15 +212,6 @@ export async function fetchCollections({ signal } = {}) {
 /** Release history: what changed in each collection, newest first. */
 export async function fetchReleases({ signal } = {}) {
   return request("/press/releases", { signal });
-}
-
-/** Published briefs. */
-export async function fetchArticles({ signal } = {}) {
-  return request("/press/articles", { signal });
-}
-
-export async function fetchArticle(slug, { signal } = {}) {
-  return request("/press/articles/" + encodeURIComponent(slug), { signal });
 }
 
 /**

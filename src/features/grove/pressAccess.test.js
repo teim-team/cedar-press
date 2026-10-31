@@ -50,7 +50,7 @@ test("the server's resolution wins over the local tier map", () => {
   assert.equal(shelfReach({ press: { canRead: true, shelfReach: "penthouse" } }), null);
 });
 
-// Cedar Press is sold through Tribal Business News and is not included with
+// Cedar Press is sold on its own and is not included with
 // Cedar Grove or with Tree. This used to pass grove and tree.
 test("Cedar Grove does not include Cedar Press", () => {
   assert.equal(canReadCedarPress(as("grove")), false);
