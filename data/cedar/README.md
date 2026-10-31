@@ -17,13 +17,23 @@ the `gaming-release-consumer` job) that every receipt in
    collection (Gaming included), each with `collection`, `release`, `store`
    (the release store's absolute path) and `manifest_sha256`, and optionally
    `expected_public_rows`. Neither repository holds the queue or the store.
-3. **Stage.** With the producer checked out clean at that commit:
+3. **Stage.** For every storefront collection in the queue except Gaming, write the bundle first, from Lumecon-data, using that queue item's store and release:
+
+   ```
+   lumecon-data retrieval-bundle --root <store> --collection <id> --release <release> --explore <contract>
+   ```
+
+   `<contract>` is a JSON object with a top-level `record_id`: the customer-table column name, or JSON null. `data/cedar/explore.json` is not that file. Its `record_id` lives under `tables`.
+
+   Then, with the producer checked out clean at that commit:
 
    ```
    LUMECON_ENVIRONMENT=review PYTHONPATH=<Lumecon-data>/src:server TEMP=<review volume> \
      python3 scripts/stage_verified_previews.py --repo . --producer <Lumecon-data> \
        --producer-commit <sha> --queue <queue.json> --output <new directory> --updated <YYYY-MM-DD>
    ```
+
+   Before it loads a collection, the stage reads `<store>/retrieval-bundles/<collection>/<release>/manifest.json`. That file's `collection_id`, `release_id`, and `manifest_sha256` must match the queue item. A missing file, a `<release>.partial` directory, or a difference in those three fields stops the stage and writes no `READY.json`. Gaming is not asked for a bundle. A selected refresh checks only the collections named with `--collection`.
 
    It writes only into the new directory, and writes `READY.json` last; a
    directory without it is incomplete. To refresh some collections only, add

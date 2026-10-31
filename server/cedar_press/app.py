@@ -65,6 +65,7 @@ from pydantic import BaseModel, Field
 
 from cedar_press import (
     cedar_service,
+    collection_profiles,
     db,
     need_profiles,
     press_catalog,
@@ -774,10 +775,12 @@ def _not_included_answer(
     on a Press subscription gets what NEED is, read off its release, and is
     told plainly where the records live.
 
-    What they do not get is retrieval. No hop to Cedar carrying this
-    collection, so nothing composes a sentence over records the subscription
-    does not open, and ``access.opened`` is a field rather than a tone so a
-    panel can render the boundary instead of inferring it from the prose.
+    What they do not get is retrieval. This return still does not hop.
+    A profile miss on the same locked page does hop, with the page id as
+    context, and the records stay closed because that id is not in
+    ``allowedCollectionIds``. ``access.opened`` is a field rather than a
+    tone so a panel can render the boundary instead of inferring it from
+    the prose.
     """
     description = profile.get("description")
     name = profile.get("collection_name") or collection_id
@@ -844,26 +847,51 @@ def _ask_which_collection(thread_id: str | None) -> dict[str, object]:
     }
 
 
+def _cedar_reads_this(question: Question, tier: str) -> bool:
+    """Whether Cedar, not the profile, should answer this figures or change question.
+
+    The profile states release-level figures and release notes. A total for
+    one entity, a count for one year, or how one nation's funding moved is
+    read from the records. When Cedar is wired and this plan's allow-list
+    carries the page's collection, a figures or change question goes to Cedar
+    unless it is plainly about the collection or its release as a whole. An
+    ambiguous question goes to Cedar too, because the profile can only answer
+    it from the release.
+    """
+    collection_id = question.collectionId
+    if not collection_id or not cedar_service.available():
+        return False
+    asked = question.question
+    if not (
+        collection_profiles.asks_for_figures(asked) or collection_profiles.asks_about_changes(asked)
+    ):
+        return False
+    if collection_profiles.about_the_whole_collection(asked, collection_id):
+        return False
+    allowed, _pins = cedar_service.retrieval_allowlist(tier)
+    return collection_id in allowed
+
+
 @app.post("/cedar/ask")
 def ask_cedar(question: Question, session: Session = Depends(require_session)) -> dict[str, object]:
     """Cedar, scoped to what this subscription can open.
 
-    THE ENTITLEMENT IS DECIDED HERE, BEFORE EITHER ANSWERER SEES THE ID.
-    It was not, and the first line of this docstring was the only place the
-    scoping existed. A `collectionId` arrived from the browser and went
-    straight to both answerers, so a Press reader naming a Cedar Press+
-    collection was answered from its profile and, past that, had the id
-    forwarded to Cedar -- which `cedar_service._payload` hands over under
-    "the service decides nothing about entitlement; it is told, because
-    entitlement was already decided on this side of the hop". That comment
-    described an arrangement this route had not implemented: Cedar was told
-    the reader may open a collection nobody had checked they could.
+    The profile answerer sees the page id before the locked-hit decision.
+    Cedar sees a hop only after that. The hop's retrieval set is the payload
+    allow-list, not this page.
 
     ``repository.may_open`` is the same rule the shelf and the download route
-    read, reused rather than restated, so a plan cannot reach a collection
-    through Cedar that it cannot reach through either of those. A hidden
-    control in the browser, an omitted sample request and a client-supplied
-    plan are all display decisions, and none of them is authorization.
+    read. ``_payload`` walks the storefront with that rule and sends
+    ``allowedCollectionIds`` plus ``pinnedReleaseIds``. The page id stays on
+    ``collectionId`` and does not remove ids from that list. A profile answer
+    for a sold collection this plan cannot open returns ``_not_included_answer``
+    and does not hop. Any other question hops. Two questions skip the profile:
+    one that names another collection (the profile answers only for its own
+    page), and a figures or change question that is not plainly about the
+    collection or its release, on a collection Cedar can read
+    (``_cedar_reads_this``). A hidden control in the browser,
+    an omitted sample request and a client-supplied plan are all display
+    decisions, and none of them is authorization.
 
     TWO ANSWERERS, IN THIS ORDER, AND THE ORDER IS THE POINT.
 
@@ -890,30 +918,26 @@ def ask_cedar(question: Question, session: Session = Depends(require_session)) -
     collection_name = None
     if question.collectionId:
         profile = repository.collection_profile(question.collectionId)
-        # An id nothing in the catalog knows is a different answer from one
-        # this plan does not reach, and `may_open` returns False for both.
-        # Telling them apart here keeps "no such collection" from becoming
-        # the sound of every locked collection, which is how a real routing
-        # bug hides behind an upgrade prompt.
         if profile is None:
             raise HTTPException(status_code=404, detail="No such collection.")
-        if repository.is_sold(question.collectionId) and not repository.may_open(
-            session.tier, question.collectionId
-        ):
-            return _not_included_answer(profile, question.collectionId, question.threadId)
         collection_name = profile.get("collection_name")
         answered = repository.cedar_answer(question.question, question.collectionId)
+        if answered and _cedar_reads_this(question, session.tier):
+            answered = None
+        if (
+            answered
+            and repository.is_sold(question.collectionId)
+            and not repository.may_open(session.tier, question.collectionId)
+        ):
+            return _not_included_answer(
+                profile, question.collectionId, question.threadId
+            )
         if answered:
             return {
                 "answer": answered["answer"],
-                # The sentence form stays for any caller already reading it;
-                # `answerBasis` is the one the panel renders from.
                 "basis": answered["basis"],
                 "answerBasis": _answer_basis("release", profile, question.collectionId),
                 "collectionId": question.collectionId,
-                # Named so the panel can say which of the two answered, and
-                # so a reader can tell a cited reading of a release from a
-                # composed reply.
                 "source": "profile",
                 "threadId": question.threadId,
             }
@@ -950,7 +974,14 @@ def ask_cedar(question: Question, session: Session = Depends(require_session)) -
             # do carry a scope, which is a real fact about the question and
             # is what `synthesis` states.
             "basis": None,
-            "answerBasis": _answer_basis("synthesis", profile, question.collectionId),
+            "answerBasis": _answer_basis(
+                "synthesis",
+                profile,
+                question.collectionId,
+                opened=repository.may_open(session.tier, question.collectionId)
+                if question.collectionId
+                else True,
+            ),
             "collectionId": question.collectionId,
             "source": "cedar",
             "threadId": reply.thread_id or question.threadId,

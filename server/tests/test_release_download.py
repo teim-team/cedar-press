@@ -411,7 +411,7 @@ class ReleaseDownloadTest(unittest.TestCase):
     def test_legacy_dataset_requires_review_and_refuses_production_before_transport(self):
         for environment, review in (
             ("production", "review"),
-            ("staging", "review"),
+            ("staging", ""),
             ("development", ""),
         ):
             with (
@@ -428,6 +428,13 @@ class ReleaseDownloadTest(unittest.TestCase):
                 self.assertEqual(response.status_code, 503)
                 self.mock_fetch.assert_not_called()
                 transport.assert_not_called()
+
+    def test_legacy_dataset_is_served_in_staging_review(self):
+        with patch.dict(os.environ, {"CEDAR_PRESS_ENVIRONMENT": "staging"}):
+            response = self.client.get(
+                "/press/collections/legislation/full-download", params={"release_id": self.rid}
+            )
+        self.assertEqual(response.status_code, 200)
 
     def test_explicit_pin_missing_malformed_or_stale_is_refused_and_audited(self):
         for pin, expected in [(None, 400), ("../outside", 400), ("b" * 64, 503)]:

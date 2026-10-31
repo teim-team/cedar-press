@@ -128,7 +128,25 @@ class SelectedPreviewRefreshTest(unittest.TestCase):
             )
         stage.write_json(self.queue_path, self.queue)
 
-    def run_stage(self, expected=OLD):
+    def write_bundle(self, **overrides):
+        payload = {
+            "collection_id": self.selected,
+            "release_id": NEW,
+            "manifest_sha256": NEW_MANIFEST,
+            "columns": [{"name": "record_id", "type": "string"}],
+            "search_fields": [],
+            "row_count": 1,
+            "customer_sheet_transform_version": "customer-sheet-2026-10-04.5",
+            "content_sha256": "f" * 64,
+        }
+        payload.update(overrides)
+        directory = self.root / "store" / "retrieval-bundles" / self.selected / NEW
+        stage.write_json(directory / "manifest.json", payload)
+        return directory / "manifest.json"
+
+    def run_stage(self, expected=OLD, *, bundle=True):
+        if bundle:
+            self.write_bundle()
         modules = {
             "lumecon_data": self.package,
             "lumecon_data.dbload": self.dbload,
@@ -263,6 +281,46 @@ class SelectedPreviewRefreshTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "exact-proof reviewed public base"):
             self.run_stage()
         self.spreadsheet.spool.assert_not_called()
+        self.assertFalse((self.output / "READY.json").exists())
+
+    def test_missing_bundle_manifest_writes_no_ready_marker(self):
+        with self.assertRaisesRegex(ValueError, "funding: retrieval bundle manifest is missing"):
+            self.run_stage(bundle=False)
+        self.dbload.load_manifest.assert_not_called()
+        self.spreadsheet.spool.assert_not_called()
+        self.assertFalse((self.output / "READY.json").exists())
+
+    def test_bundle_pin_mismatch_writes_no_ready_marker(self):
+        cases = (
+            ("collection_id", "deals"),
+            ("release_id", "9" * 64),
+            ("manifest_sha256", "9" * 64),
+        )
+        for key, value in cases:
+            with self.subTest(key=key):
+                self.output = self.root / f"staged-{key}"
+                self.dbload.load_manifest.reset_mock()
+                self.spreadsheet.spool.reset_mock()
+                self.write_bundle(**{key: value})
+                with self.assertRaisesRegex(ValueError, f"funding: retrieval bundle {key} differs"):
+                    self.run_stage(bundle=False)
+                self.dbload.load_manifest.assert_not_called()
+                self.spreadsheet.spool.assert_not_called()
+                self.assertFalse((self.output / "READY.json").exists())
+
+    def test_partial_bundle_writes_no_ready_marker(self):
+        release_dir = self.root / "store" / "retrieval-bundles" / "funding"
+        stage.write_json(
+            release_dir / (NEW + ".partial") / "manifest.json",
+            {
+                "collection_id": "funding",
+                "release_id": NEW,
+                "manifest_sha256": NEW_MANIFEST,
+            },
+        )
+        with self.assertRaisesRegex(ValueError, "funding: retrieval bundle manifest is missing"):
+            self.run_stage(bundle=False)
+        self.dbload.load_manifest.assert_not_called()
         self.assertFalse((self.output / "READY.json").exists())
 
     def test_expected_existing_pin_parser_rejects_duplicates_or_unpinned_values(self):

@@ -715,12 +715,13 @@ class TestEntitlement(unittest.TestCase):
         client.cookies.clear()
         self.assertEqual(client.get("/press/collections/deals/download").status_code, 401)
 
-    # `/cedar/ask` took a `collectionId` from the browser and handed it to both
-    # answerers without asking whether the subscription reached it. The route's
-    # own first line said "scoped to what this subscription can open" and
-    # `cedar_service._payload` told Cedar "entitlement was already decided on
-    # this side of the hop"; neither was true. These four are the cases that
-    # distinguish a real gate from a sentence about one.
+    # A locked profile hit stays local (`NOT_INCLUDED`); a locked profile miss
+    # hops with the page id and `answerBasis.opened` false; an open profile hit
+    # stays local; an open profile miss hops; no page id hops with
+    # `collectionId` null; a named miss is 501 when Cedar is unwired. A figures or
+    # change question that is not plainly about the collection or its release
+    # hops when Cedar can read the page's collection, and a question naming
+    # another collection skips the profile.
 
     def _ask(self, email: str, collection_id: str, question: str | None = None):
         ratelimit.reset_for_tests()
@@ -789,24 +790,20 @@ class TestEntitlement(unittest.TestCase):
         response = self._ask("reader@example.org", "no-such-collection")
         self.assertEqual(response.status_code, 404, response.text)
 
-    def test_a_locked_collection_never_reaches_cedar(self) -> None:
-        # The one that matters. The profile answer is a description and is
-        # allowed; the hop is retrieval and is not. If `cedar_service.ask` is
-        # ever called with a collection this plan cannot open, Cedar has been
-        # handed a scope under a contract that says entitlement was already
-        # checked.
+    def test_a_locked_description_does_not_hop(self) -> None:
         with (
             mock.patch.object(cedar_service, "available", return_value=True),
             mock.patch.object(cedar_service, "ask") as asked,
         ):
             body = self._ask(
-                "reader@example.org", "need", "What should I conclude from this?"
+                "reader@example.org", "need", "What does this collection cover?"
             ).json()
         asked.assert_not_called()
+        self.assertEqual(body["source"], "profile")
         self.assertEqual(body["access"]["opened"], False)
+        self.assertEqual(body["access"]["reason"], "NOT_INCLUDED")
 
-        # And the same question on a collection the plan does reach still gets
-        # there, so the test above is not passing because the hop is dead.
+    def test_a_locked_profile_miss_hops_with_the_page_as_context(self) -> None:
         with (
             mock.patch.object(cedar_service, "available", return_value=True),
             mock.patch.object(cedar_service, "ask") as asked,
@@ -814,13 +811,157 @@ class TestEntitlement(unittest.TestCase):
             asked.return_value = cedar_service.CedarReply(
                 answer="composed", thread_id="t-1", unavailable=False
             )
-            # A question the profile cannot answer, so the hop is the only
-            # thing left that could answer it. "What does this collection
-            # cover?" is answered off the release and never reaches Cedar,
-            # which would make this control pass for the wrong reason.
-            self._ask("reader@example.org", "lobbying", "What should I conclude from this?")
+            body = self._ask(
+                "reader@example.org", "need", "What should I conclude from this?"
+            ).json()
+        self.assertEqual(asked.call_count, 1)
+        self.assertEqual(asked.call_args.kwargs["collection_id"], "need")
+        self.assertEqual(asked.call_args.kwargs["tier"], "press")
+        self.assertEqual(body["source"], "cedar")
+        self.assertNotIn("access", body)
+        self.assertIs(body["answerBasis"]["opened"], False)
+
+    def test_an_open_profile_hit_does_not_hop(self) -> None:
+        with (
+            mock.patch.object(cedar_service, "available", return_value=True),
+            mock.patch.object(cedar_service, "ask") as asked,
+        ):
+            body = self._ask(
+                "reader@example.org", "lobbying", "What does this collection cover?"
+            ).json()
+        asked.assert_not_called()
+        self.assertEqual(body["source"], "profile")
+        self.assertIsNone(body.get("access"))
+
+    def test_no_page_hops_with_a_null_collection_id(self) -> None:
+        ratelimit.reset_for_tests()
+        sign_in("reader@example.org")
+        with (
+            mock.patch.object(cedar_service, "available", return_value=True),
+            mock.patch.object(cedar_service, "ask") as asked,
+        ):
+            asked.return_value = cedar_service.CedarReply(
+                answer="composed", thread_id="t-1", unavailable=False
+            )
+            response = client.post(
+                "/cedar/ask",
+                json={"question": "What should I conclude from this?"},
+            )
+        self.assertEqual(response.status_code, 200, response.text)
+        self.assertEqual(asked.call_count, 1)
+        self.assertIsNone(asked.call_args.kwargs["collection_id"])
+        self.assertEqual(asked.call_args.kwargs["tier"], "press")
+
+    def test_a_locked_profile_miss_is_501_when_cedar_is_unwired(self) -> None:
+        with mock.patch.object(cedar_service, "available", return_value=False):
+            response = self._ask(
+                "reader@example.org", "need", "What should I conclude from this?"
+            )
+        self.assertEqual(response.status_code, 501, response.text)
+        self.assertEqual(response.json()["code"], "NOT_ANSWERABLE")
+
+    def test_an_open_profile_miss_still_hops(self) -> None:
+        with (
+            mock.patch.object(cedar_service, "available", return_value=True),
+            mock.patch.object(cedar_service, "ask") as asked,
+        ):
+            asked.return_value = cedar_service.CedarReply(
+                answer="composed", thread_id="t-1", unavailable=False
+            )
+            body = self._ask(
+                "reader@example.org", "lobbying", "What should I conclude from this?"
+            ).json()
         self.assertEqual(asked.call_count, 1)
         self.assertEqual(asked.call_args.kwargs["collection_id"], "lobbying")
+        self.assertIs(body["answerBasis"]["opened"], True)
+
+    def test_a_figures_question_about_one_entity_hops_when_cedar_can_count(self) -> None:
+        with (
+            mock.patch.object(cedar_service, "available", return_value=True),
+            mock.patch.object(cedar_service, "ask") as asked,
+        ):
+            asked.return_value = cedar_service.CedarReply(
+                answer="composed", thread_id="t-1", unavailable=False
+            )
+            body = self._ask(
+                "reader@example.org",
+                "funding",
+                "How many awards did Cherokee Nation receive in fiscal year 2020?",
+            ).json()
+        self.assertEqual(asked.call_count, 1)
+        self.assertEqual(body["source"], "cedar")
+
+    def test_a_figures_question_about_one_entity_stays_local_without_cedar(self) -> None:
+        with mock.patch.object(cedar_service, "available", return_value=False):
+            body = self._ask(
+                "reader@example.org",
+                "funding",
+                "How many awards did Cherokee Nation receive in fiscal year 2020?",
+            ).json()
+        self.assertEqual(body["source"], "profile")
+
+    def test_a_question_about_the_whole_collection_stays_local(self) -> None:
+        with (
+            mock.patch.object(cedar_service, "available", return_value=True),
+            mock.patch.object(cedar_service, "ask") as asked,
+        ):
+            body = self._ask(
+                "reader@example.org", "deals", "How many records are in this collection?"
+            ).json()
+        asked.assert_not_called()
+        self.assertEqual(body["source"], "profile")
+
+    def test_a_locked_page_question_about_an_open_collection_hops(self) -> None:
+        with (
+            mock.patch.object(cedar_service, "available", return_value=True),
+            mock.patch.object(cedar_service, "ask") as asked,
+        ):
+            asked.return_value = cedar_service.CedarReply(
+                answer="composed", thread_id="t-1", unavailable=False
+            )
+            body = self._ask(
+                "reader@example.org",
+                "contractors",
+                "How much federal funding did Cherokee Nation receive in fiscal year 2024, "
+                "from Federal Funding to Indian Country?",
+            ).json()
+        self.assertEqual(asked.call_count, 1)
+        self.assertEqual(asked.call_args.kwargs["collection_id"], "contractors")
+        self.assertEqual(body["source"], "cedar")
+        self.assertNotIn("access", body)
+
+
+    def _hops(self, collection_id: str, question: str) -> bool:
+        with (
+            mock.patch.object(cedar_service, "available", return_value=True),
+            mock.patch.object(cedar_service, "ask") as asked,
+        ):
+            asked.return_value = cedar_service.CedarReply(
+                answer="composed", thread_id="t-1", unavailable=False
+            )
+            body = self._ask("reader@example.org", collection_id, question).json()
+        self.assertEqual(body["source"], "cedar" if asked.called else "profile")
+        return asked.called
+
+    def test_a_change_question_about_records_hops(self) -> None:
+        for question in (
+            "What changed for Cherokee Nation funding in 2021?",
+            "what changed for cherokee nation funding?",
+            "What changed since 2025?",
+        ):
+            with self.subTest(question=question):
+                self.assertTrue(self._hops("funding", question))
+
+    def test_a_figures_question_with_a_lowercase_name_hops(self) -> None:
+        self.assertTrue(self._hops("funding", "how many awards did cherokee nation receive?"))
+
+    def test_a_question_about_the_release_stays_local(self) -> None:
+        for question in (
+            "What changed since I last used this collection?",
+            "What are the headline figures?",
+        ):
+            with self.subTest(question=question):
+                self.assertFalse(self._hops("funding", question))
 
 
 class TestCedarConversation(unittest.TestCase):

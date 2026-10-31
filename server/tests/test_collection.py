@@ -535,6 +535,36 @@ class TestPressCatalogSnapshot(unittest.TestCase):
                 self.assertIn("current roster rather than a series", sentence)
                 self.assertNotIn("Coverage from", sentence)
 
+    def test_a_description_quotes_the_manifest(self) -> None:
+        import json
+
+        manifest = json.loads(
+            (_REPO / "data" / "cedar" / "collections.manifest.json").read_text(encoding="utf-8")
+        )
+        by_id = {entry["id"]: entry["descriptor"] for entry in manifest["collections"]}
+        funding = by_id["funding"]
+        covered = collection_profiles.answer_from_profile(
+            "What does this collection cover?", "funding"
+        )["answer"]
+        tracks_at = covered.index(funding["tracks"])
+        sources_at = covered.index(funding["sources"])
+        method_at = covered.index(funding["method"])
+        self.assertLess(tracks_at, sources_at)
+        self.assertLess(sources_at, method_at)
+        self.assertNotIn("It is built from", covered)
+
+        built = collection_profiles.answer_from_profile("How is funding built?", "funding")[
+            "answer"
+        ]
+        self.assertIn(funding["method"], built)
+
+        plot = collection_profiles.answer_from_profile("What does this collection cover?", "plot")[
+            "answer"
+        ]
+        self.assertIn("PLOT (Parcel-Level Ownership and Transfers)", plot)
+        self.assertIn(by_id["plot"]["sources"], plot)
+        self.assertIn(by_id["plot"]["method"], plot)
+
     def test_the_ladder_is_seven_collections_and_seven_more(self) -> None:
         # The owner's ruling of 2026-09-02: Cedar Press is the standard
         # shelf at full depth, Cedar Press+ is that plus the pro shelf. The
