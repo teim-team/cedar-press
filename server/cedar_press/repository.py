@@ -488,17 +488,25 @@ def _release_json(path, *, limit=4 * 1024 * 1024):
     return json.loads(_release_bytes(path, limit=limit))
 
 
+# Review releases are never served from production.
+REVIEW_DELIVERY_ENVIRONMENTS = frozenset({"development", "staging"})
+
+
+def _review_delivery_allowed():
+    environment = os.environ.get("CEDAR_PRESS_ENVIRONMENT", "development")
+    return environment in REVIEW_DELIVERY_ENVIRONMENTS
+
+
 def _partitioned_release(catalog, collection_id, requested_release_id, metadata_only):
-    """Development-only assembly of one manifest-pinned logical table.
+    """Development and staging assembly of one manifest-pinned logical table.
 
     Every part is verified before returning any bytes. The full artifact and key
     index live on disk; copy buffers are bounded; validation retains one JSON record at a time.
     """
-    if (
-        os.environ.get("CEDAR_PRESS_ENVIRONMENT", "development") != "development"
-        or os.environ.get("CEDAR_PRESS_PARTITIONED_REHEARSAL") != "1"
-    ):
-        raise FullReleaseUnavailable("Partitioned delivery requires explicit development rehearsal")
+    if not _review_delivery_allowed() or os.environ.get("CEDAR_PRESS_PARTITIONED_REHEARSAL") != "1":
+        raise FullReleaseUnavailable(
+            "Partitioned delivery requires explicit development or staging rehearsal"
+        )
     pins = catalog.get("collection_releases")
     if not isinstance(pins, list) or any(not isinstance(p, dict) for p in pins):
         raise FullReleaseUnavailable("Malformed collection catalog")
@@ -641,7 +649,7 @@ def _partitioned_release(catalog, collection_id, requested_release_id, metadata_
         "table_id": table,
         "format": "jsonl",
         "schema_version": 1,
-        "scope": "Development rehearsal; complete pinned logical table in manifest ordinal order",
+        "scope": "Review rehearsal; complete pinned logical table in manifest ordinal order",
         "filename": f"{collection_id}.jsonl",
         "media_type": "application/x-ndjson",
         "citation": launch.collection_citation(collection_id)
@@ -836,10 +844,7 @@ def full_release(collection_id, requested_release_id=None, *, metadata_only=Fals
         # Legacy dataset v1 manifests have no governed production eligibility
         # label. Mirror the database loader's rehearsal-only native bridge before
         # touching the data API; rights alone cannot promote a review release.
-        if (
-            os.environ.get("CEDAR_PRESS_ENVIRONMENT", "development") != "development"
-            or os.environ.get("LUMECON_ENVIRONMENT") != "review"
-        ):
+        if not _review_delivery_allowed() or os.environ.get("LUMECON_ENVIRONMENT") != "review":
             raise FullReleaseUnavailable("Legacy dataset delivery requires explicit review")
         pins = [item for item in catalog["collections"] if item["dataset_id"] == collection_id]
         if len(pins) != 1:
