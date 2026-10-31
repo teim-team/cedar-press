@@ -467,6 +467,15 @@ LAYOUTS: dict[str, dict[str, Any]] = {
     "need": {
         "grain": "One enterprise a Native entity owns, with its owner and parent enterprise.",
         "main": [
+            # The selected, cleaned table (need.published_enterprises) already
+            # carries the owner and parent, so nothing is attached to it.
+            {
+                "tables": ["published_enterprises"],
+                "rename": {
+                    "enterprise_id": "business_uid",
+                    "parent_enterprise_id": "parent_business_uid",
+                },
+            },
             {
                 "tables": ["reviewed_public_base"],
                 "rename": {
