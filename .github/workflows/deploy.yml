@@ -58,7 +58,7 @@ jobs:
       # `make audit-python` resolves the server's declared dependencies with
       # uv before auditing them, every extra included: the dev tools (ruff,
       # httpx2, coverage, pip-audit) as well as postgres.
-      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
       - run: ruff check server
       # Through the Makefile, the same calls ci.yml makes -- and the
       # deployGates test asserts the two lists stay identical, so the gate a
