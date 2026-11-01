@@ -1,4 +1,4 @@
-"""A reviewed NEED subset passes the real HTTP and shared Grove boundaries."""
+"""NEED's published table passes the real HTTP and shared Grove boundaries."""
 
 import copy
 import csv
@@ -105,6 +105,55 @@ class ReviewedNeedReleaseTest(unittest.TestCase):
         self.addCleanup(fetch.stop)
         return manifest, pin, content
 
+    def published_fixture(self):
+        manifest, pin, _ = self.fixture(
+            "need", policy.PUBLISHED_COMPONENT, columns=policy.PUBLISHED_FIELDS
+        )
+        row = dict.fromkeys(policy.PUBLISHED_FIELDS, "synthetic")
+        row.update(
+            enterprise_id="NEST-SYNTHETIC-1",
+            enterprise_name="Synthetic Enterprise",
+            owner_entity_name="Synthetic Parent",
+            source_url="https://example.test/report",
+            selection_basis="owner_document",
+        )
+        content = repository._canonical_bytes(row)
+        proof = {
+            "basis_counts": {"owner_document": 1},
+            "producer_commit": "a" * 40,
+            "record_count": 1,
+            "selection_sha256": "b" * 64,
+            "source_release_id": "c" * 64,
+            "version": policy.PUBLISHED_VERSION,
+        }
+        entry = manifest["components"][policy.PUBLISHED_COMPONENT]
+        entry.update(
+            dataset_id="need--" + policy.PUBLISHED_COMPONENT,
+            row_grain="One enterprise a Native entity owns",
+            metadata={
+                "internal_only": False,
+                "field_rights": dict.fromkeys(policy.PUBLISHED_FIELDS, "PUBLIC_DERIVED"),
+                policy.PUBLISHED_COMPONENT: copy.deepcopy(proof),
+            },
+            files={
+                "records.jsonl": {
+                    "bytes": len(content),
+                    "sha256": hashlib.sha256(content).hexdigest(),
+                }
+            },
+        )
+        manifest["attestations"] = {policy.PUBLISHED_COMPONENT: proof}
+        working = copy.deepcopy(entry)
+        working["metadata"] = {"internal_only": True}
+        manifest["components"]["enterprises"] = working
+        self.repin(manifest, pin)
+        fetch = patch.object(
+            repository, "_release_response", side_effect=lambda _: io.BytesIO(content)
+        )
+        fetch.start()
+        self.addCleanup(fetch.stop)
+        return manifest, pin, content
+
     def repin(self, manifest, pin):
         pin["manifest_sha256"] = hashlib.sha256(repository._canonical_bytes(manifest)).hexdigest()
         catalog = json.loads((self.root / "catalog.json").read_bytes())
@@ -121,12 +170,12 @@ class ReviewedNeedReleaseTest(unittest.TestCase):
             )
         )
 
-    def test_reviewed_rows_only_reach_authenticated_press_and_shared_grove_csv(self):
-        _, pin, content = self.reviewed_fixture()
+    def test_published_rows_only_reach_authenticated_press_and_shared_grove_csv(self):
+        _, pin, content = self.published_fixture()
         self.session("press_pro")
         result = self.client.get(
             "/press/collections/need/full-download",
-            params={"release_id": pin["release_id"], "component": policy.COMPONENT},
+            params={"release_id": pin["release_id"], "component": policy.PUBLISHED_COMPONENT},
         )
         self.assertEqual(result.status_code, 200, result.text)
         self.assertEqual(result.content, content)
@@ -143,11 +192,12 @@ class ReviewedNeedReleaseTest(unittest.TestCase):
         self.assertNotIn("enterprise_id", rows[0])
         self.assertEqual(rows[0]["business_uid"], "")
         self.assertEqual(rows[0]["needs_cedar_id"], "yes")
+        self.assertEqual(rows[0]["owner_entity_name"], "Synthetic Parent")
+        self.assertEqual(rows[0]["selection_basis"], "owner_document")
         self.assertNotIn("NEST-SYNTHETIC-1", result.text)
-        self.assertNotIn("private_rating", result.text)
         metadata = spreadsheet.metadata("need")
-        self.assertEqual(metadata["publication_scope"], "reviewed_public_base_only")
-        self.assertEqual(metadata["reviewed_public_base"]["record_count"], 1)
+        self.assertEqual(metadata["publication_scope"], policy.PUBLISHED_COMPONENT)
+        self.assertEqual(metadata[policy.PUBLISHED_COMPONENT]["record_count"], 1)
         response = grove_exchange.response(
             {
                 "protocol_version": 1,
@@ -160,6 +210,9 @@ class ReviewedNeedReleaseTest(unittest.TestCase):
         )
         self.assertEqual(response["status"], 200, response)
         self.assertEqual(response["payload"]["record_count"], 1)
+        self.assertEqual(
+            response["payload"][policy.PUBLISHED_COMPONENT]["version"], policy.PUBLISHED_VERSION
+        )
         self.assertFalse(repository.may_download_full("press", "need"))
         self.assertFalse(repository.may_download_full("guest", "need"))
 
@@ -172,10 +225,6 @@ class ReviewedNeedReleaseTest(unittest.TestCase):
         entry["rights"] = {"publication_class": "restricted", "redistribution": False}
         entry["metadata"]["publication_status"] = "source_limited"
         self.assertTrue(policy.reviewed_base_permitted(manifest, policy.COMPONENT, entry))
-        self.assertEqual(
-            policy.descriptor_metadata(manifest, policy.COMPONENT)["publication_scope"],
-            "reviewed_public_base_only",
-        )
         entry["metadata"]["internal_only"] = True
         self.assertFalse(policy.reviewed_base_permitted(manifest, policy.COMPONENT, entry))
 
@@ -194,75 +243,60 @@ class ReviewedNeedReleaseTest(unittest.TestCase):
         entry["rights"] = None
         self.assertFalse(policy.reviewed_base_permitted(manifest, policy.COMPONENT, entry))
 
-    def test_original_raw_components_and_legacy_sample_remain_refused_without_fetch(self):
-        _, pin, _ = self.reviewed_fixture()
-        with patch.object(
-            repository, "_release_response", side_effect=AssertionError("No held bytes")
-        ), self.assertRaises(repository.FullReleaseUnavailable):
-            repository.grove_full_release("need", pin["release_id"], component="enterprises")
-            # The legacy preview is no longer held by the reviewed-base proof
-            # (owner ruling 2026-10-04); "enterprises" above is still refused
-            # because the release itself marks it internal_only.
+    def test_only_the_published_table_is_offered_and_others_refuse_without_fetch(self):
+        _, pin, _ = self.published_fixture()
+        for component in ("enterprises", policy.COMPONENT):
+            with (
+                self.subTest(component=component),
+                patch.object(
+                    repository, "_release_response", side_effect=AssertionError("No bytes")
+                ),
+                self.assertRaises(repository.FullReleaseUnavailable),
+            ):
+                repository.grove_full_release("need", pin["release_id"], component=component)
         rows = repository.grove_release_metadata("need")
-        available = [row for row in rows if row.get("record_count")]
-        self.assertEqual([row["table_id"] for row in available], [policy.COMPONENT])
+        self.assertEqual([row["table_id"] for row in rows], [policy.PUBLISHED_COMPONENT])
+        self.assertEqual(rows[0]["record_count"], 1)
 
-    def test_malformed_or_unpaired_evidence_refuses_before_reading_any_component(self):
-        manifest, pin, _ = self.reviewed_fixture()
+    def test_a_table_that_differs_from_its_proof_refuses_before_any_bytes(self):
+        manifest, pin, _ = self.published_fixture()
         original = copy.deepcopy(manifest)
-        # Owner ruling 2026-10-04: the reviewed-base proof no longer gates
-        # NEED, so only a contract/field-map mismatch still refuses here.
-        for failure in ("missing", "unpaired", "bad_receipt", "held_metadata"):
-            with self.subTest(proof_no_longer_required=failure):
-                manifest.clear()
-                manifest.update(copy.deepcopy(original))
-                entry = manifest["components"][policy.COMPONENT]
-                if failure == "missing":
-                    del manifest["attestations"]["reviewed_public_base"]
-                elif failure == "unpaired":
-                    entry["metadata"]["reviewed_public_base"]["decisions_sha256"] = "f" * 64
-                elif failure == "bad_receipt":
-                    for proof in (
-                        manifest["attestations"]["reviewed_public_base"],
-                        entry["metadata"]["reviewed_public_base"],
-                    ):
-                        proof["intake_gate"]["status"] = "failed"
-                else:
-                    entry["metadata"]["publication_hold"] = True
-                self.repin(manifest, pin)
-                release = repository.grove_full_release(
-                    "need", pin["release_id"], component=policy.COMPONENT, metadata_only=True
-                )
-                self.assertEqual(release["table_id"], policy.COMPONENT)
-        for failure in ("extra_field",):
+        name = policy.PUBLISHED_COMPONENT
+
+        def both_proofs(key, value):
+            manifest["attestations"][name][key] = value
+            manifest["components"][name]["metadata"][name][key] = value
+
+        failures = {
+            "missing": lambda: manifest["attestations"].pop(name),
+            "unpaired": lambda: manifest["attestations"][name].update(selection_sha256="f" * 64),
+            "version": lambda: both_proofs("version", "need-published-enterprises-99"),
+            "commit": lambda: both_proofs("producer_commit", "main"),
+            "count": lambda: both_proofs("record_count", 2),
+            "dataset": lambda: manifest["components"][name].update(dataset_id="need--other"),
+            "working_table": lambda: manifest["components"][name]["metadata"].update(
+                internal_only=True
+            ),
+            "extra_column": lambda: manifest["components"][name]["fields"].append(
+                {"name": "licensed_rating", "type": "string"}
+            ),
+        }
+        for failure, change in failures.items():
             with self.subTest(failure=failure):
                 manifest.clear()
                 manifest.update(copy.deepcopy(original))
-                entry = manifest["components"][policy.COMPONENT]
-                if failure == "missing":
-                    del manifest["attestations"]["reviewed_public_base"]
-                elif failure == "unpaired":
-                    entry["metadata"]["reviewed_public_base"]["decisions_sha256"] = "f" * 64
-                elif failure == "bad_receipt":
-                    for proof in (
-                        manifest["attestations"]["reviewed_public_base"],
-                        entry["metadata"]["reviewed_public_base"],
-                    ):
-                        proof["intake_gate"]["status"] = "failed"
-                elif failure == "extra_field":
-                    entry["fields"].append(
-                        {"name": "licensed_rating", "type": "string", "nullable": False}
-                    )
-                else:
-                    entry["metadata"]["publication_hold"] = True
+                change()
                 self.repin(manifest, pin)
+                self.assertFalse(
+                    policy.published_enterprises_permitted(
+                        manifest, name, manifest["components"][name]
+                    )
+                )
                 with patch.object(
-                    repository, "_release_response", side_effect=AssertionError("No rejected bytes")
+                    repository, "_release_response", side_effect=AssertionError("No bytes")
                 ):
                     with self.assertRaises(repository.FullReleaseUnavailable):
-                        repository.grove_full_release(
-                            "need", pin["release_id"], component=policy.COMPONENT
-                        )
+                        repository.grove_full_release("need", pin["release_id"], component=name)
                     with self.assertRaises(repository.FullReleaseUnavailable):
                         spreadsheet.download("need", pin["release_id"])
 
@@ -327,91 +361,13 @@ class ReviewedNeedReleaseTest(unittest.TestCase):
         self.repin(manifest, pin)
         return manifest, pin, content
 
-    def test_claim_scoped_http_export_does_not_turn_affiliation_into_ownership(self):
-        manifest, pin, content = self.claim_scoped_fixture()
-        self.assertTrue(
-            policy.reviewed_base_permitted(
-                manifest, policy.COMPONENT, manifest["components"][policy.COMPONENT]
-            )
-        )
-        self.session("press_pro")
-        with patch.object(
-            repository, "_release_response", side_effect=lambda _: io.BytesIO(content)
-        ):
-            result = self.client.get(
-                "/press/collections/need/spreadsheet-download",
-                params={"release_id": pin["release_id"]},
-            )
-            self.assertEqual(result.status_code, 200, result.text)
-            rows = list(csv.DictReader(io.StringIO(result.text)))
-            self.assertEqual(len(rows), 1)
-            self.assertEqual(rows[0]["related_entity_name"], "Synthetic Regional Organization")
-            self.assertEqual(rows[0]["relationship_type"], "affiliated_with")
-            for column in ("owner_name", "owner_scope", "ownership_extent", "uei", "cage_code"):
-                self.assertEqual(rows[0][column], "")
-            self.assertEqual(json.loads(rows[0]["verified_claims"]), ["identity", "affiliation"])
-            response = grove_exchange.response(
-                {
-                    "protocol_version": 1,
-                    "tier": "grove",
-                    "operation": "spreadsheet",
-                    "collection": "need",
-                    "release_id": pin["release_id"],
-                },
-                self.root,
-            )
-            self.assertEqual(response["status"], 200, response)
-            self.assertEqual(
-                response["payload"]["reviewed_public_base"]["version"], policy.CLAIM_VERSION
-            )
-            self.assertEqual(response["payload"]["record_count"], 1)
-        with (
-            patch.object(
-                repository,
-                "_release_response",
-                side_effect=AssertionError("Private components stay held"),
-            ),
-            self.assertRaises(repository.FullReleaseUnavailable),
-        ):
-            repository.grove_full_release("need", pin["release_id"], component="enterprises")
-
-    def test_claim_scoped_proof_is_exact_and_refuses_before_component_fetch(self):
-        manifest, pin, _ = self.claim_scoped_fixture()
-        original = copy.deepcopy(manifest)
-        # Owner ruling 2026-10-04: the reviewed-base proof (version, pairing,
-        # nullability) no longer gates NEED; field-map and licensed-field
-        # mismatches still refuse.
-        for failure in ("missing_binding", "licensed_field"):
-            with self.subTest(failure=failure):
-                manifest.clear()
-                manifest.update(copy.deepcopy(original))
-                entry = manifest["components"][policy.COMPONENT]
-                if failure in {"unknown_version", "old_version_new_fields"}:
-                    version = (
-                        "need-reviewed-public-base-99"
-                        if failure == "unknown_version"
-                        else policy.VERSION
-                    )
-                    manifest["attestations"]["reviewed_public_base"]["version"] = version
-                    entry["metadata"]["reviewed_public_base"]["version"] = version
-                elif failure == "missing_binding":
-                    entry["fields"] = [f for f in entry["fields"] if f["name"] != "subject_binding"]
-                elif failure in {"nullable_identity", "required_unproved_owner"}:
-                    target = "enterprise_id" if failure == "nullable_identity" else "owner_name"
-                    next(f for f in entry["fields"] if f["name"] == target)["nullable"] = (
-                        target == "enterprise_id"
-                    )
-                elif failure == "licensed_field":
-                    entry["metadata"]["field_rights"]["related_entity_name"] = "LICENSED"
-                else:
-                    entry["metadata"]["reviewed_public_base"]["version"] = policy.VERSION
-                self.repin(manifest, pin)
-                with (
-                    patch.object(
-                        repository,
-                        "_release_response",
-                        side_effect=AssertionError("Rejected proof must not fetch"),
-                    ),
-                    self.assertRaises(repository.FullReleaseUnavailable),
-                ):
-                    spreadsheet.download("need", pin["release_id"])
+    def test_claim_scoped_preview_proof_is_exact(self):
+        manifest, _, _ = self.claim_scoped_fixture()
+        entry = manifest["components"][policy.COMPONENT]
+        self.assertTrue(policy.reviewed_base_permitted(manifest, policy.COMPONENT, entry))
+        changed = copy.deepcopy(entry)
+        changed["fields"] = [f for f in changed["fields"] if f["name"] != "subject_binding"]
+        self.assertFalse(policy.reviewed_base_permitted(manifest, policy.COMPONENT, changed))
+        changed = copy.deepcopy(entry)
+        changed["metadata"]["field_rights"]["related_entity_name"] = "LICENSED"
+        self.assertFalse(policy.reviewed_base_permitted(manifest, policy.COMPONENT, changed))

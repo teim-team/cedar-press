@@ -135,7 +135,7 @@ def exchange(request: dict, output_directory: Path | None = None) -> dict:
             "citation": release["citation"],
             **{
                 key: release[key]
-                for key in ("publication_scope", "reviewed_public_base")
+                for key in ("publication_scope", "published_enterprises")
                 if key in release
             },
         }
