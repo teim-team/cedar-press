@@ -9,9 +9,7 @@
 // collection's set in data/cedar/landing_examples/<collection>.json may
 // choose and order those records by their record ID and name the columns
 // they are shown on; a set with no rows shows the download as served.
-// Values are never copied or edited here. The one addition is PLOT's
-// `extra_columns`: the tribe a parcel's recorded owner names, by exact Cedar
-// register name, which the PLOT table has no column for.
+// Values are never copied, added or edited here.
 //
 // Only the landing frame reads this (PressCollectionPreview.jsx). The
 // collection viewer, record and entity pages and every download read the
@@ -23,25 +21,21 @@ import giving from "../../../data/cedar/landing_examples/foundation-corporate-gi
 import funding from "../../../data/cedar/landing_examples/funding.json" with { type: "json" };
 import legislation from "../../../data/cedar/landing_examples/legislation.json" with { type: "json" };
 import lobbying from "../../../data/cedar/landing_examples/lobbying.json" with { type: "json" };
-import nagpra from "../../../data/cedar/landing_examples/nagpra.json" with { type: "json" };
-import naturalResources from "../../../data/cedar/landing_examples/natural-resources.json" with { type: "json" };
 import need from "../../../data/cedar/landing_examples/need.json" with { type: "json" };
 import nonprofits from "../../../data/cedar/landing_examples/nonprofits.json" with { type: "json" };
-import owned from "../../../data/cedar/landing_examples/owned.json" with { type: "json" };
-import plot from "../../../data/cedar/landing_examples/plot.json" with { type: "json" };
 import subcontracting from "../../../data/cedar/landing_examples/subcontracting.json" with { type: "json" };
 import { contractFor } from "./explore.js";
 
 /** Each collection's landing set (record choices and shown columns) by collection id. */
 export const LANDING_EXAMPLES = Object.freeze(Object.fromEntries(
-  [contractors, deals, federalRegister, giving, funding, legislation, lobbying, nagpra, naturalResources, need, nonprofits, owned, plot, subcontracting]
+  [contractors, deals, federalRegister, giving, funding, legislation, lobbying, need, nonprofits, subcontracting]
     .map((set) => [set.collection, set]),
 ));
 
 /**
  * The parsed example file the landing frame shows: the download's records the
- * collection's set chooses, in the set's order, on the download's own columns
- * plus any `extra_columns` the set declares, or the download unchanged where
+ * collection's set chooses, in the set's order, on the download's own columns,
+ * or the download unchanged where
  * the set chooses none. A chosen ID missing from the download is skipped (its
  * test fails, so a refresh that drops it is noticed).
  */
@@ -51,11 +45,5 @@ export function landingSample(collectionId, parsed) {
   const idColumn = contractFor(`${collectionId}/${collectionId}`)?.record_id;
   if (!idColumn) return parsed;
   const byId = new Map(parsed.rows.map((row) => [row[idColumn], row]));
-  const extra = (set.extra_columns ?? []).filter((column) => !parsed.columns.includes(column));
-  const columns = [...parsed.columns, ...extra];
-  const rows = set.rows.flatMap((ref) => {
-    const row = byId.get(ref.id);
-    return row ? [{ ...row, ...Object.fromEntries(extra.map((column) => [column, ref[column] ?? ""])) }] : [];
-  });
-  return { ...parsed, columns, rows };
+  return { ...parsed, rows: set.rows.flatMap((ref) => byId.get(ref.id) ?? []) };
 }

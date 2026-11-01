@@ -113,16 +113,12 @@ export const DECLARED_CADENCE = Object.freeze(
   "federal-register",
   "legislation",
   "deals",
-  "nagpra",
   "lobbying",
   "contractors",
   "subcontracting",
-  "natural-resources",
-  "owned",
   "nonprofits",
   "need",
-  "foundation-corporate-giving",
-  "plot"
+  "foundation-corporate-giving"
 ].map((id) => [id, CADENCE.WEEKLY]),
   ),
 );
@@ -153,7 +149,7 @@ export function ledgerFor(id, source = ledger) {
  * Only the current dataset's example records are available to download, and
  * the count is the served download's (`sample_downloads.json`): the ledger
  * records the sample the release produced (ten rows), while the customer
- * table a reader takes holds 5 for Federal Register and 3 for PLOT.
+ * table a reader takes holds 5 for Federal Register.
  *
  * Reader wording (owner review, 2026-10-06): no "preview", "shelf",
  * "manifest" or "readiness". The sample is "example records", the word the

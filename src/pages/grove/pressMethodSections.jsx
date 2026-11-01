@@ -324,8 +324,8 @@ export function IdentityPair() {
           </ul>
           {identifier.live ? null : (
             <p className="cp-idp__pending">
-              <span className="cp-idp__pendingtag">Not issued yet</span>
-              <span>The form and its rules are settled. No published record carries this identifier yet.</span>
+              <span className="cp-idp__pendingtag">Planned</span>
+              <span>The format and its rules are set. No published record carries this identifier yet.</span>
             </p>
           )}
           <details className="cp-idp__tech">
@@ -346,7 +346,7 @@ export function IdentityPair() {
             ) : null}
             {identifier.becoming?.length ? (
               <p className="cp-idp__fields cp-idp__fields--soon">
-                <span className="cp-idp__fieldcap">Renaming to</span>
+                <span className="cp-idp__fieldcap">Planned column names</span>
                 {identifier.becoming.map((field) => (
                   <code key={field}>{field}</code>
                 ))}
@@ -553,7 +553,7 @@ export function WhyBoth() {
           <h3 className="cp-wb__name">{WHY_BOTH.business.name}</h3>
           <p className="cp-wb__role">{WHY_BOTH.business.role}</p>
           {WHY_BOTH.business.pending ? (
-            <p className="cp-wb__prov">An example of the form, not this enterprise&rsquo;s identifier. Business ids are not issued yet.</p>
+            <p className="cp-wb__prov">An example of the format, not this enterprise&rsquo;s identifier. Business ids are not yet assigned.</p>
           ) : null}
         </article>
       </div>
@@ -599,7 +599,7 @@ export function UnlinkedReasons() {
     <ul className="cp-ur">
       {UNLINKED_REASONS.map((reason) => (
         <li className={`cp-ur__item${reason.intentional ? " is-by-design" : ""}`} key={reason.id}>
-          <span className="cp-ur__tag">{reason.intentional ? "By design" : "Still to do"}</span>
+          <span className="cp-ur__tag">{reason.intentional ? "By design" : "Under review"}</span>
           <h3 className="cp-ur__label">{reason.label}</h3>
           <p className="cp-ur__body">{reason.body}</p>
         </li>

@@ -28,7 +28,6 @@ import { fetchSampleText, onBackOnline } from "../../features/grove/sampleFetch.
 import { contractFor, exploreTables, parseCsv, universalRows } from "../../features/grove/explore.js";
 import { columnPlan } from "../../features/grove/recordColumns.js";
 import { showcaseItems } from "../../features/grove/showcase.js";
-import { enrichSample } from "../../features/grove/exampleEnrichment.js";
 import { LANDING_EXAMPLES, landingSample } from "../../features/grove/landingExamples.js";
 import { Cards, Rows } from "./PressRecordTable.jsx";
 import { useNarrow } from "../../features/grove/useNarrow.js";
@@ -103,7 +102,7 @@ function usePreviewSample(collectionId) {
     pending.current.add(table.path);
     // The rows are drawn by the product's own table, which reads the
     // codebook's labels; the two arrive together.
-    Promise.all([fetchSampleText(table.path, { sha256: table.sha256 }).then((text) => enrichSample(collectionId, landingSample(collectionId, parseCsv(text)))), loadCodebook()]).then(
+    Promise.all([fetchSampleText(table.path, { sha256: table.sha256 }).then((text) => landingSample(collectionId, parseCsv(text))), loadCodebook()]).then(
       ([parsed]) => {
         pending.current.delete(table.path);
         setLoaded((prev) => (prev.has(table.path) ? prev : new Map(prev).set(table.path, parsed)));
@@ -179,9 +178,8 @@ export default function CollectionPreview({ entry, tier, register }) {
             </span>
           </p>
           {/* A count made of several record kinds says which (2026-10-06):
-              PLOT's examples are tracts and parcels while its count also
-              holds permits; the Federal Register mixes documents and
-              participants. From the manifest's record types, never typed. */}
+              the Federal Register mixes documents and participants. From
+              the manifest's record types, never typed. */}
           {DATASET_ROWS[entry.id] && countNote(entry.id) ? (
             <p className="cp-pane__countnote" data-testid="pane-count-note" style={{ margin: 0, padding: "0.45rem 1.4rem", fontSize: "0.8rem", lineHeight: 1.45, color: "var(--door-ink-3)" }}>{countNote(entry.id)}</p>
           ) : null}

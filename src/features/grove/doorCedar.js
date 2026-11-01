@@ -57,7 +57,6 @@ import { PRESS_CATALOG_BY_ID, PRESS_TIERS, STOREFRONT_CATALOG, spellCount } from
 import { visibleAudiences } from "./pressJobs.js";
 import { MAINTENANCE, NEED_ENRICHMENTS } from "./pressMethod.js";
 import { formatUpdated, freshnessLine, recentlyUpdated } from "./pressReleases.js";
-import { REGISTRY_PROGRAMS } from "./pressSources.js";
 
 const DESCRIPTOR = Object.fromEntries(LAUNCH_COLLECTION.map((entry) => [entry.id, entry]));
 const TIER_BY_SHELF = Object.fromEntries(PRESS_TIERS.map((tier) => [tier.shelf, tier]));
@@ -68,21 +67,17 @@ const COLLECTION_WORDS = Object.freeze({
   "federal-register": ["notice", "notices", "rule", "rulemaking", "comment period", "register", "consultation", "consultations"],
   legislation: ["bill", "bills", "congress", "vote", "votes", "roll call", "senate", "house", "law", "laws"],
   deals: ["deal", "acquisition", "acquisitions", "merger", "mergers", "bond", "bonds", "financing", "transaction", "transactions", "investment", "investments", "joint venture"],
-  nagpra: ["repatriation", "remains", "graves", "inventory", "museum", "museums", "ancestors"],
   // The Advocacy release holds Lobbying Disclosure Act filings only
   // (2026-10-06), so dockets and testimony no longer route here, and a
   // consultation reaches the Federal Register, which carries participants.
   lobbying: ["lobby", "lobbying", "lobbyist", "lobbyists", "advocacy", "lda", "lobbying disclosure"],
   contractors: ["contract", "contracts", "contracting", "prime", "fpds", "8(a)", "set aside", "set-aside", "vendor", "vendors"],
   subcontracting: ["subaward", "subawards", "subcontract", "subcontracts", "subcontractor", "subcontractors", "fsrs"],
-  owned: ["tero", "small business", "small businesses", "individually owned", "business directory", "certified", "native owned", "native-owned"],
   nonprofits: ["nonprofit", "nonprofits", "990", "irs", "charity", "charities"],
   // "Foundation" reached Native Nonprofits until the giving collection
   // joined the shelf; a reader asking about foundations means their giving.
   "foundation-corporate-giving": ["foundation", "foundations", "philanthropy", "philanthropic", "grantmaker", "grantmakers", "corporate giving", "bank giving", "private giving", "private funding", "donor", "donors", "990-pf"],
-  plot: ["parcel", "parcels", "land", "property", "properties", "permit", "permits", "real estate", "land ownership", "assessor", "owns these parcels", "owns this parcel", "owns the parcel", "owns the land", "owns this land", "parcel records", "land records", "property records", "development activity"],
   need: ["enterprise", "enterprises", "subsidiary", "subsidiaries", "ownership", "who owns", "holding company", "structure", "patent", "patents", "credit rating", "credit ratings", "bond rating", "ratings"],
-  "natural-resources": ["royalty", "royalties", "oil", "gas", "coal", "mineral", "minerals", "timber", "severance", "onrr"],
 });
 
 /** The first `count` sentences of a note, with the dashes the house style refuses turned into commas. */
@@ -152,8 +147,8 @@ function lowerFirst(text) {
  *
  * lumecon.ai offers at most three next questions under an answer, chosen by
  * what was just discussed. These are deliberate pairs rather than a scored
- * guess, because the door's bank is ten general answers and fourteen
- * collections, small enough to write out. The fourteen collections share one
+ * guess, because the door's bank is ten general answers and ten
+ * collections, small enough to write out. The ten collections share one
  * list: after "what is in Federal Prime Contracting", the useful next
  * questions are how it reaches a nation, what it is built from, and how to
  * get it.
@@ -224,10 +219,10 @@ const GENERAL_INTENTS = [
       `${PRESS_PRO?.name}: ${names(PRO)}.\n\n` +
       `Ask me about any one of them by name and I will tell you what it holds, how far back it goes and what it is built from.`,
     expanded:
-      `Going deeper: the ${PRESS?.name} shelf is the public record of what is happening, ` +
-      `${lowerFirst(PRESS?.promise ?? "")} The ${PRESS_PRO?.name} shelf is the structure behind it: ` +
-      `who holds the contracts and subawards, who owns which enterprise and which parcels, where resource ` +
-      `revenue goes, which businesses and nonprofits are Native-controlled.\n\n` +
+      `Going deeper: the ${PRESS?.name} shelf is the public record of what is happening across Indian ` +
+      `Country: funding, policy, advocacy and public actions. The ${PRESS_PRO?.name} shelf is the structure ` +
+      `behind it: who holds the contracts and subawards, which transactions moved capital, who owns which ` +
+      `enterprise and which nonprofits are Native-led.\n\n` +
       `Each collection states its own coverage, observation count and sources, and I can give you any of them by name.`,
   },
   {
@@ -240,18 +235,14 @@ const GENERAL_INTENTS = [
       `federal spending and award systems (USAspending, FPDS, FSRS, SAM, FAADS), Congress and the ` +
       `Federal Register (Congress.gov, Voteview, federalregister.gov), lobbying disclosures filed under the ` +
       `Lobbying Disclosure Act, IRS filings (the Business Master File and ` +
-      `Form 990), resource revenue reporting (ONRR, OSMRE, the Osage Minerals ` +
-      `Council), NAGPRA notices and the National NAGPRA databases, parcel, tract and assessor records, ` +
-      `foundation and corporate giving disclosures, and what nations and their enterprises publish about themselves.\n\n` +
+      `Form 990), foundation and corporate giving disclosures, transaction announcements and filings, ` +
+      `and what nations and their enterprises publish about themselves.\n\n` +
       `Where they are available, Cedar NEED can also add patent records, supported by company, tribal, SEC ` +
       `and court evidence, and rating-agency announcements, supported by issuer and tribal releases, filings, ` +
       `regulator records and labeled secondary sources. Each stays with the exact legal entity and date it ` +
       `concerns, and they are not on every record.`,
     expanded:
-      `Going deeper: the tribal business directories are one source family with a registry of ` +
-      `${REGISTRY_PROGRAMS} programs behind it: nations' own TERO lists, member-owned directories, state ` +
-      `certified-vendor lists and regional chambers.\n\n` +
-      `Every row carries the source it came from, so a figure traces back to the filing, the notice or ` +
+      `Going deeper: every row carries the source it came from, so a figure traces back to the filing, the notice or ` +
       `the directory that stated it.`,
   },
   {
@@ -290,41 +281,18 @@ const GENERAL_INTENTS = [
       `because its sources archive nothing. ${MAINTENANCE.goal}` +
       (recentLine ? `\n\nMost recently updated: ${recentLine}.` : ""),
   },
-  // Institutional accounts (owner, 2026-09-27). Declared before "plans" so
-  // a question about an organization's account wins a tie with the price
-  // words it shares. No seat limits, seat counts or prices are stated.
-  {
-    id: "institutional",
-    chip: "Can my organization share an account?",
-    followUps: ["plans", "collaboration", "who"],
-    triggers: ["share an account", "share my account", "share one account", "shared account", "share a login", "institutional", "institutional plan", "institutional account", "multiple users", "several users", "more than one user", "organization account", "organizational account", "organization plan", "team account", "team plan", "invite colleagues", "invite my colleagues", "invite my team", "invite teammates", "invite people", "add colleagues", "add users", "admin", "administrator", "my team", "our team", "my colleagues", "seats"],
-    answer:
-      `Cedar Press and Cedar Press+ are individual plans, one person each. For an organization with several ` +
-      `people there is the institutional Cedar Press plan: an admin invites colleagues by email, and members ` +
-      `share the organization's details and its Cedar context.\n\n` +
-      `Each person keeps their own sign-in, and their conversations and activity stay private to them, so ` +
-      `teammates do not see each other's conversations. Access comes through the organization's plan: someone ` +
-      `removed from the organization loses that access at once and keeps anything they hold individually.\n\n` +
-      `To ask about an institutional plan, contact contact@lumecon.ai.`,
-    expanded:
-      `Going deeper: the organization's plan is what opens the collections for its members, and the admin ` +
-      `manages who is in it by email invitation. Collaborative analysis and shared projects are part of ` +
-      `Cedar Grove rather than Cedar Press.\n\nTo set up an institutional plan, contact contact@lumecon.ai.`,
-  },
   {
     id: "collaboration",
     chip: "Can we work on analysis together?",
-    followUps: ["institutional", "plans", "who"],
+    followUps: ["plans", "who"],
     triggers: ["collaborate", "collaboration", "collaborative", "collaborative analysis", "analysis together", "work on analysis", "shared project", "shared projects", "work together", "shared workspace", "team workspace", "co-author", "coauthor"],
     answer:
-      `Collaborative analysis and shared projects are part of Cedar Grove, not Cedar Press. In Cedar Press ` +
-      `each person's conversations and activity stay private to them; on the institutional plan, members ` +
-      `share the organization's details and its Cedar context.\n\nTo ask about either, contact ` +
-      `contact@lumecon.ai.`,
+      `Collaborative analysis and shared projects are part of Cedar Grove, not Cedar Press. A Cedar Press ` +
+      `membership is for one person, and each member's conversations and activity stay private to them.\n\n` +
+      `To ask about Cedar Grove, contact contact@lumecon.ai.`,
     expanded:
-      `Going deeper: Cedar Press is where the collections are read, cited and downloaded, one person at a ` +
-      `time or through an organization's institutional plan. Work that a team builds together belongs in ` +
-      `Cedar Grove.`,
+      `Going deeper: Cedar Press is where the collections are read, cited and downloaded. Work that a team ` +
+      `builds together belongs in Cedar Grove.`,
   },
   {
     id: "plans",
@@ -334,10 +302,8 @@ const GENERAL_INTENTS = [
     answer:
       `Subscribe annually on this site. Payment goes through Stripe, and the email that follows lets you ` +
       `confirm your address and choose a password. If you already have an account, log in.\n\n` +
-      `${PRESS?.name} opens ${STANDARD.length} collections, ` +
-      `${lowerFirst(PRESS?.question ?? "")}\n` +
-      `${PRESS_PRO?.name} adds the other ${PRO.length}, ` +
-      `${lowerFirst(PRESS_PRO?.question ?? "")}\n\n` +
+      `${PRESS?.name} opens ${STANDARD.length} collections: ${names(STANDARD)}.\n` +
+      `${PRESS_PRO?.name} adds ${PRO.length} more: ${names(PRO)}.\n\n` +
       `Two other routes need no subscription at all: a federally recognized tribal government can request ` +
       `and review the Cedar records about its own nation, and research access covers one or two collections ` +
       `for a defined project.`,
@@ -363,8 +329,8 @@ const GENERAL_INTENTS = [
       `Going deeper: the request is reviewed by a person, and what comes back is the set of records Cedar ` +
       `has resolved to your nation across the collections, with the basis for each link, so your office can ` +
       `see what is attributed to you and on what evidence.\n\n` +
-      `A correction you raise is applied to the generating pipeline, not to a copy, so it holds in every ` +
-      `release after it.`,
+      `A correction you raise is made where the collection is built, not to a single copy, so it holds in ` +
+      `every release after it.`,
     links: ["request"],
   },
   {
@@ -413,11 +379,11 @@ const GENERAL_INTENTS = [
       `measured it is absent, not zero. And it claims only what the records show: no need scores, no ` +
       `contact or outreach lists, and no claim that one thing caused another.`,
     expanded:
-      `Going deeper: a smaller true collection always beats a larger padded one, and that rule costs rows. ` +
-      `A record whose party cannot be placed is kept and marked unresolved rather than dropped or guessed; ` +
+      `Going deeper: Cedar would rather publish fewer records than pad a collection. A record whose party ` +
+      `cannot be placed is kept and marked unresolved rather than dropped or guessed; ` +
       `a duplicate that is really two modifications of one award is kept because removing it would ` +
       `destroy real obligations.\n\n` +
-      `Every dropped row has a named reason, and every collection's known gaps are stated on the methods page.`,
+      `Every record left out has a stated reason, and every collection's known gaps are set out on the methods page.`,
     links: ["methods"],
   },
 ];

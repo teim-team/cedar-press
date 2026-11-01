@@ -62,19 +62,12 @@ test("a NEED guide states what one ownership decision settles, and names no hold
   assert.doesNotMatch(text, /The opening block of every row/);
 });
 
-test("listing and subcontract guides retain distinct identity roles and observation times", () => {
-  for (const collection of ["owned", "subcontracting"]) {
-    const { entry, book, sample } = fixture(collection);
-    const text = renderReleasedGuide(collection, book, entry, {}, sample);
-    assert.match(text, /historical ownership/);
-    if (collection === "owned") {
-      assert.match(text, /counting listings does not count unique businesses/);
-      assert.match(text, /does not establish tribal-government ownership/);
-    } else {
-      assert.match(text, /Prime and subrecipient links describe separate parties/);
-      assert.match(text, /does not verify ownership on the subaward date/);
-    }
-  }
+test("the subcontract guide retains distinct identity roles and observation times", () => {
+  const { entry, book, sample } = fixture("subcontracting");
+  const text = renderReleasedGuide("subcontracting", book, entry, {}, sample);
+  assert.match(text, /historical ownership/);
+  assert.match(text, /Prime and subrecipient links describe separate parties/);
+  assert.match(text, /does not verify ownership on the subaward date/);
 });
 
 // ── Research-readiness statements are measured from the preview ─────────────

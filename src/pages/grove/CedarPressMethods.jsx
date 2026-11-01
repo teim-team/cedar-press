@@ -389,11 +389,7 @@ export default function CedarPressMethods() {
                   <p>
                     Every source is available to the public: government records, regulatory
                     and securities filings, and published reporting, so the document a record
-                    cites is one anyone can obtain. The certified-business rosters behind
-                    Individual Native-Owned Businesses are requested from each nation&rsquo;s
-                    TERO or commerce office through its publicly listed contact, and whether
-                    the office releases one is the office&rsquo;s decision. A listing appears
-                    by name only on the terms the nation sets.
+                    cites is one anyone can obtain.
                   </p>
                   <p>
                     Select a collection in the figure to see which sources it is built from and
@@ -447,18 +443,18 @@ export default function CedarPressMethods() {
                   behind a summary that says what it holds. Nothing is deleted;
                   a reader who wants the argument opens it, and a reader
                   checking a fact never has to. */}
-              <Reasoning label="Why an identifier has to be minted, and what one identifier space would cost">
+              <Reasoning label="Why Cedar assigns its own identifiers, and why it keeps two kinds">
                 <p>
-                  A 990 says who filed it. A royalty statement says who was paid. A docket says
+                  A 990 says who filed it. A contract award says who was paid. A docket says
                   who appeared. None of them says whether those three are the same nation, and
                   public systems do not consistently record it. Cedar assigns the key none of them carries and
-                  keeps it current. The ownership between the two namespaces is a dated
-                  relationship carrying its source, which is what keeps a nation and the company
-                  it owns from collapsing into one row.
+                  keeps it current. Ownership between a nation and a company is recorded as a
+                  dated relationship with its source, which keeps the nation and the company it
+                  owns from collapsing into one record.
                 </p>
                 <p>
-                  A firm that is Native-owned without being owned by a nation gets the business
-                  id from the first sighting. If a nation acquires it later, the history is
+                  A firm that is Native-owned without being owned by a nation receives a business
+                  id when Cedar first records it. If a nation acquires it later, the history is
                   already there. A single identifier space would be a decision to treat the two
                   as one subject; an identifier that encodes ownership has to be rewritten when a
                   firm is sold, and every rewrite breaks every citation that used the old one.

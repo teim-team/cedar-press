@@ -1,10 +1,11 @@
-/* Fonts (Inter, JetBrains Mono) are self-hosted via src/styles/fonts.css. */
+/* Fonts (Inter, Source Serif 4, IBM Plex Mono) are self-hosted via src/styles/fonts.css. */
 
 .teim-rd { --ink: #0A0F26; --ink-2: #353B5C; --muted: #6B6F8A;
   --teal: #0FB5A5; --teal-dark: #0A8A7E; --teal-tint: #f2faf8; --teal-line: rgba(15,181,165,0.35);
-  /* Brand-mandated AA-safe teal for text/solid fills on white (BRAND.md). Was
-     referenced 39x but never defined, so those usages fell back invalid. */
-  --dteal: #0A7F74;
+  /* AA-safe teal for text and solid fills. #0A7F74 (BRAND.md) cleared 4.5:1
+     on white but measured 4.49:1 on the publication's #f3f6f8 ground, so it
+     is one step deeper: 4.8:1 there, 5.2:1 on white. */
+  --dteal: #097A70;
   /* Gold is brand-only (the wordmark + the italic word *luminate*); it must
      never appear in UI chrome. Amber is the AA-safe DATA color (charts, deltas),
      never gold. These were previously conflated under one --amber: #F0A91A. */
@@ -13,7 +14,7 @@
      stays light in both themes because the ground behind it does. */
   --photo-ink: #ffffff; --photo-shadow: rgba(7, 10, 26, 0.55); --rail-soft: rgba(255, 255, 255, 0.75);
   --line: rgba(10,15,38,0.12); --line-soft: rgba(10,15,38,0.07);
-  --sans: 'Inter', sans-serif; --body: 'Inter', sans-serif; --mono: 'JetBrains Mono', monospace;
+  --sans: 'Inter', sans-serif; --body: 'Inter', sans-serif; --mono: 'IBM Plex Mono', monospace; --display: 'Source Serif 4', Georgia, serif;
   /* Consolidated design tokens (see docs/design/DESIGN-SYSTEM.md). Canonical
      values for the recurring primitives so field cards, rails, chips and focus
      states stay consistent as the system grows. */
@@ -65,7 +66,7 @@
 .teim-rd { background: var(--bg); color: var(--ink); font-family: var(--body); font-optical-sizing: auto; min-height: 100vh; display: flex; flex-direction: column; }
 .teim-rd button { font: inherit; color: inherit; background: none; border: none; cursor: pointer; }
 
-.teim-rd h1 { font-family: var(--sans); font-weight: 700; font-size: clamp(1.9rem, 3.6vw, 2.6rem); line-height: 1.14; letter-spacing: -0.02em; margin-bottom: 0.9rem; }
+.teim-rd h1 { font-family: var(--sans); font-weight: var(--weight-display); font-size: clamp(1.9rem, 3.6vw, 2.6rem); line-height: 1.14; letter-spacing: var(--track-display); margin-bottom: 0.9rem; }
 
 .teim-rd table { width: 100%; border-collapse: collapse; font-size: 1rem; min-width: 500px; }
 .teim-rd th { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.12em; color: var(--muted); text-align: right; padding: 0.55rem 0.6rem; border-bottom: 1.5px solid var(--ink); font-weight: 400; }

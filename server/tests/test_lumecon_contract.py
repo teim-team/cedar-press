@@ -8,6 +8,7 @@ exist only to exercise the consumer; neither constitutes real publication proof.
 """
 
 import copy
+import dataclasses
 import hashlib
 import json
 import os
@@ -95,6 +96,17 @@ class LumeconContractTest(unittest.TestCase):
                 repository._canonical_bytes({"value": value})
 
     def test_three_namespaces_receive_exact_producer_artifacts(self):
+        # Natural Resources left the storefront with the pilot tiers; a stand-in
+        # keeps its producer artifact under test.
+        pro = next(d for d in repository.launch.LAUNCH_COLLECTION if d.shelf == "pro")
+        stand_in = dataclasses.replace(pro, id="natural-resources")
+        sold = patch.object(
+            repository.launch,
+            "LAUNCH_COLLECTION",
+            (*repository.launch.LAUNCH_COLLECTION, stand_in),
+        )
+        sold.start()
+        self.addCleanup(sold.stop)
         self.assertEqual(
             {entry["collection_id"] for entry in self.fixture["collections"]},
             {"legislation", "lobbying", "natural-resources"},

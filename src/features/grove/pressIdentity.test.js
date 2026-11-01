@@ -162,7 +162,7 @@ test("the linkage note prints no figure and promises none", () => {
   const text = `${LINKAGE_COVERAGE.note} ${LINKAGE_COVERAGE.caveat}`;
   assert.match(LINKAGE_COVERAGE.note, /varies by collection/);
   // One low share means different things; the record-type example stays.
-  assert.ok(LINKAGE_COVERAGE.note.includes("Natural Resource Revenues"), "the note lost its example");
+  assert.ok(LINKAGE_COVERAGE.note.includes("in Legislation"), "the note lost its example");
   assert.ok(!/\d/.test(text), "the linkage text prints a dated figure again");
   assert.ok(!/thirteen|fourteen|built collections/i.test(text));
   assert.ok(!/its own figure|figure to quote|reports its own/i.test(text), "the text promises a figure no page shows");
@@ -180,13 +180,13 @@ test("the business card states the exception rather than overclaiming", () => {
   const count = register.entities.filter((entity) => entity[2] === index).length;
   assert.equal(count, 44, `the register holds ${count} of that class; the exception says forty-four`);
   assert.match(business.exception, /forty-four/i);
-  assert.match(business.exception, /closed to new mints/i);
+  assert.match(business.exception, /No new firm is added that way/);
   // Codex, PR #78: it said those firms HAVE equivalence rows and that every
   // firm resolved from here CARRIES a business id only. Neither register
   // exists. While `live` is false, nothing about a business id may be present
   // tense.
   if (!business.live) {
-    assert.match(business.exception, /when the business register is written/i);
+    assert.match(business.exception, /when business ids are issued/i);
     assert.ok(!/\bgain an equivalence row to their business id\b/.test(business.exception));
     assert.ok(!/\bcarries a business id only\b/.test(business.exception), "present tense about an unminted register");
   }

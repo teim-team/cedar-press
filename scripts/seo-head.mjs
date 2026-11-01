@@ -39,8 +39,8 @@ const KEYWORDS = [
   "Indian Country data", "tribal data", "tribal government", "tribal economy",
   "Native American economic data", "Alaska Native Corporations", "Native Hawaiian Organizations",
   "tribal enterprises", "Native-owned businesses", "federal funding to tribes",
-  "federal contracting tribal", "NAGPRA notices", "tribal consultation", "Federal Register tribes",
-  "tribal legislation", "tribal lobbying", "Indian Country deals", "tribal natural resources revenue",
+  "federal contracting tribal", "tribal consultation", "Federal Register tribes",
+  "tribal legislation", "tribal lobbying", "Indian Country deals",
   "Native nonprofits", "Cedar Press", "Lumecon",
 ];
 
@@ -53,16 +53,12 @@ const CATALOG_PHRASE = {
   "federal-register": "the Federal Register",
   legislation: "legislation",
   deals: "deals",
-  nagpra: "NAGPRA",
   lobbying: "advocacy",
   "foundation-corporate-giving": "foundation and corporate giving",
   contractors: "prime contracting",
   subcontracting: "subcontracting",
-  "natural-resources": "natural resources",
-  owned: "Native-owned businesses",
   nonprofits: "Native nonprofits",
   need: "the enterprise register",
-  plot: "PLOT parcel records",
 };
 
 export function catalogDescription(catalog = STOREFRONT_CATALOG) {
@@ -123,7 +119,7 @@ export function graph() {
         url: `${SITE}/`,
         name: "Cedar Press",
         description:
-          "Trusted intelligence for Indian Country: maintained collections on federal funding, contracting, deals, policy, giving, land and Native enterprise ownership, with source records, declared row grains and separately documented Native entity associations.",
+          "Trusted intelligence for Indian Country: maintained collections on federal funding, contracting, deals, policy, philanthropy and Native enterprises, with every record traced to its source and to the Native entities it concerns.",
         inLanguage: "en",
         keywords: KEYWORDS,
         publisher: { "@id": ORG },

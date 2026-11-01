@@ -10,18 +10,16 @@ const download = (id) => parseCsv(readFileSync(new URL(`../../../public/data/ced
 const GARBLED = /Ã|Â|â€|&NBSP;|&nbsp;/;
 
 test("every landing example is a served download record, shown exactly as served", () => {
-  assert.equal(Object.keys(LANDING_EXAMPLES).length, 14);
+  assert.equal(Object.keys(LANDING_EXAMPLES).length, 10);
   for (const [id, set] of Object.entries(LANDING_EXAMPLES)) {
     const parsed = download(id);
     const idColumn = contractFor(`${id}/${id}`)?.record_id;
-    const extra = set.extra_columns ?? [];
     assert.ok(set.rows.length === 0 || set.rows.length >= 2, `${id}: a set chooses none or at least two records`);
     for (const ref of set.rows) {
-      for (const key of Object.keys(ref)) assert.ok(key === "id" || extra.includes(key), `${id}: ${key} is neither the record ID nor a declared extra column`);
+      assert.deepEqual(Object.keys(ref), ["id"], `${id}: a chosen record names only its ID`);
       assert.equal(parsed.rows.filter((row) => row[idColumn] === ref.id).length, 1, `${id}: ${ref.id} is not exactly one record of the download`);
     }
-    for (const column of extra) assert.ok(!parsed.columns.includes(column), `${id}: extra column ${column} would overwrite a download column`);
-    for (const column of set.columns ?? []) assert.ok(parsed.columns.includes(column) || extra.includes(column), `${id}: shown column ${column}`);
+    for (const column of set.columns ?? []) assert.ok(parsed.columns.includes(column), `${id}: shown column ${column}`);
     const shown = landingSample(id, parsed);
     assert.equal(shown.rows.length, set.rows.length || parsed.rows.length, id);
     for (const [index, row] of shown.rows.entries()) {
@@ -58,14 +56,4 @@ test("the landing sample keeps the download's columns and leaves a collection th
   assert.equal(LANDING_EXAMPLES.need.rows.length, 0);
   const need = download("need");
   assert.equal(landingSample("need", need), need);
-});
-
-test("every PLOT landing parcel is tied to the tribe its recorded owner names", () => {
-  const items = universalRows("plot/plot", landingSample("plot", download("plot")).rows);
-  assert.ok(items.length >= 2);
-  for (const item of items) {
-    assert.match(item.entity.uid ?? "", /^CE-[0-9A-Z]{5}-[0-9A-Z]{2}$/);
-    const tribeWord = item.entity.name.split(/[ ,]/).find((word) => word.length > 4).toUpperCase();
-    assert.ok(item.row.owner_name_raw.toUpperCase().includes(tribeWord), `${item.row.owner_name_raw} vs ${item.entity.name}`);
-  }
 });

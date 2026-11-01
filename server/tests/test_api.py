@@ -423,6 +423,9 @@ class TestCatalog(unittest.TestCase):
         client.patch("/press/profile", json={"work": None})
 
     def test_a_download_carries_its_citation(self) -> None:
+        # Deals is on the pro shelf.
+        ratelimit.reset_for_tests()
+        sign_in("pro@example.org")
         response = client.get("/press/collections/deals/download")
         self.assertEqual(response.status_code, 200)
         self.assertIn("attachment", response.headers["content-disposition"])
@@ -432,6 +435,9 @@ class TestCatalog(unittest.TestCase):
         self.assertEqual(client.get("/press/collections/nope/download").status_code, 403)
 
     def test_cedar_answers_from_a_collection_profile(self) -> None:
+        # Deals is on the pro shelf.
+        ratelimit.reset_for_tests()
+        sign_in("pro@example.org")
         response = client.post(
             "/cedar/ask",
             json={"question": "How was this collection constructed?", "collectionId": "deals"},
@@ -448,6 +454,9 @@ class TestCatalog(unittest.TestCase):
         # Owner, 2026-10-06: nothing a reader sees is a draft or a mock-up, so
         # a demonstration figure series is never quoted; Cedar says the
         # collection has no published figures and states what it holds.
+        # Deals is on the pro shelf.
+        ratelimit.reset_for_tests()
+        sign_in("pro@example.org")
         response = client.post(
             "/cedar/ask",
             json={"question": "What are the headline figures?", "collectionId": "deals"},
@@ -457,26 +466,10 @@ class TestCatalog(unittest.TestCase):
         self.assertNotIn("demonstration", answer)
         self.assertIn("has no published figures yet", answer)
 
-    def test_cedar_labels_real_statistics_with_their_source(self) -> None:
-        # As Cedar Press+, because `owned` is on the `pro` shelf and
-        # `/cedar/ask` now checks entitlement before either answerer sees the
-        # id. The subject here is how a real statistic is labelled, not who
-        # may read it; on a standard session the plan gate would answer first
-        # and this would stop testing its own subject.
+    def test_how_many_routes_to_statistics_not_construction(self) -> None:
+        # Deals is on the pro shelf.
         ratelimit.reset_for_tests()
         sign_in("pro@example.org")
-        response = client.post(
-            "/cedar/ask",
-            json={"question": "What are the headline figures?", "collectionId": "owned"},
-        )
-        self.assertEqual(response.status_code, 200)
-        answer = response.json()["answer"]
-        self.assertNotIn("demonstration", answer)
-        self.assertIn("Source:", answer)
-        ratelimit.reset_for_tests()
-        sign_in()
-
-    def test_how_many_routes_to_statistics_not_construction(self) -> None:
         response = client.post(
             "/cedar/ask",
             json={"question": "How many records are in this collection?", "collectionId": "deals"},
@@ -525,10 +518,10 @@ class TestCatalog(unittest.TestCase):
         sign_in()
 
     def test_a_collection_profile_is_served(self) -> None:
-        response = client.get("/press/collections/owned/profile")
+        response = client.get("/press/collections/nonprofits/profile")
         self.assertEqual(response.status_code, 200)
         profile = response.json()
-        self.assertEqual(profile["collection_id"], "owned")
+        self.assertEqual(profile["collection_id"], "nonprofits")
         self.assertFalse(profile["demonstration"])
         self.assertEqual(client.get("/press/collections/nope/profile").status_code, 404)
 
@@ -663,6 +656,9 @@ class TestCatalog(unittest.TestCase):
         self.assertNotIn("demonstration", answer)
 
     def test_a_change_question_without_a_version_gets_the_latest(self) -> None:
+        # Deals is on the pro shelf.
+        ratelimit.reset_for_tests()
+        sign_in("pro@example.org")
         dataset = next(d for d in launch.LAUNCH_COLLECTION if d.id == "deals")
         response = client.post(
             "/cedar/ask",
@@ -763,24 +759,18 @@ class TestEntitlement(unittest.TestCase):
         for collection_id in (
             "funding",
             "legislation",
-            "deals",
-            "nagpra",
             "lobbying",
             "federal-register",
+            "foundation-corporate-giving",
         ):
             with self.subTest(collection=collection_id):
                 body = self._ask("reader@example.org", collection_id).json()
                 self.assertIsNone(body.get("access"), collection_id)
 
-    def test_the_consent_limited_collection_is_gated_like_any_other(self) -> None:
-        # `owned` is the consent/publication-limited one: White Earth listings
-        # enter entity rows only once the nation confirms publication terms, and
-        # it has no preview file at all. It is also on the `pro` shelf, so the
-        # entitlement answer must not depend on the preview being missing --
-        # those are two different reasons and only one of them is about a plan.
-        body = self._ask("reader@example.org", "owned").json()
+    def test_a_pro_collection_is_gated_like_any_other(self) -> None:
+        body = self._ask("reader@example.org", "deals").json()
         self.assertEqual(body["access"]["reason"], "NOT_INCLUDED")
-        plus = self._ask("pro@example.org", "owned").json()
+        plus = self._ask("pro@example.org", "deals").json()
         self.assertIsNone(plus.get("access"))
 
     def test_an_unknown_collection_is_not_an_upgrade_prompt(self) -> None:
@@ -992,12 +982,12 @@ class TestCedarConversation(unittest.TestCase):
         self.assertEqual(at_limit.status_code, 200, at_limit.text)
 
     def test_an_answer_a_reader_can_open_says_its_records_are_reachable(self) -> None:
-        basis = self._ask("reader@example.org", "What does this collection cover?", "deals").json()[
-            "answerBasis"
-        ]
+        basis = self._ask(
+            "reader@example.org", "What does this collection cover?", "lobbying"
+        ).json()["answerBasis"]
         self.assertEqual(basis["kind"], "release")
         self.assertIs(basis["opened"], True)
-        self.assertEqual(basis["collectionId"], "deals")
+        self.assertEqual(basis["collectionId"], "lobbying")
 
     def test_a_locked_description_is_cited_and_declares_its_records_shut(self) -> None:
         # Two axes, and this is the pair that needs both. The description IS

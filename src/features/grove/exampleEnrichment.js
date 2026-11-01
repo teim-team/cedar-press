@@ -11,32 +11,7 @@
 // five unreleased enterprises are gone until the producer publishes them
 // (docs/TERMINAL_HANDOFF.md, "Open follow-ups from the 2026-10-06 landing-page work").
 //
-// What remains is a reading aid computed from the row's own cells.
-
-/**
- * A parsed example file `{ columns, rows }` with display columns computed from
- * each row's own cells. Returns the input unchanged for other collections.
- */
-export function enrichSample(collectionId, parsed) {
-  if (collectionId === "owned" && parsed?.rows) return withStatedTribe(parsed);
-  return parsed;
-}
-
-/**
- * Individual Native-Owned Businesses: the tribe the registry lists for the
- * business, read from the registry's own "Tribe: ..." statement in
- * `identity_claim_text`. Without it the only tribe on the row is the
- * certifying office's, which reads as if the certifier owned the business.
- */
-function withStatedTribe(parsed) {
-  const columns = [...parsed.columns];
-  if (!columns.includes("stated_tribe")) columns.splice(Math.max(columns.indexOf("business_name") + 1, 0), 0, "stated_tribe");
-  const rows = parsed.rows.map((row) => {
-    const match = /(?:^|;\s*)Tribe:\s*([^;]+)/.exec(row.identity_claim_text ?? "");
-    return { ...row, stated_tribe: match ? match[1].trim() : "" };
-  });
-  return { ...parsed, columns, rows };
-}
+// What remains is the contract addition below.
 
 /**
  * Contract fields the viewer adds so a record links to the entity its own
@@ -45,7 +20,4 @@ function withStatedTribe(parsed) {
  */
 export const CONTRACT_ADDITIONS = Object.freeze({
   "need/need": Object.freeze({ entity_uid: "native_owner_cedar_uid", entity_name: "native_owner" }),
-  // The landing's PLOT parcels name the tribe their recorded owner is
-  // (landingExamples.js `extra_columns`).
-  "plot/plot": Object.freeze({ entity_uid: "native_entity_cedar_uid", entity_name: "native_entity_name" }),
 });

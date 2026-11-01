@@ -325,19 +325,6 @@ const CUSTOMER_PRESENTATION = Object.freeze({
     amount_lower: "amount_lower_usd", amount_upper: "amount_upper_usd", amount_class: "amount_class",
     observation: ["funder_name", "financial_status", "record_kind"],
   },
-  // PLOT: a source parcel observed on a date; nothing about ownership, title
-  // or Native identity is inferred.
-  plot: {
-    subject: "source_parcel_id",
-    subject_candidates: ["source_parcel_id", "plot_record_id"],
-    // No date or year column is read: the customer table's dated columns
-    // (ownership observation, source snapshot) are blank on every sample row,
-    // and tax_year is a tax year, not when the land was observed. A year
-    // filter over this table would filter on nothing.
-    date: null, year: null, year_basis: null,
-    source: "source_record_url", source_fallback: "source_url",
-    observation: ["land_record_kind", "record_role", "estate_type", "trust_status"],
-  },
 });
 
 // What the year filter reads in a customer table, in the table's own terms.

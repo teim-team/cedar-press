@@ -1,7 +1,7 @@
 /**
  * PURPOSE
  * The launch collection: the datasets Cedar Press sells that have a release.
- * All fourteen in the catalog do.
+ * All ten in the catalog do.
  *
  * This said "what the standalone Cedar Grove license reads", from the model in
  * which Cedar Grove published a slice of itself as Cedar Press. That model was
@@ -108,16 +108,6 @@ export const EXCLUDED_COLLECTIONS = deepFreeze(manifest.excluded);
  */
 export const COUNT_NOT_SHOWN = Object.freeze(new Set(["need"]));
 
-/**
- * What an abbreviated collection name stands for, prefixed to its description
- * where the descriptor does not spell it out (owner, 2026-10-06). The service
- * applies the same text (collections.py ACRONYM_LEADS).
- */
-const ACRONYM_LEADS = Object.freeze({ plot: "PLOT (Parcel-Level Ownership and Transfers)" });
-const tracksForReaders = (descriptor) => {
-  const lead = ACRONYM_LEADS[descriptor.id];
-  return lead && !(descriptor.tracks ?? "").includes(lead) ? `${lead}: ${descriptor.tracks}` : descriptor.tracks;
-};
 
 /**
  * When each collection's DATA was last refreshed from the producer. This is
@@ -150,7 +140,7 @@ export const LAUNCH_COLLECTION = deepFreeze(
     name: entry.descriptor.name,
     shortName: entry.descriptor.short_name,
     shelf: entry.descriptor.shelf,
-    tracks: tracksForReaders(entry.descriptor),
+    tracks: entry.descriptor.tracks,
     rowsLabel: COUNT_NOT_SHOWN.has(entry.descriptor.id) ? "" : entry.descriptor.rows_label,
     downloads: entry.descriptor.downloads,
     vintage: entry.descriptor.vintage,
@@ -172,19 +162,13 @@ export const LAUNCH_COLLECTION = deepFreeze(
  * not of dollars.
  */
 export const OBSERVATIONS_NOTE =
-  "Observations are rows across collections of different kinds, such as filings, awards, parcels and documents. They are not unique entities or an additive dollar total.";
+  "Observations are rows across collections of different kinds, such as filings, awards, transactions and documents. They are not unique entities or an additive dollar total.";
 
 /**
  * Plain names for the record types a collection's count is made of. A type
  * without a name here falls back to its own words, never to a guess.
  */
 const RECORD_TYPE_NAMES = Object.freeze({
-  tract_observations: "BIA tract observations",
-  ownership_observations: "assessor parcel ownership observations",
-  environmental_events: "EPA environmental events",
-  environmental_permits: "EPA environmental permits",
-  permit_events: "permit events",
-  permits: "local permits",
   federal_actions: "Federal Register documents",
   consultation_participants: "consultation participant records",
   policy_eligible_disclosures: "policy-eligible disclosures",
@@ -193,7 +177,6 @@ const RECORD_TYPE_NAMES = Object.freeze({
 
 /** What the examples shown for a mixed collection are, where they are one kind. */
 const EXAMPLE_KIND = Object.freeze({
-  plot: "The example records shown are BIA tracts and assessor parcels; the count also covers permits and environmental records.",
   "federal-register": "A participant record is one named participant in one document, so participants are not additional documents.",
   "foundation-corporate-giving": "Each is one source disclosure, not an additive award total.",
 });

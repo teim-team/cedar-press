@@ -127,8 +127,8 @@ const PROOF_POINTS = [
   {
     id: "collections",
     label: "Put the data to work",
-    short: "Data to work",
-    body: "Explore original datasets on funding, business, policy and land. Download collections for your own research, reporting and planning, with the definitions and source references needed to use them.",
+    short: "Put the data to work",
+    body: "Explore original datasets on funding, business, policy and philanthropy. Download collections for your own research, reporting and planning, with the definitions and source references needed to use them.",
   },
   {
     id: "insights",
@@ -306,14 +306,13 @@ function Door({ user }) {
           ) : (
             // One question, two answers: get Cedar Press, or you already have
             // it. Tabs, so the panel under the bar shows one at a time.
-            <div className="cp-door__tabs" role="tablist" aria-label="Get Cedar Press or log in" ref={tabsRef}>
+            <div className="cp-door__tabs" ref={tabsRef}>
               <a id="cp-tab-signin" className="cp-door__signin" href={loginHref}>Sign in</a>
               <button
                 type="button"
                 id="cp-tab-plans"
-                role="tab"
                 className="cp-btn cp-btn--primary cp-door__tab--plans"
-                aria-selected={plansOpen}
+                aria-expanded={plansOpen}
                 aria-controls="cp-panel-plans"
                 onClick={() => setPlansOpen((open) => !open)}
               >
@@ -324,7 +323,7 @@ function Door({ user }) {
         </div>
 
         {!user && plansOpen ? (
-          <div id="cp-panel-plans" role="tabpanel" aria-labelledby="cp-tab-plans" className="cp-door__panel" ref={panelRef}>
+          <div id="cp-panel-plans" className="cp-door__panel" ref={panelRef}>
             <h2 className="cp-gate__sub">Choose your annual Cedar Press plan.</h2>
             <p className="cp-door__panelp">Pay securely through Stripe, then confirm your email and set your password.</p>
             <a className="cp-btn cp-btn--primary cp-btn--wide" href={subscribeHref}>
@@ -539,7 +538,7 @@ function Door({ user }) {
             </h2>
             <p className="cp-ways__lede">
               A Cedar Press membership opens the collections and Cedar.
-              Two other relationships need no subscription at all.
+              Tribal governments and approved research projects can work with Cedar without one.
             </p>
             <div className="cp-hero3__cta">
               <a className="cp-btn cp-btn--primary cp-btn--lg" href={subscribeHref}>

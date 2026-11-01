@@ -322,27 +322,28 @@ class TestGroveDivergence(unittest.TestCase):
         cls.js = _javascript()
 
     def test_the_customer_shelves_are_the_launch_collection(self) -> None:
-        # Giving and PLOT complete the two seven-collection Press shelves.
+        # The pilot tiers (Lumecon-data #44): five on Cedar Press, five more on
+        # Cedar Press+.
         by_shelf: dict[str, list[str]] = {}
         for dataset in launch.LAUNCH_COLLECTION:
             by_shelf.setdefault(dataset.shelf, []).append(dataset.id)
         self.assertEqual(set(by_shelf), {"standard", "pro"})
-        self.assertEqual(len(by_shelf["standard"]), 7)
-        self.assertEqual(len(by_shelf["pro"]), 7)
+        self.assertEqual(len(by_shelf["standard"]), 5)
+        self.assertEqual(len(by_shelf["pro"]), 5)
 
     def test_the_catalog_is_exactly_the_storefront(self) -> None:
-        # Fourteen in the catalog, seven and seven, all on the storefront. The
+        # Ten in the catalog, five and five, all on the storefront. The
         # catalog used to carry a thirteenth on the grove shelf, previewed as
         # a Grove exclusive; that promise was withdrawn on 2026-09-04 because
         # the collection is still being built, so nothing sits on the grove
-        # shelf. All fourteen have a release, and a catalog entry without one
+        # shelf. All ten have a release, and a catalog entry without one
         # fails here.
         catalog = self.js["catalogByShelf"]
         self.assertEqual(set(catalog), {"standard", "pro"})
-        self.assertEqual(len(catalog["standard"]), 7)
-        self.assertEqual(len(catalog["pro"]), 7)
+        self.assertEqual(len(catalog["standard"]), 5)
+        self.assertEqual(len(catalog["pro"]), 5)
         storefront = sorted(catalog["standard"] + catalog["pro"])
-        self.assertEqual(len(storefront), 14)
+        self.assertEqual(len(storefront), 10)
         released = sorted(d.id for d in launch.LAUNCH_COLLECTION)
         self.assertEqual(storefront, released)
 
@@ -382,16 +383,20 @@ class TestGroveDivergence(unittest.TestCase):
         # unreadable.
         excluded = {entry["id"]: entry for entry in launch.EXCLUDED_COLLECTIONS}
         self.assertEqual(
-            set(excluded), {"newsletters", "gaming", "_entity_layer", "infrastructure"}
+            set(excluded),
+            {
+                "newsletters", "gaming", "_entity_layer", "infrastructure",
+                "nagpra", "natural-resources", "owned", "plot",
+            },
         )
         self.assertEqual(
             {entry["shelf"] for entry in excluded.values()},
-            {"standard", "grove", "infrastructure"},
+            {"standard", "pro", "grove", "infrastructure"},
         )
         for entry in excluded.values():
             with self.subTest(collection=entry["id"]):
                 self.assertTrue(entry["reason"].strip())
-        # Gaming and Native Infrastructure belong to Grove. The other two are not
+        # Gaming and Native Infrastructure belong to Grove. The others are not
         # in Cedar Grove's favour and must not be counted as though they were.
         self.assertEqual(
             [e["id"] for e in excluded.values() if e["shelf"] == "grove"],

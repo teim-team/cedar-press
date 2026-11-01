@@ -64,16 +64,6 @@ export const SOURCE_GROUPS = Object.freeze([
     ]),
   }),
   Object.freeze({
-    id: "land-and-regulatory-records",
-    label: "Land and regulatory records",
-    sources: Object.freeze([
-      { name: "BIA mapped tracts", match: "BIA mapped tract", collections: ["plot"] },
-      { name: "Wisconsin V12 assessor parcels", match: "Wisconsin V12 assessor parcel", collections: ["plot"] },
-      { name: "Local permits", match: "local permit", collections: ["plot"] },
-      { name: "EPA regulatory sources", match: "EPA regulatory sources", collections: ["plot"] },
-    ]),
-  }),
-  Object.freeze({
     id: "spending",
     label: "Federal spending and awards",
     sources: Object.freeze([
@@ -92,7 +82,6 @@ export const SOURCE_GROUPS = Object.freeze([
       { name: "Voteview", collections: ["legislation"] },
       { name: "Committee and hearing records", match: "committee and hearing records", collections: ["legislation"] },
       { name: "federalregister.gov", collections: ["federal-register"] },
-      { name: "Federal Register NAGPRA notices", collections: ["nagpra"] },
     ]),
   }),
   // The Advocacy collection's current release holds Lobbying Disclosure Act
@@ -117,22 +106,10 @@ export const SOURCE_GROUPS = Object.freeze([
     ]),
   }),
   Object.freeze({
-    id: "resources",
-    label: "Resource revenue and royalties",
-    sources: Object.freeze([
-      { name: "ONRR disbursements", collections: ["natural-resources"] },
-      { name: "MMS American Indian collections", collections: ["natural-resources"] },
-      { name: "OSMRE Abandoned Mine Land distributions", collections: ["natural-resources"] },
-      { name: "State severance distributions", match: "state severance distributions", collections: ["natural-resources"] },
-      { name: "Osage Minerals Council payment history", collections: ["natural-resources"] },
-    ]),
-  }),
-  Object.freeze({
     id: "published",
     label: "What nations and corporations publish",
     sources: Object.freeze([
-      { name: "Tribal TERO and licensing offices", match: "Tribal TERO offices", collections: ["owned"] },
-      { name: "Nation enterprise registers", match: "enterprise registers", collections: ["owned", "need"] },
+      { name: "Nation enterprise registers", match: "enterprise registers", collections: ["need"] },
       { name: "ANC and NHO subsidiary directories", collections: ["need"] },
       { name: "Parent-published subsidiary disclosures", match: "parent-published subsidiary disclosures", collections: ["contractors"] },
       // One entry, not three: the Deals, Contractors and NEED descriptors
@@ -154,21 +131,6 @@ export const SOURCE_GROUPS = Object.freeze([
       { name: "Rating-agency announcements", declared: "owner, 2026-09-27", supportedBy: "issuer and tribal releases, filings, regulator records and labeled secondary sources", collections: ["need"] },
     ]),
   }),
-  Object.freeze({
-    id: "registry",
-    label: "The tribal business source registry",
-    sources: Object.freeze([
-      { name: "Member-owned business directories", match: "Member-owned directory", registry: true, programs: 22 },
-      { name: "Cross-tribal business directories", match: "Cross-tribal directory", registry: true, programs: 8 },
-      { name: "Alaska Native corporation shareholder directories", match: "Alaska Native corporation shareholder directory", registry: true, programs: 7 },
-      { name: "Regional chamber directories", match: "Regional chamber directory", registry: true, programs: 5 },
-      { name: "Native artist directories", match: "Artist directory", registry: true, programs: 4 },
-      { name: "Tribal enterprise pages", match: "Tribal enterprise page", registry: true, programs: 3 },
-      { name: "State certified-vendor directories", match: "State certified-vendor directory", registry: true, programs: 2 },
-      { name: "Chamber member directories", match: "Chamber member directory", registry: true, programs: 2 },
-      { name: "Tribe-linked CDFI directories", match: "Tribe-linked CDFI directory", registry: true, programs: 1 },
-    ]),
-  }),
 ]);
 
 /** Every source, flattened, in group order. */
@@ -180,16 +142,6 @@ export const PRESS_SOURCES = Object.freeze(
 
 /** How many kinds of source the door can name. Counted, never typed. */
 export const SOURCE_COUNT = PRESS_SOURCES.length;
-
-/**
- * Source programs in the registry behind the registry-evidenced kinds. The
- * registry holds 174 in total; this counts the ones the door names a kind
- * for, so the figure and the list can never disagree.
- */
-export const REGISTRY_PROGRAMS = PRESS_SOURCES.reduce(
-  (sum, source) => sum + (source.registry ? source.programs : 0),
-  0,
-);
 
 /** A collection's `sources` prose, by id. The evidence the test reads. */
 export const SOURCE_PROSE = Object.freeze(

@@ -26,7 +26,7 @@ class SpreadsheetRoutes(unittest.TestCase):
         # PLOT's one customer table is its land observations (owner rule 4,
         # 2026-10-04); a release presenting only permit tables has none.
         manifest, pin, _ = self.fixture(component="tract_observations", columns=TRACT_COLUMNS)
-        self.session("press_pro")
+        self.session("grove")
         path = "/press/collections/plot/spreadsheet-download"
         response = self.client.get(path, params={"release_id": pin["release_id"]})
         self.assertEqual(response.status_code, 200, response.text)
@@ -60,7 +60,7 @@ class SpreadsheetRoutes(unittest.TestCase):
 
     def test_unpinned_need_and_revoked_account_never_reach_bytes(self):
         self.fixture()
-        self.session("press_pro")
+        self.session("grove")
         with patch.object(repository, "_release_response", side_effect=AssertionError):
             self.assertEqual(
                 self.client.get(

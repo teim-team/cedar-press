@@ -41,8 +41,6 @@ import { PRESS_DATA_PATH } from "../../features/grove/pressRoutes";
 import { useFadeIn } from "../../features/grove/useFadeIn";
 import { useDocumentTitle } from "../../features/grove/useDocumentTitle";
 import { useScrollToTop } from "../../features/grove/useScrollToTop";
-import { AD_SLOT } from "../../features/grove/pressAds";
-import PressAd from "./PressAd";
 import { PressFoot, PressMast } from "./PressChrome";
 import { PressCedarFab } from "./PressCedarFab";
 
@@ -188,7 +186,7 @@ export default function CedarPressWhatsNew() {
             {activity.latest ? <dd>Latest: {formatUpdated(activity.latest)}</dd> : null}
           </dl> : current ? <p>{all.length} collections with verified available data</p> : null}
           {!model ? <p role="status">{authLoading || releaseState.status === "loading"
-            ? "Loading collection updates…" : "Collection updates are unavailable on this connection."}</p> : null}
+            ? "Loading collection updates…" : "Collection updates are not available right now. Please try again shortly."}</p> : null}
         </section>
 
         {/* Sticky: the feed will eventually hold hundreds of releases, and
@@ -372,7 +370,7 @@ export default function CedarPressWhatsNew() {
             })}
           </ol>
         ) : (
-          <p className="cp-feed__none">{model ? "No available updates match that combination." : "The service has not supplied current update information."}</p>
+          <p className="cp-feed__none">{model ? "No available updates match that combination." : "Update information is not available right now."}</p>
         )}
 
         {/* The list and the control that continues it are one thing, so
@@ -388,11 +386,6 @@ export default function CedarPressWhatsNew() {
             <span className="cp-feed__left">{rest} older</span>
           </p>
         ) : null}
-
-        {/* Sponsorship rule 5: never in a filtered view. The slot rides the
-            full feed only, and never an empty result. It sits after the feed
-            and its control, which is where a page pauses. */}
-        {filtered || !model ? null : <PressAd slot={AD_SLOT.FEED} />}
 
         <PressFoot />
         <PressCedarFab />

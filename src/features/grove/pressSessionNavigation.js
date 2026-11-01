@@ -17,6 +17,11 @@ export function isWorkspaceHost(location) {
   return location?.hostname === "app.cedarpress.ai" || import.meta.env?.VITE_APP_HOST === "1";
 }
 
+/** The landing page. On the workspace host "/" sends a signed-out visitor to the login page, so the door is the public host's. */
+export function landingHref(location = globalThis.location) {
+  return isWorkspaceHost(location) ? "https://cedarpress.ai/" : "/";
+}
+
 /** A same-origin path, or "/". Anything that could leave the site is dropped. */
 export function safeNext(raw) {
   const value = String(raw ?? "");

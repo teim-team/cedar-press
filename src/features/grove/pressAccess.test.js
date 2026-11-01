@@ -191,10 +191,10 @@ test("the upgrade prompt names the product that actually opens the shelf", () =>
 // The other direction matters as much: a catalog entry with no descriptor
 // behind it is a collection the shelf sells and the API cannot serve, which
 // is what the Gaming Intelligence preview was.
-test("all fourteen Press collections have measured previews and Gaming remains excluded", () => {
+test("all ten Press collections have measured previews and Gaming remains excluded", () => {
   const shipping = LAUNCH_COLLECTION.map(dataset => dataset.id).sort();
   assert.deepEqual(shipping, PRESS_CATALOG.map(entry => entry.id).sort());
-  assert.equal(shipping.length, 14);
+  assert.equal(shipping.length, 10);
   assert.ok(!shipping.includes("gaming"));
   for (const dataset of LAUNCH_COLLECTION) assert.equal(dataset.shelf, PRESS_CATALOG_BY_ID[dataset.id].shelf);
 });
@@ -276,11 +276,11 @@ test("every series states a plausible year and every roster a capture date", () 
   }
 });
 
-// The two rosters, named. Both sources publish who is on the list now and
-// archive nothing behind it, so if either ever turns into a series it should
-// be because a dated table was folded in, not because somebody typed a year.
+// The roster, named. Its source publishes who is on the list now and
+// archives nothing behind it, so if it ever turns into a series it should be
+// because a dated table was folded in, not because somebody typed a year.
 test("the rosters are rosters, and nothing reduces them to a year", () => {
-  for (const id of ["owned", "nonprofits"]) {
+  for (const id of ["nonprofits"]) {
     const entry = PRESS_CATALOG_BY_ID[id];
     assert.equal(entry.coverage.kind, "roster", id);
     assert.equal(coverageFrom(entry), null, `${id} produced a coverage year`);
@@ -304,12 +304,12 @@ test("a collection outside the reader's shelf still states its coverage", () => 
   assert.equal(coverageFrom(contractors), contractors.coverage.from);
 });
 
-// Foundation & Corporate Giving and PLOT are live on their plans like any
-// other collection on their shelf (owner, 2026-09-27), state no span and no
-// count, and never produce a year for a rollup to reach back to.
+// Foundation & Corporate Giving and Cedar NEED are live on their plans like
+// any other collection on their shelf, state no span and no count, and never
+// produce a year for a rollup to reach back to.
 test("released mixed observations open by plan without inventing a continuous span", () => {
   const reach = { press: ["standard"], press_pro: ["standard", "pro"], grove: ["standard", "pro"], tree: ["standard", "pro"] };
-  for (const id of ["plot", "foundation-corporate-giving"]) {
+  for (const id of ["need", "foundation-corporate-giving"]) {
     const entry = PRESS_CATALOG_BY_ID[id];
     assert.equal(entry.coverage.kind, "observations", id);
     assert.equal(coverageFrom(entry), null, id);
@@ -319,10 +319,10 @@ test("released mixed observations open by plan without inventing a continuous sp
     }
   }
   assert.equal(canOpenDataset({ workspace_tier: "press" }, PRESS_CATALOG_BY_ID["foundation-corporate-giving"]), true);
-  assert.equal(canOpenDataset({ workspace_tier: "press" }, PRESS_CATALOG_BY_ID.plot), false);
-  assert.equal(canOpenDataset({ workspace_tier: "press_pro" }, PRESS_CATALOG_BY_ID.plot), true);
+  assert.equal(canOpenDataset({ workspace_tier: "press" }, PRESS_CATALOG_BY_ID.need), false);
+  assert.equal(canOpenDataset({ workspace_tier: "press_pro" }, PRESS_CATALOG_BY_ID.need), true);
   assert.equal(PRESS_CATALOG_BY_ID["foundation-corporate-giving"].shelf, "standard");
-  assert.equal(PRESS_CATALOG_BY_ID.plot.shelf, "pro");
+  assert.equal(PRESS_CATALOG_BY_ID.need.shelf, "pro");
 });
 
 test("an entry with no coverage says so rather than guessing", () => {

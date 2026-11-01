@@ -144,5 +144,4 @@ export const CUSTOMER_RENAMES = Object.freeze({
  */
 export const CUSTOMER_COMPONENTS = Object.freeze({
   "federal-register": ["federal_actions"],
-  plot: ["ownership_observations", "tract_observations"],
 });

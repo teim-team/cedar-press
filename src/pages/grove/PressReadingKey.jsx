@@ -1,7 +1,7 @@
 // REVIEW OWNER: Havala
 //
 // "How to read these records" for the collections whose columns need a key
-// (NEED and PLOT, readingKeys.js). Closed by default: the records come first,
+// (NEED, readingKeys.js). Closed by default: the records come first,
 // and the key is one click away for a reader who meets "subsidiary_of" or
 // "BIA tract" for the first time.
 

@@ -36,7 +36,7 @@ export const ECOSYSTEM = Object.freeze({
   }),
   "federal-register": Object.freeze({
     sources: Object.freeze(["Office of the Federal Register", "Agency dockets"]),
-    feeds: Object.freeze(["legislation", "natural-resources", "nagpra"]),
+    feeds: Object.freeze(["legislation", "lobbying"]),
     line: "A notice validates a recognition or regulatory event, and the collections built on those events inherit it.",
   }),
   legislation: Object.freeze({
@@ -68,21 +68,6 @@ export const ECOSYSTEM = Object.freeze({
     feeds: Object.freeze(["contractors"]),
     line: "Every subaward keys to the prime award above it, so both parties resolve to the entities Prime Contracting already names.",
   }),
-  nagpra: Object.freeze({
-    sources: Object.freeze(["National Park Service notices", "Federal Register"]),
-    feeds: Object.freeze(["federal-register"]),
-    line: "Institutions and nations resolve in the entity layer, and notices arrive through the Register.",
-  }),
-  "natural-resources": Object.freeze({
-    sources: Object.freeze(["ONRR", "OSMRE", "Osage Minerals Council"]),
-    feeds: Object.freeze(["federal-register", "funding"]),
-    line: "Production and royalties attach to lands whose status the Register documents.",
-  }),
-  owned: Object.freeze({
-    sources: Object.freeze(["Tribal TERO offices", "Business licensing departments", "Enterprise registers"]),
-    feeds: Object.freeze(["contractors", "need"]),
-    line: "A certified business carries the nation whose office lists it, and the contracting record shows what it has been awarded.",
-  }),
   nonprofits: Object.freeze({
     sources: Object.freeze(["IRS Form 990", "State registries"]),
     feeds: Object.freeze(["funding", "deals"]),
@@ -90,22 +75,15 @@ export const ECOSYSTEM = Object.freeze({
   }),
   need: Object.freeze({
     sources: Object.freeze(["ANCSA audited filings", "Enterprise registers", "ANC and NHO subsidiary directories"]),
-    feeds: Object.freeze(["contractors", "deals", "owned"]),
+    feeds: Object.freeze(["contractors", "deals", "subcontracting"]),
     line: "Every subsidiary and holding company names its parent, so an award or a transaction anywhere in the family rolls up to the nation or corporation behind it.",
   }),
-  // The two collections with no release yet. Their sources are the systems
-  // the producer contract (Foundation & Corporate Giving) and the owner's
-  // source list (PLOT, `sourceRotation.js`) name; the lines are the owner's
-  // cross-collection examples (`ECOSYSTEM_EXAMPLES`), shortened for the ring.
+  // Its sources are the systems the producer contract names; the line is the
+  // owner's cross-collection example (`ECOSYSTEM_EXAMPLES`), shortened for the ring.
   "foundation-corporate-giving": Object.freeze({
     sources: Object.freeze(["IRS Form 990-PF", "Bank and corporate announcements", "Recipient announcements"]),
     feeds: Object.freeze(["funding", "nonprofits"]),
     line: "Private giving read beside federal funding and the nonprofit roster shows how an organization's support combines, with the legal recipient and the Native beneficiary kept apart.",
-  }),
-  plot: Object.freeze({
-    sources: Object.freeze(["BIA Realty/Tract Viewer", "County parcel GIS", "County assessor records"]),
-    feeds: Object.freeze(["deals", "need"]),
-    line: "A site acquisition in Deals links to the parcels PLOT follows, so a transaction and the land it bought read together without being collapsed.",
   }),
 });
 

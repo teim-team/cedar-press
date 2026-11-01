@@ -46,8 +46,8 @@ test("stale NEED cached rows cannot acquire the reviewed release citation", asyn
   assert.doesNotMatch(result.csv, /old cached row|CEDAR-NEST-1/);
 });
 
-test("owner ruling 2026-10-04: NEED and Owned downloads publish with no collection hold", async () => {
-  for (const id of ["need", "owned"]) {
+test("owner ruling 2026-10-04: NEED downloads publish with no collection hold", async () => {
+  for (const id of ["need"]) {
     assert.equal(hasSample(id), true, id);
     assert.ok(samplePath(id), id);
     const dataset = LAUNCH_COLLECTION.find((entry) => entry.id === id);
@@ -243,10 +243,9 @@ test("no public path, the Explore reader's included, carries a retired scheme or
 
 // The button said "Ten-row sample" for every collection, but the customer
 // table keeps only rows at the collection's own grain: Federal Register's
-// renders 5 and PLOT's 3. The label is the file's own count.
+// renders 5. The label is the file's own count.
 test("the download label states the customer table's real row count", async () => {
   assert.equal(sampleLabel("federal-register"), "5-row sample");
-  assert.equal(sampleLabel("plot"), "3-row sample");
   assert.equal(sampleLabel("deals"), "10-row sample");
   assert.equal(sampleLabel("not-a-collection"), null);
   for (const dataset of LAUNCH_COLLECTION) {
@@ -383,4 +382,29 @@ test("product metadata is tracked and narrowly exempted from data ignores", () =
       { cwd: root, encoding: "utf8" });
     assert.equal(ignored.status, 0, `${path} must remain ignored`);
   }
+});
+
+test("the Excel export is a workbook Excel can open, with formulas kept as text", async () => {
+  const { xlsxOf } = await import("./pressDownload.js");
+  const blob = xlsxOf([
+    { name: "Records", rows: [["name", "amount", "zip", "award", "county_fips"], ["=1+1", "302305", "02134", "1234567890123456", "37173"], ["A & B <c>\u0001", "-41.5", "", "x", "01001"]] },
+    { name: "About/notes", rows: [["Cut: everything"]] },
+  ]);
+  assert.equal(blob.type, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+  // A stored ZIP: every part is readable as written.
+  const text = new TextDecoder().decode(await blob.arrayBuffer());
+  for (const part of ["[Content_Types].xml", "_rels/.rels", "xl/workbook.xml", "xl/_rels/workbook.xml.rels", "xl/worksheets/sheet1.xml", "xl/worksheets/sheet2.xml"]) {
+    assert.ok(text.includes(part), part);
+  }
+  assert.match(text, /<sheet name="About notes" sheetId="2"/);
+  assert.match(text, /<c t="inlineStr"><is><t xml:space="preserve">=1\+1<\/t><\/is><\/c>/, "a formula is text");
+  assert.match(text, /<c><v>302305<\/v><\/c>/, "an amount is a number");
+  assert.match(text, /<c><v>-41.5<\/v><\/c>/);
+  assert.match(text, /<t xml:space="preserve">02134<\/t>/, "a leading zero stays");
+  assert.match(text, /<t xml:space="preserve">1234567890123456<\/t>/, "sixteen digits stay exact as text");
+  assert.match(text, /A &amp; B &lt;c&gt;<\/t>/, "escaped, and the control character dropped");
+  assert.match(text, /<t xml:space="preserve">37173<\/t>/, "a code column stays text even when it looks like a number");
+  const precise = new TextDecoder().decode(await xlsxOf([{ name: "R", rows: [["amount"], ["123456789012345.5"], ["0.000001"]] }]).arrayBuffer());
+  assert.match(precise, /<t xml:space="preserve">123456789012345.5<\/t>/, "sixteen significant digits stay text");
+  assert.match(precise, /<c><v>0.000001<\/v><\/c>/, "leading zeros of a fraction are not significant");
 });

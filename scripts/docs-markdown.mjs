@@ -261,10 +261,6 @@ export function renderReleasedGuide(collection, book, entry, descriptor, sample)
     p();
     p("A decision about one enterprise's ownership does not settle any other enterprise or relationship.");
   }
-  if (collection === "owned") {
-    p();
-    p("The observation is a business-directory or certification listing. Several listings may refer to one business; counting listings does not count unique businesses.");
-  }
   p();
   p("## One row is"); p();
   p(book.row);
@@ -299,10 +295,6 @@ export function renderReleasedGuide(collection, book, entry, descriptor, sample)
   p();
   p("## Entity relationships"); p();
   p("A Cedar entity link is a relationship to the record in its stated role. Read each party's identifier and role together; an association does not make the record subject identical to its owner, certifier or other party.");
-  if (collection === "owned") {
-    p();
-    p("The certifying authority identifies who lists or certifies the business. It does not establish tribal-government ownership, and individual Native ownership is a separate claim.");
-  }
   if (collection === "subcontracting") {
     p();
     p("Prime and subrecipient links describe separate parties. Their Native associations and any ownership-time qualification remain separate; a Native prime does not make its subcontractors Native, and a present association does not verify ownership on the subaward date.");
@@ -584,7 +576,7 @@ export function renderAll() {
   const collections = [...new Set([
     ...Object.keys(GUIDES.collections),
     ...MANIFEST.collections.map((entry) => entry.id),
-  ])];
+  ])].filter((c) => !MANIFEST.excluded.some((entry) => entry.id === c));
   const out = {};
   for (const collection of collections) out[`${OUT_DIR}${collection}.md`] = guideFor(collection);
   out[`${OUT_DIR}README.md`] = [

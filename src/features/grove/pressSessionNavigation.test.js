@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   isWorkspaceHost,
+  landingHref,
   loginRedirect,
   safeNext,
   workspaceSignInHref,
@@ -24,6 +25,13 @@ test("only the workspace host is the workspace", () => {
   assert.equal(isWorkspaceHost(new URL("https://app.cedarpress.ai/data")), true);
   for (const origin of ["https://cedarpress.ai", "https://www.cedarpress.ai", "https://app.cedarpress.ai.attacker.invalid"]) {
     assert.equal(isWorkspaceHost(new URL(origin)), false);
+  }
+});
+
+test("the landing page leaves the workspace host, whose root is the login page", () => {
+  assert.equal(landingHref(new URL("https://app.cedarpress.ai/login")), "https://cedarpress.ai/");
+  for (const origin of ["https://cedarpress.ai", "http://localhost:5173", "https://d123.cloudfront.net"]) {
+    assert.equal(landingHref(new URL(origin)), "/");
   }
 });
 
