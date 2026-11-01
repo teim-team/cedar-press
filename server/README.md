@@ -270,6 +270,7 @@ is separate and unchanged by it.
 | Collection | Minimum Press tier | Grove access | Components |
 | --- | --- | --- | --- |
 | Foundation and Corporate Giving | Standard | Shared | `reviewed_disclosures` |
+| NEED | Press+ | Shared | `published_enterprises` |
 | PLOT | Press+ | Shared | `environmental_permits`, `environmental_events` |
 | Gaming Intelligence | Unavailable | Exclusive | Existing Gaming component map |
 

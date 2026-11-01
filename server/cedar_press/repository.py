@@ -1231,8 +1231,13 @@ def grove_component_contract(
     contract = manifest["components"].get(component)
     if not isinstance(contract, dict):
         raise FullReleaseUnavailable("Component is not in the pinned release")
-    # Owner ruling 2026-10-04 (Elijah Moreno): no NEED publication hold. A NEED
-    # component is checked like any other collection's, below.
+    # Owner ruling 2026-10-04 (Elijah Moreno): no NEED publication hold. The
+    # selected table is checked like any other collection's, below, once it is
+    # known to be the table its proof describes.
+    if collection_id == "need" and not need_publication.published_enterprises_permitted(
+        manifest, component, contract
+    ):
+        raise FullReleaseUnavailable("NEED table differs from its stated selection")
     metadata = contract.get("metadata", {})
     if not isinstance(metadata, dict):
         raise FullReleaseUnavailable("Malformed component metadata")
@@ -1266,10 +1271,6 @@ def grove_component_contract(
     header = [field.get("name") for field in fields]
     display_component = presentation_component or component
     entry = _field_map_tables().get(f"{collection_id}/{display_component}")
-    if collection_id == "need" and component == need_publication.COMPONENT:
-        # The reviewed policy above validates the exact version and claim fields.
-        # The preview field map can still describe the older reviewed version.
-        entry = governed_collections.presentation(collection_id, display_component)
     if entry is None:
         entry = governed_collections.presentation(collection_id, display_component)
     if (

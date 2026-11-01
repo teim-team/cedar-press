@@ -238,7 +238,7 @@ class SharedCollectionReleaseTest(unittest.TestCase):
         self.assertFalse(repository.is_grove_release("plot"))
         self.assertTrue(repository.is_component_release("plot"))
         self.assertTrue(repository.is_component_release("need"))
-        self.assertIn("enterprises", repository.grove_components("need"))
+        self.assertEqual(repository.grove_components("need"), ("published_enterprises",))
 
     def test_unpinned_shared_collection_is_explicitly_unavailable(self):
         for collection in governed_collections.SHARED_COLLECTIONS:
@@ -596,6 +596,11 @@ class SharedCollectionReleaseTest(unittest.TestCase):
                         "metadata": {"field_rights": rights},
                     }
                     with (
+                        patch.object(
+                            repository.need_publication,
+                            "published_enterprises_permitted",
+                            return_value=True,
+                        ),
                         patch.object(
                             repository,
                             "_field_map_tables",

@@ -170,7 +170,7 @@ def download(collection, release_id=None, *, metadata_only=False):
         "format": "csv",
         "release_id": pin["release_id"],
         "manifest_sha256": pin["manifest_sha256"],
-        **r.need_publication.descriptor_metadata(manifest, r.need_publication.COMPONENT),
+        **r.need_publication.descriptor_metadata(manifest, r.need_publication.PUBLISHED_COMPONENT),
         "fields": list(sheet["columns"]),
         "record_count": sum(tables[name]["descriptor"]["record_count"] for name in main),
         "filename": f"{collection}.csv",

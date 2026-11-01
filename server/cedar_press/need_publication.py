@@ -42,6 +42,73 @@ CLAIM_NULLABLE_FIELDS = frozenset(
         "related_entity_name",
     }
 )
+PUBLISHED_COMPONENT = "published_enterprises"
+PUBLISHED_VERSION = "need-published-enterprises-1"
+PUBLISHED_FIELDS = (
+    "enterprise_id",
+    "enterprise_name",
+    "owner_cedar_uid",
+    "owner_entity_name",
+    "owner_class",
+    "owner_entity_class",
+    "owner_state",
+    "parent_enterprise_id",
+    "parent_enterprise_name",
+    "hierarchy_level",
+    "relationship",
+    "uei",
+    "cage_code",
+    "city",
+    "state",
+    "sector",
+    "status",
+    "first_observed_year",
+    "last_observed_year",
+    "in_federal_contracting",
+    "evidence_class",
+    "source_url",
+    "source_edition_date",
+    "selection_basis",
+)
+
+
+def published_enterprises_permitted(
+    manifest: dict[str, Any], name: str, entry: dict[str, Any]
+) -> bool:
+    """Whether this is the producer's selected table, exactly as its proof states.
+
+    A check of what arrived, not a publication hold: rights and review statuses
+    stay provenance (owner rulings 2026-10-04), and `repository` still refuses
+    tenant-private data. The row count is enforced when the bytes are verified.
+    """
+    if manifest.get("collection_id") != "need" or name != PUBLISHED_COMPONENT:
+        return False
+    metadata = entry.get("metadata")
+    attestations = manifest.get("attestations")
+    fields = entry.get("fields")
+    if (
+        not isinstance(metadata, dict)
+        or not isinstance(attestations, dict)
+        or not isinstance(fields, list)
+        or any(not isinstance(field, dict) for field in fields)
+    ):
+        return False
+    proof = metadata.get(PUBLISHED_COMPONENT)
+    if not isinstance(proof, dict) or proof != attestations.get(PUBLISHED_COMPONENT):
+        return False
+    count = proof.get("record_count")
+    commit = proof.get("producer_commit")
+    return (
+        proof.get("version") == PUBLISHED_VERSION
+        and isinstance(commit, str)
+        and re.fullmatch(r"[0-9a-f]{40}", commit) is not None
+        and type(count) is int
+        and count > 0
+        and entry.get("record_count") == count
+        and entry.get("dataset_id") == "need--" + PUBLISHED_COMPONENT
+        and metadata.get("internal_only") is False
+        and tuple(field.get("name") for field in fields) == PUBLISHED_FIELDS
+    )
 
 
 def reviewed_base_permitted(manifest: dict[str, Any], name: str, entry: dict[str, Any]) -> bool:
@@ -157,9 +224,11 @@ def reviewed_base_permitted(manifest: dict[str, Any], name: str, entry: dict[str
 
 def descriptor_metadata(manifest: dict[str, Any], component: str) -> dict[str, Any]:
     entry = manifest.get("components", {}).get(component)
-    if not isinstance(entry, dict) or not reviewed_base_permitted(manifest, component, entry):
+    if not isinstance(entry, dict) or not published_enterprises_permitted(
+        manifest, component, entry
+    ):
         return {}
     return {
-        "publication_scope": "reviewed_public_base_only",
-        "reviewed_public_base": entry["metadata"]["reviewed_public_base"],
+        "publication_scope": PUBLISHED_COMPONENT,
+        PUBLISHED_COMPONENT: entry["metadata"][PUBLISHED_COMPONENT],
     }
