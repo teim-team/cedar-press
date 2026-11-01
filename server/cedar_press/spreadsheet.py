@@ -154,6 +154,18 @@ def _spool(collection, layout, sheet, rows, origins):
 
 
 def download(collection, release_id=None, *, metadata_only=False):
+    """The customer file: a finished copy of the pinned release, or built in this request."""
+    from cedar_press import finished_sheets
+
+    descriptor = assemble(collection, release_id, metadata_only=True)
+    if metadata_only:
+        return descriptor
+    if descriptor["release_id"] != release_id:
+        raise r.FullReleaseUnavailable("Requested release is not the approved catalog pin")
+    return finished_sheets.open_verified(collection, descriptor) or assemble(collection, release_id)
+
+
+def assemble(collection, release_id=None, *, metadata_only=False):
     """Pins and every component's byte, schema, key and rights checks stay binding."""
     if not r.is_component_release(collection):
         return _single_dataset(collection, release_id, metadata_only=metadata_only)

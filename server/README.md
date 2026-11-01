@@ -216,6 +216,12 @@ Server-only configuration (never Vite/browser variables):
 - `CEDAR_PRESS_RELEASE_CATALOG`: a reviewed local catalog from Lumecon `build_catalog`.
   Funding and Prime Contracting ship as collection releases, which that file cannot
   hold; they read `CEDAR_PRESS_COMPONENT_RELEASE_CATALOG` when it is set.
+- `CEDAR_PRESS_FINISHED_SHEETS`: the folder of finished customer spreadsheets, set by
+  `infra/deploy.sh`, which starts `python -m cedar_press.finished_sheets` after each
+  deploy. The largest spreadsheets take longer to build than CloudFront waits, so each
+  is built once and kept. A file is served only for the pinned release and the current
+  presentation rules, with its hash rechecked; otherwise the request builds its own.
+  After changing a catalog without a deploy, run that command in the container.
 - `CEDAR_PRESS_DATA_API`: the Lumecon API origin. HTTPS is required; HTTP loopback
   is allowed only in development. Staging/production reject loopback and insecure cookies.
 - `CEDAR_PRESS_DATA_TOKEN`: a dataset-scoped backend grant; never a subscriber credential.
