@@ -179,6 +179,23 @@ class PartitionedReleaseTest(unittest.TestCase):
         self.assertTrue(files and all(f.closed for f in files))
         self.assertNotIn("partition@example.invalid", str(log.output))
 
+    def test_partitioned_flagship_reads_the_collection_catalog_beside_a_dataset_catalog(self):
+        settings = {
+            "CEDAR_PRESS_RELEASE_CATALOG": str(self.catalog.with_name("dataset-catalog.json")),
+            "CEDAR_PRESS_COMPONENT_RELEASE_CATALOG": str(self.catalog),
+        }
+        with patch.dict(os.environ, settings):
+            # A flagship outside the set stays on the dataset catalog, here missing.
+            self.assertEqual(
+                repository.full_release_metadata("legislation"),
+                {"kind": "full", "status": "unavailable"},
+            )
+            with patch.object(repository, "PARTITIONED_FLAGSHIPS", {"legislation"}):
+                release = repository.full_release_metadata("legislation")
+                self.assertEqual(release["release_id"], self.rid)
+                self.assertEqual(release["record_count"], 3)
+                self.assertEqual(self.request().status_code, 200)
+
     def test_global_duplicate_refused(self):
         self.parts["part-2"] = self.parts["part-0"]
         self.manifest["components"]["part-2"]["files"] = copy.deepcopy(

@@ -478,6 +478,12 @@ class SharedCollectionReleaseTest(unittest.TestCase):
         self.assertEqual(response.status_code, 200, response.text)
         self.assertEqual(response.content, content)
 
+    def test_giving_leaves_its_held_disclosures_out(self):
+        # The release holds them; they are outside what the dataset is for.
+        components = repository.grove_components("foundation-corporate-giving")
+        self.assertIn("reviewed_disclosures", components)
+        self.assertNotIn("held_disclosures", components)
+
     def test_authorized_giving_preserves_exact_decimal_text_and_component_audit(self):
         _manifest, _pin, content = self.fixture(
             "foundation-corporate-giving", "reviewed_disclosures"
