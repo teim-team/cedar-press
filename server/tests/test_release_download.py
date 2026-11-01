@@ -1,6 +1,7 @@
 """Pinned full-release delivery and negative controls; all fixtures are fictional."""
 
 import copy
+import dataclasses
 import hashlib
 import importlib.util
 import io
@@ -95,7 +96,23 @@ class ReleaseDownloadTest(unittest.TestCase):
         self.client = TestClient(app)
         self.addCleanup(self.client.close)
 
+    def sell_natural_resources(self):
+        # The producer fixture's one Press+ release. Natural Resources left the
+        # storefront with the pilot tiers, so the entitlement tests put a
+        # stand-in for it back on the pro shelf.
+        pro = next(d for d in repository.launch.LAUNCH_COLLECTION if d.shelf == "pro")
+        stand_in = dataclasses.replace(pro, id="natural-resources")
+        patcher = patch.object(
+            repository.launch,
+            "LAUNCH_COLLECTION",
+            (*repository.launch.LAUNCH_COLLECTION, stand_in),
+        )
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
     def use_producer_fixture(self, collection_id):
+        if collection_id == "natural-resources":
+            self.sell_natural_resources()
         fixture = json.loads(
             (Path(__file__).with_name("fixtures") / "lumecon_release_contract.json").read_text(
                 encoding="utf-8"
@@ -309,6 +326,7 @@ class ReleaseDownloadTest(unittest.TestCase):
         self.mock_fetch.assert_not_called()
 
     def test_current_account_denial_and_outage_fail_closed_without_fetch_or_secrets(self):
+        self.sell_natural_resources()
         app.dependency_overrides[current_session] = lambda: Session(
             "fixture@example.invalid", "press_pro"
         )

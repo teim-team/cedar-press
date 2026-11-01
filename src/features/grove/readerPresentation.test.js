@@ -27,8 +27,7 @@ test("only explicit national aggregates get that subject; missing identity is no
 
 test("reviewed labels preserve value semantics and never rewrite identifiers or unknown values", () => {
   assert.equal(readerValueLabel("lobbying", "amount_basis", "none_reported"), "No amount reported");
-  assert.equal(readerValueLabel("natural-resources", "measurement_status", "appropriated_amount"), "Appropriated amount");
-  assert.equal(readerValueLabel("owned", "cedar_entity_role", "certifying_authority"), "Certifying authority");
+  assert.equal(readerValueLabel("foundation-corporate-giving", "amount_class", "range"), "Reported range");
   assert.equal(readerValueLabel("owned", "record_key", "certifying_authority"), "certifying_authority");
   assert.equal(readerValueLabel("need", "relationship_type", "candidate_relation"), "candidate_relation");
   assert.equal(readerValueLabel("need", "relationship_type", "affiliated_with"), "Affiliated with");

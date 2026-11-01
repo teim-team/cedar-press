@@ -1,10 +1,10 @@
 .teim-rd.cp-login {
-  --door-action-top: #0d8f83; --door-action-bottom: #086b62; --door-accent-light: #5fd9cc; --door-ink-3: #647279;
+  --door-action: #0a0a0a; --door-accent-light: #f0a91a; --door-ink-3: #636363;
   --door-shadow-control: 0 1px 2px rgba(10, 15, 38, 0.08); --door-ease: var(--cp-ease);
   min-height: 100vh; display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); }
 .teim-rd .cp-login__side { display: flex; flex-direction: column; justify-content: center; gap: 1.2rem; padding: clamp(2rem, 6vw, 5rem); background: var(--dteal); color: #fff; }
 .teim-rd .cp-login__card { width: min(24rem, 100%); box-sizing: border-box; padding: 1.6rem 1.5rem 1.7rem; border: 1px solid var(--line); border-radius: 14px; background: var(--bg); }
-.teim-rd .cp-login__h { margin: 0 0 1rem; font-family: var(--sans); font-size: 1.4rem; font-weight: 700; letter-spacing: -0.015em; color: var(--ink); }
+.teim-rd .cp-login__h { margin: 0 0 1rem; font-family: var(--sans); font-size: 1.4rem; font-weight: var(--weight-display); letter-spacing: var(--track-title); color: var(--ink); }
 .teim-rd .cp-login__lede { margin: -0.4rem 0 1.2rem; font-size: 0.95rem; line-height: 1.45; color: var(--ink-2); }
 .teim-rd .cp-login__field { display: flex; flex-direction: column; gap: 0.35rem; }
 .teim-rd .cp-login__row { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; font-size: 0.88rem; font-weight: 600; color: var(--ink); }

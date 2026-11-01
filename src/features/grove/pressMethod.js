@@ -33,7 +33,7 @@ export const MAINTENANCE = Object.freeze({
   sentence:
     "Cedar Press maintains its datasets on a weekly schedule with human review, expands their source coverage and useful fields over time and develops new collections.",
   /** Why: the goal the maintenance serves. */
-  goal: "The aim is exceptionally useful, well-documented data and tools for Indian Country, well beyond filling in missing records.",
+  goal: "The goal is well-documented data and tools that Indian Country can rely on.",
   /** The short form for a fact line. */
   label: "Weekly review schedule, with human review",
 });
@@ -302,7 +302,6 @@ export const ECOSYSTEM_EXAMPLES = Object.freeze([
   "A nation's own enterprise register or audited filing names the subsidiaries the federal record files under unrelated names.",
   "Patent records and rating-agency announcements add to an enterprise's Cedar NEED profile where records are available, each kept with the specific entity it concerns and its date.",
   "Federal funding and contracting records add economic activity to an entity profile.",
-  "A site acquisition recorded in Indian Country Deals links to the parcels PLOT follows, so a transaction and the land it bought read together without being collapsed into one record.",
   "Foundation, corporate and bank giving read beside federal funding and the Native Nonprofits roster shows how an organization's private and public support combine, with the legal recipient and the Native beneficiary kept apart.",
   "Better entity resolution then improves matching across every collection above.",
 ]);

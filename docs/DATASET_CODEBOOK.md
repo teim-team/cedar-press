@@ -4,7 +4,7 @@ Generated from `data/cedar/codebook.json` and `data/cedar/collections.manifest.j
 
 ## Scope
 
-This document contains 26 dictionary entries. 14 entries describe the installed producer spreadsheets selected by the manifest. Any other entry is labelled as a compatibility reference and does not describe a currently served spreadsheet.
+This document contains 26 dictionary entries. 10 entries describe the installed producer spreadsheets selected by the manifest. Any other entry is labelled as a compatibility reference and does not describe a currently served spreadsheet.
 
 Each exported field keeps its own meaning, source role and publication qualification. A business identifier, an owner link, a certifying-authority link and a source-record key identify different objects or relationships. A missing identity is not filled by a shared name.
 
@@ -1006,15 +1006,11 @@ The columns below describe the exported names directly. No legacy rename, combin
 
 ### NAGPRA Notices
 
-Collection `nagpra` · table `nagpra` · installed producer spreadsheet
-
-**Rows in this installed spreadsheet:** 6,792. This is an observation count at the declared record types and grains.
+Collection `nagpra` · table `nagpra` · compatibility reference; not the manifest's installed spreadsheet
 
 **One row is:** One permitted observation at its declared record_type and record_grain.
 
 **Release or source location:** Exact release b45822cd045724582cee3e2be0e87008fc61569d82cf2fa53fe2e2c309eb3c0d; one researcher spreadsheet.
-
-The columns below describe the exported names directly. No legacy rename, combine or promised identity block is applied to this spreadsheet.
 
 **Fields (55):**
 
@@ -1078,15 +1074,11 @@ The columns below describe the exported names directly. No legacy rename, combin
 
 ### Tribal Natural Resource Revenue
 
-Collection `natural-resources` · table `natural-resources` · installed producer spreadsheet
-
-**Rows in this installed spreadsheet:** 11,120. This is an observation count at the declared record types and grains.
+Collection `natural-resources` · table `natural-resources` · compatibility reference; not the manifest's installed spreadsheet
 
 **One row is:** One permitted observation at its declared record_type and record_grain.
 
 **Release or source location:** Exact release f65f92d809d91fa07c977f37ff2a4c3830ca014eccb728daaaf43ebfaa61e7e5; one researcher spreadsheet.
-
-The columns below describe the exported names directly. No legacy rename, combine or promised identity block is applied to this spreadsheet.
 
 **Fields (41):**
 
@@ -1220,15 +1212,11 @@ The columns below describe the exported names directly. No legacy rename, combin
 
 ### Individual Native-Owned Businesses
 
-Collection `owned` · table `owned` · installed producer spreadsheet
-
-**Rows in this installed spreadsheet:** 3,725. This is an observation count at the declared record types and grains.
+Collection `owned` · table `owned` · compatibility reference; not the manifest's installed spreadsheet
 
 **One row is:** One permitted observation at its declared record_type and record_grain.
 
 **Release or source location:** Exact release f298b01f29651ab652e2d8f221d061504b8de035c18ae9e10cf84a3daf777ed9; one researcher spreadsheet.
-
-The columns below describe the exported names directly. No legacy rename, combine or promised identity block is applied to this spreadsheet.
 
 **Fields (35):**
 
@@ -1429,15 +1417,11 @@ The columns below describe the exported names directly. No legacy rename, combin
 
 ### PLOT
 
-Collection `plot` · table `plot` · installed producer spreadsheet
-
-**Rows in this installed spreadsheet:** 151,715. This is an observation count at the declared record types and grains.
+Collection `plot` · table `plot` · compatibility reference; not the manifest's installed spreadsheet
 
 **One row is:** One permitted observation at its declared record_type and record_grain.
 
 **Release or source location:** Exact release a450bd56cdcafd2f7ff1d8191f141b025ad384eeb5a3d676fc96a6598c4d182b; one researcher spreadsheet.
-
-The columns below describe the exported names directly. No legacy rename, combine or promised identity block is applied to this spreadsheet.
 
 **Fields (106):**
 

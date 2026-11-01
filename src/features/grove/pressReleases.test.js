@@ -48,7 +48,7 @@ import {
 // and one of the ten was not sold at all.
 test("every released collection has a release and nothing else does", () => {
   assert.deepEqual(
-    Object.keys(PRESS_RELEASES).sort(),
+    Object.keys(PRESS_RELEASES).filter((id) => !PRESS_RELEASES[id].retired).sort(),
     LAUNCH_COLLECTION.map((dataset) => dataset.id).sort(),
   );
   for (const entry of PRESS_CATALOG) assert.ok(releaseFor(entry.id), `${entry.id} has no release`);
@@ -285,7 +285,6 @@ test("each collection shows one entry, for the dataset as it stands", () => {
   }
   // The served downloads that hold fewer than ten rows say so.
   assert.match(releaseFor("federal-register").history[0].changed[1], /^5 example records /);
-  assert.match(releaseFor("plot").history[0].changed[1], /^3 example records /);
   // A synthetic collection with no served sample promises none.
   const [first] = LAUNCH_COLLECTION;
   const bare = buildReleases({ releases: { "no-sample": [
@@ -347,7 +346,7 @@ test("recently updated is deterministic when releases share a day", () => {
   const again = recentlyUpdated(3).map((r) => r.id);
   assert.deepEqual(first, again);
   assert.equal(first.length, 3);
-  assert.equal(recentlyUpdated(1)[0].id, RELEASE_FEED[0].id);
+  assert.equal(recentlyUpdated(1)[0].id, RELEASE_FEED.find((entry) => !entry.retired).id);
 });
 
 test("dates are spelled one way everywhere", () => {

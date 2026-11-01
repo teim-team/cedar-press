@@ -18,8 +18,9 @@
  * facility registers) went on 2026-10-10 (L1-U09). Nothing counts this list: the
  * marquee's run time is its length, and the reach figure never depended on it.
  *
- * The parcel, assessor, deed, permit and environmental-review labels name
- * the systems PLOT is built from; the foundation, 990-PF, bank, corporate,
+ * The parcel, resource-revenue, NAGPRA and business-directory labels went
+ * when PLOT, Natural Resources, NAGPRA and Owned left the storefront with the
+ * pilot tiers, on the same reasoning as the gaming sources. The foundation, 990-PF, bank, corporate,
  * tribal-foundation, recipient and charity-registration labels name the
  * Foundation & Corporate Giving sources (owner, 2026-09-27). The patent and
  * ratings labels name the Cedar NEED enrichment: patent publication and
@@ -102,19 +103,6 @@ export const SOURCE_ROTATION = Object.freeze([
   "OIRA Executive Order 12866 meetings",
   "Interior IBIA and IBLA appeals",
   "Congressional earmark disclosures",
-  "National NAGPRA public databases",
-  "ONRR monthly revenue",
-  "ONRR fiscal-year disbursements",
-  "ONRR production volumes",
-  "Historical MMS Indian collections",
-  "OSMRE Abandoned Mine Land distributions",
-  "North Dakota tribal tax distributions",
-  "North Dakota oil and gas tax series",
-  "State tribal tax agreement reports",
-  "Utah COBI and revitalization funds",
-  "Montana oil and gas county distributions",
-  "Osage Minerals Council payment history",
-  "Resource asset source documents",
   "BTFA budget disclosures",
   "Parent-published Native company lists",
   "SBA and GSA certification records",
@@ -122,22 +110,9 @@ export const SOURCE_ROTATION = Object.freeze([
   "IRS Form 990 returns and schedules",
   "IRS Form 990-N e-Postcard data",
   "Tribal government and enterprise directories",
-  "Member-owned business directories",
-  "Cross-tribal business directories",
   "Alaska Native corporation shareholder directories",
-  "Regional chamber directories",
-  "Native artist directories",
-  "State certified-vendor directories",
   "Tribe-linked CDFI directories",
   "FSRS subaward reporting",
-  "BIA Realty/Tract Viewer",
-  "Statewide parcel and cadastral GIS",
-  "County parcel GIS",
-  "County assessor and property-tax records",
-  "State and local permit registers",
-  "State environmental permits and CEQA reviews",
-  "Recorded deeds and land transfers",
-  "EPA facility and permit records",
   "Foundation grant databases and award lists",
   "Bank charitable-giving disclosures",
   "Corporate foundation award announcements",
@@ -154,13 +129,9 @@ export const SOURCE_ROTATION = Object.freeze([
   "ANCSA 7(i) revenue-sharing reports",
   "BIE school directory",
   "Urban Indian organization rosters",
-  "BIA mineral acreage records",
   "Center for Indian Country Development data",
-  "Tribal Employment Rights Office registries",
   "DOL OLMS and state WARN notices",
   "Tribal contractor directories",
-  "Tribal certification notices",
-  "State product and producer directories",
 ]);
 
 /**

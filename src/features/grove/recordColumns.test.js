@@ -49,14 +49,6 @@ test("the opening spreadsheet keeps amount and its qualification before extra ob
   assert.deepEqual(contract, before, "presentation selection changed the entity or amount contract");
 });
 
-test("the individual business leads the business spreadsheet, with its certifier separately qualified", () => {
-  const c = CONTRACTS["owned/owned"];
-  assert.equal(c.subject, "business_name");
-  assert.equal(c.default_columns[0], "business_name");
-  assert.ok(c.default_columns.indexOf("canonical_name") > 0);
-  assert.ok(c.default_columns.includes("cedar_entity_role"));
-});
-
 test("the resource codebook retains measurement qualifications instead of implying every row is a payment", () => {
   const key = "natural-resources/natural-resources";
   assert.equal(labelFor(key, "measurement_status"), "Measurement basis");
@@ -111,7 +103,7 @@ test("legacy tables keep their role-first source-link behavior", () => {
 
 test("installed customer contracts open on their declared columns and carry no packaging column", () => {
   const current = Object.entries(CONTRACTS);
-  assert.equal(current.length, 14);
+  assert.equal(current.length, 10);
   for (const [key, contract] of current) {
     assert.equal(contract.mapping_kind, "customer_table", key);
     const header = downloadRecord(key.split("/")[0])?.header;

@@ -136,9 +136,9 @@
     }
   },
   "link_statuses": {
-    "no_individual_named": "The record addresses or concerns a population and names no individual entity; the Cedar block is blank by design. Never a failed match.",
-    "resolved": "The named party resolved to the register; the Cedar block carries it.",
-    "unresolved": "The record names a party the register could not place; the Cedar block is blank and the name as published stands. Never recast as a population.",
-    "withheld": "The Cedar block is blank when the match named the wrong entity, which is noted in the record."
+    "no_individual_named": "The record concerns a population rather than a single entity, so its Cedar entity fields are blank by design. This is not a failed match.",
+    "resolved": "The named party is matched to a Cedar entity, shown in the record's Cedar entity fields.",
+    "unresolved": "The record names a party Cedar has not yet matched to an entity. The Cedar entity fields are blank and the name is kept as published. It is never treated as a population.",
+    "withheld": "The Cedar entity fields are blank because the match pointed to the wrong entity. The record notes this."
   }
 }

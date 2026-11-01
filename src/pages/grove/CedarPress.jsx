@@ -24,7 +24,6 @@ import { useAuth } from "../../context/useAuth";
 import { useFadeIn } from "../../features/grove/useFadeIn";
 import { GROVE_MARKETING_URL, contactHref } from "../../features/grove/appLink.js";
 import { canReadCedarPress } from "../../features/grove/pressAccess";
-import { AD_SLOT } from "../../features/grove/pressAds";
 import { useDocumentTitle } from "../../features/grove/useDocumentTitle";
 import { PRESS_CATALOG_BY_ID } from "../../features/grove/pressCatalog";
 import { anchorOf, formatUpdated, latestRelease, recentlyUpdated } from "../../features/grove/pressReleases";
@@ -32,7 +31,6 @@ import { MAINTENANCE } from "../../features/grove/pressMethod.js";
 import { Contours } from "./pressAtmosphere";
 import { PressCedarFab } from "./PressCedarFab";
 import { PressFoot, PressMast } from "./PressChrome";
-import PressAd from "./PressAd";
 import { LAUNCH_COLLECTION } from "../../features/grove/collection";
 import { openCedarQuestions } from "../../features/grove/pressJobs";
 import { PRESS_WHATS_NEW_PATH } from "../../features/grove/pressRoutes";
@@ -128,12 +126,6 @@ export default function CedarPress() {
             product should end on the maintenance — and the footer is the last
             of it rather than a separate strip below the last of it. */}
         <div className="cp-screen cp-end">
-        {/* Sponsorship rides the ending, not the arrival: a signed-in
-            reader's first screen is for using the product, and the close is
-            where a page pauses anyway. Still inside a region rather than on
-            a seam — rule 4 — and the overview names no figures, so a unit
-            is nowhere near a number. */}
-        <PressAd slot={AD_SLOT.OVERVIEW} />
         <section className="cp-surf cp-surf--deep cp-close cp-fade" id="more" aria-label="What happens next">
           <Contours strength={1.2} />
           <div className="cp-close__in">

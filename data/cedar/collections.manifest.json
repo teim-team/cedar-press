@@ -44,6 +44,26 @@
       "name": "Native Infrastructure",
       "shelf": "grove",
       "reason": "A separate Cedar Grove dataset. Records retain source-specific periods, grains and publication permissions."
+    },
+    {
+      "id": "nagpra",
+      "shelf": "standard",
+      "reason": "Not in either pilot tier (Havala Hanson's review, Lumecon-data #44, 2026-10-29). The collection and its data remain in the workspace; only the storefront slot is withdrawn."
+    },
+    {
+      "id": "owned",
+      "shelf": "pro",
+      "reason": "Not in either pilot tier (Havala Hanson's review, Lumecon-data #44, 2026-10-29). The collection and its data remain in the workspace; only the storefront slot is withdrawn."
+    },
+    {
+      "id": "natural-resources",
+      "shelf": "pro",
+      "reason": "Not in either pilot tier (Havala Hanson's review, Lumecon-data #44, 2026-10-29). The collection and its data remain in the workspace; only the storefront slot is withdrawn."
+    },
+    {
+      "id": "plot",
+      "shelf": "pro",
+      "reason": "Not in either pilot tier (Havala Hanson's review, Lumecon-data #44, 2026-10-29). The collection and its data remain in the workspace; only the storefront slot is withdrawn."
     }
   ],
   "collections": [
@@ -247,7 +267,7 @@
       "id": "deals",
       "descriptor": {
         "id": "deals",
-        "shelf": "standard",
+        "shelf": "pro",
         "level": "entity",
         "origin": "lumecon",
         "rows_label": "978 observations",
@@ -300,71 +320,6 @@
             "split": "",
             "files": 1,
             "largest_file_mb": 1.650731
-          }
-        }
-      ],
-      "full_files": {
-        "served": false,
-        "note": "The local spreadsheet was verified. These staged previews do not approve or configure a production download."
-      }
-    },
-    {
-      "id": "nagpra",
-      "descriptor": {
-        "id": "nagpra",
-        "shelf": "standard",
-        "level": "entity",
-        "origin": "lumecon",
-        "rows_label": "6,792 observations",
-        "vintage": null,
-        "version": "v4",
-        "updated": "2026-10-06",
-        "downloads": null,
-        "name": "NAGPRA Notices",
-        "short_name": "NAGPRA",
-        "tracks": "Notices of Inventory Completion and Intent to Repatriate published under the Native American Graves Protection and Repatriation Act, with the institutions and affiliated tribes named in each.",
-        "sources": "Federal Register NAGPRA notices, full text.",
-        "method": "Tribal affiliations are taken from the notice's own text, which is the legally operative statement of affiliation, and an alias is only accepted into the identity layer when it appears across at least three independent notices. Cultural detail beyond what the notice publishes is not extracted, and no inference is made about ancestral remains or objects beyond the notice's own words."
-      },
-      "cedar": {
-        "cedar_id": "nagpra",
-        "status": "READY",
-        "blockers": [],
-        "n_rows": 6792,
-        "n_tables": 1,
-        "n_record_types": 1,
-        "count_basis": "Permitted rows in the exact producer spreadsheet; mixed grains are not totals.",
-        "release_id": "b45822cd045724582cee3e2be0e87008fc61569d82cf2fa53fe2e2c309eb3c0d",
-        "manifest_sha256": "0d202a7aae98efb176337654e78fd4551594347e764c98dc28632b3f9dcbca13",
-        "readiness_scope": "Verified local preview; production approval and endpoint pins are separate."
-      },
-      "sample": {
-        "table": "nagpra.csv",
-        "path": "/data/cedar/samples/nagpra/spreadsheet__10.csv",
-        "rows": 10,
-        "of": 6792,
-        "columns": 55,
-        "release_id": "b45822cd045724582cee3e2be0e87008fc61569d82cf2fa53fe2e2c309eb3c0d",
-        "manifest_sha256": "0d202a7aae98efb176337654e78fd4551594347e764c98dc28632b3f9dcbca13"
-      },
-      "tables": [
-        {
-          "table": "nagpra.csv",
-          "sample_path": "/data/cedar/samples/nagpra/spreadsheet__10.csv",
-          "rows_in": 6792,
-          "rows_published": 6792,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 55,
-          "sample_rows": 10,
-          "record_types": {
-            "records": 6792
-          },
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 1,
-            "largest_file_mb": 12.684163
           }
         }
       ],
@@ -569,71 +524,6 @@
       }
     },
     {
-      "id": "owned",
-      "descriptor": {
-        "id": "owned",
-        "shelf": "pro",
-        "level": "entity",
-        "origin": "lumecon",
-        "rows_label": "3,725 observations",
-        "vintage": null,
-        "version": "v5",
-        "updated": "2026-10-06",
-        "downloads": null,
-        "name": "Individual Native-Owned Businesses",
-        "short_name": "Businesses",
-        "tracks": "Firms certified or listed as Native-owned by a tribal certifying authority (TERO vendor lists, Indian preference registers, tribal business licenses and tribal enterprise registers), harmonized across nations into one schema.",
-        "sources": "Tribal TERO offices, business licensing departments and enterprise registers, harvested from each nation's own publication. Contributing authorities are acknowledged in every release.",
-        "method": "The strength of each certification is preserved rather than flattened, because the authorities do not mean the same thing: a firm certified at 100% enrolled-member ownership, one on an any-Native list, one qualifying through a shareholder's spouse or descendant, and a vendor with no ownership relation at all are recorded as different claims on the same scale. The relation published is affiliation with a named nation, not an ownership assertion the source never made. Sources whose terms forbid reuse are excluded by every route and named as excluded."
-      },
-      "cedar": {
-        "cedar_id": "native-owned-businesses",
-        "status": "READY",
-        "blockers": [],
-        "n_rows": 3725,
-        "n_tables": 1,
-        "n_record_types": 1,
-        "count_basis": "Permitted rows in the exact producer spreadsheet; mixed grains are not totals.",
-        "release_id": "f298b01f29651ab652e2d8f221d061504b8de035c18ae9e10cf84a3daf777ed9",
-        "manifest_sha256": "abd0ee5d477facd6abd6d25a39a5e29d7c83c6600c0558b1f3891f72488619e9",
-        "readiness_scope": "Verified local preview; production approval and endpoint pins are separate."
-      },
-      "sample": {
-        "table": "owned.csv",
-        "path": "/data/cedar/samples/owned/spreadsheet__10.csv",
-        "rows": 10,
-        "of": 3725,
-        "columns": 35,
-        "release_id": "f298b01f29651ab652e2d8f221d061504b8de035c18ae9e10cf84a3daf777ed9",
-        "manifest_sha256": "abd0ee5d477facd6abd6d25a39a5e29d7c83c6600c0558b1f3891f72488619e9"
-      },
-      "tables": [
-        {
-          "table": "owned.csv",
-          "sample_path": "/data/cedar/samples/owned/spreadsheet__10.csv",
-          "rows_in": 3725,
-          "rows_published": 3725,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 35,
-          "sample_rows": 10,
-          "record_types": {
-            "records": 3725
-          },
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 1,
-            "largest_file_mb": 3.070806
-          }
-        }
-      ],
-      "full_files": {
-        "served": false,
-        "note": "The local spreadsheet was verified. These staged previews do not approve or configure a production download."
-      }
-    },
-    {
       "id": "need",
       "descriptor": {
         "id": "need",
@@ -647,9 +537,9 @@
         "downloads": null,
         "name": "Cedar Native Entity Enterprise Dataset (NEED)",
         "short_name": "NEED",
-        "tracks": "Enterprise ownership and affiliation across tribes, Alaska Native corporations, Native Hawaiian organizations, and state-recognized Native entities — the parent, the holding company and the operating company, kept as a chain rather than a flat list.",
+        "tracks": "Enterprise ownership and affiliation across tribes, Alaska Native corporations, Native Hawaiian organizations, and state-recognized Native entities: the parent, the holding company and the operating company, kept as a chain rather than a flat list.",
         "sources": "What each owner publishes about itself: audited annual reports filed by ANCSA corporations with the Alaska Division of Banking and Securities under Alaska Statute 45.55.139, whose Principles of Consolidation note enumerates the subsidiaries by legal name; nations' own “Our Companies” and enterprise registers; ANC and NHO subsidiary directories. Publishers whose terms forbid reuse are excluded by every route and named as excluded.",
-        "method": "This release is the reviewed public base: 43 enterprises, each pinned to its evidence. NEED has no publication hold (owner ruling 2026-10-04): its records come from publicly available websites and Lumecon has permission to publish them, and source rights are recorded as provenance. Existing enterprise IDs and source evidence are preserved. Each row lists its verified claims; identity, identifiers and relationships are separate assertions. Blank unclaimed fields are not negative findings. This reviewed cohort is not the full enterprise register or a deduplicated entity count."
+        "method": "This release covers 43 reviewed enterprises, each tied to its supporting evidence. Every record comes from publicly available sources, and its source is recorded with it. Existing enterprise IDs and source evidence are preserved. Each row lists its verified claims; identity, identifiers and relationships are separate assertions. Blank unclaimed fields are not negative findings. This reviewed cohort is not the full enterprise register or a deduplicated entity count."
       },
       "cedar": {
         "cedar_id": "need",
@@ -732,71 +622,6 @@
       }
     },
     {
-      "id": "natural-resources",
-      "descriptor": {
-        "id": "natural-resources",
-        "shelf": "pro",
-        "level": "entity",
-        "origin": "lumecon",
-        "rows_label": "11,120 observations",
-        "vintage": null,
-        "version": "v4",
-        "updated": "2026-10-06",
-        "downloads": null,
-        "name": "Tribal Natural Resource Revenue",
-        "short_name": "Resources",
-        "tracks": "Revenue reaching tribes and individual allottees from minerals, oil and gas, coal, timber and surface leases, from 1909 to current. The Osage Minerals Council's figures for 1880 to 1908 are included as the Council presents them. They are retrospective rates, not payments.",
-        "sources": "ONRR disbursements and monthly revenue; historical MMS American Indian collections; OSMRE Abandoned Mine Land distributions; state severance distributions; Osage Minerals Council payment history.",
-        "method": "Attribution routes through a party table rather than a single owner column since one payment can involve the tribal government, allottees, an enterprise, an operator and a trust account at once. Where Interior suppresses the entity by law, the row is published as an aggregate and labelled as such. Most rows are aggregates for that reason and rows are attributed wherever possible. Individual allottee detail is never published. Osage rows have a class recipient at a per-headright rate, and the headright divisor is used as a check, never as a multiplier. Osage figures are rates, not payments, and are not added to revenue totals. Figures that Alaska Native corporations report under ANCSA sections 7(i) and 7(j) (185 rows) are not in this release while their publication is decided."
-      },
-      "cedar": {
-        "cedar_id": "natural-resources",
-        "status": "READY",
-        "blockers": [],
-        "n_rows": 11120,
-        "n_tables": 1,
-        "n_record_types": 1,
-        "count_basis": "Permitted rows in the exact producer spreadsheet; mixed grains are not totals.",
-        "release_id": "f65f92d809d91fa07c977f37ff2a4c3830ca014eccb728daaaf43ebfaa61e7e5",
-        "manifest_sha256": "aefc98bded744a63714b4ac57683b6f1c2a34bf1b4f71e2f619277a559443e47",
-        "readiness_scope": "Verified local preview; production approval and endpoint pins are separate."
-      },
-      "sample": {
-        "table": "natural-resources.csv",
-        "path": "/data/cedar/samples/natural-resources/spreadsheet__10.csv",
-        "rows": 10,
-        "of": 11120,
-        "columns": 41,
-        "release_id": "f65f92d809d91fa07c977f37ff2a4c3830ca014eccb728daaaf43ebfaa61e7e5",
-        "manifest_sha256": "aefc98bded744a63714b4ac57683b6f1c2a34bf1b4f71e2f619277a559443e47"
-      },
-      "tables": [
-        {
-          "table": "natural-resources.csv",
-          "sample_path": "/data/cedar/samples/natural-resources/spreadsheet__10.csv",
-          "rows_in": 11120,
-          "rows_published": 11120,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 41,
-          "sample_rows": 10,
-          "record_types": {
-            "records": 11120
-          },
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 1,
-            "largest_file_mb": 12.69576
-          }
-        }
-      ],
-      "full_files": {
-        "served": false,
-        "note": "The local spreadsheet was verified. These staged previews do not approve or configure a production download."
-      }
-    },
-    {
       "id": "nonprofits",
       "descriptor": {
         "id": "nonprofits",
@@ -876,7 +701,7 @@
         "name": "Foundation & Corporate Giving",
         "short_name": "Giving",
         "tracks": "Publicly disclosed giving facts, with each source disclosure and financial status preserved.",
-        "sources": "Cited first-party donation reports and public foundation, corporate and bank disclosures admitted by the producer rights contract.",
+        "sources": "Cited first-party donation reports and public foundation, corporate and bank disclosures.",
         "method": "One permitted source disclosure, not one distinct award or payment. Reported recipient names may identify a program or intermediary. Commitments, payments, unpaid balances, exact amounts, ranges and aggregate program totals remain distinct and nonadditive. Only reviewed recipient bindings are carried; no ownership or Native identity is inferred from names. Restricted source prose and other withheld material remain excluded under field-level publication rights."
       },
       "cedar": {
@@ -1004,210 +829,6 @@
             "split": "",
             "files": 1,
             "largest_file_mb": 0.158533
-          }
-        }
-      ],
-      "full_files": {
-        "served": false,
-        "note": "The local spreadsheet was verified. These staged previews do not approve or configure a production download."
-      }
-    },
-    {
-      "id": "plot",
-      "descriptor": {
-        "id": "plot",
-        "shelf": "pro",
-        "level": "record",
-        "origin": "lumecon",
-        "rows_label": "151,715 observations",
-        "vintage": null,
-        "version": "v4",
-        "updated": "2026-10-06",
-        "downloads": null,
-        "name": "PLOT",
-        "short_name": "PLOT",
-        "tracks": "Public tract, assessor parcel, permit and environmental observations at their declared source grain.",
-        "sources": "Cited BIA mapped tract, Wisconsin V12 assessor parcel, local permit and EPA regulatory sources admitted by the producer rights contract.",
-        "method": "One permitted source observation at its declared record type. A BIA tract can contain several parcels; an assessor owner label is not title certification, beneficial ownership or verified Native ownership. A permit is not necessarily a unique project, and regulatory lifecycle events remain separate observations. Source snapshots, issued dates and event dates retain their own meanings. No ownership, financial transaction or canonical entity binding is inferred across components."
-      },
-      "cedar": {
-        "cedar_id": "plot",
-        "status": "READY",
-        "blockers": [],
-        "n_rows": 151715,
-        "n_tables": 1,
-        "n_record_types": 6,
-        "count_basis": "Permitted rows in the exact producer spreadsheet; mixed grains are not totals.",
-        "release_id": "a450bd56cdcafd2f7ff1d8191f141b025ad384eeb5a3d676fc96a6598c4d182b",
-        "manifest_sha256": "bd9c27c687ab072204d0ac74dbc624311b989abe18ab91350b29493941244888",
-        "readiness_scope": "Verified local preview; production approval and endpoint pins are separate."
-      },
-      "sample": {
-        "table": "plot.csv",
-        "path": "/data/cedar/samples/plot/spreadsheet__10.csv",
-        "rows": 10,
-        "of": 151715,
-        "columns": 106,
-        "release_id": "a450bd56cdcafd2f7ff1d8191f141b025ad384eeb5a3d676fc96a6598c4d182b",
-        "manifest_sha256": "bd9c27c687ab072204d0ac74dbc624311b989abe18ab91350b29493941244888"
-      },
-      "tables": [
-        {
-          "table": "plot.csv",
-          "sample_path": "/data/cedar/samples/plot/spreadsheet__10.csv",
-          "rows_in": 151715,
-          "rows_published": 151715,
-          "rows_withheld": 0,
-          "withheld_why": null,
-          "columns_published": 106,
-          "sample_rows": 10,
-          "record_types": {
-            "environmental_events": 3210,
-            "environmental_permits": 1242,
-            "ownership_observations": 4991,
-            "permit_events": 599,
-            "permits": 122,
-            "tract_observations": 141551
-          },
-          "record_type_fields": {
-            "environmental_events": {
-              "environmental_event_id": "environmental_event_id",
-              "environmental_record_id": "environmental_events__environmental_record_id",
-              "event_date": "environmental_events__event_date",
-              "event_type": "environmental_events__event_type",
-              "event_date_precision": "environmental_events__event_date_precision",
-              "event_interpretation": "event_interpretation",
-              "future_relative_to_capture": "future_relative_to_capture",
-              "source_field": "source_field",
-              "source_id": "environmental_events__source_id",
-              "source_url": "environmental_events__source_url"
-            },
-            "environmental_permits": {
-              "environmental_record_id": "environmental_permits__environmental_record_id",
-              "source_permit_id": "environmental_permits__source_permit_id",
-              "facility_registry_id": "facility_registry_id",
-              "facility_name_raw": "facility_name_raw",
-              "state": "environmental_permits__state",
-              "program": "environmental_permits__program",
-              "status_raw": "environmental_permits__status_raw",
-              "latitude": "latitude",
-              "longitude": "longitude",
-              "submitted_date": "submitted_date",
-              "issued_date": "environmental_permits__issued_date",
-              "effective_date": "effective_date",
-              "expiration_date": "environmental_permits__expiration_date",
-              "terminated_date": "terminated_date",
-              "source_snapshot_date": "environmental_permits__source_snapshot_date",
-              "native_ownership_supported": "native_ownership_supported",
-              "research_scope": "research_scope",
-              "source_record_url": "environmental_permits__source_record_url",
-              "source_id": "environmental_permits__source_id",
-              "source_url": "environmental_permits__source_url"
-            },
-            "ownership_observations": {
-              "plot_record_id": "plot_record_id",
-              "source_id": "ownership_observations__source_id",
-              "source_object_id": "source_object_id",
-              "source_parcel_id": "source_parcel_id",
-              "record_grain": "ownership_observations__record_grain",
-              "record_role": "record_role",
-              "source_ownership_code": "source_ownership_code",
-              "owner_name_raw": "owner_name_raw",
-              "estate_type": "estate_type",
-              "trust_status": "trust_status",
-              "recorded_acres": "recorded_acres",
-              "recorded_acres_measure": "recorded_acres_measure",
-              "tax_amount": "tax_amount",
-              "tax_year": "tax_year",
-              "tax_measure": "tax_measure",
-              "tax_amount_observed": "tax_amount_observed",
-              "source_tax_aggregation_eligible": "source_tax_aggregation_eligible",
-              "tax_aggregation_status": "tax_aggregation_status",
-              "tax_comparison_group": "tax_comparison_group",
-              "tax_cross_county_pooling_status": "tax_cross_county_pooling_status",
-              "state": "ownership_observations__state",
-              "county_fips": "ownership_observations__county_fips",
-              "ownership_observation_date": "ownership_observation_date",
-              "ownership_time_basis": "ownership_time_basis",
-              "source_snapshot_date": "ownership_observations__source_snapshot_date",
-              "source_vintage": "source_vintage",
-              "source_url": "ownership_observations__source_url",
-              "source_record_url": "ownership_observations__source_record_url",
-              "default_map_visible": "default_map_visible",
-              "geometry_display_scope": "geometry_display_scope",
-              "whole_footprint_ownership_claim": "whole_footprint_ownership_claim",
-              "geometry_wkb_hex": "geometry_wkb_hex"
-            },
-            "permit_events": {
-              "permit_event_id": "permit_event_id",
-              "permit_id": "permit_events__permit_id",
-              "source_id": "permit_events__source_id",
-              "event_date": "permit_events__event_date",
-              "event_date_precision": "permit_events__event_date_precision",
-              "event_type": "permit_events__event_type",
-              "scheduled_only": "scheduled_only",
-              "date_source_field": "date_source_field",
-              "source_url": "permit_events__source_url",
-              "state": "permit_events__state"
-            },
-            "permits": {
-              "permit_id": "permits__permit_id",
-              "source_id": "permits__source_id",
-              "source_permit_id": "permits__source_permit_id",
-              "permit_number": "permit_number",
-              "application_number": "application_number",
-              "record_kind": "record_kind",
-              "authority_name": "authority_name",
-              "state": "permits__state",
-              "county_fips": "permits__county_fips",
-              "municipality": "municipality",
-              "permit_type_raw": "permit_type_raw",
-              "program": "permits__program",
-              "status_raw": "permits__status_raw",
-              "application_date": "application_date",
-              "approved_date": "approved_date",
-              "issued_date": "permits__issued_date",
-              "completion_date": "completion_date",
-              "expiration_date": "permits__expiration_date",
-              "reported_value": "reported_value",
-              "value_currency": "value_currency",
-              "value_measure": "value_measure",
-              "source_snapshot_date": "permits__source_snapshot_date",
-              "source_url": "permits__source_url",
-              "source_record_url": "permits__source_record_url"
-            },
-            "tract_observations": {
-              "plot_record_id": "plot_record_id",
-              "source_id": "tract_observations__source_id",
-              "source_object_id": "source_object_id",
-              "source_parcel_id": "source_parcel_id",
-              "record_grain": "tract_observations__record_grain",
-              "record_role": "record_role",
-              "source_ownership_code": "source_ownership_code",
-              "owner_name_raw": "owner_name_raw",
-              "estate_type": "estate_type",
-              "trust_status": "trust_status",
-              "recorded_acres": "recorded_acres",
-              "recorded_acres_measure": "recorded_acres_measure",
-              "state": "tract_observations__state",
-              "county_fips": "tract_observations__county_fips",
-              "ownership_observation_date": "ownership_observation_date",
-              "ownership_time_basis": "ownership_time_basis",
-              "source_snapshot_date": "tract_observations__source_snapshot_date",
-              "source_vintage": "source_vintage",
-              "source_url": "tract_observations__source_url",
-              "source_record_url": "tract_observations__source_record_url",
-              "default_map_visible": "default_map_visible",
-              "geometry_display_scope": "geometry_display_scope",
-              "whole_footprint_ownership_claim": "whole_footprint_ownership_claim",
-              "geometry_wkb_hex": "geometry_wkb_hex"
-            }
-          },
-          "full_file": {
-            "shippable": true,
-            "split": "",
-            "files": 1,
-            "largest_file_mb": 210.436698
           }
         }
       ],

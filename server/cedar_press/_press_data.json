@@ -39,30 +39,6 @@
       "linkage": "Bills and votes tied to the tribes and Native organizations they affect, not only to the sponsors who filed them."
     },
     {
-      "id": "deals",
-      "short": "Deals",
-      "name": "Indian Country Deals",
-      "shelf": "standard",
-      "coverage": {
-        "kind": "series",
-        "from": 2000
-      },
-      "blurb": "Material transactions and capital commitments involving Native nations, organizations and enterprises, including acquisitions, divestitures, property purchases, investments, financing agreements, bond issuances, joint ventures and major capital projects. Track who participated, the Native entity involved, announced value, status and timing, and compare activity across periods.",
-      "linkage": "Buyers, sellers, borrowers and issuers resolved to tribal governments, tribally owned enterprises, ANCs and NHOs."
-    },
-    {
-      "id": "nagpra",
-      "short": "NAGPRA",
-      "name": "NAGPRA",
-      "shelf": "standard",
-      "coverage": {
-        "kind": "series",
-        "from": 1994
-      },
-      "blurb": "Public records of activity under the Native American Graves Protection and Repatriation Act, including notices, inventories and repatriation-related actions. Follow records by institution, Native entity, notice type and date.",
-      "linkage": "Notices matched to the tribes and Native Hawaiian organizations named in them, across the naming changes of three decades."
-    },
-    {
       "id": "lobbying",
       "short": "Advocacy",
       "name": "Native Federal Advocacy and Engagement",
@@ -110,28 +86,16 @@
       "linkage": "Subawards matched to the same resolved entities as the prime contracts above them."
     },
     {
-      "id": "natural-resources",
-      "short": "Natural Resources",
-      "name": "Natural Resource Revenues",
+      "id": "deals",
+      "short": "Deals",
+      "name": "Indian Country Deals",
       "shelf": "pro",
       "coverage": {
         "kind": "series",
-        "from": 1909
+        "from": 2000
       },
-      "blurb": "Public records of energy and mineral production, revenues, royalties and related disbursements associated with tribal trust and restricted lands. Compare reported activity by commodity, Native entity, location and period.",
-      "linkage": "Disbursements matched to the nations they belong to. Individual allottee detail is never published."
-    },
-    {
-      "id": "owned",
-      "short": "Individual Native-Owned",
-      "name": "Individual Native-Owned Businesses",
-      "shelf": "pro",
-      "coverage": {
-        "kind": "roster",
-        "captured": "2026-09-01"
-      },
-      "blurb": "Individually owned Native businesses identified through tribal TERO offices, commerce programs and other documented Native-business registries. Records preserve the issuing source, reported affiliation or certification, location and industry where available.",
-      "linkage": "Every listing includes the nation whose office certified it and is credited to the issuing TERO or commerce office."
+      "blurb": "Material transactions and capital commitments involving Native nations, organizations and enterprises, including acquisitions, divestitures, property purchases, investments, financing agreements, bond issuances, joint ventures and major capital projects. Track who participated, the Native entity involved, announced value, status and timing, and compare activity across periods.",
+      "linkage": "Buyers, sellers, borrowers and issuers resolved to tribal governments, tribally owned enterprises, ANCs and NHOs."
     },
     {
       "id": "nonprofits",
@@ -155,17 +119,6 @@
       },
       "blurb": "The Native Entity Enterprise Dataset (NEED): enterprises owned by or tied to tribes, Alaska Native corporations and Native Hawaiian organizations, with their federal contracting identifiers. Ownership and parent relationships are shown where the owner's own sources state them.",
       "linkage": "Business identifiers and owner relationships remain separate claims. Each public fact retains its source release and evidence; an owner association never becomes the business identity."
-    },
-    {
-      "id": "plot",
-      "short": "PLOT",
-      "name": "PLOT",
-      "shelf": "pro",
-      "coverage": {
-        "kind": "observations"
-      },
-      "blurb": "PLOT (Parcel-Level Ownership and Transfers): county assessor parcels, Bureau of Indian Affairs trust tracts, permits and environmental records associated with Native nations. Examine their recorded owners, dates and citations, with parcel observations and permit events kept at their separate grains.",
-      "linkage": "Land ownership observations and permitting records retain their source identifiers. An assessor label, mapped tract or regulatory record does not establish Native ownership, legal title or a canonical entity binding."
     }
   ],
   "releases": {
@@ -245,25 +198,6 @@
         }
       ]
     },
-    "nagpra": {
-      "name": "NAGPRA Notices",
-      "version": "v4",
-      "updated": "2026-10-01",
-      "refreshed": "2026-10-01",
-      "cadence": "Reviewed on a weekly schedule",
-      "retired": false,
-      "history": [
-        {
-          "version": "v4",
-          "date": "2026-10-01",
-          "kind": "data",
-          "changed": [
-            "Current dataset: 6,792 observations.",
-            "10 example records are available to download."
-          ]
-        }
-      ]
-    },
     "lobbying": {
       "name": "Native Federal Advocacy and Engagement",
       "version": "v4",
@@ -321,25 +255,6 @@
         }
       ]
     },
-    "owned": {
-      "name": "Individual Native-Owned Businesses",
-      "version": "v5",
-      "updated": "2026-10-01",
-      "refreshed": "2026-10-01",
-      "cadence": "Reviewed on a weekly schedule",
-      "retired": false,
-      "history": [
-        {
-          "version": "v5",
-          "date": "2026-10-01",
-          "kind": "data",
-          "changed": [
-            "Current dataset: 3,725 observations.",
-            "10 example records are available to download."
-          ]
-        }
-      ]
-    },
     "need": {
       "name": "Cedar Native Entity Enterprise Dataset (NEED)",
       "version": "v6",
@@ -354,25 +269,6 @@
           "kind": "data",
           "changed": [
             "Current dataset: 43 observations.",
-            "10 example records are available to download."
-          ]
-        }
-      ]
-    },
-    "natural-resources": {
-      "name": "Tribal Natural Resource Revenue",
-      "version": "v4",
-      "updated": "2026-10-01",
-      "refreshed": "2026-10-01",
-      "cadence": "Reviewed on a weekly schedule",
-      "retired": false,
-      "history": [
-        {
-          "version": "v4",
-          "date": "2026-10-01",
-          "kind": "data",
-          "changed": [
-            "Current dataset: 11,120 observations.",
             "10 example records are available to download."
           ]
         }
@@ -416,21 +312,74 @@
         }
       ]
     },
-    "plot": {
-      "name": "PLOT",
+    "nagpra": {
+      "name": "NAGPRA Notices",
       "version": "v4",
-      "updated": "2026-10-01",
-      "refreshed": "2026-10-01",
-      "cadence": "Reviewed on a weekly schedule",
-      "retired": false,
+      "updated": "2026-10-06",
+      "cadence": null,
+      "retired": true,
       "history": [
         {
           "version": "v4",
-          "date": "2026-10-01",
+          "date": "2026-10-06",
+          "kind": "data",
+          "changed": [
+            "Current dataset: 6,792 observations.",
+            "No example records are available yet."
+          ]
+        }
+      ]
+    },
+    "owned": {
+      "name": "Individual Native-Owned Businesses",
+      "version": "v5",
+      "updated": "2026-10-06",
+      "cadence": null,
+      "retired": true,
+      "history": [
+        {
+          "version": "v5",
+          "date": "2026-10-06",
+          "kind": "data",
+          "changed": [
+            "Current dataset: 3,725 observations.",
+            "No example records are available yet."
+          ]
+        }
+      ]
+    },
+    "natural-resources": {
+      "name": "Tribal Natural Resource Revenue",
+      "version": "v4",
+      "updated": "2026-10-06",
+      "cadence": null,
+      "retired": true,
+      "history": [
+        {
+          "version": "v4",
+          "date": "2026-10-06",
+          "kind": "data",
+          "changed": [
+            "Current dataset: 11,120 observations.",
+            "No example records are available yet."
+          ]
+        }
+      ]
+    },
+    "plot": {
+      "name": "PLOT",
+      "version": "v4",
+      "updated": "2026-10-06",
+      "cadence": null,
+      "retired": true,
+      "history": [
+        {
+          "version": "v4",
+          "date": "2026-10-06",
           "kind": "data",
           "changed": [
             "Current dataset: 151,715 observations.",
-            "3 example records are available to download."
+            "No example records are available yet."
           ]
         }
       ]
@@ -567,23 +516,6 @@
         "route": "changes"
       }
     ],
-    "nagpra": [
-      {
-        "q": "What does this collection hold about each notice?",
-        "kind": "Describe",
-        "route": "content"
-      },
-      {
-        "q": "How are notices matched to the nations and Native Hawaiian organizations they name?",
-        "kind": "Trace",
-        "route": "construct"
-      },
-      {
-        "q": "What changed since I last used this collection?",
-        "kind": "Compare",
-        "route": "changes"
-      }
-    ],
     "lobbying": [
       {
         "q": "What does each lobbying disclosure in this collection include?",
@@ -635,40 +567,6 @@
         "route": "changes"
       }
     ],
-    "natural-resources": [
-      {
-        "q": "What does this collection let me compare across commodities?",
-        "kind": "Describe",
-        "route": "content"
-      },
-      {
-        "q": "How are production and disbursements matched to nations and allottees?",
-        "kind": "Trace",
-        "route": "construct"
-      },
-      {
-        "q": "What changed since I last used this collection?",
-        "kind": "Compare",
-        "route": "changes"
-      }
-    ],
-    "owned": [
-      {
-        "q": "What does this collection hold about each business?",
-        "kind": "Describe",
-        "route": "content"
-      },
-      {
-        "q": "How does a business come to be listed, and on whose terms?",
-        "kind": "Trace",
-        "route": "construct"
-      },
-      {
-        "q": "What changed since I last used this collection?",
-        "kind": "Compare",
-        "route": "changes"
-      }
-    ],
     "nonprofits": [
       {
         "q": "What does this collection hold about each organization?",
@@ -711,23 +609,6 @@
       },
       {
         "q": "How is Foundation and Corporate Giving built?",
-        "kind": "Trace",
-        "route": "construct"
-      },
-      {
-        "q": "What changed since I last used this collection?",
-        "kind": "Compare",
-        "route": "changes"
-      }
-    ],
-    "plot": [
-      {
-        "q": "What does PLOT contain?",
-        "kind": "Describe",
-        "route": "content"
-      },
-      {
-        "q": "How is PLOT built?",
         "kind": "Trace",
         "route": "construct"
       },

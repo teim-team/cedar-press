@@ -371,7 +371,7 @@ def release_collections(
         raise HTTPException(status_code=401, detail="Authentication required")
     response.headers["Cache-Control"] = "private, no-store"
     result = repository.release_targets_for(subscriber.tier)
-    # A Grove subscriber can visit Press; its Press surface still has fourteen collections.
+    # A Grove subscriber can visit Press; its Press surface still has ten collections.
     result["collections"] = [entry for entry in result["collections"] if entry["id"] != "gaming"]
     return result
 

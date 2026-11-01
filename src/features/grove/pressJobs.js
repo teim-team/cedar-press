@@ -49,8 +49,8 @@
  *
  * ONE SENTENCE PER AUDIENCE: THE OWNER'S
  * Every audience carries the owner's intelligence sentence and the
- * collections it names. All fourteen collections are on the shelf (owner,
- * 2026-09-27), so every sentence the owner wrote is the one the page shows;
+ * collections it names. All ten collections are on the shelf (the pilot
+ * tiers), so every sentence the owner wrote is the one the page shows;
  * an audience is hidden only when a collection it names is not in the catalog
  * it is resolved against, or when it names fewer than `MIN_COLLECTIONS`.
  *
@@ -192,17 +192,6 @@ export const COLLECTION_JOBS = Object.freeze({
       ask(trace, "How are buyers, sellers and borrowers tied to the Native entity behind them?", "construct"),
     ]),
   }),
-  nagpra: Object.freeze({
-    questions: Object.freeze([
-      q(trace, "Which institutions have published notices naming a nation?", ["institution_name", "canonical_names"]),
-      q(describe, "What kinds of notices has an institution published, and when?", ["notice_type", "publication_date", "institution_name"]),
-      q(describe, "Which removal locations do the notices record?", ["removal_states", "removal_counties"]),
-    ]),
-    cedar: Object.freeze([
-      ask(describe, "What does this collection hold about each notice?", "content"),
-      ask(trace, "How are notices matched to the nations and Native Hawaiian organizations they name?", "construct"),
-    ]),
-  }),
   lobbying: Object.freeze({
     questions: Object.freeze([
       q(describe, "Which agencies and chambers are lobbied for Native organizations, and on which issues?", ["government_bodies", "issue_codes"]),
@@ -234,30 +223,6 @@ export const COLLECTION_JOBS = Object.freeze({
     cedar: Object.freeze([
       ask(describe, "What does this collection show about the prime relationship?", "content"),
       ask(trace, "How are subawards tied to the same entities as their primes?", "construct"),
-    ]),
-  }),
-  "natural-resources": Object.freeze({
-    questions: Object.freeze([
-      q(describe, "Which commodities and monetary measures are recorded for a nation?", ["commodity", "canonical_name", "amount_usd", "measurement_status"]),
-      q(compare, "How do reported resource amounts vary by period and measurement status?", ["revenue_type", "period_start", "amount_usd", "measurement_status"]),
-      q(trace, "Who pays and who operates on the lands behind these revenues?", ["payer_name", "operator_name"]),
-    ]),
-    cedar: Object.freeze([
-      ask(describe, "What does this collection let me compare across commodities?", "content"),
-      ask(trace, "How are production and disbursements matched to nations and allottees?", "construct"),
-    ]),
-  }),
-  owned: Object.freeze({
-    // Two, not three. A listing appears only on the terms its nation sets and
-    // otherwise only in aggregates, so a question about where individual
-    // businesses are would promise rows the collection withholds.
-    questions: Object.freeze([
-      q(trace, "Which offices certify Native-owned businesses, and under which programs?", ["certifying_authority_name", "program_name"]),
-      q(describe, "In which industries are a nation's certified businesses concentrated?", ["naics_code", "certifying_authority_name"]),
-    ]),
-    cedar: Object.freeze([
-      ask(describe, "What does this collection hold about each business?", "content"),
-      ask(trace, "How does a business come to be listed, and on whose terms?", "construct"),
     ]),
   }),
   nonprofits: Object.freeze({
@@ -293,17 +258,6 @@ export const COLLECTION_JOBS = Object.freeze({
     cedar: Object.freeze([
       ask(describe, "What does Foundation and Corporate Giving contain?", "content"),
       ask(trace, "How is Foundation and Corporate Giving built?", "construct"),
-    ]),
-  }),
-  plot: Object.freeze({
-    questions: Object.freeze([
-      q(describe, "Which source observations concern tracts, parcels, permits or environmental records?", ["record_type", "record_key", "record_grain", "source_parcel_id", "permit_number", "environmental_event_id"]),
-      q(compare, "How do source snapshots and recorded permit events differ in their time basis?", ["tract_observations__source_snapshot_date", "ownership_time_basis", "permit_events__event_date", "permit_events__event_date_precision", "environmental_events__event_date", "scheduled_only"]),
-      q(trace, "Which source record supports each observation?", ["tract_observations__source_record_url", "ownership_observations__source_record_url", "permits__source_record_url", "permit_events__source_url", "environmental_permits__source_record_url", "environmental_events__source_url"]),
-    ]),
-    cedar: Object.freeze([
-      ask(describe, "What does PLOT contain?", "content"),
-      ask(trace, "How is PLOT built?", "construct"),
     ]),
   }),
 });
@@ -358,10 +312,10 @@ export const AUDIENCE_JOBS = Object.freeze([
     job: "Economic development",
     outcome: "Learn from how peer nations are building their economies.",
     // Every phrase has a collection: enterprise growth (Cedar NEED),
-    // contracts (Prime Contracting), major transactions (Deals), resource
-    // activity (Natural Resources), funding (Federal Funding).
-    explanation: "Follow enterprise growth, contracts, major transactions, resource activity and funding across Indian Country to identify strategies worth examining in your own planning.",
-    collections: Object.freeze(["need", "contractors", "natural-resources", "funding"]),
+    // contracts (Prime Contracting), major transactions (Deals), funding
+    // (Federal Funding). Deals is left off the chips: it is on five use cases.
+    explanation: "Follow enterprise growth, contracts, major transactions and funding across Indian Country to identify strategies worth examining in your own planning.",
+    collections: Object.freeze(["need", "contractors", "funding"]),
     // Owner: economy sectors (hospitality, energy, construction,
     // manufacturing, healthcare), and not "Tribal Nations = council
     // chamber", so no government photograph. An exterior scene leads; the
@@ -376,8 +330,8 @@ export const AUDIENCE_JOBS = Object.freeze([
     // shared vocabulary for it.
     job: "Competitive intelligence",
     outcome: "Understand the competitive environment around your portfolio.",
-    explanation: "Track subsidiaries, joint ventures, federal business, major transactions and property activity to see where peer organizations are expanding and where new opportunities may be forming.",
-    collections: Object.freeze(["need", "subcontracting", "deals", "plot"]),
+    explanation: "Track subsidiaries, joint ventures, federal business and major transactions to see where peer organizations are expanding and where new opportunities may be forming.",
+    collections: Object.freeze(["need", "subcontracting", "deals"]),
     imagePool: Object.freeze(["transportation", "manufacturing", "construction"]),
   }),
   Object.freeze({
@@ -385,8 +339,8 @@ export const AUDIENCE_JOBS = Object.freeze([
     audience: "Native enterprises",
     job: "Partner discovery",
     outcome: "Find opportunities, partners and competitive signals.",
-    explanation: "Compare ownership networks, contracting, transactions and Native-owned businesses to identify partners, suppliers, competitors and markets worth watching.",
-    collections: Object.freeze(["need", "contractors", "deals", "owned"]),
+    explanation: "Compare ownership networks, contracting and transactions to identify partners, suppliers, competitors and markets worth watching.",
+    collections: Object.freeze(["need", "contractors", "deals"]),
     imagePool: Object.freeze(["manufacturing-v2", "agriculture", "retail", "wholesale"]),
   }),
   Object.freeze({
@@ -397,8 +351,8 @@ export const AUDIENCE_JOBS = Object.freeze([
     audience: "Banks, lenders and investors",
     job: "Due diligence",
     outcome: "Do more informed diligence and spot opportunities earlier.",
-    explanation: "Understand ownership, federal business, funding relationships, transactions and property activity before financing, investing in or partnering with a Native enterprise.",
-    collections: Object.freeze(["contractors", "foundation-corporate-giving", "deals", "plot"]),
+    explanation: "Understand ownership, federal business, funding relationships and transactions before financing, investing in or partnering with a Native enterprise.",
+    collections: Object.freeze(["contractors", "foundation-corporate-giving", "deals"]),
     imagePool: Object.freeze(["finance", "realestate"]),
   }),
   Object.freeze({
@@ -432,8 +386,8 @@ export const AUDIENCE_JOBS = Object.freeze([
     audience: "Businesses working in Indian Country",
     job: "Market entry",
     outcome: "Understand the market before entering it.",
-    explanation: "Identify Native enterprises, Native-owned businesses, active sectors, contracting patterns and major transactions before choosing markets, partners or outreach targets.",
-    collections: Object.freeze(["need", "owned", "subcontracting", "deals"]),
+    explanation: "Identify Native enterprises, active sectors, contracting patterns and major transactions before choosing markets, partners or outreach targets.",
+    collections: Object.freeze(["need", "subcontracting", "deals"]),
     // The owner's list: construction, logistics, professional services,
     // tech, finance. Lumecon's professional-services and information
     // photographs show faces, so logistics is carried twice instead.
@@ -444,11 +398,11 @@ export const AUDIENCE_JOBS = Object.freeze([
     audience: "Universities and researchers",
     job: "Research",
     outcome: "Spend more time answering the research question, not rebuilding the data.",
-    // "Federal, tribal and institutional datasets": legislation and advocacy
-    // (federal), natural resource revenues on trust lands (tribal), and
-    // NAGPRA's institutional records.
+    // "Federal, tribal and institutional datasets": legislation, advocacy and
+    // agency actions (federal), and the nonprofit register's institutional
+    // records.
     explanation: "Start with cleaned, linked and source-backed records instead of rebuilding separate federal, tribal and institutional datasets from scratch.",
-    collections: Object.freeze(["legislation", "lobbying", "natural-resources", "nagpra"]),
+    collections: Object.freeze(["legislation", "lobbying", "federal-register", "nonprofits"]),
     // Research is not a sector, and Lumecon's education photograph shows a
     // seated audience's faces: the two context textures, in slate.
     imagePool: Object.freeze(["context-lattice", "context-cedar"]),
@@ -469,11 +423,10 @@ export const AUDIENCE_JOBS = Object.freeze([
     job: "Tribal consultation",
     outcome: "Prepare more informed tribal consultations, build stronger government-to-government relationships, and better serve the communities you represent.",
     // Every claim has a collection, in the sentence's order: funding
-    // (Federal Funding), legislation (Legislation), agency actions (Federal
-    // Register), and Native-entity records (NAGPRA, whose notices are the
-    // consultation record most agencies and museums work from).
-    explanation: "Bring funding, legislation, agency actions and Native-entity records together with sources you can check.",
-    collections: Object.freeze(["funding", "legislation", "federal-register", "nagpra"]),
+    // (Federal Funding), legislation (Legislation) and agency actions
+    // (Federal Register).
+    explanation: "Bring funding, legislation and agency actions together with sources you can check.",
+    collections: Object.freeze(["funding", "legislation", "federal-register"]),
     // Public infrastructure with no faces and no council chamber: utilities,
     // transportation, then the cedar texture.
     imagePool: Object.freeze(["utilities", "transportation", "context-cedar"]),
@@ -483,8 +436,8 @@ export const AUDIENCE_JOBS = Object.freeze([
     audience: "Journalists and newsrooms",
     job: "Journalism",
     outcome: "Get to the story faster and show the record behind it.",
-    explanation: "Follow organizations and events across funding, policy, advocacy, ownership, land and transactions while keeping the underlying source attached.",
-    collections: Object.freeze(["federal-register", "lobbying", "need", "plot", "deals"]),
+    explanation: "Follow organizations and events across funding, policy, advocacy, ownership and transactions while keeping the underlying source attached.",
+    collections: Object.freeze(["federal-register", "lobbying", "need", "deals"]),
     imagePool: Object.freeze(["context-cedar", "context-lattice"]),
     researchExample: Object.freeze({
       text: "A reporter needs Deals and Cedar NEED to trace an acquisition and the enterprise structure behind it.",

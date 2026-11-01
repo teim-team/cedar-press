@@ -177,9 +177,8 @@ function RequestForm({ priorities, connected, canMove, available, onSubmitReques
         placeholder="I wish you had a dataset showing which tribal enterprises own which subsidiaries…"
       />
       <p className="cp-pri__hint">
-        Anything. A question, a dataset, a field missing from one you already use, a year Cedar
-        does not reach yet, a nation whose records are thin. There is no list to choose from and
-        nothing is out of scope to ask for.
+        A research question, a new dataset, a field missing from one you already use, earlier years
+        of coverage or a nation whose records are thin. Any request is welcome.
       </p>
       <label className="cp-pri__label" htmlFor="pri-use">
         What you would use it for <span className="cp-pri__opt">optional</span>
@@ -334,18 +333,17 @@ function PrioritiesWorkspace({ user }) {
                   <span className="cp-set__cap">What happens to it</span>
                   <ol className="cp-pri__steps">
                     <li>
-                      <b>It is read.</b> Cedar checks it against everything subscribers have already
-                      asked for, so a request that has been made ten times is visibly ten requests.
+                      <b>Every request is read.</b> Cedar compares it with what other subscribers
+                      have asked for, so a request made ten times counts as ten.
                     </li>
                     <li>
-                      <b>It is kept whole.</b> Your wording is stored as written and shown to Cedar
-                      beside any priority it relates to. It is never reduced to a category.
+                      <b>Your wording is kept.</b> It is stored as you wrote it and shown beside any
+                      related priority, never reduced to a category.
                     </li>
                     <li>
-                      <b>It is answered or it is not.</b> Points inform the order of the work. They
-                      do not decide it: feasibility, data quality, research value and Cedar&rsquo;s
-                      editorial judgment weigh alongside them, and Cedar says which priorities it
-                      took up in What&rsquo;s new.
+                      <b>Points inform the order of the work.</b> They do not decide it:
+                      feasibility, data quality, research value and Cedar&rsquo;s editorial judgment
+                      weigh alongside them. What&rsquo;s new reports which priorities Cedar took up.
                     </li>
                   </ol>
                 </aside>

@@ -16,10 +16,6 @@ const VALUE_LABELS = {
     ownership_extent: { wholly_owned: "Wholly owned", majority: "Majority owned" },
     relationship_type: { owned_by: "Owned by", subsidiary_of: "Subsidiary of", affiliated_with: "Affiliated with" },
   },
-  "natural-resources": {
-    measurement_status: { reported_revenue: "Reported revenue", appropriated_amount: "Appropriated amount", actual_payment: "Actual payment" },
-  },
-  owned: { cedar_entity_role: { certifying_authority: "Certifying authority" } },
   lobbying: { amount_basis: { none_reported: "No amount reported" } },
   "federal-register": { participant_role: { not_enumerated: "Not enumerated" } },
 };

@@ -49,6 +49,7 @@ import {
   contractFor,
   cutCsv,
   cutReadme,
+  cutTable,
   decodeCut,
   describeCut,
   encodeCut,
@@ -69,8 +70,11 @@ import { recordHref, rememberReturn, takeReturn } from "../../features/grove/pre
 import { PRESS_METHODS_PATH, PRESS_SETTINGS_PATH } from "../../features/grove/pressRoutes.js";
 import { LAUNCH_COLLECTION } from "../../features/grove/collection.js";
 import { formatUpdated } from "../../features/grove/pressReleases.js";
-import { downloadCsv, hasReleaseFile, sampleLabel, saveZip } from "../../features/grove/pressDownload.js";
+import { downloadCsv, hasReleaseFile, sampleLabel, saveXlsx, saveZip } from "../../features/grove/pressDownload.js";
 import { PRESS_CATALOG_BY_ID } from "../../features/grove/pressCatalog.js";
+import { researchComponents, spreadsheetRecordCount } from "../../features/grove/releaseResearch.js";
+import { fetchReleaseCollections, spreadsheetDownloadUrl } from "../../api.js";
+import { isConnected } from "../../config.js";
 
 /** What Collections opens on when the URL does not say. */
 const DEFAULT_COLLECTION = "funding";
@@ -115,6 +119,27 @@ function useRegister() {
   }, [state.attempt]);
   const retry = () => setState((s) => ({ ...s, status: "loading", attempt: s.attempt + 1 }));
   return { ...state, retry };
+}
+
+/**
+ * Pinned full releases by collection id. A signed-out reader, a static build
+ * or a refused request leaves this empty, and the page keeps its samples.
+ */
+function useReleaseCollections(user) {
+  const [byId, setById] = useState({});
+  useEffect(() => {
+    if (!user || !isConnected()) return undefined;
+    const controller = new AbortController();
+    fetchReleaseCollections({ signal: controller.signal })
+      .then((result) => {
+        if (!controller.signal.aborted) {
+          setById(Object.fromEntries((result?.collections || []).map((entry) => [entry.id, entry])));
+        }
+      })
+      .catch(() => {});
+    return () => controller.abort();
+  }, [user]);
+  return user ? byId : {};
 }
 
 // ── Saved views, on this device ────────────────────────────────────────────
@@ -717,12 +742,30 @@ function SampleDownload({ entry }) {
   );
 }
 
+/** The selected collection's complete spreadsheet from its pinned release, with the verified record count. */
+function FullDownload({ release }) {
+  const href = release && spreadsheetDownloadUrl(release.id, release.spreadsheet, researchComponents(release));
+  if (!href) return null;
+  const count = spreadsheetRecordCount(release);
+  return (
+    <a
+      className="cp-ex__act"
+      href={href}
+      onClick={() => track(EVENT.collectionDownloaded, { collection: release.id, shelf: release.shelf })}
+    >
+      <span aria-hidden="true">&#8595;</span> Full spreadsheet
+      {count !== null ? ` (${count.toLocaleString("en-US")} records)` : ""}
+    </a>
+  );
+}
+
 export default function PressExplore({ user, pick = null, onActive = () => {}, onSelected = () => {} }) {
   const [params, setParams] = useSearchParams();
   const navigate = useNavigate();
   const cut = useMemo(() => decodeCut(params.toString()), [params]);
   const { register, status: registerStatus, retry: retryRegister } = useRegister();
   const collections = useMemo(() => explorableCollections(user), [user]);
+  const releases = useReleaseCollections(user);
   const scope = useMemo(() => collections.filter((c) => c.open).map((c) => c.entry.id), [collections]);
   const narrow = useNarrow();
   const sectionRef = useRef(null);
@@ -912,14 +955,22 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
     write({ sort: { by, dir } });
   };
 
-  const download = () => {
+  const download = (format = "csv") => {
     const stamp = new Date().toISOString().slice(0, 10);
-    const files = [
-      { name: "records.csv", text: cutCsv(filtered, { view, columns: tableColumns, cut: said, register }) },
-      { name: "README.txt", text: cutReadme(filtered, { view, cut: said, register, columns: tableColumns, accessedOn: stamp, missing: missing.map((k) => k.split("/")[0]) }) },
-    ];
-    saveZip(`cedar-press-${view === "table" ? "sample" : "summary"}-results-${stamp}.zip`, files);
-    track(EVENT.exploreDownloaded, { rows: filtered.length, view, collections: selected.length });
+    const readme = cutReadme(filtered, { view, cut: said, register, columns: tableColumns, accessedOn: stamp, missing: missing.map((k) => k.split("/")[0]), file: format === "xlsx" ? "The Records sheet" : "records.csv" });
+    const base = `cedar-press-${view === "table" ? "sample" : "summary"}-results-${stamp}`;
+    if (format === "xlsx") {
+      saveXlsx(`${base}.xlsx`, [
+        { name: "Records", rows: cutTable(filtered, { view, columns: tableColumns, cut: said, register }) },
+        { name: "About", rows: readme.split("\n").map((line) => [line]) },
+      ]);
+    } else {
+      saveZip(`${base}.zip`, [
+        { name: "records.csv", text: cutCsv(filtered, { view, columns: tableColumns, cut: said, register }) },
+        { name: "README.txt", text: readme },
+      ]);
+    }
+    track(EVENT.exploreDownloaded, { rows: filtered.length, view, collections: selected.length, format });
   };
 
   const save = (event) => {
@@ -1227,9 +1278,13 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
         <div className="cp-ex__after">
           <div className="cp-ex__acts">
             {!atlas ? <button type="button" className="cp-ex__act cp-ex__act--primary" onClick={() => setNaming((v) => !v)} aria-expanded={naming}>Save view</button> : null}
-            <button type="button" className="cp-ex__act" onClick={download} disabled={atlas || !filtered.length || settling} title={atlas ? "Choose a collection to export records" : settling ? "Waiting for every selected preview to load" : `Download the ${filtered.length} records listed`}>
+            <button type="button" className="cp-ex__act" onClick={() => download("csv")} disabled={atlas || !filtered.length || settling} title={atlas ? "Choose a collection to export records" : settling ? "Waiting for every selected preview to load" : `Download the ${filtered.length} records listed as CSV`}>
               <span aria-hidden="true">&#8595;</span> Download
             </button>
+            <button type="button" className="cp-ex__act" onClick={() => download("xlsx")} disabled={atlas || !filtered.length || settling} title={atlas ? "Choose a collection to export records" : settling ? "Waiting for every selected preview to load" : `Download the ${filtered.length} records listed as an Excel workbook`}>
+              <span aria-hidden="true">&#8595;</span> Excel
+            </button>
+            {!atlas && single ? <FullDownload release={releases[single.entry.id]} /> : null}
             <details className="cp-ex__more" ref={moreRef}>
               <summary className="cp-ex__act" aria-label="More actions">More</summary>
               <div className="cp-ex__morein">

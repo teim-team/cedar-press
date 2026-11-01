@@ -53,17 +53,17 @@ git ls-files src/<dir>/grove                                   # files to move
 
 | | |
 |---|---|
-| Files to move | 168 — `features/grove` 120, `pages/grove` 45, `styles/grove` 3 |
-| Path references to rewrite | 363, across 81 files |
-| Referencing files inside `src/` | 51 — `pages/` 37, `features/` 12, `context/` 1, `main.jsx` 1 |
-| Referencing files outside `src/` | 30 — `server/cedar_press/` 6, `scripts/` 7, `docs/` 6, `server/tests/` 5, `tests/` 2, `data/` 2, `.env.example` 1, `eslint.config.js` 1 |
+| Files to move | 167 — `features/grove` 120, `pages/grove` 44, `styles/grove` 3 |
+| Path references to rewrite | 359, across 78 files |
+| Referencing files inside `src/` | 49 — `pages/` 36, `features/` 11, `context/` 1, `main.jsx` 1 |
+| Referencing files outside `src/` | 29 — `server/cedar_press/` 6, `scripts/` 7, `docs/` 6, `server/tests/` 4, `tests/` 2, `data/` 2, `.env.example` 1, `eslint.config.js` 1 |
 
 The reason this was deferred, open pull requests that touched the same files,
 has expired.
 
 It is a mechanical rename with no behaviour change, and it should land as its
 own commit: the three directories move to `press/` and the references are
-rewritten in one pass. The question "did all 363 references get rewritten?"
+rewritten in one pass. The question "did all 359 references get rewritten?"
 is one the build, the suites and the smoke run answer, and a reader cannot
 answer it from a diff. Prose (Markdown, comments, `.env.example`) is what no build sees,
 which is why `test_rename_plan.py` counts textual occurrences rather than

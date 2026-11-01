@@ -33,6 +33,7 @@ export default function CedarPressCreateAccount() {
   }, [linkedToken, navigate, location.pathname, location.search]);
 
   useEffect(() => {
+    if (!token) return undefined;
     let stopped = false;
     checkAccountSetup(token).then((result) => {
       if (!stopped) { setEmail(result.email); setError(""); }
@@ -59,7 +60,8 @@ export default function CedarPressCreateAccount() {
       <div className="cp-login__field"><label htmlFor="account-email">Email address</label><input id="account-email" type="email" autoComplete="email" value={email} readOnly /></div>
       <div className="cp-login__field"><label htmlFor="account-password">Create password</label><input id="account-password" type="password" autoComplete="new-password" placeholder="Choose a secure password" minLength={10} required value={password} onChange={(event) => setPassword(event.target.value)} /></div>
       <button className="cp-btn cp-btn--primary cp-btn--wide" type="submit" disabled={pending}>{pending ? "Creating account…" : "Create account"}</button>
-    </form> : !error ? <p role="status">Checking your account link…</p> : null}
+    </form> : !token ? <p className="cp-login__lede">Open the link in your confirmation email to finish creating your account. New to Cedar Press? <Link to="/subscribe">Choose a plan</Link>.</p>
+      : !error ? <p role="status">Checking your account link…</p> : null}
     {error ? <p role="alert" className="cp-gate__error">{error}</p> : null}
     <p className="cp-gate__aside">Already have an account? <Link to="/login">Sign in</Link>.</p>
   </section></AccountPage>;

@@ -78,8 +78,8 @@ function WorkCard() {
           works and is a strange thing to say to someone being asked for
           their profession. */}
       <p className="cp-set__body">
-        Tell us a little about your work and we can aim the collections better: it helps us
-        see which ones to extend and what to write about next.
+        Tell us about your work. It helps us decide which collections to extend and what to
+        research next.
       </p>
       <form className="cp-set__form" onSubmit={submit}>
         <label className="cp-who__label" htmlFor="cp-work">

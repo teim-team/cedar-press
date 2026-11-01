@@ -253,11 +253,9 @@ def proposed_entry(prior, metadata, counts, sample, updated, layout=None):
         entry["cedar"]["status"] = "REVIEWED_PUBLIC_BASE"
         entry["cedar"]["blockers"] = []
         entry["descriptor"]["method"] = (
-            "This release is the reviewed public base: 43 enterprises, each pinned to its "
-            "evidence. NEED has no "
-            "publication hold (owner ruling 2026-10-04): its records come from publicly "
-            "available websites and Lumecon has permission to publish them, and source rights "
-            "are recorded as provenance. Existing enterprise IDs and source evidence are preserved."
+            "This release covers 43 reviewed enterprises, each tied to its supporting evidence. "
+            "Every record comes from publicly available sources, and its source is recorded "
+            "with it. Existing enterprise IDs and source evidence are preserved."
         )
         if "verified_claims" in metadata["columns"]:
             entry["descriptor"]["method"] += (
@@ -722,7 +720,7 @@ ADDITIONS = {
         "name": "Foundation & Corporate Giving", "short_name": "Giving",
         "shelf": "standard",
         "tracks": "Publicly disclosed giving facts, with each source disclosure and financial status preserved.",
-        "sources": "Cited first-party donation reports and public foundation, corporate and bank disclosures admitted by the producer rights contract.",
+        "sources": "Cited first-party donation reports and public foundation, corporate and bank disclosures.",
         "method": (
             "One permitted source disclosure, not one distinct award or payment. "
             "Reported recipient names may identify a program or intermediary. "
@@ -735,7 +733,7 @@ ADDITIONS = {
     "plot": {
         "name": "PLOT", "short_name": "PLOT", "shelf": "pro",
         "tracks": "Public tract, assessor parcel, permit and environmental observations at their declared source grain.",
-        "sources": "Cited BIA mapped tract, Wisconsin V12 assessor parcel, local permit and EPA regulatory sources admitted by the producer rights contract.",
+        "sources": "Cited BIA mapped tract, Wisconsin V12 assessor parcel, local permit and EPA regulatory sources.",
         "method": (
             "One permitted source observation at its declared record type. A BIA tract can contain several parcels; "
             "an assessor owner label is not title certification, beneficial ownership or verified Native ownership. "
@@ -832,7 +830,7 @@ def admit(repo, producer, queue_path, staging, producer_commit, receipt, apply=F
     originals = {path: path.read_bytes() for path in paths}
     manifest, book, ledger = (json.loads(originals[path]) for path in paths)
     existing = {entry["id"]: entry for entry in manifest["collections"]}
-    baseline = EXPECTED - set(ADDITIONS) - {"gaming"}
+    baseline = EXPECTED - set(ADDITIONS) - {entry["id"] for entry in manifest["excluded"]}
     if len(existing) != len(manifest["collections"]) or not baseline <= set(existing) or not set(existing) <= baseline | set(ADDITIONS):
         raise ValueError("Unexpected storefront population or Gaming admission")
     if set(selected_ids) & set(existing):

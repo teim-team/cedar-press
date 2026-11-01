@@ -3,7 +3,6 @@ import test from "node:test";
 import { readFileSync } from "node:fs";
 
 import { parseCsv, universalRows } from "./explore.js";
-import { enrichSample } from "./exampleEnrichment.js";
 import { EXCLUDED_EXAMPLES, showcaseItems } from "./showcase.js";
 import { readableCode, repairMojibake } from "./readerPresentation.js";
 import { viewerItems } from "./useSamples.js";
@@ -48,7 +47,7 @@ test("monthly subaward reports are distinct observations: the showcase reorders 
 });
 
 test("the analytical viewer shows exactly the downloaded records, deobligations and repeats included", () => {
-  for (const id of ["contractors", "deals", "federal-register", "foundation-corporate-giving", "funding", "legislation", "lobbying", "nagpra", "natural-resources", "need", "nonprofits", "owned", "plot", "subcontracting"]) {
+  for (const id of ["contractors", "deals", "federal-register", "foundation-corporate-giving", "funding", "legislation", "lobbying", "need", "nonprofits", "subcontracting"]) {
     const downloaded = sample(id);
     const viewed = viewerItems(`${id}/${id}`, downloaded);
     assert.equal(viewed.length, downloaded.rows.length, id);
@@ -76,17 +75,8 @@ test("every NEED example names its ultimate Native owner in the download itself,
     assert.match(row.native_owner_source, /^https:\/\//);
     assert.ok(!row.native_owner_source.includes("github.com/teim-team"), `${row.enterprise_name}: private source`);
   }
-  // The viewer adds no NEED record or owner of its own.
-  assert.equal(enrichSample("need", parsed), parsed);
   // Each record links to that owner.
   for (const item of viewerItems("need/need", parsed)) assert.equal(item.entity.uid, item.row.native_owner_cedar_uid);
-});
-
-test("an individually owned business shows the tribe its registry lists, not only the certifier", () => {
-  const parsed = enrichSample("owned", sample("owned"));
-  assert.ok(parsed.columns.includes("stated_tribe"));
-  assert.ok(parsed.rows.every((row) => row.stated_tribe));
-  assert.ok(parsed.rows.some((row) => row.stated_tribe === "Three Affiliated Tribes"));
 });
 
 test("source codes and garbled characters read as text", () => {
@@ -107,8 +97,6 @@ test("source codes and garbled characters read as text", () => {
 const KNOWN_WRONG_BINDINGS = [
   // Pub. L. 100-585 settles the Southern Ute and Ute Mountain Ute claims.
   { collection: "legislation", record: "100-hr-2642", wrongUid: "CE-001BW-3N" },
-  // The notice names the Duckwater Shoshone Tribe, not the BIE school.
-  { collection: "nagpra", record: "00-11378", wrongUid: "CE-000E9-W1" },
 ];
 
 test("known wrong bindings are still in the pinned data and kept off the door", () => {

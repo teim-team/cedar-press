@@ -30,11 +30,6 @@ export const EXCLUDED_EXAMPLES = Object.freeze({
     // Ute tribes; the record links the Uintah and Ouray Ute Tribe.
     "100-hr-2642": "linked to the wrong Ute tribe",
   }),
-  nagpra: Object.freeze({
-    // Lists "Duckwater Shoshone Elementary School" (a BIE school) among the
-    // culturally affiliated tribes; the tribe is the Duckwater Shoshone Tribe.
-    "00-11378": "a school resolved in place of a tribe",
-  }),
   "foundation-corporate-giving": Object.freeze({
     // Recipient reported as "Notah Begay", which reads as a gift to a person;
     // the recipient is almost certainly the NB3 Foundation.
@@ -114,13 +109,10 @@ export const DISPLAY_DEFAULTS = Object.freeze({
   funding: Object.freeze(["canonical_name", "program_name", "obligations_usd", "action_date", "source_url", "__source"]),
   legislation: Object.freeze(["canonical_names", "entity_roles", "title", "introduced_date", "sponsor_name", "latest_action", "source_url", "__source"]),
   deals: Object.freeze(["canonical_name", "native_party_role", "title", "announced_value_usd", "value_basis", "event_date", "counterparty_or_funder", "source_url", "__source"]),
-  nagpra: Object.freeze(["canonical_names", "entity_roles", "institution_name", "title", "publication_date", "agency_names", "source_url", "__source"]),
   lobbying: Object.freeze(["canonical_name", "cedar_entity_role", "client_name", "registrant_name", "reported_amount_usd", "amount_basis", "activity_date", "source_url", "__source"]),
   contractors: Object.freeze(["canonical_name", "cedar_entity_role", "awardee_name", "obligations_usd", "action_date", "funding_agency", "description", "source_url", "__source"]),
   subcontracting: Object.freeze(["canonical_name", "cedar_entity_role", "prime_name", "subcontractor_name", "subaward_amount_usd", "subaward_date", "description", "source_url", "__source"]),
-  owned: Object.freeze(["canonical_name", "cedar_entity_role", "business_name", "stated_tribe", "service_category", "city", "state", "source_url", "__source"]),
   need: Object.freeze(["native_owner", "enterprise_name", "related_entity_name", "relationship_type", "uei", "cage_code"]),
-  "natural-resources": Object.freeze(["canonical_name", "cedar_entity_role", "commodity", "revenue_type", "amount_usd", "measurement_status", "period_start", "source_url", "__source"]),
   nonprofits: Object.freeze(["canonical_name", "organization_name", "inclusion_category", "city", "state", "ntee_code", "bmf_revenue_usd", "source_url", "__source"]),
   "foundation-corporate-giving": Object.freeze(["recipient_name", "funder_name", "amount_exact_usd", "financial_status", "announcement_date", "source_url", "__source"]),
   plot: Object.freeze(["source_parcel_id", "land_record_kind", "owner_name_raw", "recorded_acres", "state", "county_fips", "source_record_url"]),

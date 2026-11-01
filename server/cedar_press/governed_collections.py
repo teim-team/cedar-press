@@ -50,7 +50,7 @@ SHARED_COLLECTIONS = {
     },
     "plot": {
         "name": "PLOT",
-        "shelf": "pro",
+        "shelf": "grove",
         "components": ("environmental_permits", "environmental_events"),
     },
 }

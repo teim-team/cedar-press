@@ -13,15 +13,12 @@ import { useAuth } from "../../context/useAuth";
 import { contactHref } from "../../features/grove/appLink.js";
 import { canReadCedarPress } from "../../features/grove/pressAccess";
 import { isConnected } from "../../config.js";
-import { safeNext } from "../../features/grove/pressSessionNavigation.js";
+import { landingHref, safeNext } from "../../features/grove/pressSessionNavigation.js";
 import { useDocumentTitle } from "../../features/grove/useDocumentTitle";
 
 
-// The public site is another host in production; a dev server has only itself.
-const MARKETING_URL = import.meta.env.DEV ? "/" : "https://cedarpress.ai";
-
 const PITCH = [
-  "Maintained collections on federal funding, contracting, deals, policy, giving, land and Native enterprise ownership",
+  "Maintained collections on federal funding, contracting, deals, policy, philanthropy and Native enterprises",
   "Cedar, the AI economic analyst",
   "Source records behind every figure",
   "Downloadable spreadsheets",
@@ -229,18 +226,18 @@ export default function CedarPressLogin() {
         {!user && signingIn ? (
           <section className="cp-login__pitch" aria-labelledby="cp-login-pitch">
             <p className="cp-login__pitch-kicker">Not a Cedar Press subscriber?</p>
-            <h2 id="cp-login-pitch">See what you&rsquo;re missing</h2>
+            <h2 id="cp-login-pitch">What a membership includes</h2>
             <p>Trusted intelligence for Indian Country.</p>
             <ul>
               {PITCH.map((line) => <li key={line}>{line}</li>)}
             </ul>
             <div className="cp-login__pitch-actions">
-              <a className="cp-btn cp-btn--quiet" href={MARKETING_URL}>Learn more</a>
-              <Link className="cp-btn cp-btn--primary" to="/subscribe">Create an account</Link>
+              <a className="cp-btn cp-btn--quiet" href={landingHref()}>Learn more</a>
+              <Link className="cp-btn cp-btn--primary" to="/subscribe">View plans</Link>
             </div>
           </section>
         ) : null}
-        <p className="cp-login__back"><a href={MARKETING_URL}>&larr; Back to Cedar Press</a></p>
+        <p className="cp-login__back"><a href={landingHref()}>&larr; Back to Cedar Press</a></p>
     </AccountPage>
   );
 }

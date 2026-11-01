@@ -15,13 +15,12 @@ const collectionNames = Object.fromEntries([...standard, ...pro].map((entry) => 
 const featureGroups = {
   press: [
     { title: "Funding & philanthropy", ids: ["funding", "foundation-corporate-giving"] },
-    { title: "Policy & public action", ids: ["federal-register", "legislation", "lobbying", "nagpra"] },
-    { title: "Deals & transactions", ids: ["deals"] },
+    { title: "Policy & public action", ids: ["federal-register", "legislation", "lobbying"] },
   ],
   press_pro: [
+    { title: "Deals & transactions", ids: ["deals"] },
     { title: "Federal contracting", ids: ["contractors", "subcontracting"] },
-    { title: "Native enterprises", ids: ["owned", "need"] },
-    { title: "Organizations, resources & land", ids: ["nonprofits", "natural-resources", "plot"] },
+    { title: "Native enterprises & organizations", ids: ["need", "nonprofits"] },
   ],
 };
 
@@ -107,7 +106,7 @@ export default function CedarPressSubscribe() {
       <div className="cp-memberships__intro">
         <p className="cp-kicker">{plans?.cohort === "early_access" ? "Early access membership" : "Annual membership"}</p>
         <h1 id="membership-title">Choose your Cedar Press membership.</h1>
-        <p>Original data. Connected research. A clearer view of Indian Country.</p>
+        <p>Source-linked data on Indian Country&rsquo;s economy, maintained by Lumecon.</p>
       </div>
       {plans ? <>
         <div className="cp-memberships__cards">

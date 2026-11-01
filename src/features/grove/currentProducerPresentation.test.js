@@ -16,8 +16,8 @@ await loadCodebook();
 const raw = (path) => parseCsv(readFileSync(new URL("../../.." + path, import.meta.url), "utf8"));
 const served = (path) => parseCsv(readFileSync(new URL("../../../public" + path, import.meta.url), "utf8"));
 
-test("all fourteen producer previews have an exact raw codebook, and each customer table a valid opening view", () => {
-  assert.equal(manifest.collections.length, 14);
+test("all ten producer previews have an exact raw codebook, and each customer table a valid opening view", () => {
+  assert.equal(manifest.collections.length, 10);
   for (const collection of manifest.collections) {
     for (const table of collection.tables.filter(value => value.sample_path)) {
       const key = collection.id + "/" + table.table.replace(/\.csv$/, "");
@@ -50,8 +50,8 @@ test("all fourteen producer previews have an exact raw codebook, and each custom
   }
 });
 
-test("Giving and PLOT keep their verified per-type field maps as inputs, and open as one flat table", () => {
-  for (const id of ["foundation-corporate-giving", "plot"]) {
+test("Giving keeps its verified per-type field maps as inputs, and opens as one flat table", () => {
+  for (const id of ["foundation-corporate-giving"]) {
     const collection = manifest.collections.find(value => value.id === id);
     assert.ok(collection, id);
     for (const table of collection.tables.filter(value => value.sample_path)) {

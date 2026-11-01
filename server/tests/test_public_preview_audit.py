@@ -433,7 +433,7 @@ class PublicPreviewAuditTest(unittest.TestCase):
 
     def test_every_manifest_collection_has_a_served_preview(self) -> None:
         self.assertEqual(self.report["manifest_collections_without_served_sample"], [])
-        self.assertEqual(len(self.by_id), 14)
+        self.assertEqual(len(self.by_id), 10)
 
     def test_served_previews_are_the_producers_pinned_bytes(self) -> None:
         for e in self.report["collections"]:

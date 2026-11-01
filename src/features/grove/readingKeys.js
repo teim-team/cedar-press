@@ -1,11 +1,11 @@
 // REVIEW OWNER: Havala
 //
-// How to read the records of the two collections whose columns need a key
-// (owner, 2026-10-06: "PLOT and NEED break out what they need to ... we'll
-// have to train people what those mean").
+// How to read the records of a collection whose columns need a key (owner,
+// 2026-10-06: "we'll have to train people what those mean"). NEED is the one
+// left.
 //
 // Every meaning here restates the codebook's own definition of the column
-// (data/cedar/codebook.json, tables need/need and plot/plot) in plain words,
+// (data/cedar/codebook.json, table need/need) in plain words,
 // and every value named is one that appears in the published rows. Nothing
 // here is a figure, so nothing here can go stale against a release; a new
 // value the producer starts writing is the one thing to add.
@@ -26,22 +26,6 @@ export const READING_KEYS = Object.freeze({
       term("Verified claims", "The facts on the row that were independently confirmed, such as identity, UEI, CAGE code, subsidiary or ownership. A fact not listed is unreviewed, not false."),
       term("Subject binding", "How the source was matched to this enterprise: by its exact UEI, by its exact CAGE code, or by a reviewed profile link. Never by a shared name."),
       term("Reviewed on", "When a reviewer checked the evidence, not when the relationship began."),
-    ]),
-  }),
-  plot: Object.freeze({
-    intro:
-      "PLOT stands for Parcel-Level Ownership and Transfers. Each row is one piece of land as a public land record reports it: a county assessor's tax parcel or a Bureau of Indian Affairs trust tract. The owner is what the record says, not a verified title.",
-    terms: Object.freeze([
-      term("Land record kind", "assessor parcel: a county tax parcel. BIA tract: a Bureau of Indian Affairs trust or restricted tract."),
-      term("Parcel ID", "The parcel's or tract's identifier in its source. It is unique only within that county or BIA register."),
-      term("Owner as recorded", "The owner exactly as the assessor or the BIA lists it. “United States in trust for” a nation means trust land the United States holds for that nation."),
-      term("Record role", "assessor_owner_name_candidate: a county lists an owner that names a Native entity. bia_source_reported_tribal: the BIA reports the tract as tribal."),
-      term("Ownership code", "The source's own ownership category, such as the BIA's T for tribal."),
-      term("Estate type and trust status", "Whether the interest is surface, mineral or both, and its trust standing, where the source states them; unknown where it does not."),
-      term("Acres", "Land area as the source records it. Check the acres measure (assessor-recorded acres or BIA tract acres) before adding rows together."),
-      term("Tax", "The assessor's net property tax for the stated tax year. “Not cleared for ownership totals” means it should not be summed by owner."),
-      term("Owner time basis", "When the owner listing applies, for example the current owner when the county submitted its data rather than the tax-roll year."),
-      term("County FIPS", "The county's five-digit federal code."),
     ]),
   }),
 });

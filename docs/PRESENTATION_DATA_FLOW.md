@@ -40,6 +40,7 @@ Review-only material does not become a public sample when a local count changes.
 | Public sample display contracts | scripts/derive-explore.mjs; reads the customer-table headers plus reviewed explore.overrides.json |
 | One reader path for every sample surface, with the digest check | src/features/grove/customerTables.js, src/features/grove/sampleFetch.js |
 | Connected catalog and release checks | server/cedar_press/repository.py |
+| Connected spreadsheet download and its count check | src/features/grove/releaseResearch.js |
 | Connected preview rows and source definitions | server/cedar_press/release_research.py |
 | One verified spreadsheet per collection | server/cedar_press/spreadsheet.py |
 | Shared reader-facing field and record labels | src/features/grove/readerPresentation.js |
@@ -49,7 +50,6 @@ Review-only material does not become a public sample when a local count changes.
 | Generated-file validation | make check-generated |
 | Structural audit of served previews, descriptors and spine (read-only; also a firing test) | server/tests/test_public_preview_audit.py --report; open findings in docs/TERMINAL_HANDOFF.md, "Open items from the 2026-10-02 fact-check" |
 | Legacy 40-column Deals preview to the 36-column producer header | server/tests/legacy_deals_adapter.py (tested mapping; changes nothing served) |
-| Collection display names (owned is Individual Native-Owned Businesses) | server/tests/test_collection_display_names.py |
 
 The sample publication check and display-contract generator serve different
 contracts; neither is a substitute for the other. JS/Python parity checks remain

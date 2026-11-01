@@ -170,9 +170,9 @@ export default function CedarPressResearchAccess() {
               "repeats the same pitch"; this was the repetition. */}
           {/* WHAT HAPPENS NEXT, which the page never said. */}
           <ol className="cp-next">
-            <li><b>A person reads it.</b> Requests go to the research desk, not to a queue.</li>
-            <li><b>A fit gets the named collections, for the named project.</b> Nothing wider.</li>
-            <li><b>A miss gets an answer anyway</b>: which route fits, if one does.</li>
+            <li><b>A member of the research desk reads every request.</b></li>
+            <li><b>An approved project receives access to the collections it names</b>, for that project only.</li>
+            <li><b>If the program is not the right fit</b>, we reply with the option that is.</li>
           </ol>
           <a className="cp-trh__cta" href={REQUEST_HREF}>
             Start a research request <span aria-hidden="true">&#8594;</span>

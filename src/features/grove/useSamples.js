@@ -26,7 +26,6 @@ import { downloadCollection } from "../../api.js";
 import { isConnected } from "../../config.js";
 import { EMPTY_REGISTER, parseCsv, universalRows } from "./explore.js";
 import { fetchSampleText, onBackOnline } from "./sampleFetch.js";
-import { enrichSample } from "./exampleEnrichment.js";
 
 /**
  * The records the analytical viewer (collection viewer, record and entity
@@ -59,7 +58,7 @@ export function useSampleRows(tables, register = EMPTY_REGISTER) {
     for (const t of tables) {
       if (loaded.has(t.path) || failed.has(t.path) || pending.current.has(t.path)) continue;
       const promise = readTable(t)
-        .then((text) => enrichSample(t.key.split("/")[0], parseCsv(text)))
+        .then(parseCsv)
         .then(
           (parsed) => {
             pending.current.delete(t.path);

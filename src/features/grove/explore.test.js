@@ -180,17 +180,12 @@ test("the flagship comes first among a collection's tables and locked shelves st
   assert.ok(tables[0].flagship);
   assert.equal(tables[0].key, "lobbying/lobbying");
   const standard = explorableCollections(PRESS);
-  assert.equal(standard.length, 14);
+  assert.equal(standard.length, 10);
   assert.ok(standard.some((c) => c.open) && standard.some((c) => !c.open), "a standard reader sees open and locked collections");
-  // A collection whose flagship sample is not published says why rather
-  // than silently contributing nothing.
-  const owned = standard.find((c) => c.entry.id === "owned");
-  assert.equal(owned.flagship?.key, "owned/owned");
-  assert.equal(owned.previewUnavailable, null);
-  // Foundation & Corporate Giving and PLOT have previews like the others.
-  // Since 2026-10-04 each is one flat customer table: no record type to
-  // dispatch on, and its own source column (customerTables.js).
-  for (const id of ["plot", "foundation-corporate-giving"]) {
+  // Foundation & Corporate Giving has a preview like the others. Since
+  // 2026-10-04 it is one flat customer table: no record type to dispatch on,
+  // and its own source column (customerTables.js).
+  for (const id of ["foundation-corporate-giving"]) {
     const described = standard.find((c) => c.entry.id === id);
     assert.equal(described.flagship?.key, id + "/" + id, id);
     assert.equal(described.tables.length, 1, id);
@@ -322,9 +317,6 @@ test("a bill's several entities are each an entity, deduplicated, and a year fal
   assert.equal(rowYear({ fiscal_year: "", action_date: "2007-12-05" }, funding), null);
   assert.equal(rowYear({ fiscal_year: "2008", action_date: "2007-12-05" }, funding), 2008);
   assert.equal(funding.year_basis, "federal fiscal year");
-  // A reporting period's year is the calendar year it starts in (F-87).
-  assert.equal(contractFor("natural-resources/natural-resources").year_basis,
-    "calendar year in which the reported period starts");
 });
 
 test("an amount that is blank or not a number is null, never zero", () => {
@@ -753,18 +745,17 @@ test("every flagship sample reads through its contract without a thrown row", ()
       assert.ok(items.every((item) => item.recordId), `${key}: a row has no record id`);
     }
   }
-  // A Cedar Press+ reader's plan reaches all fourteen and a Cedar Press
-  // reader's seven, the two new collections included like any other on
-  // their shelf (owner, 2026-09-27): Foundation & Corporate Giving on Cedar
-  // Press, PLOT on Cedar Press+.
+  // A Cedar Press+ reader's plan reaches all ten and a Cedar Press reader's
+  // five: Foundation & Corporate Giving on Cedar Press, Deals on Cedar Press+
+  // (the pilot tiers, Lumecon-data #44).
   const count = (shelves) => STOREFRONT_CATALOG.filter((entry) => shelves.includes(entry.shelf)).length;
   assert.equal(explorableCollections(PRO).filter((c) => c.open).length, count(["standard", "pro"]));
   assert.equal(explorableCollections(PRESS).filter((c) => c.open).length, count(["standard"]));
   const opens = (user, id) => explorableCollections(user).find((c) => c.entry.id === id).open;
   assert.equal(opens(PRESS, "foundation-corporate-giving"), true);
   assert.equal(opens(PRO, "foundation-corporate-giving"), true);
-  assert.equal(opens(PRESS, "plot"), false, "PLOT is Cedar Press+");
-  assert.equal(opens(PRO, "plot"), true);
+  assert.equal(opens(PRESS, "deals"), false, "Deals is Cedar Press+");
+  assert.equal(opens(PRO, "deals"), true);
 });
 
 test("a table with no identifier column has no record id, and its rows keep distinct positional ids", () => {
@@ -822,8 +813,7 @@ test("CONTRACTS is the derived file, frozen, and the withheld tables are gone fr
   const published = LAUNCH_COLLECTION.flatMap(dataset =>
     collectionTables(dataset.id).filter(t => t.sample_path).map(t => tableKey(dataset.id, t.table)));
   assert.deepEqual(Object.keys(CONTRACTS).sort(), published.sort());
-  assert.equal(Object.keys(CONTRACTS).length, 14);
-  assert.equal(CONTRACTS["owned/individual_native_firm_register"], undefined);
+  assert.equal(Object.keys(CONTRACTS).length, 10);
 });
 
 // ── The field map ──────────────────────────────────────────────────────────
@@ -856,8 +846,8 @@ test("the field map decides every column of every sampled flagship in the owner'
   // The owner's column counts, exactly; Funding is 39 because DUNS is retired,
   // and Federal Register is 34 because the producer now builds
   // consultation_record_key at write time (field_map.json, 6f620ec).
-  const EXPECTED = { funding: 39, "federal-register": 34, legislation: 30, deals: 33, nagpra: 52, lobbying: 38, contractors: 49, subcontracting: 54, "natural-resources": 38, owned: 32, need: 30, nonprofits: 24 };
-  // This map records the original twelve curated schemas. Current producer
+  const EXPECTED = { funding: 39, "federal-register": 34, legislation: 30, deals: 33, lobbying: 38, contractors: 49, subcontracting: 54, need: 30, nonprofits: 24 };
+  // This map records the original curated schemas still on the storefront. Current producer
   // spreadsheets are checked against their exact codebooks and type maps in
   // currentProducerPresentation.test.js, including Giving and PLOT.
   const historical = LAUNCH_COLLECTION.filter((dataset) => Object.hasOwn(EXPECTED, dataset.id));
@@ -941,7 +931,7 @@ test("the field map decides every column of every sampled flagship in the owner'
     const lead = book.fields.slice(0, expectedLead.length).map((f) => f.label);
     assert.deepEqual(lead, expectedLead, key);
   }
-  assert.equal(sampled, 10);
+  assert.equal(sampled, 8);
   assert.deepEqual(legacyTables("need"), []);
   const reviewedNeed = currentContractFor(flagshipKey("need"));
   // The customer table has no record key; NEED rows are addressed by position.
@@ -1202,7 +1192,7 @@ test("every collection has a researcher guide with the sections the specificatio
   const { SECTIONS } = await import("../../../scripts/docs-markdown.mjs");
   const dir = fileURLToPath(new URL("../../../docs/guides/", import.meta.url));
   const ids = LAUNCH_COLLECTION.map((d) => d.id);
-  assert.equal(ids.length, 14);
+  assert.equal(ids.length, 10);
   for (const id of ids) {
     const text = readFileSync(`${dir}${id}.md`, "utf8");
     for (const section of SECTIONS) assert.ok(text.includes(`\n## ${section}\n`), `${id}: no "${section}" section`);

@@ -127,9 +127,9 @@ class TestCrossLanguageParity(unittest.TestCase):
             with self.subTest(dataset=javascript["id"]):
                 self.assertEqual(set(javascript), expected)
 
-    def test_the_fourteen_are_the_storefront(self) -> None:
-        # The approved Press collection set includes Giving and PLOT.
-        self.assertEqual(len(launch.LAUNCH_COLLECTION), 14)
+    def test_the_ten_are_the_storefront(self) -> None:
+        # The pilot collection set (Lumecon-data #44).
+        self.assertEqual(len(launch.LAUNCH_COLLECTION), 10)
         self.assertEqual(
             {d.id for d in launch.LAUNCH_COLLECTION},
             {
@@ -137,16 +137,12 @@ class TestCrossLanguageParity(unittest.TestCase):
                 "federal-register",
                 "legislation",
                 "deals",
-                "nagpra",
                 "lobbying",
                 "contractors",
                 "subcontracting",
-                "owned",
                 "need",
-                "natural-resources",
                 "nonprofits",
                 "foundation-corporate-giving",
-                "plot",
             },
         )
 
@@ -472,11 +468,11 @@ class TestPressCatalogSnapshot(unittest.TestCase):
                     self.assertIn("captured", coverage)
                     self.assertNotIn("from", coverage)
 
-    def test_the_two_rosters_are_the_two_that_have_no_series(self) -> None:
+    def test_the_roster_is_the_one_that_has_no_series(self) -> None:
         rosters = {
             entry["id"] for entry in press_catalog.CATALOG if entry["coverage"]["kind"] == "roster"
         }
-        self.assertEqual(rosters, {"owned", "nonprofits"})
+        self.assertEqual(rosters, {"nonprofits"})
 
     def test_the_retired_pair_is_gone_rather_than_aliased(self) -> None:
         # A `standardFrom` set equal to the coverage year on every entry would
@@ -523,7 +519,7 @@ class TestPressCatalogSnapshot(unittest.TestCase):
         # The Python surface, not the data: `profile_for` is what Cedar
         # answers from, and a roster reaching it as a year is how a harvest
         # date becomes a coverage claim in a sentence.
-        for dataset_id in ("owned", "nonprofits"):
+        for dataset_id in ("nonprofits",):
             profile = collection_profiles.profile_for(dataset_id)
             with self.subTest(collection=dataset_id):
                 self.assertEqual(profile["coverage_kind"], "roster")
@@ -558,35 +554,21 @@ class TestPressCatalogSnapshot(unittest.TestCase):
         ]
         self.assertIn(funding["method"], built)
 
-        plot = collection_profiles.answer_from_profile("What does this collection cover?", "plot")[
-            "answer"
-        ]
-        self.assertIn("PLOT (Parcel-Level Ownership and Transfers)", plot)
-        self.assertIn(by_id["plot"]["sources"], plot)
-        self.assertIn(by_id["plot"]["method"], plot)
-
-    def test_the_ladder_is_seven_collections_and_seven_more(self) -> None:
+    def test_the_ladder_is_five_collections_and_five_more(self) -> None:
         # The owner's ruling of 2026-09-02: Cedar Press is the standard
         # shelf at full depth, Cedar Press+ is that plus the pro shelf. The
-        # counts are what the tier copy promises, so they are pinned. Seven
-        # and seven since 2026-09-27: Foundation & Corporate Giving joined
-        # the standard shelf and PLOT the pro shelf.
+        # counts are what the tier copy promises, so they are pinned. Five and
+        # five since the pilot tiers (Lumecon-data #44): Deals moved to the pro
+        # shelf, and NAGPRA, Natural Resources, Owned and PLOT left the
+        # storefront.
         shelves: dict[str, set[str]] = {}
         for entry in press_catalog.CATALOG:
             shelves.setdefault(entry["shelf"], set()).add(entry["id"])
-        self.assertEqual(len(shelves["standard"]), 7)
+        self.assertEqual(len(shelves["standard"]), 5)
         self.assertIn("foundation-corporate-giving", shelves["standard"])
         self.assertEqual(
             shelves["pro"],
-            {
-                "contractors",
-                "subcontracting",
-                "owned",
-                "need",
-                "natural-resources",
-                "nonprofits",
-                "plot",
-            },
+            {"deals", "contractors", "subcontracting", "need", "nonprofits"},
         )
 
 

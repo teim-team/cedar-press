@@ -23,25 +23,22 @@ import { LAUNCH_COLLECTION, collectionCedarFacts } from "../src/features/grove/c
 import { coverageLabel } from "../src/features/grove/pressAccess.js";
 import { formatUpdated } from "../src/features/grove/pressReleases.js";
 import { recordHref } from "../src/features/grove/pressRecord.js";
-import { enrichSample } from "../src/features/grove/exampleEnrichment.js";
 import { showcaseItems } from "../src/features/grove/showcase.js";
 import { landingSample } from "../src/features/grove/landingExamples.js";
 
 // The browser suite follows the exact published release, including refreshed
 // source keys. It never revives retired samples just to keep a fixture alive.
 // What a reader sees is each collection's customer table (customerTables.js),
-// so that is what the suite reads too, with the same display-only additions
-// the viewer makes (exampleEnrichment.js).
+// so that is what the suite reads too.
 async function currentSample(id) {
   const path = new URL(`../public/data/cedar/downloads/${id}.csv`, import.meta.url);
-  return enrichSample(id, parseCsv(await readFile(path, "utf8")));
+  return parseCsv(await readFile(path, "utf8"));
 }
 const FUNDING_SAMPLE = await currentSample("funding");
 const FR_SAMPLE = await currentSample("federal-register");
 const NEED_SAMPLE = await currentSample("need");
-const OWNED_SAMPLE = await currentSample("owned");
 const GIVING_SAMPLE = await currentSample("foundation-corporate-giving");
-const PLOT_SAMPLE = await currentSample("plot");
+const DEALS_SAMPLE = await currentSample("deals");
 const CURRENT_ENTITY_UID = FUNDING_SAMPLE.rows.find((row) => row.cedar_uid)?.cedar_uid;
 const register = JSON.parse(await readFile(new URL("../public/data/cedar/register.json", import.meta.url), "utf8"));
 const CURRENT_ENTITY_NAME = register.entities.find((row) => row[0] === CURRENT_ENTITY_UID)?.[1];
@@ -50,7 +47,7 @@ const FR_KEY = "federal-register/federal-register";
 const FR_ROW = FR_SAMPLE.rows.find((row) => rowSource(row, contractFor(FR_KEY)));
 if (!FR_ROW) throw new Error("Published Federal Register sample needs a cited source");
 
-// The fourteen, read from the catalog rather than typed: a list typed here
+// The ten, read from the catalog rather than typed: a list typed here
 // would pass while the door advertised something else.
 import { STOREFRONT_CATALOG } from "../src/features/grove/pressCatalog.js";
 import { LUMECON_URL } from "../src/features/grove/appLink.js";
@@ -170,26 +167,6 @@ test("reviewed NEED businesses remain individually named on phones and use reada
       return { textRight: heading.getBoundingClientRect().right - parseFloat(getComputedStyle(heading).paddingRight), arrowLeft: arrow.getBoundingClientRect().left };
     }));
     for (const boundsForRow of bounds) expect(boundsForRow.textRight).toBeLessThanOrEqual(boundsForRow.arrowLeft);
-    await page.goto("/data?c=owned");
-    await expect(page.getByTestId("explore-record").first()).toContainText("Certifying authority:");
-    const firstHeading = page.getByTestId("explore-record").first().locator(".cp-ex__cardwho");
-    expect(await firstHeading.evaluate((el) => el.firstChild.textContent)).toBe(OWNED_SAMPLE.rows[0].business_name);
-    await expect(page.getByTestId("explore-record").first()).not.toContainText("certifying_authority");
-  } else {
-    await page.goto("/data?c=owned");
-    const row = page.getByTestId("explore-record").first();
-    // Owner, 2026-10-07: Cedar's column leads and is the one pinned; the
-    // business sits beside it.
-    await expect(row.locator("td.cp-ex__pin")).toContainText(OWNED_SAMPLE.rows[0].canonical_name);
-    await expect(row).toContainText(OWNED_SAMPLE.rows[0].business_name);
-    const scroller = page.locator(".cp-ex__scroll").first();
-    await scroller.evaluate((el) => el.scrollTo({ left: el.scrollWidth, behavior: "instant" }));
-    const pinned = await row.locator("td.cp-ex__pin").boundingBox();
-    const viewport = await scroller.boundingBox();
-    expect(pinned.x).toBeGreaterThanOrEqual(viewport.x);
-    expect(pinned.x + pinned.width).toBeLessThanOrEqual(viewport.x + viewport.width);
-    await page.goto("/data?c=natural-resources");
-    await expect(page.getByRole("columnheader", { name: "Measurement basis" })).toBeVisible();
   }
 });
 
@@ -226,7 +203,7 @@ test.describe("the gate", () => {
       "Cedar Press maintains its datasets on a weekly schedule with human review, expands their source coverage and useful fields over time and develops new collections.",
     );
     const panel = page.locator(".cp-hero3__proof");
-    for (const label of ["Patent publication and family records", "Historical S&P and Fitch ratings", "AM Best insurance financial-strength releases", "IRS Form 990 returns and schedules", "Recorded deeds and land transfers"]) {
+    for (const label of ["Patent publication and family records", "Historical S&P and Fitch ratings", "AM Best insurance financial-strength releases", "IRS Form 990 returns and schedules", "Federal Register documents"]) {
       await expect(panel).toContainText(label);
     }
     // Owner, 2026-10-06: no source count and no pause control on the band.
@@ -400,7 +377,7 @@ test.describe("the gate", () => {
 
   test("a deep-linked collection is scrolled into view in the phone's rail strip", async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== "phone", "the strip is the phone's rail");
-    for (const id of ["plot", "need"]) {
+    for (const id of ["deals", "need"]) {
       await page.goto(`/?collection=${id}`);
       await expect(page.locator(`[data-testid="collection-stage"][data-collection="${id}"]`)).toBeVisible();
       const inView = await page.getByTestId("press-frame").locator(".cp-rail").evaluate((rail) => {
@@ -494,9 +471,9 @@ test.describe("the gate", () => {
     expect(errors).toEqual([]);
   });
 
-  // The door stages the product: the fourteen collections down the frame's
+  // The door stages the product: the ten collections down the frame's
   // rail, one group a shelf, and the pane with real sample records of the
-  // one in hand. Fourteen is the
+  // one in hand. Ten is the
   // catalog's count; the records are the point, since a preview with a
   // description and no rows is a brochure. The reader's shelf (#catalog)
   // stays absent — asserted above — because the preview reads the public
@@ -508,7 +485,7 @@ test.describe("the gate", () => {
     // navy list until the door started mounting the shared rail. Scoped to
     // the frame, since the strip below it is the same twelve again.
     await expect(page.getByTestId("press-frame").locator(".cp-rail__item")).toHaveCount(STOREFRONT_CATALOG.length);
-    expect(STOREFRONT_CATALOG.length).toBe(14);
+    expect(STOREFRONT_CATALOG.length).toBe(10);
     await expect(page.locator('[data-testid="collection-stage"]')).toHaveCount(1);
     await expect(page.locator('[data-testid="stage-record"]').first()).toBeVisible();
     // Scoped to the frame: the door now also carries a full-size strip of the
@@ -746,9 +723,9 @@ test.describe("the gate", () => {
       await expect(panel).not.toContainText(gone);
     }
     await expect(panel).toContainText("By continuing, you agree to our Terms of Service and acknowledge our Privacy Policy.");
-    const pitch = page.getByRole("region", { name: "See what you’re missing" });
+    const pitch = page.getByRole("region", { name: "What a membership includes" });
     await expect(pitch.getByRole("link", { name: "Learn more" })).toBeVisible();
-    await pitch.getByRole("link", { name: "Create an account" }).click();
+    await pitch.getByRole("link", { name: "View plans" }).click();
     await expect(page).toHaveURL(/\/subscribe$/);
   });
 
@@ -1099,13 +1076,13 @@ test.describe("Explore the collections", () => {
     expect(errors).toEqual([]);
   });
 
-  // Giving and PLOT now carry reviewed observation-level releases. The public
-  // sample identities and release descriptor are the test's source of truth.
+  // Giving on Cedar Press and Deals on Cedar Press+. The public sample
+  // identities and release descriptor are the test's source of truth.
   for (const { id, cases } of [
     { id: "foundation-corporate-giving", cases: [{ account: PRESS_ACCOUNT, open: true }, { account: ACCOUNT, open: true }] },
-    { id: "plot", cases: [{ account: PRESS_ACCOUNT, open: false }, { account: ACCOUNT, open: true }] },
+    { id: "deals", cases: [{ account: PRESS_ACCOUNT, open: false }, { account: ACCOUNT, open: true }] },
   ]) {
-    const sample = id === "plot" ? PLOT_SAMPLE : GIVING_SAMPLE;
+    const sample = id === "deals" ? DEALS_SAMPLE : GIVING_SAMPLE;
     const table = exploreTables(id).find((entry) => entry.flagship);
     const release = LAUNCH_COLLECTION.find((entry) => entry.id === id);
     const entry = STOREFRONT_CATALOG.find((item) => item.id === id);
@@ -1182,15 +1159,15 @@ test.describe("Explore the collections", () => {
     { label: "Cedar Press", account: PRESS_ACCOUNT },
     { label: "Cedar Press+", account: ACCOUNT },
   ]) {
-    test(`${label} sees the released Owned and reviewed NEED previews on the correct plan`, async ({ page }) => {
+    test(`${label} sees the reviewed NEED preview on the correct plan`, async ({ page }) => {
       const errors = watchConsole(page);
       await signIn(page, account);
-      for (const id of ["owned", "need"]) {
+      for (const id of ["need"]) {
         await page.goto(`/data?c=${id}`);
         await expect(page.getByTestId("explore-unavailable")).toHaveCount(0);
         if (account === ACCOUNT) {
           await expect(page.getByTestId("explore-record").first()).toBeVisible();
-          await expect(page.getByTestId("explore-record")).toHaveCount((id === "need" ? NEED_SAMPLE : OWNED_SAMPLE).rows.length);
+          await expect(page.getByTestId("explore-record")).toHaveCount(NEED_SAMPLE.rows.length);
           await expect(page.getByTestId("explore-locked")).toHaveCount(0);
         } else {
           await expect(page.getByTestId("explore-locked")).toBeVisible();
@@ -1212,9 +1189,9 @@ test.describe("Explore the collections", () => {
     await expect(atlas).toBeVisible();
     await expect(atlas.getByTestId("atlas-row")).toHaveCount(STOREFRONT_CATALOG.length);
     // Every collection on the reader's shelf is included and every one on
-    // the Plus shelf is offered, Foundation & Corporate Giving and PLOT like
-    // the rest. Owned and the separately reviewed NEED component now have
-    // published previews; the unreviewed NEED components remain held.
+    // the Plus shelf is offered, Foundation & Corporate Giving and Deals like
+    // the rest. The separately reviewed NEED component has a published
+    // preview; the unreviewed NEED components remain held.
     await expect(atlas.locator(".cp-atlas__included")).toHaveCount(
       STOREFRONT_CATALOG.filter((entry) => entry.shelf === "standard").length,
     );
@@ -1224,7 +1201,7 @@ test.describe("Explore the collections", () => {
     await expect(atlas.locator(".cp-atlas__pending")).toHaveCount(0);
     await expect(atlas).not.toContainText(/not yet published|first release/i);
     // Counts, coverage and freshness now follow the actual released metadata.
-    for (const id of ["plot", "foundation-corporate-giving"]) {
+    for (const id of ["deals", "foundation-corporate-giving"]) {
       const entry = STOREFRONT_CATALOG.find((item) => item.id === id);
       const release = LAUNCH_COLLECTION.find((item) => item.id === id);
       const row = atlas.getByTestId("atlas-row").filter({ has: page.getByRole("button", { name: entry.name, exact: true }) });
@@ -1723,7 +1700,7 @@ test.describe("the door's use cases", () => {
     for (const id of ["foundations-philanthropy", "government-officials", "advisors"]) {
       await expect(page.locator(`.cp-aud__panel[data-audience="${id}"]`)).toHaveCount(1);
     }
-    for (const id of ["plot", "foundation-corporate-giving"]) expect(cited, id).toContain(id);
+    for (const id of ["deals", "foundation-corporate-giving"]) expect(cited, id).toContain(id);
     expect(errors).toEqual([]);
   });
 
@@ -1896,9 +1873,9 @@ test.describe("the door's use cases", () => {
     const line = page.locator(".cp-hero3__by");
     await expect(line).toHaveText("Built by Lumecon.");
     await expect(line.getByRole("link", { name: "Lumecon" })).toHaveAttribute("href", LUMECON_URL);
-    // Teal text is --dteal (#0A7F74), and the door's own `a { color: inherit }`
+    // Link text is --dteal (#0a0a0a), and the door's own `a { color: inherit }`
     // must not win over it.
-    await expect(line.getByRole("link", { name: "Lumecon" })).toHaveCSS("color", "rgb(10, 127, 116)");
+    await expect(line.getByRole("link", { name: "Lumecon" })).toHaveCSS("color", "rgb(10, 10, 10)");
   });
 
   // A Cedar Press reader signs in through the door's "Sign in" link and the
@@ -2333,7 +2310,7 @@ test.describe("the Cedar panel is the site's panel", () => {
     await page.locator(".cp-hero3__proof").scrollIntoViewIfNeeded();
     await page.mouse.wheel(0, 1400);
     await page.locator(".cp-dc__fab").click();
-    await page.locator(".cp-dc__input").fill("what is nagpra");
+    await page.locator(".cp-dc__input").fill("what is subcontracting");
     await page.locator(".cp-dc__send").click();
     await expect(page.locator(".cp-dc__bubble--typing")).toBeVisible();
     // Mid-pause: close, then ask for a collection from the page.
@@ -2406,33 +2383,6 @@ test.describe("house style", () => {
   }
 });
 
-test.describe("sponsorship", () => {
-  // Nothing is booked, so every house slot shows the invitation to buy it.
-  // One per page and never more, and never on a trust surface — Methods
-  // exists to be believed and carries no inventory at any price.
-  for (const { name, path, expected } of [
-    { name: "the overview", path: "/", expected: 1 },
-    { name: "What's new", path: "/whats-new", expected: 1 },
-    { name: "Methods", path: "/methods", expected: 0 },
-  ]) {
-    test(`${name} carries ${expected} invitation(s)`, async ({ page }) => {
-      await signIn(page);
-      await page.goto(path);
-      await expect(page.locator(".cp-ad--house")).toHaveCount(expected);
-      if (!expected) return;
-      // Labelled above itself, so nobody reads a house panel as editorial.
-      await expect(page.locator(".cp-ad--house .cp-ad__cap")).toHaveText("Sponsorship");
-      // Laid out, not collapsed: the panel switches to a column in a rail and
-      // on a phone, and the flex bases have to switch with it. Left unreset,
-      // the body's 22rem basis becomes a height and the panel grows a screen
-      // of empty green under two lines of text.
-      const box = await page.locator(".cp-ad--house").first().boundingBox();
-      expect(box.height).toBeLessThan(360);
-      expect(box.height).toBeGreaterThan(60);
-    });
-  }
-});
-
 test.describe("the bundle", () => {
   // Until 2026-09 this repository committed two preview accounts with their
   // passwords in plaintext and every build shipped them: grep the deployed
@@ -2455,7 +2405,7 @@ test.describe("the bundle", () => {
     }
   });
 
-  // Foundation & Corporate Giving and PLOT are published and live (owner,
+  // Foundation & Corporate Giving is published and live (owner,
   // 2026-09-27): no page, prerendered route, SEO text or door answer in the
   // build calls anything "not yet published", or waits on a first release.
   test("says nothing is not yet published", async () => {
@@ -2470,17 +2420,17 @@ test.describe("the bundle", () => {
     }
   });
 
-  // BOTH NEW COLLECTIONS ARE IN THE BUILD.
+  // THE GIVING COLLECTION IS IN THE BUILD.
   //
-  // Foundation & Corporate Giving and PLOT were held out of the bundle while
-  // they were gated: this test used to prove every string about them was
-  // ABSENT from dist-site. The owner made them part of Cedar Press on
-  // 2026-09-27, so the proof runs the other way: their ids, names, owner
-  // descriptions, profile questions, the owner's use-case sentences that
-  // name them and the path data of both marks must all be PRESENT in what
-  // the production build emitted. A collection that renders on a developer's
-  // machine and is missing from the build fails here.
-  test("carries both new collections, their questions, sentences and marks", async () => {
+  // Foundation & Corporate Giving was held out of the bundle while it was
+  // gated: this test used to prove every string about it was ABSENT from
+  // dist-site. The owner made it part of Cedar Press on 2026-09-27, so the
+  // proof runs the other way: its id, names, owner description, profile
+  // questions, the owner's use-case sentences that name it and the path data
+  // of its mark must all be PRESENT in what the production build emitted. A
+  // collection that renders on a developer's machine and is missing from the
+  // build fails here.
+  test("carries the giving collection, its questions, sentences and mark", async () => {
     const dir = fileURLToPath(new URL("../dist-site/", import.meta.url));
     const assets = await readdir(dir, { recursive: true, withFileTypes: true });
     const files = assets.filter((entry) => entry.isFile() && /\.(js|css|html|json|map|xml|txt)$/.test(entry.name));
@@ -2488,7 +2438,7 @@ test.describe("the bundle", () => {
     const bodies = await Promise.all(files.map((entry) => readFile(`${entry.parentPath}/${entry.name}`, "utf8")));
     const build = bodies.join("\n");
 
-    const ids = ["plot", "foundation-corporate-giving"];
+    const ids = ["foundation-corporate-giving"];
     const needles = [];
     for (const id of ids) {
       const entry = STOREFRONT_CATALOG.find((item) => item.id === id);
@@ -2500,13 +2450,13 @@ test.describe("the bundle", () => {
     }
     const citing = AUDIENCE_JOBS.filter((audience) => audience.collections.some((id) => ids.includes(id)));
     expect(citing.map((audience) => audience.id).sort()).toEqual(
-      ["ancs-nhos", "banks-lenders", "economic-development", "foundations-philanthropy", "journalists", "native-nonprofits"],
+      ["banks-lenders", "economic-development", "foundations-philanthropy", "native-nonprofits"],
     );
     for (const audience of citing) needles.push(audience.explanation);
     needles.push("Foundations and philanthropy");
     // The marks, read from the family file so the list cannot drift from it.
     const icons = await readFile(new URL("../src/pages/grove/pressCollectionIcons.jsx", import.meta.url), "utf8");
-    for (const name of ["GivingIcon", "PlotIcon"]) {
+    for (const name of ["GivingIcon"]) {
       const start = icons.indexOf(`const ${name} = (`);
       expect(start, `${name} is not in the family`).toBeGreaterThanOrEqual(0);
       const body = icons.slice(start, icons.indexOf(");", start));
@@ -2519,7 +2469,7 @@ test.describe("the bundle", () => {
     // for the whole description. JSX-escaped ampersands are compared both
     // ways, since the minifier may keep either spelling.
     const missing = needles.filter((needle) => !build.includes(needle) && !build.includes(needle.replaceAll("&", "\\u0026")));
-    expect(needles.length, "nothing to search for: the proof would pass vacuously").toBeGreaterThan(20);
+    expect(needles.length, "nothing to search for: the proof would pass vacuously").toBeGreaterThan(10);
     expect(missing, "new-collection material missing from the build").toEqual([]);
   });
 });
@@ -2572,14 +2522,14 @@ test.describe("crawlers", () => {
     });
   }
 
-  test("the door names all fourteen collections in the HTML a crawler fetches", async ({ request }) => {
+  test("the door names all ten collections in the HTML a crawler fetches", async ({ request }) => {
     // The viewer's rail and the use cases' chips (every example is in the
     // document, one shown at a time) spell the collections out. Prerendered,
     // so it is text in the document rather than something that appears after
     // a script runs; a crawler and a reader with JS off both get the list.
     const body = await (await request.get("/")).text();
     const names = STOREFRONT_NAMES;
-    expect(names).toHaveLength(14);
+    expect(names).toHaveLength(10);
     // The HTML escapes the one ampersand a collection name carries.
     for (const name of names) expect(body.includes(name) || body.includes(name.replaceAll("&", "&amp;")), name).toBe(true);
     // The count is the hero's own fact line, read from the catalog.
@@ -2790,7 +2740,7 @@ test.describe("Methods", () => {
     expect(boxes.svg.bottom).toBeLessThanOrEqual(boxes.text.top);
   });
 
-  test("the fourteen marks index the collections, and one profile opens beneath", async ({ page }) => {
+  test("the ten marks index the collections, and one profile opens beneath", async ({ page }) => {
     const errors = watchConsole(page);
     await page.goto("/methods");
     // The section was twelve stacked accordions; it is the marks now, and
@@ -2839,16 +2789,16 @@ test.describe("Methods", () => {
     // as intentional rather than left reading as 94% failure.
     await expect(page.locator(".cp-ur__item")).toHaveCount(3);
     await expect(page.locator(".cp-ur__item.is-by-design")).toHaveCount(2);
-    await expect(page.locator(".cp-ur")).toContainText("Never a failed match");
-    await expect(page.locator(".cp-ur")).toContainText("noted in the record");
+    await expect(page.locator(".cp-ur")).toContainText("This is not a failed match");
+    await expect(page.locator(".cp-ur")).toContainText("The record notes this");
     // Codex, PR #79: the two phrases above come only from the intentional
-    // statuses, so an empty "Still to do" card passed. Every card must carry
+    // statuses, so an empty "Under review" card passed. Every card must carry
     // a real definition, and none may be the missing-definition fallback.
     for (const body of await page.locator(".cp-ur__body").allInnerTexts()) {
       expect(body.trim().length).toBeGreaterThan(20);
       expect(body).not.toContain("Definition missing");
     }
-    await expect(page.locator(".cp-ur__item:not(.is-by-design)")).toContainText("could not place");
+    await expect(page.locator(".cp-ur__item:not(.is-by-design)")).toContainText("not yet matched");
     // The loop says where the methods come from. It must not say the Federal
     // Reserve uses or endorses them: the workspace evidences affiliation and
     // nothing more, and that is the one claim here a reader could disprove.
@@ -3286,8 +3236,8 @@ test.describe("Methods' seven stages arrive as a sequence", () => {
   });
 });
 
-// Owner, 2026-10-06: hovering a collection tells you more, and NEED and PLOT
-// explain their columns for readers meeting them for the first time.
+// Owner, 2026-10-06: hovering a collection tells you more, and NEED explains
+// its columns for readers meeting them for the first time.
 test.describe("explaining the collections", () => {
   test("hovering a collection in the app shows what it tracks, its coverage and its count", async ({ page }, testInfo) => {
     test.skip(testInfo.project.name === "phone", "a phone has no hover");
@@ -3295,18 +3245,18 @@ test.describe("explaining the collections", () => {
     await page.goto("/data?c=funding");
     // An item already in view: scrolling the rail closes the card, since its
     // position would be stale, and hover() scrolls an item below the fold.
-    const item = page.locator(".cp-rail__item", { hasText: "Deals" });
+    const item = page.locator(".cp-rail__item", { hasText: "Advocacy" });
     await item.hover();
     const tip = page.getByRole("tooltip");
     await expect(tip).toBeVisible();
-    await expect(tip).toContainText("Indian Country Deals");
+    await expect(tip).toContainText("Native Federal Advocacy and Engagement");
     await expect(tip).toContainText(/observations/i);
-    await expect(item).toHaveAttribute("aria-describedby", "cp-railtip-deals");
+    await expect(item).toHaveAttribute("aria-describedby", "cp-railtip-lobbying");
     await page.mouse.move(900, 600);
     await expect(page.getByRole("tooltip")).toHaveCount(0);
   });
 
-  for (const id of ["need", "plot"]) {
+  for (const id of ["need"]) {
     test(`the door's ${id} preview explains its records`, async ({ page }) => {
       await page.goto(`/?collection=${id}`);
       const stage = page.locator(`[data-testid="collection-stage"][data-collection="${id}"]`);

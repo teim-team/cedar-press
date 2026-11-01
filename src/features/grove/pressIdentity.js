@@ -152,7 +152,7 @@ export const IDENTIFIERS = Object.freeze([
       "The business is dissolved or acquired, and keeps its record",
     ]),
     note:
-      "Opaque, append-only, never reused. It identifies the business, not its owner, not a citizenship or certification claim, not a UEI, CAGE, EIN, DUNS or SAM registration, not a location, brand, project or contract, and not a person. A surviving legal business keeps its id through a change; a genuine legal successor gets a new one.",
+      "Permanent and never reused. It identifies the business, not its owner, not a citizenship or certification claim, not a UEI, CAGE, EIN, DUNS or SAM registration, not a location, brand, project or contract, and not a person. A surviving legal business keeps its id through a change; a genuine legal successor gets a new one.",
     // Codex, PR #77, and it was right: the displayed copy said flatly that an
     // individually owned firm carries a business id and no entity id, while
     // the published register shows the 44 firms in that class carrying CE-
@@ -167,7 +167,7 @@ export const IDENTIFIERS = Object.freeze([
     // claims about a register that has not been written. Future tense, which
     // is also what the governing decision says.
     exception:
-      "Forty-four privately owned firms were minted into the entity register before this rule and keep their entity ids. The class is closed to new mints: when the business register is written, those firms gain a business id with an equivalence row to their entity id, and every firm resolved after it carries a business id alone.",
+      "Forty-four privately owned firms entered the entity register before this rule and keep their Cedar entity ids. No new firm is added that way. When business ids are issued, each of those firms will receive one linked to its existing entity id, and firms identified after that will carry a business id alone.",
   }),
 ]);
 
@@ -232,7 +232,7 @@ export const WHY_BOTH = Object.freeze({
     "What contracts has this enterprise received?",
   ]),
   close:
-    "Two questions, two answers. A contract, a deal, a lobbying filing or a subsidiary links to whichever of the two the source actually identified, and to both where it named both. A Cedar entity id never goes in a business column, and a business id never goes in an entity column.",
+    "A contract, a deal, a lobbying filing or a subsidiary links to whichever of the two the source actually identified, and to both where it named both. A Cedar entity id never goes in a business column, and a business id never goes in an entity column.",
 });
 
 /**
@@ -269,7 +269,7 @@ export const WITHHELD_CLASS = "Individually Native-owned business";
 
 /** What Cedar publishes about an individually owned firm, said plainly. */
 export const WITHHELD_NOTE =
-  "A firm is published under its own name whatever it is named after. Where a nation's commerce office published its certified businesses, they are in the collection by name. Where the only evidence is a federal award file, the firm's name, identifiers, and business address are published as public business records with the same fields SAM and USAspending publish for all federal awardees. Cedar does not publish internal working text.";
+  "A firm is published under its own name. Where the only evidence is a federal award file, the firm's name, identifiers and business address are published as public business records, with the same fields SAM and USAspending publish for every federal awardee.";
 
 /**
  * THE LINKAGE NOTE ON THE METHODS PAGE.
@@ -286,9 +286,9 @@ export const LINKAGE_COVERAGE = Object.freeze({
   // A reader who takes a cross-collection total as a quality score has read
   // it wrong, so the page gives no single figure and says why.
   caveat:
-    "A total across collections sums tables whose rows are not the same kind of thing. A contract award and a NAGPRA notice each count as one, so any total is a measure of scale and never of quality.",
+    "A total across collections sums tables whose rows are not the same kind of thing. A contract award and a Federal Register notice each count as one, so any total is a measure of scale and never of quality.",
   note:
-    "How many records have a resolved Cedar entity varies by collection. A low share does not mean the same thing everywhere. For example, in Natural Resource Revenues, a royalty line names a lease rather than an organization, so a line like that has no entity by design. A record can have no entity for other reasons too, and they are specified below. Cedar links a record to an entity only where the evidence supports it.",
+    "How many records have a resolved Cedar entity varies by collection. A low share does not mean the same thing everywhere. For example, in Legislation, most bills concern Indian Country as a whole rather than a single nation, so a bill like that has no entity by design. A record can have no entity for other reasons too, and they are specified below. Cedar links a record to an entity only where the evidence supports it.",
 });
 
 /**
@@ -359,7 +359,7 @@ export const LINKAGE_MOVES = Object.freeze([
     id: "join",
     label: "Join records that were never meant to join",
     body:
-      "A Form 990, a royalty disbursement, a lobbying registration, an ANCSA audited filing and a nation's own enterprise register share no key and never will. Cedar puts the same identifier on all five, so a question can cross them.",
+      "A Form 990, a federal contract award, a lobbying registration, an ANCSA audited filing and a nation's own enterprise register share no key and never will. Cedar puts the same identifier on all five, so a question can cross them.",
   }),
   Object.freeze({
     id: "time",
@@ -371,13 +371,13 @@ export const LINKAGE_MOVES = Object.freeze([
     id: "lineage",
     label: "Read an old record with today's knowledge",
     body:
-      "A retired handle keeps resolving. A 2009 NAGPRA notice filed under a former name still reaches the entity that filed it, and the answer says which name was current when.",
+      "An earlier identifier keeps resolving. A 2009 lobbying filing made under a former name still reaches the organization that filed it, and the answer says which name was current at the time.",
   }),
   Object.freeze({
     id: "deeper",
     label: "Follow one answer into the next question",
     body:
-      "A nonprofit's filings name a subsidiary. The identifier on that subsidiary reaches its resource revenue, its advocacy and its enterprise structure without a new search. The datasets stop being separate places to look.",
+      "A nonprofit's filings name a subsidiary. The identifier on that subsidiary reaches its contracts, its advocacy and its enterprise structure without a new search.",
   }),
   Object.freeze({
     id: "ask",
@@ -435,4 +435,4 @@ export const LOOP_STAGES = Object.freeze([
 
 /** The closing line of the loop section, kept here so a test can read it. */
 export const LOOP_CLOSE =
-  "None of that can be added later. It accumulates one decision at a time, from records that contradict each other, and every decision has to be kept.";
+  "This work cannot be added after the fact. It accumulates one decision at a time, from records that contradict each other, and every decision is kept.";

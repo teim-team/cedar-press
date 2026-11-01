@@ -49,13 +49,11 @@ test("the tier copy states the counts the catalog adds up to", () => {
 test("the Cedar Press+ promise names every pro-shelf collection", () => {
   const pro = PRESS_TIERS.find((tier) => tier.id === "press_pro").promise.toLowerCase();
   const mention = {
+    deals: "transactions and capital commitments",
     contractors: "contracting",
     subcontracting: "subcontracting",
-    "natural-resources": "resource revenue",
-    owned: "individually owned native businesses",
     need: "enterprise structures",
     nonprofits: "nonprofit",
-    plot: "parcel-level property records",
   };
   for (const entry of collectionsOnShelf("pro")) {
     assert.ok(mention[entry.id], `${entry.id} has no keyword to look for; add one`);

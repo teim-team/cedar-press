@@ -70,8 +70,8 @@ export function hasReleaseFile(entry) {
  * What a collection's download button says it hands over: the customer
  * table's real row count, read from the render record, never a fixed "ten".
  * The customer table keeps only rows at the collection's own grain, so a
- * ten-row producer preview can render fewer (Federal Register keeps 5 of 10,
- * PLOT 3 of 10), and a label that promised ten would be wrong on its face.
+ * ten-row producer preview can render fewer (Federal Register keeps 5 of 10),
+ * and a label that promised ten would be wrong on its face.
  * `null` when the collection has no rendered table.
  */
 export function sampleLabel(id) {
@@ -201,7 +201,7 @@ function crc32(bytes) {
  * download per collection left every click after the first outside the user's
  * transient activation, which download blockers then swallow.
  */
-function zipOf(files) {
+function zipOf(files, type = "application/zip") {
   const encoder = new TextEncoder();
   const parts = [];
   const central = [];
@@ -241,7 +241,7 @@ function zipOf(files) {
   end.setUint16(10, files.length, true);
   end.setUint32(12, centralSize, true);
   end.setUint32(16, offset, true);
-  return new Blob([...parts, ...central, end.buffer], { type: "application/zip" });
+  return new Blob([...parts, ...central, end.buffer], { type });
 }
 
 /**
@@ -260,6 +260,54 @@ function zipOf(files) {
 /** Hand the browser one ZIP of text files to save. The Explore card's export uses it. */
 export function saveZip(name, files) {
   saveBlob(name, zipOf(files));
+}
+
+// Characters XML 1.0 cannot carry at all; a source cell holding one would make
+// Excel refuse the whole workbook.
+// eslint-disable-next-line no-control-regex -- the allowed set has to name tab, LF and CR
+const XML_INVALID = /[^\u0009\u000A\u000D\u0020-\uD7FF\uE000-\uFFFD\u{10000}-\u{10FFFF}]/gu;
+const xml = (value) => String(value ?? "").replace(XML_INVALID, "")
+  .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+// A number only when Excel would keep it exactly: no leading zero (ZIP codes,
+// FIPS, EINs) and no more than fifteen significant digits (award and record
+// ids). Everything else is an inline string, which Excel never evaluates, so
+// a source cell beginning with = cannot run as a formula.
+const EXACT_NUMBER = /^-?(?:0|[1-9]\d{0,14})(?:\.\d{1,6})?$/;
+// Identifier and code columns stay text in every row, so a county FIPS of
+// 37173 and one of 01001 do not land in one column as two types.
+const CODE_COLUMN = /(?:^|_)(?:id|uid|ids|uids|fips|zip|ein|uei|cage|naics|code|key)(?:_|$)/i;
+
+function sheetXml(rows) {
+  const codes = (rows[0] ?? []).map((name) => CODE_COLUMN.test(String(name)));
+  const body = rows.map((values, r) => `<row>${values.map((value, c) => {
+    const text = String(value ?? "");
+    if (r > 0 && !codes[c] && EXACT_NUMBER.test(text) && text.replace(/\D/g, "").replace(/^0+/, "").length <= 15) return `<c><v>${text}</v></c>`;
+    return `<c t="inlineStr"><is><t xml:space="preserve">${xml(text)}</t></is></c>`;
+  }).join("")}</row>`).join("");
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData>${body}</sheetData></worksheet>`;
+}
+
+/**
+ * A minimal .xlsx: one worksheet per `{ name, rows }`, rows as arrays of cell
+ * values. Built on the same stored ZIP as the CSV archive, so no library.
+ */
+export function xlsxOf(sheets) {
+  const SHEET = "application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml";
+  const REL = "http://schemas.openxmlformats.org/officeDocument/2006/relationships";
+  const names = sheets.map((sheet, i) => xml(String(sheet.name).replace(/[[\]:*?/\\]/g, " ").slice(0, 31) || `Sheet${i + 1}`));
+  const files = [
+    { name: "[Content_Types].xml", text: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>${sheets.map((_, i) => `<Override PartName="/xl/worksheets/sheet${i + 1}.xml" ContentType="${SHEET}"/>`).join("")}</Types>` },
+    { name: "_rels/.rels", text: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="${REL}/officeDocument" Target="xl/workbook.xml"/></Relationships>` },
+    { name: "xl/workbook.xml", text: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="${REL}"><sheets>${names.map((name, i) => `<sheet name="${name}" sheetId="${i + 1}" r:id="rId${i + 1}"/>`).join("")}</sheets></workbook>` },
+    { name: "xl/_rels/workbook.xml.rels", text: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${sheets.map((_, i) => `<Relationship Id="rId${i + 1}" Type="${REL}/worksheet" Target="worksheets/sheet${i + 1}.xml"/>`).join("")}</Relationships>` },
+    ...sheets.map((sheet, i) => ({ name: `xl/worksheets/sheet${i + 1}.xml`, text: sheetXml(sheet.rows) })),
+  ];
+  return zipOf(files, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+}
+
+/** Hand the browser one .xlsx to save. */
+export function saveXlsx(name, sheets) {
+  saveBlob(name, xlsxOf(sheets));
 }
 
 export async function downloadAll(entries, archiveName = "cedar-press-samples.zip") {

@@ -174,7 +174,7 @@ test("a question naming two topics answers one and offers the other first", () =
 
 test("a typo still reaches the collection", () => {
   assert.equal(door().say("legislaton").intent.id, "collection:legislation");
-  assert.equal(answer("repatriaton").id, "collection:nagpra");
+  assert.equal(answer("nonprofts").id, "collection:nonprofits");
 });
 
 test("a miss says so, offers the closest topics, and after a second miss names the research desk", () => {
@@ -206,11 +206,11 @@ test("a reader who says who they are gets their own route in as a quick reply", 
 
 test("filler is never the last topic, and greetings do not repeat verbatim", () => {
   const c = door();
-  c.say("what is nagpra");
+  c.say("what is subcontracting");
   const hello = c.say("hi");
   const again = c.say("hi");
   assert.notEqual(hello.text, again.text);
-  assert.equal(c.memory.priorTopicId, "collection:nagpra");
+  assert.equal(c.memory.priorTopicId, "collection:subcontracting");
   assert.equal(c.say("yes").kind, "drilldown");
 });
 
@@ -220,13 +220,12 @@ test("every collection is reachable by its chip, its id and its extra words", ()
     assert.equal(doorMatcher.classify(entry.id.replace(/-/g, " "))?.id, intent.id, entry.id);
     assert.equal(doorMatcher.classify(`what is in ${entry.short || entry.name}`)?.id, intent.id, entry.id);
   }
-  assert.equal(doorMatcher.classify("do you track royalties")?.id, "collection:natural-resources");
   assert.equal(doorMatcher.classify("form 990 filings")?.id, "collection:nonprofits");
 });
 
 // ── The door as the product now ships (owner, 2026-09-27) ─────────────────
-// Fourteen collections, seven on each plan, Foundation & Corporate Giving
-// and PLOT live like the rest; no gaming anywhere; the twelve landing
+// Ten collections, five on each plan (the pilot tiers), Foundation &
+// Corporate Giving live like the rest; no gaming anywhere; the twelve landing
 // audiences with their outcomes; and nothing claimed that the collections
 // cannot back.
 
@@ -243,12 +242,6 @@ test("routing: foundations and philanthropy reach the audience, and giving quest
   assert.equal(classify("which foundations fund tribes")?.id, "collection:foundation-corporate-giving");
   assert.equal(classify("corporate giving to tribes")?.id, "collection:foundation-corporate-giving");
   assert.equal(classify("philanthropy")?.id, "collection:foundation-corporate-giving");
-});
-
-test("routing: land, parcels and permits reach PLOT", () => {
-  for (const question of ["land ownership records", "who owns these parcels", "do you track building permits", "parcel data", "property records"]) {
-    assert.equal(classify(question)?.id, "collection:plot", question);
-  }
 });
 
 test("routing: the renamed audience answers to consultants and advisors", () => {
@@ -324,9 +317,9 @@ test("no gaming collection or gaming source remains in any door answer", () => {
   assert.equal(answer("tell me about the gaming collection").id, DOOR_FALLBACK.id);
 });
 
-test("Giving and PLOT describe their installed observations and retain source qualifications", () => {
+test("Giving describes its installed observations and retains source qualifications", () => {
   const manifest = JSON.parse(readFileSync(new URL("../../../data/cedar/collections.manifest.json", import.meta.url), "utf8"));
-  for (const id of ["plot", "foundation-corporate-giving"]) {
+  for (const id of ["foundation-corporate-giving"]) {
     const intent = intentForCollection(id);
     const entry = STOREFRONT_CATALOG.find((item) => item.id === id);
     for (const text of [intent.answer, intent.expanded]) {
@@ -336,12 +329,12 @@ test("Giving and PLOT describe their installed observations and retain source qu
     const published = manifest.collections.find((collection) => collection.id === id).sample.of;
     assert.ok(Number.isSafeInteger(published) && published > 0, id);
     assert.ok(intent.answer.includes(published.toLocaleString("en-US") + " observations"), `${id}: count follows the installed release`);
-    assert.match(intent.answer, id === "plot" ? /does not establish Native ownership/ : /disclosures|donation/i);
+    assert.match(intent.answer, /disclosures|donation/i);
   }
   for (const text of everything()) assert.doesNotMatch(text, /not yet published|with (its|their) first release/i, text.slice(0, 80));
 });
 
-test("collections and plans are counted from the catalog: fourteen, seven on each plan", () => {
+test("collections and plans are counted from the catalog: ten, five on each plan", () => {
   const collections = DOOR_INTENTS.find((intent) => intent.id === "collections");
   assert.ok(collections.answer.startsWith(`${STOREFRONT_CATALOG.length} collections, on two shelves.`));
   const plans = DOOR_INTENTS.find((intent) => intent.id === "plans");
@@ -349,7 +342,7 @@ test("collections and plans are counted from the catalog: fourteen, seven on eac
     const count = STOREFRONT_CATALOG.filter((entry) => entry.shelf === tier.shelf).length;
     assert.ok(plans.answer.includes(`${count}`), `${tier.name}: ${count}`);
   }
-  for (const id of ["plot", "foundation-corporate-giving"]) {
+  for (const id of ["deals", "foundation-corporate-giving"]) {
     assert.ok(collections.answer.includes(STOREFRONT_CATALOG.find((entry) => entry.id === id).short), id);
   }
 });
@@ -365,7 +358,7 @@ test("who made it reads the same way everywhere the door says it", () => {
 test("maintenance and Cedar NEED's enrichments: door Cedar says weekly, and keeps each record with its entity", () => {
   const current = DOOR_INTENTS.find((intent) => intent.id === "current");
   assert.match(current.answer, /maintains its datasets on a weekly schedule with human review/);
-  assert.match(current.expanded, /exceptionally useful, well-documented data and tools/);
+  assert.match(current.expanded, /well-documented data and tools/);
   assert.equal(classify("do you have patents")?.id, "collection:need");
   assert.equal(classify("credit ratings for tribal enterprises")?.id, "collection:need");
   const need = intentForCollection("need").answer;
@@ -377,34 +370,11 @@ test("maintenance and Cedar NEED's enrichments: door Cedar says weekly, and keep
   for (const text of everything()) assert.doesNotMatch(text, /updated (monthly|quarterly|annually)|every quarter/i, text.slice(0, 60));
 });
 
-test("institutional accounts: team and organization questions reach their own answer, never plans", () => {
-  const phrasings = [
-    "can my team share an account",
-    "is there an institutional plan",
-    "we have multiple users",
-    "do you offer an organization account",
-    "how do I invite colleagues",
-    "who is the admin for our account",
-    "how much is the institutional plan",
-  ];
-  for (const question of phrasings) {
-    const id = classify(question)?.id;
-    assert.equal(id, "institutional", question);
-    assert.notEqual(id, "plans", question);
-  }
-  const intent = DOOR_INTENTS.find((item) => item.id === "institutional");
-  assert.match(intent.answer, /Cedar Press and Cedar Press\+ are individual plans, one person each/);
-  assert.match(intent.answer, /admin invites colleagues by email/);
-  assert.match(intent.answer, /share the organization's details and its Cedar context/);
-  assert.match(intent.answer, /own sign-in/);
-  assert.match(intent.answer, /teammates do not see each other's conversations/);
-  assert.match(intent.answer, /loses that access at once and keeps anything they hold individually/);
-  assert.match(intent.answer, /contact@lumecon\.ai/);
-  for (const text of [intent.answer, intent.expanded]) {
-    assert.doesNotMatch(text, /\bseats?\b|\$|\bprice|\bcost|per user|up to \d/i, text.slice(0, 60));
-  }
+test("team work is Cedar Grove's, and nothing describes a shared Cedar Press account", () => {
   assert.equal(classify("can we do collaborative analysis")?.id, "collaboration");
   assert.match(DOOR_INTENTS.find((item) => item.id === "collaboration").answer, /Cedar Grove, not Cedar Press/);
+  assert.equal(DOOR_INTENTS.find((item) => item.id === "institutional"), undefined);
+  for (const text of everything()) assert.doesNotMatch(text, /institutional plan|admin invites/i, text.slice(0, 60));
 });
 
 // Owner, 2026-09-27: every collection is built from public material, and

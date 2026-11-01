@@ -70,8 +70,8 @@ export const PRIORITY_EXAMPLES = Object.freeze({
   }),
   expansions: Object.freeze([
     "Add annual filing history to Native Nonprofits.",
-    "Add more tribal TERO and commerce offices to Individual Native-Owned Businesses.",
-    "Carry Natural Resource Revenues to more nations and commodities.",
+    "Extend Federal Subcontracting before 2010 where subaward records allow.",
+    "Add more Alaska Native corporation subsidiaries to Cedar NEED.",
   ]),
 });
 

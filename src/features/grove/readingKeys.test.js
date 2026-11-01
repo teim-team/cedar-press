@@ -4,8 +4,8 @@ import test from "node:test";
 import { READING_KEYS, readingKey } from "./readingKeys.js";
 import { STOREFRONT_CATALOG } from "./pressCatalog.js";
 
-test("NEED and PLOT carry a reading key; the other collections do not need one", () => {
-  assert.deepEqual(Object.keys(READING_KEYS).sort(), ["need", "plot"]);
+test("NEED carries a reading key; the other collections do not need one", () => {
+  assert.deepEqual(Object.keys(READING_KEYS).sort(), ["need"]);
   const ids = new Set(STOREFRONT_CATALOG.map((entry) => entry.id));
   for (const id of Object.keys(READING_KEYS)) assert.ok(ids.has(id), `${id} is not a storefront collection`);
   assert.equal(readingKey("funding"), null);

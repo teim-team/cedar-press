@@ -31,7 +31,7 @@ class SharedCollectionReleaseTest(unittest.TestCase):
             subscribers,
             "find",
             return_value=subscribers.Subscriber(
-                "synthetic@example.invalid", "press_pro", "fixture"
+                "synthetic@example.invalid", "grove", "fixture"
             ),
         )
         self.account.start()
@@ -209,14 +209,14 @@ class SharedCollectionReleaseTest(unittest.TestCase):
         self.assertEqual(response.status_code, 200, response.text)
         self.assertIn("cite_as", response.text.splitlines()[0])
 
-    def test_sixteen_targets_preserve_tiers_and_never_invent_samples(self):
+    def test_thirteen_targets_preserve_tiers_and_never_invent_samples(self):
         with (
             patch.object(repository, "grove_release_metadata", return_value=None),
             patch.object(repository, "full_release_metadata", return_value=None),
         ):
             for tier in ("press", "press_pro", "grove", "tree"):
                 target = repository.release_targets_for(tier)
-                self.assertEqual((target["target_count"], target["press_target_count"]), (16, 14))
+                self.assertEqual((target["target_count"], target["press_target_count"]), (13, 10))
                 ids = {entry["id"] for entry in target["collections"]}
                 self.assertIn("foundation-corporate-giving", ids)
                 self.assertEqual("need" in ids, tier != "press")
@@ -225,7 +225,7 @@ class SharedCollectionReleaseTest(unittest.TestCase):
                     int(tier != "press"),
                 )
                 self.assertNotIn("entity-register", ids)
-                self.assertEqual("plot" in ids, tier != "press")
+                self.assertEqual("plot" in ids, tier in {"grove", "tree"})
                 self.assertEqual("gaming" in ids, tier in {"grove", "tree"})
                 self.assertEqual("infrastructure" in ids, tier in {"grove", "tree"})
                 self.assertTrue(
@@ -254,7 +254,7 @@ class SharedCollectionReleaseTest(unittest.TestCase):
 
     def test_plot_component_download_uses_existing_hash_path(self):
         _manifest, _pin, content = self.fixture()
-        self.session("press_pro")
+        self.session("grove")
         response = self.client.get(
             "/press/collections/plot/full-download",
             params={"release_id": "c" * 64, "component": "environmental_events"},
@@ -305,7 +305,7 @@ class SharedCollectionReleaseTest(unittest.TestCase):
 
     def test_press_tier_cannot_fetch_plot_and_stale_account_cannot_fetch(self):
         self.fixture()
-        for cookie_tier, account_tier in (("press", "press_pro"), ("press_pro", "press")):
+        for cookie_tier, account_tier in (("press_pro", "grove"), ("grove", "press_pro")):
             self.session(cookie_tier)
             with (
                 patch.object(
@@ -341,7 +341,7 @@ class SharedCollectionReleaseTest(unittest.TestCase):
     def test_component_metadata_holds_refuse_raw_and_csv_before_artifact_reads(self):
         manifest, pin, _ = self.fixture()
         contract = manifest["components"]["environmental_events"]
-        self.session("press_pro")
+        self.session("grove")
         # Owner ruling 2026-10-04: only `internal_only` still refuses; a
         # publication_hold flag or a review status no longer does (see
         # test_review_states_no_longer_hold_a_component).
@@ -384,7 +384,7 @@ class SharedCollectionReleaseTest(unittest.TestCase):
     def test_malformed_component_metadata_fails_closed_in_both_download_routes(self):
         manifest, pin, _ = self.fixture()
         contract = manifest["components"]["environmental_events"]
-        self.session("press_pro")
+        self.session("grove")
         invalid = (
             None,
             [],
@@ -423,7 +423,7 @@ class SharedCollectionReleaseTest(unittest.TestCase):
             "publication_hold": False,
             "publication_status": "eligible",
         }
-        self.session("press_pro")
+        self.session("grove")
         with patch.object(repository, "_grove_manifest", return_value=manifest):
             response = self.client.get(
                 "/press/collections/plot/full-download",
@@ -554,7 +554,7 @@ class SharedCollectionReleaseTest(unittest.TestCase):
         ):
             response = self.client.get("/press/release-collections")
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.json()["collections"]), 14)
+        self.assertEqual(len(response.json()["collections"]), 12)
         self.assertNotIn("gaming", [entry["id"] for entry in response.json()["collections"]])
         self.assertEqual(response.headers["cache-control"], "private, no-store")
 

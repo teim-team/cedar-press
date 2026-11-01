@@ -59,15 +59,6 @@ const DealsIcon = (
   </svg>
 );
 
-/** A vessel with a return arrow above it: repatriation. */
-const NagpraIcon = (
-  <svg {...glyph}>
-    <path d="M9.5 10h9l1.5 9a4 4 0 0 1-4 4.5h-4A4 4 0 0 1 8 19z" />
-    <path d="M8.5 15h11" />
-    <path d="M9 6.5a5.5 5.5 0 0 1 10 0M9 6.5 6.5 4M9 6.5l-2.8 1.6" />
-  </svg>
-);
-
 /** A megaphone aimed at the capitol: influence directed at government. */
 const LobbyingIcon = (
   <svg {...glyph}>
@@ -92,14 +83,6 @@ const SubcontractingIcon = (
     <path d="M10 3.5h8v6h-8z" />
     <path d="M14 9.5v4M5 22v-4.5h18V22M5 17.5h18" />
     <path d="M2.5 22h5M11.5 22h5M20.5 22h5" />
-  </svg>
-);
-
-/** A derrick over a hill: production and the royalty on it. */
-const ResourcesIcon = (
-  <svg {...glyph}>
-    <path d="M3 24.5 9.5 12l4.5 6 3-4 7 10.5z" />
-    <path d="M9.5 12 7 3.5M20 6.5a2.5 2.5 0 1 0 0-.1" />
   </svg>
 );
 
@@ -149,16 +132,6 @@ const EconomyIcon = (
   </svg>
 );
 
-/** A storefront under an awning: a business someone owns and runs. */
-const OwnedIcon = (
-  <svg {...glyph}>
-    <path d="M5.5 10.5 7 4.5h14l1.5 6" />
-    <path d="M6 13v10.5h16V13" />
-    <path d="M5.5 10.5c0 1.6 1.3 2.8 2.8 2.8s2.7-1.2 2.7-2.8c0 1.6 1.2 2.8 2.7 2.8h.6c1.5 0 2.7-1.2 2.7-2.8 0 1.6 1.2 2.8 2.7 2.8s2.8-1.2 2.8-2.8" />
-    <path d="M11.5 23.5v-6.5h5v6.5" />
-  </svg>
-);
-
 /** A square with a plus: what has not been built yet. */
 const NewIcon = (
   <svg {...glyph}>
@@ -186,15 +159,6 @@ const GivingIcon = (
   </svg>
 );
 
-/** Three parcels in a row, each tab fitted to the next: land, pieced together. */
-const PlotIcon = (
-  <svg {...glyph}>
-    <path d="M2.5 7h5.7v5.3a1.7 1.7 0 1 1 0 3.4V21H2.5z" />
-    <path d="M11 7h5.7v5.3a1.7 1.7 0 1 1 0 3.4V21H11v-5.3a1.7 1.7 0 1 0 0-3.4z" />
-    <path d="M19.5 7H25.5v14h-6v-5.3a1.7 1.7 0 1 0 0-3.4z" />
-  </svg>
-);
-
 /** By collection id. An id with no mark gets none rather than a stand-in,
  *  which would put the same glyph on two different things. */
 export const COLLECTION_ICONS = {
@@ -202,16 +166,12 @@ export const COLLECTION_ICONS = {
   "federal-register": RegisterIcon,
   legislation: LegislationIcon,
   deals: DealsIcon,
-  nagpra: NagpraIcon,
   lobbying: LobbyingIcon,
   "foundation-corporate-giving": GivingIcon,
   contractors: ContractorsIcon,
   subcontracting: SubcontractingIcon,
-  "natural-resources": ResourcesIcon,
-  owned: OwnedIcon,
   nonprofits: NonprofitsIcon,
   need: NeedIcon,
-  plot: PlotIcon,
   census: CensusIcon,
   labor: LaborIcon,
   economy: EconomyIcon,

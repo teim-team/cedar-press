@@ -10,7 +10,7 @@
     <title>Cedar Press: Trusted intelligence for Indian Country</title>
     <meta
       name="description"
-      content="Trusted intelligence for Indian Country: maintained collections on federal funding, contracting, deals, policy, giving, land and Native enterprise ownership, with source records, declared row grains and separately documented Native entity associations. Built by Lumecon."
+      content="Trusted intelligence for Indian Country: maintained collections on federal funding, contracting, deals, policy, philanthropy and Native enterprises, with every record traced to its source and to the Native entities it concerns. Built by Lumecon."
     />
     <link rel="canonical" href="https://cedarpress.ai/" />
     <link rel="icon" href="/favicon.ico" sizes="any" />
@@ -48,17 +48,18 @@
          are fetched in CORS mode, and a preload without it is a second,
          wasted download rather than a warm cache.
 
-         Two files now, not six. Inter and JetBrains Mono are variable builds
-         carrying every weight in one face, so the four separate Inter cuts
-         and two mono cuts that used to be listed here are one request each.
-         Both are the latin subsets; latin-ext and the italic are deliberately
+         Three files. Inter and the Source Serif 4 headline face are variable
+         builds carrying every weight in one file; IBM Plex Mono is static, and
+         600 is the weight its labels and figures use most. All are the latin
+         subsets; latin-ext and the italic are deliberately
          absent, because neither is requested on a first paint: latin-ext is
          133kB and loads only if a page needs a character in it. If a page
          starts using one above the fold it should be added here, and if a
          face stops being used it should be removed: an unused preload is
          pure cost, and the browser will say so in the console. -->
     <link rel="preload" href="/fonts/inter-latin-opsz-normal.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href="/fonts/jetbrains-mono-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/source-serif-4-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/ibm-plex-mono-latin-600-normal.woff2" as="font" type="font/woff2" crossorigin />
 
     <!-- How the service appears when a subscriber sends a link to a colleague,
          which is how a citation travels. Absolute URLs, because the crawlers
@@ -68,7 +69,7 @@
     <meta property="og:title" content="Trusted intelligence for Indian Country" />
     <meta
       property="og:description"
-      content="Trusted intelligence for Indian Country: maintained collections on federal funding, contracting, deals, policy, giving, land and Native enterprise ownership, with source records, declared row grains and separately documented Native entity associations."
+      content="Trusted intelligence for Indian Country: maintained collections on federal funding, contracting, deals, policy, philanthropy and Native enterprises, with every record traced to its source and to the Native entities it concerns."
     />
     <meta property="og:url" content="https://cedarpress.ai/" />
     <meta property="og:image" content="https://cedarpress.ai/cedar-press-og-1200x630.png" />
@@ -82,7 +83,7 @@
     <meta name="twitter:title" content="Trusted intelligence for Indian Country" />
     <meta
       name="twitter:description"
-      content="Trusted intelligence for Indian Country: maintained collections on federal funding, contracting, deals, policy, giving, land and Native enterprise ownership, with source records, declared row grains and separately documented Native entity associations."
+      content="Trusted intelligence for Indian Country: maintained collections on federal funding, contracting, deals, policy, philanthropy and Native enterprises, with every record traced to its source and to the Native entities it concerns."
     />
     <meta name="twitter:image" content="https://cedarpress.ai/cedar-press-og-1200x630.png" />
 
@@ -132,7 +133,7 @@
             "@id": "https://cedarpress.ai/#website",
             "url": "https://cedarpress.ai/",
             "name": "Cedar Press",
-            "description": "Trusted intelligence for Indian Country: maintained collections on federal funding, contracting, deals, policy, giving, land and Native enterprise ownership, with source records, declared row grains and separately documented Native entity associations.",
+            "description": "Trusted intelligence for Indian Country: maintained collections on federal funding, contracting, deals, policy, philanthropy and Native enterprises, with every record traced to its source and to the Native entities it concerns.",
             "inLanguage": "en",
             "keywords": [
               "Indian Country data",
@@ -146,13 +147,11 @@
               "Native-owned businesses",
               "federal funding to tribes",
               "federal contracting tribal",
-              "NAGPRA notices",
               "tribal consultation",
               "Federal Register tribes",
               "tribal legislation",
               "tribal lobbying",
               "Indian Country deals",
-              "tribal natural resources revenue",
               "Native nonprofits",
               "Cedar Press",
               "Lumecon"
@@ -183,8 +182,8 @@
             "@id": "https://cedarpress.ai/#catalog",
             "name": "The Cedar Press collections",
             "url": "https://cedarpress.ai/",
-            "description": "Fourteen collections on Indian Country's economy: federal funding, the Federal Register, legislation, deals, NAGPRA, advocacy, foundation and corporate giving, prime contracting, subcontracting, natural resources, Native-owned businesses, Native nonprofits, the enterprise register and PLOT parcel records, with source records and separately documented Native entity associations.",
-            "dateModified": "2026-10-01",
+            "description": "Ten collections on Indian Country's economy: federal funding, the Federal Register, legislation, advocacy, foundation and corporate giving, prime contracting, subcontracting, deals, Native nonprofits and the enterprise register, with source records and separately documented Native entity associations.",
+            "dateModified": "2026-10-06",
             "provider": {
               "@id": "https://lumecon.ai/#organization"
             },
@@ -199,12 +198,6 @@
                 "@id": "https://cedarpress.ai/#dataset-legislation"
               },
               {
-                "@id": "https://cedarpress.ai/#dataset-deals"
-              },
-              {
-                "@id": "https://cedarpress.ai/#dataset-nagpra"
-              },
-              {
                 "@id": "https://cedarpress.ai/#dataset-lobbying"
               },
               {
@@ -217,19 +210,13 @@
                 "@id": "https://cedarpress.ai/#dataset-subcontracting"
               },
               {
-                "@id": "https://cedarpress.ai/#dataset-natural-resources"
-              },
-              {
-                "@id": "https://cedarpress.ai/#dataset-owned"
+                "@id": "https://cedarpress.ai/#dataset-deals"
               },
               {
                 "@id": "https://cedarpress.ai/#dataset-nonprofits"
               },
               {
                 "@id": "https://cedarpress.ai/#dataset-need"
-              },
-              {
-                "@id": "https://cedarpress.ai/#dataset-plot"
               }
             ]
           },
@@ -323,71 +310,6 @@
             "keywords": [
               "Congressional Votes and Proposed Legislation",
               "Legislation",
-              "Indian Country data",
-              "tribal data",
-              "tribal government",
-              "tribal economy",
-              "Native American economic data",
-              "Alaska Native Corporations"
-            ],
-            "isAccessibleForFree": false,
-            "license": "https://cedarpress.ai/methods",
-            "inLanguage": "en"
-          },
-          {
-            "@type": "Dataset",
-            "@id": "https://cedarpress.ai/#dataset-deals",
-            "name": "Indian Country Deals",
-            "alternateName": "Deals",
-            "description": "Material transactions and capital commitments involving Native nations, organizations and enterprises, including acquisitions, divestitures, property purchases, investments, financing agreements, bond issuances, joint ventures and major capital projects. Track who participated, the Native entity involved, announced value, status and timing, and compare activity across periods. Buyers, sellers, borrowers and issuers resolved to tribal governments, tribally owned enterprises, ANCs and NHOs.",
-            "dateModified": "2026-10-01",
-            "url": "https://cedarpress.ai/",
-            "creator": {
-              "@id": "https://lumecon.ai/#organization"
-            },
-            "publisher": {
-              "@id": "https://lumecon.ai/#organization"
-            },
-            "includedInDataCatalog": {
-              "@id": "https://cedarpress.ai/#catalog"
-            },
-            "temporalCoverage": "2000 to present",
-            "spatialCoverage": "United States",
-            "keywords": [
-              "Indian Country Deals",
-              "Deals",
-              "Indian Country data",
-              "tribal data",
-              "tribal government",
-              "tribal economy",
-              "Native American economic data",
-              "Alaska Native Corporations"
-            ],
-            "isAccessibleForFree": false,
-            "license": "https://cedarpress.ai/methods",
-            "inLanguage": "en"
-          },
-          {
-            "@type": "Dataset",
-            "@id": "https://cedarpress.ai/#dataset-nagpra",
-            "name": "NAGPRA",
-            "alternateName": "NAGPRA Notices",
-            "description": "Public records of activity under the Native American Graves Protection and Repatriation Act, including notices, inventories and repatriation-related actions. Follow records by institution, Native entity, notice type and date. Notices matched to the tribes and Native Hawaiian organizations named in them, across the naming changes of three decades.",
-            "dateModified": "2026-10-01",
-            "url": "https://cedarpress.ai/",
-            "creator": {
-              "@id": "https://lumecon.ai/#organization"
-            },
-            "publisher": {
-              "@id": "https://lumecon.ai/#organization"
-            },
-            "includedInDataCatalog": {
-              "@id": "https://cedarpress.ai/#catalog"
-            },
-            "temporalCoverage": "1994 to present",
-            "spatialCoverage": "United States",
-            "keywords": [
-              "NAGPRA",
               "Indian Country data",
               "tribal data",
               "tribal government",
@@ -537,13 +459,10 @@
           },
           {
             "@type": "Dataset",
-            "@id": "https://cedarpress.ai/#dataset-natural-resources",
-            "name": "Natural Resource Revenues",
-            "alternateName": [
-              "Natural Resources",
-              "Tribal Natural Resource Revenue"
-            ],
-            "description": "Public records of energy and mineral production, revenues, royalties and related disbursements associated with tribal trust and restricted lands. Compare reported activity by commodity, Native entity, location and period. Disbursements matched to the nations they belong to. Individual allottee detail is never published.",
+            "@id": "https://cedarpress.ai/#dataset-deals",
+            "name": "Indian Country Deals",
+            "alternateName": "Deals",
+            "description": "Material transactions and capital commitments involving Native nations, organizations and enterprises, including acquisitions, divestitures, property purchases, investments, financing agreements, bond issuances, joint ventures and major capital projects. Track who participated, the Native entity involved, announced value, status and timing, and compare activity across periods. Buyers, sellers, borrowers and issuers resolved to tribal governments, tribally owned enterprises, ANCs and NHOs.",
             "dateModified": "2026-10-01",
             "url": "https://cedarpress.ai/",
             "creator": {
@@ -555,44 +474,11 @@
             "includedInDataCatalog": {
               "@id": "https://cedarpress.ai/#catalog"
             },
-            "temporalCoverage": "1909 to present",
+            "temporalCoverage": "2000 to present",
             "spatialCoverage": "United States",
             "keywords": [
-              "Natural Resource Revenues",
-              "Natural Resources",
-              "Indian Country data",
-              "tribal data",
-              "tribal government",
-              "tribal economy",
-              "Native American economic data",
-              "Alaska Native Corporations"
-            ],
-            "isAccessibleForFree": false,
-            "license": "https://cedarpress.ai/methods",
-            "inLanguage": "en"
-          },
-          {
-            "@type": "Dataset",
-            "@id": "https://cedarpress.ai/#dataset-owned",
-            "name": "Individual Native-Owned Businesses",
-            "alternateName": "Individual Native-Owned",
-            "description": "Individually owned Native businesses identified through tribal TERO offices, commerce programs and other documented Native-business registries. Records preserve the issuing source, reported affiliation or certification, location and industry where available. Every listing includes the nation whose office certified it and is credited to the issuing TERO or commerce office.",
-            "dateModified": "2026-10-01",
-            "url": "https://cedarpress.ai/",
-            "creator": {
-              "@id": "https://lumecon.ai/#organization"
-            },
-            "publisher": {
-              "@id": "https://lumecon.ai/#organization"
-            },
-            "includedInDataCatalog": {
-              "@id": "https://cedarpress.ai/#catalog"
-            },
-            "temporalCoverage": "Current roster, captured Sept. 1, 2026",
-            "spatialCoverage": "United States",
-            "keywords": [
-              "Individual Native-Owned Businesses",
-              "Individual Native-Owned",
+              "Indian Country Deals",
+              "Deals",
               "Indian Country data",
               "tribal data",
               "tribal government",
@@ -657,37 +543,6 @@
             "keywords": [
               "Cedar Native Entity Enterprise Dataset (NEED)",
               "Cedar NEED",
-              "Indian Country data",
-              "tribal data",
-              "tribal government",
-              "tribal economy",
-              "Native American economic data",
-              "Alaska Native Corporations"
-            ],
-            "isAccessibleForFree": false,
-            "license": "https://cedarpress.ai/methods",
-            "inLanguage": "en"
-          },
-          {
-            "@type": "Dataset",
-            "@id": "https://cedarpress.ai/#dataset-plot",
-            "name": "PLOT",
-            "description": "PLOT (Parcel-Level Ownership and Transfers): county assessor parcels, Bureau of Indian Affairs trust tracts, permits and environmental records associated with Native nations. Examine their recorded owners, dates and citations, with parcel observations and permit events kept at their separate grains. Land ownership observations and permitting records retain their source identifiers. An assessor label, mapped tract or regulatory record does not establish Native ownership, legal title or a canonical entity binding.",
-            "dateModified": "2026-10-01",
-            "url": "https://cedarpress.ai/",
-            "creator": {
-              "@id": "https://lumecon.ai/#organization"
-            },
-            "publisher": {
-              "@id": "https://lumecon.ai/#organization"
-            },
-            "includedInDataCatalog": {
-              "@id": "https://cedarpress.ai/#catalog"
-            },
-            "temporalCoverage": "Source-dated observations",
-            "spatialCoverage": "United States",
-            "keywords": [
-              "PLOT",
               "Indian Country data",
               "tribal data",
               "tribal government",

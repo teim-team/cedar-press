@@ -127,7 +127,7 @@ function codebookTable(id) {
 
 test("every collection has two or three questions, and nothing else does", () => {
   const live = liveIdsOf();
-  assert.equal(STOREFRONT_CATALOG.length, 14);
+  assert.equal(STOREFRONT_CATALOG.length, 10);
   for (const entry of STOREFRONT_CATALOG) {
     const questions = collectionQuestions(entry.id);
     assert.ok(questions.length >= 2 && questions.length <= 3, `${entry.id} has ${questions.length} questions`);
@@ -163,8 +163,8 @@ test("every collection question rests on fields its codebook table holds", () =>
   assert.ok(checked > 60, `only ${checked} fields checked`);
 });
 
-test("Giving and PLOT use verified release codebooks rather than a second imagined structure", () => {
-  for (const id of ["foundation-corporate-giving", "plot"]) {
+test("Giving uses a verified release codebook rather than a second imagined structure", () => {
+  for (const id of ["foundation-corporate-giving"]) {
     assert.ok(isReleased(id), id);
     const table = codebookTable(id);
     assert.ok(table, id);
@@ -237,17 +237,11 @@ test("every collection an audience cites is in the catalog, and every declared a
 });
 
 test("the owner's launch sentences are the ones shown", () => {
-  // Land in Journalists, property activity for ANCs and NHOs and for Banks,
-  // and private giving for Native nonprofits: the sentences the interim copy
-  // stood in for until both collections joined Cedar Press.
+  // Private giving for Native nonprofits: the sentence the interim copy
+  // stood in for until the giving collection joined Cedar Press.
   const byId = Object.fromEntries(visibleAudiences().map((a) => [a.id, a]));
   const ids = (audience) => audience.collections.map((entry) => entry.id);
-  assert.match(byId.journalists.explanation, /ownership, land and transactions/);
-  assert.ok(ids(byId.journalists).includes("plot"));
-  for (const id of ["ancs-nhos", "banks-lenders"]) {
-    assert.match(byId[id].explanation, /property activity/, id);
-    assert.ok(ids(byId[id]).includes("plot"), id);
-  }
+  assert.match(byId.journalists.explanation, /ownership and transactions/);
   assert.match(byId["native-nonprofits"].explanation, /combine federal and private support/);
   assert.ok(ids(byId["native-nonprofits"]).includes("foundation-corporate-giving"));
   assert.deepEqual(ids(byId["foundations-philanthropy"]), ["foundation-corporate-giving", "funding", "nonprofits"]);
@@ -269,8 +263,8 @@ test("the consultants and government use cases carry the owner's copy and chips 
   assert.equal(government.audience, "Government and public agency officials");
   assert.equal(government.job, "Tribal consultation");
   assert.equal(government.outcome, "Prepare more informed tribal consultations, build stronger government-to-government relationships, and better serve the communities you represent.");
-  assert.equal(government.explanation, "Bring funding, legislation, agency actions and Native-entity records together with sources you can check.");
-  assert.deepEqual([...government.collections], ["funding", "legislation", "federal-register", "nagpra"]);
+  assert.equal(government.explanation, "Bring funding, legislation and agency actions together with sources you can check.");
+  assert.deepEqual([...government.collections], ["funding", "legislation", "federal-register"]);
   assert.deepEqual([...government.imagePool], ["utilities", "transportation", "context-cedar"]);
   // Placement: after the researchers, before the journalists; Tribal
   // Nations stays its own audience.
@@ -320,12 +314,12 @@ test("coverage report: live collections no shown use case names", (t) => {
 
 test("the coverage report names a collection that loses its last use case", () => {
   // The report's mechanism, not a coverage rule: it has to be able to see a gap.
-  assert.ok(!uncoveredIds().includes("nagpra"));
-  const withoutNagpra = AUDIENCE_JOBS.map((audience) => ({
+  assert.ok(!uncoveredIds().includes("legislation"));
+  const withoutLegislation = AUDIENCE_JOBS.map((audience) => ({
     ...audience,
-    collections: audience.collections.map((id) => (id === "nagpra" ? "funding" : id)),
+    collections: audience.collections.map((id) => (id === "legislation" ? "funding" : id)),
   }));
-  assert.ok(uncoveredIds(STOREFRONT_CATALOG, withoutNagpra).includes("nagpra"));
+  assert.ok(uncoveredIds(STOREFRONT_CATALOG, withoutLegislation).includes("legislation"));
 });
 
 // ── Copy and data rules ───────────────────────────────────────────────────
@@ -384,12 +378,12 @@ test("the entity page offers only the actions that work today", () => {
   assert.ok(liveIdsOf().has(related.collection), "related enterprises needs a live collection");
 });
 
-test("every collection has a mark, and the two new marks are drawn with the family", () => {
+test("every collection has a mark, and the Giving mark is drawn with the family", () => {
   const family = read("../../pages/grove/pressCollectionIcons.jsx");
   const keyedIn = (src, id) =>
     new RegExp(`(^|\\s)(${id}|"${id}"):\\s*\\w+Icon,`, "m").test(src.slice(src.search(/export const \w+_ICONS/)));
   for (const entry of STOREFRONT_CATALOG) assert.ok(keyedIn(family, entry.id), `no mark for ${entry.id}`);
-  for (const name of ["GivingIcon", "PlotIcon"]) {
+  for (const name of ["GivingIcon"]) {
     const start = family.indexOf(`const ${name} = (`);
     assert.ok(start >= 0, name);
     const body = family.slice(start, family.indexOf(");", start));
@@ -405,7 +399,6 @@ test("the owner's collection descriptions keep the brief's limits", () => {
   for (const entry of STOREFRONT_CATALOG) {
     assert.doesNotMatch(entry.blurb, /\bevery\b/i, `${entry.id}: "every" needs a release to substantiate it`);
   }
-  assert.doesNotMatch(byId.nagpra.blurb, /outstanding/i, "no outstanding-claim status Cedar cannot establish");
   assert.doesNotMatch(byId.nonprofits.blurb, /year over year|annual/i, "no annual comparison before the series ships");
   assert.match(byId.nonprofits.blurb, /Native-led and Native-serving as the same thing/);
 });
@@ -481,32 +474,27 @@ test("no runtime string states a collection count: every count is derived from t
     assert.equal(found, null, `${rel} types a count: ${found}`);
   }
   // The crawler's description is generated, and counts the storefront.
-  assert.match(catalogDescription(), /^Fourteen collections on Indian Country's economy: federal funding, /);
+  assert.match(catalogDescription(), /^Ten collections on Indian Country's economy: federal funding, /);
   assert.match(catalogDescription(), /foundation and corporate giving/);
-  assert.match(catalogDescription(), /PLOT parcel records/);
   assert.match(catalogDescription(STOREFRONT_CATALOG.slice(0, 3)), /^Three collections on /);
   assert.throws(() => catalogDescription([{ id: "not-a-collection" }]), /no catalog phrase for not-a-collection/, "a collection with no phrase stops the generator by name");
 });
 
-test("the fourteen split seven and seven: giving in Cedar Press, PLOT in Cedar Press+", () => {
+test("the ten split five and five: giving in Cedar Press, Deals in Cedar Press+", () => {
   const shelves = (catalog) => ({
     standard: catalog.filter((entry) => entry.shelf === "standard").length,
     pro: catalog.filter((entry) => entry.shelf === "pro").length,
   });
-  assert.equal(STOREFRONT_CATALOG.length, 14);
-  assert.deepEqual(shelves(STOREFRONT_CATALOG), { standard: 7, pro: 7 });
+  assert.equal(STOREFRONT_CATALOG.length, 10);
+  assert.deepEqual(shelves(STOREFRONT_CATALOG), { standard: 5, pro: 5 });
   const byId = Object.fromEntries(STOREFRONT_CATALOG.map((entry) => [entry.id, entry]));
   assert.equal(byId["foundation-corporate-giving"].shelf, "standard");
-  assert.equal(byId.plot.shelf, "pro");
+  assert.equal(byId.deals.shelf, "pro");
   // The owner's Methods concepts are each collection's linkage line.
   assert.match(byId["foundation-corporate-giving"].linkage, /^Philanthropic, corporate and bank giving/);
-  assert.match(byId.plot.linkage, /^Land ownership observations and permitting records/);
-  assert.match(byId.plot.linkage, /does not establish Native ownership/);
 });
 
-test("the owner's cross-collection examples for the two new collections are in Methods", () => {
-  const deals = ECOSYSTEM_EXAMPLES.find((text) => text.includes("PLOT"));
-  assert.match(deals, /Indian Country Deals links to the parcels PLOT follows/);
+test("the owner's cross-collection example for Foundation & Corporate Giving is in Methods", () => {
   const giving = ECOSYSTEM_EXAMPLES.find((text) => text.startsWith("Foundation, corporate and bank giving"));
   assert.match(giving, /federal funding and the Native Nonprofits roster/);
 });

@@ -143,8 +143,6 @@ const READER_LABELS = Object.freeze({
     financial_status: "Status", announcement_date: "Announced", recipient_name_reported: "Recipient as reported", report_year: "Report year",
     funder_class: "Funder type", recipient_affiliation: "Recipient affiliation", payment_date: "Paid",
   }),
-  owned: Object.freeze({ business_name: "Business", stated_tribe: "Tribe (as listed)", certifying_authority_name: "Certifying authority", service_category: "Services" }),
-  plot: Object.freeze({ native_entity_name: "Native entity", native_entity_cedar_uid: "Cedar ID", source_parcel_id: "Parcel ID", land_record_kind: "Land record", owner_name_raw: "Owner as recorded", recorded_acres: "Acres", county_fips: "County FIPS", source_record_url: "Source record" }),
   nonprofits: Object.freeze({ inclusion_category: "Category", ntee_code: "NTEE code", bmf_revenue_usd: "Revenue (IRS)" }),
   subcontracting: Object.freeze({ prime_name: "Prime contractor", subcontractor_name: "Subcontractor" }),
 });
@@ -1269,10 +1267,15 @@ export function entityVectors(entity, contract = null) {
  * the README says so. Citation and the cut travel beside it in the README,
  * never as rows, so the file re-imports as exactly the records it lists.
  */
-export function cutCsv(rows, { view, columns = [], cut = null, register = EMPTY_REGISTER }) {
+export function cutCsv(rows, options) {
+  return cutTable(rows, options).map((values) => values.map(csvCell).join(",")).join("\n");
+}
+
+/** The cut as a header row and value rows, the one source both the CSV and the Excel export write. */
+export function cutTable(rows, { view, columns = [], cut = null, register = EMPTY_REGISTER }) {
   const explain = explainsMatches(cut);
   const header = [...(view === "table" ? columns : UNIVERSAL_HEADER), ...(explain ? ["matched_by"] : [])];
-  const lines = [header.map(csvCell).join(",")];
+  const lines = [header];
   for (const item of rows) {
     const values = view === "table"
       ? columns.map((column) => item.row[column])
@@ -1288,9 +1291,9 @@ export function cutCsv(rows, { view, columns = [], cut = null, register = EMPTY_
         ];
       })();
     if (explain) values.push(matchedBy(item, cut, register));
-    lines.push(values.map(csvCell).join(","));
+    lines.push(values);
   }
-  return lines.join("\n");
+  return lines;
 }
 
 /**
@@ -1298,14 +1301,14 @@ export function cutCsv(rows, { view, columns = [], cut = null, register = EMPTY_
  * cite it, and the cut that made it, so a reader can say exactly which rows
  * these were and reproduce them.
  */
-export function cutReadme(rows, { view, cut, register = EMPTY_REGISTER, columns = [], accessedOn = null, missing = [] }) {
+export function cutReadme(rows, { view, cut, register = EMPTY_REGISTER, columns = [], accessedOn = null, missing = [], file = "records.csv" }) {
   const collections = [...new Set(rows.map((item) => item.collection))].sort();
   const lines = [
     "Cedar Press · Explore the collections · sample export",
     "",
     view === "table"
-      ? `records.csv holds ${rows.length} example record(s) from ${scopeOf(cut)} with the table's own ${columns.length} columns.`
-      : `records.csv holds ${rows.length} example record(s) across ${collections.length} collection(s) in a REDUCED summary shape: one line per record with the entity, its type, the date, a 180-character observation, the amount where the table records one (never comparable across collections) and the source. entity_uids, entity_names, entity_types and entity_roles are pipe-separated lists aligned position for position (the first position is the entity_name/entity_type entity); a record naming several parties carries them all. Use each collection's own download for the full columns.`,
+      ? `${file} holds ${rows.length} example record(s) from ${scopeOf(cut)} with the table's own ${columns.length} columns.`
+      : `${file} holds ${rows.length} example record(s) across ${collections.length} collection(s) in a REDUCED summary shape: one line per record with the entity, its type, the date, a 180-character observation, the amount where the table records one (never comparable across collections) and the source. entity_uids, entity_names, entity_types and entity_roles are pipe-separated lists aligned position for position (the first position is the entity_name/entity_type entity); a record naming several parties carries them all. Use each collection's own download for the full columns.`,
     `Cut: ${describeCut(cut, { register })}`,
     `Cut query (cut version ${CUT_VERSION}): ${encodeCut(cut) || "(none)"}`,
     ...(missing.length
