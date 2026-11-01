@@ -497,6 +497,20 @@ def _review_delivery_allowed():
     return environment in REVIEW_DELIVERY_ENVIRONMENTS
 
 
+#: Flagships shipped as one table over several parts. Their pin is a collection
+#: release, which a dataset catalog cannot hold, so they read the collection
+#: catalog the component route already uses, and the two kinds coexist.
+PARTITIONED_FLAGSHIPS = frozenset({"contractors", "funding"})
+
+
+def _flagship_catalog_location(collection_id):
+    if collection_id in PARTITIONED_FLAGSHIPS:
+        location = os.environ.get("CEDAR_PRESS_COMPONENT_RELEASE_CATALOG")
+        if location:
+            return location
+    return os.environ.get("CEDAR_PRESS_RELEASE_CATALOG")
+
+
 def _partitioned_release(catalog, collection_id, requested_release_id, metadata_only):
     """Development and staging assembly of one manifest-pinned logical table.
 
@@ -817,7 +831,7 @@ def full_release(collection_id, requested_release_id=None, *, metadata_only=Fals
     """
     if not any(item.id == collection_id for item in launch.LAUNCH_COLLECTION):
         raise FullReleaseUnavailable("Unknown collection")
-    location = os.environ.get("CEDAR_PRESS_RELEASE_CATALOG")
+    location = _flagship_catalog_location(collection_id)
     if not location:
         raise FullReleaseUnavailable("No pinned release catalog configured")
     try:
@@ -1534,7 +1548,7 @@ def grove_release_metadata(collection_id):
 
 def full_release_metadata(collection_id):
     """Preview counts are never substituted for a verified full-release descriptor."""
-    if not os.environ.get("CEDAR_PRESS_RELEASE_CATALOG"):
+    if not _flagship_catalog_location(collection_id):
         return None
     try:
         return full_release(collection_id, metadata_only=True)

@@ -214,6 +214,8 @@ Server-only configuration (never Vite/browser variables):
 
 - `CEDAR_PRESS_ENVIRONMENT`: `development` (default), `staging`, or `production`.
 - `CEDAR_PRESS_RELEASE_CATALOG`: a reviewed local catalog from Lumecon `build_catalog`.
+  Funding and Prime Contracting ship as collection releases, which that file cannot
+  hold; they read `CEDAR_PRESS_COMPONENT_RELEASE_CATALOG` when it is set.
 - `CEDAR_PRESS_DATA_API`: the Lumecon API origin. HTTPS is required; HTTP loopback
   is allowed only in development. Staging/production reject loopback and insecure cookies.
 - `CEDAR_PRESS_DATA_TOKEN`: a dataset-scoped backend grant; never a subscriber credential.
@@ -284,8 +286,8 @@ Configure `CEDAR_PRESS_COMPONENT_RELEASE_CATALOG` and
 and pin. They are separate from the original dataset catalog configuration so
 both formats can coexist. The committed shared pin is empty. Gaming keeps its
 existing Grove pin/catalog. A review requires `CEDAR_GROVE_ENVIRONMENT=review`
-with `CEDAR_PRESS_ENVIRONMENT=development`, matching the existing component
-review path; production refuses this setting. Source rights are provenance in
+with `CEDAR_PRESS_ENVIRONMENT` set to `development` or `staging`, matching the
+existing component review path; production refuses this setting. Source rights are provenance in
 review as in production: only tenant-private data is refused.
 
 Reproduce a saved real candidate without a server listener or child process:
