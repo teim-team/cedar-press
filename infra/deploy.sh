@@ -36,9 +36,13 @@ PREVIOUS=$(docker inspect --format '{{.Config.Image}}' "$NAME" 2>/dev/null || tr
 MOUNTS=()
 [ -d "$DIR/release-catalog" ] && MOUNTS+=(-v "$DIR/release-catalog:/etc/cedar-press/release:ro")
 
+# Finished customer spreadsheets, kept across deploys. 10001 is the image's press user.
+install -d -m 0700 -o 10001 -g 10001 "$DIR/finished-sheets"
+MOUNTS+=(-v "$DIR/finished-sheets:/var/lib/cedar-press/sheets")
+
 start() {
   docker run -d --name "$NAME" --restart unless-stopped --env-file "$DIR/env" -p 8000:8000 \
-    "${MOUNTS[@]}" \
+    "${MOUNTS[@]}" -e CEDAR_PRESS_FINISHED_SHEETS=/var/lib/cedar-press/sheets \
     --memory 1g --pids-limit 256 --log-opt max-size=10m --log-opt max-file=3 "$1" >/dev/null
 }
 
@@ -55,6 +59,9 @@ start "$IMAGE"
 
 if healthy; then
   echo "deployed $IMAGE"
+  # In the background, at low priority; its lines appear in docker logs. A request
+  # that arrives first builds its own file, as it would with no finished one.
+  docker exec -d "$NAME" sh -c 'nice -n 10 python -m cedar_press.finished_sheets >/proc/1/fd/1 2>&1' || true
 else
   echo "new container failed its health check; last logs:"
   docker logs --tail 30 "$NAME" 2>&1 || true
