@@ -124,7 +124,7 @@ class ReviewedNeedReleaseTest(unittest.TestCase):
             "record_count": 1,
             "selection_sha256": "b" * 64,
             "source_release_id": "c" * 64,
-            "version": policy.PUBLISHED_VERSION,
+            "version": policy.PUBLISHED_VERSIONS[-1],
         }
         entry = manifest["components"][policy.PUBLISHED_COMPONENT]
         entry.update(
@@ -211,7 +211,8 @@ class ReviewedNeedReleaseTest(unittest.TestCase):
         self.assertEqual(response["status"], 200, response)
         self.assertEqual(response["payload"]["record_count"], 1)
         self.assertEqual(
-            response["payload"][policy.PUBLISHED_COMPONENT]["version"], policy.PUBLISHED_VERSION
+            response["payload"][policy.PUBLISHED_COMPONENT]["version"],
+            policy.PUBLISHED_VERSIONS[-1],
         )
         self.assertFalse(repository.may_download_full("press", "need"))
         self.assertFalse(repository.may_download_full("guest", "need"))
@@ -257,6 +258,16 @@ class ReviewedNeedReleaseTest(unittest.TestCase):
         rows = repository.grove_release_metadata("need")
         self.assertEqual([row["table_id"] for row in rows], [policy.PUBLISHED_COMPONENT])
         self.assertEqual(rows[0]["record_count"], 1)
+
+    def test_the_new_table_version_and_the_one_it_replaces_are_both_admitted(self):
+        manifest, _, _ = self.published_fixture()
+        name = policy.PUBLISHED_COMPONENT
+        entry = manifest["components"][name]
+        for version in ("need-published-enterprises-1", "need-published-enterprises-2"):
+            with self.subTest(version=version):
+                manifest["attestations"][name]["version"] = version
+                entry["metadata"][name]["version"] = version
+                self.assertTrue(policy.published_enterprises_permitted(manifest, name, entry))
 
     def test_a_table_that_differs_from_its_proof_refuses_before_any_bytes(self):
         manifest, pin, _ = self.published_fixture()

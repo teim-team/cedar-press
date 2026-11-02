@@ -43,7 +43,8 @@ CLAIM_NULLABLE_FIELDS = frozenset(
     }
 )
 PUBLISHED_COMPONENT = "published_enterprises"
-PUBLISHED_VERSION = "need-published-enterprises-1"
+# The earlier version stays admitted so a pin can move to the new release and back.
+PUBLISHED_VERSIONS = ("need-published-enterprises-1", "need-published-enterprises-2")
 PUBLISHED_FIELDS = (
     "enterprise_id",
     "enterprise_name",
@@ -99,7 +100,7 @@ def published_enterprises_permitted(
     count = proof.get("record_count")
     commit = proof.get("producer_commit")
     return (
-        proof.get("version") == PUBLISHED_VERSION
+        proof.get("version") in PUBLISHED_VERSIONS
         and isinstance(commit, str)
         and re.fullmatch(r"[0-9a-f]{40}", commit) is not None
         and type(count) is int
